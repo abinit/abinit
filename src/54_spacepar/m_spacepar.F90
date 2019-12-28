@@ -36,7 +36,7 @@ module m_spacepar
  use m_time,            only : timab
  use defs_abitypes,     only : MPI_type
  use m_symtk,           only : mati3inv, chkgrp, symdet, symatm, matr3inv
- use m_geometry,        only : metric, symredcart
+ use m_geometry,        only : metric, symredcart,wedge_basis,wedge_product
  use m_mpinfo,          only : ptabs_fourdp
  use m_fft,             only : zerosym, fourdp
 
@@ -62,7 +62,7 @@ public :: rotate_rho
 contains
 !!***
 
-!!****f* m_spacepar/make_vectornd
+  !!****f* m_spacepar/make_vectornd
 !! NAME
 !! make_vectornd
 !!
@@ -105,21 +105,21 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
  integer :: ig1min,ig2min,ig3min
  integer :: ii,ii1,ing,me_fft,n1,n2,n3,nd_atom,nd_atom_tot,nproc_fft
  real(dp),parameter :: tolfix=1.000000001e0_dp
- real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs
- real(dp) :: phase,prefac,precosph,presinph,prefacgs,ucvol
+ real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs,phase,ucvol
+ complex(dpc) :: prefac,cgr
  !arrays
  integer :: id(3)
  integer,allocatable :: nd_list(:)
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
- real(dp) :: gcart(3),gmet(3,3),gprimd(3,3),gred(3),mcg_cart(3),rmet(3,3)
- real(dp) :: AGre_red(3),AGre_cart(3),AGim_red(3),AGim_cart(3)
+ real(dp) :: gmet(3,3),gprimd(3,3),gred(3),mcgc(3),rmet(3,3)
+ real(dp) :: rgbasis(3,3,3)
  real(dp),allocatable :: gq(:,:),nd_m(:,:),ndvecr(:),work1(:,:),work2(:,:),work3(:,:)
+
 
 ! *************************************************************************
 
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
-
 
  ! make list of atoms with nonzero nuclear dipole moments
  ! in typical applications only 0 or 1 atoms have nonzero dipoles. This
@@ -131,6 +131,12 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
     end if
  end do
 
+ ! construct the basis vectors of the generalized cross product
+ ! real space a, b, c (contained in rprimd)
+ ! reciprocal space a*, b*, c* (contained in gprimd)
+ ! for m x G will need a x a*, a x b* etc (9 a^b type basis vectors)
+ call wedge_basis(gprimd,rprimd,rgbasis)
+
  ! note that nucdipmom is input as vectors in atomic units referenced
  ! to cartesian coordinates
  ABI_ALLOCATE(nd_list,(nd_atom_tot))
@@ -140,14 +146,15 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
     if (any(abs(nucdipmom(:,iatom))>tol8)) then
        nd_atom_tot = nd_atom_tot + 1
        nd_list(nd_atom_tot) = iatom
-       nd_m(:,nd_atom_tot) = nucdipmom(:,iatom)
+       ! the following expresses the dipole moment components in units of rprimd translations
+       nd_m(:,nd_atom_tot) = MATMUL(TRANSPOSE(gprimd),nucdipmom(:,iatom))
     end if
  end do
  
  n1=ngfft(1); n2=ngfft(2); n3=ngfft(3)
  nproc_fft = mpi_enreg%nproc_fft; me_fft = mpi_enreg%me_fft
 
- prefac = -four_pi/(ucvol*two_pi)
+ prefac = -four_pi*j_dpc/(ucvol*two_pi)
 
  ! Get the distrib associated with this fft_grid
  call ptabs_fourdp(mpi_enreg,n2,n3,fftn2_distrib,ffti2_local,fftn3_distrib,ffti3_local)
@@ -205,53 +212,42 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
           ig1 = i1 - (i1/id1)*n1 -1 
           ii=i1+i23
 
-          gred(1) = one*ig1; gred(2) = one*ig2; gred(3) = one*ig3
-          ! obtain \vec{G} in cartesian coordinates
-          gcart(1:3) = MATMUL(gprimd,gred)
-          gs = DOT_PRODUCT(gred,MATMUL(gmet,gred))
+          gred(1) = gq(1,i1); gred(2) = gq(2,i2); gred(3) = gq(3,i3)
+         
+          if(gs .LE. cutoff)then
 
-         if(gs .LE. cutoff)then
+             do iatom = 1, nd_atom_tot
+                nd_atom = nd_list(iatom)
+                phase = -two_pi*DOT_PRODUCT(xred(:,nd_atom),gred(:))
+                cgr = cmplx(cos(phase),sin(phase))
 
-            prefacgs = prefac/gs
-            do iatom = 1, nd_atom_tot
-               nd_atom = nd_list(iatom)
-               phase = two_pi*DOT_PRODUCT(xred(:,nd_atom),gred(:))
-               presinph=prefacgs*sin(phase)
-               precosph=prefacgs*cos(phase)
+                ! cross product m x G
+                call wedge_product(mcgc,nd_m(:,iatom),gred,rgbasis)
+                
+                ! express mcgc relative to rprimd translations. This is done because
+                ! we wish ultimately to apply A.p to |cwavef>; in getghc_nucdip, the
+                ! p|cwavef> is done in reduced coordinates so do that here too, because
+                ! r.G has no need of the metric if both terms are in reduced coords
+                mcgc = MATMUL(TRANSPOSE(gprimd),mcgc)
+                
+                work1(re,ii) = work1(re,ii) + real(prefac*cgr*mcgc(1)/gs)
+                work2(re,ii) = work2(re,ii) + real(prefac*cgr*mcgc(2)/gs)
+                work3(re,ii) = work3(re,ii) + real(prefac*cgr*mcgc(3)/gs)
 
-               ! cross product m x G
-               mcg_cart(1) =  nd_m(2,iatom)*gcart(3) - nd_m(3,iatom)*gcart(2)
-               mcg_cart(2) = -nd_m(1,iatom)*gcart(3) + nd_m(3,iatom)*gcart(1)
-               mcg_cart(3) =  nd_m(1,iatom)*gcart(2) - nd_m(2,iatom)*gcart(1)
+                work1(im,ii) = work1(im,ii) + aimag(prefac*cgr*mcgc(1)/gs)
+                work2(im,ii) = work2(im,ii) + aimag(prefac*cgr*mcgc(2)/gs)
+                work3(im,ii) = work3(im,ii) + aimag(prefac*cgr*mcgc(3)/gs)
 
-               ! Re(A(G)), in cartesian coordinates
-               AGre_cart = presinph*mcg_cart
-
-               ! refer back to recip space
-               AGre_red = MATMUL(TRANSPOSE(gprimd),AGre_cart)
-
-               ! Im(A(G)), in cartesian coordinates
-               AGim_cart = precosph*mcg_cart
-
-               ! refer back to recip space
-               AGim_red = MATMUL(TRANSPOSE(gprimd),AGim_cart)
-
-               work1(re,ii) = AGre_red(1)
-               work2(re,ii) = AGre_red(2)
-               work3(re,ii) = AGre_red(3)
-               work1(im,ii) = AGim_red(1)
-               work2(im,ii) = AGim_red(2)
-               work3(im,ii) = AGim_red(3)
-            end do
-         else
-           ! gs>cutoff
-           work1(re,ii)=zero
-           work1(im,ii)=zero
-           work2(re,ii)=zero
-           work2(im,ii)=zero
-           work3(re,ii)=zero
-           work3(im,ii)=zero
-         end if
+             end do
+          else
+             ! gs>cutoff
+             work1(re,ii)=zero
+             work1(im,ii)=zero
+             work2(re,ii)=zero
+             work2(im,ii)=zero
+             work3(re,ii)=zero
+             work3(im,ii)=zero
+          end if
 
        end do ! End loop on i1
      end if
@@ -1275,6 +1271,7 @@ end subroutine hartrestr
 !! rprimd(3,3)=dimensional real space primitive translations
 !! symafm(nsym)=(anti)ferromagnetic part of symmetry operations
 !! symrel(3,3,nsym)=symmetry matrices in real space (integers)
+!! tnons(3,nsym)=reduced nonsymmorphic translations
 !!
 !! OUTPUT
 !! rhog(2,nfft)=symmetrized rho(G) (total) electron density in G space
@@ -1304,7 +1301,7 @@ end subroutine hartrestr
 !! SOURCE
 
 subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,nsym,&
-&                 phnons,rhog,rhor,rprimd,symafm,symrel)
+&                 phnons,rhog,rhor,rprimd,symafm,symrel,tnons)
 
 !Arguments ------------------------------------
 !scalars
@@ -1316,14 +1313,16 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  real(dp),intent(in) :: gprimd(3,3),phnons(2,nfftot**(1-1/nsym),(nspden/nsppol)-3*(nspden/4)),rprimd(3,3)
  real(dp),intent(inout) :: rhor(cplex*nfft,nspden)
  real(dp),intent(out) :: rhog(2,nfft)
+ real(dp),intent(in) :: tnons(3,nsym)
 
 !Local variables-------------------------------
 !scalars
- integer :: ier,imagn,ind,ind2,indsy,ispden,isym,iup,izone,izone_max,j,j1,j2,j3,jsym
+ integer :: id1,id2,id3,ier,imagn,ind,ind2,indsy,ispden,isym,iup,izone,izone_max,j,j1,j2,j3,jsym
  integer :: k1,k2,k3,l1,l2,l3,me_fft
  integer :: n1,n2,n3,nd2,nproc_fft,nspden_eff,nsym_used,numpt,nup
  integer :: r2,rep,spaceComm
  logical,parameter :: afm_noncoll=.true.  ! TRUE if antiferro symmetries are used in non-collinear magnetism
+ real(dp) :: arg,tau1,tau2,tau3
  real(dp) :: magxsu1,magxsu2,magysu1,magysu2,magzsu1,magzsu2,mxi,mxr,myi,myr,mzi,mzr,phi,phr,rhosu1,rhosu2
  !character(len=500) :: message
 !arrays
@@ -1333,7 +1332,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
  real(dp) :: tsec(2)
  real(dp),allocatable :: magngx(:,:),magngy(:,:),magngz(:,:)
  real(dp),allocatable :: rhosu1_arr(:),rhosu2_arr(:),work(:)
- real(dp),allocatable :: symafm_used(:),symrec_cart(:,:,:),symrel_cart(:,:,:)
+ real(dp),allocatable :: symafm_used(:),symrec_cart(:,:,:),symrel_cart(:,:,:),tnons_used(:,:)
 
 !*************************************************************************
 !
@@ -1526,15 +1525,21 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 !    ---------------------------------------------
      if (nspden==4) then
 
+       id1=n1/2+2
+       id2=n2/2+2
+       id3=n3/2+2
+
 !      Transfer symmetries in cartesian coordinates
 !      Compute symmetries in reciprocal space in cartesian coordinates
        ABI_ALLOCATE(symrec_cart,(3,3,nsym_used))
        ABI_ALLOCATE(symrel_cart,(3,3,nsym_used))
        ABI_ALLOCATE(symafm_used,(nsym_used))
+       ABI_ALLOCATE(tnons_used,(3,nsym_used))
        jsym=0
        do isym=1,nsym
          if (symafm(isym)/=1.and.(.not.afm_noncoll)) cycle
          jsym=jsym+1
+         tnons_used(:,jsym)=tnons(:,isym)
          symafm_used(jsym)=dble(symafm(isym))
          call symredcart(rprimd,gprimd,symrel_cart(:,:,jsym),symrel(:,:,isym))
          call matr3inv(symrel_cart(:,:,jsym),symrec_cart(:,:,jsym))
@@ -1557,11 +1562,20 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
          ind=irrzon(1+numpt,1,1)
          rep=irrzon(izone,2,1)
          nup=nsym_used/rep
+!        Get coordinates in the range [0,n-1]
          j=ind-1;l1=modulo(j,n1);l2=modulo(j/n1,n2);l3=j/(n1*n2)
+!        Get location of G vector (grid point) centered at 0 0 0
+!TO BE UNCOMMENTED
+         l3=l3-(l3/id3)*n3
+         l2=l2-(l2/id2)*n2
+         l1=l1-(l1/id1)*n1
+
          jsym=0
          do isym=1,nsym
            if (symafm(isym)/=1.and.(.not.afm_noncoll)) cycle
            jsym=jsym+1
+!          The G vectors should transform as vectors in reciprocal space
+!          However, one acts with the INVERSE of the symmetry operation => Inverse[symrec]=Transpose[symrel]
            j1=symrel(1,1,isym)*l1+symrel(2,1,isym)*l2+symrel(3,1,isym)*l3
            j2=symrel(1,2,isym)*l1+symrel(2,2,isym)*l2+symrel(3,2,isym)*l3
            j3=symrel(1,3,isym)*l1+symrel(2,3,isym)*l2+symrel(3,3,isym)*l3
@@ -1577,14 +1591,43 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
            if (isymg(iup)==0) isymg(iup)=jsym
            if(fftn2_distrib(modulo((indsy-1)/n1,n2) + 1) == me_fft ) then  ! this is indsy is to be treated by me_fft
              indsy=n1*(nd2*k3+ ffti2_local(k2+1) -1)+k1+1        ! this is indsy in the current proc
-             phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
-             phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
+
+!            Working on this: the present coding will be detrimental for speed ! cos and sin are recomputed many times !
+             tau1=tnons_used(1,jsym)
+             tau2=tnons_used(2,jsym)
+             tau3=tnons_used(3,jsym) 
+             if (abs(tau1)>tol12.or.abs(tau2)>tol12.or.abs(tau3)>tol12) then
+!              Compute exp(-2*Pi*I*G dot tau) using original G (equivalent of phnons in the collinear case) 
+               arg=two_pi*(dble(l1)*tau1+dble(l2)*tau2+dble(l3)*tau3)
+               phr=cos(arg)
+               phi=-sin(arg)
+             else
+               phr=one
+               phi=zero
+             end if
+             phr=phr*symafm_used(jsym)
+             phi=phi*symafm_used(jsym)
+!TO BE COMMENTED
+!            phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
+!            phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
+
+!            The magnetization should transform as a vector in real space 
+!            However, one acts with the INVERSE of the symmetry operation.
+!            => Inverse[symrel_cart] = Transpose[symrel_cart] because symrel_cart is unitary   ?!?!?
              mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(1,2,jsym)*magngy(1,indsy)+symrel_cart(1,3,jsym)*magngz(1,indsy)
              mxi=symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(1,2,jsym)*magngy(2,indsy)+symrel_cart(1,3,jsym)*magngz(2,indsy)
              myr=symrel_cart(2,1,jsym)*magngx(1,indsy)+symrel_cart(2,2,jsym)*magngy(1,indsy)+symrel_cart(2,3,jsym)*magngz(1,indsy)
              myi=symrel_cart(2,1,jsym)*magngx(2,indsy)+symrel_cart(2,2,jsym)*magngy(2,indsy)+symrel_cart(2,3,jsym)*magngz(2,indsy)
              mzr=symrel_cart(3,1,jsym)*magngx(1,indsy)+symrel_cart(3,2,jsym)*magngy(1,indsy)+symrel_cart(3,3,jsym)*magngz(1,indsy)
              mzi=symrel_cart(3,1,jsym)*magngx(2,indsy)+symrel_cart(3,2,jsym)*magngy(2,indsy)+symrel_cart(3,3,jsym)*magngz(2,indsy)
+
+!            mxr=symrel_cart(1,1,jsym)*magngx(1,indsy)+symrel_cart(2,1,jsym)*magngy(1,indsy)+symrel_cart(3,1,jsym)*magngz(1,indsy)
+!            mxi=symrel_cart(1,1,jsym)*magngx(2,indsy)+symrel_cart(2,1,jsym)*magngy(2,indsy)+symrel_cart(3,1,jsym)*magngz(2,indsy)
+!            myr=symrel_cart(1,2,jsym)*magngx(1,indsy)+symrel_cart(2,2,jsym)*magngy(1,indsy)+symrel_cart(3,2,jsym)*magngz(1,indsy)
+!            myi=symrel_cart(1,2,jsym)*magngx(2,indsy)+symrel_cart(2,2,jsym)*magngy(2,indsy)+symrel_cart(3,2,jsym)*magngz(2,indsy)
+!            mzr=symrel_cart(1,3,jsym)*magngx(1,indsy)+symrel_cart(2,3,jsym)*magngy(1,indsy)+symrel_cart(3,3,jsym)*magngz(1,indsy)
+!            mzi=symrel_cart(1,3,jsym)*magngx(2,indsy)+symrel_cart(2,3,jsym)*magngy(2,indsy)+symrel_cart(3,3,jsym)*magngz(2,indsy)
+
              magxsu1=magxsu1+mxr*phr-mxi*phi;magxsu2=magxsu2+mxi*phr+mxr*phi
              magysu1=magysu1+myr*phr-myi*phi;magysu2=magysu2+myi*phr+myr*phi
              magzsu1=magzsu1+mzr*phr-mzi*phi;magzsu2=magzsu2+mzi*phr+mzr*phi
@@ -1614,7 +1657,13 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
          nup=nsym_used/rep
          do iup=1,nup
            ind=irrzon(iup+numpt,1,imagn)
+!          Get coordinates in the range [0,n-1]
            j=ind-1;j1=modulo(j,n1);j2=modulo(j/n1,n2);j3=j/(n1*n2)
+!TO BE UNCOMMENTED
+!          Get location of G vector (grid point) centered at 0 0 0
+           l3=j3-(j3/id3)*n3
+           l2=j2-(j2/id2)*n2
+           l1=j1-(j1/id1)*n1
            if(fftn2_distrib(j2+1)==me_fft)  then ! this ind is to be treated by me_fft
              r2=ffti2_local(j2+1) - 1
              ind=n1*(nd2*j3+r2)+j1+1  ! this is ind in the current proc
@@ -1625,20 +1674,44 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
              magxsu1=rhosu1_arr(3*izone-2);magxsu2=rhosu2_arr(3*izone-2)
              magysu1=rhosu1_arr(3*izone-1);magysu2=rhosu2_arr(3*izone-1)
              magzsu1=rhosu1_arr(3*izone  );magzsu2=rhosu2_arr(3*izone  )
-             phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
-             phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
+!            Working on this: the present coding will be detrimental for speed ! cos and sin are recomputed many times !
+             tau1=tnons_used(1,jsym)
+             tau2=tnons_used(2,jsym)
+             tau3=tnons_used(3,jsym)
+             if (abs(tau1)>tol12.or.abs(tau2)>tol12.or.abs(tau3)>tol12) then
+!              Compute exp(-2*Pi*I*G dot tau) using original G   (equivalent of phnons in the collinear case)
+               arg=two_pi*(dble(l1)*tau1+dble(l2)*tau2+dble(l3)*tau3)
+               phr=cos(arg)
+               phi=-sin(arg)
+             else
+               phr=one
+               phi=zero
+             end if
+             phr=phr*symafm_used(jsym)
+             phi=phi*symafm_used(jsym)
+!TO BE COMMENTED
+!            phr=phnons(1,iup,imagn);if (rep==1) phr=phr*symafm_used(jsym) !if rep==2, symafm is already included in phnons
+!            phi=phnons(2,iup,imagn);if (rep==1) phi=phi*symafm_used(jsym) !(see irrzg.F90)
+!            The magnetization should transform as a vector in real space 
+!            => symrel_cart  ?!?
              mxr=symrec_cart(1,1,jsym)*magxsu1+symrec_cart(2,1,jsym)*magysu1+symrec_cart(3,1,jsym)*magzsu1
              mxi=symrec_cart(1,1,jsym)*magxsu2+symrec_cart(2,1,jsym)*magysu2+symrec_cart(3,1,jsym)*magzsu2
              myr=symrec_cart(1,2,jsym)*magxsu1+symrec_cart(2,2,jsym)*magysu1+symrec_cart(3,2,jsym)*magzsu1
              myi=symrec_cart(1,2,jsym)*magxsu2+symrec_cart(2,2,jsym)*magysu2+symrec_cart(3,2,jsym)*magzsu2
              mzr=symrec_cart(1,3,jsym)*magxsu1+symrec_cart(2,3,jsym)*magysu1+symrec_cart(3,3,jsym)*magzsu1
              mzi=symrec_cart(1,3,jsym)*magxsu2+symrec_cart(2,3,jsym)*magysu2+symrec_cart(3,3,jsym)*magzsu2
-             magngx(1,ind)=mxr*phr+mxi*phi
-             magngx(2,ind)=mxi*phr-mxr*phi
-             magngy(1,ind)=myr*phr+myi*phi
-             magngy(2,ind)=myi*phr-myr*phi
-             magngz(1,ind)=mzr*phr+mzi*phi
-             magngz(2,ind)=mzi*phr-mzr*phi
+!            mxr=symrel_cart(1,1,jsym)*magxsu1+symrel_cart(1,2,jsym)*magysu1+symrel_cart(1,3,jsym)*magzsu1
+!            mxi=symrel_cart(1,1,jsym)*magxsu2+symrel_cart(1,2,jsym)*magysu2+symrel_cart(1,3,jsym)*magzsu2
+!            myr=symrel_cart(2,1,jsym)*magxsu1+symrel_cart(2,2,jsym)*magysu1+symrel_cart(2,3,jsym)*magzsu1
+!            myi=symrel_cart(2,1,jsym)*magxsu2+symrel_cart(2,2,jsym)*magysu2+symrel_cart(2,3,jsym)*magzsu2
+!            mzr=symrel_cart(3,1,jsym)*magxsu1+symrel_cart(3,2,jsym)*magysu1+symrel_cart(3,3,jsym)*magzsu1
+!            mzi=symrel_cart(3,1,jsym)*magxsu2+symrel_cart(3,2,jsym)*magysu2+symrel_cart(3,3,jsym)*magzsu2
+             magngx(1,ind)=mxr*phr-mxi*phi
+             magngx(2,ind)=mxi*phr+mxr*phi
+             magngy(1,ind)=myr*phr-myi*phi
+             magngy(2,ind)=myi*phr+myr*phi
+             magngz(1,ind)=mzr*phr-mzi*phi
+             magngz(2,ind)=mzi*phr+mzr*phi
            end if
          end do
          numpt=numpt+nup
@@ -1649,6 +1722,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
        ABI_DEALLOCATE(symrec_cart)
        ABI_DEALLOCATE(symrel_cart)
        ABI_DEALLOCATE(symafm_used)
+       ABI_DEALLOCATE(tnons_used)
 
      end if ! nspden==4
 
@@ -1681,6 +1755,7 @@ subroutine symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfftot,ngfft,nspden,nsppol,
 
    integer :: map_symrhg
    integer,intent(in) :: j1,n1
+!  Map into [0,n-1] 
    map_symrhg=mod(n1+mod(j1,n1),n1)
  end function map_symrhg
 
@@ -1873,16 +1948,13 @@ subroutine irrzg(irrzon,nspden,nsppol,nsym,n1,n2,n3,phnons,symafm,symrel,tnons)
              j3=symrel_used(1,3,isym)*l1+&
 &             symrel_used(2,3,isym)*l2+symrel_used(3,3,isym)*l3
 
-!            Map into [0,n-1] and then add 1 for array index in [1,n]
-             k1=1+mod(n1+mod(j1,n1),n1)
-             k2=1+mod(n2+mod(j2,n2),n2)
-             k3=1+mod(n3+mod(j3,n3),n3)
-!            k1=1+map(j1,n1)
-!            k2=1+map(j2,n2)
-!            k3=1+map(j3,n3)
+!            Map into [0,n-1] 
+             k1=mod(n1+mod(j1,n1),n1)
+             k2=mod(n2+mod(j2,n2),n2)
+             k3=mod(n3+mod(j3,n3),n3)
 
 !            Get linear index of rotated point Gj
-             ind2=k1+n1*((k2-1)+n2*(k3-1))
+             ind2=1+k1+n1*(k2+n2*k3)
 
 !            Store info for new class:
              class(isym)=ind2

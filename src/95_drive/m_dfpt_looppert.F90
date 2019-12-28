@@ -1863,7 +1863,7 @@ print *, ' occkq ', occkq
          call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
            kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
            dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-           occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,ucvol,wtk_rbz)
+           occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
          call transgrid(cplex,mpi_enreg,nspden,+1,1,1,dtset%paral_kgb,pawfgr,rho1wfg,rhog1,rho1wfr,rhor1)
          ABI_DEALLOCATE(rho1wfg)
          ABI_DEALLOCATE(rho1wfr)
@@ -1872,7 +1872,7 @@ print *, ' occkq ', occkq
          call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
            kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
            dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-           occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,ucvol,wtk_rbz)
+           occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
        end if
 
      else if (.not. found_eq_gkk) then
@@ -1927,7 +1927,7 @@ print *, ' occkq ', occkq
 &       paw_an_pert,paw_ij_pert,pawang,pawang1,pawfgr,pawfgrtab_pert,pawrad,pawrhoij_pert,pawrhoij1,pawtab,&
 &       pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
 &       dtset%qptn,resid,residm,rhog,rhog1,&
-&       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,&
+&       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
 &       wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode,&
 &       kramers_deg)
@@ -1946,7 +1946,7 @@ print *, ' occkq ', occkq
 &       paw_an_pert,paw_ij_pert,pawang,pawang1,pawfgr,pawfgrtab_pert,pawrad,pawrhoij_pert,pawrhoij1,pawtab,&
 &       pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
 &       dtset%qptn,resid,residm,rhog,rhog1,&
-&       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,&
+&       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
 &       wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode,&
 &       kramers_deg,&

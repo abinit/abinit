@@ -1,6 +1,6 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 11h57 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h26 )
   
 - input  file    -> t02.in
 - output file    -> t02.out
@@ -34,18 +34,18 @@
 -    mband =           5        mffmem =           1         mkmem =           3
        mpw =          65          nfft =        1728          nkpt =           3
 ================================================================================
-P This job should need less than                       1.126 Mbytes of memory.
+P This job should need less than                       1.118 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           12 blocks of mpw  integer numbers, for      0.003 Mbytes.
-P           77 blocks of mpw  real(dp)  numbers, for      0.038 Mbytes.
+P           61 blocks of mpw  real(dp)  numbers, for      0.030 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
 P           30 blocks of nfft real(dp)  numbers, for      0.396 Mbytes.
 P              Additional     real(dp)  numbers, for      0.439 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.121 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.126 Mbytes.
+P Main chain + fourwf.f                 1.113 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.118 Mbytes.
 P XC chain                              1.006 Mbytes.
 P mkrho chain                           1.029 Mbytes.
 P fourdp chain                          1.028 Mbytes.
@@ -67,18 +67,18 @@ _ WF disk file :      0.017 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           3
        mpw =          65          nfft =        1728          nkpt =           3
 ================================================================================
-P This job should need less than                       1.126 Mbytes of memory.
+P This job should need less than                       1.118 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           12 blocks of mpw  integer numbers, for      0.003 Mbytes.
-P           77 blocks of mpw  real(dp)  numbers, for      0.038 Mbytes.
+P           61 blocks of mpw  real(dp)  numbers, for      0.030 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
 P           30 blocks of nfft real(dp)  numbers, for      0.396 Mbytes.
 P              Additional     real(dp)  numbers, for      0.439 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.121 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.126 Mbytes.
+P Main chain + fourwf.f                 1.113 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.118 Mbytes.
 P XC chain                              1.006 Mbytes.
 P mkrho chain                           1.029 Mbytes.
 P fourdp chain                          1.028 Mbytes.
@@ -100,18 +100,18 @@ _ WF disk file :      0.017 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           5        mffmem =           1         mkmem =           3
        mpw =          65          nfft =        1728          nkpt =           3
 ================================================================================
-P This job should need less than                       1.126 Mbytes of memory.
+P This job should need less than                       1.118 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           12 blocks of mpw  integer numbers, for      0.003 Mbytes.
-P           77 blocks of mpw  real(dp)  numbers, for      0.038 Mbytes.
+P           61 blocks of mpw  real(dp)  numbers, for      0.030 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
 P           30 blocks of nfft real(dp)  numbers, for      0.396 Mbytes.
 P              Additional     real(dp)  numbers, for      0.439 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.121 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.126 Mbytes.
+P Main chain + fourwf.f                 1.113 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.118 Mbytes.
 P XC chain                              1.006 Mbytes.
 P mkrho chain                           1.029 Mbytes.
 P fourdp chain                          1.028 Mbytes.
@@ -161,18 +161,18 @@ _ WF disk file :      0.017 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           3
        mpw =          65          nfft =        1728          nkpt =           3
 ================================================================================
-P This job should need less than                       1.182 Mbytes of memory.
+P This job should need less than                       1.174 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           12 blocks of mpw  integer numbers, for      0.003 Mbytes.
-P          181 blocks of mpw  real(dp)  numbers, for      0.090 Mbytes.
+P          165 blocks of mpw  real(dp)  numbers, for      0.082 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
 P           30 blocks of nfft real(dp)  numbers, for      0.396 Mbytes.
 P              Additional     real(dp)  numbers, for      0.444 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.178 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.182 Mbytes.
+P Main chain + fourwf.f                 1.170 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.174 Mbytes.
 P XC chain                              1.051 Mbytes.
 P mkrho chain                           1.075 Mbytes.
 P fourdp chain                          1.073 Mbytes.
@@ -222,18 +222,18 @@ _ WF disk file :      0.032 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           3
        mpw =          65          nfft =        1728          nkpt =           3
 ================================================================================
-P This job should need less than                       1.323 Mbytes of memory.
+P This job should need less than                       1.315 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           12 blocks of mpw  integer numbers, for      0.003 Mbytes.
-P          187 blocks of mpw  real(dp)  numbers, for      0.093 Mbytes.
+P          171 blocks of mpw  real(dp)  numbers, for      0.085 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
 P           30 blocks of nfft real(dp)  numbers, for      0.396 Mbytes.
 P              Additional     real(dp)  numbers, for      0.581 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.318 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.323 Mbytes.
+P Main chain + fourwf.f                 1.310 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.315 Mbytes.
 P XC chain                              1.188 Mbytes.
 P mkrho chain                           1.213 Mbytes.
 P fourdp chain                          1.211 Mbytes.
@@ -255,18 +255,18 @@ _ WF disk file :      0.032 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           3
        mpw =          65          nfft =        1728          nkpt =           3
 ================================================================================
-P This job should need less than                       1.323 Mbytes of memory.
+P This job should need less than                       1.315 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           12 blocks of mpw  integer numbers, for      0.003 Mbytes.
-P          187 blocks of mpw  real(dp)  numbers, for      0.093 Mbytes.
+P          171 blocks of mpw  real(dp)  numbers, for      0.085 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
 P           30 blocks of nfft real(dp)  numbers, for      0.396 Mbytes.
 P              Additional     real(dp)  numbers, for      0.581 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.318 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.323 Mbytes.
+P Main chain + fourwf.f                 1.310 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.315 Mbytes.
 P XC chain                              1.188 Mbytes.
 P mkrho chain                           1.213 Mbytes.
 P fourdp chain                          1.211 Mbytes.
@@ -288,18 +288,18 @@ _ WF disk file :      0.032 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          10        mffmem =           1         mkmem =           3
        mpw =          65          nfft =        1728          nkpt =           3
 ================================================================================
-P This job should need less than                       1.323 Mbytes of memory.
+P This job should need less than                       1.315 Mbytes of memory.
 P Max. in main chain + nonlop.f + opernl.f
 P           12 blocks of mpw  integer numbers, for      0.003 Mbytes.
-P          187 blocks of mpw  real(dp)  numbers, for      0.093 Mbytes.
+P          171 blocks of mpw  real(dp)  numbers, for      0.085 Mbytes.
 P            2 blocks of nfft integer numbers, for      0.013 Mbytes.
 P           30 blocks of nfft real(dp)  numbers, for      0.396 Mbytes.
 P              Additional     real(dp)  numbers, for      0.581 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 1.318 Mbytes.
-P Main chain + nonlop.f + opernl.f      1.323 Mbytes.
+P Main chain + fourwf.f                 1.310 Mbytes.
+P Main chain + nonlop.f + opernl.f      1.315 Mbytes.
 P XC chain                              1.188 Mbytes.
 P mkrho chain                           1.213 Mbytes.
 P fourdp chain                          1.211 Mbytes.
@@ -342,7 +342,7 @@ _ WF disk file :      0.032 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -586,8 +586,8 @@ P          mk1mem           3
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -605,7 +605,7 @@ P          mk1mem           3
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -732,7 +732,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  kpt#   3, nband=  5, wtk=  0.50000, kpt=  0.2500 -0.2500  0.2500 (reduced coord)
   -0.28978   -0.23836   -0.07393   -0.03902   -0.01686
 
- ETOT 10  -10.689610820964     5.329E-15 3.461E-17 2.129E-14
+ ETOT 10  -10.689610820964     7.105E-15 3.461E-17 2.129E-14
 
  prteigrs : about to open file t02o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.04304   Average Vxc (hartree)=  -0.30593
@@ -744,7 +744,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  kpt#   3, nband=  5, wtk=  0.50000, kpt=  0.2500 -0.2500  0.2500 (reduced coord)
   -0.28978   -0.23836   -0.07393   -0.03902   -0.01686
 
- ETOT 11  -10.689610820964     5.329E-15 1.230E-18 2.018E-16
+ ETOT 11  -10.689610820964     3.553E-15 1.230E-18 2.018E-16
 
  prteigrs : about to open file t02o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.04304   Average Vxc (hartree)=  -0.30593
@@ -784,7 +784,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.1975E-21; max=  1.5564E-20
+ Mean square residual over all n,k,spin=   51.975E-22; max=  15.563E-21
    0.2500  0.2500  0.2500    1  1.55635E-20 kpt; spin; max resid(k); each band:
   6.55E-21 1.56E-20 9.33E-23 3.22E-22 1.35E-20
   -0.2500  0.2500  0.2500    1  7.69271E-21 kpt; spin; max resid(k); each band:
@@ -808,8 +808,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  frms,max,avg= 5.8449450E-03 1.0123714E-02   6.333E-11  0.000E+00 -2.888E-10 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00121975495356    -0.00000000000000     0.52058225439053
-    2     -0.00121975495356     0.00000000000000    -0.52058225439053
+    1      0.00121975495357    -0.00000000000000     0.52058225439053
+    2     -0.00121975495357     0.00000000000000    -0.52058225439053
  frms,max,avg= 3.0055913E-01 5.2058225E-01   3.257E-09  0.000E+00 -1.485E-08 e/A
  length scales=  9.000000000000  9.000000000000  9.000000000000 bohr
               =  4.762594877310  4.762594877310  4.762594877310 angstroms
@@ -833,7 +833,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  2.78254479411771E+00
-    Hartree energy  =  3.97289115692333E-01
+    Hartree energy  =  3.97289115692334E-01
     XC energy       = -2.61264050449510E+00
     Ewald energy    = -1.13056929236330E+01
     PspCore energy  =  1.44126513565306E+00
@@ -844,6 +844,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  Other information on the energy :
     Total energy(eV)= -2.90879103363252E+02 ; Band energy (Ha)=  -1.2189501767E+00
 --------------------------------------------------------------------------------
+
+
 
           ===> extra information on forces <===
  ewald contribution to reduced grads
@@ -949,7 +951,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  kpt#   3, nband=  5, wtk=  0.50000, kpt=  0.2500 -0.2500  0.2500 (reduced coord)
   -0.28978   -0.23834   -0.07394   -0.03901   -0.01687
 
- ETOT  5  -10.689618411248    -1.807E-12 2.624E-14 1.279E-11
+ ETOT  5  -10.689618411248    -1.803E-12 2.624E-14 1.279E-11
 
  prteigrs : about to open file t02o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.04304   Average Vxc (hartree)=  -0.30593
@@ -961,7 +963,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  kpt#   3, nband=  5, wtk=  0.50000, kpt=  0.2500 -0.2500  0.2500 (reduced coord)
   -0.28978   -0.23834   -0.07394   -0.03901   -0.01687
 
- ETOT  6  -10.689618411248    -3.020E-14 2.581E-16 7.347E-13
+ ETOT  6  -10.689618411248    -3.197E-14 2.581E-16 7.347E-13
 
  prteigrs : about to open file t02o_DS2_EIG
  Fermi (or HOMO) energy (hartree) =   0.04304   Average Vxc (hartree)=  -0.30593
@@ -1013,12 +1015,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.2452E-20; max=  1.1573E-19
+ Mean square residual over all n,k,spin=   42.452E-21; max=  11.573E-20
    0.2500  0.2500  0.2500    1  7.67214E-20 kpt; spin; max resid(k); each band:
   4.63E-20 3.55E-20 7.80E-21 4.51E-22 7.67E-20
   -0.2500  0.2500  0.2500    1  1.15728E-19 kpt; spin; max resid(k); each band:
   1.47E-20 1.29E-20 1.16E-19 1.35E-22 9.48E-20
-   0.2500 -0.2500  0.2500    1  9.70780E-20 kpt; spin; max resid(k); each band:
+   0.2500 -0.2500  0.2500    1  9.70781E-20 kpt; spin; max resid(k); each band:
   1.92E-20 2.69E-20 9.71E-20 8.89E-21 7.96E-20
  reduced coordinates (array xred) for    2 atoms
        0.231000000000      0.231000000000      0.231000000000
@@ -1032,14 +1034,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
     2      0.00000000000000     0.00000000000000    -2.74948455957311
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000004212    -0.00000000000000     0.01010803042705
-    2     -0.00000000004212     0.00000000000000    -0.01010803042705
- frms,max,avg= 5.8358741E-03 1.0108030E-02  -2.108E-12  0.000E+00  1.902E-12 h/b
+    1      0.00000000004212     0.00000000000000     0.01010803042705
+    2     -0.00000000004212    -0.00000000000000    -0.01010803042705
+ frms,max,avg= 5.8358741E-03 1.0108030E-02  -2.107E-12  0.000E+00  1.902E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000216598    -0.00000000000000     0.51977577936890
-    2     -0.00000000216598     0.00000000000000    -0.51977577936890
- frms,max,avg= 3.0009269E-01 5.1977578E-01  -1.084E-10  0.000E+00  9.780E-11 e/A
+    1      0.00000000216598     0.00000000000000     0.51977577936889
+    2     -0.00000000216598    -0.00000000000000    -0.51977577936889
+ frms,max,avg= 3.0009269E-01 5.1977578E-01  -1.084E-10  0.000E+00  9.781E-11 e/A
  length scales=  9.000000000000  9.000000000000  9.000000000000 bohr
               =  4.762594877310  4.762594877310  4.762594877310 angstroms
  prteigrs : about to open file t02o_DS2_EIG
@@ -1073,6 +1075,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  Other information on the energy :
     Total energy(eV)= -2.90879309905385E+02 ; Band energy (Ha)=  -1.2188978799E+00
 --------------------------------------------------------------------------------
+
+
 
           ===> extra information on forces <===
  ewald contribution to reduced grads
@@ -1242,7 +1246,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.2498E-20; max=  1.1574E-19
+ Mean square residual over all n,k,spin=   42.498E-21; max=  11.574E-20
    0.2500  0.2500  0.2500    1  7.67231E-20 kpt; spin; max resid(k); each band:
   4.63E-20 3.56E-20 7.80E-21 1.09E-21 7.67E-20
   -0.2500  0.2500  0.2500    1  1.15740E-19 kpt; spin; max resid(k); each band:
@@ -1261,13 +1265,13 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
     2      0.00000000000000     0.00000000000000    -2.74948455957311
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00002367604179     0.00000000000000     0.01009237517739
-    2      0.00002367604179    -0.00000000000000    -0.01009237517739
+    1     -0.00002367604179    -0.00000000000000     0.01009237517739
+    2      0.00002367604179     0.00000000000000    -0.01009237517739
  frms,max,avg= 5.8268516E-03 1.0092375E-02  -6.925E-11  0.000E+00  2.956E-10 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00121747091710     0.00000000000000     0.51897075413145
-    2      0.00121747091710    -0.00000000000000    -0.51897075413145
+    1     -0.00121747091710    -0.00000000000000     0.51897075413145
+    2      0.00121747091710     0.00000000000000    -0.51897075413145
  frms,max,avg= 2.9962873E-01 5.1897075E-01  -3.561E-09  0.000E+00  1.520E-08 e/A
  length scales=  9.000000000000  9.000000000000  9.000000000000 bohr
               =  4.762594877310  4.762594877310  4.762594877310 angstroms
@@ -1302,6 +1306,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  Other information on the energy :
     Total energy(eV)= -2.90879515806782E+02 ; Band energy (Ha)=  -1.2188456510E+00
 --------------------------------------------------------------------------------
+
+
 
           ===> extra information on forces <===
  ewald contribution to reduced grads
@@ -1376,10 +1382,6 @@ P newkpt: treating      5 bands with npw=      65 for ikpt=   2 by node    0
 P newkpt: treating      5 bands with npw=      65 for ikpt=   3 by node    0
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS2_WFK
-P newkpt: treating      5 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating      5 bands with npw=      65 for ikpt=   2 by node    0
-P newkpt: treating      5 bands with npw=      65 for ikpt=   3 by node    0
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 P newkpt: treating      5 bands with npw=      65 for ikpt=   1 by node    0
@@ -1388,21 +1390,21 @@ P newkpt: treating      5 bands with npw=      65 for ikpt=   3 by node    0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
--ETOT  1   24.636814926425     -4.171E+01 6.108E-02 2.044E+03
+-ETOT  1   24.636814929372     -4.171E+01 6.108E-02 2.044E+03
 
- ETOT  2   2.5562929769722     -2.208E+01 5.322E-03 2.103E+01
+ ETOT  2   2.5562929764047     -2.208E+01 5.322E-03 2.103E+01
 
- ETOT  3   2.3616814189752     -1.946E-01 5.818E-05 8.138E-01
+ ETOT  3   2.3616814189474     -1.946E-01 5.818E-05 8.138E-01
 
- ETOT  4   2.3549777617274     -6.704E-03 1.237E-06 4.025E-02
+ ETOT  4   2.3549777617265     -6.704E-03 1.237E-06 4.025E-02
 
- ETOT  5   2.3546652045875     -3.126E-04 1.086E-07 1.260E-03
+ ETOT  5   2.3546652045870     -3.126E-04 1.086E-07 1.260E-03
 
- ETOT  6   2.3546583154753     -6.889E-06 1.929E-09 7.165E-05
+ ETOT  6   2.3546583154751     -6.889E-06 1.929E-09 7.165E-05
 
- ETOT  7   2.3546579160244     -3.995E-07 2.855E-10 9.648E-07
+ ETOT  7   2.3546579160245     -3.995E-07 2.855E-10 9.648E-07
 
- ETOT  8   2.3546579103752     -5.649E-09 2.886E-12 1.834E-08
+ ETOT  8   2.3546579103753     -5.649E-09 2.886E-12 1.834E-08
 
  ETOT  9   2.3546579102681     -1.071E-10 1.070E-13 2.267E-10
 
@@ -1412,7 +1414,7 @@ P newkpt: treating      5 bands with npw=      65 for ikpt=   3 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.5667E-14; max=  1.0701E-13
+ Mean square residual over all n,k,spin=   15.667E-15; max=  10.701E-14
    0.2500  0.2500  0.2500    1  1.07007E-13 kpt; spin; max resid(k); each band:
   1.03E-14 5.42E-15 3.61E-15 8.29E-15 1.07E-13
   -0.2500  0.2500  0.2500    1  1.23351E-14 kpt; spin; max resid(k); each band:
@@ -1586,7 +1588,7 @@ P newkpt: treating      5 bands with npw=      65 for ikpt=   3 by node    0
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
@@ -1648,7 +1650,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.28010518E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  5.28010518E-04  sigma(3 1)= -3.09178426E-14
+  sigma(2 2)=  5.28010518E-04  sigma(3 1)= -3.09170221E-14
   sigma(3 3)=  1.02442017E-03  sigma(2 1)=  0.00000000E+00
 
  Integrated electronic density in atomic spheres:
@@ -1660,15 +1662,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.9271E-26; max=  2.4644E-25
-   0.2500  0.2500  0.2500    1  2.46437E-25 kpt; spin; max resid(k); each band:
-  7.99E-28 8.04E-28 8.13E-28 8.13E-28 5.45E-27 5.45E-27 1.38E-26 1.38E-26
+ Mean square residual over all n,k,spin=   19.271E-27; max=  24.645E-26
+   0.2500  0.2500  0.2500    1  2.46448E-25 kpt; spin; max resid(k); each band:
+  8.01E-28 7.99E-28 8.12E-28 8.13E-28 5.45E-27 5.45E-27 1.38E-26 1.38E-26
   2.46E-25 2.46E-25
-  -0.2500  0.2500  0.2500    1  5.04944E-27 kpt; spin; max resid(k); each band:
-  1.81E-28 1.81E-28 2.06E-27 2.06E-27 2.46E-28 2.46E-28 2.59E-30 2.59E-30
+  -0.2500  0.2500  0.2500    1  5.05061E-27 kpt; spin; max resid(k); each band:
+  1.81E-28 1.80E-28 2.06E-27 2.06E-27 2.46E-28 2.47E-28 2.60E-30 2.60E-30
   5.05E-27 5.05E-27
-   0.2500 -0.2500  0.2500    1  1.08253E-26 kpt; spin; max resid(k); each band:
-  9.98E-29 1.01E-28 5.98E-28 5.98E-28 1.08E-26 1.08E-26 7.44E-28 7.45E-28
+   0.2500 -0.2500  0.2500    1  1.08262E-26 kpt; spin; max resid(k); each band:
+  1.00E-28 1.00E-28 5.98E-28 5.98E-28 1.08E-26 1.08E-26 7.44E-28 7.44E-28
   1.96E-27 1.96E-27
  reduced coordinates (array xred) for    2 atoms
        0.231000000000      0.231000000000      0.231000000000
@@ -1719,13 +1721,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
     XC energy       = -2.61261807867084E+00
     Ewald energy    = -1.13058438878511E+01
     PspCore energy  =  1.44126513565306E+00
-    Loc. psp. energy= -1.95539062796538E+00
+    Loc. psp. energy= -1.95539062796537E+00
     NL   psp  energy=  5.63285770662780E-01
     >>>>>>>>> Etotal= -1.06896184112477E+01
 
  Other information on the energy :
     Total energy(eV)= -2.90879309905385E+02 ; Band energy (Ha)=  -1.2188978801E+00
 --------------------------------------------------------------------------------
+
+
 
           ===> extra information on forces <===
  ewald contribution to reduced grads
@@ -1743,12 +1747,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.28010518E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  5.28010518E-04  sigma(3 1)= -3.09178426E-14
+  sigma(2 2)=  5.28010518E-04  sigma(3 1)= -3.09170221E-14
   sigma(3 3)=  1.02442017E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.0403E+01 GPa]
 - sigma(1 1)=  1.55346032E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.55346032E+01  sigma(3 1)= -9.09634180E-10
+- sigma(2 2)=  1.55346032E+01  sigma(3 1)= -9.09610042E-10
 - sigma(3 3)=  3.01394768E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
@@ -1800,10 +1804,6 @@ P newkpt: treating     10 bands with npw=      65 for ikpt=   2 by node    0
 P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS5_WFK
-P newkpt: treating     10 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   2 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 P newkpt: treating     10 bands with npw=      65 for ikpt=   1 by node    0
@@ -1812,23 +1812,23 @@ P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
--ETOT  1   24.631281143057     -4.172E+01 6.108E-02 2.043E+03
+-ETOT  1   24.631281487608     -4.172E+01 6.108E-02 2.043E+03
 
- ETOT  2   2.5574049394862     -2.207E+01 5.323E-03 2.113E+01
+ ETOT  2   2.5574048668322     -2.207E+01 5.323E-03 2.113E+01
 
- ETOT  3   2.3617356422781     -1.957E-01 5.826E-05 8.182E-01
+ ETOT  3   2.3617356387374     -1.957E-01 5.826E-05 8.182E-01
 
- ETOT  4   2.3549801865480     -6.755E-03 1.248E-06 4.059E-02
+ ETOT  4   2.3549801863930     -6.755E-03 1.248E-06 4.059E-02
 
- ETOT  5   2.3546652482098     -3.149E-04 1.094E-07 1.269E-03
+ ETOT  5   2.3546652482071     -3.149E-04 1.094E-07 1.269E-03
 
- ETOT  6   2.3546583191556     -6.929E-06 1.941E-09 7.204E-05
+ ETOT  6   2.3546583191558     -6.929E-06 1.941E-09 7.204E-05
 
- ETOT  7   2.3546579175295     -4.016E-07 2.872E-10 9.595E-07
+ ETOT  7   2.3546579175298     -4.016E-07 2.872E-10 9.595E-07
 
- ETOT  8   2.3546579119044     -5.625E-09 2.857E-12 1.822E-08
+ ETOT  8   2.3546579119046     -5.625E-09 2.857E-12 1.822E-08
 
- ETOT  9   2.3546579117983     -1.061E-10 1.070E-13 2.251E-10
+ ETOT  9   2.3546579117985     -1.061E-10 1.070E-13 2.251E-10
 
  At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.061E-10 < toldfe=  1.000E-07
@@ -1836,14 +1836,14 @@ P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.5609E-14; max=  1.0698E-13
+ Mean square residual over all n,k,spin=   15.609E-15; max=  10.698E-14
    0.2500  0.2500  0.2500    1  1.06985E-13 kpt; spin; max resid(k); each band:
   1.03E-14 1.03E-14 5.39E-15 5.39E-15 3.56E-15 3.56E-15 8.17E-15 8.17E-15
   1.07E-13 1.07E-13
   -0.2500  0.2500  0.2500    1  1.23209E-14 kpt; spin; max resid(k); each band:
   1.23E-14 1.23E-14 9.07E-15 9.07E-15 9.54E-15 9.54E-15 5.97E-15 5.97E-15
   9.81E-15 9.81E-15
-   0.2500 -0.2500  0.2500    1  2.10936E-14 kpt; spin; max resid(k); each band:
+   0.2500 -0.2500  0.2500    1  2.10937E-14 kpt; spin; max resid(k); each band:
   1.21E-14 1.21E-14 4.89E-15 4.89E-15 2.11E-14 2.11E-14 8.44E-15 8.44E-15
   6.48E-15 6.48E-15
 
@@ -2013,7 +2013,7 @@ P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
@@ -2044,8 +2044,8 @@ P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2063,7 +2063,7 @@ P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   34.79471556
+  pspatm : epsatm=   34.79471556
          --- l  ekb(1:nproj) -->
              0   -0.901401   -0.217891    1.555038
              1   -0.989901    1.571994
@@ -2203,7 +2203,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
   -0.28728   -0.28728   -0.23668   -0.23668   -0.08320   -0.08320   -0.06346   -0.06346
   -0.00235   -0.00235
 
- ETOT  9  -10.743266945580    -1.574E-12 8.297E-14 9.596E-12
+ ETOT  9  -10.743266945580    -1.572E-12 8.297E-14 9.596E-12
 
  prteigrs : about to open file t02o_DS7_EIG
  Fermi (or HOMO) energy (hartree) =   0.04003   Average Vxc (hartree)=  -0.30516
@@ -2218,7 +2218,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
   -0.28728   -0.28728   -0.23668   -0.23668   -0.08320   -0.08320   -0.06346   -0.06346
   -0.00235   -0.00235
 
- ETOT 10  -10.743266945580    -1.528E-13 2.542E-15 3.894E-13
+ ETOT 10  -10.743266945580    -1.581E-13 2.542E-15 3.894E-13
 
  prteigrs : about to open file t02o_DS7_EIG
  Fermi (or HOMO) energy (hartree) =   0.04003   Average Vxc (hartree)=  -0.30516
@@ -2233,7 +2233,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
   -0.28728   -0.28728   -0.23668   -0.23668   -0.08320   -0.08320   -0.06346   -0.06346
   -0.00235   -0.00235
 
- ETOT 11  -10.743266945580    -8.882E-15 1.804E-16 1.871E-14
+ ETOT 11  -10.743266945580    -3.553E-15 1.804E-16 1.871E-14
 
  prteigrs : about to open file t02o_DS7_EIG
  Fermi (or HOMO) energy (hartree) =   0.04003   Average Vxc (hartree)=  -0.30516
@@ -2248,7 +2248,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
   -0.28728   -0.28728   -0.23668   -0.23668   -0.08320   -0.08320   -0.06346   -0.06346
   -0.00235   -0.00235
 
- ETOT 12  -10.743266945580     3.553E-15 1.453E-18 1.436E-16
+ ETOT 12  -10.743266945580     0.000E+00 1.453E-18 1.436E-16
 
  prteigrs : about to open file t02o_DS7_EIG
  Fermi (or HOMO) energy (hartree) =   0.04003   Average Vxc (hartree)=  -0.30516
@@ -2294,11 +2294,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.4095E-21; max=  5.3102E-20
-   0.2500  0.2500  0.2500    1  5.31019E-20 kpt; spin; max resid(k); each band:
+ Mean square residual over all n,k,spin=   54.095E-22; max=  53.102E-21
+   0.2500  0.2500  0.2500    1  5.31015E-20 kpt; spin; max resid(k); each band:
   3.01E-21 3.71E-21 2.88E-21 3.26E-21 6.58E-22 1.52E-21 1.77E-20 1.58E-20
   1.17E-20 5.31E-20
-  -0.2500  0.2500  0.2500    1  3.85070E-21 kpt; spin; max resid(k); each band:
+  -0.2500  0.2500  0.2500    1  3.85071E-21 kpt; spin; max resid(k); each band:
   3.35E-21 3.85E-21 2.39E-21 3.17E-21 1.84E-21 2.33E-21 8.56E-22 1.22E-21
   1.78E-21 2.26E-21
    0.2500 -0.2500  0.2500    1  3.45422E-21 kpt; spin; max resid(k); each band:
@@ -2321,8 +2321,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  frms,max,avg= 2.0386517E-03 3.5309922E-03   9.213E-11  0.000E+00 -5.376E-10 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00102330672049    -0.00000000000000     0.18157090320202
-    2     -0.00102330672049     0.00000000000000    -0.18157090320202
+    1      0.00102330672049    -0.00000000000000     0.18157090320201
+    2     -0.00102330672049     0.00000000000000    -0.18157090320201
  frms,max,avg= 1.0483167E-01 1.8157090E-01   4.737E-09  0.000E+00 -2.764E-08 e/A
  length scales=  9.000000000000  9.000000000000  9.000000000000 bohr
               =  4.762594877310  4.762594877310  4.762594877310 angstroms
@@ -2360,6 +2360,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  Other information on the energy :
     Total energy(eV)= -2.92339160766629E+02 ; Band energy (Ha)=  -1.2508934224E+00
 --------------------------------------------------------------------------------
+
+
 
           ===> extra information on forces <===
  ewald contribution to reduced grads
@@ -2522,7 +2524,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
   -0.28727   -0.28727   -0.23665   -0.23665   -0.08320   -0.08320   -0.06346   -0.06346
   -0.00235   -0.00235
 
- ETOT  8  -10.743269590428    -1.243E-14 4.079E-18 6.299E-16
+ ETOT  8  -10.743269590428    -1.599E-14 4.079E-18 6.299E-16
 
  prteigrs : about to open file t02o_DS8_EIG
  Fermi (or HOMO) energy (hartree) =   0.04004   Average Vxc (hartree)=  -0.30516
@@ -2556,7 +2558,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.12937927E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  5.12937927E-04  sigma(3 1)= -6.51990977E-15
+  sigma(2 2)=  5.12937927E-04  sigma(3 1)= -6.52017295E-15
   sigma(3 3)=  1.03867893E-03  sigma(2 1)=  0.00000000E+00
 
  Integrated electronic density in atomic spheres:
@@ -2568,14 +2570,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.6429E-20; max=  8.8591E-20
+ Mean square residual over all n,k,spin=   36.429E-21; max=  88.592E-21
    0.2500  0.2500  0.2500    1  8.85915E-20 kpt; spin; max resid(k); each band:
   4.80E-20 5.09E-20 4.35E-20 4.77E-20 2.41E-20 3.33E-20 8.86E-20 4.37E-20
   7.64E-20 7.17E-20
   -0.2500  0.2500  0.2500    1  5.29303E-20 kpt; spin; max resid(k); each band:
   4.61E-20 4.55E-20 5.29E-20 5.21E-20 1.59E-20 1.74E-20 1.39E-20 1.07E-20
   1.16E-20 1.12E-20
-   0.2500 -0.2500  0.2500    1  5.39217E-20 kpt; spin; max resid(k); each band:
+   0.2500 -0.2500  0.2500    1  5.39216E-20 kpt; spin; max resid(k); each band:
   5.29E-20 5.39E-20 4.36E-20 4.44E-20 2.24E-20 2.03E-20 1.22E-20 1.64E-20
   1.27E-20 8.71E-21
  reduced coordinates (array xred) for    2 atoms
@@ -2590,13 +2592,13 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
     2      0.00000000000000     0.00000000000000    -2.74948455957311
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000001292     0.00000000000000     0.00351107577221
-    2     -0.00000000001292    -0.00000000000000    -0.00351107577221
+    1      0.00000000001292    -0.00000000000000     0.00351107577221
+    2     -0.00000000001292     0.00000000000000    -0.00351107577221
  frms,max,avg= 2.0271205E-03 3.5110758E-03   8.159E-12  0.000E+00  5.240E-12 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000066462     0.00000000000000     0.18054676023150
-    2     -0.00000000066462    -0.00000000000000    -0.18054676023150
+    1      0.00000000066462    -0.00000000000000     0.18054676023149
+    2     -0.00000000066462     0.00000000000000    -0.18054676023149
  frms,max,avg= 1.0423872E-01 1.8054676E-01   4.195E-10  0.000E+00  2.694E-10 e/A
  length scales=  9.000000000000  9.000000000000  9.000000000000 bohr
               =  4.762594877310  4.762594877310  4.762594877310 angstroms
@@ -2635,6 +2637,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
     Total energy(eV)= -2.92339232736592E+02 ; Band energy (Ha)=  -1.2508390648E+00
 --------------------------------------------------------------------------------
 
+
+
           ===> extra information on forces <===
  ewald contribution to reduced grads
     1      -1.508802021840     -1.508802021840     -1.508802021840
@@ -2651,12 +2655,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.12937927E-04  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  5.12937927E-04  sigma(3 1)= -6.51990977E-15
+  sigma(2 2)=  5.12937927E-04  sigma(3 1)= -6.52017295E-15
   sigma(3 3)=  1.03867893E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -2.0247E+01 GPa]
 - sigma(1 1)=  1.50911523E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  1.50911523E+01  sigma(3 1)= -1.91822336E-10
+- sigma(2 2)=  1.50911523E+01  sigma(3 1)= -1.91830079E-10
 - sigma(3 3)=  3.05589842E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
@@ -2751,7 +2755,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
   -0.28727   -0.28727   -0.23663   -0.23663   -0.08321   -0.08321   -0.06345   -0.06345
   -0.00235   -0.00235
 
- ETOT  5  -10.743272210460    -1.156E-12 1.362E-14 8.032E-12
+ ETOT  5  -10.743272210460    -1.160E-12 1.362E-14 8.032E-12
 
  prteigrs : about to open file t02o_DS9_EIG
  Fermi (or HOMO) energy (hartree) =   0.04006   Average Vxc (hartree)=  -0.30516
@@ -2796,7 +2800,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
   -0.28727   -0.28727   -0.23663   -0.23663   -0.08321   -0.08321   -0.06345   -0.06345
   -0.00235   -0.00235
 
- ETOT  8  -10.743272210460    -1.776E-15 4.245E-18 6.116E-16
+ ETOT  8  -10.743272210460     0.000E+00 4.245E-18 6.116E-16
 
  prteigrs : about to open file t02o_DS9_EIG
  Fermi (or HOMO) energy (hartree) =   0.04006   Average Vxc (hartree)=  -0.30516
@@ -2811,7 +2815,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
   -0.28727   -0.28727   -0.23663   -0.23663   -0.08321   -0.08321   -0.06345   -0.06345
   -0.00235   -0.00235
 
- ETOT  9  -10.743272210460     5.329E-15 8.206E-20 4.540E-18
+ ETOT  9  -10.743272210460     7.105E-15 8.206E-20 4.540E-18
 
  prteigrs : about to open file t02o_DS9_EIG
  Fermi (or HOMO) energy (hartree) =   0.04006   Average Vxc (hartree)=  -0.30516
@@ -2842,7 +2846,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.5382E-20; max=  8.2057E-20
+ Mean square residual over all n,k,spin=   35.382E-21; max=  82.057E-21
    0.2500  0.2500  0.2500    1  8.20572E-20 kpt; spin; max resid(k); each band:
   4.55E-20 4.87E-20 4.11E-20 4.57E-20 2.24E-20 3.22E-20 4.72E-20 8.21E-20
   7.99E-20 7.59E-20
@@ -2869,8 +2873,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  frms,max,avg= 2.0156750E-03 3.4911950E-03  -9.015E-11  0.000E+00  5.516E-10 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00102109859105     0.00000000000000     0.17952445142755
-    2      0.00102109859105    -0.00000000000000    -0.17952445142755
+    1     -0.00102109859104     0.00000000000000     0.17952445142755
+    2      0.00102109859104    -0.00000000000000    -0.17952445142755
  frms,max,avg= 1.0365017E-01 1.7952445E-01  -4.636E-09  0.000E+00  2.837E-08 e/A
  length scales=  9.000000000000  9.000000000000  9.000000000000 bohr
               =  4.762594877310  4.762594877310  4.762594877310 angstroms
@@ -2896,7 +2900,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  2.88790780938617E+00
+    Kinetic energy  =  2.88790780938618E+00
     Hartree energy  =  4.21618118317014E-01
     XC energy       = -2.62156054449182E+00
     Ewald energy    = -1.13059946840271E+01
@@ -2908,6 +2912,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  Other information on the energy :
     Total energy(eV)= -2.92339304031288E+02 ; Band energy (Ha)=  -1.2507847753E+00
 --------------------------------------------------------------------------------
+
+
 
           ===> extra information on forces <===
  ewald contribution to reduced grads
@@ -2982,10 +2988,6 @@ P newkpt: treating     10 bands with npw=      65 for ikpt=   2 by node    0
 P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t02o_DS8_WFK
-P newkpt: treating     10 bands with npw=      65 for ikpt=   1 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   2 by node    0
-P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 P newkpt: treating     10 bands with npw=      65 for ikpt=   1 by node    0
@@ -2994,23 +2996,23 @@ P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
--ETOT  1   21.844895392552     -5.283E+01 7.062E-02 1.848E+03
+-ETOT  1   21.844894932129     -5.283E+01 7.062E-02 1.848E+03
 
- ETOT  2   2.8225849289101     -1.902E+01 1.126E-02 3.359E+01
+ ETOT  2   2.8225848927269     -1.902E+01 1.126E-02 3.359E+01
 
- ETOT  3   2.4867994178115     -3.358E-01 2.477E-03 5.089E-01
+ ETOT  3   2.4867994142696     -3.358E-01 2.477E-03 5.089E-01
 
- ETOT  4   2.4817944550907     -5.005E-03 1.103E-05 2.311E-02
+ ETOT  4   2.4817944548455     -5.005E-03 1.103E-05 2.311E-02
 
- ETOT  5   2.4815734492899     -2.210E-04 1.005E-06 9.633E-04
+ ETOT  5   2.4815734492815     -2.210E-04 1.005E-06 9.633E-04
 
- ETOT  6   2.4815619444653     -1.150E-05 4.623E-08 6.748E-05
+ ETOT  6   2.4815619444643     -1.150E-05 4.623E-08 6.748E-05
 
- ETOT  7   2.4815612683993     -6.761E-07 3.171E-09 1.828E-06
+ ETOT  7   2.4815612683995     -6.761E-07 3.171E-09 1.828E-06
 
- ETOT  8   2.4815612453211     -2.308E-08 1.894E-10 5.986E-08
+ ETOT  8   2.4815612453213     -2.308E-08 1.894E-10 5.986E-08
 
- ETOT  9   2.4815612439342     -1.387E-09 1.460E-11 7.203E-09
+ ETOT  9   2.4815612439344     -1.387E-09 1.460E-11 7.203E-09
 
  At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.387E-09 < toldfe=  1.000E-07
@@ -3018,14 +3020,14 @@ P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.3217E-12; max=  1.4605E-11
-   0.2500  0.2500  0.2500    1  1.46050E-11 kpt; spin; max resid(k); each band:
+ Mean square residual over all n,k,spin=   13.217E-13; max=  14.605E-12
+   0.2500  0.2500  0.2500    1  1.46049E-11 kpt; spin; max resid(k); each band:
   8.96E-14 8.56E-14 7.17E-14 7.45E-14 9.02E-14 8.80E-14 8.23E-12 3.04E-12
   1.46E-11 1.22E-11
   -0.2500  0.2500  0.2500    1  1.27980E-13 kpt; spin; max resid(k); each band:
   5.38E-14 5.58E-14 6.17E-14 5.04E-14 1.10E-13 1.28E-13 2.30E-14 2.41E-14
   2.24E-14 3.89E-14
-   0.2500 -0.2500  0.2500    1  1.15747E-13 kpt; spin; max resid(k); each band:
+   0.2500 -0.2500  0.2500    1  1.15748E-13 kpt; spin; max resid(k); each band:
   4.41E-14 4.66E-14 4.81E-14 4.21E-14 1.06E-13 1.16E-13 1.92E-14 2.28E-14
   2.72E-14 2.32E-14
 
@@ -3195,7 +3197,7 @@ P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00  0.000000E+00
@@ -3223,24 +3225,24 @@ P newkpt: treating     10 bands with npw=      65 for ikpt=   3 by node    0
            etotal8    -1.0743269590E+01
            etotal9    -1.0743272210E+01
            etotal10    2.4815612439E+00
-            fcart1     2.3720459232E-05 -4.6229339863E-19  1.0123713871E-02
-                      -2.3720459232E-05  4.6229339863E-19 -1.0123713871E-02
-            fcart2     4.2121591836E-11 -5.3236347076E-19  1.0108030427E-02
-                      -4.2121591836E-11  5.3236347076E-19 -1.0108030427E-02
-            fcart3    -2.3676041791E-05  3.2904711955E-19  1.0092375177E-02
-                       2.3676041791E-05 -3.2904711955E-19 -1.0092375177E-02
+            fcart1     2.3720459232E-05 -5.9788344745E-19  1.0123713871E-02
+                      -2.3720459232E-05  5.9788344745E-19 -1.0123713871E-02
+            fcart2     4.2121531923E-11  4.2915531362E-19  1.0108030427E-02
+                      -4.2121531923E-11 -4.2915531362E-19 -1.0108030427E-02
+            fcart3    -2.3676041791E-05 -1.0984030977E-19  1.0092375177E-02
+                       2.3676041791E-05  1.0984030977E-19 -1.0092375177E-02
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-            fcart5    -4.2710438512E-12 -5.6140704230E-19  1.0108030340E-02
-                       4.2710438512E-12  5.6140704230E-19 -1.0108030340E-02
+            fcart5    -4.2710771876E-12 -7.2845593332E-19  1.0108030340E-02
+                       4.2710771876E-12  7.2845593332E-19 -1.0108030340E-02
             fcart6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-            fcart7     1.9900149021E-05 -1.2042661654E-19  3.5309921837E-03
-                      -1.9900149021E-05  1.2042661654E-19 -3.5309921837E-03
-            fcart8     1.2924862048E-11  7.4967083262E-20  3.5110757722E-03
-                      -1.2924862048E-11 -7.4967083262E-20 -3.5110757722E-03
-            fcart9    -1.9857207737E-05  3.5180178077E-21  3.4911950296E-03
-                       1.9857207737E-05 -3.5180178077E-21 -3.4911950296E-03
+            fcart7     1.9900149021E-05 -1.1467135566E-19  3.5309921837E-03
+                      -1.9900149021E-05  1.1467135566E-19 -3.5309921837E-03
+            fcart8     1.2924886429E-11 -3.9577244019E-20  3.5110757722E-03
+                      -1.2924886429E-11  3.9577244019E-20 -3.5110757722E-03
+            fcart9    -1.9857207736E-05  2.4618609404E-20  3.4911950296E-03
+                       1.9857207736E-05 -2.4618609404E-20 -3.4911950296E-03
             fcart10    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
@@ -3360,13 +3362,13 @@ P          mk1mem           3
            strten4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten5     5.2801051822E-04  5.2801051816E-04  1.0244201685E-03
-                       0.0000000000E+00 -3.0917842553E-14  0.0000000000E+00
+                       0.0000000000E+00 -3.0917022126E-14  0.0000000000E+00
            strten6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten7     5.1280941527E-04  5.1269429867E-04  1.0385558456E-03
                        0.0000000000E+00 -1.3766047857E-07  0.0000000000E+00
            strten8     5.1293792748E-04  5.1293792703E-04  1.0386789349E-03
-                       0.0000000000E+00 -6.5199097741E-15  0.0000000000E+00
+                       0.0000000000E+00 -6.5201729523E-15  0.0000000000E+00
            strten9     5.1306636359E-04  5.1318110664E-04  1.0388020063E-03
                        0.0000000000E+00  1.3757094508E-07  0.0000000000E+00
            strten10    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
@@ -3478,51 +3480,65 @@ P          mk1mem           3
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
-- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
+-
+- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
 - interatomic force constants from density-functional perturbation theory,
 - X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [4] A brief introduction to the ABINIT software package.
+- [5] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [5] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
--
-- Proc.   0 individual time (sec): cpu=          4.1  wall=          4.7
+- Proc.   0 individual time (sec): cpu=          3.8  wall=          5.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  18 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.1  wall=          4.7
+.Delivered  17 WARNINGs and  23 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.8  wall=          5.9

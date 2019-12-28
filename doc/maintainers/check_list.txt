@@ -21,7 +21,7 @@ B.1 src/make parents , src/make abiauty  (obsolete - new scripts would be needed
 C. For the final merge of a development version  
 -----------------------------------------------
 C.1 src/make abiauty  and perhaps at some point again abirules ...
-C.2 Update all reference files (optional, but definitely for major version number change).
+C.2 Update all reference files (optional, but definitely for major version number changes - see dev*/main*/update_refs.sh).
 
 D. For the first merge of a production version (possibly for the first release also)
 ------------------------------------------------------------------------------------

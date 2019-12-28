@@ -515,7 +515,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          cond_string(1)='dmft_kspectralfunc' ; cond_values(1)=1
          call chkint_eq(0,1,cond_string,cond_values,ierr,'iscf',dt%iscf,2,(/-2,-3/),iout)
        endif
-       if((dt%dmft_solv<6.or.dt%dmft_solv>7).and.dt%ucrpa==0) then
+       if((dt%dmft_solv<6.or.dt%dmft_solv>7).and.dt%ucrpa==0.and.dt%dmft_solv/=9) then
          cond_string(1)='usedmft' ; cond_values(1)=1
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmft_nwlo',dt%dmft_nwlo,1,iout)
          cond_string(1)='usedmft' ; cond_values(1)=1
@@ -532,7 +532,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_mxsf',dt%dmft_mxsf,-1,one,iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,9,(/-2,-1,0,1,2,5,6,7,8/),iout)
+       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_solv',dt%dmft_solv,10,(/-2,-1,0,1,2,5,6,7,8,9/),iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkdpr(0,1,cond_string,cond_values,ierr,'dmft_tolfreq',dt%dmft_tolfreq,-1,0.01_dp,iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
@@ -561,7 +561,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_t2g',dt%dmft_t2g,2,(/0,1/),iout)
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_x2my2d',dt%dmft_x2my2d,2,(/0,1/),iout)
-       if (dt%dmft_solv>=4.and.dt%ucrpa==0) then
+       if (dt%dmft_solv>=4.and.dt%ucrpa==0.and.dt%dmft_solv/=9) then
          cond_string(1)='usedmft' ; cond_values(1)=1
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,1,iout)
          cond_string(1)='usedmft' ; cond_values(1)=1
@@ -581,11 +581,19 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
          cond_string(1)='dmft_solv' ; cond_values(1)=5
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_meas',dt%dmftctqmc_meas,1,iout)
 #if defined HAVE_TRIQS_v2_0 || defined HAVE_TRIQS_v1_4
-         if (dt%dmft_solv==6.or.dt%dmft_solv==7) then
+         if (dt%dmft_solv==6.or.dt%dmft_solv==7.or.dt%dmft_solv==9) then
            cond_string(1)='dmft_solv' ; cond_values(1)=5
            call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,2*dt%dmft_nwli+1,iout)
            cond_string(1)='usedmft' ; cond_values(1)=1
            call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftctqmc_triqs_nleg',dt%dmftctqmc_triqs_nleg,1,iout)
+         end if
+#endif
+#if !defined HAVE_PYTHON_INVOCATION
+         if (dt%dmft_solv==9) then
+           write(msg,'(2a)')&
+&           'ABINIT must have been compiled with the flag enable_python_invocation="yes" in order to allow', &
+&           ' dmft_solv==9. You need to recompile ABINIT or change the value of dmft_solv.'
+           MSG_ERROR(msg)
          end if
 #endif
        end if
@@ -1976,12 +1984,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
 
-!    nucdipmom requires kptopt > 2
-     if(dt%kptopt<=2) then
+!    nucdipmom requires kptopt 3 or zero
+     if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) .OR. (dt%kptopt .EQ. 4) ) then
        write(msg, '(a,i4,a,a,a)' )&
        ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
        ' => stop ',ch10,&
-       'Action: re-run with kptopt greater than 2 '
+       'Action: re-run with kptopt of 3 or 0 '
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
 
@@ -2177,6 +2185,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_RESPFN/),iout)
    end if
    !PAW+Linear Response+GGA function restricted to pawxcdev=0
+   !PAW+response_to_strain only allowed for LDA
    if (dt%usepaw==1.and.dt%optdriver==RUNL_RESPFN) then
      allow=(dt%ixc>0).and.((dt%ixc>=11.and.dt%ixc<=16).or.(dt%ixc>=23.and.dt%ixc<=39))
      if(.not.allow) allow=(dt%ixc<0).and.libxc_functionals_isgga()
@@ -2194,6 +2203,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &         '  - This is restricted to pawxcdev=0!',ch10,&
 &         '  - Be careful to run the preparatory Ground-State calculations also with pawxcdev=0!'
          MSG_WARNING(msg)
+       end if
+       if (dt%rfstrs/=0) then
+         write(msg,'(3a)' )&
+&         'You are performing a DFPT+PAW calculation using a GGA XC functional:',ch10,&
+&         '  Response to strain perturbation is not yet available!'
+         MSG_ERROR_NOSTOP(msg, ierr)
        end if
      end if
    end if
@@ -2230,20 +2245,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
   !  orbmag
-  ! only values of 0 (default) 1, 2, 3 are allowed
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,4,(/0,1,2,3/),iout)
+  ! only values of 0 (default) 1, 2, 3, -1, -2, -3 are allowed
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,7,(/-3,-2,-1,0,1,2,3/),iout)
   ! when orbmag /= 0, symmorphi must be 0 (no tnons)
   if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'symmorphi',dt%symmorphi,1,(/0/),iout)
   end if
-  ! only kptopt 4 and 3 are allowed for Chern number
-  if((dt%orbmag.EQ.1).OR.(dt%orbmag.EQ.3)) then
-     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/3,4/),iout)
-  end if
-  ! only kptopt 3 is allowed for orbmag
-  if(dt%orbmag.GT.1) then
+  ! only kptopt 3 is allowed 
+  if(dt%orbmag.NE.0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,1,(/3/),iout)
   end if

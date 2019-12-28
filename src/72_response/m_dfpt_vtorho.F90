@@ -157,6 +157,7 @@ contains
 !!  symaf1(nsym1)=(anti)ferromagnetic part of symmetry operations
 !!  symrc1(3,3,nsym1)=symmetry operations in reciprocal space
 !!  symrl1(3,3,nsym1)=symmetry operations in real space
+!!  tnons1(3,nsym1)=non-symmorphic translations
 !!  ucvol=unit cell volume in bohr**3.
 !!  usecprj= 1 if cprj, cprjq, cprj1 arrays are stored in memory
 !!  useylmgr1= 1 if ylmgr1 array is allocated
@@ -226,7 +227,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & natom,nband_rbz,ncpgr,nfftf,nhat1,nkpt_rbz,npwarr,npwar1,nres2,nspden,&
 & nsppol,nsym1,ntypat,nvresid1,occkq,occ_rbz,optres,&
 & paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,pawrhoij1,pawtab,&
-& phnons1,ph1d,prtvol,psps,pwindall,qmat,resid,residm,rhog1,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,&
+& phnons1,ph1d,prtvol,psps,pwindall,qmat,resid,residm,rhog1,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,&
 & usecprj,useylmgr1,ddk_f,vtrial,vtrial1,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
 
 !Arguments -------------------------------
@@ -273,6 +274,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp),intent(out) :: resid(mband*nkpt_rbz*nsppol),rhog1(2,nfftf)
  real(dp),intent(inout) :: nvresid1(cplex*nfftf,nspden),rhor1(cplex*nfftf,nspden)
  real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
+ real(dp),intent(in) :: tnons1(3,nsym1)
  real(dp),intent(in),target :: vtrial(nfftf,nspden)
  real(dp),intent(inout),target :: vtrial1(cplex*nfftf,nspden)
  real(dp),intent(in) :: wtk_rbz(nkpt_rbz),xred(3,natom)
@@ -835,10 +837,10 @@ write (*,*) 'vtorho rhor1 ', rhor1(1:5,:)
 !
    if (psps%usepaw==0) then
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
-&     nspden,nsppol,nsym1,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1)
+&     nspden,nsppol,nsym1,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1)
    else
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
-&     nspden,nsppol,nsym1,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1)
+&     nspden,nsppol,nsym1,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1)
    end if
 !  We now have both rho(r) and rho(G), symmetrized, and if nsppol=2
 !  we also have the spin-up density, symmetrized, in rhor1(:,2).

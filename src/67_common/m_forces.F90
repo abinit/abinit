@@ -483,9 +483,12 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  grtn(:,:)=grl(:,:)+grchempottn(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
 ! grtn(:,:)=grl(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
 
- if (usefock==1 .and. associated(fock).and.fock%fock_common%optfor) then
-   grtn(:,:)=grtn(:,:)+fock%fock_common%forces(:,:)
+ if (usefock==1 .and. associated(fock)) then
+   if (fock%fock_common%optfor) then
+     grtn(:,:)=grtn(:,:)+fock%fock_common%forces(:,:)
+   end if
  end if
+
  if (ngrvdw==dtset%natom) grtn(:,:)=grtn(:,:)+grvdw(:,:)
 ! note that fionred is subtracted, because it really is a force and we need to
 ! turn it back into a gradient. The fred2fcart routine below includes the minus
