@@ -423,7 +423,7 @@ print *, 'wfk_open_read 421 Wfk%hdr_offset ', Wfk%hdr_offset
    if (Wfk%hdr_offset > 0) then
      call wfk_compute_offsets(Wfk)
    else
-     MSG_ERROR("hdr_offset <=0")
+     MSG_ERROR("wfk_open_read hdr_offset <=0")
    end if
 #endif
 
@@ -482,6 +482,7 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
 !Local variables-------------------------------
 !scalars
  integer :: mpierr,ierr
+ integer :: hdroffset(1)
  real(dp) :: cpu,wall,gflops
  logical :: do_write_frm,do_write_hdr
  character(len=500) :: msg
@@ -571,16 +572,22 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
    !%% call MPI_File_set_size(Wfk%fh, MPI_Offset size, mpierr)
    !ABI_CHECK_MPI(mpierr,"MPI_FILE_SET_SIZE")
 
-   call hdr_mpio_skip(Wfk%fh,fform,Wfk%hdr_offset)
-print *, ' Wfk%hdr_offset ', Wfk%hdr_offset, fform
-   ABI_CHECK(fform == Wfk%fform,"fform != Wfk%fform")
-   !call wfk%Hdr%echo(wfk%fform, 4, unit=std_out)
+   hdroffset = -1
+   if (Wfk%my_rank==Wfk%master) then
+     call hdr_mpio_skip(Wfk%fh,fform,Wfk%hdr_offset)
+     ABI_CHECK(fform == Wfk%fform,"fform != Wfk%fform")
+     !call wfk%Hdr%echo(wfk%fform, 4, unit=std_out)
+     hdroffset = Wfk%hdr_offset
+   end if
+   call xmpi_bcast(hdroffset, Wfk%master, Wfk%comm, ierr)
+   Wfk%hdr_offset = hdroffset(1)
+print *, ' Wfk%hdr_offset  fform funt ierr ', Wfk%hdr_offset, fform, funt, ierr
 
    ! Precompute offsets for MPI-IO access
    if (Wfk%hdr_offset > 0) then
      call wfk_compute_offsets(Wfk)
    else
-     MSG_ERROR("hdr_offset <=0")
+     MSG_ERROR("wfk_open_write hdr_offset <=0")
    end if
    call cwtime_report(" FILE_OPEN", cpu, wall, gflops)
 
@@ -3320,11 +3327,12 @@ subroutine wfk_write_my_kptbands(outpath, dtset, distrb_flags, comm, &
 
  call cwtime(cpu, wall, gflops, "start")
 
-print *, 'formeig ', formeig, ' wfk_disk%hdr_offset ', wfk_disk%hdr_offset
+print *, 'formeig ', formeig
  iomode = iomode_from_fname(outpath)
  wfk_unt = get_unit()
- call wfk_disk%open_write(hdr,outpath,formeig,iomode,wfk_unt,xmpi_comm_self)
+ call wfk_disk%open_write(hdr,outpath,formeig,iomode,wfk_unt,comm) !xmpi_comm_self)
 
+print *, 'after wfk_disk%open_write  wfk_disk%hdr_offset ', wfk_disk%hdr_offset
  icg = 0
  ikg = 0
  ibdeig = 0
@@ -3333,10 +3341,9 @@ print *, 'formeig ', formeig, ' wfk_disk%hdr_offset ', wfk_disk%hdr_offset
    do ik_rbz=1,nkpt_in
 
 print *, 'ibdeig, ibdocc, icg, ikg ', ibdeig, ibdocc, icg, ikg
-print *, shape(kg)
-print *, shape(cg)
-print *, shape(eigen)
-print *, shape(occ)
+print *, 'shapekg ', shape(kg)
+print *, 'shapecg ', shape(cg)
+print *, 'shapeeig ', shape(eigen)
      nband_k = hdr%nband(ik_rbz+(spin-1)*hdr%nkpt)
      npw_k = hdr%npwarr(ik_rbz)
 print *, ' nband_k npw_k ', nband_k, npw_k
@@ -3352,6 +3359,7 @@ print *, ' nband_k npw_k ', nband_k, npw_k
      end if
 
      if (present(occ)) then
+print *, 'shapeocc ', shape(occ)
        call wfk_disk%write_band_block([iband,iband+nband_me-1],ik_rbz,spin,xmpio_single,&
 &        kg_k=kg(:,ikg+1:ikg+npw_k), &
 &        cg_k=cg(:,icg+1:icg+npw_k*nband_me*dtset%nspinor),&
