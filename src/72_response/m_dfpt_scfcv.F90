@@ -3096,7 +3096,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
 !Zero only portion of nonlocal matrix to be computed here
  d2nl(:,:,1:dtset%natom+2,idir,ipert)=zero
-print *, ' entering nstdy d2nl = ', idir,ipert, d2nl
 
  ABI_ALLOCATE(d2bbb_k,(2,3,dtset%mband,dtset%mband*dtset%prtbbb))
  ABI_ALLOCATE(d2nl_k,(2,3,mpert))
@@ -3244,13 +3243,11 @@ print *, 'nstdy cycle, ik,isppol, nband ', proc_distrb_cycle(mpi_enreg%proc_dist
 !    contributions to kinetic energy, nonlocal energy, forces,
 !    and update of rhor1 to this k-point and this spin polarization.
 !    Note that dfpt_nstwf is called with kpoint, while kpt is used inside dfpt_vtowfk
-print *, 'nstdy d2nl_k before ', ikpt, d2nl_k
      call dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 &     icg,icg1,idir,ikpt,ipert,isppol,istwf_k,kg_k,kg1_k,kpoint,kpq,mkmem,mk1mem,mpert,&
 &     mpi_enreg,mpw,mpw1,nband_k,npw_k,npw1_k,nsppol,&
 &     occ_k,psps,rmet,ddks,wtk_k,ylm_k,ylm1_k)
 
-print *, 'nstdy d2nl_k ', ikpt, d2nl_k
      d2nl(:,:,:,idir,ipert)=d2nl(:,:,:,idir,ipert)+d2nl_k(:,:,:)
      if(dtset%prtbbb==1)d2bbb(:,:,idir,ipert,:,:)=d2bbb(:,:,idir,ipert,:,:)+d2bbb_k(:,:,:,:)
 

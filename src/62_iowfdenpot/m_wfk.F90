@@ -3045,10 +3045,13 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
 !TODO: need to construct rbz2ibz properly with kranks to get from requested input k to the ibz k 
 !   we have on file
 !   make routine map_kpts (cryst, kptns_in, ebands_ibz%kptns, nkpt_in, nkibz, rbz2ibz)
+!TODO: generalize present routine to accept non reduced kpt set, and just go find the ones it needs
+!      should we still use symrels and spin our the irred subset of the input wfk?
  chksymbreak = 0
  iout = 0
  ! abuse symkpt, sending it a "less than full bz set"
  !   should still reduce to the ibz, though not necessairly the same one!!
+ !   2019/12/28: Seems it still does generate the same one every time for different perts of FCC Al...
  ABI_ALLOCATE (rbz2ibz, (6,nkpt_in))
  ABI_ALLOCATE (ibz2rbz, (nkpt_in))
  ABI_ALLOCATE (symrelT, (3,3,cryst%nsym))
@@ -3339,6 +3342,7 @@ print *, 'after wfk_disk%open_write  wfk_disk%hdr_offset ', wfk_disk%hdr_offset
  ibdocc = 0
  do spin=1,dtset%nsppol
    do ik_rbz=1,nkpt_in
+print *, 'spin, ik_rbz ', spin, ik_rbz
 
 print *, 'ibdeig, ibdocc, icg, ikg ', ibdeig, ibdocc, icg, ikg
 print *, 'shapekg ', shape(kg)

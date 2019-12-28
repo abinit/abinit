@@ -1956,9 +1956,6 @@ print *, ' occkq ', occkq
 &       rhog1_pq=rhog1_pq,rhog1_mq=rhog1_mq,rhor1_pq=rhor1_pq,rhor1_mq=rhor1_mq)
      end if
 
-print *, 'd2bbb ', d2bbb
-print *, 'd2lo ', d2lo
-print *, 'd2nl ', d2nl
      _IBM6("after dfpt_scfcv")
 
 !    2nd-order eigenvalues stuff
@@ -2140,6 +2137,7 @@ print *, 'd2nl ', d2nl
 
    if (write_1wfk) then
      ! Output 1st-order wavefunctions in file
+print *, 'calling wfk_write_my_kptbands nkpt_rbz spacecomm distrb_flags ', nkpt_rbz, spacecomm, distrb_flags
      call wfk_write_my_kptbands(fiwf1o, dtset, distrb_flags, spacecomm, &
 &          formeig, hdr, nkpt_rbz, &
 &          cg1, kg1, eigen1)
