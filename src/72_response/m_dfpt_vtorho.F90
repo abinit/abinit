@@ -299,6 +299,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: ii,ikg,ikg1,ikpt,ilm,index1,ispden,iscf_mod,isppol,istwf_k
  integer :: mbd2kpsp,mbdkpsp,mcgq,mcgq_disk,mcprjq
  integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nkpg,nkpg1
+ integer :: nband_eff
  integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
  integer :: nband_me
  logical :: paral_atom,qne0
@@ -851,8 +852,8 @@ write (*,*) 'vtorho rhor1 ', rhor1(1:5,:)
  do isppol=1,nsppol
    do ikpt=1,nkpt_rbz
      nband_k=nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
-     nband_k=max(1,nband_k-dtset%nbdbuf)
-     residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_k-1)))
+     nband_eff=max(1,nband_k-dtset%nbdbuf)
+     residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
      ibdkpt=ibdkpt+nband_k
    end do
  end do

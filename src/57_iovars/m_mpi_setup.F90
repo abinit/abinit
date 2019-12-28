@@ -546,8 +546,10 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !    Initialize tabs used for k/spin parallelism (with sequential-type values)
      ABI_ALLOCATE(mpi_enregs(idtset)%proc_distrb,(nkpt,mband_upper,nsppol))
      ABI_ALLOCATE(mpi_enregs(idtset)%my_kpttab,(nkpt))
+     ABI_ALLOCATE(mpi_enregs(idtset)%my_bandtab,(mband_upper))
      mpi_enregs(idtset)%proc_distrb(:,:,:)=0
      mpi_enregs(idtset)%my_kpttab(:)=(/(ii,ii=1,nkpt)/)
+     mpi_enregs(idtset)%my_bandtab(:)=(/(ii,ii=1,mband_upper)/)
      mpi_enregs(idtset)%my_isppoltab(:)=1;if (dtsets(idtset)%nsppol==1) mpi_enregs(idtset)%my_isppoltab(2)=0
 
 !    HF or hybrid calculation : initialization of the array distrb_hf

@@ -43,7 +43,7 @@ module m_dfpt_nstwf
  use m_io_tools, only : file_exists
  use m_geometry, only : stresssym
  use m_dynmat,   only : dfpt_sygra
- use m_mpinfo,   only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle
+ use m_mpinfo,   only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle, proc_distrb_band
  use m_hdr,      only : hdr_skip
  use m_occ,      only : occeig
  use m_pawang,   only : pawang_type
@@ -1843,6 +1843,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
  type(rf_hamiltonian_type) :: rf_hamkq
 !arrays
  integer :: ik_ddks(3)
+ integer :: band_procs(nband_k)
  logical :: distrb_cycle(nband_k)
  real(dp) :: dum_grad_berry(1,1),dum_gvnlx1(1,1),dum_gs1(1,1),dum_ylmgr(1,3,1),tsec(2)
  real(dp),allocatable :: cg_k(:,:),cwave0(:,:),cwavef(:,:),cwavef_da(:,:)
@@ -1870,6 +1871,9 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 
 ! filter for bands on this cpu for cg cg1 etc.
  distrb_cycle = (mpi_enreg%proc_distrb(ikpt,1:nband_k,isppol) /= mpi_enreg%me_kpt)
+ call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ikpt,isppol,nband_k,&
+&  mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
+
 
 !Additional allocations
  if (.not.ddk) then
@@ -1994,8 +1998,8 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
      cwavef(:,:)=cg1(:,1+(iband_me-1)*npw1_k*dtset%nspinor+icg1:iband_me*npw1_k*dtset%nspinor+icg1)
 
    end if 
-   call xmpi_bcast(cwave0, mpi_enreg%proc_distrb(ikpt,iband,isppol), mpi_enreg%comm_band, ierr)
-   call xmpi_bcast(cwavef, mpi_enreg%proc_distrb(ikpt,iband,isppol), mpi_enreg%comm_band, ierr)
+   call xmpi_bcast(cwave0, band_procs(iband), mpi_enreg%comm_band, ierr)
+   call xmpi_bcast(cwavef, band_procs(iband), mpi_enreg%comm_band, ierr)
 
 !  In case non ddk perturbation
    if (ipert /= dtset%natom + 1) then

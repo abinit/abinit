@@ -67,7 +67,7 @@ MODULE m_mpinfo
  public :: proc_distrb_cycle     ! Test a condition to cycle
  public :: proc_distrb_nband     ! Return number of bands present on this cpu
  public :: proc_distrb_cycle_bands ! Return array of logicals for bands to cycle at this k and spin
- public :: proc_distrb_cycle_band_procs ! Return array of processor tags for bands to cycle at this k and spin
+ public :: proc_distrb_band      ! Return array of me indices for bands at this k and spin
 
  public :: initmpi_seq           ! Initializes the MPI information for sequential use.
  public :: initmpi_world         ! %comm_world is redifined for the number of processors on which ABINIT is launched
@@ -229,6 +229,7 @@ subroutine destroy_mpi_enreg(MPI_enreg)
  ABI_SFREE(mpi_enreg%kpt_loc2ibz_sp)
  ABI_SFREE(mpi_enreg%mkmem)
  ABI_SFREE(mpi_enreg%my_kpttab)
+ ABI_SFREE(mpi_enreg%my_bandtab)
  if (associated(mpi_enreg%my_atmtab)) then
    ABI_DEALLOCATE(mpi_enreg%my_atmtab)
    nullify(mpi_enreg%my_atmtab)
@@ -404,6 +405,8 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
  if (allocated(mpi_enreg1%my_kpttab)) then
    ABI_ALLOCATE(mpi_enreg2%my_kpttab,(size(mpi_enreg1%my_kpttab)))
    mpi_enreg2%my_kpttab=mpi_enreg1%my_kpttab
+   ABI_ALLOCATE(mpi_enreg2%my_bandtab,(size(mpi_enreg1%my_bandtab)))
+   mpi_enreg2%my_bandtab=mpi_enreg1%my_bandtab
  end if
 
 !Do not copy wavelet pointers, just associate.
@@ -737,7 +740,7 @@ end function mpi_distrib_is_ok
 !!  proc_distrb_cycle
 !!
 !! FUNCTION
-!!  test a condition to cycle
+!!  test a condition to cycle over bands and k-points which do not belong to the present processor
 !!
 !! INPUTS
 !!
@@ -814,7 +817,7 @@ end function proc_distrb_nband
 !!  proc_distrb_cycle_bands
 !!
 !! FUNCTION
-!!  return vector of logicals for each band
+!!  return vector of logicals for each band being on present proc
 !!
 !! INPUTS
 !!
@@ -853,14 +856,14 @@ subroutine proc_distrb_cycle_bands(cycle_bands,distrb,ikpt,isppol,me)
  end if
 
 end subroutine proc_distrb_cycle_bands
-
 !!***
-!!****f* ABINIT/proc_distrb_cycle_band_procs
+
+!!****f* ABINIT/proc_distrb_kptband
 !! NAME
-!!  proc_distrb_cycle_band_procs
+!!  proc_distrb_kptband
 !!
 !! FUNCTION
-!!  return vector of processor me tags for each band
+!!  return vector of processor indices for each band, within the full kpt communicator
 !!
 !! INPUTS
 !!
@@ -870,34 +873,80 @@ end subroutine proc_distrb_cycle_bands
 !!
 !! SOURCE
 
-subroutine proc_distrb_cycle_band_procs(cycle_band_procs,distrb,ikpt,isppol)
+subroutine proc_distrb_kptband(kpt_band_procs,distrb,ikpt,isppol)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikpt,isppol
  integer,allocatable,intent(in) :: distrb(:,:,:)
- integer,allocatable,intent(out) :: cycle_band_procs(:)
+ integer,allocatable,intent(out) :: kpt_band_procs(:)
  character(len=500) :: msg
 
 ! *************************************************************************
 
- if (allocated(cycle_band_procs)) then
-    ABI_DEALLOCATE (cycle_band_procs)
+ if (allocated(kpt_band_procs)) then
+    ABI_DEALLOCATE (kpt_band_procs)
  end if
- ABI_ALLOCATE (cycle_band_procs, (size(distrb, 2)))
- cycle_band_procs=-1
+ ABI_ALLOCATE (kpt_band_procs, (size(distrb, 2)))
+ kpt_band_procs=-1
  if (allocated(distrb)) then
    if (isppol==-1) then
-! TODO : should raise error here - the output rank will be all wrong.
-     cycle_band_procs=distrb(ikpt,:,1)
-     write (msg, "(a)") " for the moment proc_distrb_cycle_bands does not handle the 'any spin' option nsppol -1"
+! TODO : should raise error here - the output rank will be all wrong for isppol 2!
+     kpt_band_procs=distrb(ikpt,:,1)
+     write (msg, "(a)") " for the moment proc_distrb_kptband does not handle the 'any spin' option nsppol -1"
      MSG_ERROR(msg)
    else
-     cycle_band_procs=distrb(ikpt,:,isppol)
+     kpt_band_procs=distrb(ikpt,:,isppol)
    end if
  end if
 
-end subroutine proc_distrb_cycle_band_procs
+end subroutine proc_distrb_kptband
+!!***
+
+!!****f* ABINIT/proc_distrb_band
+!! NAME
+!!  proc_distrb_band
+!!
+!! FUNCTION
+!!  return vector of processor me indices for each band, within the band communicator
+!!
+!! INPUTS
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine proc_distrb_band(band_procs,distrib,ikpt,isppol,nband,me_band,me_kpt,comm_band)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: nband, ikpt, isppol
+ integer,intent(in) :: me_band,me_kpt,comm_band
+ integer,allocatable,intent(in) :: distrib(:,:,:)
+ integer,intent(out) :: band_procs(nband)
+
+ integer :: ierr, iband
+! character(len=500) :: msg
+
+! *************************************************************************
+
+ band_procs = 0
+ 
+ if (allocated(distrib)) then
+   do iband=1, nband
+! is this band k spin on current proc?
+     if (distrib(ikpt,iband,isppol)/=me_kpt) cycle
+! if so save rank in band subcommunicator
+     band_procs(iband) = me_band+1
+   end do
+   call xmpi_sum(band_procs,comm_band,ierr)
+ end if
+
+ band_procs = band_procs-1
+
+end subroutine proc_distrb_band
 !!***
 
 !!****f* ABINIT/initmpi_world
@@ -2209,9 +2258,10 @@ subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
        ABI_ALLOCATE(ranks,(0))
      end if
 
-     mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks)
+     mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
      mpi_enreg%nproc_band=nrank
-     mpi_enreg%me_band=me
+!     mpi_enreg%me_band=mod(me, nrank)
+print *, ' spacecomm,nrank,ranks, mpi_enreg%comm_band me ', spacecomm,nrank,ranks, mpi_enreg%comm_band, mpi_enreg%me_band, " mod(me, nrank) ", mod(me, nrank)
 
      ABI_DEALLOCATE(ranks)
    end if
@@ -2391,6 +2441,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 !Local variables-------------------------------
  integer :: inb,inb1,ind,ind0,nband_k,proc_max,proc_min
  integer :: iiband,iikpt,iisppol,ikpt_this_proc,nbsteps,nproc_kpt,temp_unit
+ integer :: iband_this_proc, iband
  integer :: kpt_distrb(nkpt)
  logical,save :: first=.true.,has_file
  character(len=500) :: msg
@@ -2588,7 +2639,9 @@ print *, 'yes band paral now'
        ind=ind0/nbsteps
        do iiband=1,nband_k
          mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
-         if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc_kpt-ind-1
+         if (nsppol==2) then 
+           mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc_kpt-ind-1
+         end if
        end do
        ind0=ind0+1
      end do
@@ -2610,6 +2663,8 @@ print *, 'yes band paral now'
 
  end if ! has_file
 
+! local indices on cpus, for each sppol kpt band
+ mpi_enreg%my_bandtab(:)=0
  mpi_enreg%my_kpttab(:)=0
  mpi_enreg%my_isppoltab(:)=0
  do iisppol=1,nsppol
@@ -2620,6 +2675,12 @@ print *, 'yes band paral now'
      ikpt_this_proc=ikpt_this_proc+1
      mpi_enreg%my_kpttab(iikpt)=ikpt_this_proc
      mpi_enreg%my_isppoltab(iisppol)=1
+     iband_this_proc = 0
+     do iband=1,nband_k
+       if(proc_distrb_cycle(mpi_enreg%proc_distrb,iikpt,iband,iband,iisppol,mpi_enreg%me_kpt)) cycle
+       iband_this_proc = iband_this_proc + 1
+       mpi_enreg%my_bandtab(iikpt)=iband_this_proc
+     end do
    end do
  end do
 

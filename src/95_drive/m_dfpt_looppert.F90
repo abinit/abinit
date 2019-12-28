@@ -1105,8 +1105,6 @@ print *, ' fermie ', fermie
 &            formeig, istwfk_rbz, kpt_rbz, nkpt_rbz, npwarr, &
 &            cg, eigen=eigen0, occ=occ_rbz)
   
-print *, ' occ_rbz ', occ_rbz
-
 !DEBUG
 !mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
    mcg_tmp = mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol

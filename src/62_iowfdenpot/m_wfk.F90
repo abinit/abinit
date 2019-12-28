@@ -418,7 +418,7 @@ subroutine wfk_open_read(Wfk,fname,formeig,iomode,funt,comm,Hdr_out)
    !call MPI_FILE_SET_VIEW(Wfk%fh,origin,MPI_BYTE,MPI_BYTE,'native',xmpio_info,mpierr)
 
    call hdr_mpio_skip(Wfk%fh,fform,Wfk%hdr_offset)
-
+print *, 'wfk_open_read 421 Wfk%hdr_offset ', Wfk%hdr_offset
    ! Precompute offsets for MPI-IO access
    if (Wfk%hdr_offset > 0) then
      call wfk_compute_offsets(Wfk)
@@ -572,6 +572,7 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
    !ABI_CHECK_MPI(mpierr,"MPI_FILE_SET_SIZE")
 
    call hdr_mpio_skip(Wfk%fh,fform,Wfk%hdr_offset)
+print *, ' Wfk%hdr_offset ', Wfk%hdr_offset, fform
    ABI_CHECK(fform == Wfk%fform,"fform != Wfk%fform")
    !call wfk%Hdr%echo(wfk%fform, 4, unit=std_out)
 
@@ -3319,7 +3320,7 @@ subroutine wfk_write_my_kptbands(outpath, dtset, distrb_flags, comm, &
 
  call cwtime(cpu, wall, gflops, "start")
 
-print *, 'formeig ', formeig
+print *, 'formeig ', formeig, ' wfk_disk%hdr_offset ', wfk_disk%hdr_offset
  iomode = iomode_from_fname(outpath)
  wfk_unt = get_unit()
  call wfk_disk%open_write(hdr,outpath,formeig,iomode,wfk_unt,xmpi_comm_self)

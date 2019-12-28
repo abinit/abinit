@@ -2479,7 +2479,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
      ban2tot = ban2tot + 2*nband_k**2
 
 ! asserts at least 1 band of the current k and spin is on present processor
-print *, ' cycle, nband ', proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me),&
+print *, ' ik, cycle, nband ', ikpt, proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me),&
 &        proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
        bdtot_index=bdtot_index+nband_k

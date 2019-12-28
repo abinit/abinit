@@ -648,10 +648,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 !arrays
  integer :: g0_k(3),g0_kq(3)
  integer :: work_ngfft(18),gmax(3)
- integer,allocatable :: cycle_band_procs(:)
  integer(i1b),allocatable :: itreatq_dvdb(:)
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
  integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:)
+ integer, allocatable :: band_procs(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
  real(dp) :: vk(3), vkq(3), tsec(2), eminmax(2)
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
@@ -1207,8 +1207,6 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        if (.not. ihave_ikibz_spin(ikq_ibz, spin)) then
          ignore_kq = ignore_kq + 1; cycle
        end if
-!TODO: adjust for sppol in case it is distributed or nband differs
-       call proc_distrb_cycle_band_procs(cycle_band_procs,mpi_enreg%proc_distrb,ikq_ibz,1)
 
 
        ! ====================================
@@ -1398,6 +1396,10 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
            ! For the time being use mpw1 = 0 because mpw1 is not used in this call to dfpt_cgwf
            ! still it's clear that the treatment of this array must be completely refactored in the DFPT code.
            !
+           ABI_ALLOCATE (band_procs, (nbcalc_ks))
+           call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ik_ibz,1,nbcalc_ks,&
+&               mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
+
            grad_berry_size_mpw1 = 0
            do ib_k=1,nbcalc_ks
              ! MPI parallelism inside bsum_comm (not very efficient)
@@ -1420,8 +1422,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              band_me = band_ks
              !nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
              nband_me = nband_kq
-             call dfpt_cgwf(band_ks, band_me, berryopt0, cgq, cg1s_kq(:,:,ipc, ib_k), kets_k(:,:,ib_k), &
-               cwaveprj, cwaveprj0, cycle_band_procs, rf2, dcwavef, &
+             call dfpt_cgwf(band_ks, band_me, band_procs, berryopt0, cgq, cg1s_kq(:,:,ipc, ib_k), kets_k(:,:,ib_k), &
+               cwaveprj, cwaveprj0, rf2, dcwavef, &
                eig0nk, ebands%eig(:, ikq_ibz, spin), out_eig1_k, ghc, gh1c_n, grad_berry, gsc, gscq, &
                gs_hamkq, gvnlxc, gvnlx1, icgq0, idir, ipert, igscq0, &
                mcgq, mgscq, mpi_enreg, grad_berry_size_mpw1, cryst%natom, nband_kq, nband_me, nbdbuf0, nline_in, npw_k, npw_kq, nspinor, &
@@ -1447,6 +1449,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              end if
 
            end do ! ib_k
+
+           ABI_DEALLOCATE (band_procs)
 
            ABI_FREE(cgq)
            ABI_FREE(gscq)

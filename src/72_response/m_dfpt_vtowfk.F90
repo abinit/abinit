@@ -239,7 +239,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  type(rf2_t) :: rf2
 !arrays
  logical,allocatable :: cycle_bands(:)
- integer,allocatable :: cycle_band_procs(:)
+ integer :: band_procs(nband_k)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwave0(:,:),cwave1(:,:),cwavef(:,:)
  real(dp),allocatable :: dcwavef(:,:),gh1c_n(:,:),gh0c1(:,:)
@@ -340,6 +340,10 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 !==================  LOOP OVER BANDS ==================================
 !======================================================================
 
+ call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ikpt,isppol,mband,&
+&  mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
+print *, 'band_procs  ', band_procs
+
  iband_me = 0
  do iband=1,nband_k
 
@@ -429,16 +433,15 @@ unit_me = 6
      if (ipert==natom+2.and.gs_hamkq%usepaw==1.and.inonsc==1) opt_gvnlx1=2
 
      if ( (ipert/=natom+10 .and. ipert/=natom+11) .or. abs(occ_k(iband))>tol8 ) then
-       call proc_distrb_cycle_band_procs(cycle_band_procs,mpi_enreg%proc_distrb,ikpt,isppol)
        nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
-       call dfpt_cgwf(iband,iband_me,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
-&       cycle_band_procs,rf2,dcwavef,&
+
+       call dfpt_cgwf(iband,iband_me,band_procs,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
+&       rf2,dcwavef,&
 &       eig0nk,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
 &       idir,ipert,igscq,mcgq,mgscq,mpi_enreg,mpw1,natom,nband_k,nband_me,dtset%nbdbuf,dtset%nline,&
 &       npw_k,npw1_k,nspinor,opt_gvnlx1,prtvol,quit,resid,rf_hamkq,dtset%dfpt_sciss,dtset%tolrde,&
 &       dtset%tolwfr,usedcwavef,dtset%wfoptalg,nlines_done)
        resid_k(iband)=resid
-       ABI_DEALLOCATE (cycle_band_procs)
      else
        resid_k(iband)=zero
      end if
