@@ -72,7 +72,7 @@ iatprj_bs 1
 #%% [files]
 #%% files_to_test = 
 #%%   t94.out, tolnlines = 0, tolabs = 0.000e+00, tolrel = 0.000e+00;
-#%%   t94.out_ep_SBK, tolnlines = 49, tolabs = 7.0e-07, tolrel = 7.0e-05
+#%%   t94.out_ep_SBK, tolnlines = 50, tolabs = 7.0e-07, tolrel = 7.0e-05
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
