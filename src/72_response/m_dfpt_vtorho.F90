@@ -660,7 +660,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
          eloc0=eloc0+wtk_k*occ_k(iband)*eloc0_k(iband)
          enl0=enl0+wtk_k*occ_k(iband)*enl0_k(iband)
          enl1=enl1+wtk_k*occ_k(iband)*enl1_k(iband)
-write (*,*) ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), ek0_k(iband), ek1_k(iband), eloc0_k(iband), enl0_k(iband), enl1_k(iband)
+write (*,*) ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), &
+&   ek0_k(iband), ek1_k(iband), eloc0_k(iband), enl0_k(iband), enl1_k(iband)
        end do
      end if
 
@@ -695,7 +696,7 @@ write (*,*) ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), ek0_
        ikg1=ikg1+npw1_k
      end if
 
-   end do
+   end do !ikpt loop
 
 !======================================================================
 !==================  END BIG K POINT LOOP  ============================

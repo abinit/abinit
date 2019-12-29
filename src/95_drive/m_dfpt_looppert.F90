@@ -1135,7 +1135,8 @@ print *, 'shapes ', shape(cg), "  ", shape(cg_tmp)
        npw = npwarr(ikpt)
        iband_me = 0
        do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
-print *, 'mpi_enreg%proc_distrb(ikpt,iband,isppol) ', mpi_enreg%proc_distrb(ikpt,iband,isppol), ' meband ', mpi_enreg%me_band, ' mekpt ', mpi_enreg%me_kpt
+print *, 'mpi_enreg%proc_distrb(ikpt,iband,isppol) ', mpi_enreg%proc_distrb(ikpt,iband,isppol), &
+&       ' meband ', mpi_enreg%me_band, ' mekpt ', mpi_enreg%me_kpt
          if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) then
            icg_tmp = icg_tmp + npw
            cycle

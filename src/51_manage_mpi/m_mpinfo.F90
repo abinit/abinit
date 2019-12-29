@@ -2261,7 +2261,8 @@ subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
      mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
      mpi_enreg%nproc_band=nrank
 !     mpi_enreg%me_band=mod(me, nrank)
-print *, ' spacecomm,nrank,ranks, mpi_enreg%comm_band me ', spacecomm,nrank,ranks, mpi_enreg%comm_band, mpi_enreg%me_band, " mod(me, nrank) ", mod(me, nrank)
+print *, ' spacecomm,nrank,ranks, mpi_enreg%comm_band me ', spacecomm,nrank,ranks,&
+&  mpi_enreg%comm_band, mpi_enreg%me_band, " mod(me, nrank) ", mod(me, nrank)
 
      ABI_DEALLOCATE(ranks)
    end if

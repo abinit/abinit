@@ -1142,6 +1142,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 !  Note that there are different "exit" instructions within the loop
 !  ######################################################################
  end do ! istep
+print *, 'istep loop finished'
 
  ! Avoid pending requests if itime == ntime.
  call xmpi_wait(quitsum_request,ierr)

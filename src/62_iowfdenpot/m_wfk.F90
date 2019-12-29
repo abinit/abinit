@@ -704,6 +704,7 @@ subroutine wfk_close(Wfk, delete)
  if (wfk%rw_mode /= WFK_NOMODE) then
    Wfk%rw_mode = WFK_NOMODE
 
+print *, ' Wfk%iomode, IO_MODE_FORTRAN, IO_MODE_MPI ', Wfk%iomode, IO_MODE_FORTRAN, IO_MODE_MPI
    select case (Wfk%iomode)
    case (IO_MODE_FORTRAN)
       close(wfk%fh)
@@ -1763,8 +1764,8 @@ end subroutine wfk_read_bks
 !!  ik_ibz=Index of the k-point in the IBZ.
 !!  spin=Spin index
 !!  sc_mode= MPI-IO option
-!!    xmpio_single     ==> for reading by current proc.
-!!    xmpio_collective ==> for collective reading.
+!!    xmpio_single     ==> for writing by current proc.
+!!    xmpio_collective ==> for collective writing.
 !!
 !! OUTPUTS
 !!  [kg_k=(:,:)] = G-vectors
@@ -3190,7 +3191,8 @@ print *, ' spin, ik_ibz, nqst, needthisk ', spin, ik_ibz, nqst, needthisk
        istwf_kf = istwfk_in(ikf)
        npw_kf = npwarr(ikf)
 
-print *, 'ikf, kf, isym, itimrev, g0, ik_ibz, jj, iqst, ik_ibz, kibz ', ikf, kf, isym, itimrev, g0, ik_ibz, jj, iqst, ik_ibz, kibz
+print *, 'ikf, kf, isym, itimrev, g0, ik_ibz, jj, iqst, ik_ibz, kibz ', &
+&         ikf, kf, isym, itimrev, g0, ik_ibz, jj, iqst, ik_ibz, kibz
        if (present(eigen)) then
          eigen(ibdeig(ikf,spin)+1:ibdeig(ikf,spin)+nband_k*(2*nband_k)**formeig) = eig_disk(1:nband_k*(2*nband_k)**formeig)
        end if
@@ -3342,7 +3344,7 @@ print *, 'after wfk_disk%open_write  wfk_disk%hdr_offset ', wfk_disk%hdr_offset
  ibdocc = 0
  do spin=1,dtset%nsppol
    do ik_rbz=1,nkpt_in
-print *, 'spin, ik_rbz ', spin, ik_rbz
+print *, 'spin, ik_rbz, nkpt_in ', spin, ik_rbz, nkpt_in
 
 print *, 'ibdeig, ibdocc, icg, ikg ', ibdeig, ibdocc, icg, ikg
 print *, 'shapekg ', shape(kg)
@@ -3364,13 +3366,13 @@ print *, ' nband_k npw_k ', nband_k, npw_k
 
      if (present(occ)) then
 print *, 'shapeocc ', shape(occ)
-       call wfk_disk%write_band_block([iband,iband+nband_me-1],ik_rbz,spin,xmpio_single,&
+       call wfk_disk%write_band_block([iband,iband+nband_me-1],ik_rbz,spin,xmpio_collective,&
 &        kg_k=kg(:,ikg+1:ikg+npw_k), &
 &        cg_k=cg(:,icg+1:icg+npw_k*nband_me*dtset%nspinor),&
 &        eig_k=eigen(ibdeig+1:ibdeig+nband_k*(2*nband_k)**formeig), &
 &        occ_k=occ(ibdocc+1:ibdocc+nband_k))
      else
-       call wfk_disk%write_band_block([iband,iband+nband_me-1],ik_rbz,spin,xmpio_single,&
+       call wfk_disk%write_band_block([iband,iband+nband_me-1],ik_rbz,spin,xmpio_collective,&
 &        kg_k=kg(:,ikg+1:ikg+npw_k), &
 &        cg_k=cg(:,icg+1:icg+npw_k*nband_me*dtset%nspinor),&
 &        eig_k=eigen(ibdeig+1:ibdeig+nband_k*(2*nband_k)**formeig))
