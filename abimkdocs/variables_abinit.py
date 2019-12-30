@@ -11968,7 +11968,7 @@ Variable(
 [[nspinor]] == 1;
 [[paral_atom]] == 0;
 [[paral_kgb]] == 0;
-[[kptopt]] > 2 """,
+[[kptopt]] == 3 """,
     text=r"""
 Compute quantities related to orbital magnetization. The
     implementation assumes an insulator, so no empty or partially
@@ -11980,11 +11980,18 @@ Compute quantities related to orbital magnetization. The
     see also [[cite:Ceresoli2006]]. The computed results are returned in the
     standard output file, search for "Orbital magnetization" and "Chern number".
 
-* [[orbmag]] = 1: Compute Chern number [[cite:Ceresoli2006]]. This computation is
-    faster than the full [[orbmag]] calculation, and a nonzero value indicates a circulating
-    electronic current.
+* [[orbmag]] = 1: Compute Chern number (really, the integral of the Berry curvature
+over the Brillouin zone) [[cite:Ceresoli2006]]. This computation is
+faster than the full [[orbmag]] calculation, and a nonzero value indicates a circulating
+electronic current.
 * [[orbmag]] = 2: Compute electronic orbital magnetization.
 * [[orbmag]] = 3: Compute both Chern number and electronic orbital magnetization.
+
+The above settings use an implementation based on a discretization of the wavefunction
+derivatives, as in [[cite:Ceresoli2006]]. Using [[orbmag]] -1, -2, -3 delivers the
+same computations as the corresponding 1, 2, 3 values, but based on an implementation
+using a discretization of the density operator itself. Both methods should converge to
+the same values but in our experience the wavefunction-based method converges faster.
 """,
 ),
 
@@ -16406,7 +16413,7 @@ The references for the numbering of space groups, and their list of symmetry ope
   * International Tables for Crystallography [[cite:Hahn1983]]
   * The mathematical theory of symmetry in solids, Representation theory for point groups and space groups [[cite:Bradley1972]]
 
-Related input variables: [[symrel]], [[tnons]], [[symafm]], [[spgroupma]], 
+Related input variables: [[symrel]], [[tnons]], [[symafm]], [[spgroupma]],
 """,
 ),
 
@@ -16443,7 +16450,7 @@ Alternatively, for Shubnikov type IV magnetic groups, one might define [[spgroup
 and [[genafm]]. For both the types III and IV, one might define by hand the set
 of symmetries, using [[symrel]], [[tnons]] and [[symafm]].
 
-Note that the meaning of the spin-flip operation of symmetry is different in the [[nspden]]=2 or in the [[nspden]]=4 
+Note that the meaning of the spin-flip operation of symmetry is different in the [[nspden]]=2 or in the [[nspden]]=4
 case, see detailed explanations in the section on the [[symafm]] input variable. Thus, the same atomic
 positions and [[spinat]] vectors might yield different [[symafm]] values depending on [[nspden]],
 and thus different Shubnikov magnetic space groups.
@@ -16715,29 +16722,29 @@ The symmetries that can act on the magnetization can yield decreased CPU time  (
 in the following cases:
 
   * antiferromagnetism ([[nsppol]] = 1, [[nspinor]] = 1, [[nspden]] = 2)
-  * non-collinear magnetism ([[nsppol]] = 1, [[nspinor]] = 2, [[nspden]] = 4) 
+  * non-collinear magnetism ([[nsppol]] = 1, [[nspinor]] = 2, [[nspden]] = 4)
 
 Also in the case [[nsppol]] = 2, [[nspinor]] = 1, [[nspden]] = 2  they might simply yield better accuracy (or faster convergence),
 but there is no automatic gain of CPU time or memory, although it is not as clear cut as in the above cases.
 
 IMPORTANT : The meaning of [[symafm]] is different in the [[nspden]] = 2 case (collinear magnetism),
 and in the [[nspden]] = 4 case (non-collinear magnetism, with explicit treatment of magnetization as a vector).
-Indeed in the first case, it is supposed that the magnetization vector is not affected by the real space symmetry operations 
+Indeed in the first case, it is supposed that the magnetization vector is not affected by the real space symmetry operations
 (so-called black and white symmetry groups).
-By contrast, in the second case, the real space symmetry operations act on the magnetization vector. 
+By contrast, in the second case, the real space symmetry operations act on the magnetization vector.
 The rationale for such different treatment comes from the fact that the treatment of spin-orbit coupling is incompatible with collinear magnetism [[nspden]]=2,
 so there is no need to worry about it in this case. On the contrary, many calculations with [[nspden]]=2
 will include spin-orbit coupling. The symmetry operations should thus act coherently on the spin-orbit coupling, which implies
-that the real space operations should act also on the magnetization vector in the [[nspden]]=4 case. So, with 
+that the real space operations should act also on the magnetization vector in the [[nspden]]=4 case. So, with
 [[nspden]]=4, even with [[symafm]]=1,
 symmetry operations might change the magnetization vector, e.g. possibly reverse it from one atom to another atom.
 Still, when real space operations also act on the magnetization vector, nothing prevents to have ADDITIONAL "spin-flip" operations, which
-is indeed then the meaning of [[symafm]]=-1 in the [[nspden]]=4 case. 
+is indeed then the meaning of [[symafm]]=-1 in the [[nspden]]=4 case.
 
 Let's illustrate this with an example. Take an H$_2$ system, with the two H atoms quite distant from each other.
 The electron on the first H atom might be 1s spin up, and the electron on the second atom might be 1s spin down.
 With [[nspden]]=2, the inversion symmetry centered in the middle of the segment joining the two atoms will NOT act on the spin,
-so that the actual symmetry operation that leaves the system invariant is an inversion ([[symrel]]= -1 0 0  0 -1 0  0 0 -1) accompanied 
+so that the actual symmetry operation that leaves the system invariant is an inversion ([[symrel]]= -1 0 0  0 -1 0  0 0 -1) accompanied
 by a spin-flip with [[symafm]]=-1.
 By contrast, with [[nspden]]=4, the inversion symmetry centered in the middle of the segment joining the two atoms will reverse the spin direction as well,
 so that the proper symmetry operation is [[symrel]]= -1 0 0  0 -1 0  0 0 -1 but no additional spin-flip is needed to obtain a symmetry operation that leaves the system invariant, so that [[symafm]]=1.
@@ -20154,6 +20161,142 @@ Possible values:
 
     eph_ecutosc cannot be greater than [[ecut]]
 """,
+),
+
+Variable(
+    abivarname="output_file",
+    varset="files",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="OUTPUT FILE",
+    text=r"""
+String specifying the name of the main output file
+when Abinit is executed with the new syntax:
+
+    abinit run.abi > run.log 2> run.err &
+
+If not specified, the name of the output file is automatically generated by replacing
+the file extension of the input file with `.abo`.
+To specify the filename in the input use the syntax
+
+    output_file = "t01.out"
+
+with the string enclosed between double quotation marks.
+"""
+),
+
+Variable(
+    abivarname="indata_prefix",
+    varset="files",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="INput DATA PREFIX",
+    text=r"""
+Prefix for input files. Replaces the analogous entry in the obsolete *files_file*
+This variable is used when Abinit is executed with the new syntax:
+
+    abinit run.abi > run.log 2> run.err &
+
+If this option is not specified, a prefix is automatically constructed from the input file name
+provided the file ends with e.g. `.ext`. (`.abi` is recommended)
+
+If the input file does not have a file extension, a default is provided.
+"""
+),
+
+Variable(
+    abivarname="outdata_file",
+    varset="files",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="OUTput DATA PREFIX",
+    text=r"""
+Prefix for output files. Replaces the analogous entry in the obsolete *files_file*
+This variable is used when Abinit is executed with the new syntax:
+
+    abinit run.abi > run.log 2> run.err &
+
+If this option is not specified, a prefix is automatically constructed from the input file name
+provided the file ends with e.g. `.ext`. (`.abi` is recommended)
+
+If the input file does not have a file extension, a default is provided.
+"""
+),
+
+Variable(
+    abivarname="tmpdata_prefix",
+    varset="files",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval=None,
+    mnemonics="TeMPorary DATA PREFIX",
+    text=r"""
+Prefix for temporary files. Replaces the analogous entry in the obsolete *files_file*
+This variable is used when Abinit is executed with the new syntax:
+
+    abinit run.abi > run.log 2> run.err &
+
+If this option is not specified, a prefix is automatically constructed from the input file name
+provided the file ends with `.ext`.
+
+If the input file does not have a file extension, a default is provided.
+"""
+),
+
+Variable(
+    abivarname="pp_dirpath",
+    varset="files",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="PseudoPotential DIRectory PATH",
+    text=r"""
+Directory prependeded to the pseudopotential basename specified in [[pseudos]].
+This variable is used when Abinit is executed with the new syntax:
+
+    abinit run.abi > run.log 2> run.err &
+
+The string must be quoted in double quotation marks:
+
+    pp_dirpath = "/home/user/my_pseudos/"
+
+If not present, the list in [[pseudos]] is used directly.
+"""
+),
+
+Variable(
+    abivarname="pseudos",
+    varset="files",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="PSEUDOpotentialS",
+    text=r"""
+String defining the list of pseudopotential files
+when Abinit is executed with the new syntax:
+
+    abinit run.abi > run.log 2> run.err &
+
+The string must be quoted in double quotation marks and multiple files should be separated by a comma, e.g.
+
+    pseudos = "al.psp8, as.psp8"
+
+The **mandatory** list must contain [[ntypat]] pseudos ordered according to the [[znucl]] array.
+The directory where all pseudos are located can be specified with [[pp_dirpath]].
+
+!!! important
+
+    Shell variables e.g. $HOME or tilde syntax `~` for user home are not supported.
+"""
 ),
 
 ]

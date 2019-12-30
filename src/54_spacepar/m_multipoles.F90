@@ -390,7 +390,7 @@ subroutine out1dm(fnameabo_app_1dm,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,&
 ! *************************************************************************
 
 !Initialize the file
- write(message, '(a,a)' ) ' io1dm : about to open file ',fnameabo_app_1dm
+ write(message, '(a,a)' ) ' io1dm : about to open file ',trim(fnameabo_app_1dm)
  call wrtout(std_out,message,'COLL')
  call wrtout(ab_out,message,'COLL')
 

@@ -37,6 +37,7 @@
     use m_errors
     use m_abstract_potential, only: abstract_potential_t
     use m_random_xoroshiro128plus, only: rng_t
+    use m_hashtable_strval, only: hash_table_t
     implicit none
 !!***
     private

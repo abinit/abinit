@@ -284,7 +284,7 @@ end subroutine delete_file
 !!
 !! SOURCE
 
-logical function is_connected(unit,fname)
+logical function is_connected(unit, fname)
 
  integer,intent(in) :: unit
  character(len=*),intent(in) :: fname
@@ -294,8 +294,8 @@ logical function is_connected(unit,fname)
  logical :: isopen
 ! *********************************************************************
 
- inquire(file=fname,number=unt_found,opened=isopen)
- is_connected=(isopen.and.(unt_found==unit))
+ inquire(file=fname, number=unt_found, opened=isopen)
+ is_connected=(isopen .and. (unt_found == unit))
 
 end function is_connected
 !!***
@@ -1091,8 +1091,8 @@ function open_file(file,iomsg,unit,newunit,access,form,status,action,recl) resul
  end if
 
  if (iostat /= 0) then
-   write(msg, "(a,i0,2a)")"Fortran open returned iostat ",iostat," while opening: "//trim(file)
-   iomsg = trim(msg)//ch10//"IOMSG: "//trim(iomsg)
+   write(msg, "(a,i0,2a)")"Fortran open returned iostat: ",iostat," while opening file: "//trim(file)
+   iomsg = trim(msg)//ch10//"Runtime error message: "//trim(iomsg)
  end if
 
 end function open_file

@@ -151,7 +151,8 @@ subroutine xmpi_isend_dp2d(xval,dest,tag,spaceComm,request,ierr)
 
 !Local variables-------------------
 #if defined HAVE_MPI
- integer :: ier,my_tag,n1,n2
+ integer :: ier,my_dt,my_op,my_tag,n1,n2
+ integer(kind=int64) :: ntot
 #endif
 
 ! *************************************************************************
@@ -162,7 +163,20 @@ subroutine xmpi_isend_dp2d(xval,dest,tag,spaceComm,request,ierr)
    n1=size(xval,dim=1)
    n2=size(xval,dim=2)
    my_tag = MOD(tag,xmpi_tag_ub)
-   call MPI_ISEND(xval,n1*n2,MPI_DOUBLE_PRECISION,dest,my_tag,spaceComm,request,ier)
+
+   !This product of dimensions can be greater than a 32bit integer
+   !We use a INT64 to store it. If it is too large, we switch to an
+   !alternate routine because MPI<4 doesnt handle 64 bit counts.
+   ntot=int(n1*n2,kind=int64)
+
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_ISEND(xval,n1*n2,MPI_DOUBLE_PRECISION,dest,my_tag,spaceComm,request,ier)
+   else
+     call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
+     call MPI_ISEND(xval,1,my_dt,dest,my_tag,spaceComm,request,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
+
    xmpi_count_requests = xmpi_count_requests + 1
    ierr=ier
  end if

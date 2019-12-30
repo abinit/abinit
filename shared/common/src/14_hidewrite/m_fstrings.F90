@@ -115,19 +115,20 @@ MODULE m_fstrings
    module procedure ltoa_dp
  end interface ltoa
 
-  character(len=1),parameter :: BLANK=' '
-  character(len=1),parameter :: NCHAR = char(10)
-  character(len=1),parameter :: DIR_SEPARATOR = '/'
+ character(len=1),parameter :: BLANK=' '
+ character(len=1),parameter :: NCHAR = char(10)
+ character(len=1),parameter :: DIR_SEPARATOR = '/'
 
-  integer,parameter :: ASCII_A=ICHAR('A')
-  integer,parameter :: ASCII_Z=ICHAR('Z')
-  integer,parameter :: ASCII_aa=ICHAR('a')
-  integer,parameter :: ASCII_zz=ICHAR('z')
-  integer,parameter :: SHIFT=ASCII_aa-ASCII_A ! Capital letters have smaller Dec value in the ASCII table.
-  integer,parameter :: ASCII_0=ICHAR('0')
-  integer,parameter :: ASCII_9=ICHAR('9')
+ integer,parameter :: ASCII_A=ICHAR('A')
+ integer,parameter :: ASCII_Z=ICHAR('Z')
+ integer,parameter :: ASCII_aa=ICHAR('a')
+ integer,parameter :: ASCII_zz=ICHAR('z')
+ integer,parameter :: SHIFT=ASCII_aa-ASCII_A ! Capital letters have smaller Dec value in the ASCII table.
+ integer,parameter :: ASCII_0=ICHAR('0')
+ integer,parameter :: ASCII_9=ICHAR('9')
 
-  integer,parameter :: MAX_SLEN=500
+ integer,parameter :: MAX_SLEN = 500
+
 
 CONTAINS  !===========================================================
 !!***
@@ -1942,15 +1943,15 @@ subroutine inupper(string)
 !lower case and upper case letters stayed upper case
  if (first) then
    do ii=1,26
-!    Look for occurrence of each upper case character
-!    anywhere in string of all lower case letters
+     ! Look for occurrence of each upper case character
+     ! anywhere in string of all lower case letters
      indx=index(lolett,uplett(ii:ii))
-!    If found then print error message and quit
+     ! If found then print error message and quit
      if (indx>0) then
        write(std_out, '(a,a,a,a,a,a,a,a,a)' )&
-&       'Upper case string = ',uplett,ch10,&
-&       'Lower case string = ',lolett,ch10,&
-&       'Upper case character ',uplett(ii:ii),'found in supposedly lower case string.'
+        'Upper case string = ',uplett,ch10,&
+        'Lower case string = ',lolett,ch10,&
+        'Upper case character ',uplett(ii:ii),'found in supposedly lower case string.'
        stop
      end if
    end do
@@ -1959,7 +1960,7 @@ subroutine inupper(string)
 
  inquotes = 0
  do ii=1,len_trim(string)
-!  Pick off single character of string (one byte):
+   !  Pick off single character of string (one byte):
    cc=string(ii:ii)
 
    ! Ignore tokens between quotation marks.
