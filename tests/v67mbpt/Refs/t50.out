@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Dec 2019.
-- ( at 17h56 )
+.Starting date : Mon 30 Dec 2019.
+- ( at 18h09 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v67mbpt_t50/t50.in
 - output file    -> t50.out
@@ -782,6 +782,18 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Last  excitonic eigenvalue=   18.93 [eV]
 
 
+ Direct diagonalization of the resonant excitonic Hamiltonian, Matrix size= 96
+. Using LAPACK sequential version.
+ Excitonic eigenvalues in eV up to n=   32
+   2.88822   2.91273   2.91608   2.99328   3.00885   3.00995   3.20515   3.20539
+   3.27340   3.28147   3.28196   3.30482   3.33980   3.34008   3.38186   3.38219
+   3.39281   3.65194   3.65463   3.65479   4.00777   4.04635   4.10574   4.11130
+   4.14902   4.16248   4.18065   4.19989   4.23287   4.24129   4.25837   4.30389
+
+ First excitonic eigenvalue=    2.89 [eV]
+ Last  excitonic eigenvalue=   18.94 [eV]
+
+
  GW  direct gap       3.33  0.00 [eV] 
  EXC direct gap       3.10  0.00 [eV] 
  EXC binding energy   0.23  0.00 [eV] 
@@ -810,6 +822,176 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
  Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_RPA_NLF_MDF
  Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_GW_NLF_MDF
  Writing EXC Macroscopic dielectric function to file: t50o_DS4_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  59.5642  -0.0000  46.9558  -0.0000  54.7973   0.1453
+   0.0100  59.5649   0.0043  46.9562   0.0021  54.7978   0.1478
+   0.0200  59.5671   0.0086  46.9572   0.0042  54.7994   0.1503
+   0.0300  59.5707   0.0130  46.9589   0.0063  54.8021   0.1529
+   0.0400  59.5757   0.0173  46.9612   0.0084  54.8058   0.1554
+   0.0500  59.5822   0.0216  46.9642   0.0105  54.8106   0.1580
+   0.0600  59.5901   0.0259  46.9679   0.0126  54.8165   0.1606
+   0.0700  59.5994   0.0303  46.9723   0.0147  54.8235   0.1631
+   0.0800  59.6102   0.0346  46.9773   0.0168  54.8315   0.1657
+   0.0900  59.6224   0.0389  46.9831   0.0189  54.8406   0.1683
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0001_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0001_GW_NLF_MDF
+ Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0001_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  59.6498  -0.0000  47.0084  -0.0000  54.8652   0.1564
+   0.0100  59.6506   0.0048  47.0087   0.0023  54.8657   0.1593
+   0.0200  59.6527   0.0095  47.0097   0.0046  54.8673   0.1621
+   0.0300  59.6563   0.0143  47.0114   0.0069  54.8700   0.1650
+   0.0400  59.6614   0.0191  47.0138   0.0092  54.8738   0.1679
+   0.0500  59.6679   0.0239  47.0168   0.0116  54.8786   0.1707
+   0.0600  59.6758   0.0286  47.0205   0.0139  54.8845   0.1736
+   0.0700  59.6852   0.0334  47.0249   0.0162  54.8915   0.1765
+   0.0800  59.6960   0.0382  47.0299   0.0185  54.8996   0.1794
+   0.0900  59.7083   0.0430  47.0357   0.0208  54.9087   0.1823
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0002_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0002_GW_NLF_MDF
+ Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0002_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  59.9453  -0.0000  47.1891  -0.0000  55.0977   0.2020
+   0.0100  59.9461   0.0063  47.1895   0.0031  55.0982   0.2059
+   0.0200  59.9483   0.0127  47.1905   0.0061  55.0998   0.2098
+   0.0300  59.9519   0.0190  47.1922   0.0092  55.1026   0.2137
+   0.0400  59.9571   0.0254  47.1946   0.0123  55.1064   0.2176
+   0.0500  59.9636   0.0317  47.1976   0.0153  55.1113   0.2216
+   0.0600  59.9717   0.0381  47.2014   0.0184  55.1173   0.2255
+   0.0700  59.9812   0.0444  47.2058   0.0215  55.1243   0.2295
+   0.0800  59.9922   0.0508  47.2110   0.0245  55.1325   0.2335
+   0.0900  60.0047   0.0572  47.2168   0.0276  55.1418   0.2375
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0003_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0003_GW_NLF_MDF
+ Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0003_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  60.3385  -0.0000  47.4288  -0.0000  55.4061   0.2624
+   0.0100  60.3393   0.0086  47.4292   0.0041  55.4067   0.2678
+   0.0200  60.3415   0.0171  47.4302   0.0082  55.4083   0.2732
+   0.0300  60.3453   0.0257  47.4320   0.0124  55.4111   0.2786
+   0.0400  60.3505   0.0342  47.4344   0.0165  55.4150   0.2840
+   0.0500  60.3572   0.0428  47.4375   0.0206  55.4199   0.2895
+   0.0600  60.3655   0.0514  47.4413   0.0248  55.4260   0.2949
+   0.0700  60.3752   0.0600  47.4458   0.0289  55.4332   0.3004
+   0.0800  60.3864   0.0686  47.4510   0.0330  55.4415   0.3059
+   0.0900  60.3991   0.0772  47.4569   0.0372  55.4509   0.3115
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0004_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0004_GW_NLF_MDF
+ Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0004_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  60.7759  -0.0000  47.6949  -0.0000  55.7497   0.3254
+   0.0100  60.7767   0.0112  47.6953   0.0054  55.7503   0.3325
+   0.0200  60.7790   0.0223  47.6963   0.0107  55.7519   0.3397
+   0.0300  60.7828   0.0335  47.6981   0.0161  55.7547   0.3469
+   0.0400  60.7882   0.0447  47.7006   0.0214  55.7586   0.3541
+   0.0500  60.7950   0.0559  47.7037   0.0268  55.7637   0.3614
+   0.0600  60.8035   0.0671  47.7076   0.0321  55.7698   0.3686
+   0.0700  60.8134   0.0783  47.7122   0.0375  55.7771   0.3759
+   0.0800  60.8249   0.0895  47.7175   0.0429  55.7856   0.3832
+   0.0900  60.8379   0.1007  47.7235   0.0482  55.7951   0.3905
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0005_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0005_GW_NLF_MDF
+ Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0005_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  61.2356  -0.0000  47.9742  -0.0000  56.1131   0.3841
+   0.0100  61.2364   0.0141  47.9745   0.0067  56.1136   0.3932
+   0.0200  61.2387   0.0281  47.9756   0.0134  56.1152   0.4024
+   0.0300  61.2426   0.0422  47.9774   0.0201  56.1180   0.4116
+   0.0400  61.2481   0.0563  47.9799   0.0268  56.1220   0.4208
+   0.0500  61.2552   0.0703  47.9831   0.0335  56.1271   0.4301
+   0.0600  61.2638   0.0844  47.9871   0.0402  56.1333   0.4394
+   0.0700  61.2740   0.0985  47.9918   0.0469  56.1407   0.4487
+   0.0800  61.2857   0.1127  47.9972   0.0537  56.1492   0.4580
+   0.0900  61.2990   0.1268  48.0033   0.0604  56.1589   0.4674
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0006_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0006_GW_NLF_MDF
+ Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0006_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  61.7078  -0.0000  48.2607  -0.0000  56.4855   0.4312
+   0.0100  61.7086   0.0172  48.2611   0.0081  56.4860   0.4426
+   0.0200  61.7110   0.0344  48.2622   0.0163  56.4876   0.4541
+   0.0300  61.7150   0.0516  48.2640   0.0244  56.4904   0.4655
+   0.0400  61.7206   0.0688  48.2666   0.0326  56.4944   0.4770
+   0.0500  61.7278   0.0860  48.2699   0.0407  56.4995   0.4885
+   0.0600  61.7366   0.1033  48.2739   0.0489  56.5058   0.5000
+   0.0700  61.7470   0.1205  48.2787   0.0570  56.5133   0.5116
+   0.0800  61.7591   0.1378  48.2841   0.0652  56.5219   0.5232
+   0.0900  61.7727   0.1551  48.2904   0.0734  56.5318   0.5348
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0007_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0007_GW_NLF_MDF
+ Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0007_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  62.1874  -0.0000  48.5517  -0.0000  56.8578   0.4670
+   0.0100  62.1882   0.0206  48.5521   0.0097  56.8582   0.4808
+   0.0200  62.1907   0.0411  48.5532   0.0193  56.8598   0.4947
+   0.0300  62.1948   0.0617  48.5550   0.0290  56.8626   0.5086
+   0.0400  62.2005   0.0823  48.5576   0.0387  56.8666   0.5225
+   0.0500  62.2079   0.1029  48.5610   0.0484  56.8718   0.5365
+   0.0600  62.2169   0.1235  48.5651   0.0581  56.8782   0.5505
+   0.0700  62.2276   0.1441  48.5699   0.0678  56.8857   0.5646
+   0.0800  62.2399   0.1648  48.5755   0.0775  56.8945   0.5786
+   0.0900  62.2538   0.1855  48.5819   0.0872  56.9045   0.5928
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0008_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0008_GW_NLF_MDF
+ Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0008_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  62.6715  -0.0000  48.8454  -0.0000  57.2274   0.4923
+   0.0100  62.6723   0.0242  48.8457   0.0113  57.2278   0.5088
+   0.0200  62.6748   0.0483  48.8469   0.0226  57.2295   0.5253
+   0.0300  62.6790   0.0725  48.8488   0.0339  57.2323   0.5419
+   0.0400  62.6849   0.0966  48.8514   0.0451  57.2364   0.5585
+   0.0500  62.6925   0.1208  48.8548   0.0564  57.2416   0.5752
+   0.0600  62.7017   0.1450  48.8590   0.0677  57.2481   0.5919
+   0.0700  62.7126   0.1693  48.8640   0.0790  57.2558   0.6086
+   0.0800  62.7252   0.1935  48.8696   0.0904  57.2648   0.6254
+   0.0900  62.7395   0.2178  48.8761   0.1017  57.2749   0.6422
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0009_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0009_GW_NLF_MDF
+ Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0009_EXC_MDF
+  
+ Macroscopic dielectric function:
+ omega [eV] <KS_RPA_nlf>  <GW_RPA_nlf>  <BSE> 
+   0.0000  63.1580  -0.0000  49.1407  -0.0000  57.5911   0.5075
+   0.0100  63.1589   0.0280  49.1411   0.0130  57.5916   0.5269
+   0.0200  63.1615   0.0559  49.1423   0.0260  57.5932   0.5463
+   0.0300  63.1657   0.0839  49.1442   0.0389  57.5962   0.5658
+   0.0400  63.1717   0.1119  49.1469   0.0519  57.6003   0.5853
+   0.0500  63.1795   0.1399  49.1504   0.0649  57.6057   0.6048
+   0.0600  63.1889   0.1679  49.1546   0.0779  57.6123   0.6244
+   0.0700  63.2000   0.1960  49.1596   0.0909  57.6202   0.6440
+   0.0800  63.2129   0.2241  49.1654   0.1039  57.6293   0.6637
+   0.0900  63.2275   0.2522  49.1720   0.1169  57.6397   0.6834
+  
+ Writing KS-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0010_RPA_NLF_MDF
+ Writing GW-RPA macroscopic dielectric function without local fields to file: t50o_DS4_T0010_GW_NLF_MDF
+ Writing EXC Macroscopic dielectric function to file: t50o_DS4_T0010_EXC_MDF
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1124,10 +1306,10 @@ P           mkmem4          3
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.0
+- Proc.   0 individual time (sec): cpu=          5.3  wall=          5.5
 
 ================================================================================
 
  Calculation completed.
-.Delivered  10 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.0  wall=          4.0
+.Delivered  64 WARNINGs and  19 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.3  wall=          5.5
