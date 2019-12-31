@@ -2977,7 +2977,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  integer :: ikpt,ii,jj,kk,ll,iqst,nqst
  integer :: wfk_unt, iband, nband_me
  integer :: nband_me_saved, iband_saved, chksymbreak, iout
- real(dp) :: ecut_eff,dksqmax,cpu,wall,gflops
+ real(dp) :: ecut_eff,cpu,wall,gflops
  character(len=500) :: msg
  logical :: isirred_kf
  logical :: needthisk
@@ -3015,6 +3015,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
 ! if I use xmpi_comm_self only the mother thread gets eigen and cg
 ! if I use comm and MPIO_stuff then it hangs on this call
 ! if I impose FORTRAN_IO and xmpio_single it complains the file is already opened by another proc
+ ABI_UNUSED(comm)
  call wfk_open_read(wfk_disk,inpath,formeig,iomode,wfk_unt,xmpi_comm_self)
 
 
@@ -3354,15 +3355,22 @@ print *, 'shapeeig ', shape(eigen)
      npw_k = hdr%npwarr(ik_rbz)
 print *, ' nband_k npw_k ', nband_k, npw_k
 
-     if (.not. any(distrb_flags(ik_rbz,:,spin))) cycle
+     ! even if I do not have any bands to run, go through the mpio calls to avoid deadlocks
+     !if (.not. any(distrb_flags(ik_rbz,:,spin))) cycle
 
      nband_me = count(distrb_flags(ik_rbz,:,spin))
-     do iband = 1, nband_k
-       if (distrb_flags(ik_rbz,iband,spin)) exit
-     end do
-     if (.not. distrb_flags(ik_rbz,iband+nband_me-1,spin)) then
-       stop "wfk_write_my_kptbands: bands not contiguous in distrb_flags"
+     if (nband_me == 0) then
+       iband = 1 ! does write_band_block accept the range [1,0]?
+     else
+       do iband = 1, nband_k
+         if (distrb_flags(ik_rbz,iband,spin)) exit
+       end do
+!TODO: check all nband_me entries in distrib_flags - the distribution could be random but with iband+nband_me-1 .true.
+       if (.not. distrb_flags(ik_rbz,iband+nband_me-1,spin)) then
+         stop "wfk_write_my_kptbands: bands not contiguous in distrb_flags"
+       end if
      end if
+print *, 'nband_me, distrb_flags(ik_rbz,iband+nband_me-1,spin)) '
 
      if (present(occ)) then
 print *, 'shapeocc ', shape(occ)
