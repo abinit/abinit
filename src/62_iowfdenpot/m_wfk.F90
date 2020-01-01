@@ -1853,6 +1853,8 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
    ABI_CHECK(Wfk%formeig == 0, "formeig /=0 with occ_k in input!")
  end if
 
+print *, 'Wfk%iomode ', Wfk%iomode, ' IO_MODE_FORTRAN, IO_MODE_MPIO ', IO_MODE_FORTRAN, IO_MODE_MPI
+print *, 'sc_mode, xmpio_collective, xmpio_single ', sc_mode, xmpio_collective, xmpio_single
  select case (Wfk%iomode)
  case (IO_MODE_FORTRAN)
 
@@ -2026,9 +2028,11 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
    else if (Wfk%formeig==1) then
 
      if (present(eig_k)) then
+print *, 'in writing of records for mpio formeig 1'
        types = [MPI_DOUBLE_COMPLEX,MPI_DOUBLE_COMPLEX]
        sizes = [nband_disk,npw_disk*nspinor_disk]
 
+! TODO: are we missing frmarkers here?
        call xmpio_create_fstripes(nband_disk,sizes,types,gkk_type,my_offpad,mpierr)
        ABI_CHECK_MPI(mpierr,"xmpio_create_fstripes")
 
@@ -2038,7 +2042,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
        ABI_CHECK_MPI(mpierr,"SET_VIEW")
 
        call MPI_TYPE_FREE(gkk_type,mpierr)
-       ABI_CHECK_MPI(mpierr,"")
+       ABI_CHECK_MPI(mpierr,"FREE")
 
        bufsz = (nband_disk**2)
 
@@ -2977,9 +2981,10 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  integer :: ikpt,ii,jj,kk,ll,iqst,nqst
  integer :: wfk_unt, iband, nband_me
  integer :: nband_me_saved, iband_saved, chksymbreak, iout
+ integer :: ik_disk
  real(dp) :: ecut_eff,cpu,wall,gflops
  character(len=500) :: msg
- logical :: isirred_kf
+ logical :: isirred_kf, foundk
  logical :: needthisk
  logical,parameter :: force_istwfk1=.False.
  type(wfk_t),target :: wfk_disk
@@ -2990,21 +2995,13 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  integer :: g0(3),work_ngfft(18),gmax_disk(3),gmax_kf(3),gmax(3)
  integer,allocatable :: kg_kf(:,:), icg(:,:), ikg(:), ibdeig(:,:), ibdocc(:,:)
  integer,allocatable :: ibz2rbz(:)
+ integer,allocatable :: ibz2disk(:)
  integer,allocatable :: symrelT(:,:,:)
  integer,allocatable :: rbz2ibz(:,:),kg_disk(:,:),iperm(:),rbz2ibz_sort(:)
  real(dp) :: kf(3),kibz(3)
  real(dp),allocatable :: cg_disk(:,:),eig_disk(:),occ_disk(:),work(:,:,:,:)
 
 ! *************************************************************************
-
- if (all(dtset%kptrlatt == 0)) then
-   write(msg,"(5a)")&
-     "Cannot produce full WFK file because kptrlatt == 0",ch10,&
-     "Please use nkgpt and shiftk to define a homogeneous k-mesh.",ch10,&
-     "Returning to caller"
-   MSG_WARNING(msg)
-   return
- end if
 
  call cwtime(cpu, wall, gflops, "start")
 
@@ -3064,11 +3061,22 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  call symkpt_new(chksymbreak, cryst%gmet, ibz2rbz, iout, kptns_in, nkpt_in, nkibz, &
 &     cryst%nsym, symrelT, cryst%timrev-1, rbz2ibz, xmpi_comm_self)
 
- ABI_CHECK (nkibz == wfk_disk%nkpt, "wfk_read_my_kptbands Error - found different number of irred k")
- ! check the kibz found are the same as those on disk:
- do ik_ibz=1,wfk_disk%nkpt
-   if (sum(abs(ebands_ibz%kptns(:,ik_ibz) - kptns_in(:,ibz2rbz(ik_ibz)))) > tol6) then
-     MSG_ERROR ("found different set of irred kpts from that on disk.")
+ ! we now have 3 lists: input k, disk k, and irred k
+ ! check that all of the irred k (needed to complete the input k requested) are in the list of those on disk
+ ABI_ALLOCATE (ibz2disk, (nkibz))
+ ibz2disk = -1
+ do ik_ibz=1,nkibz
+   foundk = .false.
+   do ik_disk=1,wfk_disk%nkpt
+print *, ' kpt disk vs irred ', ebands_ibz%kptns(:,ik_disk), '   ', kptns_in(:,ibz2rbz(ik_ibz))
+     if (sum(abs(ebands_ibz%kptns(:,ik_disk) - kptns_in(:,ibz2rbz(ik_ibz)))) < tol6) then
+       ibz2disk(ik_ibz) = ik_disk
+       foundk = .true.
+       exit
+     end if
+   end do
+   if (.not. foundk) then
+     MSG_ERROR ("wfk_read_my_kptbands : not all of the required irred kpts are on disk.")
    end if
  end do
 
@@ -3105,7 +3113,8 @@ print *, 'rbz2ibz_sort ', rbz2ibz_sort
    jj = 0
    do ikpt=1,nkpt_in
      ik_ibz = rbz2ibz(1,ikpt)
-     nband_k = wfk_disk%nband(ik_ibz,spin)
+     ik_disk = ibz2disk(ik_ibz)
+     nband_k = wfk_disk%nband(ik_disk,spin)
      ikg(ikpt) = jj
      ibdeig(ikpt,spin) = kk
      ibdocc(ikpt,spin) = ll
@@ -3123,11 +3132,11 @@ print *, 'icg counts ikpt, spin ', icg(ikpt,spin),ikpt,spin
 
 print *, ' distrb_flags(:,:,:) ', distrb_flags
  do spin=1,nsppol
-   do ik_ibz=1,wfk_disk%nkpt
-     nband_k = wfk_disk%nband(ik_ibz,spin)
+   do ik_ibz=1,nkibz
+     nband_k = wfk_disk%nband(ik_disk,spin)
      kibz = ebands_ibz%kptns(:,ik_ibz)
-     istwf_disk = wfk_disk%hdr%istwfk(ik_ibz)
-     npw_disk = wfk_disk%hdr%npwarr(ik_ibz)
+     istwf_disk = wfk_disk%hdr%istwfk(ik_disk)
+     npw_disk = wfk_disk%hdr%npwarr(ik_disk)
 
      ! Find number of symmetric k-points associated to ik_ibz
      nqst = 0
@@ -3175,10 +3184,10 @@ print *, ' spin, ik_ibz, nqst, needthisk ', spin, ik_ibz, nqst, needthisk
 ! may need to re-read if for a different equivalent k if I need other bands
        if (iband /= iband_saved .or. nband_me /= nband_me_saved) then
          if (formeig > 0) then
-           call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_ibz,spin,xmpio_single,&
+           call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_disk,spin,xmpio_single,&
              kg_k=kg_disk,cg_k=cg_disk,eig_k=eig_disk)
          else 
-           call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_ibz,spin,xmpio_single,&
+           call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_disk,spin,xmpio_single,&
              kg_k=kg_disk,cg_k=cg_disk,eig_k=eig_disk,occ_k=occ_disk)
          end if
          iband_saved = iband
@@ -3202,7 +3211,7 @@ print *, 'ikf, kf, isym, itimrev, g0, ik_ibz, jj, iqst, ik_ibz, kibz ', &
        end if
 
        ! The test on npwarr is needed because we may change istwfk e.g. gamma.
-       if (isirred_kf .and. wfk_disk%hdr%npwarr(ik_ibz) == npwarr(ikf)) then
+       if (isirred_kf .and. wfk_disk%hdr%npwarr(ik_disk) == npwarr(ikf)) then
          if (present(kg)) then
            kg(:,ikg(ikf)+1:ikg(ikf)+npw_kf) = kg_disk (:,1:npw_kf)
          end if
@@ -3248,6 +3257,7 @@ print *, 'ikf, kf, isym, itimrev, g0, ik_ibz, jj, iqst, ik_ibz, kibz ', &
  ABI_FREE(rbz2ibz_sort)
  ABI_FREE(rbz2ibz)
  ABI_FREE(ibz2rbz)
+ ABI_FREE(ibz2disk)
 
  ABI_FREE(kg_disk)
  ABI_FREE(cg_disk)
@@ -3340,10 +3350,10 @@ print *, 'formeig ', formeig
 
 print *, 'after wfk_disk%open_write  wfk_disk%hdr_offset ', wfk_disk%hdr_offset
  icg = 0
- ikg = 0
  ibdeig = 0
  ibdocc = 0
  do spin=1,dtset%nsppol
+   ikg = 0
    do ik_rbz=1,nkpt_in
 print *, 'spin, ik_rbz, nkpt_in ', spin, ik_rbz, nkpt_in
 
@@ -3370,7 +3380,7 @@ print *, ' nband_k npw_k ', nband_k, npw_k
          stop "wfk_write_my_kptbands: bands not contiguous in distrb_flags"
        end if
      end if
-print *, 'nband_me, distrb_flags(ik_rbz,iband+nband_me-1,spin)) '
+print *, 'nband_me, distrb_flags(ik_rbz,iband+nband_me-1,spin)) ', nband_me, distrb_flags(ik_rbz,iband+nband_me-1,spin)
 
      if (present(occ)) then
 print *, 'shapeocc ', shape(occ)

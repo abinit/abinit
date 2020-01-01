@@ -229,7 +229,6 @@ subroutine destroy_mpi_enreg(MPI_enreg)
  ABI_SFREE(mpi_enreg%kpt_loc2ibz_sp)
  ABI_SFREE(mpi_enreg%mkmem)
  ABI_SFREE(mpi_enreg%my_kpttab)
- ABI_SFREE(mpi_enreg%my_bandtab)
  if (associated(mpi_enreg%my_atmtab)) then
    ABI_DEALLOCATE(mpi_enreg%my_atmtab)
    nullify(mpi_enreg%my_atmtab)
@@ -405,8 +404,6 @@ subroutine copy_mpi_enreg(MPI_enreg1,MPI_enreg2)
  if (allocated(mpi_enreg1%my_kpttab)) then
    ABI_ALLOCATE(mpi_enreg2%my_kpttab,(size(mpi_enreg1%my_kpttab)))
    mpi_enreg2%my_kpttab=mpi_enreg1%my_kpttab
-   ABI_ALLOCATE(mpi_enreg2%my_bandtab,(size(mpi_enreg1%my_bandtab)))
-   mpi_enreg2%my_bandtab=mpi_enreg1%my_bandtab
  end if
 
 !Do not copy wavelet pointers, just associate.
@@ -2255,14 +2252,16 @@ subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
        end do
      end do
      if (.not.allocated(ranks)) then
+print *, 'ranks not alloc'
        ABI_ALLOCATE(ranks,(0))
      end if
 
      mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
      mpi_enreg%nproc_band=nrank
 !     mpi_enreg%me_band=mod(me, nrank)
-print *, ' spacecomm,nrank,ranks, mpi_enreg%comm_band me ', spacecomm,nrank,ranks,&
-&  mpi_enreg%comm_band, mpi_enreg%me_band, " mod(me, nrank) ", mod(me, nrank)
+print *, ' spacecomm,nrank,ranks ', spacecomm,nrank,ranks
+print *, ' mpi_enreg%comm_band me ', mpi_enreg%comm_band, mpi_enreg%me_band, &
+&        " mod(me, nrank) ", mod(me, nrank)
 
      ABI_DEALLOCATE(ranks)
    end if
@@ -2665,7 +2664,6 @@ print *, 'yes band paral now'
  end if ! has_file
 
 ! local indices on cpus, for each sppol kpt band
- mpi_enreg%my_bandtab(:)=0
  mpi_enreg%my_kpttab(:)=0
  mpi_enreg%my_isppoltab(:)=0
  do iisppol=1,nsppol
@@ -2680,7 +2678,6 @@ print *, 'yes band paral now'
      do iband=1,nband_k
        if(proc_distrb_cycle(mpi_enreg%proc_distrb,iikpt,iband,iband,iisppol,mpi_enreg%me_kpt)) cycle
        iband_this_proc = iband_this_proc + 1
-       mpi_enreg%my_bandtab(iikpt)=iband_this_proc
      end do
    end do
  end do

@@ -258,9 +258,6 @@ module defs_abitypes
    integer, allocatable :: my_kpttab(:)
     ! Indicates the correspondence between the ikpt and ikpt_this_proc
 
-   integer, allocatable :: my_bandtab(:)
-    ! Indicates the correspondence between the iband and iband_this_proc (or iband_me)
-
    real(dp) :: pw_unbal_thresh
     !Threshold (in %) activating the plane-wave load balancing process (see kpgsph routine)
 

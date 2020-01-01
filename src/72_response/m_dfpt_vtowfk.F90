@@ -467,7 +467,7 @@ unit_me = 6
 write (unit_me, *) 'vtowfk iband, cwavef ', iband, cwavef(:,1:5)
 write (unit_me, *) 'vtowfk iband, cwave1 ', iband, cwave1(:,1:5)
 ii = (iband-1)*nband_k*2
-write (unit_me, *) 'vtowfk iband, eig1_k ', iband, eig1_k(ii+1:ii+10)
+write (unit_me, *) 'vtowfk iband, eig1_k ', iband, eig1_k(ii+1:ii+min(10,nband_k))
        ABI_DEALLOCATE (cycle_bands)
      else
        tocceig=0

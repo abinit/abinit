@@ -1090,10 +1090,15 @@ print *, 'skipping for resid'
      ! A negative residual will be the signal of this problem ...
      resid=-two
      if (prtvol > 0) call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set resid to -2')
-   else
+   else if (d2edt2 > tol12) then
      ! Here, the value of theta that gives the minimum
      theta=-dedt/d2edt2
      !write(std_out,*)' dfpt_cgwf: dedt,d2edt2=',dedt,d2edt2
+   else
+     write(msg,'(a)') 'DFPT_CGWF WARNING : d2edt2 is zero, skipping update'
+     call wrtout(std_out,msg,'COLL')
+     theta=zero
+print *, 'dedt, d2edt2, theta ', dedt, d2edt2, theta
    end if
 
    ! Check that result is above machine precision

@@ -1013,6 +1013,7 @@ print *, 'nkpt_rbz ', nkpt_rbz
 ! given number of reduced kpt, store distribution of bands across procs
    ABI_ALLOCATE(distrb_flags,(nkpt_rbz,dtset%mband,dtset%nsppol))
    distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
+print *, 'distrb_flags ', distrb_flags
 
    _IBM6("IBM6 before kpgio")
 
@@ -1021,6 +1022,7 @@ print *, 'nkpt_rbz ', nkpt_rbz
    call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
 &   kpt_rbz,mkmem_rbz,nband_rbz,nkpt_rbz,'PERS',mpi_enreg,mpw,npwarr,npwtot,dtset%nsppol)
    call timab(143,2,tsec)
+print *, 'after kpgio'
 
 !  Set up the spherical harmonics (Ylm) at k
    useylmgr=0; option=0 ; nylmgr=0
