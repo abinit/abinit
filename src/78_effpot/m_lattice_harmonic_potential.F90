@@ -44,6 +44,7 @@ module m_lattice_harmonic_potential
 
   type, public, extends(abstract_potential_t) :: lattice_harmonic_potential_t
      integer :: natom           ! number of atoms
+     real(dp) :: ref_energy=0.0      ! reference energy
      !real(dp):: ref_cell(3,3)   ! reference structure cell parameters.Not needed.
      !real(dp), allocatable :: ref_xcart(:,:) ! reference xcart. not needed
      type(COO_mat_t) :: coeff  ! coefficient. A COO sparse matrix (3N*3N).
@@ -51,6 +52,7 @@ module m_lattice_harmonic_potential
      procedure :: initialize
      procedure :: finalize
      procedure :: set_supercell
+     procedure :: set_ref_energy
      procedure :: calculate
      procedure :: add_term
   end type lattice_harmonic_potential_t
@@ -96,6 +98,15 @@ contains
     call self%coeff%add_entry([i,j], val)
   end subroutine add_term
 
+
+  !-------------------------------------------------------------------!
+  ! Set the reference energy.
+  !-------------------------------------------------------------------!
+  subroutine set_ref_energy(self, ref_energy)
+    class(lattice_harmonic_potential_t), intent(inout) :: self
+    real(dp), intent(in) :: ref_energy
+    call self%ref_energy=ref_energy
+  end subroutine set_ref_energy
 
   !-------------------------------------------------------------------!
   ! set_supercell
