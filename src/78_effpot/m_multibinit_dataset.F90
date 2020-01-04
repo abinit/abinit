@@ -129,7 +129,8 @@ module m_multibinit_dataset
   integer :: kptrlatt(3,3)
   integer :: kptrlatt_fine(3,3)
   integer :: qrefine(3)
-  ! TODO hexu: add parameters for spin.
+
+  ! parameters for spin
   integer :: spin_calc_traj_obs
   integer :: spin_calc_thermo_obs
   integer :: spin_calc_correlation_obs
@@ -179,7 +180,7 @@ module m_multibinit_dataset
   real(dp) :: latt_compressibility
   integer :: latt_mask(3)
 
-  ! TODO hexu:add parameters for spin
+  !  parameters for spin
   real(dp) :: spin_dt
   real(dp) :: spin_damping
   real(dp) :: spin_sia_k1amp
@@ -187,8 +188,8 @@ module m_multibinit_dataset
   ! TODO hexu: add spin convergence tol. (or remove it)
   real(dp) :: spin_temperature_start   ! var temperature start
   real(dp) :: spin_temperature_end     ! var temperature end
-  real(dp) :: spin_tolavg !average
-  real(dp) :: spin_tolvar !covariance
+  !real(dp) :: spin_tolavg !average
+  !real(dp) :: spin_tolvar !covariance
 
   real(dp) :: spin_mag_field(3)  ! external magnetic field
   real(dp) :: spin_projection_qpoint(3) ! qpoint to check if spin configuration is random
@@ -381,9 +382,9 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%spin_ntime_pre=0
  multibinit_dtset%spin_ntime=10000
  multibinit_dtset%spin_nctime=100
- multibinit_dtset%spin_nmatom=0
- multibinit_dtset%spin_n1l=1
- multibinit_dtset%spin_n2l=0
+!multibinit_dtset%spin_nmatom=0
+!multibinit_dtset%spin_n1l=1
+!multibinit_dtset%spin_n2l=0
 
  multibinit_dtset%spin_dt=100
 
@@ -394,8 +395,8 @@ multibinit_dtset%spin_temperature=325
 multibinit_dtset%spin_temperature_start=0.0
 multibinit_dtset%spin_temperature_end= 0.0
 multibinit_dtset%spin_temperature_nstep= 0
-multibinit_dtset%spin_tolavg=1d-2 ! TODO hexu: to be decided. should it be a function of temperature?
-multibinit_dtset%spin_tolvar=1d-3 ! TODO hexu: as above. 
+!multibinit_dtset%spin_tolavg=1d-2 ! TODO hexu: to be decided. should it be a function of temperature?
+!multibinit_dtset%spin_tolvar=1d-3 ! TODO hexu: as above. 
 
 multibinit_dtset%spin_var_temperature=0 
 multibinit_dtset%spin_write_traj=1 
