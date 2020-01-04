@@ -64,7 +64,7 @@ where $m_i$ denotes the magnetic moment of site $i$, and $\vec{H}$ is the magnet
 
 One way to calculate the Heisenberg model parameters is to use the spin force theorem (see [[cite:Liechtenstein1983]], [[cite:Katsnelson2000]]), for which one perturbs the system by rotating  localized spins. In ABINIT, the Hamiltonian uses plane waves as a basis set, thus the localized spin is not directly accessible. We can construct localized Wannier functions and rewrite the Hamiltonian in the Wannier basis. Then, the exchange parameters can be calculated from this Hamiltonian ( [[cite:Korotin2015]] ). 
 
-For building the Wannier function Hamiltonian from ABINIT, see the tutorial [wannier90](wannier90). Other DFT codes interfaced with [Wannier90](http://www.wannier.org) can also be used. Then, the  [TB2J](https://gitlab.abinit.org/xuhe/TB2J) package can be used to calculate the Heisenberg model parameters and generate the input model for MULTIBINIT. The data will be stored in a xml file which is used as input for the MULTIBINIT calculation. For the tutorial, this file is provided. Please read the [TB2J tutorial](https://gitlab.abinit.org/xuhe/TB2J/blob/master/README.md) to see how to create your own xml file. 
+For building the Wannier function Hamiltonian from ABINIT, see the tutorial [wannier90](wannier90). Other DFT codes interfaced with [Wannier90](http://www.wannier.org) can also be used. Then, the  [TB2J](https://gitlab.abinit.org/xuhe/TB2J) package can be used to calculate the Heisenberg model parameters and generate the input model for MULTIBINIT. The data will be stored in a xml (.xml) or a netcdf (.nc) file which is used as input for the MULTIBINIT calculation. For the tutorial, this file is provided. Please read the [TB2J tutorial](https://gitlab.abinit.org/xuhe/TB2J/blob/master/README.md) to see how to create your own xml/netcdf file. 
 
 ## 3. Run spin dynamics
 
@@ -74,7 +74,7 @@ Once we have the spin model xml file, we can run a spin dynamics calculation wit
 
 * "tmulti5_1.files" is the "files" file, which gives the names of the input and output files for  MULTIBINIT.
 * "tmulti5_1.in" is the main input file containing the parameters for the spin dynamics simulation.
-* "tmulti5_1.xml" is the file containing the Heisenberg model parameters.
+* "tmulti5_1.xml" is the file containing the Heisenberg model parameters. 
 
 You can copy these three files into a directory (e.g. Work_spindyn). 
 
@@ -230,8 +230,8 @@ spin_ntime = 20000              ! Measurement steps. (Is this enough?)
 spin_nctime = 100               ! Number of time steps between two writes 
                                 ! into netcdf
 spin_dt = 1e-16 s               ! Time step (Is this too large?)
-spin_init_state = 2             ! Ferromagnetic initial state (problematic?) 
-spin_projection_qpoint = 0.0 0.0 0.0       ! Wave vector of spin order  
+spin_init_state = 3             ! User specified spin order(problematic?) 
+spin_init_qpoint = 0.0 0.0 0.0       ! Wave vector of spin order  
 
 spin_var_temperature = 1        ! Variable temperature calculation
 spin_temperature_start = 0      ! Starting temperature

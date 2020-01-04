@@ -19,7 +19,8 @@ spin_ntime_pre =10000          ! warming up steps. Is it enough?
 spin_ntime =10000             ! number of steps. Is it enough?
 spin_nctime=100               ! number of  time steps between two nc file write
 spin_dt=1e-16 s               ! time step. Is it too small?
-spin_init_state = 2           ! FM initial state. May cause some trouble
+spin_init_state = 3           ! User specified initial state. 
+spin_init_qpoint=  0 0 0      ! Initial spin wave vector set to 0. FM. May casuse some trouble
 
 spin_var_temperature=1        ! switch on variable temperature calculation
 spin_temperature_start=0      ! starting point of temperature
