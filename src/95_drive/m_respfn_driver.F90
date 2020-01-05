@@ -1395,8 +1395,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    call wrtout(ab_out,message,'COLL')
 
 !  In the RESPFN code, dfpt_nstdy and stady3 were called here
-print *, 'd2lo', d2lo
-print *, 'd2nl', d2nl
    d2nfr(:,:,:,:,:)=d2lo(:,:,:,:,:)+d2nl(:,:,:,:,:)
    if (psps%usepaw==1) d2nfr(:,:,:,:,:)=d2nfr(:,:,:,:,:)+d2ovl(:,:,:,:,:)
 
@@ -1513,7 +1511,6 @@ print *, 'd2nl', d2nl
      ABI_ALLOCATE(eigvec,(2*3*natom*3*natom))
      ABI_ALLOCATE(phfrq,(3*natom))
      qphnrm=one
-print *, 'd2cart ', d2cart
      call dfpt_phfrq(dtset%amu_orig(:,1),displ,d2cart,eigval,eigvec,indsym,mpert,&
 &     dtset%nsym,natom,dtset%nsym,ntypat,phfrq,qphnrm,qphon,&
 &     dtset%rprimd_orig(1:3,1:3,1),0,dtset%symrel,dtset%symafm,dtset%typat,ucvol)

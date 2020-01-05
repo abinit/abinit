@@ -704,7 +704,7 @@ subroutine wfk_close(Wfk, delete)
  if (wfk%rw_mode /= WFK_NOMODE) then
    Wfk%rw_mode = WFK_NOMODE
 
-print *, ' Wfk%iomode, IO_MODE_FORTRAN, IO_MODE_MPI ', Wfk%iomode, IO_MODE_FORTRAN, IO_MODE_MPI
+print *, ' wfkclose: Wfk%iomode, IO_MODE_FORTRAN, IO_MODE_MPI ', Wfk%iomode, IO_MODE_FORTRAN, IO_MODE_MPI
    select case (Wfk%iomode)
    case (IO_MODE_FORTRAN)
       close(wfk%fh)
@@ -1212,6 +1212,7 @@ subroutine wfk_read_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_
    end if
  end if
 
+print *, ' wfk_read_band_block : Wfk%iomode IO_MODE_FORTRAN, IO_MODE_MPI ', Wfk%iomode, IO_MODE_FORTRAN, IO_MODE_MPI
  select case (Wfk%iomode)
  case (IO_MODE_FORTRAN)
 
@@ -3344,7 +3345,7 @@ subroutine wfk_write_my_kptbands(outpath, dtset, distrb_flags, comm, &
  call cwtime(cpu, wall, gflops, "start")
 
 print *, 'formeig ', formeig
- iomode = iomode_from_fname(outpath)
+ iomode = 0 !iomode_from_fname(outpath)
  wfk_unt = get_unit()
  call wfk_disk%open_write(hdr,outpath,formeig,iomode,wfk_unt,comm) !xmpi_comm_self)
 
