@@ -3447,12 +3447,13 @@ integer,intent(inout),allocatable :: index_irred(:)
 integer :: isym,idisp,ncombi_to_test,idisp2,ii,jj
 logical :: need_compute,irreducible, need_only_even 
 !arrays
-integer :: index_coeff_tmp(ndisp),powers(ndisp)
+integer :: index_coeff_tmp(ndisp),powers(ndisp),symcoeff_found(nsym)
 integer,allocatable :: index_isym(:)
 !Source
 ! *************************************************************************
 need_only_even = .FALSE. 
 if(present(only_even))need_only_even=only_even
+symcoeff_found = 0 
 
 irreducible = .TRUE.
 !Only start the function if start-symmetry is smaller than maximum symmetry
@@ -3480,6 +3481,11 @@ if(isym_in <= nsym .and. idisp_in <= ndisp)then
            do idisp=1,ndisp
               index_coeff_tmp(idisp) = list_symcoeff(6,index_coeff_in(idisp),index_isym(idisp))
            end do !idisp=1,ndisp
+           ! Store index of symmetric coefficient to evade double generation. 
+           symcoeff_found(isym) = index_coeff_tmp(idisp_in)
+           if(isym > 1 .and. any(symcoeff_found(:isym-1) == symcoeff_found(isym)))then 
+                index_coeff_tmp = 0 
+           endif
 !          Check if we want only even terms
 !          count the number of body
            powers(:) = 1
