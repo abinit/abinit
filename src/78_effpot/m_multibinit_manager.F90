@@ -517,6 +517,8 @@ contains
     class(mb_manager_t), intent(inout) :: self
 
     character(len=90) :: msg
+
+    real(dp), allocatable :: Htmp(:,:)
     real(dp) :: etotal
     integer :: i
 
@@ -528,6 +530,13 @@ contains
 
     ! calculate various quantities for reference spin structure
     do i =1, self%pots%size
+      select type (scpot => self%pots%list(i)%ptr)  ! use select type because properties only defined for spin_potential are used
+      type is (spin_potential_t) 
+        ABI_ALLOCATE(Htmp, (3,scpot%nspin))
+        call scpot%get_Heff(scpot%supercell%spin%Sref, Htmp, scpot%eref)
+        ABI_DEALLOCATE(Htmp)
+      end select
+
       select type (scpot => self%pots%list(i)%ptr)  ! use select type because properties only defined for slc_potential are used
       type is (slc_potential_t) 
         call scpot%calculate_ref()
@@ -546,7 +555,19 @@ contains
     msg='Energy contributions'
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
-    call self%energy_table%print_all()
+    msg=' Lattice contributions'
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    call self%energy_table%print_entry(label='Lattice kinetic energy')
+    call self%energy_table%print_entry(label='Lattice_harmonic_potential')
+    msg=' Spin contributions'
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    call self%energy_table%print_entry(label='SpinPotential')
+    msg=' Spin-lattice coupling contributions'
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    call self%energy_table%print_entry(prefix='SLCPotential')
     etotal=self%energy_table%sum_val()
     write(msg, "(A12, 29X, ES13.5)") 'Total energy', etotal
     call wrtout(std_out,msg,'COLL')

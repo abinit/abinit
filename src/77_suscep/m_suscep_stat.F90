@@ -379,8 +379,8 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
            call pawcprj_get(atindx1,cprj_loc,cprj,natom,1,ibg,ikpt,iorder_cprj,isp,&
 &           mband/mpi_enreg%nproc_band,mkmem,natom,nband_loc,nband_loc,my_nspinor,nsppol,unpaw,&
 &           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-           call pawcprj_mpi_allgather(cprj_loc,cprj_k,natom,my_nspinor*nband_loc,dimcprj,0,&
-&           mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.true.)
+           call pawcprj_mpi_allgather(cprj_loc,cprj_k,natom,my_nspinor*nband_loc,mpi_enreg%bandpp,&
+&           dimcprj,0,mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.true.)
            call pawcprj_free(cprj_loc)
            ABI_DATATYPE_DEALLOCATE(cprj_loc)
          end if

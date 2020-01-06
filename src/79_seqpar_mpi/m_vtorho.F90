@@ -68,7 +68,7 @@ module m_vtorho
  use m_fock,               only : fock_type, fock_ACE_type, fock_updateikpt, fock_calc_ene
  use m_invovl,             only : make_invovl
  use m_tddft,              only : tddft
- use m_kg,                 only : mkkin, mkkpg, mknucdipmom_k
+ use m_kg,                 only : mkkin, mkkpg
  use m_suscep_stat,        only : suscep_stat
  use m_fft,                only : fftpac
  use m_spacepar,           only : symrhg
@@ -873,21 +873,6 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &         npw_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,&
 &         psps%usepaw,psps%useylm,ylm_k,ylmgr)
        end if
-
-! !     compute and load nuclear dipole Hamiltonian at current k point
-!        if(any(abs(gs_hamk%nucdipmom)>0.0)) then
-!          if(allocated(nucdipmom_k)) then
-!            ABI_DEALLOCATE(nucdipmom_k)
-!          end if
-!          ABI_ALLOCATE(nucdipmom_k,(npw_k*(npw_k+1)/2))
-!          call mknucdipmom_k(gmet,kg_k,kpoint,natom,gs_hamk%nucdipmom,nucdipmom_k,npw_k,rprimd,ucvol,xred)
-!          if(allocated(gs_hamk%nucdipmom_k)) then
-!             ABI_DEALLOCATE(gs_hamk%nucdipmom_k)
-!          end if
-!          ABI_ALLOCATE(gs_hamk%nucdipmom_k,(npw_k*(npw_k+1)/2))
-!          call gs_hamk%load_k(nucdipmom_k=nucdipmom_k)
-!        end if
-
 
 !      Load k-dependent part in the Hamiltonian datastructure
 !       - Compute 3D phase factors

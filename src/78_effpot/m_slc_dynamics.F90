@@ -85,6 +85,7 @@ module  m_slc_dynamics
     real(dp):: t
     integer :: counter
     character(len=80) :: msg, msg_empty
+    real(dp):: etotal, espin, elatt, eslc
 
     integer :: master, my_rank, comm, nproc
     logical :: iam_master
@@ -116,22 +117,70 @@ module  m_slc_dynamics
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out, msg, 'COLL')
 
-     write(msg, "(A13, 4X, A13, 6X, A13, 4X, A13)")  "Iteration", "time(s)", "Avg_Mst/Ms", "ETOT(Ha/uc)"
+     write(msg, "(5X, A9, 6X, A10, 5X, A10, 5X, A10, 5X, A10)")  "Iteration", "E_spin(Ha)", "E_latt(Ha)", "E_slc(Ha)", "E_tot(Ha)"
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out, msg, 'COLL')
 
      msg=repeat("-", 80)
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out, msg, 'COLL')
-    end if
+   end if
 
+   !thermalization of spin degrees of freedom
+   if (abs(self%spin_mover%thermal_time) > 1e-30) then
+     if (iam_master) then
+       msg="Thermalization run:"
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+     end if
+
+     do while(t<self%spin_mover%thermal_time)
+       counter=counter+1
+       call self%spin_mover%run_one_step(effpot=calculator, displacement=displacement, strain=strain, &
+            & lwf=lwf, energy_table=energy_table)
+       if (iam_master) then
+         call self%spin_mover%hist%set_vars( time=t,  inc=.True.)
+         if(mod(counter, self%spin_mover%hist%spin_nctime)==0) then
+           call self%spin_mover%spin_ob%get_observables( self%spin_mover%hist%S(:,:, self%spin_mover%hist%ihist_prev), &
+                self%spin_mover%hist%Snorm(:,self%spin_mover%hist%ihist_prev), & 
+                self%spin_mover%hist%etot(self%spin_mover%hist%ihist_prev))
+           etotal = energy_table%sum_val()
+           espin = energy_table%sum_val(label='SpinPotential')
+           elatt = energy_table%sum_val(label='Lattice_harmonic_potential')
+           elatt = elatt + energy_table%sum_val(label='Lattice kinetic energy')
+           eslc = energy_table%sum_val(prefix='SLCPotential')
+           write(msg, "(A1, 1X, I13, 2X, ES13.5, 2X, ES13.5, 2X, ES13.5, 2X, ES13.5)") "-", counter, espin, elatt, eslc, etotal
+           call wrtout(std_out,msg,'COLL')
+           call wrtout(ab_out, msg, 'COLL')
+         endif
+       end if
+       t=t+self%dt
+     end do
+
+     t=0.0
+     counter=0
+     if (iam_master) then
+       call self%spin_mover%hist%reset(array_to_zero=.False.)
+     end if
+   endif
+
+   if(iam_master) then
+     call self%spin_mover%spin_ob%reset()
+   endif
 
     do while(t<self%spin_mover%total_time)
+     if (iam_master) then
+       msg="Measurement run:"
+       call wrtout(std_out,msg,'COLL')
+       call wrtout(ab_out, msg, 'COLL')
+     end if
+
       counter=counter+1
       !one step in coupled spin-lattice dynamics
       call self%run_one_step(effpot=calculator, spin=spin, displacement=displacement, strain=strain, lwf=lwf, &
            & energy_table=energy_table)
 
+      !Writing to output and hist files
       if (iam_master) then
         call self%spin_mover%hist%set_vars(time=t,  inc=.True.)
         call self%spin_mover%spin_ob%get_observables(self%spin_mover%hist%S(:,:, self%spin_mover%hist%ihist_prev), &
@@ -139,19 +188,16 @@ module  m_slc_dynamics
              self%spin_mover%hist%etot(self%spin_mover%hist%ihist_prev))
         if(modulo(counter, self%spin_mover%hist%spin_nctime)==0) then
           call self%spin_mover%spin_ncfile%write_one_step(self%spin_mover%hist)
-          write(msg, "(A1, 1X, I13, 4X, ES13.5, 4X, ES13.5, 4X, ES13.5)") "-", counter, t*Time_Sec, &
-                & self%spin_mover%spin_ob%Mst_norm_total/self%spin_mover%spin_ob%Snorm_total, &
-                & self%spin_mover%hist%etot(self%spin_mover%hist%ihist_prev)/self%spin_mover%spin_ob%nscell
+          etotal = energy_table%sum_val()
+          espin = energy_table%sum_val(label='SpinPotential')
+          elatt = energy_table%sum_val(label='Lattice_harmonic_potential')
+          elatt = elatt + energy_table%sum_val(label='Lattice kinetic energy')
+          eslc = energy_table%sum_val(prefix='SLCPotential')
+          write(msg, "(A1, 1X, I13, 2X, ES13.5, 2X, ES13.5, 2X, ES13.5, 2X, ES13.5)") "-", counter, espin, elatt, eslc, etotal
           call wrtout(std_out,msg,'COLL')
           call wrtout(ab_out, msg, 'COLL')
         endif
       end if
-      ! TODO: Adjust output
-      !write(msg, "(A13, 4X, A15, 4X, A15, 4X, A15, 4X, A15)") &
-      !      &  "Iteration", "temperature(K)", "Ekin(Ha/uc)", &
-      !      & "Epot(Ha/uc)", "ETOT(Ha/uc)"
-      !call wrtout(std_out,msg,'COLL')
-      !call wrtout(ab_out, msg, 'COLL')
 
       t=t+self%spin_mover%dt
     enddo

@@ -1,17 +1,16 @@
 #test on AlAs with and without nuclear dipole moments
 
-ndtset 4
-udtset 2 2
+ndtset 2
 
 # first data set: normal ground state
-nucdipmom?1
+nucdipmom1
 0.0 0.0 0.0
 0.0 0.0 0.0
 
 # second data set: add nuclear dipole moment in z direction to Al site
 # nuclear dipoles are input in cartesian coords, atomic units
 # note that in atomic units, 1 unit of mag dipole = 2 bohr magnetons
-nucdipmom?2
+nucdipmom2
 0.0 0.0  10.0
 0.0 0.0  0.0
 
@@ -19,16 +18,11 @@ nucdipmom?2
 # symmetry will be lower in data set 2 case due to dipole in z direction on one site
 
 # turn off all symmetries
-kptopt1? 3
-nsym1? 1
-symrel1? 1 0 0 0 1 0 0 0 1
-
-# allow for spatial symmetries
-# there won't be many because we must preserve both the dipole position and handedness
-kptopt2? 4
-nsym2? 0
-
+kptopt 3
+nsym 1
+symrel 1 0 0 0 1 0 0 0 1
 symmorphi 0
+
 kptrlatt
 4 4 -4
 -4 4 -4
