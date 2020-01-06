@@ -105,7 +105,7 @@ contains
   subroutine set_ref_energy(self, ref_energy)
     class(lattice_harmonic_potential_t), intent(inout) :: self
     real(dp), intent(in) :: ref_energy
-    call self%ref_energy=ref_energy
+    self%ref_energy=ref_energy
   end subroutine set_ref_energy
 
   !-------------------------------------------------------------------!

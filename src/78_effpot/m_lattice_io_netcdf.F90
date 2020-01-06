@@ -294,7 +294,7 @@ contains
           end do
        end do
 
-       scpot%set_ref_energy(self%ref_energy * scmaker%ncells)
+       call scpot%set_ref_energy(self%ref_energy * scmaker%ncells)
 
        ! Test the phonon energy
        !call COO_to_dense(scpot%coeff, real_sc_evecs)

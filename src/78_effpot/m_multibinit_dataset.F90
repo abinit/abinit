@@ -141,8 +141,8 @@ module m_multibinit_dataset
   integer :: spin_ntime_pre
   integer :: spin_ntime
   integer :: spin_nmatom !TODO hexu: is it needed?
-  integer :: spin_n1l
-  integer :: spin_n2l
+!  integer :: spin_n1l
+!  integer :: spin_n2l
   integer :: spin_sia_add
   integer :: spin_temperature_nstep    ! var temperature number of steps
   integer :: spin_var_temperature
@@ -1364,25 +1364,25 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  end if
 
 
- multibinit_dtset%spin_n1l=1
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_n1l',tread,'INT')
- if(tread==1) multibinit_dtset%spin_n1l=intarr(1)
- if(multibinit_dtset%spin_n1l<0)then
-    write(message, '(a,i0,a,a,a)' )&
-         &   'spin_n1l is',multibinit_dtset%spin_n1l,', which is lower than 0 .',ch10,&
-         &   'Action: correct spin_n1l in your input file.'
-    MSG_ERROR(message)
- end if
-
- multibinit_dtset%spin_n2l=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_n2l',tread,'INT')
- if(tread==1) multibinit_dtset%spin_n2l=intarr(1)
- if(multibinit_dtset%spin_n2l<0)then
-    write(message, '(a,i0,a,a,a)' )&
-         &   'spin_n2l is',multibinit_dtset%spin_n2l,', which is lower than 0 .',ch10,&
-         &   'Action: correct spin_n2l in your input file.'
-    MSG_ERROR(message)
- end if
+! multibinit_dtset%spin_n1l=1
+! call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_n1l',tread,'INT')
+! if(tread==1) multibinit_dtset%spin_n1l=intarr(1)
+! if(multibinit_dtset%spin_n1l<0)then
+!    write(message, '(a,i0,a,a,a)' )&
+!         &   'spin_n1l is',multibinit_dtset%spin_n1l,', which is lower than 0 .',ch10,&
+!         &   'Action: correct spin_n1l in your input file.'
+!    MSG_ERROR(message)
+! end if
+!
+! multibinit_dtset%spin_n2l=0
+! call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_n2l',tread,'INT')
+! if(tread==1) multibinit_dtset%spin_n2l=intarr(1)
+! if(multibinit_dtset%spin_n2l<0)then
+!    write(message, '(a,i0,a,a,a)' )&
+!         &   'spin_n2l is',multibinit_dtset%spin_n2l,', which is lower than 0 .',ch10,&
+!         &   'Action: correct spin_n2l in your input file.'
+!    MSG_ERROR(message)
+! end if
  
  multibinit_dtset%spin_init_orientation= [0.0, 0.0, 1.0]
  if(3>marr)then
@@ -1501,27 +1501,27 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 
 
 
- multibinit_dtset%spin_tolavg=1d-02
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_tolavg',tread,'DPR')
- if(tread==1) multibinit_dtset%spin_tolavg=dprarr(1)
- if(multibinit_dtset%spin_tolavg<=0)then
-    write(message, '(a,f10.1,a,a,a,a,a)' )&
-         &   'spin_tolavg is ',multibinit_dtset%spin_tolavg,'. The only allowed values',ch10,&
-         &   'are positives values.',ch10,&
-         &   'Action: correct spin_tolavg in your input file.'
-    MSG_ERROR(message)
- end if
-
- multibinit_dtset%spin_tolvar=1d-02
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_tolvar',tread,'DPR')
- if(tread==1) multibinit_dtset%spin_tolvar=dprarr(1)
- if(multibinit_dtset%spin_tolvar<=0)then
-    write(message, '(a,f10.1,a,a,a,a,a)' )&
-         &   'spin_tolvar is ',multibinit_dtset%spin_tolvar,'. The only allowed values',ch10,&
-         &   'are positives values.',ch10,&
-         &   'Action: correct spin_tolvar in your input file.'
-    MSG_ERROR(message)
- end if
+! multibinit_dtset%spin_tolavg=1d-02
+! call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_tolavg',tread,'DPR')
+! if(tread==1) multibinit_dtset%spin_tolavg=dprarr(1)
+! if(multibinit_dtset%spin_tolavg<=0)then
+!    write(message, '(a,f10.1,a,a,a,a,a)' )&
+!         &   'spin_tolavg is ',multibinit_dtset%spin_tolavg,'. The only allowed values',ch10,&
+!         &   'are positives values.',ch10,&
+!         &   'Action: correct spin_tolavg in your input file.'
+!    MSG_ERROR(message)
+! end if
+!
+! multibinit_dtset%spin_tolvar=1d-02
+! call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_tolvar',tread,'DPR')
+! if(tread==1) multibinit_dtset%spin_tolvar=dprarr(1)
+! if(multibinit_dtset%spin_tolvar<=0)then
+!    write(message, '(a,f10.1,a,a,a,a,a)' )&
+!         &   'spin_tolvar is ',multibinit_dtset%spin_tolvar,'. The only allowed values',ch10,&
+!         &   'are positives values.',ch10,&
+!         &   'Action: correct spin_tolvar in your input file.'
+!    MSG_ERROR(message)
+! end if
  
  multibinit_dtset%spin_var_temperature=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spin_var_temperature',tread,'INT')
