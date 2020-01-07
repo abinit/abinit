@@ -826,7 +826,7 @@ else
   write(message,*)ch10,"Normalization of plowannier k-point by k-point"
 end if
 MSG_COMMENT(message)
-opt=1
+!opt=1
         ! 0 : normalization k-point by k-point (normal use of plowan)
         ! 1 : normalization of the sum over k-points (use with crpa old keywords)
 
