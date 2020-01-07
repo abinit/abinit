@@ -415,7 +415,7 @@ subroutine size_dvxc(ixc,order,nspden,&
    if (abs(order)>=2) then
      if (ixc==1.or.ixc==13.or.ixc==21.or.ixc==22.or.(ixc>=7.and.ixc<=10)) then
        ndvxc=min(nspden,2)+1
-     else if ((ixc>=2.and.ixc<=6).or.ixc==50) then
+     else if ((ixc>=2.and.ixc<=6).or.(ixc>=31.and.ixc<=34).or.ixc==50) then
        ndvxc=1
      else if (ixc==12.or.ixc==24) then
        ndvxc=8
@@ -809,7 +809,7 @@ end subroutine mkdenpos
 !! SOURCE
 
 subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
-&          rho_updn,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &            ! mandatory arguments
+&          rho_updn,exc,vxcrho,nvxcgrho,nvxclrho,nvxctau,ndvxc,nd2vxc, &       ! mandatory arguments
 &          grho2_updn,vxcgrho,lrho_updn,vxclrho,tau_updn,vxctau,dvxc,d2vxc, &  ! optional arguments
 &          exexch,el_temp,fxcT,hyb_mixing,xc_funcs)                            ! optional parameters
 
@@ -977,7 +977,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &    'doesnt match the requirements of the XC functional!'
    MSG_BUG(message)
  end if
- if (abs(order)>1.and.(need_laplacian==1.or.need_kden==1)) then
+ if (abs(order)>0.and.ixc<0.and.(need_laplacian==1.or.need_kden==1)) then
    message='Derivatives of XC potential are not available in mGGA!'
    MSG_BUG(message)
  end if
@@ -1202,19 +1202,20 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 
 !>>>>> Only for test purpose (test various part of MGGA implementation)
  else if(ixc==31 .or. ixc==32 .or. ixc==33 .or. ixc==34) then
-   exc(:)=zero
-   vxcrho(:,:)=zero
-   vxcgrho(:,:)=zero
-   vxclrho(:,:)=zero
-   vxctau(:,:)=zero
+   exc(:)=zero ; vxcrho(:,:)=zero
+   if (present(vxcgrho).and.nvxcgrho>0) vxcgrho(:,:)=zero
+   if (present(vxclrho).and.nvxclrho>0) vxclrho(:,:)=zero
+   if (present(vxctau).and.nvxctau>0) vxctau(:,:)=zero
+   if (present(dvxc).and.ndvxc>0) dvxc(:,:)=zero
+   if (present(d2vxc).and.nd2vxc>0) d2vxc(:,:)=zero
 
 !>>>>> Perdew-Wang LSD is coded in Perdew-Burke-Ernzerhof GGA, with optpbe=1
    optpbe=1
    select case(ixc)
    case (31)
      alpha=1.00d0-(1.00d0/1.01d0)
-!      Compute first LDA XC (exc,vxc) and then add fake MGGA XC (exc,vxc)
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc)
+!    Compute first LDA XC (exc,vxc) and then add fake MGGA XC (exc,vxc)
+     call xcpbe(exc,npts,nspden,optpbe,1,rho_updn,vxcrho,0,0)
      if (nspden==1) then
 !        it should be : exc_tot= exc_spin up + exc_spin down = 2*exc_spin up but this applies to tau and rho (so it cancels)
        exc(:)=exc(:)+alpha*tau_updn(:,1)/rho_updn(:,1)
@@ -1226,8 +1227,8 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      vxctau(:,:)=alpha
    case (32)
      alpha=0.01d0
-!      Compute first LDA XC (exc,vxc) and then add fake MGGA XC (exc,vxc)
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc)
+!    Compute first LDA XC (exc,vxc) and then add fake MGGA XC (exc,vxc)
+     call xcpbe(exc,npts,nspden,optpbe,1,rho_updn,vxcrho,0,0)
      if (nspden==1) then
        exc(:)=exc(:)+2.0d0*alpha*lrho_updn(:,1)
        vxcrho(:,1) =vxcrho(:,1)+2.0d0*alpha*lrho_updn(:,1)
@@ -1241,8 +1242,8 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      end if
    case (33)
      alpha=-0.010d0
-!      Compute first LDA XC (exc,vxc) and then add fake MGGA XC (exc,vxc)
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc)
+!    Compute first LDA XC (exc,vxc) and then add fake MGGA XC (exc,vxc)
+     call xcpbe(exc,npts,nspden,optpbe,1,rho_updn,vxcrho,0,0)
      if (nspden==1) then
 !        it should be : exc_tot= exc_spin up + exc_spin down = 2*exc_spin up but this applies to grho2 and rho
 !        (for grho2 it is a factor 4 to have total energy and for rho it is just a factor 2. So we end with factor 2 only)
@@ -1256,8 +1257,8 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
      end if
    case (34)
      alpha=-0.010d0
-!      Compute first LDA XC (exc,vxc) and then add fake MGGA XC (exc,vxc)
-     call xcpbe(exc,npts,nspden,optpbe,order,rho_updn,vxcrho,ndvxc,nd2vxc)
+!    Compute first LDA XC (exc,vxc) and then add fake MGGA XC (exc,vxc)
+     call xcpbe(exc,npts,nspden,optpbe,1,rho_updn,vxcrho,0,0)
      if (nspden==1) then
        exc(:)=exc(:)+16.0d0*alpha*tau_updn(:,1)
        vxcrho(:,1)=vxcrho(:,1)+16.0d0*alpha*tau_updn(:,1)

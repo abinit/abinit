@@ -631,13 +631,8 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    if (option<2.and.need_vxctau) paw_an(iatom)%has_vxctau=2
    if (need_kxc.and.nkxc1>0) paw_an(iatom)%has_kxc=2
 
-!  Update core XC conjtribution to energy
+!  Update core XC contribution to energy
    if (option/=1.and.ipositron/=1) exccore=exccore+pawtab(itypat)%exccore
-   if (ipositron/=0)  then
-     ABI_DEALLOCATE(rho1_ep)
-     ABI_DEALLOCATE(trho1_ep)
-     ABI_DEALLOCATE(nhat1_ep)
-   end if
 
 !  =========== Compute valence-only XC potentials ===========
 !  ==========================================================
@@ -1002,6 +997,15 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    ABI_DEALLOCATE(rho1)
    ABI_DEALLOCATE(trho1)
    ABI_DEALLOCATE(nhat1)
+   if (usekden==1) then
+     ABI_DEALLOCATE(tau1)
+     ABI_DEALLOCATE(ttau1)
+   end if
+   if (ipositron/=0)  then
+     ABI_DEALLOCATE(rho1_ep)
+     ABI_DEALLOCATE(trho1_ep)
+     ABI_DEALLOCATE(nhat1_ep)
+   end if
 
 !  Deallocate potentials
    if (.not.keep_vhartree) then

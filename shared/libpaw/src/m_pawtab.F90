@@ -159,7 +159,8 @@ MODULE m_pawtab
    ! if 2, onsite matrix elements of the nabla operator are computed and stored.
 
   integer :: has_nablaphi
-   ! if 1, nablaphi are computed for MetaGGA and stored. 0 otherwise
+   ! if 1, nablaphi are allocated
+   ! if 2, nablaphi are computed for MetaGGA and stored.
 
   integer :: has_tproj
    ! Flag controling use of projectors in real space (0 if tnval is unknown)

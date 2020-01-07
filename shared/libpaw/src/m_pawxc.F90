@@ -1018,12 +1018,12 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 !  Allocation of temporary memory space
    LIBPAW_ALLOCATE(rhonow,(nrad,nspden,ngrad*ngrad+uselaplacian))
    LIBPAW_ALLOCATE(rhoarr,(nrad,nspden))
-   if (usexcnhat< 2) rho_=> rhor
-   if (usexcnhat==2) rho_=> rhohat
    if (usexcnhat>0) then
      LIBPAW_ALLOCATE(rhohat,(nrad,lm_size,nspden))
      rhohat(:,:,:)=rhor(:,:,:)+nhat(:,:,:)
    end if
+   if (usexcnhat< 2) rho_=> rhor
+   if (usexcnhat==2) rho_=> rhohat
    if (option/=3.and.option/=4) then
      if (nspden/=4) then
        vxc_updn => vxc

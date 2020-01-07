@@ -744,7 +744,7 @@ end subroutine pawpsp_cg
 
 subroutine pawpsp_read(core_mesh,funit,imainmesh,lmax,&
 & ncore,nmesh,pawrad,pawtab,pspversion,radmesh,save_core_msz,&
-& tncore,tnvale,tproj,tproj_mesh,usexcnhat_in,usexcnhat_out,vale_mesh,&
+& tcoretau,tncore,tnvale,tproj,tproj_mesh,usexcnhat_in,usexcnhat_out,vale_mesh,&
 & vlocopt,vlocr,vloc_mesh,znucl)
 
 !Arguments ------------------------------------
@@ -753,7 +753,7 @@ subroutine pawpsp_read(core_mesh,funit,imainmesh,lmax,&
  logical,intent(in) :: save_core_msz
  real(dp),intent(in):: znucl
 !arrays
- real(dp),pointer :: ncore(:),tncore(:),tnvale(:),tproj(:,:),vlocr(:)
+ real(dp),pointer :: ncore(:),tcoretau(:),tncore(:),tnvale(:),tproj(:,:),vlocr(:)
  type(pawrad_type),intent(inout) :: pawrad
  type(pawrad_type),intent(out)::core_mesh,tproj_mesh,vale_mesh,vloc_mesh
  type(pawrad_type),pointer :: radmesh(:)
@@ -1328,12 +1328,21 @@ subroutine pawpsp_read(core_mesh,funit,imainmesh,lmax,&
  end if
 
 !---------------------------------
-!Initialize (to zero) kinetic energy densities
-if (pawtab%has_coretau>0) then
-  LIBPAW_ALLOCATE(pawtab%coretau,(pawtab%core_mesh_size))
-  LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%core_mesh_size))
-  pawtab%coretau=zero ; pawtab%tcoretau=zero
-endif
+!Initialize (to zero) kinetic energy densities (for testing purpose)
+ if (pawtab%has_coretau>0) then
+   write(msg,'(5a)' )&
+&   'Kinetic energy density is requested but the core kinetic energy density',ch10,&
+&   'is not present in the pseudopotential file!',ch10,&
+&   'We assume that it is zero (for testing purpose).'
+   MSG_WARNING(msg)
+   pawtab%coretau_mesh_size=pawtab%mesh_size
+   if(save_core_msz) pawtab%coretau_mesh_size=core_mesh%mesh_size
+   LIBPAW_ALLOCATE(pawtab%coretau,(pawtab%coretau_mesh_size))
+   LIBPAW_ALLOCATE(pawtab%tcoretau,(pawtab%coretau_mesh_size))
+   LIBPAW_POINTER_ALLOCATE(tcoretau,(core_mesh%mesh_size))
+   pawtab%rcoretau=core_mesh%rad(pawtab%coretau_mesh_size)
+   pawtab%coretau=zero ; pawtab%tcoretau=zero ; tcoretau=zero
+ endif
 
 end subroutine pawpsp_read
 !!***
@@ -1777,14 +1786,14 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 ! end if
 
 !Check optional arguments
- usekden=pawtab%has_coretau
+ usekden=merge(0,1,pawtab%has_coretau==0)
  if (present(tcoretau)) then
    if (usekden>=1) then
      if (.not.(present(coretau_mesh))) then
        msg='tcoretau present but not coretau_mesh!'
        MSG_BUG(msg)
      end if
-     if (size(tcoretau)/=coretau_mesh%mesh_size) then
+     if (size(tcoretau)>coretau_mesh%mesh_size) then
        msg='wrong size for tcoretau!'
        MSG_BUG(msg)
      end if
@@ -2458,7 +2467,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    if (reduced_ncor) then
      call pawpsp_cg(pawtab%dncdq0,pawtab%d2ncdq0,mqgrid_vl,qgrid_vl,pawtab%tcorespl(:,1),rcore_mesh,rtncor,yp1,ypn)
    else
-   call pawpsp_cg(pawtab%dncdq0,pawtab%d2ncdq0,mqgrid_vl,qgrid_vl,pawtab%tcorespl(:,1),core_mesh,tncore,yp1,ypn)
+     call pawpsp_cg(pawtab%dncdq0,pawtab%d2ncdq0,mqgrid_vl,qgrid_vl,pawtab%tcorespl(:,1),core_mesh,tncore,yp1,ypn)
    end if
 !  Compute second derivative of tcorespl(q)
    call paw_spline(qgrid_vl,pawtab%tcorespl(:,1),mqgrid_vl,yp1,ypn,pawtab%tcorespl(:,2))
@@ -2480,7 +2489,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &       'Action : check your pseudopotential (increase tNvale meshSize).'
        MSG_ERROR(msg)
      end if
-    if(mqgrid_vl>0) then
+     if(mqgrid_vl>0) then
 !      Compute tcorespl(q)=tNc(q) from tNcore(r)
        if (reduced_taucor) then
          call pawpsp_cg(pawtab%dtaucdq0,qq,mqgrid_vl,qgrid_vl,pawtab%tcoretauspl(:,1),rcoretau_mesh,rttaucor,yp1,ypn)
@@ -2532,7 +2541,7 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
  if (pawxcdev/=0) then
    call pawxcm(ncore,pawtab%exccore,yp1,0,ixc,work2,1,tmp_lmselect,work3,0,non_magnetic_xc,core_mesh%mesh_size,&
 &   nspden,4,pawang_tmp,core_mesh,pawxcdev,work1,1,0,tmp1,xclevel,xc_denpos)
- else 
+ else
    if (present(tcoretau)) then
      call pawxc(ncore,pawtab%exccore,yp1,ixc,work2,work1,1,tmp_lmselect,work3,0,0,non_magnetic_xc,core_mesh%mesh_size,&
 &     nspden,4,pawang_tmp,core_mesh,tmp1,1,0,tmp2,xclevel,xc_denpos,coretau=tcoretau)
@@ -3823,22 +3832,22 @@ subroutine pawpsp_17in(epsatm,ffspl,icoulomb,ipsp,ixc,lmax,&
 
  if (allocated(vlocr)) then
    LIBPAW_DEALLOCATE(vlocr)
- end if 
+ end if
  if (allocated(ncore)) then
    LIBPAW_DEALLOCATE(ncore)
- end if 
+ end if
  if (allocated(tncore)) then
    LIBPAW_DEALLOCATE(tncore)
- end if 
+ end if
  if (allocated(coretau)) then
    LIBPAW_DEALLOCATE(coretau)
- end if 
+ end if
  if (allocated(tcoretau)) then
    LIBPAW_DEALLOCATE(tcoretau)
- end if 
+ end if
  if (allocated(tproj)) then
    LIBPAW_DEALLOCATE(tproj)
- end if 
+ end if
 
  if(pawtab%shape_type==-1) then
    call pawrad_free(shpf_mesh)
@@ -3917,11 +3926,11 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,ixc,&
 
 !Local variables ------------------------------
 !scalars
- integer :: imainmesh
- integer :: nmesh
+ integer :: imainmesh,nmesh
  integer :: pspversion,usexcnhat,vlocopt
  logical :: save_core_msz
  type(pawrad_type) :: core_mesh,tproj_mesh,vale_mesh,vloc_mesh
+!arrays
  real(dp),pointer :: ncore(:),tncore(:),tcoretau(:),tnvale(:),tproj(:,:),vlocr(:)
  type(pawrad_type),pointer :: radmesh(:)
 
@@ -3939,13 +3948,14 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,ixc,&
 
  call pawpsp_read(core_mesh,tmp_unit,imainmesh,lmax,&
 &  ncore,nmesh,pawrad,pawtab,pspversion,radmesh,save_core_msz,&
-&  tncore,tnvale,tproj,tproj_mesh,usexcnhat_in,usexcnhat,vale_mesh,vlocopt,vlocr,&
-&  vloc_mesh,znucl)
+&  tcoretau,tncore,tnvale,tproj,tproj_mesh,usexcnhat_in,usexcnhat,&
+&  vale_mesh,vlocopt,vlocr,vloc_mesh,znucl)
 
  call pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
 &     mmax,mqgrid_ff,mqgrid_vl,ncore,nmesh,pawrad,pawtab,pawxcdev,pspversion,&
 &     qgrid_ff,qgrid_vl,radmesh,tncore,tnvale,tproj,tproj_mesh,usexcnhat,vale_mesh,&
-&     vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl)
+&     vloc_mesh,vlocopt,vlocr,vlspl,xcccrc,xclevel,xc_denpos,zion,znucl,&
+&     tcoretau=tcoretau,coretau_mesh=core_mesh)
 
  if(usewvl==1 .or. icoulomb > 0) then
 !  Calculate up to the 5th derivative of tcoredens
@@ -3974,6 +3984,9 @@ subroutine pawpsp_7in(epsatm,ffspl,icoulomb,ixc,&
  end if
  if (associated(tnvale)) then
    LIBPAW_POINTER_DEALLOCATE(tnvale)
+ end if
+ if (associated(tcoretau)) then
+   LIBPAW_POINTER_DEALLOCATE(tcoretau)
  end if
  if (associated(tproj)) then
    LIBPAW_POINTER_DEALLOCATE(tproj)
