@@ -614,8 +614,8 @@ endif
         mbband2=2*wanbz%latom_wan(iatom2)%lcalc(il2)+1
         mbband3=2*wanbz%latom_wan(iatom3)%lcalc(il3)+1
         mbband4=2*wanbz%latom_wan(iatom4)%lcalc(il4)+1
-        ABI_ALLOCATE(rhot_q_m1m3,(nspinor,nspinor,mbband1,mbband3,npw,nqibz))
-        ABI_ALLOCATE(rhot_q_m2m4,(nspinor,nspinor,mbband2,mbband4,npw,nqibz))
+        ABI_ALLOCATE(rhot_q_m1m3,(npw,nqibz,mbband1,mbband3,nspinor,nspinor))
+        ABI_ALLOCATE(rhot_q_m2m4,(npw,nqibz,mbband2,mbband4,nspinor,nspinor))
         do ispinor1=1,wanbz%nspinor
         do ispinor2=1,wanbz%nspinor
         do ispinor3=1,wanbz%nspinor
@@ -628,10 +628,10 @@ endif
             do iG=1,npw
               ! cp_paral=cp_paral+1
               ! if(mod(cp_paral-1,nprocs)==Wfd%my_rank) then
-                rhot_q_m1m3(ispinor1,ispinor3,m1,m3,iG,iqibz)=&
+                rhot_q_m1m3(iG,iqibz,m1,m3,ispinor1,ispinor3)=&
                   &rhot1(iG,iqibz)%atom_index(iatom1,iatom3)%position(pos1,pos3)%atom(il1,il3)%matl(m1,m3,spin1,ispinor1,ispinor3)
           
-                rhot_q_m2m4(ispinor2,ispinor4,m2,m4,iG,iqibz)=&
+                rhot_q_m2m4(iG,iqibz,m2,m4,ispinor2,ispinor4)=&
                   &rhot1(iG,iqibz)%atom_index(iatom2,iatom4)%position(pos2,pos4)%atom(il2,il4)%matl(m2,m4,spin2,ispinor2,ispinor4)
               !endif
             enddo!iG
@@ -656,7 +656,7 @@ endif
 !       \  /       | | | | | |
 !        \/        |_| |_| |_|
 
-        
+        print*,"Lukaku",mbband1,mbband2,mbband3,mbband4,nspinor
         ABI_ALLOCATE(V_m,(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor))
         write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
         write(message,*)  "==Calculation of the bare interaction  V m=="
@@ -689,8 +689,8 @@ endif
             if(mod(im_paral-1,nprocs)==Wfd%my_rank) then
 !!somme interne sur iG, puis somme externe sur iq_ibz
 !! Sum_(iq_ibz) wi(iq_ibz)*Sum_ig  Rho(m3,m1,iG,iq)cong*Rho(m2,m4,ig,iq)
-              V_m(ms1,ms2,ms3,ms4)=sum(q_coord(:,4)*sum(conjg(rhot_q_m1m3(ispinor3,ispinor1,m3,m1,:,:))* &
-              &rhot_q_m2m4(ispinor2,ispinor4,m2,m4,:,:),dim = 1))*Ha_eV/(ucvol)
+              V_m(ms1,ms2,ms3,ms4)=sum(q_coord(:,4)*sum(conjg(rhot_q_m1m3(:,:,m3,m1,ispinor3,ispinor1))* &
+              &rhot_q_m2m4(:,:,m2,m4,ispinor2,ispinor4),dim = 1))*Ha_eV/(ucvol)
             endif!paral
           end do!m4
           end do!m3
@@ -818,8 +818,8 @@ endif
         call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
         
         ABI_ALLOCATE(U_m,(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor))
-        ABI_ALLOCATE(rhot_q_m1m3_npwe,(nspinor,nspinor,mbband1,mbband3,npwe,nqibz))
-        ABI_ALLOCATE(rhot_q_m2m4_npwe,(nspinor,nspinor,mbband2,mbband4,npwe,nqibz))
+        ABI_ALLOCATE(rhot_q_m1m3_npwe,(npwe,nqibz,mbband1,mbband3,nspinor,nspinor))
+        ABI_ALLOCATE(rhot_q_m2m4_npwe,(npwe,nqibz,mbband2,mbband4,nspinor,nspinor))
         ABI_ALLOCATE(trrho,(npwe,nqibz))
         ABI_ALLOCATE(sumrhorhoeps,(nqibz))
 
@@ -827,8 +827,8 @@ endif
    !--------------------------------------------
         trrho(:,:)=czero
         do iG1=1,npwe
-          rhot_q_m1m3_npwe(:,:,:,:,iG1,:)=rhot_q_m1m3(:,:,:,:,iG1,:)
-          rhot_q_m2m4_npwe(:,:,:,:,iG1,:)=rhot_q_m2m4(:,:,:,:,iG1,:)
+          rhot_q_m1m3_npwe(iG1,:,:,:,:,:)=rhot_q_m1m3(iG1,:,:,:,:,:)
+          rhot_q_m2m4_npwe(iG1,:,:,:,:,:)=rhot_q_m2m4(iG1,:,:,:,:,:)
         enddo
         !  do  ispinor1=1,nspinor
         !     do m1=1,mbband
@@ -938,8 +938,8 @@ endif
 !     sum q sum G1 sum G2 f(G1,q)f(G2,q)G(G1,G2,q)
 !     sum q sum G1 f(g1,q) sum G2 f(G2,q)G(G1,G2,q)
                     do iG1=1,npwe
-                      nc=nc+conjg(rhot_q_m1m3_npwe(ispinor1,ispinor3,m1,m3,iG1,iq_ibz))*&
-                      &sum(rhot_q_m2m4_npwe(ispinor2,ispinor4,m2,m4,:,iq_ibz)*scr(:,iG1,iomega,iqalloc))
+                      nc=nc+conjg(rhot_q_m1m3_npwe(iG1,iq_ibz,m1,m3,ispinor1,ispinor3))*&
+                      &sum(rhot_q_m2m4_npwe(:,iq_ibz,m2,m4,ispinor2,ispinor4)*scr(:,iG1,iomega,iqalloc))
                     end do
                     
                     U_m(ms1,ms2,ms3,ms4)=U_m(ms1,ms2,ms3,ms4)+nc*q_coord(iq_ibz,4)
@@ -1338,7 +1338,7 @@ endif
      write(message,'(a,3x,2a,2f10.4,a)')ch10,utype,&
        &   ' value of J=U-1/((2l+1)(2l)) \sum_{m1,m2} (U(m1,m2,m1,m2)-U(m1,m1,m2,m2))=',JJ2,ch10
      call wrtout(std_out,message,'COLL')
-     stop
+!     stop
    endif
  endif
 endif

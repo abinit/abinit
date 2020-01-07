@@ -814,12 +814,19 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 ! Drive the normalization of the psichis
 
 if (dtset%plowan_projcalc(1)==-2)then
-  opt=1 
-  if (dtset%ucrpa >= 1 .or. dtset%dmft_kspectralfunc==1) opt = 0 
+  if (dtset%ucrpa >= 1 .or. dtset%dmft_kspectralfunc==1) then 
+    opt = 0
+    write(message,*)ch10,"Normalization of plowannier k-point by k-point"
+  else
+    opt=1
+    write(message,*)ch10,"Normalization of plowannier on the sum of the k-points"
+  endif
 else
   opt=0
+  write(message,*)ch10,"Normalization of plowannier k-point by k-point"
 end if
-! 
+MSG_COMMENT(message)
+opt=1
         ! 0 : normalization k-point by k-point (normal use of plowan)
         ! 1 : normalization of the sum over k-points (use with crpa old keywords)
 
@@ -2544,13 +2551,11 @@ end subroutine get_plowannier
    call init_plowannier(wanibz%bandf_wan,wanibz%bandi_wan,dtset%plowan_compute,&
      &dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
      &dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
-     &dtset%kpt,dtset%nimage,kmesh%nbz,dtset%nspinor,dtset%nsppol,dtset%wtk,wanbz)
+     &kmesh%bz,dtset%nimage,kmesh%nbz,dtset%nspinor,dtset%nsppol,dtset%wtk,wanbz)
   
    write(msg,'(a)')" Reconstruction of the full Brillouin Zone using data.plowann in the IBZ"
    call wrtout(std_out,msg,'COLL');call wrtout(ab_out,msg,'COLL')
-   if (sym==1) then 
-     wanbz=wanibz
-   else if (cryst%nsym==1) then
+   if (cryst%nsym==1) then
      do ik_bz=1,kmesh%nbz
        do iband=wanbz%bandi_wan,wanbz%bandf_wan
          ibandc=iband-wanbz%bandi_wan+1
@@ -2561,10 +2566,10 @@ end subroutine get_plowannier
                  do ispinor=1,wanbz%nspinor
                    if (kmesh%tabi(ik_bz)==1) then 
                      wanbz%psichi(ik_bz,ibandc,iatom)%atom(il)%matl(im,spin,ispinor)=&
-                     &wanibz%psichi(kmesh%tab(ik_bz),ibandc,iatom)%atom(il)%matl(im,spin,ispinor)
+                       &wanibz%psichi(kmesh%tab(ik_bz),ibandc,iatom)%atom(il)%matl(im,spin,ispinor)
                    else if (kmesh%tabi(ik_bz)==-1) then
                      wanbz%psichi(ik_bz,ibandc,iatom)%atom(il)%matl(im,spin,ispinor)=&
-                      &conjg(wanibz%psichi(kmesh%tab(ik_bz),ibandc,iatom)%atom(il)%matl(im,spin,ispinor))
+                       &conjg(wanibz%psichi(kmesh%tab(ik_bz),ibandc,iatom)%atom(il)%matl(im,spin,ispinor))
                    endif
                  enddo
                enddo
