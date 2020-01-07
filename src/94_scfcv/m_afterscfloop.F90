@@ -59,7 +59,7 @@ module m_afterscfloop
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp
- use m_orbmag,           only : chern_number,orbmag,orbmag_type
+ use m_orbmag,           only : orbmag,orbmag_type
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
@@ -280,7 +280,7 @@ contains
 !!      scfcv
 !!
 !! CHILDREN
-!!      applyprojectorsonthefly,chern_number,denspot_free_history
+!!      applyprojectorsonthefly,denspot_free_history
 !!      eigensystem_info,elpolariz,energies_copy,exchange_electronpositron
 !!      forstr,getph,hdr_update,kswfn_free_scf_data,last_orthon,metric,mkrho
 !!      nhatgrid,nonlop_test,pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar
@@ -548,12 +548,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !----------------------------------------------------------------------
 ! Orbital magnetization calculations
 !----------------------------------------------------------------------
- if(dtset%orbmag==1) then
-    call chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
-         & mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
-         & rprimd,symrec,usecprj,psps%usepaw,xred)
- end if
- if(dtset%orbmag==2 .OR. dtset%orbmag==3) then
+ if(dtset%orbmag.NE.0) then
     call orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,&
          & paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,rprimd,symrec,usecprj,&
          & vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
