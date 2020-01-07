@@ -206,6 +206,9 @@ module m_multibinit_dataset
   integer, allocatable :: fit_bancoeff(:)
   ! fit_bancoeffs(fit_nbancoeff)
 
+  integer, allocatable :: iatfix(:,:) 
+  ! iatfix(3,natom) atom fix contraints for Broyden
+
   integer, allocatable :: opt_coeff(:)
   ! opt_coeff(opt_ncoeff)
 
@@ -436,6 +439,7 @@ multibinit_dtset%slc_coupling=0
  multibinit_dtset%conf_cutoff_disp(:)=zero
  ABI_ALLOCATE(multibinit_dtset%q1shft,(3,multibinit_dtset%nqshft))
  multibinit_dtset%q1shft(:,:) = zero
+ ABI_ALLOCATE(multibinit_dtset%iatfix,(3,natom))
 
  multibinit_dtset%latt_mask(:) = 0
 
@@ -507,6 +511,10 @@ subroutine multibinit_dtset_free(multibinit_dtset)
  if(allocated(multibinit_dtset%q1shft))then
    ABI_DEALLOCATE(multibinit_dtset%q1shft)
  end if
+ if(allocated(multibinit_dtset%iatfix))then 
+   ABI_DEALLOCATE(multibinit_dtset%iatfix)
+ end if
+
 
  !if (allocated(multibinit_dtset%gilbert_damping))  then
  !  ABI_DEALLOCATE(multibinit_dtset%gilbert_damping)
@@ -572,7 +580,8 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !Dummy arguments for subroutine 'intagm' to parse input file
 !Set routine version number here:
 !scalars
- integer :: iatifc,ii,iph1,iph2,jdtset,jj,marr,tread
+ integer :: iatifc,ii,iph1,iph2,jdtset,jj,marr,tread,idir,natfix,iatom
+ integer :: natom_sc
  character(len=500) :: message
 !arrays
  integer,allocatable :: intarr(:)
@@ -2236,6 +2245,96 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 !Y
 
 !Z
+
+!=======================================================================
+! Read Geometric constraint variables for relaxation
+!=======================================================================
+
+ natom_sc = natom*multibinit_dtset%ncell(1)*multibinit_dtset%ncell(2)*multibinit_dtset%ncell(3)
+ ABI_ALLOCATE(multibinit_dtset%iatfix,(3,natom_sc))
+ multibinit_dtset%iatfix(:,:)=0
+
+ do idir=0,3
+
+   if(idir==0)then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natfix',tread,'INT')
+   else if(idir==1)then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natfixx',tread,'INT')
+   else if(idir==2)then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natfixy',tread,'INT')
+   else if(idir==3)then
+     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natfixz',tread,'INT')
+   end if
+
+!  Use natfix also for natfixx,natfixy,natfixz
+   natfix=0
+   if(tread==1)then 
+      natfix=intarr(1)        
+      ABI_DEALLOCATE(intarr)
+      ABI_DEALLOCATE(dprarr)
+      ABI_ALLOCATE(intarr,(natfix))
+      ABI_ALLOCATE(dprarr,(natfix))
+      marr = natfix
+   endif 
+
+!  Checks the validity of natfix
+   if (natfix<0 .or. natfix>natom_sc) then
+     write(message, '(a,a,a,i0,a,i4,a,a,a)' )&
+&     'The input variables natfix, natfixx, natfixy and natfixz must be',ch10,&
+&     'between 0 and natom of the supercell (= ',natom_sc,'), while one of them is ',natfix,'.',ch10,&
+&     'Action: correct that occurence in your input file.'
+     MSG_ERROR(message)
+   end if
+
+!  Read iatfix
+   if(idir==0)then
+     call intagm(dprarr,intarr,jdtset,marr,natfix,string(1:lenstr),'iatfix',tread,'INT')
+   else if(idir==1)then
+     call intagm(dprarr,intarr,jdtset,marr,natfix,string(1:lenstr),'iatfixx',tread,'INT')
+   else if(idir==2)then
+     call intagm(dprarr,intarr,jdtset,marr,natfix,string(1:lenstr),'iatfixy',tread,'INT')
+   else if(idir==3)then
+     call intagm(dprarr,intarr,jdtset,marr,natfix,string(1:lenstr),'iatfixz',tread,'INT')
+   end if
+
+!  If some iatfix was read, natfix must vanish
+   if (natfix==0 .and. tread==1)then
+     write(message, '(a,i1,5a)' )&
+&     'For direction ',idir,' the corresponding natfix is zero,',ch10,&
+&     'while iatfix specifies some atoms to be fixed.',ch10,&
+&     'Action: either specify a non-zero natfix(x,y,z) or suppress iatfix(x,y,z).'
+     MSG_ERROR(message)
+   end if
+
+!  If natfix is non-zero, iatfix must be defined
+   if (natfix>0 .and. tread==0)then
+     write(message, '(a,i1,3a,i0,3a)' )&
+&     'For direction ',idir,' no iatfix has been specified,',ch10,&
+&     'while natfix specifies that some atoms to be fixed, natfix= ',natfix,'.',ch10,&
+&     'Action: either set natfix(x,y,z) to zero or define iatfix(x,y,z).'
+     MSG_ERROR(message)
+   end if
+
+   if(tread==1)then
+     do ii=1,natfix
+!      Checks the validity of the input iatfix
+       if (intarr(ii)<1 .or. intarr(ii)>natom_sc) then
+         write(message, '(a,a,a,i0,a,a,a)' )&
+&         'The input variables iatfix, iatfixx, iatfixy and iatfixz must be',ch10,&
+&         'between 1 and natom of the supercell, while one of them is ',intarr(ii),'.',ch10,&
+&         'Action: correct that occurence in your input file.'
+         MSG_ERROR(message)
+       end if
+!      Finally set the value of the internal iatfix array
+       do iatom=1,natom_sc
+         if(intarr(ii)==iatom)then
+           if(idir==0)multibinit_dtset%iatfix(1:3,iatom)=1
+           if(idir/=0)multibinit_dtset%iatfix(idir,iatom)=1
+         end if
+       end do
+     end do
+   end if
+ end do
 
 !=======================================================================
 ! Read SCALE UP variables 

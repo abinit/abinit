@@ -327,7 +327,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 
    !array
    ABI_ALLOCATE(dtset%iatfix,(3,dtset%natom)) ! Indices of AToms that are FIXed
-   dtset%iatfix = 0
+   dtset%iatfix = inp%iatfix
    dtset%goprecprm(:) = zero !Geometry Optimization PREconditioner PaRaMeters equations
    ABI_ALLOCATE(dtset%prtatlist,(dtset%natom)) !PRinT by ATom LIST of ATom
    dtset%prtatlist(:) = 0
