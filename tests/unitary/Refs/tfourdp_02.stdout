@@ -1,0 +1,164 @@
+
+.Version 8.0.3 of FFTPROF 
+.(sequential version, prepared for a x86_64_linux_gnu4.6 computer) 
+
+.Copyright (C) 1998-2019 ABINIT group . 
+ FFTPROF comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Mon  4 Apr 2016.
+- ( at 22h45 )
+  
+ Tool for profiling and testing the FFT libraries used in ABINIT.
+ Allowed options are: 
+   fourdp --> Test FFT transforms of density and potentials on the full box.
+   fourwf --> Test FFT transforms of wavefunctions using the zero-pad algorithm.
+   gw_fft --> Test the FFT transforms used in the GW code.
+   all    --> Test all FFT routines.
+ 
+
+  ==== OpenMP parallelism is ON ====
+- Max_threads:       2
+- Num_threads:       2
+- Num_procs:         4
+- Dynamic:           F
+- Nested:            F
+ 
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)= 20.0000000  0.0000000  0.0000000  G(1)=  0.0500000  0.0000000  0.0000000
+ R(2)=  0.0000000 20.0000000  0.0000000  G(2)=  0.0000000  0.0500000  0.0000000
+ R(3)=  0.0000000  0.0000000 20.0000000  G(3)=  0.0000000  0.0000000  0.0500000
+ Unit cell volume ucvol=  8.0000000E+03 bohr^3
+ Unit cell volume ucvol=  8.0000000E+03 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+
+ ==== FFT setup for fftalg 112 ====
+  FFT mesh divisions ........................    90   90   90
+  Augmented FFT divisions ...................    91   91   90
+  FFT algorithm .............................   112
+  FFT cache size ............................    16
+
+ ==== FFT setup for fftalg 102 ====
+  FFT mesh divisions ........................    90   90   90
+  Augmented FFT divisions ...................    91   91   90
+  FFT algorithm .............................   102
+  FFT cache size ............................    16
+
+ ==== FFT setup for fftalg 412 ====
+  FFT mesh divisions ........................    90   90   90
+  Augmented FFT divisions ...................    91   91   90
+  FFT algorithm .............................   412
+  FFT cache size ............................    16
+
+ ==== FFT setup for fftalg 312 ====
+  FFT mesh divisions ........................    90   90   90
+  Augmented FFT divisions ...................    91   91   90
+  FFT algorithm .............................   312
+  FFT cache size ............................    16
+
+================================================
+==== fourdp with cplex  1, isign -1, ndat 1 ====
+================================================
+        Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
+- Goedecker (112)       0.0446     0.0446      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.0542     0.0280      2 ( 80%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.0670     0.0324      3 ( 46%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.0758     0.0374      4 ( 30%) 5     0.00E+00    0.00E+00
+- Goedecker (102)       0.0976     0.0976      1 (100%) 5     4.71E-16    1.65E-19
+- Goedecker (102)       0.1360     0.0764      2 ( 64%) 5     4.71E-16    1.65E-19
+- Goedecker (102)       0.1470     0.0700      3 ( 46%) 5     4.71E-16    1.65E-19
+- Goedecker (102)       0.1568     0.0682      4 ( 36%) 5     4.71E-16    1.65E-19
+- Goedecker2002 (412)   0.0422     0.0422      1 (100%) 5     1.76E-16    1.63E-19
+- Goedecker2002 (412)   0.0416     0.0418      2 ( 50%) 5     1.76E-16    1.63E-19
+- Goedecker2002 (412)   0.0414     0.0414      3 ( 34%) 5     1.76E-16    1.63E-19
+- Goedecker2002 (412)   0.0398     0.0398      4 ( 27%) 5     1.76E-16    1.63E-19
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+
+ Consistency check: MAX(Max_|Err|) =  4.71E-16, Max(<|Err|>) =  1.65E-19, reference_lib: Goedecker (112)
+
+
+================================================
+==== fourdp with cplex  2, isign -1, ndat 1 ====
+================================================
+        Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
+- Goedecker (112)       0.0794     0.0796      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.1096     0.0590      2 ( 67%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.1418     0.0492      3 ( 54%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.1614     0.0656      4 ( 30%) 5     0.00E+00    0.00E+00
+- Goedecker (102)       0.0916     0.0918      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker (102)       0.1134     0.0628      2 ( 73%) 5     0.00E+00    0.00E+00
+- Goedecker (102)       0.1468     0.0584      3 ( 52%) 5     0.00E+00    0.00E+00
+- Goedecker (102)       0.1658     0.0762      4 ( 30%) 5     0.00E+00    0.00E+00
+- Goedecker2002 (412)   0.0692     0.0692      1 (100%) 5     6.59E-16    1.89E-19
+- Goedecker2002 (412)   0.0658     0.0658      2 ( 53%) 5     6.59E-16    1.89E-19
+- Goedecker2002 (412)   0.0872     0.0872      3 ( 26%) 5     6.59E-16    1.89E-19
+- Goedecker2002 (412)   0.0876     0.0894      4 ( 19%) 5     6.59E-16    1.89E-19
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+
+ Consistency check: MAX(Max_|Err|) =  6.59E-16, Max(<|Err|>) =  1.89E-19, reference_lib: Goedecker (112)
+
+
+================================================
+==== fourdp with cplex  1, isign  1, ndat 1 ====
+================================================
+        Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
+- Goedecker (112)       0.0374     0.0374      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.0456     0.0262      2 ( 71%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.0562     0.0326      3 ( 38%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.0668     0.0322      4 ( 29%) 5     0.00E+00    0.00E+00
+- Goedecker (102)       0.0794     0.0794      1 (100%) 5     1.71E-13    2.54E-15
+- Goedecker (102)       0.1068     0.0574      2 ( 69%) 5     1.71E-13    2.54E-15
+- Goedecker (102)       0.1376     0.0472      3 ( 56%) 5     1.71E-13    2.54E-15
+- Goedecker (102)       0.1606     0.0660      4 ( 30%) 5     1.71E-13    2.54E-15
+- Goedecker2002 (412)   0.0362     0.0362      1 (100%) 5     1.71E-13    2.80E-15
+- Goedecker2002 (412)   0.0364     0.0364      2 ( 50%) 5     1.71E-13    2.80E-15
+- Goedecker2002 (412)   0.0418     0.0418      3 ( 29%) 5     1.71E-13    2.80E-15
+- Goedecker2002 (412)   0.0420     0.0422      4 ( 21%) 5     1.71E-13    2.80E-15
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+
+ Consistency check: MAX(Max_|Err|) =  1.71E-13, Max(<|Err|>) =  2.80E-15, reference_lib: Goedecker (112)
+
+
+================================================
+==== fourdp with cplex  2, isign  1, ndat 1 ====
+================================================
+        Library        CPU-time   WALL-time   nthreads  ncalls  Max_|Err|   <|Err|>
+- Goedecker (112)       0.1060     0.1062      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.1234     0.0730      2 ( 73%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.1438     0.0646      3 ( 55%) 5     0.00E+00    0.00E+00
+- Goedecker (112)       0.1632     0.0752      4 ( 35%) 5     0.00E+00    0.00E+00
+- Goedecker (102)       0.0968     0.0968      1 (100%) 5     0.00E+00    0.00E+00
+- Goedecker (102)       0.1202     0.0656      2 ( 74%) 5     0.00E+00    0.00E+00
+- Goedecker (102)       0.1348     0.0474      3 ( 68%) 5     0.00E+00    0.00E+00
+- Goedecker (102)       0.1556     0.0584      4 ( 41%) 5     0.00E+00    0.00E+00
+- Goedecker2002 (412)   0.0790     0.0792      1 (100%) 5     1.96E-13    3.18E-15
+- Goedecker2002 (412)   0.0846     0.0848      2 ( 47%) 5     1.96E-13    3.18E-15
+- Goedecker2002 (412)   0.0838     0.0840      3 ( 31%) 5     1.96E-13    3.18E-15
+- Goedecker2002 (412)   0.0818     0.0820      4 ( 24%) 5     1.96E-13    3.18E-15
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+- FFTW3 (312)             N/A        N/A        N/A     N/A       N/A        N/A
+
+ Consistency check: MAX(Max_|Err|) =  1.96E-13, Max(<|Err|>) =  3.18E-15, reference_lib: Goedecker (112)
+
+
+ Analysis completed.

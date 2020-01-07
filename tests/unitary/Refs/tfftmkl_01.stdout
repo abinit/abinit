@@ -1,0 +1,100 @@
+
+.Version 8.0.4 of FFTPROF 
+.(MPI version, prepared for a x86_64_linux_intel15.0 computer) 
+
+.Copyright (C) 1998-2019 ABINIT group . 
+ FFTPROF comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Sun 17 Apr 2016.
+- ( at 18h02 )
+  
+ Tool for profiling and testing the FFT libraries used in ABINIT.
+ Allowed options are: 
+   fourdp --> Test FFT transforms of density and potentials on the full box.
+   fourwf --> Test FFT transforms of wavefunctions using the zero-pad algorithm.
+   gw_fft --> Test the FFT transforms used in the GW code.
+   all    --> Test all FFT routines.
+ 
+ Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
+ R(1)= 20.0000000  0.0000000  0.0000000  G(1)=  0.0500000  0.0000000  0.0000000
+ R(2)=  0.0000000 20.0000000  0.0000000  G(2)=  0.0000000  0.0500000  0.0000000
+ R(3)=  0.0000000  0.0000000 20.0000000  G(3)=  0.0000000  0.0000000  0.0500000
+ Unit cell volume ucvol=  8.0000000E+03 bohr^3
+ Unit cell volume ucvol=  8.0000000E+03 bohr^3
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+ Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
+ 
+ ==== FFT setup for fftalg 512 ====
+  FFT mesh divisions ........................   100  100  100
+  Augmented FFT divisions ...................   101  101  100
+  FFT algorithm .............................   512
+  FFT cache size ............................    16
+=== FFT Unit Tests ===
+fftbox_utests with fftalg = 512, ndat = 1, nthreads = 1
+DFTI c2c_ip_spc :  OK
+DFTI c2c_op_spc :  OK
+DFTI c2c_ip_dpc :  OK
+DFTI c2c_op_dpc :  OK
+DFTI fourdp (cplex1) :  OK
+DFTI fourdp (cplex2) :  OK
+DFTI c2c_ip_spc :  OK
+DFTI c2c_op_spc :  OK
+DFTI c2c_ip_dpc :  OK
+DFTI c2c_op_dpc :  OK
+DFTI fourdp (cplex1) :  OK
+DFTI fourdp (cplex2) :  OK
+DFTI c2c_ip_spc :  OK
+DFTI c2c_op_spc :  OK
+DFTI c2c_ip_dpc :  OK
+DFTI c2c_op_dpc :  OK
+DFTI fourdp (cplex1) :  OK
+DFTI fourdp (cplex2) :  OK
+DFTI c2c_ip_spc :  OK
+DFTI c2c_op_spc :  OK
+DFTI c2c_ip_dpc :  OK
+DFTI c2c_op_dpc :  OK
+DFTI fourdp (cplex1) :  OK
+DFTI fourdp (cplex2) :  OK
+DFTI c2c_ip_spc :  OK
+DFTI c2c_op_spc :  OK
+DFTI c2c_ip_dpc :  OK
+DFTI c2c_op_dpc :  OK
+DFTI fourdp (cplex1) :  OK
+DFTI fourdp (cplex2) :  OK
+DFTI c2c_ip_spc :  OK
+DFTI c2c_op_spc :  OK
+DFTI c2c_ip_dpc :  OK
+DFTI c2c_op_dpc :  OK
+DFTI fourdp (cplex1) :  OK
+DFTI fourdp (cplex2) :  OK
+fftu_utests with fftalg = 512, ndat = 1, nthreads = 1
+DFTI fftu_spc, istwfk1 :  OK
+DFTI fftu_dpc, istwfk1 :  OK
+DFTI fftu_spc, istwfk2 :  OK
+DFTI fftu_dpc, istwfk2 :  OK
+DFTI fftu_spc, istwfk3 :  OK
+DFTI fftu_dpc, istwfk3 :  OK
+DFTI fftu_spc, istwfk4 :  OK
+DFTI fftu_dpc, istwfk4 :  OK
+DFTI fftu_spc, istwfk5 :  OK
+DFTI fftu_dpc, istwfk5 :  OK
+DFTI fftu_spc, istwfk6 :  OK
+DFTI fftu_dpc, istwfk6 :  OK
+DFTI fftu_spc, istwfk7 :  OK
+DFTI fftu_dpc, istwfk7 :  OK
+DFTI fftu_spc, istwfk8 :  OK
+DFTI fftu_dpc, istwfk8 :  OK
+DFTI fftu_spc, istwfk9 :  OK
+DFTI fftu_dpc, istwfk9 :  OK
+Total number of failed tests = 0
+ 
+ Analysis completed.

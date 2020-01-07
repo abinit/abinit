@@ -1,0 +1,1056 @@
+
+.Version 8.11.12 of CUT3D 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+
+.Copyright (C) 1998-2019 ABINIT group . 
+ CUT3D comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h27 )
+  
+
+  What is the name of the 3D function (density, potential or wavef) file ?
+  => Your 3D function file is: t65o_DS3_WFK
+
+- Your file contains unformatted binary header + 3D data
+
+ ===============================================================================
+ ECHO of the ABINIT file header 
+ 
+ First record :
+.codvsn,headform,fform = 8.11.1   80    2
+ 
+ Second record :
+ bantot,intxc,ixc,natom  =    30     0     7     1
+ ngfft(1:3),nkpt         =    24    24    24     3
+ nspden,nspinor          =     1     1
+ nsppol,nsym,npsp,ntypat =     1     8     1     1
+ occopt,pertcase,usepaw  =     7     0     0
+ ecut,ecutdg,ecutsm      =  3.0000000000E+00  3.0000000000E+00  0.0000000000E+00
+ ecut_eff                =  3.0000000000E+00
+ qptn(1:3)               =  0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+ rprimd(1:3,1)           =  1.4000000000E+01  0.0000000000E+00  0.0000000000E+00
+ rprimd(1:3,2)           =  0.0000000000E+00  1.4001000000E+01  0.0000000000E+00
+ rprimd(1:3,3)           =  0.0000000000E+00  0.0000000000E+00  1.4002000000E+01
+ stmbias,tphysel,tsmear  =  0.0000000000E+00  0.0000000000E+00  1.0000000000E-03
+
+ Third record :
+ istwfk=   2   3   9
+ nband =  10  10  10
+ npwarr=  346  341  336
+ so_psp=   1
+ symafm=
+          1  1  1  1  1  1  1  1
+ symrel=
+           1   0   0   0   1   0   0   0   1    -1   0   0   0  -1   0   0   0  -1
+          -1   0   0   0   1   0   0   0  -1     1   0   0   0  -1   0   0   0   1
+          -1   0   0   0  -1   0   0   0   1     1   0   0   0   1   0   0   0  -1
+           1   0   0   0  -1   0   0   0  -1    -1   0   0   0   1   0   0   0   1
+ type  =   1
+ kptns =                 (max 50 k-points will be written)
+            0.000000E+00    0.000000E+00    0.000000E+00
+            5.000000E-01    0.000000E+00    0.000000E+00
+            5.000000E-01    5.000000E-01    5.000000E-01
+ wtk =
+          1.00  1.00  1.00
+   occ =
+          2.00  1.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
+          2.00  1.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
+          2.00  1.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00  0.00
+ tnons =
+          0.000000  0.000000  0.000000    0.400000 -0.400000 -0.200000
+          0.400000  0.000000 -0.200000    0.000000 -0.400000  0.000000
+          0.400000 -0.400000  0.000000    0.000000  0.000000 -0.200000
+          0.000000 -0.400000 -0.200000    0.400000  0.000000  0.000000
+  znucl= 13.00
+
+ Pseudopotential info :
+ title=Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
+  znuclpsp= 13.00, zionpsp=  3.00, pspso=  0, pspdat=960528, pspcod=  2, pspxc=  1
+  lmnmax  =  3
+ 
+ Last record :
+ residm,etot,fermie=    9.966699E-17   -1.912169624853E+00   -7.655537E-02
+ xred =
+            2.000000E-01    3.000000E-01    4.000000E-01
+ End the ECHO of the ABINIT file header 
+ ===============================================================================
+
+ ===========================================================
+
+ ECHO important input variables ...
+
+  Dimensional primitive vectors (ABINIT equivalent: rprimd):
+    1.400000E+01    0.000000E+00    0.000000E+00
+    0.000000E+00    1.400100E+01    0.000000E+00
+    0.000000E+00    0.000000E+00    1.400200E+01
+  Grid density (ABINIT equivalent: ngfft):    24   24   24
+  Number of atoms       :           1
+  Number of atomic types:           1
+
+   #    Atomic positions (cartesian coordinates - Bohr)
+   1    2.800000E+00    4.200300E+00    5.600800E+00
+
+  This file is a WF file. 
+
+ For which k-points? (1 to    3)
+  => Your k-point is :            1
+
+
+ For which band ? (1 to    10)
+  => Your band number is :            1
+
+  => Your spin polarisation number is :            1
+
+ Do you want to analyze a GW wavefunction? (1=yes,0=no)
+ => Your choice is :           0
+
+ Do you want the atomic analysis for this state : 
+ (kpt,band)= (    1    1)? 
+ If yes, enter the radius of the atomic spheres, in bohr 
+ If no, enter 0 
+ You entered ratsph=      7.00000000 Bohr 
+
+ Atomic sphere analysis 
+
+ wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
+ Angular analysis (real spherical harmonics)
+
+ Atom #   1 is  Al, in-sphere charge =  0.996233
+ l=0, charge= 0.996164, m=-l,l splitting: 0.996
+ l=1, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000
+ l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
+ l=3, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+ l=4, charge= 0.000069, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+
+ Sum of angular contributions for all atomic spheres
+ l=0, charge = 0.996164 proportion = 0.999931
+ l=1, charge = 0.000000 proportion = 0.000000
+ l=2, charge = 0.000000 proportion = 0.000000
+ l=3, charge = 0.000000 proportion = 0.000000
+ l=4, charge = 0.000069 proportion = 0.000069
+
+ Total over all atoms and l=0 to 4 :  0.996233
+
+ Charge in the sphere around each atom 
+ Atom number    1 :  charge =    0.99637180
+
+  3D wave function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit to k-point / band / spin-pol loop
+   1 => 3D formatted real and imaginary data
+        (output the bare 3D data - two column,R,I)
+   2 => 3D formatted real data
+        (output the bare 3D data - one column)
+   3 => 3D formatted imaginary data
+        (output the bare 3D data - one column)
+   4 => 3D indexed real and imaginary data
+        (3D data, preceeded by 3D index)
+   5 => 3D indexed real data
+        (bare 3D data, preceeded by 3D index)
+   6 => 3D indexed imaginary data
+        (bare 3D data, preceeded by 3D index)
+   7 => 3D Data Explorer formatted data 
+        (Real file and Imaginary file)
+   8 => 3D Data Explorer formatted data 
+        (Only the Real file)
+   9 => 3D Data Explorer formatted data 
+        (Only the Imaginary file)
+  10 => 3D Data Explorer formatted data and position files
+  11 => XCrysden formatted data (norm of wf) and position files
+  12 => NetCDF data and position file
+  13 => XCrysden/VENUS wavefunction (real part of data)
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit inner loop
+  Task            0  has been done !
+
+  Run interpolation again? (1=default=yes,0=no)
+
+ For which k-points? (1 to    3)
+  => Your k-point is :            1
+
+
+ For which band ? (1 to    10)
+  => Your band number is :            2
+
+  => Your spin polarisation number is :            1
+
+ Do you want to analyze a GW wavefunction? (1=yes,0=no)
+ => Your choice is :           0
+
+ Do you want the atomic analysis for this state : 
+ (kpt,band)= (    1    2)? 
+ If yes, enter the radius of the atomic spheres, in bohr 
+ If no, enter 0 
+ You entered ratsph=      7.00000000 Bohr 
+
+ Atomic sphere analysis 
+
+ wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
+ Angular analysis (real spherical harmonics)
+
+ Atom #   1 is  Al, in-sphere charge =  0.987234
+ l=0, charge= 0.000000, m=-l,l splitting: 0.000
+ l=1, charge= 0.985080, m=-l,l splitting: 0.000 0.985 0.000
+ l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
+ l=3, charge= 0.002154, m=-l,l splitting: 0.000 0.000 0.000 0.002 0.000 0.000 0.000
+ l=4, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+
+ Sum of angular contributions for all atomic spheres
+ l=0, charge = 0.000000 proportion = 0.000000
+ l=1, charge = 0.985080 proportion = 0.997818
+ l=2, charge = 0.000000 proportion = 0.000000
+ l=3, charge = 0.002154 proportion = 0.002182
+ l=4, charge = 0.000000 proportion = 0.000000
+
+ Total over all atoms and l=0 to 4 :  0.987234
+
+ Charge in the sphere around each atom 
+ Atom number    1 :  charge =    0.98730916
+
+  3D wave function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit to k-point / band / spin-pol loop
+   1 => 3D formatted real and imaginary data
+        (output the bare 3D data - two column,R,I)
+   2 => 3D formatted real data
+        (output the bare 3D data - one column)
+   3 => 3D formatted imaginary data
+        (output the bare 3D data - one column)
+   4 => 3D indexed real and imaginary data
+        (3D data, preceeded by 3D index)
+   5 => 3D indexed real data
+        (bare 3D data, preceeded by 3D index)
+   6 => 3D indexed imaginary data
+        (bare 3D data, preceeded by 3D index)
+   7 => 3D Data Explorer formatted data 
+        (Real file and Imaginary file)
+   8 => 3D Data Explorer formatted data 
+        (Only the Real file)
+   9 => 3D Data Explorer formatted data 
+        (Only the Imaginary file)
+  10 => 3D Data Explorer formatted data and position files
+  11 => XCrysden formatted data (norm of wf) and position files
+  12 => NetCDF data and position file
+  13 => XCrysden/VENUS wavefunction (real part of data)
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit inner loop
+  Task            0  has been done !
+
+  Run interpolation again? (1=default=yes,0=no)
+
+ For which k-points? (1 to    3)
+  => Your k-point is :            1
+
+
+ For which band ? (1 to    10)
+  => Your band number is :            3
+
+  => Your spin polarisation number is :            1
+
+ Do you want to analyze a GW wavefunction? (1=yes,0=no)
+ => Your choice is :           0
+
+ Do you want the atomic analysis for this state : 
+ (kpt,band)= (    1    3)? 
+ If yes, enter the radius of the atomic spheres, in bohr 
+ If no, enter 0 
+ You entered ratsph=      7.00000000 Bohr 
+
+ Atomic sphere analysis 
+
+ wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
+ Angular analysis (real spherical harmonics)
+
+ Atom #   1 is  Al, in-sphere charge =  0.987239
+ l=0, charge= 0.000000, m=-l,l splitting: 0.000
+ l=1, charge= 0.985084, m=-l,l splitting: 0.985 0.000 0.000
+ l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
+ l=3, charge= 0.002155, m=-l,l splitting: 0.001 0.000 0.001 0.000 0.000 0.000 0.000
+ l=4, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+
+ Sum of angular contributions for all atomic spheres
+ l=0, charge = 0.000000 proportion = 0.000000
+ l=1, charge = 0.985084 proportion = 0.997817
+ l=2, charge = 0.000000 proportion = 0.000000
+ l=3, charge = 0.002155 proportion = 0.002183
+ l=4, charge = 0.000000 proportion = 0.000000
+
+ Total over all atoms and l=0 to 4 :  0.987239
+
+ Charge in the sphere around each atom 
+ Atom number    1 :  charge =    0.98731406
+
+  3D wave function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit to k-point / band / spin-pol loop
+   1 => 3D formatted real and imaginary data
+        (output the bare 3D data - two column,R,I)
+   2 => 3D formatted real data
+        (output the bare 3D data - one column)
+   3 => 3D formatted imaginary data
+        (output the bare 3D data - one column)
+   4 => 3D indexed real and imaginary data
+        (3D data, preceeded by 3D index)
+   5 => 3D indexed real data
+        (bare 3D data, preceeded by 3D index)
+   6 => 3D indexed imaginary data
+        (bare 3D data, preceeded by 3D index)
+   7 => 3D Data Explorer formatted data 
+        (Real file and Imaginary file)
+   8 => 3D Data Explorer formatted data 
+        (Only the Real file)
+   9 => 3D Data Explorer formatted data 
+        (Only the Imaginary file)
+  10 => 3D Data Explorer formatted data and position files
+  11 => XCrysden formatted data (norm of wf) and position files
+  12 => NetCDF data and position file
+  13 => XCrysden/VENUS wavefunction (real part of data)
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit inner loop
+  Task            0  has been done !
+
+  Run interpolation again? (1=default=yes,0=no)
+
+ For which k-points? (1 to    3)
+  => Your k-point is :            1
+
+
+ For which band ? (1 to    10)
+  => Your band number is :            4
+
+  => Your spin polarisation number is :            1
+
+ Do you want to analyze a GW wavefunction? (1=yes,0=no)
+ => Your choice is :           0
+
+ Do you want the atomic analysis for this state : 
+ (kpt,band)= (    1    4)? 
+ If yes, enter the radius of the atomic spheres, in bohr 
+ If no, enter 0 
+ You entered ratsph=      7.00000000 Bohr 
+
+ Atomic sphere analysis 
+
+ wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
+ Angular analysis (real spherical harmonics)
+
+ Atom #   1 is  Al, in-sphere charge =  0.987244
+ l=0, charge= 0.000000, m=-l,l splitting: 0.000
+ l=1, charge= 0.985088, m=-l,l splitting: 0.000 0.000 0.985
+ l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
+ l=3, charge= 0.002156, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.001 0.000 0.001
+ l=4, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+
+ Sum of angular contributions for all atomic spheres
+ l=0, charge = 0.000000 proportion = 0.000000
+ l=1, charge = 0.985088 proportion = 0.997816
+ l=2, charge = 0.000000 proportion = 0.000000
+ l=3, charge = 0.002156 proportion = 0.002184
+ l=4, charge = 0.000000 proportion = 0.000000
+
+ Total over all atoms and l=0 to 4 :  0.987244
+
+ Charge in the sphere around each atom 
+ Atom number    1 :  charge =    0.98731899
+
+  3D wave function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit to k-point / band / spin-pol loop
+   1 => 3D formatted real and imaginary data
+        (output the bare 3D data - two column,R,I)
+   2 => 3D formatted real data
+        (output the bare 3D data - one column)
+   3 => 3D formatted imaginary data
+        (output the bare 3D data - one column)
+   4 => 3D indexed real and imaginary data
+        (3D data, preceeded by 3D index)
+   5 => 3D indexed real data
+        (bare 3D data, preceeded by 3D index)
+   6 => 3D indexed imaginary data
+        (bare 3D data, preceeded by 3D index)
+   7 => 3D Data Explorer formatted data 
+        (Real file and Imaginary file)
+   8 => 3D Data Explorer formatted data 
+        (Only the Real file)
+   9 => 3D Data Explorer formatted data 
+        (Only the Imaginary file)
+  10 => 3D Data Explorer formatted data and position files
+  11 => XCrysden formatted data (norm of wf) and position files
+  12 => NetCDF data and position file
+  13 => XCrysden/VENUS wavefunction (real part of data)
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit inner loop
+  Task            0  has been done !
+
+  Run interpolation again? (1=default=yes,0=no)
+
+ For which k-points? (1 to    3)
+  => Your k-point is :            1
+
+
+ For which band ? (1 to    10)
+  => Your band number is :            5
+
+  => Your spin polarisation number is :            1
+
+ Do you want to analyze a GW wavefunction? (1=yes,0=no)
+ => Your choice is :           0
+
+ Do you want the atomic analysis for this state : 
+ (kpt,band)= (    1    5)? 
+ If yes, enter the radius of the atomic spheres, in bohr 
+ If no, enter 0 
+ You entered ratsph=      7.00000000 Bohr 
+
+ Atomic sphere analysis 
+
+ wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
+ Angular analysis (real spherical harmonics)
+
+ Atom #   1 is  Al, in-sphere charge =  0.486308
+ l=0, charge= 0.486306, m=-l,l splitting: 0.486
+ l=1, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000
+ l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
+ l=3, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+ l=4, charge= 0.000002, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+
+ Sum of angular contributions for all atomic spheres
+ l=0, charge = 0.486306 proportion = 0.999995
+ l=1, charge = 0.000000 proportion = 0.000000
+ l=2, charge = 0.000000 proportion = 0.000000
+ l=3, charge = 0.000000 proportion = 0.000000
+ l=4, charge = 0.000002 proportion = 0.000005
+
+ Total over all atoms and l=0 to 4 :  0.486308
+
+ Charge in the sphere around each atom 
+ Atom number    1 :  charge =    0.48632905
+
+  3D wave function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit to k-point / band / spin-pol loop
+   1 => 3D formatted real and imaginary data
+        (output the bare 3D data - two column,R,I)
+   2 => 3D formatted real data
+        (output the bare 3D data - one column)
+   3 => 3D formatted imaginary data
+        (output the bare 3D data - one column)
+   4 => 3D indexed real and imaginary data
+        (3D data, preceeded by 3D index)
+   5 => 3D indexed real data
+        (bare 3D data, preceeded by 3D index)
+   6 => 3D indexed imaginary data
+        (bare 3D data, preceeded by 3D index)
+   7 => 3D Data Explorer formatted data 
+        (Real file and Imaginary file)
+   8 => 3D Data Explorer formatted data 
+        (Only the Real file)
+   9 => 3D Data Explorer formatted data 
+        (Only the Imaginary file)
+  10 => 3D Data Explorer formatted data and position files
+  11 => XCrysden formatted data (norm of wf) and position files
+  12 => NetCDF data and position file
+  13 => XCrysden/VENUS wavefunction (real part of data)
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit inner loop
+  Task            0  has been done !
+
+  Run interpolation again? (1=default=yes,0=no)
+
+ For which k-points? (1 to    3)
+  => Your k-point is :            1
+
+
+ For which band ? (1 to    10)
+  => Your band number is :            6
+
+  => Your spin polarisation number is :            1
+
+ Do you want to analyze a GW wavefunction? (1=yes,0=no)
+ => Your choice is :           0
+
+ Do you want the atomic analysis for this state : 
+ (kpt,band)= (    1    6)? 
+ If yes, enter the radius of the atomic spheres, in bohr 
+ If no, enter 0 
+ You entered ratsph=      7.00000000 Bohr 
+
+ Atomic sphere analysis 
+
+ wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
+ Angular analysis (real spherical harmonics)
+
+ Atom #   1 is  Al, in-sphere charge =  0.713503
+ l=0, charge= 0.000000, m=-l,l splitting: 0.000
+ l=1, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000
+ l=2, charge= 0.713148, m=-l,l splitting: 0.000 0.000 0.670 0.000 0.043
+ l=3, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+ l=4, charge= 0.000355, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+
+ Sum of angular contributions for all atomic spheres
+ l=0, charge = 0.000000 proportion = 0.000000
+ l=1, charge = 0.000000 proportion = 0.000000
+ l=2, charge = 0.713148 proportion = 0.999503
+ l=3, charge = 0.000000 proportion = 0.000000
+ l=4, charge = 0.000355 proportion = 0.000497
+
+ Total over all atoms and l=0 to 4 :  0.713503
+
+ Charge in the sphere around each atom 
+ Atom number    1 :  charge =    0.71383213
+
+  3D wave function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit to k-point / band / spin-pol loop
+   1 => 3D formatted real and imaginary data
+        (output the bare 3D data - two column,R,I)
+   2 => 3D formatted real data
+        (output the bare 3D data - one column)
+   3 => 3D formatted imaginary data
+        (output the bare 3D data - one column)
+   4 => 3D indexed real and imaginary data
+        (3D data, preceeded by 3D index)
+   5 => 3D indexed real data
+        (bare 3D data, preceeded by 3D index)
+   6 => 3D indexed imaginary data
+        (bare 3D data, preceeded by 3D index)
+   7 => 3D Data Explorer formatted data 
+        (Real file and Imaginary file)
+   8 => 3D Data Explorer formatted data 
+        (Only the Real file)
+   9 => 3D Data Explorer formatted data 
+        (Only the Imaginary file)
+  10 => 3D Data Explorer formatted data and position files
+  11 => XCrysden formatted data (norm of wf) and position files
+  12 => NetCDF data and position file
+  13 => XCrysden/VENUS wavefunction (real part of data)
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit inner loop
+  Task            0  has been done !
+
+  Run interpolation again? (1=default=yes,0=no)
+
+ For which k-points? (1 to    3)
+  => Your k-point is :            1
+
+
+ For which band ? (1 to    10)
+  => Your band number is :            7
+
+  => Your spin polarisation number is :            1
+
+ Do you want to analyze a GW wavefunction? (1=yes,0=no)
+ => Your choice is :           0
+
+ Do you want the atomic analysis for this state : 
+ (kpt,band)= (    1    7)? 
+ If yes, enter the radius of the atomic spheres, in bohr 
+ If no, enter 0 
+ You entered ratsph=      7.00000000 Bohr 
+
+ Atomic sphere analysis 
+
+ wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
+ Angular analysis (real spherical harmonics)
+
+ Atom #   1 is  Al, in-sphere charge =  0.713662
+ l=0, charge= 0.000000, m=-l,l splitting: 0.000
+ l=1, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000
+ l=2, charge= 0.713308, m=-l,l splitting: 0.000 0.000 0.043 0.000 0.670
+ l=3, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+ l=4, charge= 0.000354, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+
+ Sum of angular contributions for all atomic spheres
+ l=0, charge = 0.000000 proportion = 0.000000
+ l=1, charge = 0.000000 proportion = 0.000000
+ l=2, charge = 0.713308 proportion = 0.999505
+ l=3, charge = 0.000000 proportion = 0.000000
+ l=4, charge = 0.000354 proportion = 0.000495
+
+ Total over all atoms and l=0 to 4 :  0.713662
+
+ Charge in the sphere around each atom 
+ Atom number    1 :  charge =    0.71399158
+
+  3D wave function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit to k-point / band / spin-pol loop
+   1 => 3D formatted real and imaginary data
+        (output the bare 3D data - two column,R,I)
+   2 => 3D formatted real data
+        (output the bare 3D data - one column)
+   3 => 3D formatted imaginary data
+        (output the bare 3D data - one column)
+   4 => 3D indexed real and imaginary data
+        (3D data, preceeded by 3D index)
+   5 => 3D indexed real data
+        (bare 3D data, preceeded by 3D index)
+   6 => 3D indexed imaginary data
+        (bare 3D data, preceeded by 3D index)
+   7 => 3D Data Explorer formatted data 
+        (Real file and Imaginary file)
+   8 => 3D Data Explorer formatted data 
+        (Only the Real file)
+   9 => 3D Data Explorer formatted data 
+        (Only the Imaginary file)
+  10 => 3D Data Explorer formatted data and position files
+  11 => XCrysden formatted data (norm of wf) and position files
+  12 => NetCDF data and position file
+  13 => XCrysden/VENUS wavefunction (real part of data)
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit inner loop
+  Task            0  has been done !
+
+  Run interpolation again? (1=default=yes,0=no)
+
+ For which k-points? (1 to    3)
+  => Your k-point is :            1
+
+
+ For which band ? (1 to    10)
+  => Your band number is :            8
+
+  => Your spin polarisation number is :            1
+
+ Do you want to analyze a GW wavefunction? (1=yes,0=no)
+ => Your choice is :           0
+
+ Do you want the atomic analysis for this state : 
+ (kpt,band)= (    1    8)? 
+ If yes, enter the radius of the atomic spheres, in bohr 
+ If no, enter 0 
+ You entered ratsph=      7.00000000 Bohr 
+
+ Atomic sphere analysis 
+
+ wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
+ Angular analysis (real spherical harmonics)
+
+ Atom #   1 is  Al, in-sphere charge =  0.458464
+ l=0, charge= 0.000000, m=-l,l splitting: 0.000
+ l=1, charge= 0.307895, m=-l,l splitting: 0.000 0.308 0.000
+ l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
+ l=3, charge= 0.150569, m=-l,l splitting: 0.000 0.000 0.000 0.151 0.000 0.000 0.000
+ l=4, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+
+ Sum of angular contributions for all atomic spheres
+ l=0, charge = 0.000000 proportion = 0.000000
+ l=1, charge = 0.307895 proportion = 0.671579
+ l=2, charge = 0.000000 proportion = 0.000000
+ l=3, charge = 0.150569 proportion = 0.328421
+ l=4, charge = 0.000000 proportion = 0.000000
+
+ Total over all atoms and l=0 to 4 :  0.458464
+
+ Charge in the sphere around each atom 
+ Atom number    1 :  charge =    0.46210224
+
+  3D wave function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit to k-point / band / spin-pol loop
+   1 => 3D formatted real and imaginary data
+        (output the bare 3D data - two column,R,I)
+   2 => 3D formatted real data
+        (output the bare 3D data - one column)
+   3 => 3D formatted imaginary data
+        (output the bare 3D data - one column)
+   4 => 3D indexed real and imaginary data
+        (3D data, preceeded by 3D index)
+   5 => 3D indexed real data
+        (bare 3D data, preceeded by 3D index)
+   6 => 3D indexed imaginary data
+        (bare 3D data, preceeded by 3D index)
+   7 => 3D Data Explorer formatted data 
+        (Real file and Imaginary file)
+   8 => 3D Data Explorer formatted data 
+        (Only the Real file)
+   9 => 3D Data Explorer formatted data 
+        (Only the Imaginary file)
+  10 => 3D Data Explorer formatted data and position files
+  11 => XCrysden formatted data (norm of wf) and position files
+  12 => NetCDF data and position file
+  13 => XCrysden/VENUS wavefunction (real part of data)
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit inner loop
+  Task            0  has been done !
+
+  Run interpolation again? (1=default=yes,0=no)
+
+ For which k-points? (1 to    3)
+  => Your k-point is :            1
+
+
+ For which band ? (1 to    10)
+  => Your band number is :            9
+
+  => Your spin polarisation number is :            1
+
+ Do you want to analyze a GW wavefunction? (1=yes,0=no)
+ => Your choice is :           0
+
+ Do you want the atomic analysis for this state : 
+ (kpt,band)= (    1    9)? 
+ If yes, enter the radius of the atomic spheres, in bohr 
+ If no, enter 0 
+ You entered ratsph=      7.00000000 Bohr 
+
+ Atomic sphere analysis 
+
+ wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
+ Angular analysis (real spherical harmonics)
+
+ Atom #   1 is  Al, in-sphere charge =  0.458452
+ l=0, charge= 0.000000, m=-l,l splitting: 0.000
+ l=1, charge= 0.307858, m=-l,l splitting: 0.308 0.000 0.000
+ l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
+ l=3, charge= 0.150594, m=-l,l splitting: 0.094 0.000 0.056 0.000 0.000 0.000 0.000
+ l=4, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+
+ Sum of angular contributions for all atomic spheres
+ l=0, charge = 0.000000 proportion = 0.000000
+ l=1, charge = 0.307858 proportion = 0.671517
+ l=2, charge = 0.000000 proportion = 0.000000
+ l=3, charge = 0.150594 proportion = 0.328483
+ l=4, charge = 0.000000 proportion = 0.000000
+
+ Total over all atoms and l=0 to 4 :  0.458452
+
+ Charge in the sphere around each atom 
+ Atom number    1 :  charge =    0.46209279
+
+  3D wave function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit to k-point / band / spin-pol loop
+   1 => 3D formatted real and imaginary data
+        (output the bare 3D data - two column,R,I)
+   2 => 3D formatted real data
+        (output the bare 3D data - one column)
+   3 => 3D formatted imaginary data
+        (output the bare 3D data - one column)
+   4 => 3D indexed real and imaginary data
+        (3D data, preceeded by 3D index)
+   5 => 3D indexed real data
+        (bare 3D data, preceeded by 3D index)
+   6 => 3D indexed imaginary data
+        (bare 3D data, preceeded by 3D index)
+   7 => 3D Data Explorer formatted data 
+        (Real file and Imaginary file)
+   8 => 3D Data Explorer formatted data 
+        (Only the Real file)
+   9 => 3D Data Explorer formatted data 
+        (Only the Imaginary file)
+  10 => 3D Data Explorer formatted data and position files
+  11 => XCrysden formatted data (norm of wf) and position files
+  12 => NetCDF data and position file
+  13 => XCrysden/VENUS wavefunction (real part of data)
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit inner loop
+  Task            0  has been done !
+
+  Run interpolation again? (1=default=yes,0=no)
+
+ For which k-points? (1 to    3)
+  => Your k-point is :            1
+
+
+ For which band ? (1 to    10)
+  => Your band number is :           10
+
+  => Your spin polarisation number is :            1
+
+ Do you want to analyze a GW wavefunction? (1=yes,0=no)
+ => Your choice is :           0
+
+ Do you want the atomic analysis for this state : 
+ (kpt,band)= (    1   10)? 
+ If yes, enter the radius of the atomic spheres, in bohr 
+ If no, enter 0 
+ You entered ratsph=      7.00000000 Bohr 
+
+ Atomic sphere analysis 
+
+ wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
+ Angular analysis (real spherical harmonics)
+
+ Atom #   1 is  Al, in-sphere charge =  0.458440
+ l=0, charge= 0.000000, m=-l,l splitting: 0.000
+ l=1, charge= 0.307822, m=-l,l splitting: 0.000 0.000 0.308
+ l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
+ l=3, charge= 0.150619, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.056 0.000 0.094
+ l=4, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+
+ Sum of angular contributions for all atomic spheres
+ l=0, charge = 0.000000 proportion = 0.000000
+ l=1, charge = 0.307822 proportion = 0.671454
+ l=2, charge = 0.000000 proportion = 0.000000
+ l=3, charge = 0.150619 proportion = 0.328546
+ l=4, charge = 0.000000 proportion = 0.000000
+
+ Total over all atoms and l=0 to 4 :  0.458440
+
+ Charge in the sphere around each atom 
+ Atom number    1 :  charge =    0.46208348
+
+  3D wave function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit to k-point / band / spin-pol loop
+   1 => 3D formatted real and imaginary data
+        (output the bare 3D data - two column,R,I)
+   2 => 3D formatted real data
+        (output the bare 3D data - one column)
+   3 => 3D formatted imaginary data
+        (output the bare 3D data - one column)
+   4 => 3D indexed real and imaginary data
+        (3D data, preceeded by 3D index)
+   5 => 3D indexed real data
+        (bare 3D data, preceeded by 3D index)
+   6 => 3D indexed imaginary data
+        (bare 3D data, preceeded by 3D index)
+   7 => 3D Data Explorer formatted data 
+        (Real file and Imaginary file)
+   8 => 3D Data Explorer formatted data 
+        (Only the Real file)
+   9 => 3D Data Explorer formatted data 
+        (Only the Imaginary file)
+  10 => 3D Data Explorer formatted data and position files
+  11 => XCrysden formatted data (norm of wf) and position files
+  12 => NetCDF data and position file
+  13 => XCrysden/VENUS wavefunction (real part of data)
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit inner loop
+  Task            0  has been done !
+
+  Run interpolation again? (1=default=yes,0=no)
+
+ For which k-points? (1 to    3)
+  => Your k-point is :            2
+
+
+ For which band ? (1 to    10)
+  => Your band number is :            1
+
+  => Your spin polarisation number is :            1
+
+ Do you want to analyze a GW wavefunction? (1=yes,0=no)
+ => Your choice is :           0
+
+ Do you want the atomic analysis for this state : 
+ (kpt,band)= (    2    1)? 
+ If yes, enter the radius of the atomic spheres, in bohr 
+ If no, enter 0 
+ You entered ratsph=      7.00000000 Bohr 
+
+ Atomic sphere analysis 
+
+ wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
+ Angular analysis (real spherical harmonics)
+
+ Atom #   1 is  Al, in-sphere charge =  0.997321
+ l=0, charge= 0.997055, m=-l,l splitting: 0.997
+ l=1, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000
+ l=2, charge= 0.000214, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
+ l=3, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+ l=4, charge= 0.000051, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+
+ Sum of angular contributions for all atomic spheres
+ l=0, charge = 0.997055 proportion = 0.999734
+ l=1, charge = 0.000000 proportion = 0.000000
+ l=2, charge = 0.000214 proportion = 0.000215
+ l=3, charge = 0.000000 proportion = 0.000000
+ l=4, charge = 0.000051 proportion = 0.000051
+
+ Total over all atoms and l=0 to 4 :  0.997321
+
+ Charge in the sphere around each atom 
+ Atom number    1 :  charge =    0.99743900
+
+  3D wave function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit to k-point / band / spin-pol loop
+   1 => 3D formatted real and imaginary data
+        (output the bare 3D data - two column,R,I)
+   2 => 3D formatted real data
+        (output the bare 3D data - one column)
+   3 => 3D formatted imaginary data
+        (output the bare 3D data - one column)
+   4 => 3D indexed real and imaginary data
+        (3D data, preceeded by 3D index)
+   5 => 3D indexed real data
+        (bare 3D data, preceeded by 3D index)
+   6 => 3D indexed imaginary data
+        (bare 3D data, preceeded by 3D index)
+   7 => 3D Data Explorer formatted data 
+        (Real file and Imaginary file)
+   8 => 3D Data Explorer formatted data 
+        (Only the Real file)
+   9 => 3D Data Explorer formatted data 
+        (Only the Imaginary file)
+  10 => 3D Data Explorer formatted data and position files
+  11 => XCrysden formatted data (norm of wf) and position files
+  12 => NetCDF data and position file
+  13 => XCrysden/VENUS wavefunction (real part of data)
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit inner loop
+  Task            0  has been done !
+
+  Run interpolation again? (1=default=yes,0=no)
+
+ For which k-points? (1 to    3)
+  => Your k-point is :            3
+
+
+ For which band ? (1 to    10)
+  => Your band number is :            1
+
+  => Your spin polarisation number is :            1
+
+ Do you want to analyze a GW wavefunction? (1=yes,0=no)
+ => Your choice is :           0
+
+ Do you want the atomic analysis for this state : 
+ (kpt,band)= (    3    1)? 
+ If yes, enter the radius of the atomic spheres, in bohr 
+ If no, enter 0 
+ You entered ratsph=      7.00000000 Bohr 
+
+ Atomic sphere analysis 
+
+ wffile : kpgmax, bessargmax, nradint =     1.732051E+00    7.620000E+01   762
+ Angular analysis (real spherical harmonics)
+
+ Atom #   1 is  Al, in-sphere charge =  0.998950
+ l=0, charge= 0.998844, m=-l,l splitting: 0.999
+ l=1, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000
+ l=2, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
+ l=3, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+ l=4, charge= 0.000106, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
+
+ Sum of angular contributions for all atomic spheres
+ l=0, charge = 0.998844 proportion = 0.999894
+ l=1, charge = 0.000000 proportion = 0.000000
+ l=2, charge = 0.000000 proportion = 0.000000
+ l=3, charge = 0.000000 proportion = 0.000000
+ l=4, charge = 0.000106 proportion = 0.000106
+
+ Total over all atoms and l=0 to 4 :  0.998950
+
+ Charge in the sphere around each atom 
+ Atom number    1 :  charge =    0.99906787
+
+  3D wave function was read. Ready for further treatment.
+
+ ===========================================================
+
+  What is your choice ? Type:
+   0 => exit to k-point / band / spin-pol loop
+   1 => 3D formatted real and imaginary data
+        (output the bare 3D data - two column,R,I)
+   2 => 3D formatted real data
+        (output the bare 3D data - one column)
+   3 => 3D formatted imaginary data
+        (output the bare 3D data - one column)
+   4 => 3D indexed real and imaginary data
+        (3D data, preceeded by 3D index)
+   5 => 3D indexed real data
+        (bare 3D data, preceeded by 3D index)
+   6 => 3D indexed imaginary data
+        (bare 3D data, preceeded by 3D index)
+   7 => 3D Data Explorer formatted data 
+        (Real file and Imaginary file)
+   8 => 3D Data Explorer formatted data 
+        (Only the Real file)
+   9 => 3D Data Explorer formatted data 
+        (Only the Imaginary file)
+  10 => 3D Data Explorer formatted data and position files
+  11 => XCrysden formatted data (norm of wf) and position files
+  12 => NetCDF data and position file
+  13 => XCrysden/VENUS wavefunction (real part of data)
+  14 => Gaussian/cube wavefunction module
+
+ Your choice is  0
+
+  Exit inner loop
+  Task            0  has been done !
+
+  Run interpolation again? (1=default=yes,0=no)
+-
+- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.8
+
+  Thank you for using me
+

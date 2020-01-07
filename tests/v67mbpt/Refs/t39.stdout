@@ -1,0 +1,203 @@
+
+.Version 8.11.12 of MRGSCR 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+
+.Copyright (C) 1998-2019 ABINIT group . 
+ MRGSCR comes with ABSOLUTELY NO WARRANTY.
+ It is free software, and you are welcome to redistribute it
+ under certain conditions (GNU General Public License,
+ see ~abinit/COPYING or http://www.gnu.org/copyleft/gpl.txt).
+
+ ABINIT is a project of the Universite Catholique de Louvain,
+ Corning Inc. and other collaborators, see ~abinit/doc/developers/contributors.txt .
+ Please read https://docs.abinit.org/theory/acknowledgments for suggested
+ acknowledgments of the ABINIT effort.
+ For more information, see https://www.abinit.org .
+
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h32 )
+  
+>>>  Enter the number of files to merge: 
+>>>  Enter the name of the file to be analyzed: 
+
+ Running single-file mode:
+ Checking the integrity of file: t37o_DS3_SCR
+ reporting the list of q-points that are missing.
+ SCR file: epsilon^-1 , calculated using inclvkb = 2
+ TESTPARTICLE RPA
+ Identifier                       4
+ Kxc kernel                       0
+ Treatment of q-->0 limit         2
+ headform                        80
+ fform                         1004
+ gwcalctyp                        2
+ Number of components             1       1
+ Number of q-points               8
+ Number of q-directions           1
+ Number of frequencies           26
+ Number of bands used            50
+ Dimension of matrix             27
+ Number of planewaves used      331
+ Spectral method                  1
+ Test_type                        0
+ Time-ordering                    1
+ Scissor Energy                 0.000000E+00
+ Spectral smearing              1.000000E-01
+ Complex Imaginary Shift        3.674933E-03
+
+ q-points [r.l.u.]:
+    1    0.000000    0.000000    0.000000
+    2    0.250000    0.000000    0.000000
+    3    0.500000    0.000000    0.000000
+    4    0.250000    0.250000    0.000000
+    5    0.500000    0.250000    0.000000
+    6   -0.250000    0.250000    0.000000
+    7    0.500000    0.500000    0.000000
+    8   -0.250000    0.500000    0.250000
+
+ Frequencies used [eV]:
+  1   0.00   0.00
+  2   1.00   0.00
+  3   2.00   0.00
+  4   3.00   0.00
+  5   4.00   0.00
+  6   5.00   0.00
+  7   6.00   0.00
+  8   7.00   0.00
+  9   8.00   0.00
+ 10   9.00   0.00
+ 11  10.00   0.00
+ 12  11.00   0.00
+ 13  12.00   0.00
+ 14  13.00   0.00
+ 15  14.00   0.00
+ 16  15.00   0.00
+ 17  16.00   0.00
+ 18  17.00   0.00
+ 19  18.00   0.00
+ 20  19.00   0.00
+ 21  20.00   0.00
+ 22   0.00   5.00
+ 23   0.00  12.93
+ 24   0.00  25.52
+ 25   0.00  45.50
+ 26   0.00  77.22
+
+ Checking if the list of q-points is complete. 
+
+ ==== K-mesh for the wavefunctions ====
+ Number of points in the irreducible wedge :     8
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
+     3)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.06250
+     4)     2.50000000E-01  2.50000000E-01  0.00000000E+00       0.09375
+     5)     5.00000000E-01  2.50000000E-01  0.00000000E+00       0.37500
+     6)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.18750
+     7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
+     8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
+
+ Together with 48 symmetry operations and time-reversal symmetry 
+ yields    64 points in the full Brillouin Zone.
+
+
+ ==== Q-mesh for the screening function ====
+ Number of points in the irreducible wedge :     8
+ Reduced coordinates and weights : 
+
+     1)     0.00000000E+00  0.00000000E+00  0.00000000E+00       0.01563
+     2)     2.50000000E-01  0.00000000E+00  0.00000000E+00       0.12500
+     3)     5.00000000E-01  0.00000000E+00  0.00000000E+00       0.06250
+     4)     2.50000000E-01  2.50000000E-01  0.00000000E+00       0.09375
+     5)     5.00000000E-01  2.50000000E-01  0.00000000E+00       0.37500
+     6)    -2.50000000E-01  2.50000000E-01  0.00000000E+00       0.18750
+     7)     5.00000000E-01  5.00000000E-01  0.00000000E+00       0.04688
+     8)    -2.50000000E-01  5.00000000E-01  2.50000000E-01       0.09375
+
+ Together with 48 symmetry operations and time-reversal symmetry 
+ yields    64 points in the full Brillouin Zone.
+
+
+
+.File t37o_DS3_SCR contains a complete list of q-points 
+
+
+ Do you want to recover a subset of q-points    (= 1) ?
+  or extract the contents of the file           (= 2) ?
+  or create dielectric function (SCR file)
+    and/or extract plasmon-pole parameters      (= 3) ?
+  or remove real frequencies                    (= 4) ?
+  or remove imaginary frequencies               (= 5) ?
+  or calculate a model screening                (= 6) ?
+
+ Do you want to remove every other real frequency  (= 1) ?
+  or specify for each real frequency individually  (= 2) ?
+  or remove ALL real frequencies                   (= 3) ?
+
+ Found 26 frequencies.
+ 21 real, and 5 imaginary.
+
+
+ Removing every other real frequency, i.e. every even one.
+ If the total number of frequencies is odd, the first and last one will be kept.
+ If the total number is even, the first one will still be in the final set.
+
+ 11 real frequencies will be kept.
+ Finally, we have 16 frequencies. 11 real, and 5 imaginary.
+>>>  Enter the full name of the final output file: 
+ ==== Header of the final file ====
+ SCR file: epsilon^-1 , calculated using inclvkb = 2
+ TESTPARTICLE RPA
+ Identifier                       4
+ Kxc kernel                       0
+ Treatment of q-->0 limit         2
+ headform                        80
+ fform                         1004
+ gwcalctyp                        2
+ Number of components             1       1
+ Number of q-points               8
+ Number of q-directions           1
+ Number of frequencies           16
+ Number of bands used            50
+ Dimension of matrix             27
+ Number of planewaves used      331
+ Spectral method                  1
+ Test_type                        0
+ Time-ordering                    1
+ Scissor Energy                 0.000000E+00
+ Spectral smearing              1.000000E-01
+ Complex Imaginary Shift        3.674933E-03
+
+ q-points [r.l.u.]:
+    1    0.000000    0.000000    0.000000
+    2    0.250000    0.000000    0.000000
+    3    0.500000    0.000000    0.000000
+    4    0.250000    0.250000    0.000000
+    5    0.500000    0.250000    0.000000
+    6   -0.250000    0.250000    0.000000
+    7    0.500000    0.500000    0.000000
+    8   -0.250000    0.500000    0.250000
+
+ Frequencies used [eV]:
+  1   0.00   0.00
+  2   2.00   0.00
+  3   4.00   0.00
+  4   6.00   0.00
+  5   8.00   0.00
+  6  10.00   0.00
+  7  12.00   0.00
+  8  14.00   0.00
+  9  16.00   0.00
+ 10  18.00   0.00
+ 11  20.00   0.00
+ 12   0.00   5.00
+ 13   0.00  12.93
+ 14   0.00  25.52
+ 15   0.00  45.50
+ 16   0.00  77.22
+
+ ==== Frequencies have been removed successfully === 
+
+-
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
