@@ -145,7 +145,7 @@ contains
  integer :: ierr,ik_bz,ik_ibz,iq_ibz,i,iG1,iG2,iG,iiG,iomega,iomega1,ispinor1,ispinor2,ispinor3,ispinor4
  integer :: lpawu_read,nkibz,nbband,nkbz,nprocs,nqalloc,nqibz,ms1,ms2,ms3,ms4,mbband,nspinor
  integer :: isym_kgw,iik,unt, cp_paral
- complex(dpc) ::ph_mkt
+ complex(dpc) ::ph_mkt,cplx1,cplx2
 
  logical :: wannier=.TRUE.
  logical :: verbose=.FALSE.
@@ -616,6 +616,8 @@ endif
         mbband4=2*wanbz%latom_wan(iatom4)%lcalc(il4)+1
         ABI_ALLOCATE(rhot_q_m1m3,(npw,nqibz,mbband1,mbband3,nspinor,nspinor))
         ABI_ALLOCATE(rhot_q_m2m4,(npw,nqibz,mbband2,mbband4,nspinor,nspinor))
+        rhot_q_m1m3=czero
+        rhot_q_m2m4=czero
         do ispinor1=1,wanbz%nspinor
         do ispinor2=1,wanbz%nspinor
         do ispinor3=1,wanbz%nspinor
@@ -628,11 +630,12 @@ endif
             do iG=1,npw
               ! cp_paral=cp_paral+1
               ! if(mod(cp_paral-1,nprocs)==Wfd%my_rank) then
-                rhot_q_m1m3(iG,iqibz,m1,m3,ispinor1,ispinor3)=&
-                  &rhot1(iG,iqibz)%atom_index(iatom1,iatom3)%position(pos1,pos3)%atom(il1,il3)%matl(m1,m3,spin1,ispinor1,ispinor3)
-          
-                rhot_q_m2m4(iG,iqibz,m2,m4,ispinor2,ispinor4)=&
-                  &rhot1(iG,iqibz)%atom_index(iatom2,iatom4)%position(pos2,pos4)%atom(il2,il4)%matl(m2,m4,spin2,ispinor2,ispinor4)
+              cplx1=rhot1(iG,iqibz)%atom_index(iatom1,iatom3)%position(pos1,pos3)%atom(il1,il3)%matl(m1,m3,spin1,ispinor1,ispinor3)
+              rhot_q_m1m3(iG,iqibz,m1,m3,ispinor1,ispinor3)=cplx1
+              
+              cplx2=rhot1(iG,iqibz)%atom_index(iatom2,iatom4)%position(pos2,pos4)%atom(il2,il4)%matl(m2,m4,spin2,ispinor2,ispinor4)
+              rhot_q_m2m4(iG,iqibz,m2,m4,ispinor2,ispinor4)=cplx2
+                
               !endif
             enddo!iG
             enddo!iqibz

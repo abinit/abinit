@@ -2543,15 +2543,15 @@ end subroutine get_plowannier
    character(len=500) :: msg
    integer :: sym,iatom,spin,ik_bz,iband,ibandc,il,ispinor,im,ik_ibz,isym,itim
    integer ::  at_indx,indx, iat,m1,m2,l
-   real(dp) :: kbz(3)
+   real(dp) :: kbz(3),wtk(kmesh%nbz)
 !*****************************************************************************************
   
-
+   wtk=one
    sym=kmesh%nbz/kmesh%nibz
    call init_plowannier(wanibz%bandf_wan,wanibz%bandi_wan,dtset%plowan_compute,&
      &dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
      &dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
-     &kmesh%bz,dtset%nimage,kmesh%nbz,dtset%nspinor,dtset%nsppol,dtset%wtk,wanbz)
+     &kmesh%bz,dtset%nimage,kmesh%nbz,dtset%nspinor,dtset%nsppol,wtk,wanbz)
   
    write(msg,'(a)')" Reconstruction of the full Brillouin Zone using data.plowann in the IBZ"
    call wrtout(std_out,msg,'COLL');call wrtout(ab_out,msg,'COLL')

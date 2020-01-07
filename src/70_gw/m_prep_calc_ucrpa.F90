@@ -614,8 +614,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 !       end do
 !     end if
 
-     write(msg,'(2(a,i4),a,i3)')' prep_calc_ucrpa : ik_bz ',ik_bz,'/',Kmesh%nbz,' done'
-     call wrtout(std_out,msg,'PERS')
+
      !
      ! * Find the corresponding irreducible q-point.
      call get_BZ_item(Qmesh,iq_bz,qbz,iq_ibz,isym_q,itim_q)
@@ -631,6 +630,9 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
       if (.NOT.has_IBZ_item(Qmesh,qbz,iq_ibz_dump,g0_dump)) then
         cycle
       end if
+      
+      write(msg,'(2(a,i4),a,i3)')' prep_calc_ucrpa : ik_bz ',ik_bz,'/',Kmesh%nbz,' done'
+      call wrtout(std_out,msg,'PERS')
 !      write(6,*) "kkk1p",ik_bz,jk_bz,iq_ibz
 
 !     write(std_out,*)'prep_calc_ucrpa:ik_bz ',ik_bz,'/',Kmesh%nbz,' done by processor ',Wfd%my_rank,"iq_BZ",iq_bz,"iQ_iBZ",iq_ibz
