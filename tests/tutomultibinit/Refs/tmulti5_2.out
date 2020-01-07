@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of MULTIBINIT 
+.Version 8.11.14 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h19 )
+.Starting date : Tue  7 Jan 2020.
+- ( at 13h08 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/tutomultibinit/Input/tmulti5_2.xml
+-/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/xuhe_Multibinit-slc/tests/tutomultibinit/Input/tmulti5_2.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -48,7 +48,10 @@
               spin_sia_k1amp    1.00000E-06
               spin_sia_k1dir    0.00000E+00    0.00000E+00    1.00000E+00
       spin_projection_qpoint    0.00000E+00    0.00000E+00    0.00000E+00
-             spin_init_state           2
+             spin_init_state           3
+       spin_init_orientation    0.00000E+00    0.00000E+00    1.00000E+00
+            spin_init_qpoint    0.00000E+00    0.00000E+00    0.00000E+00
+       spin_init_rotate_axis    1.00000E+00    0.00000E+00    0.00000E+00
         spin_var_temperature           1
       spin_temperature_start        0.00000
         spin_temperature_end      900.00000
@@ -81,7 +84,7 @@ dipdip_range         6         6         6
 ================================================================================
 
 reading spin terms.
- Initial spins set to reference configuration.
+ Initial spins set according to spin_init_* variables.
 Starting temperature dependent calculations. T from   0.00000E+00      K to   9.00000E+02
 ===============================================================================
 Temperature:        0.00000E+00 K.
@@ -2321,10 +2324,10 @@ Measurement run:
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=        248.6  wall=        249.3
+- Proc.   0 individual time (sec): cpu=        247.2  wall=        247.5
 
 ================================================================================
 
-+Total cpu time    248.596  and wall time    249.306 sec
++Total cpu time    247.193  and wall time    247.466 sec
 
  multibinit : the run completed succesfully.
