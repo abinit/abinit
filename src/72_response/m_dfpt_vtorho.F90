@@ -85,9 +85,10 @@ contains
 !!  cgq(2,mpw1*nspinor*mband_mem*mkqmem*nsppol)=pw coefficients of GS wavefunctions at k+q.
 !!  cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
 !!  cplex: if 1, real space 1-order functions on FFT grid are REAL; if 2, COMPLEX
-!!  cprj(natom,nspinor*mband_mem*mkmem*nsppol*usecprj)= wave functions at k
+!TODO distribute cprj over bands mband_mem
+!!  cprj(natom,nspinor*mband*mkmem*nsppol*usecprj)= wave functions at k
 !!              projected with non-local projectors: cprj=<p_i|Cnk>
-!!  cprjq(natom,nspinor*mband_mem*mkqmem*nsppol*usecprj)= wave functions at k+q
+!!  cprjq(natom,nspinor*mband*mkqmem*nsppol*usecprj)= wave functions at k+q
 !!              projected with non-local projectors: cprjq=<p_i|Cnk+q>
 !!  dbl_nnsclo=if 1, will double the value of dtset%nnsclo
 !!  doccde_rbz(mband*nkpt_rbz*nsppol)=derivative of occ_rbz wrt the energy
@@ -283,6 +284,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp),intent(in) :: ylmgr1(mpw1*mk1mem,3+6*((ipert-natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
  integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
  real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt_rbz,2,3)
+!TODO: mband_mem to distribute cprj over bands
  type(pawcprj_type),intent(in) :: cprj (natom,dtset%nspinor*mband*mkmem *nsppol*usecprj)
  type(pawcprj_type),intent(in) :: cprjq(natom,dtset%nspinor*mband*mkqmem*nsppol*usecprj)
  type(pawcprj_type),intent(inout) :: cprj1(natom,dtset%nspinor*mband*mk1mem*nsppol*usecprj)
@@ -400,8 +402,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
 !Prepare RF PAW files
  if (psps%usepaw==1) then
-!TODO MJV: PAW
-   mcprjq=dtset%nspinor*mband_mem*mkqmem*nsppol*usecprj;mcprjq_disk=0
+!TODO MJV: PAW mband_mem
+   mcprjq=dtset%nspinor*mband*mkqmem*nsppol*usecprj;mcprjq_disk=0
  else
    mcprjq=0;mcprjq_disk=0
  end if

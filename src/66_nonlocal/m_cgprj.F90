@@ -396,7 +396,7 @@ contains
 !!  istwfk(nkpt)=option parameter that describes the storage of wfs
 !!  kg(3,mpw*mkmem)=reduced planewave coordinates
 !!  kpt(3,nkpt)=reduced coordinates of k points.
-!!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband*mkmem*nsppol
+!!  mcg=size of wave-functions array (cg) =mpw*nspinor*mband_mem*mkmem*nsppol
 !!  mcprj=size of projected wave-functions array (cprj) =nspinor*mband*mkmem*nsppol
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem=number of k points treated by this node.
@@ -406,6 +406,8 @@ contains
 !!  natom=number of atoms in cell
 !!  nattyp(ntypat)= # atoms of each type
 !!  nband(nkpt*nsppol)=number of bands at this k point for that spin polarization
+!TODO : distribute cprj over bands as well
+!!  mband_mem=max number of bands for this processor (in case of band parallelism)
 !!  ncprj=1st dim. of cprj array (natom if iatom<=0, 1 if iatom>0)
 !!  ngfft(18)=contain all needed information about 3D FFT, see ~ABINIT/Infos/vargs.htm#ngfft
 !!  nkpt=number of k points
@@ -448,6 +450,8 @@ contains
 !scalars
  integer,intent(in) :: choice,iatom,idir,iorder_cprj,mcg,mcprj,mgfft,mkmem,mpsang,mpw
  integer,intent(in) :: natom,ncprj,nkpt,nspinor,nsppol,ntypat,paral_kgb,uncp
+!TODO : distribute cprj over bands as well
+! integer,intent(in) :: mband_mem
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  type(pseudopotential_type),target,intent(in) :: psps
@@ -533,13 +537,15 @@ contains
    spaceComm=mpi_enreg%comm_cell
    spaceComm_fft=xmpi_comm_self
    npband_bandfft=1
-   cg_bandpp=1;cprj_bandpp=1
+   cg_bandpp=1
+   cprj_bandpp=1
    cg_band_distributed=.false.
    cprj_band_distributed=.false.
+   spaceComm_band=xmpi_comm_self
    if (mpi_enreg%paralbd==1) then
+     cg_band_distributed=.true.
+     !cprj_band_distributed=.true.
      spaceComm_band=mpi_enreg%comm_band
-   else
-     spaceComm_band=xmpi_comm_self
    end if
  end if
  if (cg_bandpp/=cprj_bandpp) then

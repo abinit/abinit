@@ -2983,10 +2983,12 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  integer :: wfk_unt, iband, nband_me
  integer :: nband_me_saved, iband_saved, chksymbreak, iout
  integer :: ik_disk
+ integer :: spin_saved, spin_sym
  real(dp) :: ecut_eff,cpu,wall,gflops
  character(len=500) :: msg
  logical :: isirred_kf, foundk
  logical :: needthisk
+ logical :: convnsppol1to2
  logical,parameter :: force_istwfk1=.False.
  type(wfk_t),target :: wfk_disk
  type(crystal_t) :: cryst
@@ -2999,7 +3001,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  integer,allocatable :: ibz2disk(:)
  integer,allocatable :: symrelT(:,:,:)
  integer,allocatable :: rbz2ibz(:,:),kg_disk(:,:),iperm(:),rbz2ibz_sort(:)
- real(dp) :: kf(3),kibz(3)
+ real(dp) :: kf(3),kibz(3), ksym(3)
  real(dp),allocatable :: cg_disk(:,:),eig_disk(:),occ_disk(:),work(:,:,:,:)
 
 ! *************************************************************************
@@ -3017,15 +3019,20 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  call wfk_open_read(wfk_disk,inpath,formeig,iomode,wfk_unt,xmpi_comm_self)
 
 
- ABI_CHECK(wfk_disk%nsppol == dtset%nsppol, "nsppol does not agree with file")
  ABI_CHECK(wfk_disk%mband == dtset%mband, "mband does not agree with file")
+ mband = wfk_disk%mband;
  ABI_CHECK(wfk_disk%nspinor == dtset%nspinor, "nspinor does not agree with file")
+ nspinor = wfk_disk%nspinor
 ! checks: impose each individual nband conserved wrt disk?
 
-! NB: npw can differ as can istwfk
+ ABI_CHECK(wfk_disk%nsppol <= dtset%nsppol, "nsppol can not decrease when reading from disk")
+! ABI_CHECK(wfk_disk%nsppol == dtset%nsppol, "nsppol does not agree with file")
+ nsppol = dtset%nsppol;
+ convnsppol1to2=.false.
+ if (wfk_disk%nsppol < dtset%nsppol) convnsppol1to2 = .true.
 
- mband = wfk_disk%mband; mpw_disk = maxval(wfk_disk%Hdr%npwarr)
- nsppol = wfk_disk%nsppol; nspinor = wfk_disk%nspinor
+! NB: npw can differ as can istwfk
+ mpw_disk = maxval(wfk_disk%Hdr%npwarr)
  ecut_eff = wfk_disk%hdr%ecut_eff ! ecut * dilatmx**2
 
  ABI_MALLOC(kg_disk, (3, mpw_disk))
@@ -3115,7 +3122,10 @@ print *, 'rbz2ibz_sort ', rbz2ibz_sort
    do ikpt=1,nkpt_in
      ik_ibz = rbz2ibz(1,ikpt)
      ik_disk = ibz2disk(ik_ibz)
-     nband_k = wfk_disk%nband(ik_disk,spin)
+     ! conversion of single spin AFM wfk file to full 2 component one in memory
+     spin_sym=spin
+     if (convnsppol1to2) spin_sym=1
+     nband_k = wfk_disk%nband(ik_disk,spin_sym)
      ikg(ikpt) = jj
      ibdeig(ikpt,spin) = kk
      ibdocc(ikpt,spin) = ll
@@ -3133,6 +3143,9 @@ print *, 'icg counts ikpt, spin ', icg(ikpt,spin),ikpt,spin
 
 print *, ' distrb_flags(:,:,:) ', distrb_flags
  do spin=1,nsppol
+   ! for nsppol=1 input and nsppol=2 run, no need to continue the spin loop
+   if (convnsppol1to2 .and. spin > 1) exit
+
    do ik_ibz=1,nkibz
      nband_k = wfk_disk%nband(ik_disk,spin)
      kibz = ebands_ibz%kptns(:,ik_ibz)
@@ -3153,6 +3166,7 @@ print *, ' distrb_flags(:,:,:) ', distrb_flags
        nqst = nqst + 1
 print *, 'iqst, ii, iperm(ii), nqst, ik_ibz, distrb_flags(iperm(ii),:,spin)  ', iqst, ii, iperm(ii), nqst, ik_ibz, distrb_flags(iperm(ii),:,spin)
        if (any(distrb_flags(iperm(ii),:,spin))) needthisk=.true.
+       if (convnsppol1to2 .and. any(distrb_flags(iperm(ii),:,nsppol+1-spin))) needthisk=.true.
      end do ! loop over equivalent k
 
 print *, ' spin, ik_ibz, nqst, needthisk ', spin, ik_ibz, nqst, needthisk
@@ -3168,83 +3182,110 @@ print *, ' spin, ik_ibz, nqst, needthisk ', spin, ik_ibz, nqst, needthisk
        ikf = iperm(iqst+jj)
        ABI_CHECK(ik_ibz == rbz2ibz(1,ikf), "ik_ibz !/ ind qq(1)")
 
-! how many bands in memory for this cpu_
-       nband_me = count(distrb_flags(ikf,:,spin))
-! no need to put wfk at this k for this processor into memory
-       if (nband_me == 0) cycle
-
-! find starting band index
-       do iband = 1, nband_k
-         if (distrb_flags(ikf,iband,spin)) exit
-       end do
-! check bands are contiguous in distrb_flags for this ikf and find first band needed, iband
-       if (.not. distrb_flags(ikf,iband+nband_me-1,spin)) then
-         stop "wfk_read_my_kptbands: bands not contiguous in distrb_flags"
-       end if
-
-! may need to re-read if for a different equivalent k if I need other bands
-       if (iband /= iband_saved .or. nband_me /= nband_me_saved) then
-         if (formeig > 0) then
-           call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_disk,spin,xmpio_single,&
-             kg_k=kg_disk,cg_k=cg_disk,eig_k=eig_disk)
-         else 
-           call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_disk,spin,xmpio_single,&
-             kg_k=kg_disk,cg_k=cg_disk,eig_k=eig_disk,occ_k=occ_disk)
-         end if
-         iband_saved = iband
-         nband_me_saved = nband_me
-       end if
-
-       isym = rbz2ibz(2,ikf); itimrev = rbz2ibz(3,ikf); g0 = rbz2ibz(4:6,ikf) ! IS(k_ibz) + g0 = k_bz
-       isirred_kf = (isym == 1 .and. itimrev == 0 .and. all(g0 == 0))
-
        kf = kptns_in(:,ikf)
        istwf_kf = istwfk_in(ikf)
        npw_kf = npwarr(ikf)
 
+       do spin_sym = 1, nsppol
+print *, 'spin_sym, spin,  nsppol, wfk_disk%nsppol ', spin_sym, spin, nsppol, wfk_disk%nsppol
+         if (.not. convnsppol1to2 .and. spin_sym /= spin) cycle
+
+! how many bands in memory for this cpu_
+         nband_me = count(distrb_flags(ikf,:,spin_sym))
+! no need to put wfk at this k for this processor into memory
+         if (nband_me == 0) cycle
+
+! find starting band index
+         do iband = 1, nband_k
+           if (distrb_flags(ikf,iband,spin_sym)) exit
+         end do
+! check bands are contiguous in distrb_flags for this ikf and find first band needed, iband
+         if (.not. distrb_flags(ikf,iband+nband_me-1,spin_sym)) then
+           stop "wfk_read_my_kptbands: bands not contiguous in distrb_flags"
+         end if
+
+! may need to re-read if for a different equivalent k if I need other bands
+         if (iband /= iband_saved .or. nband_me /= nband_me_saved .or. spin /= spin_saved) then
+print *, 'reading from file for iband, ik_disk, spin', iband, ik_disk, spin
+           if (formeig > 0) then
+             call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_disk,spin,xmpio_single,&
+               kg_k=kg_disk,cg_k=cg_disk,eig_k=eig_disk)
+           else 
+             call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_disk,spin,xmpio_single,&
+               kg_k=kg_disk,cg_k=cg_disk,eig_k=eig_disk,occ_k=occ_disk)
+           end if
+           ! in nsppol=1 nspden=2 case the occupations are doubled
+           if (convnsppol1to2) then
+             occ_disk = half * occ_disk
+           end if
+           iband_saved = iband
+           nband_me_saved = nband_me
+           spin_saved = spin
+         end if
+       
+         ! reset isym for each spin_sym
+         isym = rbz2ibz(2,ikf); itimrev = rbz2ibz(3,ikf); g0 = rbz2ibz(4:6,ikf) ! IS(k_ibz) + g0 = k_bz
+
+         ! complete the spin down wfk with an AFM symop
+         if (spin_sym /= spin) then
+           !  try next symop to find afm operation to get the spin component we want
+           do isym = 1, cryst%nsym
+             if (cryst%symafm(isym) == 1) cycle
+             ksym = matmul(symrelT(:,:,isym), kibz)
+             if (sum(abs(ksym-kf)) < tol8) exit
+           end do
+           ABI_CHECK(isym <= cryst%nsym, "did not find the AFM symop I need to get isppol=2 wave functions from disk")
+
+
+print *, 'using afm symop ', isym, cryst%symafm(isym), cryst%symrel(:,:,isym), cryst%tnons(:,isym)
+         end if
+         isirred_kf = (isym == 1 .and. itimrev == 0 .and. all(g0 == 0) .and. cryst%symafm(isym) == 1)
+print *, 'isirred_kf ', isirred_kf
+
 print *, 'ikf, kf, isym, itimrev, g0, ik_ibz, jj, iqst, ik_ibz, kibz ', &
 &         ikf, kf, isym, itimrev, g0, ik_ibz, jj, iqst, ik_ibz, kibz
-       if (present(eigen)) then
-         eigen(ibdeig(ikf,spin)+1:ibdeig(ikf,spin)+nband_k*(2*nband_k)**formeig) = eig_disk(1:nband_k*(2*nband_k)**formeig)
-       end if
-       if (present(occ)) then
-         occ(ibdocc(ikf,spin)+1:ibdocc(ikf,spin)+nband_k) = occ_disk(1:nband_k)
-       end if
-
-       ! The test on npwarr is needed because we may change istwfk e.g. gamma.
-       if (isirred_kf .and. wfk_disk%hdr%npwarr(ik_disk) == npwarr(ikf)) then
-         if (present(kg)) then
-           kg(:,ikg(ikf)+1:ikg(ikf)+npw_kf) = kg_disk (:,1:npw_kf)
+         if (present(eigen)) then
+           eigen(ibdeig(ikf,spin_sym)+1:ibdeig(ikf,spin_sym)+nband_k*(2*nband_k)**formeig) = eig_disk(1:nband_k*(2*nband_k)**formeig)
          end if
-         cg(:,icg(ikf,spin)+1:icg(ikf,spin)+npw_kf*nband_me*dtset%nspinor) = &
-&           cg_disk(:,1:npw_kf*nband_me*dtset%nspinor)
-       else
-         ! Compute G-sphere centered on kf
-         call get_kg(kf,istwf_kf,ecut_eff,cryst%gmet,npw_kf,kg_kf)
-         ABI_CHECK(npw_kf == npwarr(ikf), "Wrong npw_kf")
-         if (present(kg)) then
-           kg(:,ikg(ikf)+1:ikg(ikf)+npw_kf) = kg_kf (:,1:npw_kf)
+         if (present(occ)) then
+           occ(ibdocc(ikf,spin_sym)+1:ibdocc(ikf,spin_sym)+nband_k) = occ_disk(1:nband_k)
          end if
+  
+         ! The test on npwarr is needed because we may change istwfk e.g. gamma.
+         if (isirred_kf .and. wfk_disk%hdr%npwarr(ik_disk) == npwarr(ikf)) then
+           if (present(kg)) then
+             kg(:,ikg(ikf)+1:ikg(ikf)+npw_kf) = kg_disk (:,1:npw_kf)
+           end if
+           cg(:,icg(ikf,spin_sym)+1:icg(ikf,spin_sym)+npw_kf*nband_me*dtset%nspinor) = &
+&             cg_disk(:,1:npw_kf*nband_me*dtset%nspinor)
+         else
+           ! Compute G-sphere centered on kf
+           call get_kg(kf,istwf_kf,ecut_eff,cryst%gmet,npw_kf,kg_kf)
+           ABI_CHECK(npw_kf == npwarr(ikf), "Wrong npw_kf")
+           if (present(kg)) then
+             kg(:,ikg(ikf)+1:ikg(ikf)+npw_kf) = kg_kf (:,1:npw_kf)
+           end if
 
-         ! FFT box must enclose the two spheres centered on kdisk and kf
-         gmax_disk = maxval(abs(kg_disk(:,1:npw_disk)), dim=2)
-         gmax_kf = maxval(abs(kg_kf), dim=2)
-         do ii=1,3
-           gmax(ii) = max(gmax_disk(ii), gmax_kf(ii))
-         end do
-         gmax = 2*gmax + 1
-         call ngfft_seq(work_ngfft, gmax)
-         ABI_CALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
+           ! FFT box must enclose the two spheres centered on kdisk and kf
+           gmax_disk = maxval(abs(kg_disk(:,1:npw_disk)), dim=2)
+           gmax_kf = maxval(abs(kg_kf), dim=2)
+           do ii=1,3
+             gmax(ii) = max(gmax_disk(ii), gmax_kf(ii))
+           end do
+           gmax = 2*gmax + 1
+           call ngfft_seq(work_ngfft, gmax)
+           ABI_CALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
+  
+           ! Rotate nband_k wavefunctions (output in cg)
+           call cgtk_rotate(cryst,kibz,isym,itimrev,g0,nspinor,nband_me,&
+&            npw_disk,kg_disk,npw_kf,kg_kf,istwf_disk,istwf_kf,cg_disk,&
+&            cg(:,icg(ikf,spin_sym)+1:icg(ikf,spin_sym)+npw_kf*nband_me*dtset%nspinor),&
+&            work_ngfft,work)
 
-         ! Rotate nband_k wavefunctions (output in cg)
-         call cgtk_rotate(cryst,kibz,isym,itimrev,g0,nspinor,nband_me,&
-&          npw_disk,kg_disk,npw_kf,kg_kf,istwf_disk,istwf_kf,cg_disk,&
-&          cg(:,icg(ikf,spin)+1:icg(ikf,spin)+npw_kf*nband_me*dtset%nspinor),&
-&          work_ngfft,work)
-
-         ABI_FREE(work)
-         ABI_FREE(kg_kf)
-       end if
+           ABI_FREE(work)
+           ABI_FREE(kg_kf)
+         end if
+       end do ! spin_sym
      end do ! equiv kpt jj
    end do ! kpt
  end do ! sppol

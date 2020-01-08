@@ -65,7 +65,7 @@ module m_dfpt_loopert
  use m_fft,        only : fourdp
  use m_fftcore,    only : fftcore_set_mixprec
  use m_kg,         only : getcut, getmpw, kpgio, getph
- use m_iowf,       only : outwf
+ use m_iowf,       only : outwf, outresid
  use m_ioarr,      only : read_rhor
  use m_pawang,     only : pawang_type, pawang_init, pawang_free
  use m_pawrad,     only : pawrad_type
@@ -364,6 +364,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
  integer :: mcg_tmp, iband_me, icg_tmp, npw 
  real(dp), allocatable :: cg_tmp(:,:)
+ real(dp), allocatable :: eigen_tmp(:)
+ real(dp), allocatable :: occ_tmp(:)
 
 ! ***********************************************************************
 
@@ -1072,6 +1074,7 @@ print *, 'after kpgio'
 &   nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
 &   dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 &   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
+print *, " eigen0 1075 ", eigen0
    ABI_DEALLOCATE(eigen0)
 
 !  Initialize header, update it with evolving variables
@@ -1083,6 +1086,8 @@ print *, 'after kpgio'
      residm,rprimd,occ_rbz,pawrhoij_pert,xred,dtset%amu_orig(:,1),&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 print *, ' fermie ', fermie
+print *, " ebands_k%eig 1087 ", ebands_k%eig
+print *, " occ_rbz 1087 ", occ_rbz
 
 !  Initialize GS wavefunctions at k
    ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
@@ -1105,20 +1110,24 @@ print *, ' fermie ', fermie
    call wfk_read_my_kptbands(dtfil%fnamewffk, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpt_rbz, nkpt_rbz, npwarr, &
 &            cg, eigen=eigen0, occ=occ_rbz)
+print *, 'eigen0 1111 ', eigen0
+print *, " occ_rbz 1111 ", occ_rbz
   
 !DEBUG
 !mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
    mcg_tmp = mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
    ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
-!TODO MJV: this needs to be a distributed inwffil reading of the whole WFK, reading only my bands!
-   call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
+   ABI_ALLOCATE(eigen_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
+   ABI_ALLOCATE(occ_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
+   call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen_tmp,dtset%exchn2n3d,&
 &   formeig,hdr0,ireadwf0,istwfk_rbz,kg,&
 &   kpt_rbz,dtset%localrdwf,dtset%mband,mcg_tmp,&
 &   mkmem_rbz,mpi_enreg,mpw,nband_rbz,dtset%ngfft,nkpt_rbz,npwarr,&
-&   dtset%nsppol,nsym,occ_rbz,optorth,dtset%symafm,&
+&   dtset%nsppol,nsym,occ_tmp,optorth,dtset%symafm,&
 &   dtset%symrel,dtset%tnons,dtfil%unkg,wffgs,wfftgs,&
 &   dtfil%unwffgs,dtfil%fnamewffk,wvl)
    call timab(144,2,tsec)
+print *, " occ_tmp 1128 ", occ_tmp
 !  Close wffgs%unwff, if it was ever opened (in inwffil)
    if (ireadwf0==1) then
      call WffClose(wffgs,ierr)
@@ -1144,8 +1153,9 @@ print *, 'mpi_enreg%proc_distrb(ikpt,iband,isppol) ', mpi_enreg%proc_distrb(ikpt
          end if
          iband_me = iband_me + 1
 print *, 'is ik ib kpt icg ', isppol, ikpt, iband, kpt_rbz(:,ikpt), icg
-if (sum(abs(cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol4) then
-print *, ' diff in cg ', cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+if (sum(abs(cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol6) then
+print *, ' diff in cg '
+print *, cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
 end if 
          !cg(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
          icg = icg + npw
@@ -1154,6 +1164,8 @@ end if
      end do
    end do
    ABI_DEALLOCATE(cg_tmp)
+   ABI_DEALLOCATE(eigen_tmp)
+   ABI_DEALLOCATE(occ_tmp)
 !ENDDEBUG
 
    call timab(144,2,tsec)
@@ -1170,7 +1182,8 @@ end if
      if (ipert==dtset%natom+1) ncpgr=1
      if (ipert==dtset%natom+3.or.ipert==dtset%natom+4) ncpgr=1
      if (usecprj==1) then
-!TODO MJV: PAW case also needs porting to mband_mem loops
+!TODO : distribute cprj by band as well?
+       !mcprj=dtset%nspinor*dtset%mband_mem*mkmem_rbz*dtset%nsppol
        mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
        ABI_DATATYPE_DEALLOCATE(cprj)
        ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
@@ -1311,7 +1324,7 @@ end if
      call wrtout(std_out, " qpt is Gamma, psi_k+q initialized from psi_k in memory")
      cgq = cg
 print *, ' mpw, mpw1 ', mpw, mpw1
-print *, 'cgq ', cgq
+!print *, 'cgq ', cgq
      eigenq = eigen0
    else
      call timab(144,1,tsec)
@@ -1384,8 +1397,9 @@ print *, ' diff in cgq ', cgq(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
    ABI_DATATYPE_ALLOCATE(cprjq,(0,0))
    if (psps%usepaw==1) then
      if (usecprj==1) then
-!TODO MJV : PAW
        mcprjq=dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
+!TODO : distribute cprj by band as well?
+       !mcprjq=dtset%nspinor*dtset%mband_mem*mkqmem_rbz*dtset%nsppol
        ABI_DATATYPE_DEALLOCATE(cprjq)
        ABI_DATATYPE_ALLOCATE(cprjq,(dtset%natom,mcprjq))
        call pawcprj_alloc(cprjq,0,dimcprj_srt)
@@ -2138,6 +2152,9 @@ print *, ' occkq ', occkq
    end if
 
    if (write_1wfk) then
+     call outresid(dtset,kpt_rbz,dtset%mband, &
+&                nband_rbz,nkpt_rbz,&
+&                dtset%nsppol,resid)
      ! Output 1st-order wavefunctions in file
 print *, 'calling wfk_write_my_kptbands nkpt_rbz spacecomm distrb_flags ', nkpt_rbz, spacecomm, distrb_flags
      call wfk_write_my_kptbands(fiwf1o, dtset, distrb_flags, spacecomm, &

@@ -74,7 +74,7 @@ contains
 !!  cgq(2,mcgq)=array for planewave coefficients of wavefunctions.
 !!  cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
 !!  cplex=1 if rhoaug1 is real, 2 if rhoaug1 is complex
-!TODO MJV: PAW
+!TODO MJV: PAW mband_mem
 !!  cprj(natom,nspinor*mband*mkmem*nsppol*usecprj)= wave functions at k
 !!              projected with non-local projectors: cprj=<p_i|Cnk>
 !!  cprjq(natom,mcprjq)= wave functions at k+q projected with non-local projectors: cprjq=<p_i|Cnk+q>
@@ -155,7 +155,7 @@ contains
 !!  rhoaug1(cplex*n4,n5,n6,nspden)= density in electrons/bohr**3,
 !!   on the augmented fft grid. (cumulative, so input as well as output).
 !!  ==== if (gs_hamkq%usepaw==1) ====
-!TODO MJV: PAW
+!TODO MJV: PAW mband_mem
 !!    cprj1(natom,nspinor*mband*mk1mem*nsppol*usecprj)=
 !!              1st-order wave functions at k,q projected with non-local projectors:
 !!                       cprj1=<p_i|C1nk,q> where p_i is a non-local projector
@@ -219,6 +219,7 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  real(dp),intent(inout) :: ek1_k(nband_k)
  real(dp),intent(out) :: enl0_k(nband_k),enl1_k(nband_k)
  real(dp),intent(out) :: resid_k(nband_k)
+!TODO: PAW distrib bands mband_mem
  type(pawcprj_type),intent(in) :: cprj(natom,nspinor*mband*mkmem*nsppol*gs_hamkq%usecprj)
  type(pawcprj_type),intent(in) :: cprjq(natom,mcprjq)
  type(pawcprj_type),intent(inout) :: cprj1(natom,nspinor*mband*mk1mem*nsppol*gs_hamkq%usecprj)
@@ -298,12 +299,12 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
  if (gs_hamkq%usepaw==1) then
 !  1-Compute all <g|S|Cnk+q>
    igscq=0
-!TODO MJV: PAW
+!TODO MJV: PAW mband_mem
    mgscq=mpw1*nspinor*mband
    ABI_MALLOC_OR_DIE(gscq,(2,mgscq), ierr)
 
    call getgsc(cgq,cprjq,gs_hamkq,gscq,ibgq,icgq,igscq,ikpt,isppol,mcgq,mcprjq,&
-&   mgscq,mpi_enreg,natom,nband_k,npw1_k,dtset%nspinor,select_k=KPRIME_H_KPRIME)
+&   mgscq,mpi_enreg,natom,nband_k,dtset%mband_mem,npw1_k,dtset%nspinor,select_k=KPRIME_H_KPRIME)
 !  2-Initialize additional scalars/arrays
    iorder_cprj=0;iorder_cprj1=0
    dim_dcwf=npw1_k*nspinor;if (ipert==natom+2.or.ipert==natom+10.or.ipert==natom+11) dim_dcwf=0
@@ -361,7 +362,7 @@ unit_me = 6
    if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1.and.ipert/=natom+10.and.ipert/=natom+11) then
      idir0 = idir
      if(ipert==natom+3.or.ipert==natom+4) idir0 =1
-!TODO MJV: PAW
+!TODO MJV: PAW distribute cprj mband_mem
      call pawcprj_get(gs_hamkq%atindx1,cwaveprj0,cprj,natom,iband,ibg,ikpt,iorder_cprj,&
 &     isppol,mband,mkmem,natom,1,nband_k,nspinor,nsppol,dtfil%unpaw,&
 &     mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,&
@@ -566,7 +567,7 @@ write (unit_me, *) 'vtowfk iband, eig1_k ', iband, eig1_k(ii+1:ii+min(10,nband_k
 
 !  PAW: write first-order projected wavefunctions
    if (psps%usepaw==1.and.gs_hamkq%usecprj==1) then
-!TODO MJV: PAW
+!TODO MJV: PAW distribute cprj and cprj1 over bands? mband_mem
      call pawcprj_put(gs_hamkq%atindx,cwaveprj,cprj1,natom,iband,ibg1,ikpt,iorder_cprj1,isppol,&
 &     mband,mk1mem,natom,1,nband_k,gs_hamkq%dimcprj,nspinor,nsppol,dtfil%unpaw1,&
 &     mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,to_be_gathered=.true.)
@@ -777,7 +778,9 @@ subroutine full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_band
 
 !  In the PAW case, also apply correction to projected WF
    if (usepaw==1) then
-     index_cprjq=nspinor*(ibandkq_me-1)+ibgq
+     index_cprjq=nspinor*(ibandkq-1)+ibgq
+!TODO : PAW distrib cprj over bands 
+     !index_cprjq=nspinor*(ibandkq_me-1)+ibgq
      call pawcprj_zaxpby((/factr,facti/),(/one,zero/),cprjq(:,index_cprjq+1:index_cprjq+nspinor),cwaveprj1)
    end if
 
@@ -960,7 +963,9 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,e
 
 !        In the PAW case, also apply correction to projected WF
          if (usepaw==1) then
-           index_cprjq=nspinor*(ibandkq_me-1)+ibgq
+           index_cprjq=nspinor*(ibandkq-1)+ibgq
+!TODO : distribution of PAW cprj over bands 
+           !index_cprjq=nspinor*(ibandkq_me-1)+ibgq
 !TODO : add cwaveprj1_corr here
            call pawcprj_zaxpby((/factr,facti/),(/one,zero/),cprjq(:,index_cprjq+1:index_cprjq+nspinor),cwaveprj1)
          end if

@@ -379,9 +379,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),intent(in) :: ylmgr(mpw*mkmem,3,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
  real(dp),intent(in) :: ylmgr1(mpw1*mk1mem,3+6*((ipert-dtset%natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
  real(dp),intent(in) :: zeff(3,3,dtset%natom)
-!TODO MJV : PAW
- type(pawcprj_type),intent(in) :: cprj(dtset%natom,dtset%nspinor*dtset%mband*mkmem*dtset%nsppol*usecprj)
- type(pawcprj_type),intent(in) :: cprjq(dtset%natom,dtset%nspinor*dtset%mband*mkqmem*dtset%nsppol*usecprj)
+ type(pawcprj_type),intent(in) :: cprj(dtset%natom,dtset%nspinor*dtset%mband_mem*mkmem*dtset%nsppol*usecprj)
+ type(pawcprj_type),intent(in) :: cprjq(dtset%natom,dtset%nspinor*dtset%mband_mem*mkqmem*dtset%nsppol*usecprj)
  type(datafiles_type),intent(in) :: dtfil
  type(hdr_type),intent(inout) :: hdr
  type(pawang_type),intent(in) :: pawang,pawang1
@@ -542,8 +541,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    ABI_ALLOCATE(nhat1,(cplex*nfftf,dtset%nspden))
    nhat1=zero
 !  Projections of 1-st order WF on nl projectors
-!TODO MJV : PAW
-   ABI_DATATYPE_ALLOCATE(cprj1,(dtset%natom,dtset%nspinor*dtset%mband*mk1mem*dtset%nsppol*usecprj))
+   ABI_DATATYPE_ALLOCATE(cprj1,(dtset%natom,dtset%nspinor*dtset%mband_mem*mk1mem*dtset%nsppol*usecprj))
    if (usecprj==1.and.mk1mem/=0) then
      !cprj ordered by atom-type
      ABI_ALLOCATE(dimcprj,(dtset%natom))
@@ -1045,7 +1043,6 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
    if (ipert<dtset%natom+10) then
      optene=1
-!TODO MJV: check for paralbd
      call dfpt_rhotov(cplex,ehart01,ehart1,elpsp1,exc1,elmag1,gsqcut,idir,ipert,&
 &     dtset%ixc,kxc,mpi_enreg,dtset%natom,nfftf,ngfftf,nhat,nhat1,nhat1gr,nhat1grdim,nkxc,&
 &     nspden,n3xccc,nmxc,optene,optres,dtset%qptn,rhog,rhog1,rhor,rhor1,&
@@ -1336,10 +1333,9 @@ print *, 'calling nselt ', ipert
 !MT oct. 2015: this works perfectly on all automatic tests
  if(ipert<=dtset%natom+4)then
    if (psps%usepaw==1.or.dtset%userie==919) then
-!TODO MJV : PAW
      call dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dtfil,dtset,d2lo,d2nl,d2ovl,&
 &     eigenq,eigen0,eigen1,eovl1,gmet,gprimd,gsqcut,idir,indkpt1,indsy1,ipert,irrzon1,istwfk_rbz,&
-&     kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,ncpgr,&
+&     kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,dtset%mband_mem,ncpgr,&
 &     nfftf,ngfftf,nhat,nhat1,nkpt_rbz,nkxc,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,&
 &     nsym1,n3xccc,occkq,occ_rbz,paw_an,paw_an1,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrad,&
 &     pawrhoij,pawrhoij1,pawtab,phnons1,ph1d,ph1df,psps,rhog,rhor,rhor1,rmet,rprimd,symaf1,symrc1,&
@@ -3645,9 +3641,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  real(dp),intent(out) :: eigen1(2*mband*mband*nkpt_rbz*nsppol)
  real(dp),intent(out) :: nhatfermi(:,:)
  real(dp),intent(out) :: rhorfermi(cplex*nfftf,nspden)
-!TODO MJV : PAW
- type(pawcprj_type),intent(in) :: cprj (natom,dtset%nspinor*mband*mkmem *nsppol*usecprj)
- type(pawcprj_type),intent(in) :: cprjq(natom,dtset%nspinor*mband*mkqmem*nsppol*usecprj)
+ type(pawcprj_type),intent(in) :: cprj (natom,dtset%nspinor*mband_mem*mkmem *nsppol*usecprj)
+ type(pawcprj_type),intent(in) :: cprjq(natom,dtset%nspinor*mband_mem*mkqmem*nsppol*usecprj)
  type(paw_ij_type),intent(in) :: paw_ij(my_natom*psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*psps%usepaw)
  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*psps%usepaw)
@@ -3664,6 +3659,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  integer :: mbd2kpsp,mcgq,mcgq_disk,mcprjq,mcprjq_disk
  integer :: me,n1,n2,n3,n4,n5,n6,nband_k,nkpg,nkpg1,npw1_k,npw_k,nspden_rhoij
  integer :: optfr,qphase_rhoij,spaceworld
+ integer :: nband_me
  logical :: paral_atom,qne0
  real(dp) :: arg,fe1norm,invfe1norm,wtk_k
  type(gs_hamiltonian_type) :: gs_hamkq
@@ -3734,8 +3730,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
 !Prepare RF PAW files for reading and writing if mkmem, mkqmem or mk1mem==0
  if (psps%usepaw==1) then
-!TODO MJV : PAW
-   mcprjq=dtset%nspinor*mband*mkqmem*nsppol*usecprj;mcprjq_disk=0
+   mcprjq=dtset%nspinor*mband_mem*mkqmem*nsppol*usecprj;mcprjq_disk=0
  else
    mcprjq=0;mcprjq_disk=0
  end if
@@ -4018,15 +4013,16 @@ print *, ' cycle, nband ', proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_
      bdtot_index=bdtot_index+nband_k
      bd2tot_index=bd2tot_index+2*nband_k**2
 
+     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
 !    Shift array memory
      if (mkmem/=0) then
-       ibg=ibg+nband_k
-       icg=icg+npw_k*dtset%nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+       ibg=ibg+nband_me
+       icg=icg+npw_k*dtset%nspinor*nband_me
        ikg=ikg+npw_k
      end if
      if (mkqmem/=0) then
-       ibgq=ibgq+dtset%nspinor*nband_k
-       icgq=icgq+npw1_k*dtset%nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+       ibgq=ibgq+dtset%nspinor*nband_me
+       icgq=icgq+npw1_k*dtset%nspinor*nband_me
      end if
      if (mk1mem/=0) then
        ikg1=ikg1+npw1_k
@@ -4219,10 +4215,9 @@ end subroutine dfpt_rhofermi
 !!  cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)=planewave coefficients of wavefunctions
 !!  cgq(2,mcgq)=array for planewave coefficients of wavefunctions.
 !!  cplex=1 if rhoaug is real, 2 if rhoaug is complex
-!TODO MJV : PAW
-!!  cprj(natom,nspinor*mband*mkmem*nsppol*usecprj)= wave functions at k
+!!  cprj(natom,nspinor*mband_mem*mkmem*nsppol*usecprj)= wave functions at k
 !!              projected with non-local projectors: cprj=<p_i|Cnk>
-!!  cprjq(natom,nspinor*mband*mkqmem*nsppol*usecprj)= wave functions at k+q
+!!  cprjq(natom,nspinor*mband_mem*mkqmem*nsppol*usecprj)= wave functions at k+q
 !!              projected with non-local projectors: cprjq=<p_i|Cnk+q>
 !!  dtfil <type(datafiles_type)>=variables related to files
 !!  eig0_k(nband_k)=GS eigenvalues at k (hartree)
@@ -4304,8 +4299,9 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
  real(dp),intent(inout) :: eig1_k(2*nband_k**2)
  real(dp),intent(out) :: fe1fixed_k(nband_k)
  real(dp),intent(out) :: fe1norm_k(nband_k)
-!TODO MJV : PAW
- type(pawcprj_type),intent(in) :: cprj(gs_hamkq%natom,nspinor*mband_mem*mkmem*nsppol*gs_hamkq%usecprj)
+ type(pawcprj_type),intent(in) :: cprj(gs_hamkq%natom,nspinor*mband*mkmem*nsppol*gs_hamkq%usecprj)
+!TODO distribute cprj over bands
+ !type(pawcprj_type),intent(in) :: cprj(gs_hamkq%natom,nspinor*mband_mem*mkmem*nsppol*gs_hamkq%usecprj)
  type(pawcprj_type),intent(in) :: cprjq(gs_hamkq%natom,mcprjq)
  type(pawrhoij_type),intent(inout) :: pawrhoijfermi(gs_hamkq%natom*gs_hamkq%usepaw)
 
@@ -4399,7 +4395,7 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 
      if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
 !      Read PAW ground state projected WF (cprj)
-!TODO MJV: PAW
+! TODO: has mpi information and could work on distributed cprj array
        call pawcprj_get(gs_hamkq%atindx1,cwaveprj0,cprj,gs_hamkq%natom,iband,ibg,ikpt,iorder_cprj,&
 &       isppol,mband,mkmem,gs_hamkq%natom,1,nband_k,nspinor,nsppol,dtfil%unpaw,&
 &       mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,&
@@ -4411,8 +4407,9 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
      cwaveq(:,1:npw_k*nspinor)=wtband*cgq(:,1+indx:npw_k*nspinor+indx)
      if (gs_hamkq%usepaw==1.and.gs_hamkq%usecprj==1) then
 !      Read PAW ground state projected WF (cprj)
-!TODO MJV: PAW
        indx=nspinor*(iband-1)+ibgq
+! TODO: cprj distributed -> iband_me
+       !indx=nspinor*(iband-1)+ibgq
        call pawcprj_copy(cprjq(:,1+indx:nspinor+indx),cwaveprjq)
        call pawcprj_axpby(zero,wtband,cwaveprj_tmp,cwaveprjq)
      end if

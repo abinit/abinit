@@ -42,7 +42,7 @@ module m_berryphase_new
  use m_fftcore,      only : kpgsph
  use m_geometry,     only : xred2xcart, metric
  use m_io_tools,     only : open_file
- use m_iowf,         only : outwf
+ use m_iowf,         only : outwf, outresid
  use m_kg,           only : getph
  use m_kpts,         only : listkk, smpbz
  use m_mpinfo,       only : proc_distrb_cycle
@@ -1116,10 +1116,14 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
      ABI_ALLOCATE(resid,(mband*nkpt*nsppol))
      resid(:) = zero
 
+     call outresid(dtset,dtset%kptns,mband,&
+&                dtset%nband,nkpt,&
+&                nsppol,resid)
+
      call outwf(cg1,dtset,psps,eig_dum,fiwf1o,hdr,kg,dtset%kptns,&
 &     mband,mcg,mkmem,mpi_enreg,mpw,natom,dtset%nband,&
 &     nkpt,npwarr,nsppol,&
-&     occ_dum,resid,response,dtfil%unwff2,wfs,wvl)
+&     occ_dum,response,dtfil%unwff2,wfs,wvl)
 
      ABI_DEALLOCATE(resid)
    end if  ! ddkflag == 1

@@ -43,7 +43,7 @@ module m_dfpt_nstwf
  use m_io_tools, only : file_exists
  use m_geometry, only : stresssym
  use m_dynmat,   only : dfpt_sygra
- use m_mpinfo,   only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle, proc_distrb_band
+ use m_mpinfo,   only : destroy_mpi_enreg, initmpi_seq, proc_distrb_cycle, proc_distrb_band, proc_distrb_nband
  use m_hdr,      only : hdr_skip
  use m_occ,      only : occeig
  use m_pawang,   only : pawang_type
@@ -108,9 +108,9 @@ contains
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions at k
-!!  cgq(2,mpw1*nspinor*mband*mkqmem*nsppol)=pw coefficients of GS wavefunctions at k+q.
-!!  cg1(2,mpw1*nspinor*mband*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
+!!  cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)=planewave coefficients of wavefunctions at k
+!!  cgq(2,mpw1*nspinor*mband_mem*mkqmem*nsppol)=pw coefficients of GS wavefunctions at k+q.
+!!  cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
 !!  cplex=if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
 !!  cprj(natom,nspinor*mband*mkmem*nsppol*usecprj)= wave functions at k projected with non-local projectors
 !!  cprjq(natom,nspinor*mband*mkqmem*nsppol*usecprj)= wave functions at k+q projected with non-local projectors
@@ -144,6 +144,7 @@ contains
 !!  mpw1=maximum dimensioned size of npw for wfs at k+q (also for 1-order wfs).
 !!  nattyp(ntypat)= # atoms of each type.
 !!  nband_rbz(nkpt_rbz*nsppol)=number of bands at each RF k point for each spin
+!!  mband_mem=number of bands per processor
 !!  ncpgr=number of gradients stored in cprj array (cprj=<p_i|Cnk>)
 !!  nfftf=(effective) number of FFT grid points (for this proc) for the "fine" grid
 !!  ngfftf(1:18)=integer array with FFT box dimensions and other for the "fine" grid
@@ -235,7 +236,7 @@ contains
 subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dtfil,dtset,d2lo,d2nl,d2ovl,&
 &                  eigenq,eigen0,eigen1,eovl1,gmet,gprimd,gsqcut,idir,indkpt1,indsy1,ipert,irrzon1,istwfk_rbz,&
 &                  kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,&
-&                  mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,ncpgr,nfftf,ngfftf,nhat,nhat1,&
+&                  mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,mband_mem,ncpgr,nfftf,ngfftf,nhat,nhat1,&
 &                  nkpt_rbz,nkxc,npwarr,npwar1,nspden,nspinor,nsppol,nsym1,n3xccc,occkq,occ_rbz,&
 &                  paw_an,paw_an1,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoij,&
 &                  pawrhoij1,pawtab,phnons1,ph1d,ph1df,psps,rhog,rhor,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
@@ -247,6 +248,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer,intent(in) :: cplex,idir,ipert,mgfftf,mkmem,mkqmem,mk1mem,mpert,mpw,mpw1
  integer,intent(in) :: ncpgr,nfftf,nkpt_rbz,nkxc,nspden,nspinor,nsppol,nsym1
  integer,intent(in) :: n3xccc,usecprj,usepaw,usexcnhat,useylmgr1
+ integer,intent(in) :: mband_mem
  real(dp),intent(in) :: gsqcut,ucvol
  real(dp),intent(out) :: eovl1
  type(datafiles_type),intent(in) :: dtfil
@@ -263,9 +265,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer,intent(in) :: ngfftf(18),npwarr(nkpt_rbz),npwar1(nkpt_rbz)
  integer,intent(in) :: symaf1(nsym1),symrc1(3,3,nsym1),symrl1(3,3,nsym1)
  integer,intent(inout) :: blkflg(3,mpert,3,mpert)
- real(dp),intent(in) :: cg(2,mpw*nspinor*dtset%mband*mkmem*nsppol)
- real(dp),intent(in) :: cgq(2,mpw1*nspinor*dtset%mband*mkqmem*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*nspinor*dtset%mband*mk1mem*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*nspinor*dtset%mband_mem*mkmem*nsppol)
+ real(dp),intent(in) :: cgq(2,mpw1*nspinor*dtset%mband_mem*mkqmem*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*nspinor*dtset%mband_mem*mk1mem*nsppol)
  real(dp),intent(in) :: docckqde(dtset%mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: doccde_rbz(dtset%mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: eigenq(dtset%mband*nkpt_rbz*nsppol),eigen0(dtset%mband*nkpt_rbz*nsppol)
@@ -310,6 +312,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  integer :: nfftot,nkpg,nkpg1,nkpt_me,npw_,npw_k,npw1_k,nspden_rhoij
  integer :: nvh1,nvxc1,nzlmopt_ipert,nzlmopt_ipert1,optlocal,optnl
  integer :: option,opt_gvnlx1,qphase_rhoij,sij_opt,spaceworld,usevnl,wfcorr,ik_ddk
+ integer :: nband_me, iband_me
  real(dp) :: arg,doti,dotr,dot1i,dot1r,dot2i,dot2r,dot3i,dot3r,elfd_fact,invocc,lambda,wtk_k
  logical :: force_recompute,has_dcwf,has_dcwf2,has_drho,has_ddk_file
  logical :: is_metal,is_metal_or_qne0,need_ddk_file,need_pawij10
@@ -423,11 +426,12 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        if (.not.(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me))) nkpt_me=nkpt_me+1
      end do
    end do
+   nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
  end if
 
 !Sizes for WF at k+q
- mcgq=mpw1*nspinor*dtset%mband*mkqmem*nsppol
- mcprjq=nspinor*dtset%mband*mkqmem*nsppol*usecprj
+ mcgq=mpw1*nspinor*dtset%mband_mem*mkqmem*nsppol
+ mcprjq=nspinor*dtset%mband_mem*mkqmem*nsppol*usecprj
 
 !Check ddk files (needed to compute electric field perturbations)
  ddkfil(:)=0
@@ -1038,16 +1042,18 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        end if
 
 !      LOOP OVER BANDS
+       iband_me = 0
        do iband=1,nband_k
 
 !        Skip band if not to be treated by this proc
          if (xmpi_paral==1) then
            if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me) cycle
          end if
+         iband_me = iband_me + 1
 
 !        Extract GS wavefunctions
          if (need_wfk) then
-           cwave0(:,:)=cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg)
+           cwave0(:,:)=cg(:,1+(iband_me-1)*npw_k*nspinor+icg:iband_me*npw_k*nspinor+icg)
            if (usecprj==1) then
              call pawcprj_get(gs_hamkq%atindx1,cwaveprj0,cprj,dtset%natom,iband,ibg,ikpt,iorder_cprj,&
 &             isppol,dtset%mband,mkmem,dtset%natom,1,nband_k,nspinor,nsppol,dtfil%unpaw,&
@@ -1057,7 +1063,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 
 !        Extract 1st-order wavefunctions
          if (need_wf1) then
-           cwavef(:,:)=cg1(:,1+(iband-1)*npw1_k*nspinor+icg1:iband*npw1_k*nspinor+icg1)
+           cwavef(:,:)=cg1(:,1+(iband_me-1)*npw1_k*nspinor+icg1:iband_me*npw1_k*nspinor+icg1)
          end if
 
 !        LOOP OVER PERTURBATION DIRECTIONS
@@ -1226,6 +1232,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !            Compute -Sum_{j}[<u0_k+q_j|H^(j2)-Eps_k_i.S^(j2)|u0_k_i>.|u0_k+q_j>
              call projbd(cgq,gvnlx1,-1,icgq,0,istwf_k,mcgq,0,nband_k,npw1_k,nspinor,&
 &             dum1,ch1c(:,1:nband_k,iband,ikpt_me),option,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft)
+!TODO MJV
              if (has_dcwf) then
                if (ipert==ipert1.and.idir==idir1) gvnlx1=gvnlx1-gh1
                dotr=zero;doti=zero
@@ -1257,6 +1264,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
              ABI_ALLOCATE(gvnlx1,(2,npw1_k*nspinor))
              dotr=zero;doti=zero
              invocc=zero ; if (abs(occ_k(iband))>tol8) invocc=two/occ_k(iband)
+!TODO MJV: this loop should also be parallelized
              do jband=1,nband_k
 !              Computation of cs1c=<u0_k_i|S^(j1)|u0_k+q_j>
                if ((ipert==ipert1.and.idir==idir1).or.(abs(occ_k(iband))>tol8)) then
@@ -1345,6 +1353,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                ABI_ALLOCATE(dcwavef,(2,npw1_k*nspinor))
                ABI_DATATYPE_ALLOCATE(dcwaveprj,(dtset%natom,nspinor))
                call pawcprj_alloc(dcwaveprj,0,gs_hamkq%dimcprj)
+!TODO MJV: PAW paral band distribution
                call getdc1(cgq,cprjq,dcwavef,dcwaveprj,ibgq,icgq,istwf_k,mcgq,&
 &               mcprjq,mpi_enreg,dtset%natom,nband_k,npw1_k,nspinor,1,gs1)
 
@@ -1423,16 +1432,16 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        bd2tot_index=bd2tot_index+2*nband_k**2
        if (mkmem/=0) then
          ibg=ibg+nspinor*nband_k
-         icg=icg+npw_k*nspinor*nband_k
+         icg=icg+npw_k*nspinor*nband_me
          ikg=ikg+npw_k
        end if
        if (mkqmem/=0) then
          ibgq=ibgq+nspinor*nband_k
-         icgq=icgq+npw1_k*nspinor*nband_k
+         icgq=icgq+npw1_k*nspinor*nband_me
        end if
        if (mk1mem/=0) then
          ibg1=ibg1+nspinor*nband_k
-         icg1=icg1+npw1_k*nspinor*nband_k
+         icg1=icg1+npw1_k*nspinor*nband_me
          ikg1=ikg1+npw1_k
        end if
 

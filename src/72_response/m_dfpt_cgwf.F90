@@ -1090,7 +1090,7 @@ print *, 'skipping for resid'
      ! A negative residual will be the signal of this problem ...
      resid=-two
      if (prtvol > 0) call wrtout(std_out,' dfpt_cgwf: problem of minimisation (likely metallic), set resid to -2')
-   else if (d2edt2 > tol12) then
+   else if (d2edt2 > 1.d-40) then
      ! Here, the value of theta that gives the minimum
      theta=-dedt/d2edt2
      !write(std_out,*)' dfpt_cgwf: dedt,d2edt2=',dedt,d2edt2

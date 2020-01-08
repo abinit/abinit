@@ -83,7 +83,7 @@ module m_gstate
  use m_scfcv,            only : scfcv_t, scfcv_init, scfcv_destroy, scfcv_run
  use m_dtfil,            only : dtfil_init_time
  use m_jellium,          only : jellium
- use m_iowf,             only : outwf
+ use m_iowf,             only : outwf, outresid
  use m_outqmc,           only : outqmc
  use m_ioarr,            only : ioarr,read_rhor
  use m_inwffil,          only : inwffil
@@ -1401,10 +1401,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  hdr%rprimd=rprimd_for_kg
 
  if (write_wfk) then
+   call outresid(dtset,dtset%kptns,dtset%mband,&
+&                dtset%nband,dtset%nkpt,&
+&                dtset%nsppol,resid)
+
    call outwf(cg,dtset,psps,eigen,filnam,hdr,kg,dtset%kptns,&
     dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%natom,&
     dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,&
-    occ,resid,response,dtfil%unwff2,wvl%wfs,wvl%descr)
+    occ,response,dtfil%unwff2,wvl%wfs,wvl%descr)
 
    ! Generate WFK with k-mesh from WFK containing list of k-points inside pockets.
    if (dtset%getkerange_path /= ABI_NOFILE) then

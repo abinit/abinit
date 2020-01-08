@@ -56,10 +56,114 @@ MODULE m_iowf
  private
 
  public :: outwf
+ public :: outresid
 
 !!***
 
 CONTAINS  !====================================================================================================
+!!***
+
+!!****f* m_iowf/outresid
+!! NAME
+!! outresid
+!!
+!! FUNCTION
+!!  - Compute the maximal residual and eventually print it
+!!
+!! INPUTS
+!!  dtset <type(dataset_type)>=all input variables for this dataset
+!!  kptns(3,nkpt)=k points in terms of recip primitive translations
+!!  mband=maximum number of bands
+!!  nband=number of bands
+!!  nkpt=number of k points
+!!  nsppol=1 for unpolarized, 2 for spin-polarized
+!!  resid(mband*nkpt*nsppol)=squared residuals for each band and k point
+!!   where resid(n,k)=|<C(n,k)|(H-e(n,k))|C(n,k)>|^2 for the ground state
+!!
+!! OUTPUT
+!!  (only writing)
+!!
+!! NOTES
+!!
+!! PARENTS
+!!      berryphase_new,dfpt_looppert,gstate
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine outresid(dtset,kptns,mband,&
+&                nband,nkpt,&
+&                nsppol,resid)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: mband,nkpt,nsppol
+ type(dataset_type),intent(in) :: dtset
+!arrays
+ integer, intent(in) :: nband(nkpt*nsppol)
+ real(dp), intent(in) :: kptns(3,nkpt)
+ real(dp), intent(in) :: resid(mband*nkpt*nsppol)
+
+!Local variables-------------------------------
+ integer,parameter :: nkpt_max=50
+ integer :: band_index,spin,ikpt,ibdkpt,nkpt_eff,nband_k,nband_eff
+ integer :: iband, ii
+ real(dp) :: resims,residm, residk
+ character(len=500) :: msg
+
+!Compute mean square and maximum residual over all bands and k points and spins
+!(disregard k point weights and occupation numbers here)
+ band_index=sum(nband(1:nkpt*nsppol))
+ resims=sum(resid(1:band_index))/dble(band_index)
+
+!Find largest residual over bands, k points, and spins, except for nbdbuf highest bands
+!Already AVAILABLE in hdr ?!
+ ibdkpt=1
+ residm=zero
+ do spin=1,nsppol
+   do ikpt=1,nkpt
+     nband_k=nband(ikpt+(spin-1)*nkpt)
+     nband_eff=max(1,nband_k-dtset%nbdbuf)
+     residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
+     ibdkpt=ibdkpt+nband_k
+   end do
+ end do
+
+ write(msg,'(a,2p,e12.4,a,e12.4)')' Mean square residual over all n,k,spin= ',resims,'; max=',residm
+ call wrtout([std_out, ab_out], msg)
+
+ band_index=0
+ nkpt_eff=nkpt
+ if( (dtset%prtvol==0 .or. dtset%prtvol==1) .and. nkpt_eff>nkpt_max ) nkpt_eff=nkpt_max
+
+!Loop over spin again
+ do spin=1,nsppol
+!  Give (squared) residuals for all bands at each k
+   do ikpt=1,nkpt
+     nband_k=nband(ikpt+(spin-1)*nkpt)
+!    Will not print all residuals when prtvol=0 or 1
+     if(ikpt<=nkpt_eff)then
+!      Find largest residual over all bands for given k point
+       residk=maxval(resid(1+band_index:nband_k+band_index))
+       write(msg,'(1x,3f8.4,3x,i2,1p,e13.5,a)')kptns(1:3,ikpt),spin,residk,' kpt; spin; max resid(k); each band:'
+       if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,msg,'COLL')
+       do ii=0,(nband_k-1)/8
+         write(msg,'(1x,1p,8e9.2)')(resid(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
+         if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
+         call wrtout(std_out,msg,'COLL')
+       end do
+     else if(ikpt==nkpt_eff+1)then
+       write(msg,'(2a)')' outwf : prtvol=0 or 1, do not print more k-points.',ch10
+       if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,msg,'COLL')
+     end if
+     band_index=band_index+nband_k
+   end do
+ end do
+
+end subroutine outresid
 !!***
 
 !!****f* m_iowf/outwf
@@ -95,8 +199,6 @@ CONTAINS  !=====================================================================
 !!  nsppol=1 for unpolarized, 2 for spin-polarized
 !!  nstep=desired number of electron iteration steps
 !!  occ(mband*nkpt*nsppol)=occupations for all bands at each k point
-!!  resid(mband*nkpt*nsppol)=squared residuals for each band and k point
-!!   where resid(n,k)=|<C(n,k)|(H-e(n,k))|C(n,k)>|^2 for the ground state
 !!  response: if == 0, GS wavefunctions , if == 1, RF wavefunctions
 !!  unwff2=unit for output of wavefunction
 !!  wfs <type(wvl_projector_type)>=wavefunctions information for wavelets.
@@ -117,7 +219,7 @@ CONTAINS  !=====================================================================
 
 subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 &                mpi_enreg,mpw,natom,nband,nkpt,npwarr,&
-&                nsppol,occ,resid,response,unwff2,&
+&                nsppol,occ,response,unwff2,&
 &                wfs,wvl)
 
 !Arguments ------------------------------------
@@ -135,19 +237,17 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  integer, intent(in) :: kg(3,mpw*mkmem),nband(nkpt*nsppol),npwarr(nkpt)
  real(dp), intent(inout) :: cg(2,mcg)
  real(dp), intent(in) :: eigen((2*mband)**response*mband*nkpt*nsppol),kptns(3,nkpt)
- real(dp), intent(in) :: occ(mband*nkpt*nsppol),resid(mband*nkpt*nsppol)
+ real(dp), intent(in) :: occ(mband*nkpt*nsppol)
 
 !Local variables-------------------------------
- integer,parameter :: nkpt_max=50
- integer :: iomode,action,band_index,fform,formeig,iband,ibdkpt,icg,iat,iproj
- integer :: ierr,ii,ikg,ikpt,spin,master,mcg_disk,me,me0,my_nspinor
- integer :: nband_k,nkpt_eff,nmaster,npw_k,option,rdwr,sender,source !npwtot_k,
- integer :: nband_eff
+ integer :: iomode,action,band_index,fform,formeig,iband,icg,iat,iproj
+ integer :: ierr,ikg,ikpt,spin,master,mcg_disk,me,me0,my_nspinor
+ integer :: nband_k,nmaster,npw_k,option,rdwr,sender,source !npwtot_k,
  integer :: spaceComm,spaceComm_io,spacecomsender,spaceWorld,sread,sskip,tim_rwwf,xfdim2
 #ifdef HAVE_MPI
  integer :: ipwnbd
 #endif
- real(dp) :: residk,residm,resims,cpu,wall,gflops
+ real(dp) :: cpu,wall,gflops
  logical :: ihave_data,iwrite,iam_master,done
  character(len=500) :: msg
  type(wffile_type) :: wff2
@@ -224,56 +324,6 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  iwrite=iam_master
  sender=-1
 
-!Compute mean square and maximum residual over all bands and k points and spins
-!(disregard k point weights and occupation numbers here)
- band_index=sum(nband(1:nkpt*nsppol))
- resims=sum(resid(1:band_index))/dble(band_index)
-
-!Find largest residual over bands, k points, and spins, except for nbdbuf highest bands
-!Already AVAILABLE in hdr ?!
- ibdkpt=1
- residm=zero
- do spin=1,nsppol
-   do ikpt=1,nkpt
-     nband_k=nband(ikpt+(spin-1)*nkpt)
-     nband_eff=max(1,nband_k-dtset%nbdbuf)
-     residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
-     ibdkpt=ibdkpt+nband_k
-   end do
- end do
-
- write(msg,'(a,2p,e12.4,a,e12.4)')' Mean square residual over all n,k,spin= ',resims,'; max=',residm
- call wrtout([std_out, ab_out], msg)
-
- band_index=0
- nkpt_eff=nkpt
- if( (dtset%prtvol==0 .or. dtset%prtvol==1) .and. nkpt_eff>nkpt_max ) nkpt_eff=nkpt_max
-
-!Loop over spin again
- do spin=1,nsppol
-!  Give (squared) residuals for all bands at each k
-   do ikpt=1,nkpt
-     nband_k=nband(ikpt+(spin-1)*nkpt)
-!    Will not print all residuals when prtvol=0 or 1
-     if(ikpt<=nkpt_eff)then
-!      Find largest residual over all bands for given k point
-       residk=maxval(resid(1+band_index:nband_k+band_index))
-       write(msg,'(1x,3f8.4,3x,i2,1p,e13.5,a)')kptns(1:3,ikpt),spin,residk,' kpt; spin; max resid(k); each band:'
-       if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
-       call wrtout(std_out,msg,'COLL')
-       do ii=0,(nband_k-1)/8
-         write(msg,'(1x,1p,8e9.2)')(resid(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
-         if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
-         call wrtout(std_out,msg,'COLL')
-       end do
-     else if(ikpt==nkpt_eff+1)then
-       write(msg,'(2a)')' outwf : prtvol=0 or 1, do not print more k-points.',ch10
-       if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
-       call wrtout(std_out,msg,'COLL')
-     end if
-     band_index=band_index+nband_k
-   end do
- end do
 
 !Will write the wavefunction file only when nstep>0
 !MT 07 2015: writing reactivated when nstep=0

@@ -1358,12 +1358,13 @@ end subroutine getghc_mGGA
 !! SOURCE
 
 subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
-&                 mcg,mcprj,mgsc,mpi_enreg,natom,nband,npw_k,nspinor,select_k)
+&                 mcg,mcprj,mgsc,mpi_enreg,natom,nband,mband_mem,npw_k,nspinor,select_k)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ibg,icg,igsc,ikpt,isppol,mcg,mcprj
  integer,intent(in) :: mgsc,natom,nband,npw_k,nspinor
+ integer,intent(in) :: mband_mem
  integer,intent(in),optional :: select_k
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout),target :: gs_ham
@@ -1430,7 +1431,7 @@ subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
    if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me.and.nband>0) then
      gsc(:,1+index_gsc:npw_k*my_nspinor+index_gsc)=zero
      index_cprj=index_cprj+my_nspinor
-     index_cg=index_cg+npw_k*my_nspinor
+     !index_cg=index_cg+npw_k*my_nspinor
      index_gsc=index_gsc+npw_k*my_nspinor
      cycle
    end if
