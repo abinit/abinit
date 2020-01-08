@@ -1358,13 +1358,14 @@ end subroutine getghc_mGGA
 !! SOURCE
 
 subroutine getgsc(cg,cprj,gs_ham,gsc,ibg,icg,igsc,ikpt,isppol,&
-&                 mcg,mcprj,mgsc,mpi_enreg,natom,nband,mband_mem,npw_k,nspinor,select_k)
+&                 mcg,mcprj,mgsc,mpi_enreg,natom,nband,npw_k,nspinor,select_k)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ibg,icg,igsc,ikpt,isppol,mcg,mcprj
  integer,intent(in) :: mgsc,natom,nband,npw_k,nspinor
- integer,intent(in) :: mband_mem
+!TODO : may be needed to distribute cprj over band procs
+! integer,intent(in) :: mband_mem
  integer,intent(in),optional :: select_k
  type(MPI_type),intent(in) :: mpi_enreg
  type(gs_hamiltonian_type),intent(inout),target :: gs_ham
