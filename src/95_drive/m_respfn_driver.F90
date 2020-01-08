@@ -1786,6 +1786,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_DEALLOCATE(piezofrnl)
  call efmasdeg_free_array(efmasdeg)
  call efmasval_free_array(efmasval)
+print *, 'back in respfn'
  ABI_DEALLOCATE(grxc)
  ABI_DEALLOCATE(indsym)
  ABI_DEALLOCATE(kxc)
@@ -1799,6 +1800,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_DEALLOCATE(vtrial)
  ABI_DEALLOCATE(ylm)
  ABI_DEALLOCATE(ylmgr)
+print *, 'respfn 1803'
  call pawfgr_destroy(pawfgr)
  if (psps%usepaw==1) then
    call pawrhoij_free(pawrhoij)
@@ -1815,6 +1817,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if(rfphon==1.and.psps%n1xccc/=0)then
    ABI_DEALLOCATE(blkflgfrx1)
  end if
+print *, 'respfn 1820'
 
  ! Clean the header
  call hdr%free()
