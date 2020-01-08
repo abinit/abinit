@@ -977,7 +977,7 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 &    'doesnt match the requirements of the XC functional!'
    MSG_BUG(message)
  end if
- if (abs(order)>0.and.ixc<0.and.(need_laplacian==1.or.need_kden==1)) then
+ if (abs(order)>1.and.ixc<0.and.(need_laplacian==1.or.need_kden==1)) then
    message='Derivatives of XC potential are not available in mGGA!'
    MSG_BUG(message)
  end if
