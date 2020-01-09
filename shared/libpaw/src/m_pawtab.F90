@@ -1640,7 +1640,7 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
    end if
    if (allocated(pawtab%tcoretauspl)) then
      siz_tcoretauspl=size(pawtab%tcoretauspl)       !(mqgrid,2)
-     if (siz_tcoretauspl/=pawtab%mqgrid*2) msg=trim(msg)//' tcoretauspl'
+     if (siz_tcoretauspl/=pawtab%mqgrid*2.and.siz_tcoretauspl/=0) msg=trim(msg)//' tcoretauspl'
      nn_dpr=nn_dpr+siz_tcoretauspl
    end if
    if (allocated(pawtab%tnablaphi)) then
@@ -2618,6 +2618,8 @@ subroutine pawtab_bcast(pawtab,comm_mpi,only_from_file)
      LIBPAW_ALLOCATE(pawtab%tcoretauspl,(pawtab%mqgrid,2))
      pawtab%tcoretauspl=reshape(list_dpr(ii:ii+siz_tcoretauspl-1),(/pawtab%mqgrid,2/))
      ii=ii+siz_tcoretauspl
+   else
+     LIBPAW_ALLOCATE(pawtab%tcoretauspl,(pawtab%mqgrid,0))
    end if
    if (allocated(pawtab%tphi)) then
      LIBPAW_DEALLOCATE(pawtab%tphi)

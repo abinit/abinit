@@ -1566,6 +1566,7 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
  LIBPAW_ALLOCATE(vxctauij1,(qphase*ij_size*usekden))
  LIBPAW_ALLOCATE(ff,(mesh_size))
  LIBPAW_ALLOCATE(gg,(mesh_size))
+ vxcij1=zero;vxcij2=zero;vxctauij1=zero
 
 !----------------------------------------------------------
 !Loop over spin components

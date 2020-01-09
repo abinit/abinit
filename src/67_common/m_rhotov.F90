@@ -358,17 +358,17 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
      if (usepaw==0.or.usexcnhat/=0) then
        call dotprod_vn(1,rhor,energies%e_xcdc,doti,nfft,nfftot,dtset%nspden,1,vxc,ucvol,&
 &       mpi_comm_sphgrid=mpi_comm_sphgrid)
-       if (with_vxctau)then
-         call dotprod_vn(1,taur,e_xcdc_vxctau,doti,nfft,nfftot,dtset%nspden,1,vxctau(:,:,1),&
-&         ucvol,mpi_comm_sphgrid=mpi_comm_sphgrid)
-         energies%e_xcdc=energies%e_xcdc+e_xcdc_vxctau
-       end if
      else
        ABI_ALLOCATE(rhowk,(nfft,dtset%nspden))
        rhowk=rhor-nhat
        call dotprod_vn(1,rhowk,energies%e_xcdc,doti,nfft,nfftot,dtset%nspden,1,vxc,ucvol,&
 &       mpi_comm_sphgrid=mpi_comm_sphgrid)
        ABI_DEALLOCATE(rhowk)
+     end if
+     if (with_vxctau)then
+       call dotprod_vn(1,taur,e_xcdc_vxctau,doti,nfft,nfftot,dtset%nspden,1,vxctau(:,:,1),&
+&       ucvol,mpi_comm_sphgrid=mpi_comm_sphgrid)
+       energies%e_xcdc=energies%e_xcdc+e_xcdc_vxctau
      end if
      if (ipositron==2) energies%e_xcdc=energies%e_xcdc-electronpositron%e_xcdc
    else
@@ -454,7 +454,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
  ABI_ALLOCATE(v_constr_dft_r, (nfft,dtset%nspden))
  v_constr_dft_r = zero
  if (dtset%magconon==1.or.dtset%magconon==2) then
-   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred) 
+   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred)
  end if
 
  if (optres==0) then
