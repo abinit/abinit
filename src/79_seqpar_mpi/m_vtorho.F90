@@ -1237,11 +1237,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !    Blanchet Once we have occupation, compute number of free electrons
      if(associated(hightemp)) then
        call hightemp%compute_nfreeel(energies%e_fermie,1024,dtset%tsmear)
-       call hightemp%compute_e_kin_freeel(energies%e_fermie,1024,nfftf,dtset%nspden,&
+!        call hightemp%compute_e_kin_freeel(energies%e_fermie,1024,nfftf,dtset%nspden,&
+! &       dtset%tsmear,vtrial)
+       call hightemp%compute_e_kin_freeel_approx(energies%e_fermie,nfftf,dtset%nspden,&
 &       dtset%tsmear,vtrial)
-       ! if(psps%usepaw==1) then
-       !   call hightemp_prt_cprj(cprj,eigen,gs_hamk,istep,dtset%mband,mcprj_local,mpi_enreg,natom,dtset%nkpt,dtset%nsppol,occ)
-       ! end if
      end if
 
 !    !=========  DMFT call begin ============================================

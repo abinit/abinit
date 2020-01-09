@@ -894,7 +894,9 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      vtrial(:,:)=zero
 
      call hightemp%compute_nfreeel(results_gs%energies%e_fermie,1024,dtset%tsmear)
-     call hightemp%compute_e_kin_freeel(results_gs%energies%e_fermie,1024,nfftf,dtset%nspden,&
+!      call hightemp%compute_e_kin_freeel(results_gs%energies%e_fermie,1024,nfftf,dtset%nspden,&
+! &     dtset%tsmear,vtrial)
+     call hightemp%compute_e_kin_freeel_approx(results_gs%energies%e_fermie,nfftf,dtset%nspden,&
 &     dtset%tsmear,vtrial)
 
      ABI_DEALLOCATE(vtrial)
