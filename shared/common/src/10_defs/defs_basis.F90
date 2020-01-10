@@ -82,8 +82,8 @@ module defs_basis
 
  integer, parameter :: fnlen=264     ! maximum length of file name variables
  !integer, parameter :: fnlen=400     ! maximum length of file name variables
- !integer, parameter :: fnlen=1024     ! maximum length of file name variables
- integer, parameter :: strlen=2000000 ! maximum length of input string
+ !integer, parameter :: fnlen=1000000     ! maximum length of file name variables
+ integer, parameter :: strlen=4000000 ! maximum length of input string
 
  integer, parameter :: md5_slen = 32 ! lenght of strings storing the pseudos' md5 checksum.
  character(len=md5_slen),parameter :: md5_none = "None"
