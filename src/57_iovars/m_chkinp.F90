@@ -104,8 +104,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  integer :: bantot,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
  integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,mgga,miniatsph,minidyn,mod10,mpierr,all_nprocs
- integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu,nproc,nspden,nspinor,nsppol,optdriver,response,usepaw,usewvl
- integer :: fftalg !,fftalga,fftalgc,
+ integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu,nproc,nspden,nspinor,nsppol,optdriver,response
+ integer :: fftalg,need_kden,usepaw,usewvl
  real(dp) :: delta,dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
  character(len=1000) :: msg
  type(dataset_type) :: dt
@@ -170,6 +170,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    nproc=mpi_enregs(idtset)%nproc
    mgga=0;if(dt%ixc>=31.and.dt%ixc<=34)mgga=1
    if (dt%ixc<0.and.libxc_functionals_ismgga()) mgga=1
+   need_kden=mgga;if (dt%ixc==31.or.dt%ixc==34) need_kden=0
 
 !  =====================================================================================================
 !  Check the values of variables, using alphabetical order
@@ -2260,7 +2261,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'symmorphi',dt%symmorphi,1,(/0/),iout)
   end if
-  ! only kptopt 3 is allowed 
+  ! only kptopt 3 is allowed
   if(dt%orbmag.NE.0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,1,(/3/),iout)
@@ -3193,7 +3194,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%usekden==0)then
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
-     if(mgga==1)then
+     if(mgga/=need_kden)then
        write(msg, '(3a)' )&
 &       'The functional is a MGGA, but the kinetic energy density',ch10, &
 &       'is not present. Please set "usekden 1" in the input file.'

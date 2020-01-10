@@ -1747,6 +1747,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 &       dtset%pawprtvol,pawrhoij,pawrhoij_unsym,pawtab,qpt,rhowfg,rhowfr,rhor,rprimd,dtset%symafm,&
 &       symrec,dtset%typat,ucvol,dtset%usewvl,xred,pawnhat=nhat,rhog=rhog)
        if (dtset%usekden==1) then
+!        DO WE NEED TAUG?
          call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,tauwfg,taug,tauwfr,taur)
        end if
      else
