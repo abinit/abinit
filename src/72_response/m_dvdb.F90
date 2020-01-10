@@ -7501,7 +7501,7 @@ subroutine dvdb_qdownsample(dvdb, new_dvdb_fname, ngqpt, comm)
  ABI_FREE(iq_read)
  ABI_FREE(pinfo)
 
- write(msg, '(2a)') " Downsampling of the electron-phonon coupling potential completed", ch10
+ write(msg, '(2a)') " Downsampling of the e-ph coupling potential completed", ch10
  call wrtout(std_out, msg, do_flush=.True.)
 
 20 continue

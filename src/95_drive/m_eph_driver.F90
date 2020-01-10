@@ -134,7 +134,7 @@ contains
 !!
 !! SOURCE
 
-subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
+subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim, xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -498,8 +498,8 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    end do
 
    if (my_rank == master) then
-     ! Disabled by default because it's slow and we use netcdf that is much better.
      if (dtset%prtvol > 0) then
+       ! Disabled by default because it's slow and we use netcdf that is much better.
        path = strcat(dtfil%filnam_ds(4), "_PHDOS")
        call wrtout(ab_out, sjoin("- Writing phonon DOS to file:", path))
        call phdos%print(path)
@@ -507,7 +507,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
 #ifdef HAVE_NETCDF
      path = strcat(dtfil%filnam_ds(4), "_PHDOS.nc")
-     !call wrtout(ab_out, sjoin("- Writing phonon DOS to netcdf file:", path))
+     call wrtout(ab_out, sjoin("- Writing phonon DOS to netcdf file:", path))
      ncerr = nctk_open_create(ncid, path, xmpi_comm_self)
      NCF_CHECK_MSG(ncerr, sjoin("Creating PHDOS.nc file:", path))
      NCF_CHECK(cryst%ncwrite(ncid))
@@ -593,7 +593,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 #else
    MSG_ERROR("netcdf support not enabled")
 #endif
- endif
+ end if
 
  ! ===========================================
  ! === Open and read pseudopotential files ===
@@ -621,12 +621,12 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (2, -2)
-   ! Compute electron-phonon matrix elements
+   ! Compute e-ph matrix elements.
    call eph_gkk(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, ebands_kq, dvdb, ifc, &
      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
  case (3)
-   ! Compute phonon self-energy
+   ! Compute phonon self-energy.
    call eph_phpi(wfk0_path, wfq_path, dtfil, ngfftc, ngfftf, dtset, cryst, ebands, ebands_kq, dvdb, ifc, &
      pawfgr, pawang, pawrad, pawtab, psps, mpi_enreg, comm)
 
@@ -638,7 +638,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    if (dtset%eph_task == -4) call transport(dtfil, dtset, ebands, cryst, comm)
 
  case (5, -5)
-   ! Interpolate the phonon potential
+   ! Interpolate the phonon potential.
    call dvdb%interpolate_and_write(dtset, dtfil%fnameabo_dvdb, ngfftc, ngfftf, cryst, &
      ifc%ngqpt, ifc%nqshft, ifc%qshft, comm)
 
@@ -647,7 +647,7 @@ subroutine eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
    call frohlichmodel(cryst, dtset, efmasdeg, efmasval, ifc)
 
  case (7)
-   ! Compute phonon-limited transport from SIGEPH file
+   ! Compute phonon-limited transport from SIGEPH file.
    call transport(dtfil, dtset, ebands, cryst, comm)
 
  case (15, -15)

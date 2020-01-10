@@ -6539,9 +6539,9 @@ Variable(
     defaultval=0,
     mnemonics="Integer for second-order EIGenvalues from Response-Function",
     text=r"""
-If [[ieig2rf]] is greater then 0, the code will produce a file, named with the
-trailing suffix _EIGR2D, containing the second-order electronic eigenvalues
-for the perturbation. These files are used in the calculation of the thermal
+If [[ieig2rf]] is greater than 0, the code will produce a file, named with the
+suffix _EIGR2D, containing the second-order electronic eigenvalues for the perturbation.
+These files are used in the calculation of the thermal
 correction to the electronic eigenvalues.
 
   * If [[ieig2rf]] is set to 1, the second-order electronic eigenvalues will be
@@ -6570,11 +6570,11 @@ correction to the electronic eigenvalues.
     less disk space and memory (but run a little bit slower).
 
 !!! note
+
     [[ieig2rf]] = 4 and 5 can only be used if Abinit is compiled with NETCDF support.
 
 
-Related variables:
-[[bdeigrf]],[[elph2_imagden]],[[getgam_eig2nkq]],[[smdelta]]
+Related variables: [[bdeigrf]], [[elph2_imagden]], [[getgam_eig2nkq]], [[smdelta]]
 """,
 ),
 
@@ -6609,6 +6609,7 @@ presenting the interplay between the different above-mentioned input
 variables, as well as with the parallelism (see input variable [[npimage]]).
 
 ```fortran
+
     do itimimage=1,ntimimage
       do iimage=1,nimage
         (possibly, parallelisation over images)
@@ -6704,7 +6705,9 @@ off [[inclvkb]] is to let to the choice of the user.
 In general, the use of [[inclvkb]] = 0 is fine for GW calculations in
 crystalline systems provided that the k-point sampling is sufficiently converged.
 
-The use of [[inclvkb]] = 2 is strongly recommended for the calculation of optical properties.
+!!! important
+
+    The use of [[inclvkb]] = 2 is strongly recommended for the calculation of optical properties.
 """,
 ),
 
@@ -6723,14 +6726,13 @@ Variable(
    (doubles number of grid points)--the high accuracy version is only valid for boxcut>=2. If boxcut < 2, the code stops.
 
 For RF calculations only [[intxc]] = 0 is allowed yet. Moreover, the GS
-preparation runs (giving the density file and zero-order wavefunctions) must
-be done with [[intxc]] = 0
+preparation runs (giving the density file and zero-order wavefunctions) must be done with [[intxc]] = 0
 
 Prior to ABINITv2.3, the choice [[intxc]] = 1 was favoured (it was the default),
 but the continuation of the development of the code lead to prefer the default
 [[intxc]] = 0. Indeed, the benefit of [[intxc]] = 1 is rather small, while making
-it available for all cases is a non-negligible development effort. Other
-targets are prioritary. You will notice that many automatic tests use
+it available for all cases is a non-negligible development effort.
+Other targets are prioritary. You will notice that many automatic tests use
 [[intxc]] = 1. Please, do not follow this historical choice for your production runs.
 """,
 ),
@@ -6745,41 +6747,42 @@ Variable(
     mnemonics="Input-Output MODE",
     characteristics=['[[DEVELOP]]'],
     text=r"""
-This option selects the format used to produce the output wavefunction files
-and the files containing densities and potentials. It mainly affects the
-creation of the output files since several parts of Abinit are able to read
-data from files independently of their format (either binary files or netcdf
-files). The possible values are:
+This option selects the format used to produce "large" binary files such as the output wavefunction files,
+the files with densities and potentials (DEN, POT) as well as the SCR file produced by the GW code.
+Other "small" files such as the GSR.nc are always produced indipendently of the value of **iomode**.
+
+Note that this variable mainly defines the format of the output files since Abinit is able to read
+data from files independently of their format (either Fortran binary files or netcdf files).
+The possible values are:
 
   * 0 --> Use standard Fortran IO (ok for sequential runs, not suitable for large parallel runs)
   * 1 --> Use MPI/IO routines (ok both for sequential and large parallel runs)
   * 3 --> Use NetCDF library to produce files according to the ETSF specification [[cite:Gonze2008]]
     (ok for sequential, requires netcdf4 + hdf5 + MPI-IO support for large parallel runs)
 
-By default, Abinit produces Fortran files and uses parallel MPI-IO under the
-hood when these operations cannot be implemented in terms of simple Fortran
-write/read statements. For example, [[paral_kgb]] = 1 uses the MPI-IO API
-provided by your MPI library.
+By default, Abinit produces Fortran files and uses the MPI-IO API when these operations
+cannot be implemented in terms of simple Fortran write/read statements.
+For example, [[paral_kgb]] = 1 uses the MPI-IO API to generate a Fortran binary file that can be read with
+plain Fortran read statements.
 
-In a nutshell, use the default value and make sure that your MPI library
-supports MPI-IO before embarking yourself in large parallel runs (HAVE_MPI_IO
-should be set to 1 in ~abinit/config.h). Many MPI libraries, nowadays, support
-the MPI-2 standard so it's very likely that your MPI supports parallel IO. If
-you encounter problems, please ask your sysadmin to install a MPI library with MPI-IO capabilities.
+There are cases, however, in which you would like to change the default behaviour.
+For example, you may want to generate WFK or DEN files in netcdf
+format because you need data in this format.
+In this case, you have to use iomode == 3 in the input file to override the default behaviour.
+Note, however, that you still need parallel IO capabilities enabled in the netcdf library if
+you want to produce netcdf files in parallel with [[paral_kgb]] = 1
+(i.e. netcdf4 + hdf5 + MPI-IO).
+At present, the internal fallbacks provided by Abinit do not support netcdf4 so you have
+to link against an external netcdf library that supports hdf5+MPI-IO
+and is compatible with the mpif90 used to compile Abinit.
+See ~abinit/doc/build/config-examples/ubu_intel_17.0_openmpi.ac for a typical configuration file.
 
-There are cases, however, in which you would like to change the default
-behaviour. For example, you may want to generate WFK or DEN files in etsf-io
-format because you need data in this format. In this case, you have to use
-iomode==3 in the input file to override the default behaviour. Note however
-that you still need parallel IO capabilities enabled in the netcdf library if
-you want to produce netcdf files in parallel with [[paral_kgb]] = 1 (i.e.
-netcdf4 + hdf5 + MPI-IO). At present, the internal fallbacks provided by
-Abinit do not support netcdf4 so you have to link against an external netcdf
-library that supports hdf5+MPI-IO and is compatible with the mpif90 used to
-compile Abinit. See ~abinit/doc/build/config-examples/ubu_intel_17.0_openmpi.ac for a typical configuration file.
+!!! important
 
-Additional note: The use of the ETSF_IO library [[cite:Caliste2008]] has been disabled, and replaced by direct NetCDF calls.
-The ETSF_IO library is not maintained anymore.
+    The use of the ETSF_IO library [[cite:Caliste2008]] has been disabled, and replaced
+    by direct NetCDF calls since the ETSF_IO library is not maintained anymore.
+    The netcdf files, however, are still written following the ETSF-IO specifications [[cite:Gonze2008]]
+    and extended with Abinit-specific quantities.
 """,
 ),
 
@@ -6801,8 +6804,7 @@ Choice of algorithm to control the displacements of ions, and eventually (see
 **Purpose:** Molecular dynamics (if [[vis]] = 0), Structural optimization (if
 [[vis]] >0)
 **Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:** Viscous parameter [[vis]], time step [[dtion]], index
-of atoms fixed [[iatfix]]
+**Related variables:** Viscous parameter [[vis]], time step [[dtion]], index of atoms fixed [[iatfix]]
 
   * 2 --> Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS). This is much more efficient for structural optimization than viscous damping, when there are less than about 10 degrees of freedom to optimize. Another version of the BFGS is available with [[ionmov]]==22, and is apparently more robust and efficient than [[ionmov]]==2.
 **Purpose:** Structural optimization
