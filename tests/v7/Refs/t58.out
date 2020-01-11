@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.13 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h34 )
+.Starting date : Sun 29 Dec 2019.
+- ( at 18h11 )
   
-- input  file    -> t58.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v7_t58-t59/t58.in
 - output file    -> t58.out
 - root for input  files -> t58i
 - root for output files -> t58o
@@ -323,8 +323,8 @@ P          mk1mem           8
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.09552
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -385,7 +385,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   15.571E-18; max=  88.224E-18
+ Mean square residual over all n,k,spin=   15.571E-18; max=  77.913E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -893,9 +893,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
  ETOT 20   17.648645889489      2.842E-14 1.529E-15 5.941E-27
  ETOT 21   17.648645889489     -8.527E-14 7.242E-16 5.831E-27
  ETOT 22   17.648645889489      0.000E+00 1.327E-16 4.051E-27
- ETOT 23   17.648645889489      5.684E-14 8.090E-17 6.394E-27
+ ETOT 23   17.648645889489      5.684E-14 9.695E-17 6.394E-27
 
- At SCF step   23   max residual=  8.09E-17 < tolwfr=  1.00E-16 =>converged.
+ At SCF step   23   max residual=  9.69E-17 < tolwfr=  1.00E-16 =>converged.
 -open ddk wf file :t58o_DS2_1WF7
 -open ddk wf file :t58o_DS2_1WF8
 -open ddk wf file :t58o_DS2_1WF9
@@ -903,7 +903,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  80.898E-18
+ Mean square residual over all n,k,spin=  -16.667E-03; max=  96.946E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1097,9 +1097,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
  ETOT 19   17.649241772287      8.527E-14 2.638E-15 1.601E-26
  ETOT 20   17.649241772287     -5.684E-14 2.209E-16 2.254E-26
  ETOT 21   17.649241772287      0.000E+00 1.642E-16 4.046E-27
- ETOT 22   17.649241772287     -2.842E-14 8.485E-17 6.812E-27
+ ETOT 22   17.649241772287     -2.842E-14 8.977E-17 6.812E-27
 
- At SCF step   22   max residual=  8.49E-17 < tolwfr=  1.00E-16 =>converged.
+ At SCF step   22   max residual=  8.98E-17 < tolwfr=  1.00E-16 =>converged.
 -open ddk wf file :t58o_DS2_1WF7
 -open ddk wf file :t58o_DS2_1WF8
 -open ddk wf file :t58o_DS2_1WF9
@@ -1107,7 +1107,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  84.852E-18
+ Mean square residual over all n,k,spin=  -16.667E-03; max=  89.773E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1641,7 +1641,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   24.875E-09; max=  23.880E-07
+ Mean square residual over all n,k,spin=   24.875E-09; max=  87.053E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -1745,14 +1745,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
  ETOT 23   18.952549737264     -2.274E-13 3.194E-14 3.606E-21
  ETOT 24   18.952549737264      3.411E-13 5.568E-16 1.230E-22
  ETOT 25   18.952549737264     -1.421E-13 1.008E-15 7.616E-22
- ETOT 26   18.952549737264     -5.684E-14 9.665E-17 3.841E-21
+ ETOT 26   18.952549737264     -5.684E-14 9.779E-17 3.841E-21
 
- At SCF step   26   max residual=  9.66E-17 < tolwfr=  1.00E-16 =>converged.
+ At SCF step   26   max residual=  9.78E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  96.649E-18
+ Mean square residual over all n,k,spin=  -16.667E-03; max=  97.792E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1952,14 +1952,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
  ETOT 23   18.953115795565      1.137E-13 2.450E-14 2.486E-21
  ETOT 24   18.953115795565      1.705E-13 4.076E-16 1.235E-21
  ETOT 25   18.953115795565      1.137E-13 7.469E-16 4.934E-22
- ETOT 26   18.953115795565     -2.842E-13 9.715E-17 3.890E-22
+ ETOT 26   18.953115795565     -2.842E-13 9.828E-17 3.890E-22
 
- At SCF step   26   max residual=  9.72E-17 < tolwfr=  1.00E-16 =>converged.
+ At SCF step   26   max residual=  9.83E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  97.152E-18
+ Mean square residual over all n,k,spin=  -16.667E-03; max=  98.279E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2415,9 +2415,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
  ETOT 23   18.952549737264     -2.274E-13 3.194E-14 3.606E-21
  ETOT 24   18.952549737264      3.411E-13 5.568E-16 1.230E-22
  ETOT 25   18.952549737264     -1.421E-13 1.008E-15 7.616E-22
- ETOT 26   18.952549737264     -5.684E-14 9.665E-17 3.841E-21
+ ETOT 26   18.952549737264     -5.684E-14 9.779E-17 3.841E-21
 
- At SCF step   26   max residual=  9.66E-17 < tolwfr=  1.00E-16 =>converged.
+ At SCF step   26   max residual=  9.78E-17 < tolwfr=  1.00E-16 =>converged.
  
    ---------------------------------
   The charge sum rule is activated
@@ -2432,7 +2432,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  96.649E-18
+ Mean square residual over all n,k,spin=  -16.667E-03; max=  97.792E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2648,9 +2648,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
  ETOT 23   18.953115795565      1.137E-13 2.450E-14 2.486E-21
  ETOT 24   18.953115795565      1.705E-13 4.076E-16 1.235E-21
  ETOT 25   18.953115795565      1.137E-13 7.469E-16 4.934E-22
- ETOT 26   18.953115795565     -2.842E-13 9.715E-17 3.890E-22
+ ETOT 26   18.953115795565     -2.842E-13 9.828E-17 3.890E-22
 
- At SCF step   26   max residual=  9.72E-17 < tolwfr=  1.00E-16 =>converged.
+ At SCF step   26   max residual=  9.83E-17 < tolwfr=  1.00E-16 =>converged.
  
    ---------------------------------
   The charge sum rule is activated
@@ -2665,7 +2665,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  97.152E-18
+ Mean square residual over all n,k,spin=  -16.667E-03; max=  98.279E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3293,10 +3293,10 @@ P          mk1mem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         20.9  wall=         23.8
+- Proc.   0 individual time (sec): cpu=         18.4  wall=         19.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and  65 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         20.9  wall=         23.8
++Overall time at end (sec) : cpu=         18.4  wall=         19.7

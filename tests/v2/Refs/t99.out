@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.13 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h26 )
+.Starting date : Sun 29 Dec 2019.
+- ( at 17h35 )
   
-- input  file    -> t99.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v2_t99/t99.in
 - output file    -> t99.out
 - root for input  files -> t99i
 - root for output files -> t99o
@@ -306,8 +306,8 @@ P          mk1mem2        128
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb.pspfhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/41nb.pspfhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/41nb.pspfhi
 - Niobium, fhi98PP : TM-type, LDA, l=0 local
 - 41.00000   5.00000     10122                znucl, zion, pspdat
     6    7    2    0       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -478,22 +478,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     100.438     100.412
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   30335.038542654      2.992E+04 1.772E+00 1.718E+08
- ETOT  2   97785.940467552      6.745E+04 6.368E+00 5.508E+08
- ETOT  3   32.461176904617     -9.775E+04 2.560E+00 1.678E+05
- ETOT  4   2.7869166561424     -2.967E+01 5.337E-03 6.754E+00
- ETOT  5   2.7856301204438     -1.287E-03 1.093E-04 2.269E-03
- ETOT  6   2.7856294073630     -7.131E-07 3.794E-07 4.610E-05
- ETOT  7   2.7856294253360      1.797E-08 1.164E-08 1.534E-04
- ETOT  8   2.7856293987156     -2.662E-08 4.524E-11 3.436E-06
- ETOT  9   2.7856293981091     -6.065E-10 1.875E-12 2.513E-08
- ETOT 10   2.7856293981031     -6.025E-12 6.816E-15 4.280E-11
+ ETOT  2   97785.940467552      6.745E+04 6.607E+00 5.508E+08
+ ETOT  3   32.461176904617     -9.775E+04 2.849E+00 1.678E+05
+ ETOT  4   2.7869166561424     -2.967E+01 5.901E-03 6.754E+00
+ ETOT  5   2.7856301204438     -1.287E-03 1.095E-04 2.269E-03
+ ETOT  6   2.7856294073630     -7.131E-07 3.996E-07 4.610E-05
+ ETOT  7   2.7856294253360      1.797E-08 1.439E-08 1.534E-04
+ ETOT  8   2.7856293987156     -2.662E-08 5.647E-11 3.436E-06
+ ETOT  9   2.7856293981091     -6.065E-10 2.530E-12 2.513E-08
+ ETOT 10   2.7856293981031     -6.025E-12 9.438E-15 4.280E-11
 
  At SCF step   10       vres2   =  4.28E-11 < tolvrs=  1.00E-09 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -33.333E-03; max=  68.165E-16
+ Mean square residual over all n,k,spin=  -33.333E-03; max=  94.376E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -868,10 +868,10 @@ P          mk1mem2        128
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          4.2  wall=          4.8
+- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.2  wall=          4.8
++Overall time at end (sec) : cpu=          3.6  wall=          3.7

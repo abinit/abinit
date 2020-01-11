@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.13 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h38 )
+.Starting date : Sun 29 Dec 2019.
+- ( at 18h15 )
   
-- input  file    -> t57.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v8_t57/t57.in
 - output file    -> t57.out
 - root for input  files -> t57i
 - root for output files -> t57o
@@ -463,8 +463,8 @@ P          mk1mem6          2
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -478,8 +478,8 @@ P          mk1mem6          2
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1341,7 +1341,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   26.237E-13; max=  94.227E-18
+ Mean square residual over all n,k,spin=   26.237E-13; max=  92.829E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -1387,8 +1387,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1402,8 +1402,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1449,17 +1449,18 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 -inwffil : will read wavefunctions from disk file t57o_DS2_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -27.757624794034     -2.776E+01 2.346E-01 0.000E+00
+-ETOT  1  -27.757624794034     -2.776E+01 2.424E-01 0.000E+00
  ETOT  2  -27.964661678244     -2.070E-01 4.825E-03 0.000E+00
  ETOT  3  -27.969478428039     -4.817E-03 2.311E-04 0.000E+00
  ETOT  4  -27.969624110433     -1.457E-04 4.527E-06 0.000E+00
  ETOT  5  -27.969629266851     -5.156E-06 2.461E-07 0.000E+00
- ETOT  6  -27.969629461514     -1.947E-07 5.721E-09 0.000E+00
- ETOT  7  -27.969629469153     -7.639E-09 3.336E-10 0.000E+00
- ETOT  8  -27.969629469457     -3.036E-10 9.708E-12 0.000E+00
- ETOT  9  -27.969629469469     -1.178E-11 9.464E-13 0.000E+00
+ ETOT  6  -27.969629461514     -1.947E-07 1.037E-08 0.000E+00
+ ETOT  7  -27.969629469153     -7.639E-09 8.439E-10 0.000E+00
+ ETOT  8  -27.969629469457     -3.036E-10 3.141E-11 0.000E+00
+ ETOT  9  -27.969629469469     -1.178E-11 3.635E-12 0.000E+00
+ ETOT 10  -27.969629469469      7.105E-15 9.464E-13 0.000E+00
 
- At SCF step    9   max residual=  9.46E-13 < tolwfr=  1.00E-12 =>converged.
+ At SCF step   10   max residual=  9.46E-13 < tolwfr=  1.00E-12 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1505,17 +1506,18 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 -inwffil : will read wavefunctions from disk file t57o_DS2_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -27.720468849737     -2.772E+01 2.346E-01 0.000E+00
+-ETOT  1  -27.720468849737     -2.772E+01 2.424E-01 0.000E+00
  ETOT  2  -27.964138204329     -2.437E-01 5.897E-03 0.000E+00
  ETOT  3  -27.969566296252     -5.428E-03 2.312E-04 0.000E+00
  ETOT  4  -27.969718471713     -1.522E-04 4.527E-06 0.000E+00
  ETOT  5  -27.969723472555     -5.001E-06 2.461E-07 0.000E+00
- ETOT  6  -27.969723646098     -1.735E-07 5.721E-09 0.000E+00
- ETOT  7  -27.969723652423     -6.325E-09 3.337E-10 0.000E+00
- ETOT  8  -27.969723652659     -2.358E-10 9.708E-12 0.000E+00
- ETOT  9  -27.969723652667     -7.972E-12 5.826E-13 0.000E+00
+ ETOT  6  -27.969723646098     -1.735E-07 1.183E-08 0.000E+00
+ ETOT  7  -27.969723652423     -6.325E-09 1.087E-09 0.000E+00
+ ETOT  8  -27.969723652659     -2.358E-10 2.990E-11 0.000E+00
+ ETOT  9  -27.969723652667     -7.972E-12 5.263E-12 0.000E+00
+ ETOT 10  -27.969723652667      7.105E-15 5.826E-13 0.000E+00
 
- At SCF step    9   max residual=  5.83E-13 < tolwfr=  1.00E-12 =>converged.
+ At SCF step   10   max residual=  5.83E-13 < tolwfr=  1.00E-12 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1561,17 +1563,18 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 -inwffil : will read wavefunctions from disk file t57o_DS2_1WF9
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -27.767309020787     -2.777E+01 2.399E-01 0.000E+00
+-ETOT  1  -27.767309020787     -2.777E+01 2.424E-01 0.000E+00
  ETOT  2  -27.965144003869     -1.978E-01 3.417E-03 0.000E+00
  ETOT  3  -27.969573839161     -4.430E-03 2.498E-04 0.000E+00
  ETOT  4  -27.969713172536     -1.393E-04 3.441E-06 0.000E+00
  ETOT  5  -27.969718385975     -5.213E-06 3.369E-07 0.000E+00
- ETOT  6  -27.969718595697     -2.097E-07 4.855E-09 0.000E+00
- ETOT  7  -27.969718604436     -8.739E-09 5.526E-10 0.000E+00
- ETOT  8  -27.969718604806     -3.699E-10 9.520E-12 0.000E+00
- ETOT  9  -27.969718604821     -1.516E-11 9.943E-13 0.000E+00
+ ETOT  6  -27.969718595697     -2.097E-07 1.167E-08 0.000E+00
+ ETOT  7  -27.969718604436     -8.739E-09 1.051E-09 0.000E+00
+ ETOT  8  -27.969718604806     -3.699E-10 2.843E-11 0.000E+00
+ ETOT  9  -27.969718604821     -1.516E-11 5.030E-12 0.000E+00
+ ETOT 10  -27.969718604821     -1.066E-14 9.943E-13 0.000E+00
 
- At SCF step    9   max residual=  9.94E-13 < tolwfr=  1.00E-12 =>converged.
+ At SCF step   10   max residual=  9.94E-13 < tolwfr=  1.00E-12 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1837,8 +1840,8 @@ message: |
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1852,8 +1855,8 @@ message: |
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2243,10 +2246,10 @@ P          mk1mem6          2
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         43.5  wall=         45.2
+- Proc.   0 individual time (sec): cpu=         38.4  wall=         39.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  24 WARNINGs and  62 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         43.5  wall=         45.2
++Overall time at end (sec) : cpu=         38.4  wall=         39.4
