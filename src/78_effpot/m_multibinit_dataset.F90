@@ -908,6 +908,8 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
       &   multibinit_dtset%dynamics/=12.and.multibinit_dtset%dynamics/=13.and.&
       &   multibinit_dtset%dynamics/=27.and.&
       &   multibinit_dtset%dynamics/=9.and.&
+      &   multibinit_dtset%dynamics/=7.and.&
+      &   multibinit_dtset%dynamics/=1.and.&
       &   multibinit_dtset%dynamics/=2.and.&
       &   multibinit_dtset%dynamics/=22.and.&
       &   multibinit_dtset%dynamics/=24.and.multibinit_dtset%dynamics/=25 .and. &
@@ -916,7 +918,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     ) then
    write(message, '(a,i8,a,a,a,a,a)' )&
 &   'dynamics is ',multibinit_dtset%dynamics,', but the only allowed values',ch10,&
-&   'are 2,6,9,12,13, 22,24,25,101,102, 103 or 120 (see ionmov in abinit documentation).',ch10,&
+&   'are 1,2,6,7,9,12,13, 22,24,25,101,102, 103 or 120 (see ionmov in abinit documentation).',ch10,&
 &   'Action: correct dynamics in your input file.'
    MSG_ERROR(message)
  end if
@@ -2534,7 +2536,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
 !Local variables -------------------------
 !Set routine version number here:
 !scalars
- integer :: ii,iph1,iph2,iqshft
+ integer :: ii,iph1,iph2,iqshft,natfix
 
 !*********************************************************************
 
@@ -2573,6 +2575,16 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
      write(nunit,'(3x,a12)',advance='no')'    qmass  '
      write(nunit,'(3x,15F12.10)') (multibinit_dtset%qmass(ii),ii=1,multibinit_dtset%nnos)
    end if
+
+   if(any(multibinit_dtset%iatfix /= 0))then 
+      natfix = 0
+      do ii=1,size(multibinit_dtset%iatfix,2)
+          if(any(multibinit_dtset%iatfix(:,ii) /= 0))then 
+             natfix = natfix + 1 
+          endif 
+      enddo       
+      write(nunit,'(3x,a9,3I10)')'   natfix', natfix
+   endif 
 
    if(multibinit_dtset%dynamics==101)then
    end if
