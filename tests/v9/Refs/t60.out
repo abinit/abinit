@@ -1871,6 +1871,12 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+ Computing average over the unit cell of the periodic part of the DFPT potentials
+
+ Using list of q-points specified by ph_qpath with 5 qpoints
+
+ - Results stored in: t60o_DS9_V1QAVG.nc
+ Use `abiopen.py out_V1QAVG.nc -e` to visualize results
 
 ================================================================================
 == DATASET 10 ==================================================================
@@ -1963,6 +1969,12 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+ Computing average over the unit cell of the periodic part of the DFPT potentials
+
+ Using list of q-points found in the DVDB file
+
+ - Results stored in: t60o_DS10_V1QAVG.nc
+ Use `abiopen.py out_V1QAVG.nc -e` to visualize results
 
 == END DATASET(S) ==============================================================
 ================================================================================

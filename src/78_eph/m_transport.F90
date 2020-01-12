@@ -774,7 +774,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  ! Compute index of valence band
  max_occ = two/(self%nspinor*self%nsppol)
  ! TODO: should add nelect0 to ebands to keep track of intrinsic
- nvalence = nint(self%ebands%nelect - self%eph_extrael)/max_occ
+ nvalence = nint((self%ebands%nelect - self%eph_extrael)/max_occ)
 
  ABI_CALLOC(self%ne,(self%ntemp))
  ABI_CALLOC(self%nh,(self%ntemp))

@@ -2,9 +2,9 @@
 authors: DC
 ---
 
-# Parallelism for the ground state using wavelets  
+# Parallelism for the ground state using wavelets
 
-## Boron cluster, alkane molecule...  
+## Boron cluster, alkane molecule...
 
 This tutorial explains how to run the calculation of an isolated system using a
 wavelet basis-set on a parallel computer using MPI. You will learn the
@@ -21,7 +21,7 @@ explained in the tutorial [A first introduction to ABINIT in parallel](basepar).
 [TUTORIAL_README]
 
 ## 1 Wavelets variables and parallelism
-  
+
 The parallelism with the wavelet formalism can be used for two purposes: to
 reduce the memory load per node, or to reduce the overall computation time.
 
@@ -39,14 +39,14 @@ There are no specific input variables to use the parallelism in the wavelet
 mode as the only parallelisation level is on orbitals. So running ABINIT with
 an `mpirun` command is enough (this command differs according to the local MPI
 implementation) such as:
-    
+
     mpirun -np Nproc abinit < infile > logfile
 
 For further understanding of the wavelet mode, or for citation purposes, one
 may read [[cite:Genovese2008]]
 
 ## 2 Speed-up calculation for a boron cluster
-  
+
 We propose here to determine the speed-up in the calculation of the total
 energy of a cluster made of 14 boron atoms. Open the file `tgswvl_01.in`. It
 contains first the definition of the wavelet basis-set. One may want to test
@@ -58,7 +58,7 @@ use the given values (0.45Bohr and 5).
 
 Run ABINIT with 3 processors. The overall time is printed at the end of the
 output file (and of the log):
-    
+
     Proc.   0 individual time (sec): cpu=        172.6  wall=        172.6
 
 Read the output file to find the number of orbitals in the calculation (given
@@ -71,13 +71,13 @@ time with one processor and the time of a run with N processors.
 
 Assuming that the directories are called {01, 03, 07, 21}, one can grep the
 over-all time of a run and plot it in gnuplot with:
-    
+
     plot "< grep 'individual time' */log | tr '/' ' '" u 1:(ttt/$11) w lp t "Boron cluster", x t "Ideal speed-up"
 
 where `ttt` represents the time on one processor. The efficiency (in percent)
 of the parallelization process is the ratio between the speed-up and the
 number of processors. One can plot it with:
-    
+
     plot "< grep 'individual time' */log | tr '/' ' '" u 1:(ttt/$11/$1*100) w lp t "Boron cluster"
 
 The first conclusion is that the efficiency is not so good when one use one
@@ -98,7 +98,7 @@ are three sections, giving the time of the initialisation process (before
 entering the SCF loop), the time of the SCF loop itself, and the time for the
 post-processing. Let's have a closer look to the SCF section (the actual
 figures will vary between runs and number of processors):
-    
+
      CATEGORY          mean TIME(sec)       PERCENT
     CrtLocPot                1.70E-01        0.018
     ApplyLocPotKin           1.83E+02       19.865
@@ -118,16 +118,16 @@ figures will vary between runs and number of processors):
     Exchangecorr             5.01E+00        0.543
     ----------------------------------------------------------------------
     Total CPU time for category: WFN_OPT = 9.22E+02  Total categorized percent  98.0
-    
+
 
 With the total time of this SCF section, one can compute the speed-up and the
 efficiency of the wavelet mode more accurately:
-    
+
       N processors   Speed-up  Efficiency (%)
            3           2.3        75.3
            7           3.7        52.8
           21           7.5        35.6
-    
+
 With the percentages of the `time.prc` file, one can see that, for this
 example, the time is mostly spent in the precondionner and the application of
 the local part of the Hamiltonian on the wavefunctions. Let's categorise the
@@ -139,18 +139,18 @@ time information:
   * The other entries are in a miscellaneous category.
 
 By doing the summations, one can give the percentage per category during the SCF loop:
-    
+
      CATEGORY       mean TIME(sec)       PERCENT
     Communication       14.9               1.62
     Convolutions       635.0              68.87
     Linear algebra     204.4              21.17
     Other               67.7               7.34
-    
+
 You can analyse all the time.prc that have been generated for the different
 number of processors and see the evolution of the different categories.
 
 ## 4 Orbital parallelism and array parallelism
-  
+
 If the number of processors is not a divisor of the number of orbitals, there
 will be some processors with fewer orbitals than others. This is not the best
 distribution from an orbital point of view. But, the wavelet mode also
@@ -161,11 +161,11 @@ bigger number of processors, like the Poisson Solver part for instance.
 Run the boron example with {2, 4, 14, 15} processors and plot the speed-up.
 One can also look at the standard output to the load balancing of the Poisson
 Solver and the load balancing of orbitals (with 15 processors):
-    
+
     [...]
-     Processes from 0 to 9 treat 2 orbitals 
-     Processes from 10 to 10 treat 1 orbitals 
-     Processes from 11 to 14 treat 0 orbitals 
+     Processes from 0 to 9 treat 2 orbitals
+     Processes from 10 to 10 treat 1 orbitals
+     Processes from 11 to 14 treat 0 orbitals
     [...]
      Load Balancing for Poisson Solver related operations:
      LB_density        : processors   0  - 13 work at 100%
@@ -173,7 +173,7 @@ Solver and the load balancing of orbitals (with 15 processors):
       LB_kernel        : processors   0  - 12 work at 100%
                          processor      13   works at  92%
                          processors  14  - 14 work at   0%
-    
+
 One can see that, as expected, the load balancing per orbital is bad (4
 processors are doing nothing), but one can see also that the load balancing of
 the scalar arrays is not so good since the last processor will have a reduced
@@ -181,18 +181,18 @@ array. It is thus useless to run this job at 15 processors, 14 will give the
 same run time (since the load balancing will be better).
 
 ## 5 Speed-up calculation on a 65-atom alkane
-  
+
 Let's do the same with a bigger molecule and a finer grid. Open the file
 `tgswvl_02.in`. It contains the definition of an alkane chain of 65 atoms,
-providing 64 orbitals. 
+providing 64 orbitals.
 
 {% dialog tests/tutoparal/Input/tgswvl_02.in %}
 
-Run this input file with {1, 2, 4, 8, 16, 24, 32, 48, 64} processors. 
+Run this input file with {1, 2, 4, 8, 16, 24, 32, 48, 64} processors.
 The run with one processor should take less than one hour. If
 the time is short, one can reduce [[wvl_hgrid]] in the input file to 0.45.
 
-![Speedup for the C21H44 alkane chain](paral_gswvl_assets/speedup-C21.png) 
+![Speedup for the C21H44 alkane chain](paral_gswvl_assets/speedup-C21.png)
 ![Efficiency for the C21H44 alkane chain](paral_gswvl_assets/efficiency-C21.png)
 ![Time repartition for the C21H44 alkane chain](paral_gswvl_assets/time-C21.png)
 _Time measurements for a run over several processors of a C 21H44 alkane chain_
@@ -201,7 +201,7 @@ As we obtained previously, the efficiency is generally lowered when the number
 of processors is not a divisor of the number of orbitals (namely here 24 and 48).
 
 ## 6 Conclusion
-  
+
 With the wavelet mode, it is possible to efficiently decrease the run time by
 increasing the number of processors. The efficiency is limited by the increase
 of amount of time spent in the communications. The efficiency increases with

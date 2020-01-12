@@ -152,9 +152,6 @@ P          mk1mem3          2
         optdriver1          0
         optdriver2          0
         optdriver3          1
-         prtefmas1          0
-         prtefmas2          0
-         prtefmas3          1
             rfdir1          0       0       0
             rfdir2          0       0       0
             rfdir3          1       1       1
@@ -960,9 +957,6 @@ P          mk1mem3          2
         optdriver1          0
         optdriver2          0
         optdriver3          1
-         prtefmas1          0
-         prtefmas2          0
-         prtefmas3          1
             rfdir1          0       0       0
             rfdir2          0       0       0
             rfdir3          1       1       1
