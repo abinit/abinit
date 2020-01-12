@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.13 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h18 )
+.Starting date : Sun 29 Dec 2019.
+- ( at 17h29 )
   
-- input  file    -> t52.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/paral_t51_MPI1-t52_MPI1-t53_MPI1/t52.in
 - output file    -> t52_MPI1.out
 - root for input  files -> t52_MPI1i
 - root for output files -> t52_MPI1o
@@ -214,8 +214,8 @@ P           mkmem         256
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10256
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -517,43 +517,43 @@ P           mkmem         256
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         12.4        0.21      0.003
-- Total wall clock time (s,m,h):         12.7        0.21      0.004
+- Total cpu        time (s,m,h):         11.1        0.19      0.003
+- Total wall clock time (s,m,h):         11.3        0.19      0.003
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           12.4, wall_time =           12.7
+- cpu_time =           11.1, wall_time =           11.3
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   8.196  66.1      8.262  64.8          87909      -1.00        0.99       0.99
-- nonlop(apply)                  1.212   9.8      1.226   9.6          87909      -1.00        0.99       0.99
-- projbd                         0.771   6.2      0.782   6.1         126648      -1.00        0.99       0.99
-- getghc-other                   0.487   3.9      0.463   3.6             -1      -1.00        1.05       1.05
-- vtowfk(ssdiag)                 0.473   3.8      0.474   3.7             -1      -1.00        1.00       1.00
-- others (129)                   0.136   1.1      0.140   1.1             -1      -1.00        0.97       0.97
+- fourwf%(pot)                   7.309  65.6      7.332  64.8          87909      -1.00        1.00       1.00
+- nonlop(apply)                  1.128  10.1      1.146  10.1          87909      -1.00        0.98       0.98
+- projbd                         0.689   6.2      0.694   6.1         126648      -1.00        0.99       0.99
+- getghc-other                   0.458   4.1      0.419   3.7             -1      -1.00        1.09       1.09
+- vtowfk(ssdiag)                 0.417   3.7      0.417   3.7             -1      -1.00        1.00       1.00
+- others (129)                   0.125   1.1      0.127   1.1             -1      -1.00        0.99       0.99
 -<END_TIMER>
 -
-- subtotal                      11.274  90.9     11.347  89.0                                  0.99       0.99
+- subtotal                      10.125  90.8     10.135  89.6                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          12.4, wall_time =          12.7
+- cpu_time =          11.1, wall_time =          11.3
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   8.196  66.1      8.262  64.8          87909      -1.00        0.99       0.99
-- nonlop(apply)                  1.212   9.8      1.226   9.6          87909      -1.00        0.99       0.99
-- projbd                         0.771   6.2      0.782   6.1         126648      -1.00        0.99       0.99
-- getghc-other                   0.487   3.9      0.463   3.6             -1      -1.00        1.05       1.05
-- vtowfk(ssdiag)                 0.473   3.8      0.474   3.7             -1      -1.00        1.00       1.00
-- others (129)                   0.136   1.1      0.140   1.1             -1      -1.00        0.97       0.97
+- fourwf%(pot)                   7.309  65.6      7.332  64.8          87909      -1.00        1.00       1.00
+- nonlop(apply)                  1.128  10.1      1.146  10.1          87909      -1.00        0.98       0.98
+- projbd                         0.689   6.2      0.694   6.1         126648      -1.00        0.99       0.99
+- getghc-other                   0.458   4.1      0.419   3.7             -1      -1.00        1.09       1.09
+- vtowfk(ssdiag)                 0.417   3.7      0.417   3.7             -1      -1.00        1.00       1.00
+- others (129)                   0.125   1.1      0.127   1.1             -1      -1.00        0.99       0.99
 -<END_TIMER>
 
-- subtotal                      11.274  90.9     11.347  89.0                                  0.99       0.99
+- subtotal                      10.125  90.8     10.135  89.6                                  1.00       1.00
 
 ================================================================================
 
@@ -623,10 +623,10 @@ P           mkmem         256
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         12.4  wall=         12.7
+- Proc.   0 individual time (sec): cpu=         11.1  wall=         11.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  50 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.4  wall=         12.7
++Overall time at end (sec) : cpu=         11.1  wall=         11.3

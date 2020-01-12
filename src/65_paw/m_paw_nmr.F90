@@ -298,7 +298,7 @@ subroutine make_efg_onsite(efg,my_natom,natom,nsym,ntypat,paw_an,pawang,pawrhoij
      call pawdensities(compch_sph,cplex,iatom_tot,lmselectin,lmselectout,lm_size,&
 &     nhat1,nspden,nzlmopt,opt_compch,opt_dens,opt_l,opt_print,&
 &     pawang,0,pawrad(itypat),pawrhoij(iatom),pawtab(itypat),&
-&     rho1,trho1,0)
+&     rho1,trho1)
 
      do lm = 5, 9 ! loop on L=2 components of multipole expansion
 
