@@ -784,6 +784,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      MSG_ERROR_NOSTOP("sigma_erange and gw_qprange are mutually exclusive", ierr)
    end if
 
+!  effmass_free
+   if(abs(dt%effmass_free-one)>tol8.and.(dt%ixc<31.or.dt%ixc>34).and.mgga==1)then
+     write(msg, '(5a)' )&
+&     'A modified electronic effective mass is not useable with a meta-GGA XC functional!',ch10,&
+&     'Except with fake metaGGAs (31<=ixc<=34).',ch10,&
+&     'effmass should be included in kinetic energy density (tau).'
+     MSG_ERROR_NOSTOP(msg, ierr)
+   end if
+
 !  efmas
    if(optdriver==RUNL_RESPFN) then !.and.usepaw==1)then
      cond_string(1)='optdriver' ; cond_values(1)=1

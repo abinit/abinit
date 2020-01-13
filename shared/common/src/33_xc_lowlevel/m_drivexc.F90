@@ -799,7 +799,7 @@ end subroutine mkdenpos
 !!  [fxcT(npts)]=XC free energy of the electron gaz at finite temperature (to be used for plasma systems)
 !!
 !! PARENTS
-!!      drivexc_main
+!!    rhotoxc,m_pawxc
 !!
 !! CHILDREN
 !!      invcb,libxc_functionals_end,libxc_functionals_getvxc
