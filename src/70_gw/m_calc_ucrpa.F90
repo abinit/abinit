@@ -659,7 +659,7 @@ endif
 !       \  /       | | | | | |
 !        \/        |_| |_| |_|
 
-        print*,"Lukaku",mbband1,mbband2,mbband3,mbband4,nspinor
+        
         ABI_ALLOCATE(V_m,(mbband1*nspinor,mbband2*nspinor,mbband3*nspinor,mbband4*nspinor))
         write(message,*) "";call wrtout(std_out,message,'COLL');call wrtout(ab_out,message,'COLL')
         write(message,*)  "==Calculation of the bare interaction  V m=="
