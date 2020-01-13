@@ -46,15 +46,15 @@ module m_hightemp
     real(dp) :: ebcut,edc_kin_freeel,e_kin_freeel,e_ent_freeel
     real(dp) :: nfreeel,e_shiftfactor,ucvol
   contains
-    procedure :: compute_e_kin_freeel,compute_e_kin_freeel_approx
+    procedure :: compute_e_ent_freeel,compute_e_kin_freeel_approx
     procedure :: compute_nfreeel
     procedure :: compute_e_shiftfactor,init,destroy
   end type hightemp_type
 
   ! type(hightemp_type),save,pointer :: hightemp=>null()
-  public :: hightemp_dosfreeel,dip12,djp12,dip32,djp32
-  public :: hightemp_get_e_shiftfactor
-  public :: hightemp_getnfreeel,hightemp_prt_eigocc
+  public :: dip12,djp12,dip32,djp32
+  public :: hightemp_dosfreeel,hightemp_get_e_shiftfactor
+  public :: hightemp_get_nfreeel_approx,hightemp_prt_eigocc
 contains
 
   !!****f* ABINIT/m_hightemp/init
@@ -215,21 +215,16 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine compute_nfreeel(this,fermie,mrgrid,tsmear)
+  subroutine compute_nfreeel(this,fermie,tsmear)
 
     ! Arguments -------------------------------
     ! Scalars
     class(hightemp_type),intent(inout) :: this
-    integer,intent(in) :: mrgrid
     real(dp),intent(in) :: fermie,tsmear
-
-    ! Local variables -------------------------
-    ! Scalars
-    real(dp) :: factor,xcut,gamma
 
     ! *********************************************************************
 
-    call hightemp_getnfreeel_approx(this%e_shiftfactor,this%ebcut,&
+    call hightemp_get_nfreeel_approx(this%e_shiftfactor,this%ebcut,&
     & fermie,this%nfreeel,tsmear,this%ucvol)
     ! write(0,*) this%nfreeel, factor*djp12(xcut,gamma), abs(factor*djp12(xcut,gamma)-this%nfreeel)
   end subroutine compute_nfreeel
@@ -256,58 +251,58 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine compute_e_kin_freeel(this,fermie,mrgrid,nfftf,nspden,tsmear,vtrial)
-
-    ! Arguments -------------------------------
-    ! Scalars
-    class(hightemp_type),intent(inout) :: this
-    integer,intent(in) :: mrgrid,nfftf,nspden
-    real(dp),intent(in) :: fermie,tsmear
-    ! Arrays
-    real(dp),intent(in) :: vtrial(nfftf,nspden)
-
-    ! Local variables -------------------------
-    ! Scalars
-    integer :: ii,ifft,ispden
-    real(dp) :: ix,step
-    ! Arrays
-    real(dp),dimension(:),allocatable :: values
-
-    ! *********************************************************************
-    step=1e-5
-
-    ! Dynamic array find size
-    ix=this%ebcut
-    ii=0
-    do while(fermi_dirac(ix,fermie,tsmear)>tol16)
-      ii=ii+1
-      ix=ix+step
-    end do
-    ABI_ALLOCATE(values,(ii))
-
-    ! Computation of e_kin_freeel
-    ix=this%ebcut
-    ii=0
-    do while(fermi_dirac(ix,fermie,tsmear)>tol16)
-      ii=ii+1
-      values(ii)=fermi_dirac(ix,fermie,tsmear)*&
-      & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)*(ix-this%e_shiftfactor)
-      ix=ix+step
-    end do
-    if (ii>1) then
-      this%e_kin_freeel=simpson(step,values)
-    end if
-
-    ! Computation of edc_kin_freeel
-    this%edc_kin_freeel=zero
-    do ispden=1,nspden
-      do ifft=1,nfftf
-        this%edc_kin_freeel=this%edc_kin_freeel+vtrial(ifft,ispden)
-      end do
-    end do
-    ! Verifier la constante (/nspden**2)
-    this%edc_kin_freeel=this%edc_kin_freeel*this%nfreeel/nspden/nfftf/nspden
-  end subroutine compute_e_kin_freeel
+  ! subroutine compute_e_kin_freeel(this,fermie,mrgrid,nfftf,nspden,tsmear,vtrial)
+  !
+  !   ! Arguments -------------------------------
+  !   ! Scalars
+  !   class(hightemp_type),intent(inout) :: this
+  !   integer,intent(in) :: mrgrid,nfftf,nspden
+  !   real(dp),intent(in) :: fermie,tsmear
+  !   ! Arrays
+  !   real(dp),intent(in) :: vtrial(nfftf,nspden)
+  !
+  !   ! Local variables -------------------------
+  !   ! Scalars
+  !   integer :: ii,ifft,ispden
+  !   real(dp) :: ix,step
+  !   ! Arrays
+  !   real(dp),dimension(:),allocatable :: values
+  !
+  !   ! *********************************************************************
+  !   step=1e-5
+  !
+  !   ! Dynamic array find size
+  !   ix=this%ebcut
+  !   ii=0
+  !   do while(fermi_dirac(ix,fermie,tsmear)>tol16)
+  !     ii=ii+1
+  !     ix=ix+step
+  !   end do
+  !   ABI_ALLOCATE(values,(ii))
+  !
+  !   ! Computation of e_kin_freeel
+  !   ix=this%ebcut
+  !   ii=0
+  !   do while(fermi_dirac(ix,fermie,tsmear)>tol16)
+  !     ii=ii+1
+  !     values(ii)=fermi_dirac(ix,fermie,tsmear)*&
+  !     & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)*(ix-this%e_shiftfactor)
+  !     ix=ix+step
+  !   end do
+  !   if (ii>1) then
+  !     this%e_kin_freeel=simpson(step,values)
+  !   end if
+  !
+  !   ! Computation of edc_kin_freeel
+  !   this%edc_kin_freeel=zero
+  !   do ispden=1,nspden
+  !     do ifft=1,nfftf
+  !       this%edc_kin_freeel=this%edc_kin_freeel+vtrial(ifft,ispden)
+  !     end do
+  !   end do
+  !   ! Verifier la constante (/nspden**2)
+  !   this%edc_kin_freeel=this%edc_kin_freeel*this%nfreeel/nspden/nfftf/nspden
+  ! end subroutine compute_e_kin_freeel
 
   !!****f* ABINIT/m_hightemp/compute_e_kin_freeel_approx
   !! NAME
@@ -359,39 +354,63 @@ contains
     this%edc_kin_freeel=this%edc_kin_freeel*this%nfreeel/nspden/nfftf/nspden
   end subroutine compute_e_kin_freeel_approx
 
-  ! *********************************************************************
-
-  !!****f* ABINIT/m_hightemp/hightemp_dosfreeel
+  !!****f* ABINIT/m_hightemp/compute_e_ent_freeel
   !! NAME
-  !! hightemp_dosfreeel
+  !! compute_e_ent_freeel
   !!
   !! FUNCTION
-  !! Returns the free particle density of states for a given energy (in Hartree)
   !!
   !! INPUTS
-  !! energy=get the value of the free particle density of states at this energy
-  !! e_shiftfactor=energy shift factor
-  !! ucvol=unit cell volume (bohr^3)
   !!
   !! OUTPUT
-  !! freedos=value of free particle density of states at given energy
   !!
   !! PARENTS
   !!
   !! CHILDREN
   !!
   !! SOURCE
-  function hightemp_dosfreeel(energy,e_shiftfactor,ucvol)
-
+  subroutine compute_e_ent_freeel(this,fermie,tsmear)
     ! Arguments -------------------------------
     ! Scalars
-    real(dp),intent(in) :: energy,e_shiftfactor,ucvol
-    real(dp) :: hightemp_dosfreeel
+    class(hightemp_type),intent(inout) :: this
+    real(dp),intent(in) :: fermie,tsmear
+
+    ! Local variables -------------------------
+    ! Scalars
+    integer :: ii
+    real(dp) :: ix,step
+    ! Arrays
+    real(dp),dimension(:),allocatable :: valuesent
 
     ! *********************************************************************
+    step=1e-4
+    this%e_ent_freeel=zero
 
-    hightemp_dosfreeel=sqrt(2.)*ucvol*sqrt(energy-e_shiftfactor)/(PI*PI)
-  end function hightemp_dosfreeel
+    ! Dynamic array find size
+    ix=this%ebcut
+    ii=0
+    do while(fermi_dirac(ix,fermie,tsmear)>tol14)
+      ii=ii+1
+      ix=ix+step
+    end do
+
+    ABI_ALLOCATE(valuesent,(ii))
+
+    ix=this%ebcut
+    ii=0
+    do while(fermi_dirac(ix,fermie,tsmear)>tol14)
+      ii=ii+1
+      valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*log(fermi_dirac(ix,fermie,tsmear))+&
+      & (1.-fermi_dirac(ix,fermie,tsmear))*log(1.-fermi_dirac(ix,fermie,tsmear)))*&
+      & hightemp_dosfreeel(ix,this%e_shiftfactor,this%ucvol)
+      ix=ix+step
+    end do
+    if (ii>1) then
+      this%e_ent_freeel=simpson(step,valuesent)
+    end if
+  end subroutine compute_e_ent_freeel
+
+  ! *********************************************************************
 
   !!****f* ABINIT/m_hightemp/dip12
   !! NAME
@@ -798,6 +817,38 @@ contains
     djp32=dip32(gamma)-xcut*xcut*DSQRT(xcut)/2.5D+0
   end function djp32
 
+  !!****f* ABINIT/m_hightemp/hightemp_dosfreeel
+  !! NAME
+  !! hightemp_dosfreeel
+  !!
+  !! FUNCTION
+  !! Returns the free particle density of states for a given energy (in Hartree)
+  !!
+  !! INPUTS
+  !! energy=get the value of the free particle density of states at this energy
+  !! e_shiftfactor=energy shift factor
+  !! ucvol=unit cell volume (bohr^3)
+  !!
+  !! OUTPUT
+  !! freedos=value of free particle density of states at given energy
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  function hightemp_dosfreeel(energy,e_shiftfactor,ucvol)
+
+    ! Arguments -------------------------------
+    ! Scalars
+    real(dp),intent(in) :: energy,e_shiftfactor,ucvol
+    real(dp) :: hightemp_dosfreeel
+
+    ! *********************************************************************
+
+    hightemp_dosfreeel=sqrt(2.)*ucvol*sqrt(energy-e_shiftfactor)/(PI*PI)
+  end function hightemp_dosfreeel
+
   !!****f* ABINIT/m_hightemp/hightemp_get_e_shiftfactor
   !! NAME
   !! hightemp_get_e_shiftfactor
@@ -907,56 +958,56 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_getnfreeel(ebcut,entropy,fermie,mrgrid,nfreeel,tsmear,e_shiftfactor,ucvol)
+  ! subroutine hightemp_getnfreeel(ebcut,entropy,fermie,mrgrid,nfreeel,tsmear,e_shiftfactor,ucvol)
+  !
+  !   ! Arguments -------------------------------
+  !   ! Scalars
+  !   integer,intent(in) :: mrgrid
+  !   real(dp),intent(in) :: ebcut,fermie,tsmear,e_shiftfactor,ucvol
+  !   real(dp),intent(out) :: entropy,nfreeel
+  !
+  !   ! Local variables -------------------------
+  !   ! Scalars
+  !   integer :: ii
+  !   real(dp) :: ix,step
+  !   ! Arrays
+  !   real(dp),dimension(:),allocatable :: valuesnel,valuesent
+  !
+  !   ! *********************************************************************
+  !   step=1e-5
+  !   nfreeel=zero
+  !   entropy=zero
+  !
+  !   ! Dynamic array find size
+  !   ix=ebcut
+  !   ii=0
+  !   do while(fermi_dirac(ix,fermie,tsmear)>1e-14)
+  !     ii=ii+1
+  !     ix=ix+step
+  !   end do
+  !
+  !   ABI_ALLOCATE(valuesnel,(ii))
+  !   ABI_ALLOCATE(valuesent,(ii))
+  !
+  !   ix=ebcut
+  !   ii=0
+  !   do while(fermi_dirac(ix,fermie,tsmear)>1e-14)
+  !     ii=ii+1
+  !     valuesnel(ii)=fermi_dirac(ix,fermie,tsmear)*hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
+  !     valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*log(fermi_dirac(ix,fermie,tsmear))+&
+  !     & (1.-fermi_dirac(ix,fermie,tsmear))*log(1.-fermi_dirac(ix,fermie,tsmear)))*&
+  !     & hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
+  !     ix=ix+step
+  !   end do
+  !   if (ii>1) then
+  !     nfreeel=simpson(step,valuesnel)
+  !     entropy=simpson(step,valuesent)
+  !   end if
+  ! end subroutine hightemp_getnfreeel
 
-    ! Arguments -------------------------------
-    ! Scalars
-    integer,intent(in) :: mrgrid
-    real(dp),intent(in) :: ebcut,fermie,tsmear,e_shiftfactor,ucvol
-    real(dp),intent(out) :: entropy,nfreeel
-
-    ! Local variables -------------------------
-    ! Scalars
-    integer :: ii
-    real(dp) :: ix,step
-    ! Arrays
-    real(dp),dimension(:),allocatable :: valuesnel,valuesent
-
-    ! *********************************************************************
-    step=1e-5
-    nfreeel=zero
-    entropy=zero
-
-    ! Dynamic array find size
-    ix=ebcut
-    ii=0
-    do while(fermi_dirac(ix,fermie,tsmear)>1e-14)
-      ii=ii+1
-      ix=ix+step
-    end do
-
-    ABI_ALLOCATE(valuesnel,(ii))
-    ABI_ALLOCATE(valuesent,(ii))
-
-    ix=ebcut
-    ii=0
-    do while(fermi_dirac(ix,fermie,tsmear)>1e-14)
-      ii=ii+1
-      valuesnel(ii)=fermi_dirac(ix,fermie,tsmear)*hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
-      valuesent(ii)=(fermi_dirac(ix,fermie,tsmear)*log(fermi_dirac(ix,fermie,tsmear))+&
-      & (1.-fermi_dirac(ix,fermie,tsmear))*log(1.-fermi_dirac(ix,fermie,tsmear)))*&
-      & hightemp_dosfreeel(ix,e_shiftfactor,ucvol)
-      ix=ix+step
-    end do
-    if (ii>1) then
-      nfreeel=simpson(step,valuesnel)
-      entropy=simpson(step,valuesent)
-    end if
-  end subroutine hightemp_getnfreeel
-
-  !!****f* ABINIT/m_hightemp/hightemp_getnfreeel_approx
+  !!****f* ABINIT/m_hightemp/hightemp_get_nfreeel_approx
   !! NAME
-  !! hightemp_getnfreeel_approx
+  !! hightemp_get_nfreeel_approx
   !!
   !! FUNCTION
   !!
@@ -969,7 +1020,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_getnfreeel_approx(e_shiftfactor,ebcut,fermie,nfreeel,tsmear,ucvol)
+  subroutine hightemp_get_nfreeel_approx(e_shiftfactor,ebcut,fermie,nfreeel,tsmear,ucvol)
 
     ! Arguments -------------------------------
     ! Scalars
@@ -989,7 +1040,7 @@ contains
     gamma=(fermie-e_shiftfactor)/tsmear
 
     nfreeel=factor*djp12(xcut,gamma)
-  end subroutine hightemp_getnfreeel_approx
+  end subroutine hightemp_get_nfreeel_approx
 
   !!****f* ABINIT/m_hightemp/hightemp_prt_eigocc
   !! NAME
@@ -1026,13 +1077,14 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_prt_eigocc(eigen,etotal,energies,fnameabo_eig,iout,kptns,&
+  subroutine hightemp_prt_eigocc(e_shiftfactor,eigen,etotal,energies,fnameabo_eig,iout,kptns,&
     & mband,nband,nkpt,nsppol,occ,rprimd,strten,tsmear,usepaw,wtk)
 
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: iout,mband,nkpt,nsppol,usepaw
     real(dp),intent(in) :: etotal,tsmear
+    real(dp),intent(in) :: e_shiftfactor
     character(len=*),intent(in) :: fnameabo_eig
     type(energies_type),intent(in) :: energies
     ! Arrays
@@ -1086,7 +1138,7 @@ contains
 
     write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
     & ' Hartree energy     = ',energies%e_hartree,' Ha         Ewald energy       = ',energies%e_ewald,&
-    & ' Ha         E. Shift factor U0 = ',energies%e_shiftfactor, ' Ha'
+    & ' Ha         E. Shift factor U0 = ',e_shiftfactor, ' Ha'
     call wrtout(temp_unit,msg,'COLL')
 
     if (usepaw==0) then

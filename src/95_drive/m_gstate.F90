@@ -893,7 +893,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ABI_ALLOCATE(vtrial,(nfftf,dtset%nspden))
      vtrial(:,:)=zero
 
-     call hightemp%compute_nfreeel(results_gs%energies%e_fermie,1024,dtset%tsmear)
+     call hightemp%compute_nfreeel(results_gs%energies%e_fermie,dtset%tsmear)
 !      call hightemp%compute_e_kin_freeel(results_gs%energies%e_fermie,1024,nfftf,dtset%nspden,&
 ! &     dtset%tsmear,vtrial)
      call hightemp%compute_e_kin_freeel_approx(results_gs%energies%e_fermie,nfftf,dtset%nspden,&
@@ -1468,7 +1468,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & mpi_enreg,nfftf,ngfftf,occ,dtset%optforces,&
 & resid,rhor,rprimd,results_gs%vxcavg,xred)
 
- call hightemp_prt_eigocc(eigen,results_gs%etotal,results_gs%energies,dtfil%fnameabo_eig,std_out,&
+ call hightemp_prt_eigocc(hightemp%e_shiftfactor,eigen,results_gs%etotal,results_gs%energies,dtfil%fnameabo_eig,std_out,&
 & dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,occ,rprimd,results_gs%strten,&
 & dtset%tsmear,psps%usepaw,dtset%wtk)
 
@@ -1660,7 +1660,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  end if
 
  if(dtset%useria==6661) then
-   call hightemp%destroy
+   call hightemp%destroy()
    ABI_DATATYPE_DEALLOCATE(hightemp)
  end if
 
