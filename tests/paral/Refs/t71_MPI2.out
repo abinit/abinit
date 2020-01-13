@@ -554,7 +554,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     122.688     122.646
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   20.302E-07; max=  12.508E-05
+ Mean square residual over all n,k,spin=   20.302E-07; max=  97.592E-12
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000

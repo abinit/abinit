@@ -142,6 +142,7 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  integer :: iomode,action,band_index,fform,formeig,iband,ibdkpt,icg,iat,iproj
  integer :: ierr,ii,ikg,ikpt,spin,master,mcg_disk,me,me0,my_nspinor
  integer :: nband_k,nkpt_eff,nmaster,npw_k,option,rdwr,sender,source !npwtot_k,
+ integer :: nband_eff
  integer :: spaceComm,spaceComm_io,spacecomsender,spaceWorld,sread,sskip,tim_rwwf,xfdim2
 #ifdef HAVE_MPI
  integer :: ipwnbd
@@ -235,8 +236,8 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  do spin=1,nsppol
    do ikpt=1,nkpt
      nband_k=nband(ikpt+(spin-1)*nkpt)
-     nband_k=max(1,nband_k-dtset%nbdbuf)
-     residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_k-1)))
+     nband_eff=max(1,nband_k-dtset%nbdbuf)
+     residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
      ibdkpt=ibdkpt+nband_k
    end do
  end do

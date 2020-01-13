@@ -1263,6 +1263,18 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
    call ebands_interpolate_kpath(ebands, dtset, crystal, [0, 0], dtfil%filnam_ds(4), spacecomm)
  end if
 
+ if(associated(elfr))then
+   ABI_DEALLOCATE(elfr)
+ end if
+
+ if(associated(grhor))then
+   ABI_DEALLOCATE(grhor)
+ end if
+
+ if(associated(lrhor))then
+   ABI_DEALLOCATE(lrhor)
+ end if
+
  call crystal%free()
  call ebands_free(ebands)
 
