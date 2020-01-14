@@ -120,7 +120,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
    ' M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanziger.'
  comment(1)=' Comment: the fifth generic paper describing the ABINIT project.'//ch10//&
    ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
-   ' is available at https://www.abinit.org/about/ABINIT20.pdf .'//ch10//&
+   ' is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020'
  priority(1)=3
@@ -140,7 +140,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
    ' B.Xu, A.Zhou, J.W.Zwanziger.'
  comment(2)=' Comment: the fourth generic paper describing the ABINIT project.'//ch10//&
    ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
-   ' is available at https://www.abinit.org/about/ABINIT16.pdf .'//ch10//&
+   ' is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016'
  priority(2)=2
@@ -154,7 +154,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
    ' M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger'
  comment(3)=' Comment: the third generic paper describing the ABINIT project.'//ch10//&
    ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
-   ' is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .'//ch10//&
+   ' is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009'
  priority(3)=1
@@ -167,8 +167,8 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  comment(4)=' Comment: the second generic paper describing the ABINIT project. Note that this paper'//ch10//&
    ' should be cited especially if you are using the GW part of ABINIT, as several authors'//ch10//&
    ' of this part are not in the list of authors of the first or third paper.'//ch10//&
-   ' The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.'//ch10//&
-   ' Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,'//ch10//&
+   ' The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.'//ch10//&
+   ' Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,'//ch10//&
    ' the licence allows the authors to put it on the Web).'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005'
  priority(4)=0
