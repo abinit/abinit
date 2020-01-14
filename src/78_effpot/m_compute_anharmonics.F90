@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_compute_anharmonics
 !! NAME
 !!  m_compute_anharmonics

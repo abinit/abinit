@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_rhotov
 !! NAME
 !!  m_dfpt_rhotov

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_cut3d
 !! NAME
 !!  m_cut3d

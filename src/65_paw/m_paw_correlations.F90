@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* m_paw_correlations/m_paw_correlations
 !! NAME
 !!  m_paw_correlations

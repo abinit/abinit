@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_rf2_init
 !! NAME
 !!  m_rf2_init

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fourier_interpol
 !! NAME
 !!  m_fourier_interpol

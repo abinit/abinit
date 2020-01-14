@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_primitive_potential_list
 !! NAME
 !! m_primitive_potential_list

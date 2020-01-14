@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_cohsex
 !! NAME
 !!  m_cohsex

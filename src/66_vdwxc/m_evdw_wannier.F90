@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_evdw_wannier
 !! NAME
 !! m_evdw_wannier

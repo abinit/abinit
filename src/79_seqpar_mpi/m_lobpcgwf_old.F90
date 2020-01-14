@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lobpcgwf_old
 !! NAME
 !!   m_lobpcgwf_old

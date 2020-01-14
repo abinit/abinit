@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_out_acknowl
 !! NAME
 !!  m_out_acknowl

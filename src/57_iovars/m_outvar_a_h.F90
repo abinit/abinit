@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outvar_a_h
 !! NAME
 !!  m_outvar_a_h

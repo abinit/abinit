@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/bond_lotf
 !! NAME
 !! bond_lotf

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_wfsinp
 !! NAME
 !!  m_wvl_wfsinp

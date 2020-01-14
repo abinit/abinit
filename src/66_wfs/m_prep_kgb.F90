@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_prep_kgb
 !! NAME
 !!  m_prep_kgb

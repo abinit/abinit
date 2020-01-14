@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_screening_driver
 !! NAME
 !!  m_screening_driver

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_epweights
 !! NAME
 !!  m_epweights

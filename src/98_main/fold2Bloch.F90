@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/fold2Bloch
 !! NAME
 !! fold2Bloch

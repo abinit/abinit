@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_abstract_mover
 !! NAME
 !! m_abstract_mover

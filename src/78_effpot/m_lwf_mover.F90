@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lwf_mover
 !! NAME
 !! m_lwf_mover

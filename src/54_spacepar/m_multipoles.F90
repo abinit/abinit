@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_multipoles
 !! NAME
 !!  m_multipoles
