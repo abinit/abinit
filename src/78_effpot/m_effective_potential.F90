@@ -978,10 +978,11 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 !  Count the rpt inferior to the tolerance
    irpt2 = 0
    do irpt=1,full_nrpt
-     if(any(abs(full_cell_atmfrc(:,:,:,:,irpt)) > tol20))then
+     if(any(abs(full_cell_atmfrc(:,:,:,:,irpt)) > tol5))then
        irpt2 = irpt2 + 1
      end if
    end do
+   write(std_out,*) "irpt2: how many dipdip cells: ", irpt2
 
 !  Copy ifc into effective potential
 !  !!!Warning eff_pot%harmonics_terms%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,nrpt
@@ -999,7 +1000,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
 
     irpt2 = 0
     do irpt = 1,full_nrpt
-     if(any(abs(full_cell_atmfrc(:,:,:,:,irpt)) > tol20))then
+     if(any(abs(full_cell_atmfrc(:,:,:,:,irpt)) > tol5))then
        irpt2 = irpt2 + 1
        eff_pot%harmonics_terms%ifcs%atmfrc(:,:,:,:,irpt2) = full_cell_atmfrc(:,:,:,:,irpt)
        eff_pot%harmonics_terms%ifcs%short_atmfrc(:,:,:,:,irpt2) = full_cell_short_atmfrc(:,:,:,:,irpt)

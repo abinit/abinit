@@ -127,7 +127,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS,&
 &                                   positive,verbose,anharmstr,spcoupling,&
 &                                   only_odd_power,only_even_power,prt_names,prt_anh,& 
-&                                   fit_iatom)
+&                                   fit_iatom,prt_files)
 
  implicit none
 
@@ -144,7 +144,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  real(dp),optional,intent(in) :: cutoff_in,fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS
  logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
  logical,optional,intent(in) :: only_odd_power,only_even_power
- logical,optional,intent(in) :: initialize_data
+ logical,optional,intent(in) :: initialize_data,prt_files
 !Local variables-------------------------------
 !scalar
  integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff
@@ -156,6 +156,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  logical :: iam_master,need_verbose,need_positive,converge,file_opened
  logical :: need_anharmstr,need_spcoupling,ditributed_coefficients,need_prt_anh
  logical :: need_only_odd_power,need_only_even_power,need_initialize_data
+ logical :: need_prt_files
 !arrays
  real(dp) :: mingf(4)
  integer :: sc_size(3)
@@ -205,6 +206,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(present(prt_anh))then
    if(prt_anh == 1) need_prt_anh = .TRUE.
  end if
+ need_prt_files = .TRUE. 
+ if(present(prt_files))need_prt_files=prt_files
  need_only_even_power = .FALSE.
  if(present(only_even_power)) need_only_even_power = only_even_power
  if(need_only_odd_power.and.need_only_even_power)then
@@ -1129,7 +1132,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
 ! Calculate MSD values for final model 
    call fit_polynomial_coeff_computeMSD(eff_pot,hist,gf_values(4,1),gf_values(2,1),gf_values(1,1),&
-&                                       natom_sc,ntime,fit_data%training_set%sqomega,&
+&                                       natom_sc,ntime,fit_data%training_set%sqomega,comm,&
 &                                       compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename)
 
 
@@ -2298,18 +2301,18 @@ end subroutine fit_polynomial_coeff_getFS
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,&
+subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,comm,&
 &                                          compute_anharmonic,print_file,filename,scup_dtset)
 
  implicit none
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: natom,ntime
+ integer, intent(in) :: natom,ntime,comm
  real(dp),intent(out):: mse,msef,mses
  logical,optional,intent(in) :: compute_anharmonic,print_file
 !arrays
- real(dp) :: sqomega(ntime)
+ real(dp),intent(in) :: sqomega(ntime)
  type(effective_potential_type),intent(in) :: eff_pot
  type(abihist),intent(in) :: hist
 !Strings/Characters
@@ -2317,11 +2320,11 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  type(scup_dtset_type),optional,intent(inout) :: scup_dtset
 !Local variables-------------------------------
 !scalar
-integer :: ii,ia,mu,unit_energy,unit_stress,itime
+integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank
 !Uncommend for dipdip test
 ! integer :: ifirst
  real(dp):: energy,energy_harm
- logical :: need_anharmonic = .TRUE.,need_print=.FALSE.,need_elec_eval
+ logical :: need_anharmonic = .TRUE.,need_print=.FALSE.,need_elec_eval,iam_master
  !arrays
  real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
 !Strings/Characters 
@@ -2334,6 +2337,11 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime
 ! *************************************************************************
  !MS Hide SCALE-UP variables 
  ABI_UNUSED(itime)
+
+ !MPI 
+ master = 0
+ nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+ iam_master = (my_rank == master)
 
  !Do some checks
  if(ntime /= hist%mxhist)then
@@ -2412,7 +2420,7 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime
 &                                    xred=xred,compute_anharmonic=need_anharmonic,verbose=.false.,&
 &                                    filename=file_anh,elec_eval=need_elec_eval)
 
-   if(need_print)then
+   if(need_print .and. iam_master)then
      WRITE(unit_energy ,'(I10,7(F23.14))') ii,hist%etot(ii),energy_harm,energy,&
 &                                       abs(hist%etot(ii) - energy_harm),abs(hist%etot(ii) - energy)
      WRITE(unit_stress,'(I10,12(F23.14))') ii,hist%strten(:,ii),strten(:)
@@ -2542,7 +2550,7 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
 &                            filename,eff_pot%anharmonics_terms)                  
 
   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,&
-&                                      sqomega,&
+&                                      sqomega,comm,&
 &                 compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename,scup_dtset=scup_dtset)
 
 
