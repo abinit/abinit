@@ -106,7 +106,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  cite(:)=0
  priority(:)=0
 
- ref(1)='The Abinit project: Impact, environment and recent developments.'//ch10//&
+ ref(1)=' The Abinit project: Impact, environment and recent developments.'//ch10//&
    ' Computer Phys. Comm. 248, 107042 (2020).'//ch10//&
    ' X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,'//ch10//&
    ' J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,'//ch10//& 
@@ -123,7 +123,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
    ' is available at https://www.abinit.org/about/ABINIT20.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020'
- priority(2)=3
+ priority(1)=3
 
  ref(2)=' Recent developments in the ABINIT software package.'//ch10//&
    ' Computer Phys. Comm. 205, 106 (2016).'//ch10//&
