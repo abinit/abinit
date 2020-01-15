@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of MULTIBINIT 
+.Version 8.11.14 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 09h09 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h53 )
   
 -  nproc =   10
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t98_sys.xml
+-/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/paral/Input/t98_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -60,8 +60,8 @@
 
 ================================================================================
 
--Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t98_sys.xml
--Reading the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t98_sys.xml with LibXML library
+-Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/paral/Input/t98_sys.xml
+-Reading the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/paral/Input/t98_sys.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -1506,6 +1506,6 @@
 
 ================================================================================
 
-+Total cpu time      0.488  and wall time      0.503 sec
++Total cpu time      0.505  and wall time      0.520 sec
 
  multibinit : the run completed succesfully.

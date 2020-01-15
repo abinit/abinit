@@ -1,5 +1,5 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Dec 2019.
-- ( at 17h29 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h14 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/paral_t51_MPI1-t52_MPI1-t53_MPI1/t52.in
 - output file    -> t52_MPI1.out
@@ -517,43 +517,43 @@ P           mkmem         256
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         11.1        0.19      0.003
+- Total cpu        time (s,m,h):         11.0        0.18      0.003
 - Total wall clock time (s,m,h):         11.3        0.19      0.003
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           11.1, wall_time =           11.3
+- cpu_time =           11.0, wall_time =           11.3
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   7.309  65.6      7.332  64.8          87909      -1.00        1.00       1.00
-- nonlop(apply)                  1.128  10.1      1.146  10.1          87909      -1.00        0.98       0.98
-- projbd                         0.689   6.2      0.694   6.1         126648      -1.00        0.99       0.99
-- getghc-other                   0.458   4.1      0.419   3.7             -1      -1.00        1.09       1.09
-- vtowfk(ssdiag)                 0.417   3.7      0.417   3.7             -1      -1.00        1.00       1.00
-- others (129)                   0.125   1.1      0.127   1.1             -1      -1.00        0.99       0.99
+- fourwf%(pot)                   7.260  65.8      7.280  64.5          87909      -1.00        1.00       1.00
+- nonlop(apply)                  1.095   9.9      1.107   9.8          87909      -1.00        0.99       0.99
+- projbd                         0.696   6.3      0.703   6.2         126648      -1.00        0.99       0.99
+- getghc-other                   0.441   4.0      0.411   3.6             -1      -1.00        1.07       1.07
+- vtowfk(ssdiag)                 0.409   3.7      0.408   3.6             -1      -1.00        1.00       1.00
+- others (129)                   0.123   1.1      0.124   1.1             -1      -1.00        0.99       0.99
 -<END_TIMER>
 -
-- subtotal                      10.125  90.8     10.135  89.6                                  1.00       1.00
+- subtotal                      10.024  90.8     10.033  88.9                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          11.1, wall_time =          11.3
+- cpu_time =          11.0, wall_time =          11.3
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   7.309  65.6      7.332  64.8          87909      -1.00        1.00       1.00
-- nonlop(apply)                  1.128  10.1      1.146  10.1          87909      -1.00        0.98       0.98
-- projbd                         0.689   6.2      0.694   6.1         126648      -1.00        0.99       0.99
-- getghc-other                   0.458   4.1      0.419   3.7             -1      -1.00        1.09       1.09
-- vtowfk(ssdiag)                 0.417   3.7      0.417   3.7             -1      -1.00        1.00       1.00
-- others (129)                   0.125   1.1      0.127   1.1             -1      -1.00        0.99       0.99
+- fourwf%(pot)                   7.260  65.8      7.280  64.5          87909      -1.00        1.00       1.00
+- nonlop(apply)                  1.095   9.9      1.107   9.8          87909      -1.00        0.99       0.99
+- projbd                         0.696   6.3      0.703   6.2         126648      -1.00        0.99       0.99
+- getghc-other                   0.441   4.0      0.411   3.6             -1      -1.00        1.07       1.07
+- vtowfk(ssdiag)                 0.409   3.7      0.408   3.6             -1      -1.00        1.00       1.00
+- others (129)                   0.123   1.1      0.124   1.1             -1      -1.00        0.99       0.99
 -<END_TIMER>
 
-- subtotal                      10.125  90.8     10.135  89.6                                  1.00       1.00
+- subtotal                      10.024  90.8     10.033  88.9                                  1.00       1.00
 
 ================================================================================
 
@@ -623,10 +623,10 @@ P           mkmem         256
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         11.1  wall=         11.3
+- Proc.   0 individual time (sec): cpu=         11.0  wall=         11.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  50 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.1  wall=         11.3
++Overall time at end (sec) : cpu=         11.0  wall=         11.3

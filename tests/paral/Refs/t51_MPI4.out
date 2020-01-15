@@ -1,5 +1,5 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 30 Dec 2019.
-- ( at 18h08 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h50 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/paral_t51_MPI4-t52_MPI4-t53_MPI4/t51.in
 - output file    -> t51_MPI4.out
@@ -1145,23 +1145,22 @@ P           mkmem           3
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            0.3, wall_time =            0.4
+- cpu_time =            0.4, wall_time =            0.5
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   0.077   4.8      0.078   4.5            860      -1.00        1.00       1.00
-- invars2                        0.031   1.9      0.032   1.9              1      -1.00        0.98       0.98
-- abinit(2)                      0.018   1.1      0.018   1.1              1      -1.00        0.98       0.98
-- scfcv-scprqt                   0.014   0.9      0.080   4.7             10      -1.00        0.17       0.17
-- nonlop(apply)                  0.012   0.8      0.012   0.7            860      -1.00        0.99       0.99
-- ewald                          0.012   0.7      0.012   0.7              1      -1.00        0.98       0.98
+- fourwf%(pot)                   0.078   4.8      0.079   4.5            860      -1.00        0.99       0.99
+- invars2                        0.033   2.0      0.033   1.9              1      -1.00        0.98       0.98
+- abinit(2)                      0.017   1.1      0.018   1.0              1      -1.00        0.98       0.98
+- scfcv-scprqt                   0.014   0.9      0.083   4.7             10      -1.00        0.17       0.17
+- ewald                          0.012   0.8      0.013   0.7              1      -1.00        0.98       0.98
+- nonlop(apply)                  0.012   0.7      0.012   0.7            860      -1.00        0.99       0.99
 - stress                         0.010   0.6      0.010   0.6              1      -1.00        0.98       0.98
 - ewald2 (+vdw_dftd)             0.009   0.6      0.009   0.5              1      -1.00        1.00       1.00
-- projbd                         0.009   0.5      0.009   0.5           1288      -1.00        0.96       0.96
-- others (125)                   0.030   1.9      0.031   1.8             -1      -1.00        0.96       0.96
+- others (126)                   0.039   2.4      0.041   2.3             -1      -1.00        0.97       0.97
 -<END_TIMER>
 -
-- subtotal                       0.222  13.7      0.292  17.0                                  0.76       0.76
+- subtotal                       0.225  13.8      0.297  17.0                                  0.76       0.76
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
@@ -1171,26 +1170,26 @@ P           mkmem           3
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   0.258  15.9      0.260  15.1           2870      -1.00        0.99       0.99
-- scfcv-scprqt                   0.256  15.8      0.323  18.8             40      -1.00        0.79       0.79
-- invars2                        0.128   7.9      0.130   7.6              4      -1.00        0.99       0.99
-- vtorho(MPI)                    0.103   6.4      0.103   6.0             40      -1.00        1.00       1.00
-- abinit(2)                      0.067   4.1      0.068   4.0              4      -1.00        0.98       0.98
-- ewald                          0.047   2.9      0.048   2.8              4      -1.00        0.98       0.98
-- nonlop(apply)                  0.039   2.4      0.040   2.3           2870      -1.00        0.99       0.99
-- stress                         0.038   2.4      0.039   2.3              4      -1.00        0.99       0.99
+- scfcv-scprqt                   0.262  16.1      0.332  19.0             40      -1.00        0.79       0.79
+- fourwf%(pot)                   0.259  15.9      0.262  15.0           2870      -1.00        0.99       0.99
+- invars2                        0.127   7.8      0.131   7.5              4      -1.00        0.97       0.97
+- vtorho(MPI)                    0.098   6.0      0.099   5.7             40      -1.00        0.98       0.98
+- abinit(2)                      0.065   4.0      0.066   3.8              4      -1.00        0.99       0.99
+- ewald                          0.047   2.9      0.049   2.8              4      -1.00        0.96       0.96
+- nonlop(apply)                  0.041   2.5      0.043   2.4           2870      -1.00        0.97       0.97
+- stress                         0.039   2.4      0.039   2.3              4      -1.00        0.99       0.99
 - ewald2 (+vdw_dftd)             0.037   2.3      0.037   2.1              4      -1.00        1.00       1.00
-- projbd                         0.028   1.7      0.029   1.7           4300      -1.00        0.98       0.98
-- fourdp                         0.017   1.1      0.017   1.0            204      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.016   1.0      0.016   1.0             -4      -1.00        0.98       0.98
-- getghc-other                   0.016   1.0      0.015   0.9             -4      -1.00        1.08       1.08
-- mkrho/=                        0.013   0.8      0.013   0.8             80      -1.00        0.99       0.99
+- projbd                         0.029   1.8      0.029   1.7           4300      -1.00        0.99       0.99
+- fourdp                         0.018   1.1      0.018   1.0            204      -1.00        0.97       0.97
+- getghc-other                   0.017   1.0      0.016   0.9             -4      -1.00        1.02       1.02
+- vtowfk(ssdiag)                 0.016   1.0      0.016   0.9             -4      -1.00        0.97       0.97
+- mkrho/=                        0.014   0.9      0.014   0.8             80      -1.00        0.99       0.99
 - fourwf%(den)                   0.011   0.7      0.011   0.7            230      -1.00        1.00       1.00
-- xc:pot/=fourdp                 0.011   0.7      0.011   0.7             44      -1.00        1.00       1.00
-- others (118)                   0.028   1.7      0.029   1.7             -1      -1.00        0.96       0.96
+- xc:pot/=fourdp                 0.011   0.7      0.011   0.6             44      -1.00        1.00       1.00
+- others (118)                   0.028   1.7      0.029   1.6             -1      -1.00        0.96       0.96
 -<END_TIMER>
 
-- subtotal                       1.114  68.9      1.189  69.3                                  0.94       0.94
+- subtotal                       1.119  68.7      1.204  68.9                                  0.93       0.93
 
 ================================================================================
 
@@ -1260,7 +1259,7 @@ P           mkmem           3
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
+- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.5
 
 ================================================================================
 
