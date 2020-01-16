@@ -289,7 +289,7 @@
 # Forced Fortran preprocessor flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-#FPPFLAGS="-P"
+FPPFLAGS="-P -traditional-cpp"
 
                        # ------------------------------ #
 
@@ -315,7 +315,7 @@
 
 # Fortran compiler additional custom flags
 #
-FCFLAGS_EXTRA="-fopenmp"
+FCFLAGS_EXTRA="-g -L/usr/local/nag/lib"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -348,7 +348,7 @@ FCFLAGS_EXTRA="-fopenmp"
 
 # Fortran linker custom flags
 #
-FC_LDFLAGS_EXTRA="-fopenmp"
+#FC_LDFLAGS_EXTRA="-Bstatic"
 
 # Forced Fortran linker flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -382,7 +382,7 @@ FC_LDFLAGS_EXTRA="-fopenmp"
 # Combine this option with enable_debug="yes" to keep preprocessed source
 # files (they are removed by default, except if their build fails)
 #
-#enable_fc_wrapper="yes"
+enable_fc_wrapper="yes"
 
 # Choose whether to read file lists from standard input or "ab.files"
 # (default is yes = standard input)
@@ -468,7 +468,7 @@ FC_LDFLAGS_EXTRA="-fopenmp"
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI environment.
 #
-enable_mpi="no"
+enable_mpi="yes"
 
 # Activate the MPI_IN_PLACE option whenever possible (default is no)
 # WARNING: this feature requires MPI2, ignored if the MPI library
@@ -489,7 +489,7 @@ enable_mpi="no"
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI I/O environment.
 #
-enable_mpi_io="no"
+enable_mpi_io="yes"
 
 # Enable MPI-IO mode in Abinit (use MPI-IO as default IO library,
 # change the default values of iomode)   
@@ -531,7 +531,7 @@ enable_mpi_io="no"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-#with_mpi_prefix="/usr/local/openmpi-gcc"
+with_mpi_prefix="/usr/local/openmpi-4.0.2_nag7.0"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -725,13 +725,13 @@ with_netcdf_incs="-I${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/include -I${FAL
 
 # Link flags for the NetCDF library (default is unset)
 #
-with_netcdf_libs="-L${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/lib -lnetcdf -L/usr/lib64 -lhdf5 -lhdf5_hl"
+with_netcdf_libs="-L${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/lib -lnetcdff -L${FALLBACKS_HOME}_8.12/${FB}/netcdf4/4.4.1.1/lib -lnetcdf -L/usr/local/hdf5-1.10.6_nag70_paral/lib -lhdf5_hl -lhdf5 -lz -lcurl -ldl"
 #
 #
 # Enable Netcdf mode in Abinit (use netcdf as default IO library,
 # change the default values of iomode)   
 #
-#enable_netcdf_default="no"
+enable_netcdf_default="yes"
 
                        # ------------------------------ #
 
@@ -769,15 +769,15 @@ with_netcdf_libs="-L${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/lib -lnet
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-with_fft_flavor="fftw3"
+#with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
-with_fft_incs="-I/usr/include"
+#with_fft_incs="-I/usr/local/include/fftw"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/usr/lib64 -lfftw3_omp -lfftw3f_omp -lfftw3 -lfftw3f"
+#with_fft_libs="-L/usr/local/lib/fftw -lfftw3"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -852,15 +852,15 @@ with_fft_libs="-L/usr/lib64 -lfftw3_omp -lfftw3f_omp -lfftw3 -lfftw3f"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="atlas"
+with_linalg_flavor="netlib"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_incs="-I/usr/include/atlas"
+#with_linalg_incs="-I/usr/local/include"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/usr/lib64/atlas -ltatlas -lsatlas"
+with_linalg_libs="-L/usr/local/netlib371_nag70 -llapack -lrefblas -lpthread -lm"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -1025,7 +1025,7 @@ with_libxc_libs="-L${FALLBACKS_HOME}_8.12/${FB}/libxc/4.2.3/lib -lxc"
 
 # Enable double precision for GW calculations (gmatteo)
 #
-#enable_gw_dpc="yes"
+enable_gw_dpc="yes"
 
 # Enable memory profiling (waroquiers)
 #
@@ -1037,7 +1037,7 @@ enable_memory_profiling="no"
 
 # Enable OpenMP (gmatteo, torrent)
 #
-enable_openmp="yes"
+#enable_openmp="yes"
 
 # Enable ZDOTC and ZDOTU bugfix (gmatteo)
 #

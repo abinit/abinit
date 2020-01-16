@@ -141,7 +141,7 @@
 
 # C compiler additional custom flags
 #
-CFLAGS_EXTRA="`xml2-config --cflags`"
+#CFLAGS_EXTRA="-O2"
 
 # Forced C compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -315,7 +315,7 @@ CFLAGS_EXTRA="`xml2-config --cflags`"
 
 # Fortran compiler additional custom flags
 #
-FCFLAGS_EXTRA="-O2 -g -Wall -Wno-maybe-uninitialized -ffpe-trap=invalid,zero,overflow -fbacktrace -pedantic -fcheck=all"
+#FCFLAGS_EXTRA="-O2"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -365,12 +365,12 @@ FCFLAGS_EXTRA="-O2 -g -Wall -Wno-maybe-uninitialized -ffpe-trap=invalid,zero,ove
 
 # Fortran linker additional custom libraries
 #
-FC_LIBS_EXTRA="`xml2-config --libs`"
+#FC_LIBS_EXTRA="-lsvml"
 
 # Forced Fortran linker libraries
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-#FC_LIBS="-lsvml"
+FC_LIBS="-L/home/buildbot/anaconda2/lib -lhdf5 -lhdf5_hl"
 
                        # ------------------------------ #
 
@@ -468,7 +468,7 @@ FC_LIBS_EXTRA="`xml2-config --libs`"
 # it. If set to "yes", the configure script will stop if it does not find
 # a working MPI environment.
 #
-enable_mpi="no"
+enable_mpi="yes"
 
 # Activate the MPI_IN_PLACE option whenever possible (default is no)
 # WARNING: this feature requires MPI2, ignored if the MPI library
@@ -531,7 +531,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-#with_mpi_prefix="/usr/local/openmpi-gcc"
+with_mpi_prefix="${MPI_HOME}"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -769,15 +769,15 @@ with_netcdf_libs="-L${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/lib -lnet
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-with_fft_flavor="fftw3"
+#with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
-with_fft_incs="-I/usr/include"
+#with_fft_incs="-I/usr/local/include/fftw"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/usr/lib64 -lfftw3 -lfftw3f"
+#with_fft_libs="-L/usr/local/lib/fftw -lfftw3"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -852,15 +852,15 @@ with_fft_libs="-L/usr/lib64 -lfftw3 -lfftw3f"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="custom"
+with_linalg_flavor="acml"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-#with_linalg_incs="-I/usr/local/include"
+with_linalg_incs="-I/opt/acml6.1.0/include"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/usr/local/OpenBLAS-0.3.7_gcc92/lib -lopenblas -lpthread"
+with_linalg_libs="-L/opt/acml6.1.0/lib -lacml"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -960,7 +960,7 @@ with_wannier90_libs="-L${FALLBACKS_HOME}_8.12/${FB}/wannier90/2.0.1.1/lib -lwann
 
 # Flag to enable LIBXML library
 #
-enable_xml="yes"
+#enable_xml=no
 
 # ---------------------------------------------------------------------------- #
 # DMFT library connector                                                        #
@@ -1029,7 +1029,7 @@ enable_gw_dpc="yes"
 
 # Enable memory profiling (waroquiers)
 #
-enable_memory_profiling="no"
+enable_memory_profiling="yes"
 
 # Enable lotf (mancini)
 #

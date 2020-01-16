@@ -39,7 +39,7 @@
 #       the CPPFLAGS_64BITS, CFLAGS_64BITS, CXXFLAGS_64BITS, and
 #       FCFLAGS_64BITS variables manually.
 #
-enable_64bit_flags="no"
+#enable_64bit_flags="yes"
 
 # Enable debug mode (default is basic)
 #
@@ -60,7 +60,7 @@ enable_64bit_flags="no"
 # Note: debug levels are incremental, i.e. the flags of one level are
 # appended to those of the previous ones
 #
-enable_debug="enhanced"
+#enable_debug="yes"
 
 # Enable compiler hints (default is yes)
 #
@@ -90,7 +90,7 @@ enable_debug="enhanced"
 #
 #     * this option is ignored when debugging is in profile mode
 #
-enable_optim="no"
+#enable_optim="aggressive"
 
 # Disable vectorization with AVX-enable processor in problematic procedures
 #
@@ -315,7 +315,7 @@ enable_optim="no"
 
 # Fortran compiler additional custom flags
 #
-FCFLAGS_EXTRA="-Wall"
+FCFLAGS_EXTRA="-O2 -g -Wall -Wno-maybe-uninitialized -fbacktrace -pedantic -fcheck=all"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -370,19 +370,19 @@ FCFLAGS_EXTRA="-Wall"
 # Forced Fortran linker libraries
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-FC_LIBS="-lstdc++ -ldl"
+FC_LIBS="-L/usr/lib/x86_64-linux-gnu/hdf5/serial -lhdf5 -lhdf5_hl -lstdc++ -ldl"
 
                        # ------------------------------ #
 
 # Use C clock instead of Fortran clock for timings (default is no)
 #
-enable_cclock="no"
+#enable_cclock="yes"
 
 # Wrap Fortran compiler calls (default is auto-detected)
 # Combine this option with enable_debug="yes" to keep preprocessed source
 # files (they are removed by default, except if their build fails)
 #
-enable_fc_wrapper="no"
+#enable_fc_wrapper="yes"
 
 # Choose whether to read file lists from standard input or "ab.files"
 # (default is yes = standard input)
@@ -531,7 +531,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/openmpi_gcc53"
+with_mpi_prefix="${MPI_HOME}"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -705,17 +705,17 @@ with_mpi_prefix="/usr/local/openmpi_gcc53"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_trio_flavor="netcdf"
+with_trio_flavor="netcdf+psml"
 
                        # ------------------------------ #
 
 # Include flags for the psml library (default is unset)
 #
-#with_psml_incs="-I/usr/local/include/psml"
+with_psml_incs="-I${FALLBACKS_HOME}_8.12/${FB}/xmlf90/1.5.3.1/include -I${FALLBACKS_HOME}_8.12/${FB}/libpsml/1.1.7/include"
 
 # Link flags for the psml library (default is unset)
 #
-#with_psml_libs="-L/usr/local/lib/psml -lpsml"
+with_psml_libs="-L${FALLBACKS_HOME}_8.12/${FB}/libpsml/1.1.7/lib -lpsml -L${FALLBACKS_HOME}_8.12/${FB}/xmlf90/1.5.3.1/lib -lxmlf90"
 
                        # ------------------------------ #
 
@@ -769,15 +769,15 @@ with_netcdf_libs="-L${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/lib -lnet
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-with_fft_flavor="fftw3"
+with_fft_flavor="fftw3-mkl"
 
 # Include flags for the FFT library (default is unset)
 #
-with_fft_incs="-I/usr/include"
+#with_fft_incs="-I/usr/local/include/fftw"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/usr/lib64 -lfftw3 -lfftw3f"
+with_fft_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -852,7 +852,7 @@ with_fft_libs="-L/usr/lib64 -lfftw3 -lfftw3f"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="custom"
+with_linalg_flavor="mkl"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
@@ -860,7 +860,7 @@ with_linalg_flavor="custom"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/usr/local/OpenBLAS/lib -lopenblas -lpthread"
+with_linalg_libs="-L${MKLROOT}/lib/intel64 -Wl,--start-group  -lmkl_gf_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -900,21 +900,21 @@ with_linalg_libs="-L/usr/local/OpenBLAS/lib -lopenblas -lpthread"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="none"
+with_dft_flavor="atompaw+libxc+wannier90"
 
                        # ------------------------------ #
 
 # Full path to the AtomPAW executables (default is unset)
 #
-#with_atompaw_bins="/usr/local/bin"
+with_atompaw_bins="${FALLBACKS_HOME}_8.12/${FB}/atompaw/4.1.0.6/bin"
 
 # Include flags for the AtomPAW library (default is unset)
 #
-#with_atompaw_incs="-I/usr/local/include/atompaw"
+with_atompaw_incs="-I${FALLBACKS_HOME}_8.12/${FB}/atompaw/4.1.0.6/include"
 
 # Link flags for the AtomPAW library (default is unset)
 #
-#with_atompaw_libs="-L/usr/local/lib/atompaw -latompaw"
+with_atompaw_libs="-L${FALLBACKS_HOME}_8.12/${FB}/atompaw/4.1.0.6/lib -latompaw"
 
                        # ------------------------------ #
 
@@ -930,25 +930,25 @@ with_dft_flavor="none"
 
 # Include flags for the LibXC library (default is unset)
 #
-#with_libxc_incs="-I/opt/etsf/include"
+with_libxc_incs="-I${FALLBACKS_HOME}_8.12/${FB}/libxc/4.2.3/include"
 
 # Link flags for the LibXC library (default is unset)
 #
-#with_libxc_libs="-L/opt/etsf/lib -lxc"
+with_libxc_libs="-L${FALLBACKS_HOME}_8.12/${FB}/libxc/4.2.3/lib -lxc"
 
                        # ------------------------------ #
 
 # Full path to the Wannier90 executables (default is unset)
 #
-#with_wannier90_bins="/usr/local/bin"
+with_wannier90_bins="${FALLBACKS_HOME}_8.12/${FB}/wannier90/2.0.1.1/bin"
 
 # Include flags for the Wannier90 library (default is unset)
 #
-#with_wannier90_incs="-I/usr/local/include/wannier90"
+with_wannier90_incs="-I${FALLBACKS_HOME}_8.12/${FB}/wannier90/2.0.1.1/include"
 
 # Link flags for the Wannier90 library (default is unset)
 #
-#with_wannier90_libs="-L${HOME}/lib/wannier90 -lwannier90"
+with_wannier90_libs="-L${FALLBACKS_HOME}_8.12/${FB}/wannier90/2.0.1.1/lib -lwannier90"
 
 # Flag to force wannier90 v1.x (autodetected by default, but may not work)
 #
@@ -1021,11 +1021,11 @@ enable_python_invocation="yes"
 
 # Enable exports (pouillon)
 #
-enable_exports="yes"
+#enable_exports="yes"
 
 # Enable double precision for GW calculations (gmatteo)
 #
-enable_gw_dpc="no"
+enable_gw_dpc="yes"
 
 # Enable memory profiling (waroquiers)
 #
@@ -1037,7 +1037,7 @@ enable_memory_profiling="no"
 
 # Enable OpenMP (gmatteo, torrent)
 #
-enable_openmp="no"
+#enable_openmp="yes"
 
 # Enable ZDOTC and ZDOTU bugfix (gmatteo)
 #

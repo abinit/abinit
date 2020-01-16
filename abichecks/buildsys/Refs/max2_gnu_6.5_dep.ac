@@ -118,7 +118,7 @@
 
 # C preprocessor additional custom flags
 #
-CPPFLAGS_EXTRA="-DHAVE_TEST_TIME_PARTITIONING"
+#CPPFLAGS_EXTRA="-P"
 
 # Forced C preprocessor flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
@@ -315,12 +315,12 @@ CPPFLAGS_EXTRA="-DHAVE_TEST_TIME_PARTITIONING"
 
 # Fortran compiler additional custom flags
 #
-FCFLAGS_EXTRA="-O2 -g -Wall -Wno-maybe-uninitialized -ffpe-trap=invalid,zero,overflow -fbacktrace -pedantic -fcheck=all"
+#FCFLAGS_EXTRA="-O2"
 
 # Forced Fortran compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-#FCFLAGS="-O2"
+FCFLAGS="-O0 -g -ffree-line-length-none -ffree-form"
 
 # Fortran flags for fixed-form source files
 #
@@ -370,7 +370,7 @@ FCFLAGS_EXTRA="-O2 -g -Wall -Wno-maybe-uninitialized -ffpe-trap=invalid,zero,ove
 # Forced Fortran linker libraries
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!
 #
-FC_LIBS="-lstdc++ -ldl"
+FC_LIBS="-L/home/buildbot/anaconda2/lib -lhdf5 -lhdf5_hl"
 
                        # ------------------------------ #
 
@@ -531,7 +531,7 @@ enable_mpi_io="yes"
 #     the MPI compiler wrappers are wrapped themselves, so that the
 #     specified serial compilers are used when building Abinit.
 #
-with_mpi_prefix="/usr/local/openmpi_gcc53"
+with_mpi_prefix="${MPI_HOME}"
 
 # Set MPI runner for tests (default is unset)
 # Note: replaces the former with_mpi_runner option
@@ -769,15 +769,15 @@ with_netcdf_libs="-L${FALLBACKS_HOME}_8.12/${FB}/netcdf4_fortran/4.4.4/lib -lnet
 #   * By default, Abinit will use the internal Goedecker FFT library
 #   * This connector is highly experimental - USE AT YOUR OWN RISKS!
 #
-with_fft_flavor="fftw3"
+#with_fft_flavor="fftw3"
 
 # Include flags for the FFT library (default is unset)
 #
-with_fft_incs="-I/usr/include"
+#with_fft_incs="-I/usr/local/include/fftw"
 
 # Link flags for the FFT library (default is unset)
 #
-with_fft_libs="-L/usr/lib64 -lfftw3 -lfftw3f"
+#with_fft_libs="-L/usr/local/lib/fftw -lfftw3"
 
 # ---------------------------------------------------------------------------- #
 # Linear algebra connector                                                     #
@@ -852,15 +852,15 @@ with_fft_libs="-L/usr/lib64 -lfftw3 -lfftw3f"
 #     problems with MKL, by going to
 #     http://software.intel.com/en-us/articles/intel-mkl-link-line-advisor/
 #
-with_linalg_flavor="custom"
+with_linalg_flavor="acml"
 
 # Include flags for the external linear algebra libraries (default is unset)
 #
-#with_linalg_incs="-I/usr/local/include"
+with_linalg_incs="-I/opt/acml6.1.0/include"
 
 # Link flags for the external linear algebra libraries (default is unset)
 #
-with_linalg_libs="-L/usr/local/OpenBLAS/lib -lopenblas -lpthread"
+with_linalg_libs="-L/opt/acml6.1.0/lib -lacml"
 
 # ---------------------------------------------------------------------------- #
 # Algorithmic library connector                                                #
@@ -900,7 +900,7 @@ with_linalg_libs="-L/usr/local/OpenBLAS/lib -lopenblas -lpthread"
 #
 # You may specify any combination, using '+' as a separator
 #
-with_dft_flavor="atompaw+libxc+wannier90+bigdft"
+with_dft_flavor="atompaw+libxc+wannier90"
 
                        # ------------------------------ #
 
@@ -920,11 +920,11 @@ with_atompaw_libs="-L${FALLBACKS_HOME}_8.12/${FB}/atompaw/4.1.0.6/lib -latompaw"
 
 # Include flags for the BigDFT library (default is unset)
 #
-with_bigdft_incs="-I${FALLBACKS_HOME}_8.12/${FB}/bigdft/abinit-1.7.1.28/include"
+#with_bigdft_incs="-I/usr/local/include/bigdft"
 
 # Link flags for the BigDFT library (default is unset)
 #
-with_bigdft_libs="-L${FALLBACKS_HOME}_8.12/${FB}/bigdft/abinit-1.7.1.28/lib -lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
+#with_bigdft_libs="-L/usr/local/lib/bigdft -lbigdft-1 -labinit -lpaw_bigdft -lyaml -lrt"
 
                        # ------------------------------ #
 
@@ -1029,7 +1029,7 @@ enable_gw_dpc="yes"
 
 # Enable memory profiling (waroquiers)
 #
-enable_memory_profiling="no"
+enable_memory_profiling="yes"
 
 # Enable lotf (mancini)
 #
@@ -1053,7 +1053,7 @@ enable_memory_profiling="no"
 
 # Activate maintainer checks (default is no)
 #
-enable_maintainer_checks="yes"
+enable_maintainer_checks="no"
 
 # Fortran compiler vendor to be used by the build system (default is unset)
 #
