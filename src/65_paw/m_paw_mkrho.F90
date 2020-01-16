@@ -53,8 +53,8 @@ MODULE m_paw_mkrho
  private
 
 !public procedures.
- public :: pawmkrho ! Build PAW electron density on fine grid, including compensation charge density
- public :: denfgr   ! Build complete PAW electron density on fine grid, including on-site contributions
+ public :: pawmkrho ! Build PAW electronic density on fine grid, including compensation charge density
+ public :: denfgr   ! Build complete PAW electronic density on fine grid, including on-site contributions
 
 CONTAINS  !========================================================================================
 !!***

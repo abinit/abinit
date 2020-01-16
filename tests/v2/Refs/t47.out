@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h26 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h17 )
   
-- input  file    -> t47.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v2_t47/t47.in
 - output file    -> t47.out
 - root for input  files -> t47i
 - root for output files -> t47o
@@ -437,8 +437,8 @@ P           mkmem9          1
          ecut(hartree)=      5.800   => boxcut(ratio)=   2.03365
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -584,7 +584,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     182.250     182.224
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   31.264E-15; max=  31.224E-14
+ Mean square residual over all n,k,spin=   35.850E-18; max=  47.302E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -659,7 +659,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     182.250     182.224
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   31.264E-15; max=  31.224E-14
+ Mean square residual over all n,k,spin=   35.850E-18; max=  47.302E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -734,7 +734,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     182.250     182.224
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   31.264E-15; max=  31.224E-14
+ Mean square residual over all n,k,spin=   35.850E-18; max=  47.302E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -809,7 +809,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     182.250     182.224
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   31.264E-15; max=  31.224E-14
+ Mean square residual over all n,k,spin=   35.850E-18; max=  47.302E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -884,7 +884,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     182.250     182.224
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   31.264E-15; max=  31.224E-14
+ Mean square residual over all n,k,spin=   35.850E-18; max=  47.302E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -959,7 +959,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     182.250     182.224
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   31.264E-15; max=  31.224E-14
+ Mean square residual over all n,k,spin=   35.850E-18; max=  47.302E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -1042,7 +1042,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     182.250     182.224
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   34.519E-10; max=  77.794E-16
+ Mean square residual over all n,k,spin=   51.086E-16; max=  77.794E-16
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -1115,7 +1115,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     182.250     182.224
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   70.755E-11; max=  77.786E-16
+ Mean square residual over all n,k,spin=   51.141E-16; max=  77.786E-16
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -1455,10 +1455,10 @@ P           mkmem9          1
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.9
+- Proc.   0 individual time (sec): cpu=          1.8  wall=          2.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  68 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.1  wall=          2.9
++Overall time at end (sec) : cpu=          1.8  wall=          2.1

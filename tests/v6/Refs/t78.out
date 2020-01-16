@@ -1,5 +1,5 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Dec 2019.
-- ( at 17h40 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h24 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v6_t78-t79-t80-t81/t78.in
 - output file    -> t78.out
@@ -599,7 +599,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      20.924
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   82.116E-24; max=  98.947E-24
+ Mean square residual over all n,k,spin=   94.124E-24; max=  98.947E-24
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -739,7 +739,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      20.924
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -50.000E-03; max=  12.666E-16
+ Mean square residual over all n,k,spin=   51.438E-17; max=  12.666E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -872,7 +872,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      20.924
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   80.535E-24; max=  97.442E-24
+ Mean square residual over all n,k,spin=   93.314E-24; max=  97.442E-24
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -967,7 +967,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      20.924
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -50.000E-03; max=  27.131E-15
+ Mean square residual over all n,k,spin=   28.509E-16; max=  27.131E-15
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1020,7 +1020,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      20.924
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -50.000E-03; max=  17.326E-16
+ Mean square residual over all n,k,spin=   32.243E-17; max=  17.326E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1138,7 +1138,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      20.924
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   80.535E-24; max=  97.441E-24
+ Mean square residual over all n,k,spin=   93.314E-24; max=  97.441E-24
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -1238,7 +1238,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      20.924
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -50.000E-03; max=  18.180E-16
+ Mean square residual over all n,k,spin=   30.464E-17; max=  18.180E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1356,7 +1356,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      20.924
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   80.534E-24; max=  97.441E-24
+ Mean square residual over all n,k,spin=   93.314E-24; max=  97.441E-24
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -1452,7 +1452,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      20.924
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -50.000E-03; max=  30.495E-17
+ Mean square residual over all n,k,spin=   52.828E-18; max=  30.495E-17
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1505,7 +1505,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      20.924
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -50.000E-03; max=  53.867E-17
+ Mean square residual over all n,k,spin=   15.881E-17; max=  53.867E-17
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1623,7 +1623,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      20.924
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   80.535E-24; max=  97.441E-24
+ Mean square residual over all n,k,spin=   93.314E-24; max=  97.441E-24
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -1719,7 +1719,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      20.924
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -50.000E-03; max=  94.046E-17
+ Mean square residual over all n,k,spin=   34.114E-17; max=  94.046E-17
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1771,7 +1771,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      20.924
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -50.000E-03; max=  54.784E-16
+ Mean square residual over all n,k,spin=   11.577E-16; max=  54.784E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1889,7 +1889,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      20.924
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   80.535E-24; max=  97.442E-24
+ Mean square residual over all n,k,spin=   93.314E-24; max=  97.442E-24
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -1990,7 +1990,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      21.000      20.924
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -50.000E-03; max=  15.352E-17
+ Mean square residual over all n,k,spin=   34.776E-18; max=  15.352E-17
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2431,10 +2431,10 @@ P          mk1mem          32
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          3.1  wall=          3.4
+- Proc.   0 individual time (sec): cpu=          3.2  wall=          3.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered 154 WARNINGs and  74 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.1  wall=          3.4
++Overall time at end (sec) : cpu=          3.2  wall=          3.9

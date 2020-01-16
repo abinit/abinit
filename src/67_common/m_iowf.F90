@@ -114,21 +114,24 @@ subroutine outresid(dtset,kptns,mband,&
 
 !Compute mean square and maximum residual over all bands and k points and spins
 !(disregard k point weights and occupation numbers here)
- band_index=sum(nband(1:nkpt*nsppol))
- resims=sum(resid(1:band_index))/dble(band_index)
 
 !Find largest residual over bands, k points, and spins, except for nbdbuf highest bands
 !Already AVAILABLE in hdr ?!
  ibdkpt=1
  residm=zero
+ resims=zero
+ band_index=zero
  do spin=1,nsppol
    do ikpt=1,nkpt
      nband_k=nband(ikpt+(spin-1)*nkpt)
      nband_eff=max(1,nband_k-dtset%nbdbuf)
      residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
+     resims=resims     +      resid(ibdkpt:ibdkpt+nband_eff-1)
      ibdkpt=ibdkpt+nband_k
+     band_index=band_index + nband_eff
    end do
  end do
+ resims=resims/dble(band_index)
 
  write(msg,'(a,2p,e12.4,a,e12.4)')' Mean square residual over all n,k,spin= ',resims,'; max=',residm
  call wrtout([std_out, ab_out], msg)
@@ -324,6 +327,35 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
  iwrite=iam_master
  sender=-1
 
+ band_index=0
+ nkpt_eff=nkpt
+ if( (dtset%prtvol==0 .or. dtset%prtvol==1) .and. nkpt_eff>nkpt_max ) nkpt_eff=nkpt_max
+
+!Loop over spin again
+ do spin=1,nsppol
+!  Give (squared) residuals for all bands at each k
+   do ikpt=1,nkpt
+     nband_k=nband(ikpt+(spin-1)*nkpt)
+!    Will not print all residuals when prtvol=0 or 1
+     if(ikpt<=nkpt_eff)then
+!      Find largest residual over all bands for given k point
+       residk=maxval(resid(1+band_index:nband_k+band_index))
+       write(msg,'(1x,3f8.4,3x,i2,1p,e13.5,a)')kptns(1:3,ikpt),spin,residk,' kpt; spin; max resid(k); each band:'
+       if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,msg,'COLL')
+       do ii=0,(nband_k-1)/8
+         write(msg,'(1x,1p,8e9.2)')(resid(iband+band_index),iband=1+ii*8,min(nband_k,8+ii*8))
+         if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
+         call wrtout(std_out,msg,'COLL')
+       end do
+     else if(ikpt==nkpt_eff+1)then
+       write(msg,'(2a)')' outwf : prtvol=0 or 1, do not print more k-points.',ch10
+       if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
+       call wrtout(std_out,msg,'COLL')
+     end if
+     band_index=band_index+nband_k
+   end do
+ end do
 
 !Will write the wavefunction file only when nstep>0
 !MT 07 2015: writing reactivated when nstep=0

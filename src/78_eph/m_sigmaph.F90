@@ -1444,7 +1444,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              else if (my_rank == master .and. (enough_stern <= 5 .or. dtset%prtvol > 10)) then
                write(std_out, "(2(a,es13.5),a,i0,2a)") &
                  " Sternheimer converged with resid: ", out_resid, " <= tolwfr: ", dtset%tolwfr, &
-                 " after ", nlines_done, " iterations. Wall-time: ", trim(sec2str(wall_stern))
+                 " after ", nlines_done, " iterations. wall-time: ", trim(sec2str(wall_stern))
                !write(std_out,*)" |psi1|^2", cg_real_zdotc(npw_kq*nspinor, cg1s_kq(:, :, ipc, ib_k), cg1s_kq(:, :, ipc, ib_k))
                enough_stern = enough_stern + 1
              end if

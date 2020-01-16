@@ -83,6 +83,7 @@ CONTAINS  !=====================================================================
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! INPUTS
+!!  effmass_free=effective mass for electrons (1. in common case)
 !!  gnt_option=flag activated if pawang%gntselect and pawang%realgnt have to be allocated
 !!             also determine the size of these pointers
 !!  gsqcut_shp=effective cut-off to determine shape functions in reciprocal space
@@ -166,14 +167,15 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 
-subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nphi,nsym,ntheta,&
-&                  pawang,pawrad,pawspnorb,pawtab,pawxcdev,xclevel,usekden,usepotzero)
+subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,&
+&                  nphi,nsym,ntheta,pawang,pawrad,pawspnorb,pawtab,pawxcdev,xclevel,&
+&                  usekden,usepotzero)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: gnt_option,lcutdens,lmix,mpsang,nphi,nsym,ntheta,usekden
  integer,intent(in) :: pawspnorb,pawxcdev,xclevel,usepotzero
- real(dp),intent(in) :: gsqcut_eff,hyb_range_fock
+ real(dp),intent(in) :: effmass_free,gsqcut_eff,hyb_range_fock
  type(pawang_type),intent(inout) :: pawang
 !arrays
  type(pawrad_type),intent(in) :: pawrad(:)
@@ -201,7 +203,7 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
  DBG_ENTER("COLL")
 
  call timab(553,1,tsec)
-! if kinetic energy density is used, set nabgnt_option to 1 for nablagaunt computation 
+! if kinetic energy density is used, set nabgnt_option to 1 for nablagaunt computation
  nabgnt_option=0 ; if (usekden>=1) nabgnt_option=1
  ntypat=size(pawtab)
  if (size(pawrad)/=ntypat) then
@@ -441,7 +443,6 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
    end do
 
    if (usekden==1)  then
-     pawtab(itypat)%has_nablaphi=1
      pw_mesh_size=pawtab(itypat)%partialwave_mesh_size
      if (allocated(pawtab(itypat)%nablaphi)) then
        ABI_DEALLOCATE(pawtab(itypat)%nablaphi)
@@ -453,17 +454,17 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
      ABI_ALLOCATE(pawtab(itypat)%tnablaphi,(pw_mesh_size,basis_size))
      ABI_ALLOCATE(der,(pw_mesh_size))
      do iln=1,basis_size
-       call nderiv_gen(der,pawtab(itypat)%phi(1:pw_mesh_size,iln),&
-&                      pawrad(itypat))
-       pawtab(itypat)%nablaphi(2:,iln)=der(2:) &
+       call nderiv_gen(der,pawtab(itypat)%phi(1:pw_mesh_size,iln),pawrad(itypat))
+       pawtab(itypat)%nablaphi(2:pw_mesh_size,iln)=der(2:pw_mesh_size) &
 &          -pawtab(itypat)%phi(2:pw_mesh_size,iln)/pawrad(itypat)%rad(2:pw_mesh_size)
        call nderiv_gen(der,pawtab(itypat)%tphi(1:pw_mesh_size,iln),pawrad(itypat))
-       pawtab(itypat)%tnablaphi(2:,iln)=der(2:) &
+       pawtab(itypat)%tnablaphi(2:pw_mesh_size,iln)=der(2:pw_mesh_size) &
 &          -pawtab(itypat)%tphi(2:pw_mesh_size,iln)/pawrad(itypat)%rad(2:pw_mesh_size)
-       call pawrad_deducer0(pawtab(itypat)%nablaphi,size(pawtab(itypat)%nablaphi),pawrad(itypat))
-       call pawrad_deducer0(pawtab(itypat)%tnablaphi,size(pawtab(itypat)%tnablaphi),pawrad(itypat))
+       call pawrad_deducer0(pawtab(itypat)%nablaphi(:,iln),pw_mesh_size,pawrad(itypat))
+       call pawrad_deducer0(pawtab(itypat)%tnablaphi(:,iln),pw_mesh_size,pawrad(itypat))
      end do
      ABI_DEALLOCATE(der)
+     pawtab(itypat)%has_nablaphi=2
    end if
 
 !  ==================================================
@@ -654,6 +655,23 @@ subroutine pawinit(gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,nph
        end if
      end do
      ABI_DEALLOCATE(work)
+   end if
+
+!  ==================================================
+!  8- TAKE into account a modified effective mass for the electrons
+
+   if (abs(effmass_free-one)>tol8) then
+     if (pawtab(itypat)%has_kij/=2) then
+       message='we need kij and has_kij/=2!'
+       MSG_BUG(message)
+     end if
+     if (allocated(pawtab(itypat)%dij0)) then
+       pawtab(itypat)%dij0(1:lmn2_size)=pawtab(itypat)%dij0(1:lmn2_size)-pawtab(itypat)%kij(1:lmn2_size)
+     end if
+     pawtab(itypat)%kij(1:lmn2_size)=pawtab(itypat)%kij(1:lmn2_size)/effmass_free
+     if (allocated(pawtab(itypat)%dij0)) then
+       pawtab(itypat)%dij0(1:lmn2_size)=pawtab(itypat)%dij0(1:lmn2_size)+pawtab(itypat)%kij(1:lmn2_size)
+     end if
    end if
 
 !  ***********************

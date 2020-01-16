@@ -6,7 +6,7 @@ authors: AM, FR
 
 ## Build a harmonic lattice model and run a dynamics
 
-This lesson aims at showing how to build a harmonic model by using a second-principles approach 
+This lesson aims at showing how to build a harmonic model by using a second-principles approach
 for lattice dynamics simulations based on atomic potentials fitted on first-principles calculations.
 
 **Before beginning, it is very important to read the reference [[cite:Wojdel2013]].**
@@ -14,7 +14,7 @@ for lattice dynamics simulations based on atomic potentials fitted on first-prin
 With this lesson, you will learn to:
 
   * Compute the model from the DDB
-  * Generate the XML for the model 
+  * Generate the XML for the model
   * Run a dynamics within MULTIBINIT
 
 In this tutorial, all the knowledge about the Density Functional Theory (DFT) and Density Functional Perturbation Theory (DFPT) should have been already acquired.
@@ -22,7 +22,7 @@ In addition, the DFPT is a key feature of ABINIT for MULTIBINIT thus, in order t
 please have a look at the tutorials on [[lesson:rf1| Phonon response]], [[lesson:elastic|strain response]] and [[lesson:rf2| Mrgddb]] before to continue.
 After these tutorials you should be able to compute a full DFPT calculation and a complete DDB file.
 Thereby this tutorial will not provide the inputs for ABINIT, that you can find, however, in the previously cited tutorials.
-  
+
 The AGATE software, used to make the analysis of the results, is also required for this tutorial. You can install it on debian with:
 
     sudo add-apt-repository ppa:piti-diablotin/abiout
@@ -53,13 +53,13 @@ $$\displaystyle  E^{harm}(\boldsymbol{u},\boldsymbol{\eta}) =  E^{harm}(\boldsym
 This calculation requires:
 
   * the computation of the phonon response (including short range and dipole-dipole interactions):
-  
+
 $$\displaystyle  E^{harm}(\boldsymbol{u}) \Longrightarrow \underbrace{\frac{\partial^2 E}{\partial
-          \boldsymbol{u}^2}}_{\substack{\text{Inter-atomic}\\\text{force constants}}} , 
+          \boldsymbol{u}^2}}_{\substack{\text{Inter-atomic}\\\text{force constants}}} ,
      \underbrace{\frac{\partial^2 E}{\partial
           {\boldsymbol{\cal{E}}}^2}}_{\text{Dielectric tensor}} ,
      \underbrace{\frac{\partial^2 E}{\partial{\boldsymbol{\cal{E}}} \partial \boldsymbol{u}}}_{\text{Effective charges}} $$
-  
+
   * the computation of the strain response:
 $$\displaystyle  E^{harm}(\boldsymbol{\eta}) \Longrightarrow \underbrace{\frac{\partial^2 E}{\partial
             \boldsymbol{\eta}^2}}_{\text{Elastic constants}} $$
@@ -97,7 +97,7 @@ As mentioned in the guide of [[help:multibinit | MULTIBINIT]]:
    * "tutomulti1_1.out" is the main output
    * "tmulti1_DDB" is the DDB which contains the system definition and the list of the energy derivatives
 
-It is now time to copy the file ~abinit/tests/tutomultibinit/Input/tmulti1_DDB and ~abinit/tests/tutomultibinit/Input/tmulti1_DDB in your **Work_latticeModel** directory. 
+It is now time to copy the file ~abinit/tests/tutomultibinit/Input/tmulti1_DDB and ~abinit/tests/tutomultibinit/Input/tmulti1_DDB in your **Work_latticeModel** directory.
 You should read carefully the input file:
 
 {% dialog tests/tutomultibinit/Input/tmulti1_1.in %}
@@ -129,7 +129,7 @@ Your XML file is now ready and you can use it as input for MULTIBINIT. To do tha
 Here, the DDB file is replaced by the XML file. Do not forget to copy the ~abinit/tests/tutomultibinit/Input/tutomulti1_2.in in your directory before you run:
 
     multibinit < tmulti1_2.files > tmulti1_2_stdout
-  
+
 In tutomulti1_2.in, [[multibinit:prt_model]] is still set to one so multibinit will write again the model XML file, which is useless at this stage, being a copy of the one read as input. Set this input variable to 0 and, in this case, MULTIBINIT will just read (and not write) the XML file.
 
 With the two last examples, we have shown that MULTIBINIT is able to read either a DDB file or a XML as inputs for the system definition and the harmonic part of the potential.
@@ -143,7 +143,7 @@ The simulation starts from the DDB to correctly account for the dipole-dipole in
     agate tmulti1_3.out_HIST.nc
 
 Also try to use the effective potential from the xml file instead, in which the dipole-dipole interactions were not corrected. What do you see when you visualize the track?
-   
+
 * * *
 
 This MULTIBINIT tutorial is now finished.

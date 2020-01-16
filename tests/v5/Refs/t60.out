@@ -1,5 +1,5 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Dec 2019.
-- ( at 17h37 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h20 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v5_t60/t60.in
 - output file    -> t60.out
@@ -509,7 +509,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     284.500     284.488
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   28.697E-12; max=  81.655E-16
+ Mean square residual over all n,k,spin=   47.501E-16; max=  81.655E-16
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -600,7 +600,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     284.500     284.488
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   15.941E-09; max=  96.185E-16
+ Mean square residual over all n,k,spin=   40.808E-16; max=  96.185E-16
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -709,7 +709,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     284.500     284.488
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   97.391E-10; max=  98.449E-16
+ Mean square residual over all n,k,spin=   43.861E-16; max=  98.449E-16
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -1153,10 +1153,10 @@ P           mkmem5         10
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.1  wall=          2.4
++Overall time at end (sec) : cpu=          2.1  wall=          2.3

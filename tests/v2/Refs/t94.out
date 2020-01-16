@@ -1,5 +1,5 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Dec 2019.
-- ( at 17h35 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h18 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v2_t94/t94.in
 - output file    -> t94.out
@@ -531,7 +531,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     291.500     291.463
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -25.000E-03; max=  43.885E-17
+ Mean square residual over all n,k,spin=   62.649E-18; max=  43.885E-17
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -937,10 +937,10 @@ P          mk1mem2         64
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.5
+- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.3  wall=          3.5
++Overall time at end (sec) : cpu=          3.3  wall=          3.4

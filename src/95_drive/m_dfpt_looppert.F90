@@ -2333,9 +2333,7 @@ print *, 'calling wfk_write_my_kptbands nkpt_rbz spacecomm distrb_flags ', nkpt_
    ! Clean band structure datatypes (should use it more in the future !)
    call ebands_free(ebands_k)
    call ebands_free(ebands_kq)
-   if(.not.kramers_deg) then
-     call ebands_free(ebands_kmq)
-   end if
+   if(.not.kramers_deg) call ebands_free(ebands_kmq)
 
 !  %%%% Parallelization over perturbations %%%%%
 !  *Redefine output/log files
@@ -2513,20 +2511,18 @@ print *, 'calling wfk_write_my_kptbands nkpt_rbz spacecomm distrb_flags ', nkpt_
    ABI_DEALLOCATE(npwarr_pert)
    ABI_DEALLOCATE(cg0_pert)
 
-   if(dtset%prtefmas==1)then
-     fname = strcat(dtfil%filnam_ds(4),"_EFMAS.nc")
-     !write(std_out,*)' dfpt_looppert: will write ',fname
+   if (dtset%prtefmas == 1 .and. me == master) then
+     fname = strcat(dtfil%filnam_ds(4), "_EFMAS.nc")
 #ifdef HAVE_NETCDF
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EFMAS file")
      NCF_CHECK(crystal%ncwrite(ncid))
-!    NCF_CHECK(ebands_ncwrite(ebands_k, ncid)) ! At this stage, ebands_k is not available
-     call print_efmas(efmasdeg,efmasval,kpt_rbz_pert,ncid)
+     !NCF_CHECK(ebands_ncwrite(ebands_k, ncid)) ! At this stage, ebands_k is not available
+     call print_efmas(efmasdeg, efmasval, kpt_rbz_pert, ncid)
      NCF_CHECK(nf90_close(ncid))
 #endif
    endif
 
    call efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz_pert,mpi_enreg,nkpt_rbz,rprimd)
-
    ABI_DEALLOCATE(kpt_rbz_pert)
  end if
 
