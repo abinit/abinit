@@ -314,11 +314,7 @@ module defs_basis
   integer,parameter,public :: NLO_MINCAT = 10
 
 ! Parameter to compute the maximum index of the perturbation
-#ifdef MR_DEV
   integer,parameter,public :: MPERT_MAX = 8
-#else 
-  integer,parameter,public :: MPERT_MAX = 6
-#endif
 
 
 !Parameters for LOG/STATUS files treatment

@@ -117,6 +117,9 @@ contains
 subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 &                   pawang,pawrad,pawtab,psps,xred)
     
+#ifdef FC_INTEL
+!DEC$ NOOPTIMIZE
+#endif
 
  implicit none
 

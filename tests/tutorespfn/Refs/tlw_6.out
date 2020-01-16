@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 21 Nov 2019.
-- ( at 14h20 )
+.Starting date : Thu 16 Jan 2020.
+- ( at 15h38 )
   
 
 ================================================================================
@@ -157,10 +157,10 @@
  displacement     direction
        1               1       -0.026268        0.000000
        1               2        0.000000        0.000000
-       1               3        0.000000        0.000000
+       1               3       -0.000000        0.000000
        2               1        0.000000        0.000000
        2               2       -0.026268        0.000000
-       2               3        0.000000        0.000000
+       2               3       -0.000000        0.000000
        3               1        0.000000        0.000000
        3               2        0.000000        0.000000
        3               3       -0.026268        0.000000
@@ -169,11 +169,11 @@
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.084017E+00    0.000000E+00   -1.691161E-19
-         1         2    0.000000E+00    2.084017E+00   -1.691161E-19
+         1         1    2.084017E+00    0.000000E+00    4.191918E-19
+         1         2    0.000000E+00    2.084017E+00    4.191918E-19
          1         3    0.000000E+00    0.000000E+00    2.084017E+00
-         2         1   -2.084017E+00    0.000000E+00    1.691161E-19
-         2         2    0.000000E+00   -2.084017E+00    1.691161E-19
+         2         1   -2.084017E+00    0.000000E+00   -4.191918E-19
+         2         2    0.000000E+00   -2.084017E+00   -4.191918E-19
          2         3    0.000000E+00    0.000000E+00   -2.084017E+00
  Now, the imaginary part of the dynamical matrix is zeroed
  
@@ -181,7 +181,7 @@
  
  Calculation of the interatomic forces 
  
--begin at tcpu      0.060  and twall      0.060 sec
+-begin at tcpu      0.066  and twall      0.066 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -236,7 +236,7 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -1.0 -1.0 -1.0  1.0 -1.0  1.0 -1.0  0.0  0.0 -0.0 -0.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0 -0.0  0.0  1.0  1.0 -1.0 -1.0
+ -0.0 -0.0  0.0  0.0  1.0  1.0 -1.0 -1.0
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
   3.0 -1.0 -1.0 -1.0  1.0 -1.0  1.0 -1.0  0.0 -0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0
@@ -253,7 +253,7 @@
    in atomic units:     0.1461921519E-02
    in units km/s:              3.19823
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9003951703E-03
+   in atomic units:     0.9003951706E-03
    in SI units K  :            284.32197
  
  Speed of sound for this q and mode:
@@ -267,7 +267,7 @@
    in atomic units:     0.3316414161E-02
    in units km/s:              7.25529
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.2042574280E-02
+   in atomic units:     0.2042574279E-02
    in SI units K  :            644.99318
  
  
@@ -279,10 +279,10 @@
 -  4.105229E+01  5.039828E+01  9.395629E+01  4.270629E+02  4.270723E+02
 -  4.565050E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1409812887E-02
+   in atomic units:     0.1409812888E-02
    in units km/s:              3.08424
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.8683015459E-03
+   in atomic units:     0.8683015462E-03
    in SI units K  :            274.18762
  
  Speed of sound for this q and mode:
@@ -595,24 +595,24 @@
 -  1.848531E+01  1.848531E+01  4.024380E+01  4.254242E+02  4.254242E+02
 -  4.559350E+02
  Speed of sound for this q and mode:
-   in atomic units:     0.1554986301E-02
+   in atomic units:     0.1554986302E-02
    in units km/s:              3.40183
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9577136239E-03
+   in atomic units:     0.9577136240E-03
    in SI units K  :            302.42168
  
  Speed of sound for this q and mode:
-   in atomic units:     0.1554986301E-02
+   in atomic units:     0.1554986302E-02
    in units km/s:              3.40183
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9577136239E-03
+   in atomic units:     0.9577136240E-03
    in SI units K  :            302.42168
  
  Speed of sound for this q and mode:
-   in atomic units:     0.3385312309E-02
+   in atomic units:     0.3385312308E-02
    in units km/s:              7.40602
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.2085008541E-02
+   in atomic units:     0.2085008540E-02
    in SI units K  :            658.39284
  
  
@@ -627,14 +627,14 @@
    in atomic units:     0.1497967883E-02
    in units km/s:              3.27709
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9225960691E-03
+   in atomic units:     0.9225960693E-03
    in SI units K  :            291.33245
  
  Speed of sound for this q and mode:
    in atomic units:     0.1497967883E-02
    in units km/s:              3.27709
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.9225960691E-03
+   in atomic units:     0.9225960693E-03
    in SI units K  :            291.33245
  
  Speed of sound for this q and mode:
@@ -714,7 +714,7 @@
    3.724576E-04  3.976431E-04  1.235185E-03  1.971793E-03  1.993607E-03
    2.056757E-03
  Phonon frequencies in cm-1    :
--  8.174499E+01  8.727257E+01  2.710917E+02  4.327586E+02  4.375463E+02
+-  8.174499E+01  8.727257E+01  2.710917E+02  4.327586E+02  4.375462E+02
 -  4.514060E+02
  
   Phonon wavevector (reduced coordinates) :  0.50000  0.40000  0.50000
@@ -967,6 +967,6 @@
  
 ================================================================================
  
-+Total cpu time      0.091  and wall time      0.091 sec
++Total cpu time      0.164  and wall time      0.164 sec
  
  anaddb : the run completed succesfully.

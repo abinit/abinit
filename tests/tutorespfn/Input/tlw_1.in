@@ -99,10 +99,10 @@ diemac 13.0
 #%% test_chain =  tlw_1.in, tlw_2.in, tlw_3.in
 #%% [files]
 #%% files_to_test =
-#%%   tlw_1.out, tolnlines=  0, tolabs=  0.000e0, tolrel=  0.000e-0, fld_options = -easy
+#%%   tlw_1.out, tolnlines=  1, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-medium
 #%% psp_files =  14si.fhi
 #%% [paral_info]
-#%% max_nprocs = 4
+#%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = M. Royo
 #%% keywords = DFPT, LONGWAVE
