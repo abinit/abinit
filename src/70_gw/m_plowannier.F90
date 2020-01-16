@@ -816,15 +816,19 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 if (dtset%plowan_projcalc(1)==-2)then
   if (dtset%ucrpa >= 1 .or. dtset%dmft_kspectralfunc==1) then 
     opt = 0
-    write(message,*)ch10,"Normalization of plowannier k-point by k-point"
   else
     opt=1
-    write(message,*)ch10,"Normalization of plowannier on the sum of the k-points"
   endif
 else
   opt=0
-  write(message,*)ch10,"Normalization of plowannier k-point by k-point"
 end if
+opt=1
+if (opt==0) then
+  write(message,*)ch10,"Normalization of plowannier k-point by k-point"
+else
+  write(message,*)ch10,"Normalization of plowannier on the sum of the k-points"
+endif
+
 MSG_COMMENT(message)
 !opt=1
         ! 0 : normalization k-point by k-point (normal use of plowan)
