@@ -121,6 +121,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 !DEC$ NOOPTIMIZE
 #endif
 
+
  implicit none
 
 !Arguments ------------------------------------
