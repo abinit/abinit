@@ -36,7 +36,6 @@ prtden 0
 #%% [setup]
 #%% executable = abinit
 #%% need_cpp_vars = !HAVE_MPI_IO_DEFAULT
-#%% exclude_builders = ubu_intel_17.0_openmpi
 #%% [files]
 #%% files_to_test = 
 #%%   t06.out, tolnlines = 2, tolabs = 1.100e-07, tolrel = 5.000e-04
