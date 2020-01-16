@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lattice_verlet_mover
 !! NAME
 !! m_lattice_verlet_mover

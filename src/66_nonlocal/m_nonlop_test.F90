@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_nonlop_test
 !! NAME
 !!  m_nonlop_test

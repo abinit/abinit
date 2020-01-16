@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_invars1
 !! NAME
 !!  m_invars1

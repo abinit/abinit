@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_results_gs
 !! NAME
 !!  m_results_gs

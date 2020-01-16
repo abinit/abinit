@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_eliashberg_1d
 !! NAME
 !!  m_eliashberg_1d

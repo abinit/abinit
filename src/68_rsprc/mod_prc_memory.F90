@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/mod_prc_memory
 !! NAME
 !! mod_prc_memory

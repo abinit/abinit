@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sigmaph
 !! NAME
 !!  m_sigmaph

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/lapackprof
 !! NAME
 !! lapackprof

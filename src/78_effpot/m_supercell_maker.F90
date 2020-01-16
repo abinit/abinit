@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_supercell_maker
 !! NAME
 !! m_supercell_maker

@@ -2,7 +2,6 @@
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_GreenHyboffdiag
 !! NAME
 !!  m_GreenHyboffdiag

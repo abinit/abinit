@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lattice_berendsen_NVT_mover
 !! TODO: This is not yet implemented.
 !! NAME

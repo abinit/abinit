@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_langevin
 !! NAME
 !!  m_pred_langevin

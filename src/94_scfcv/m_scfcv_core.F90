@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_scfcv_core
 !! NAME
 !!  m_scfcv_core

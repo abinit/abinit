@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_denspot
 !! NAME
 !!  m_wvl_denspot

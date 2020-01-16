@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fft_mesh
 !! NAME
 !!  m_fft_mesh
