@@ -1822,6 +1822,8 @@ print *, 'respfn 1820'
  ! Clean the header
  call hdr%free()
 
+print *, 'respfn 1825'
+
 !Clean GPU data
 #if defined HAVE_GPU_CUDA
  if (dtset%use_gpu_cuda==1) then
@@ -1829,6 +1831,7 @@ print *, 'respfn 1820'
  end if
 #endif
 
+print *, 'respfn 1834'
  call timab(138,2,tsec)
  call timab(132,2,tsec)
 

@@ -1362,7 +1362,9 @@ print *, ' mpw, mpw1 ', mpw, mpw1
          end if
          iband_me = iband_me + 1
 print *, 'is ik ib cgq ', isppol, ikpt, iband
+if (sum(abs(cgq(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol6) then
 print *, ' diff in cgq ', cgq(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+end if
          !cgq(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
          icg = icg + npw
          icg_tmp = icg_tmp + npw

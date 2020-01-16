@@ -2984,6 +2984,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  integer :: nband_me_saved, iband_saved, chksymbreak, iout
  integer :: ik_disk
  integer :: spin_saved, spin_sym
+ integer :: itimrev_disk
  real(dp) :: ecut_eff,cpu,wall,gflops
  character(len=500) :: msg
  logical :: isirred_kf, foundk
@@ -3074,6 +3075,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  ABI_ALLOCATE (ibz2disk, (nkibz))
  ibz2disk = -1
  do ik_ibz=1,nkibz
+print *, 'ik_ibz, nkibz ', ik_ibz, nkibz
    foundk = .false.
    do ik_disk=1,wfk_disk%nkpt
 print *, ' kpt disk vs irred ', ebands_ibz%kptns(:,ik_disk), '   ', kptns_in(:,ibz2rbz(ik_ibz))
@@ -3082,8 +3084,15 @@ print *, ' kpt disk vs irred ', ebands_ibz%kptns(:,ik_disk), '   ', kptns_in(:,i
        foundk = .true.
        exit
      end if
+!TODO: make sure the algorithm prefers +kibz to the time reversed copy. May be ok as is.
+     if (sum(abs(ebands_ibz%kptns(:,ik_disk) + kptns_in(:,ibz2rbz(ik_ibz)))) < tol6) then
+       ibz2disk(ik_ibz) = -ik_disk
+       foundk = .true.
+       exit
+     end if
    end do
    if (.not. foundk) then
+print *, 'ik_ibz, kptns_in(:,ibz2rbz(ik_ibz))  ', ik_ibz, kptns_in(:,ibz2rbz(ik_ibz))
      MSG_ERROR ("wfk_read_my_kptbands : not all of the required irred kpts are on disk.")
    end if
  end do
@@ -3121,7 +3130,8 @@ print *, 'rbz2ibz_sort ', rbz2ibz_sort
    jj = 0
    do ikpt=1,nkpt_in
      ik_ibz = rbz2ibz(1,ikpt)
-     ik_disk = ibz2disk(ik_ibz)
+     ik_disk = abs(ibz2disk(ik_ibz))
+
      ! conversion of single spin AFM wfk file to full 2 component one in memory
      spin_sym=spin
      if (convnsppol1to2) spin_sym=1
@@ -3147,8 +3157,12 @@ print *, ' distrb_flags(:,:,:) ', distrb_flags
    if (convnsppol1to2 .and. spin > 1) exit
 
    do ik_ibz=1,nkibz
+     ik_disk = abs(ibz2disk(ik_ibz))
+     itimrev_disk = 0
+     if (ibz2disk(ik_ibz) < 0) itimrev_disk = 1
+
      nband_k = wfk_disk%nband(ik_disk,spin)
-     kibz = ebands_ibz%kptns(:,ik_ibz)
+     kibz = kptns_in(:, ibz2rbz(ik_ibz))
      istwf_disk = wfk_disk%hdr%istwfk(ik_disk)
      npw_disk = wfk_disk%hdr%npwarr(ik_disk)
 
@@ -3183,6 +3197,7 @@ print *, ' spin, ik_ibz, nqst, needthisk ', spin, ik_ibz, nqst, needthisk
        ABI_CHECK(ik_ibz == rbz2ibz(1,ikf), "ik_ibz !/ ind qq(1)")
 
        kf = kptns_in(:,ikf)
+print *, ' kf ',kf
        istwf_kf = istwfk_in(ikf)
        npw_kf = npwarr(ikf)
 
@@ -3224,7 +3239,17 @@ print *, 'reading from file for iband, ik_disk, spin', iband, ik_disk, spin
          end if
        
          ! reset isym for each spin_sym
-         isym = rbz2ibz(2,ikf); itimrev = rbz2ibz(3,ikf); g0 = rbz2ibz(4:6,ikf) ! IS(k_ibz) + g0 = k_bz
+         isym = rbz2ibz(2,ikf)
+         ! there is a first time reversal possible from the irred set found above to the kptns in input.
+         ! a second possible time reversal if the irred k is not explicitly in the disk file, but only it's time reversed image
+         itimrev = mod(itimrev_disk+rbz2ibz(3,ikf),2)
+         g0 = rbz2ibz(4:6,ikf) ! IS(k_ibz) + g0 = k_bz
+
+         ! see if we can not get away without time reversal anyway, if k is equal to it's time reversal image
+         if (itimrev > 0) then
+print *, 'itimrev, abs(mod(two*kibz, one)) ', itimrev, abs(mod(two*kibz, one))
+           if (sum(abs(mod(two*kibz, one))) < tol12) itimrev = 0
+         end if
 
          ! complete the spin down wfk with an AFM symop
          if (spin_sym /= spin) then
@@ -3235,10 +3260,9 @@ print *, 'reading from file for iband, ik_disk, spin', iband, ik_disk, spin
              if (sum(abs(ksym-kf)) < tol8) exit
            end do
            ABI_CHECK(isym <= cryst%nsym, "did not find the AFM symop I need to get isppol=2 wave functions from disk")
-
-
 print *, 'using afm symop ', isym, cryst%symafm(isym), cryst%symrel(:,:,isym), cryst%tnons(:,isym)
          end if
+
          isirred_kf = (isym == 1 .and. itimrev == 0 .and. all(g0 == 0) .and. cryst%symafm(isym) == 1)
 print *, 'isirred_kf ', isirred_kf
 
@@ -3250,15 +3274,18 @@ print *, 'ikf, kf, isym, itimrev, g0, ik_ibz, jj, iqst, ik_ibz, kibz ', &
          if (present(occ)) then
            occ(ibdocc(ikf,spin_sym)+1:ibdocc(ikf,spin_sym)+nband_k) = occ_disk(1:nband_k)
          end if
+print *, 'npwarr disk and kf : ', wfk_disk%hdr%npwarr(ik_disk), npwarr(ikf)
   
          ! The test on npwarr is needed because we may change istwfk e.g. gamma.
          if (isirred_kf .and. wfk_disk%hdr%npwarr(ik_disk) == npwarr(ikf)) then
+print *, 'npwarr is the same and irred kf, so just copy over'
            if (present(kg)) then
              kg(:,ikg(ikf)+1:ikg(ikf)+npw_kf) = kg_disk (:,1:npw_kf)
            end if
            cg(:,icg(ikf,spin_sym)+1:icg(ikf,spin_sym)+npw_kf*nband_me*dtset%nspinor) = &
 &             cg_disk(:,1:npw_kf*nband_me*dtset%nspinor)
          else
+print *, 'npwarr change or need to convert the wf by symmetry, or complete it'
            ! Compute G-sphere centered on kf
            call get_kg(kf,istwf_kf,ecut_eff,cryst%gmet,npw_kf,kg_kf)
            ABI_CHECK(npw_kf == npwarr(ikf), "Wrong npw_kf")
@@ -3432,6 +3459,7 @@ print *, 'shapeocc ', shape(occ)
 &        eig_k=eigen(ibdeig+1:ibdeig+nband_k*(2*nband_k)**formeig), &
 &        occ_k=occ(ibdocc+1:ibdocc+nband_k))
      else
+print *, 'no occ, could be printing RF WFK formeig ', formeig
        call wfk_disk%write_band_block([iband,iband+nband_me-1],ik_rbz,spin,xmpio_collective,&
 &        kg_k=kg(:,ikg+1:ikg+npw_k), &
 &        cg_k=cg(:,icg+1:icg+npw_k*nband_me*dtset%nspinor),&

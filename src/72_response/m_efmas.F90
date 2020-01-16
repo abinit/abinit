@@ -132,7 +132,6 @@ CONTAINS
 
    !XG20180810: please do not remove. Otherwise, I get an error on my Mac.
    write(std_out,*)' efmasval_free_array : enter '
-print *, ' allocated(efmasval) ', allocated(efmasval)
 
    if(allocated(efmasval)) then
      n=shape(efmasval)
@@ -144,7 +143,6 @@ print *, ' allocated(efmasval) ', allocated(efmasval)
      ABI_DATATYPE_DEALLOCATE(efmasval)
    end if
 
-print *, 'efmasval_free_array : exit'
  end subroutine efmasval_free_array
 !!***
 
