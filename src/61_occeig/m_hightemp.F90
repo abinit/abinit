@@ -1077,12 +1077,12 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_prt_eigocc(e_shiftfactor,eigen,etotal,energies,fnameabo_eig,iout,kptns,&
-    & mband,nband,nkpt,nsppol,occ,rprimd,strten,tsmear,usepaw,wtk)
+  subroutine hightemp_prt_eigocc(e_shiftfactor,eigen,etotal,energies,fnameabo_eig,&
+    & iout,iter,kptns,mband,nband,nkpt,nsppol,occ,rprimd,strten,tsmear,usepaw,wtk)
 
     ! Arguments -------------------------------
     ! Scalars
-    integer,intent(in) :: iout,mband,nkpt,nsppol,usepaw
+    integer,intent(in) :: iout,iter,mband,nkpt,nsppol,usepaw
     real(dp),intent(in) :: etotal,tsmear
     real(dp),intent(in) :: e_shiftfactor
     character(len=*),intent(in) :: fnameabo_eig
@@ -1164,8 +1164,8 @@ contains
     ! Loop over spins
     do isppol=1,nsppol
       ! write(msg, '(a,i6,a)') ' Eigenvalues (hartree) for nkpt=',nkpt,'k points:'
-      write(msg, '(a,i12,a,i12)') ' Number of kpts     = ',nkpt,'            Number of bands    = ',&
-      & mband
+      write(msg, '(a,i12,a,i12,a,i15)') ' Number of kpts     = ',nkpt,'            Number of bands    = ',&
+      & mband,'            Iteration          = ',iter
       call wrtout(temp_unit,msg,'COLL')
 
       ! Loop over k-points

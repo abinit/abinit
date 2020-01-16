@@ -1469,7 +1469,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & resid,rhor,rprimd,results_gs%vxcavg,xred)
 
  call hightemp_prt_eigocc(hightemp%e_shiftfactor,eigen,results_gs%etotal,results_gs%energies,dtfil%fnameabo_eig,std_out,&
-& dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,occ,rprimd,results_gs%strten,&
+& 0,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,occ,rprimd,results_gs%strten,&
 & dtset%tsmear,psps%usepaw,dtset%wtk)
 
  if ( (dtset%iscf>=0 .or. dtset%iscf==-3) .and. dtset%prtstm==0) then

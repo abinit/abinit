@@ -51,6 +51,7 @@ module m_mover
  use m_time,               only : abi_wtime, sec2str
  use m_exit,               only : get_start_time, have_timelimit_in, get_timelimit, enable_timelimit_in
  use m_electronpositron,   only : electronpositron_type
+ use m_hightemp,           only : hightemp_prt_eigocc
  use m_scfcv,              only : scfcv_t, scfcv_run
  use m_effective_potential,only : effective_potential_type, effective_potential_evaluate
  use m_dtfil,              only : dtfil_init_time
@@ -76,9 +77,9 @@ module m_mover
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef
-#if defined DEV_MS_SCALEUP 
- use scup_global, only : global_set_parent_iter,global_set_print_parameters 
-#endif 
+#if defined DEV_MS_SCALEUP
+ use scup_global, only : global_set_parent_iter,global_set_print_parameters
+#endif
  use m_scup_dataset
  implicit none
 
@@ -125,7 +126,7 @@ contains
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!   | mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
 !!  rprimd(3,3)=dimensional primitive translations (bohr)
-!!  scup_dtset <type(scup_dtset_type) = derived datatype holding all options 
+!!  scup_dtset <type(scup_dtset_type) = derived datatype holding all options
  !!            for the evaluation of an effective electronic model using SCALE UP
 !!
 !! OUTPUT
@@ -223,7 +224,7 @@ real(dp), intent(in),target :: amu_curr(:) !(scfcv%dtset%ntypat)
 real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
-type(scup_dtset_type),optional, intent(inout) :: scup_dtset  
+type(scup_dtset_type),optional, intent(inout) :: scup_dtset
 
 !Local variables-------------------------------
 !scalars
@@ -251,7 +252,7 @@ logical :: change,useprtxfase
 logical :: skipcycle
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
-real(dp) :: minE,wtime_step,now,prev
+real(dp) :: minE,wtime_step,now,prev,e_shiftfactor
 logical :: file_exists
 !arrays
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
@@ -408,9 +409,9 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      call wrtout(std_out,message,'COLL')
    end if
    need_elec_eval = .FALSE.
-   if(present(scup_dtset))then 
+   if(present(scup_dtset))then
      need_elec_eval = scup_dtset%scup_elec_model
-   endif 
+   endif
  else
    if(need_verbose)then
      write(message,'(a,a,i2,a,a,a,80a)')&
@@ -621,26 +622,26 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
              if(itime == 1 .and. ab_mover%restartxf==-3)then
                call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
-               hist%ihist = 1 
+               hist%ihist = 1
              end if
 
-#if defined DEV_MS_SCALEUP 
+#if defined DEV_MS_SCALEUP
            !If we a SCALE UP effective electron model give the iteration and set print-options
            if(need_elec_eval)then
               call global_set_parent_iter(itime)
-              ! Set all print options to false. 
+              ! Set all print options to false.
               call global_set_print_parameters(geom=.FALSE.,eigvals=.FALSE.,eltic=.FALSE.,&
 &                      orbocc=.FALSE.,bands=.FALSE.)
-              if(itime == 1 .or. modulo(itime,scup_dtset%scup_printniter) == 0)then 
-                 call global_set_print_parameters(scup_dtset%scup_printgeom,scup_dtset%scup_printeigv,scup_dtset%scup_printeltic,& 
+              if(itime == 1 .or. modulo(itime,scup_dtset%scup_printniter) == 0)then
+                 call global_set_print_parameters(scup_dtset%scup_printgeom,scup_dtset%scup_printeigv,scup_dtset%scup_printeltic,&
 &                         scup_dtset%scup_printorbocc,scup_dtset%scup_printbands)
-              end if 
+              end if
            end if
 #endif
 
            call effective_potential_evaluate( &
 &           effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
-&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,& 
+&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,&
 &           filename=name_file,elec_eval=need_elec_eval)
 
 !          Check if the simulation did not diverge...
@@ -750,6 +751,23 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 &       ab_mover%ntypat,ab_mover%typat,amu_curr,ab_mover%znucl,ab_mover%dtion,scfcv_args%dtset%mdtemp)
      end if
 #endif
+
+!    ###########################################################
+!    ### TEMPORARY. BLANCHET : write eigen values and occupations
+
+     if(associated(scfcv_args%hightemp)) then
+       e_shiftfactor=scfcv_args%hightemp%e_shiftfactor
+     else
+       e_shiftfactor=zero
+     end if
+
+     if(abs(scfcv_args%results_gs%etotal)>tol14) then
+       call hightemp_prt_eigocc(e_shiftfactor,scfcv_args%eigen,&
+&       scfcv_args%results_gs%etotal,scfcv_args%results_gs%energies,scfcv_args%dtfil%fnameabo_eig,&
+&       std_out,itime,scfcv_args%dtset%kptns,scfcv_args%dtset%mband,scfcv_args%dtset%nband,&
+&       scfcv_args%dtset%nkpt,scfcv_args%dtset%nsppol,scfcv_args%occ,rprimd,&
+&       scfcv_args%results_gs%strten,scfcv_args%dtset%tsmear,scfcv_args%psps%usepaw,scfcv_args%dtset%wtk)
+     end if
 
 !    ###########################################################
 !    ### 14. Output after SCFCV

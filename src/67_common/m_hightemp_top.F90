@@ -32,8 +32,39 @@ module m_hightemp_top
 
   implicit none
 
-  public :: hightemp_prt_cprj
+  public :: hightemp_prt_cg,hightemp_prt_cprj
 contains
+
+  !!****f* ABINIT/m_hightemp/hightemp_prt_cg
+  !! NAME
+  !! hightemp_prt_cg
+  !!
+  !! FUNCTION
+  !! Printing cg values... INTENT : testing values of cgs, increasing
+  !! the number of bands, and the temperature.
+  !!
+  !! INPUTS
+  !!
+  !! OUTPUT
+  !!
+  !! PARENTS
+  !!
+  !! CHILDREN
+  !!
+  !! SOURCE
+  subroutine hightemp_prt_cg(cprj,eigen,gs_hamk,istep,mband,mcprj,mpi_enreg,natom,nkpt,nsppol,occ)
+    ! Arguments -------------------------------
+    ! Scalars
+    integer, intent(in) :: istep,mband,mcprj,natom,nkpt,nsppol
+    type(gs_hamiltonian_type), intent(inout) :: gs_hamk
+    type(MPI_type), intent(inout) :: mpi_enreg
+    ! Arrays
+    real(dp), intent(inout) :: eigen(mband*nkpt*nsppol)
+    real(dp), intent(inout) :: occ(mband*nkpt*nsppol)
+    type(pawcprj_type),intent(in) :: cprj(natom,mcprj*gs_hamk%usecprj)
+
+
+  end subroutine hightemp_prt_cg
 
   !!****f* ABINIT/m_hightemp/hightemp_prt_cprj
   !! NAME
