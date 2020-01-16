@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_band2eps_dataset
 !! NAME
 !!  m_band2eps_dataset

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_berryphase_new
 !! NAME
 !!  m_berryphase_new
@@ -1711,7 +1710,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 end subroutine berryphase_new
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/update_e_field_vars
 !! NAME
 !! update_e_field_vars
@@ -2653,7 +2651,6 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
 end subroutine prtefield
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/init_e_field_vars
 !! NAME
 !! init_e_field_vars
@@ -2770,7 +2767,6 @@ subroutine init_e_field_vars(dtefield,dtset,gmet,gprimd,kg,&
 end subroutine init_e_field_vars
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/initberry
 !! NAME
 !! initberry

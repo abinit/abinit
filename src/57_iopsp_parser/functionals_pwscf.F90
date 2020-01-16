@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/functionals_pwscf.F90
 !! NAME
 !!  functionals_pwscf

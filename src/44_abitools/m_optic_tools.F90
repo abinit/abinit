@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_optic_tools
 !! NAME
 !! m_optic_tools

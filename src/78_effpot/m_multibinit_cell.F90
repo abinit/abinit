@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_multibinit_cell
 !! NAME
 !! m_multibinit_cell

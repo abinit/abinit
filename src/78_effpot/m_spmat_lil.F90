@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_spmat_lil
 !! NAME
 !! m_spmat_lil

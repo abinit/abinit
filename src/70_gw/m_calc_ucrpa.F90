@@ -39,7 +39,6 @@ MODULE m_calc_ucrpa
 !!***
 
 contains
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/calc_ucrpa
 !! NAME
 !! calc_ucrpa

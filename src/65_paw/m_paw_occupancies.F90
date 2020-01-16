@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* m_paw_occupancies/m_paw_occupancies
 !! NAME
 !!  m_paw_occupancies

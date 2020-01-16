@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_predict_string
 !! NAME
 !!  m_predict_string

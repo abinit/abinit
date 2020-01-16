@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pead_nl_loop
 !! NAME
 !!  m_pead_nl_loop

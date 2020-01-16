@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_rayleigh_ritz
 !! NAME
 !!  m_rayleigh_ritz

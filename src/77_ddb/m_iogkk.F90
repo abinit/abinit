@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_iogkk
 !! NAME
 !!  m_iogkk
@@ -1926,7 +1925,6 @@ end subroutine nmsq_gam_sumFS
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/nmsq_pure_gkk
 !!
 !! NAME

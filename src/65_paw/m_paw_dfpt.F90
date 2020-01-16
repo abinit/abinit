@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* m_paw_dfpt/m_paw_dfpt
 !! NAME
 !!  m_paw_dfpt

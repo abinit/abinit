@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_args_gs
 !! NAME
 !!  m_args_gs

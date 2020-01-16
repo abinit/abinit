@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_scup_dataset
 !! NAME
 !!  m_scup_dataset

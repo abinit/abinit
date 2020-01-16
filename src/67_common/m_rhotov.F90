@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_rhotov
 !! NAME
 !!  m_rhotov

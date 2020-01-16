@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sigma_driver
 !! NAME
 !!  m_sigma_driver

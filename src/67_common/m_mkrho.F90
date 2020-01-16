@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* m_mkrho/m_mkrho
 !! NAME
 !!  m_mkrho
