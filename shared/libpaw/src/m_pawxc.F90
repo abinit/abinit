@@ -1650,8 +1650,8 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        end if
 !      Possibly add integral of Vxctau*tau
        if (with_taur.and.need_vxctau) then
-         ff(:)=ff(:)+vxctau(:,ipts,1)*tauarr(:,nspden)
-         if (nspden==2) ff(:)=ff(:)+vxctau(:,ipts,2)*(tauarr(:,1)-tauarr(:,2))
+         ff(:)=ff(:)+vxctau_(:,ipts,1)*tauarr(:,nspden)
+         if (nspden==2) ff(:)=ff(:)+vxctau_(:,ipts,2)*(tauarr(:,1)-tauarr(:,2))
        end if
        ff(1:nrad)=ff(1:nrad)*pawrad%rad(1:nrad)**2
        call simp_gen(vxcrho,ff,pawrad)
@@ -1680,6 +1680,9 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        LIBPAW_DEALLOCATE(ylmlapl)
        LIBPAW_DEALLOCATE(ylmgnorm)
      end if
+   end if
+   if (usekden==1.and.(.not.present(vxctau)).and.(option==0.or.option==2)) then
+     LIBPAW_DEALLOCATE(vxctau_)
    end if
 
 !  ------------------------------------

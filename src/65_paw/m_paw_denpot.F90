@@ -1320,7 +1320,7 @@ subroutine pawdensities(compch_sph,cplex,iatom,lmselectin,lmselectout,lm_size,nh
      jrhoij=jrhoij+pawrhoij%cplex_rhoij
    end do
 
-!  Scale densities with 1/r**2 and compute rho1(r=0) and trho1(r=0)
+!  Compute rho1(r=0) and trho1(r=0)
    if (cplex==2)  then
      ABI_ALLOCATE(aa,(5))
      ABI_ALLOCATE(bb,(5))
@@ -1644,7 +1644,8 @@ subroutine pawkindensities(cplex,lmselectin,lm_size,nspden,nzlmopt,&
          if (cplex==2) ro(2)=pawrhoij%rhoijp(iq0+jrhoij,1)
        end if
      end if
-     ro(1:cplex)=pawtab%dltij(klmn)*ro(1:cplex)
+!    Apply factor 1/2 (because tau=1/2 * Sum_ij[rhoij.Nabla_phi_i*Nabla_phi_j])
+     ro(1:cplex)=half*pawtab%dltij(klmn)*ro(1:cplex)
 
 !    First option: AE and PS on-site kin. energy densities (opt_dens==0 or 1)
 !    ------------------------------------------------------------------------
@@ -1730,7 +1731,7 @@ subroutine pawkindensities(cplex,lmselectin,lm_size,nspden,nzlmopt,&
      jrhoij=jrhoij+pawrhoij%cplex_rhoij
    end do
 
-!  Scale densities with 1/r**2 and compute tau1(r=0) and ttau1(r=0)
+!  Compute tau1(r=0) and ttau1(r=0)
    if (cplex==2) then
      ABI_ALLOCATE(aa,(5))
      ABI_ALLOCATE(bb,(5))

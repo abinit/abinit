@@ -840,7 +840,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !      If fake meta-GGA, has to remove the core contribution
 !        when electronic effective mass has been modified
-       if (ixc>=31.and.ixc<=34) then
+       if (n3xccc>0.and.(ixc>=31.and.ixc<=34)) then
          if (ixc==31) then
            coeff=one-(one/1.01_dp)
            if (nspden_updn==1) then

@@ -242,8 +242,12 @@ subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
 
  ! Set-up internal dimensions.
  !These arrays are needed only in the self-consistent case
- if (iscf == AB7_MIXING_EIG) then
-    !    For iscf==1, five additional vectors are needed
+ if (iscf == AB7_MIXING_NONE) then
+    !    For iscf==0, one additional vector is needed.
+    !    The index 1 is attributed to the new residual potential.
+    mix%n_fftgr=1 ; mix%n_index=1
+ else if (iscf == AB7_MIXING_EIG) then
+    !    For iscf==1, five additional vectors are needed.
     !    The index 1 is attributed to the old trial potential,
     !    The new residual potential, and the new
     !    preconditioned residual potential receive now a temporary index
@@ -306,7 +310,9 @@ subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
  mix%i_vrespc(:)=0
 
  ! Setup initial values.
- if (iscf == AB7_MIXING_EIG) then
+ if (iscf == AB7_MIXING_NONE) then
+    mix%i_vresid(1)=1
+ else if (iscf == AB7_MIXING_EIG) then
     mix%i_vtrial(1)=1 ; mix%i_vresid(1)=2 ; mix%i_vrespc(1)=3
  else if(iscf == AB7_MIXING_SIMPLE) then
     mix%i_vtrial(1)=1 ; mix%i_vresid(1)=2 ; mix%i_vrespc(1)=3
@@ -485,15 +491,15 @@ subroutine ab7_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
  errid = AB7_NO_ERROR
 
  if (mix%n_fftgr>0) then
-   mix%f_fftgr(:,:,mix%i_vresid(1)) = arr_resid(:,:)
-   if (present(arr_respc)) mix%f_fftgr(:,:,mix%i_vrespc(1)) = arr_respc(:,:)
+   if (mix%i_vresid(1)>0) mix%f_fftgr(:,:,mix%i_vresid(1)) = arr_resid(:,:)
+   if (present(arr_respc).and.mix%i_vrespc(1)>0) mix%f_fftgr(:,:,mix%i_vrespc(1)) = arr_respc(:,:)
  end if
  if (mix%n_pawmix>0) then
-   if (present(arr_paw_resid)) mix%f_paw(:, mix%i_vresid(1)) = arr_paw_resid(:)
-   if (present(arr_paw_respc)) mix%f_paw(:, mix%i_vrespc(1)) = arr_paw_respc(:)
+   if (present(arr_paw_resid).and.mix%i_vresid(1)>0) mix%f_paw(:, mix%i_vresid(1)) = arr_paw_resid(:)
+   if (present(arr_paw_respc).and.mix%i_vrespc(1)>0) mix%f_paw(:, mix%i_vrespc(1)) = arr_paw_respc(:)
  end if
  if (mix%n_atom>0) then
-   if (present(arr_atm)) mix%f_atm(:,:, mix%i_vresid(1)) = arr_atm(:,:)
+   if (present(arr_atm).and.mix%i_vresid(1)>0) mix%f_atm(:,:, mix%i_vresid(1)) = arr_atm(:,:)
  end if
 
 end subroutine ab7_mixing_copy_current_step
@@ -547,7 +553,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
    !call memocc_abi(i_stat, mix%f_fftgr, 'mix%f_fftgr', subname)
    ABI_ALLOCATE(mix%f_fftgr,(mix%space * mix%nfft,mix%nspden,mix%n_fftgr))
    mix%f_fftgr(:,:,:)=zero
-   if (mix%mffmem == 0 .and. istep_ > 1) then
+   if (mix%mffmem == 0 .and. istep_ > 1 .and. mix%n_fftgr>0) then
      call timab(83,1,tsec)
      if (open_file(mix%diskCache,msg,newunit=temp_unit,form='unformatted',status='old') /= 0) then
        MSG_ERROR(msg)
@@ -563,7 +569,7 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
     !allocate(mix%f_paw(mix%n_pawmix,mix%n_fftgr), stat = i_stat)
     !call memocc_abi(i_stat, mix%f_paw, 'mix%f_paw', subname)
     ABI_ALLOCATE(mix%f_paw,(mix%n_pawmix,mix%n_fftgr))
-    if (mix%n_pawmix > 0) then
+    if (mix%n_pawmix > 0 .and. mix%n_fftgr>0) then
       mix%f_paw(:,:)=zero
       if (mix%mffmem == 0 .and. istep_ > 1) then
         read(temp_unit) mix%f_paw
@@ -628,8 +634,10 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
     end if
     rewind(temp_unit)
     ! VALGRIND complains not all of f_fftgr_disk is initialized
-     write(temp_unit) mix%f_fftgr
-    if (mix%n_pawmix > 0) then
+    if (mix%n_fftgr > 0) then
+      write(temp_unit) mix%f_fftgr
+    end if
+    if (mix%n_pawmix > 0 .and. mix%n_fftgr > 0) then
       write(temp_unit) mix%f_paw
     end if
     close(unit=temp_unit)
@@ -732,12 +740,6 @@ end subroutine ab7_mixing_eval_deallocate
     if (reset) initialized = 0
  end if
 
- ! If no mixing, exit here
- if (mix%iscf == AB7_MIXING_NONE) then
-   if (present(resnrm)) resnrm=0.d0
-   return
- end if
-
  ! Miscellaneous
  moveAtm = 0
  if (mix%n_atom > 0) moveAtm = 1
@@ -753,7 +755,9 @@ end subroutine ab7_mixing_eval_deallocate
 
  ! Do the mixing.
  resnrm_ = 0.d0
- if (mix%iscf == AB7_MIXING_EIG) then
+ if (mix%iscf == AB7_MIXING_NONE) then
+   arr(:,:)=arr(:,:)+mix%f_fftgr(:,:,1)
+ else if (mix%iscf == AB7_MIXING_EIG) then
     !  This routine compute the eigenvalues of the SCF operator
     call scfeig(istep, mix%space * mix%nfft, mix%nspden, &
          & mix%f_fftgr(:,:,mix%i_vrespc(1)), arr, &

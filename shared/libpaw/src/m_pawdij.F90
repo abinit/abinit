@@ -812,7 +812,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
    end if
 
-
 !  ------------------------------------------------------------------------
 !  ----------- Add Dij spin-orbit to Dij
 !  ------------------------------------------------------------------------
