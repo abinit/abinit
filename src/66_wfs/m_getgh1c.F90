@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_getgh1c
 !! NAME
 !!  m_getgh1c

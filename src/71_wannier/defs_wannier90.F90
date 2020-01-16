@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/defs_wannier90
 !! NAME
 !! defs_wannier90

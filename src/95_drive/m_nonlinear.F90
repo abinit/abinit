@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_nonlinear
 !! NAME
 !!  m_nonlinear
@@ -674,9 +673,9 @@ end if
    if (psp_gencond==1.or.call_pawinit) then
 !    Some gen-cond have to be added...
      call timab(553,1,tsec)
-     call pawinit(gnt_option,zero,zero,dtset%pawlcutd,dtset%pawlmix,&
+     call pawinit(dtset%effmass_free,gnt_option,zero,zero,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
-&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usepotzero)
+&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,0,dtset%usepotzero)
      call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,&
 &     rprimd,symrec,pawang%zarot)
 
@@ -965,7 +964,7 @@ end if
 & nsym1,phnons1,symaf1,symrc1,symrl1,tnons1,dtset%typat,xred)
  if (psps%usepaw==1) then
 !  Allocate/initialize only zarot in pawang1 datastructure
-   call pawang_init(pawang1,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
+   call pawang_init(pawang1,0,0,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
    call setsym_ylm(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
  end if
 

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/optic
 !! NAME
 !! optic
@@ -8,7 +7,7 @@
 !! the linear and non-linear optical responses in the RPA.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2019 ABINIT group (SSharma,MVer,VRecoules,YG)
+!! Copyright (C) 2002-2019 ABINIT group (SSharma,MVer,VRecoules,YG,NAP)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -207,7 +206,7 @@ program optic
    end if
 
    write(msg,'(3a)') "From version 7.11.4, optic uses namelists as input.",ch10,&
-&   "See e.g. ~/tests/tutorespfn/Input/toptic_2.in"
+     "See e.g. ~/tests/tutorespfn/Input/toptic_2.in"
    MSG_COMMENT(msg)
 
    ! Setup some default values:
@@ -472,7 +471,7 @@ program optic
  ABI_ALLOCATE(doccde,(mband*nkpt*nsppol))
 
  !Recompute fermie from header
- !WARNING no garantie that it works for other materials than insulators
+ !WARNING no guarantee that it works for other materials than insulators
  nelect = hdr%nelect
  tphysel = zero
  ABI_ALLOCATE(istwfk,(nkpt))
@@ -719,6 +718,7 @@ program optic
 &   linel1,linel2,linel3,nomega,domega,scissor,broadening,tolerance,tmp_radix,do_antiresonant,optic_ncid,comm)
  end do
 
+ ! onlinear electro-optical susceptibility for semiconductors
  call wrtout(std_out," optic : Call nonlinopt","COLL")
  do ii=1,num_nonlin2_comp
    nonlin1 = int( nonlin2_comp(ii)/100.0_dp)

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_matlu
 !! NAME
 !!  m_matlu
@@ -537,7 +536,6 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
 end subroutine print_matlu
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* m_matlu/sym_matlu
 !! NAME
 !! sym_matlu
@@ -2285,7 +2283,7 @@ end subroutine add_matlu
    write(message,'(3x,2a,e12.4,a,e12.4,6a)') ch10,&
 &   ' Occupation matrix is non diagonal : the maximum off-diag part ',maxoffdiag,' is larger than',tol,ch10&
 &    , "The corresponding non diagonal elements will be neglected in the Weiss/Hybridization functions",ch10&
-&    , "(Except if dmft_solv=8 where these elements are taken into accounts)",ch10&
+&    , "(Except if dmft_solv=8,9 where these elements are taken into accounts)",ch10&
 &    , "This is an approximation"
    MSG_WARNING(message)
  else
@@ -2682,7 +2680,8 @@ end subroutine add_matlu
            mat_out_c=czero
 
            if(optprt>2) then
-             write(message,'(2a)') ch10,"SLM input matrix"
+             write(message,'(2a, i2, a, i2, a, i2)') ch10,"SLM input matrix, isppol=", isppol, ", ispinor=", ispinor,& 
+&             ", ispinor2=", ispinor2
              call wrtout(std_out,message,'COLL')
              do im1=1,ll*2+1
                write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
@@ -2708,7 +2707,8 @@ end subroutine add_matlu
            end do
 
            if(optprt>2) then
-             write(message,'(2a)') ch10,"YLM output matrix"
+             write(message,'(2a, i2, a, i2, a, i2)') ch10,"YLM output matrix, isppol=", isppol, ", ispinor=", ispinor,&
+&             ", ispinor2=", ispinor2
              call wrtout(std_out,message,'COLL')
              do im1=1,ll*2+1
                write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&

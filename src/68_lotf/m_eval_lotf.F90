@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/eval_lotf
 !! NAME
 !! eval_lotf

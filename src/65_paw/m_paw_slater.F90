@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_slater
 !! NAME
 !!  m_paw_slater
@@ -40,7 +39,8 @@ MODULE m_paw_slater
  use m_paw_atomorb,  only : atomorb_type, init_atomorb, print_atomorb, destroy_atomorb, get_overlap
  use m_crystal,      only : crystal_t
  use m_paw_io,       only : pawio_print_ij
- use m_pawang,       only : pawang_type, realgaunt
+ use m_pawang,       only : pawang_type
+ use m_paw_sphharm,   only : realgaunt
  use m_pawrad,       only : pawrad_type, pawrad_free, pawrad_isame, &
 &                           pawrad_deducer0, simp_gen, calc_slatradl
  use m_pawtab,       only : pawtab_type

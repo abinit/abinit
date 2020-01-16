@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psp8
 !! NAME
 !!  m_psp8
@@ -237,6 +236,7 @@ subroutine psp8in(ekb,epsatm,ffspl,indlmn,lloc,lmax,lmnmax,lnmax,&
    if (pspso==0) then
      write (message, '(3a)') 'You are reading a pseudopotential file with spin orbit projectors',ch10,&
 &     ' but internal variable pspso is 0 - this is not possible for oncvpsp. Set nspinor to 2 and so_psp 1'
+! TODO: this should be a bug, not a warning. The code later crashes in init of indlmn
      MSG_COMMENT(message)
    end if
  else

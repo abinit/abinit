@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_nucprop
 !! NAME
 !!  m_nucprop
@@ -331,7 +330,6 @@ contains
 !!***
 
 !!***
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/calc_fc
 !! NAME
 !! calc_fc

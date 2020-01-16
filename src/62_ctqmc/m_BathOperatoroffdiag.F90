@@ -3,7 +3,6 @@
 #include "config.h"
 #endif
 
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_BathOperatoroffdiag
 !! NAME
 !!  m_BathOperatoroffdiag

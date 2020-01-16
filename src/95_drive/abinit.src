@@ -33,6 +33,7 @@ sources = [
  "m_longwave.F90",
  "m_mover.F90",
  "m_mover_effpot.F90",
+ "m_multibinit_driver.F90",
  "m_nonlinear.F90",
  "m_precpred_1geo.F90",
  "m_respfn_driver.F90",

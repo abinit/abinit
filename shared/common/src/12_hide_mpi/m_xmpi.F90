@@ -136,6 +136,15 @@ MODULE m_xmpi
  integer,save, public ABI_PROTECTED :: xmpi_count_requests = 0
  ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
  ! This counter should be zero at the end of the run if all requests have been released)
+
+ ! For MPI <v4, collective communication routines accept only a 32bit integer as data count.
+ ! To exchange more than 2^32 data we need to create specific user-defined datatypes
+ ! For this, we need some parameters:
+ integer(KIND=int32),public,parameter :: xmpi_maxint32=HUGE(0_int32)
+ integer(KIND=int64),public,parameter :: xmpi_maxint32_64=int(xmpi_maxint32,kind=int64)
+ ! Max. integer that can be represented with 32 bits
+ integer(KIND=int64),public,save :: xmpi_largetype_size=0
+ ! Number of data to be used in user-defined operations related to user-defined "largetype" type
 !!***
 
 !----------------------------------------------------------------------
@@ -192,8 +201,12 @@ MODULE m_xmpi
  public :: xmpi_split_block           ! Splits tasks inside communicator using block distribution.
  public :: xmpi_split_cyclic          ! Splits tasks inside communicator using cyclic distribution.
  public :: xmpi_split_list            ! Splits list of indices inside communicator using block distribution.
- public :: xmpi_distab
+ public :: xmpi_distab                ! Fill table defining the distribution of the tasks according to the # of processors
  public :: xmpi_distrib_with_replicas ! Distribute tasks among MPI ranks (replicas are allowed)
+
+! Private procedures.
+ private :: xmpi_largetype_create      ! Build a large-count contiguous datatype (to handle a very large # of data)
+ private :: xmpi_largetype_free        ! Release a large-count contiguous datatype
 
  interface xmpi_comm_free
    module procedure xmpi_comm_free_0D
@@ -2586,6 +2599,328 @@ end function xmpi_distrib_with_replicas
 
 !----------------------------------------------------------------------
 
+!!****f* m_xmpi/xmpi_largetype_create
+!! NAME
+!!  xmpi_largetype_create
+!!
+!! FUNCTION
+!!  This function builds a large-count contiguous datatype made of "small" adjacent
+!!  chunks (of same original type). The new type can then be used in MPI
+!!  routines when the number of elements to communicate exceeds a 32bit integer.
+!!
+!! INPUTS
+!!  inputtype= (INTEGER) input type (typically INTEGER, REAL(dp), ...)
+!!  largecount= total number of elements expressed as a 64bit integer
+!!  op_type= type of operation that will be applied during collective comms
+!!           At present, MPI_SUM, MPI_LOR, MPI_LAND are implemented
+!!
+!! OUTPUT
+!!  largetype= (INTEGER) new MPI type made of a serie of adjacent chunks
+!!  largetype_op= (INTEGER) MPI user-defined operation associated to largetype type
+!!
+!! NOTE
+!!  This routine is partially inspired by https://github.com/jeffhammond/BigMPI
+!!  See: J.R. Hammond. A. Schafer, R. Latham,
+!!       "ToINT_MAX. . . and beyond. Exploring large-count support in MPI",
+!!       2014 Workshop on Exascale MPI at Supercomputing Conference
+!!       MIT License (MIT)
+!!       Permission is hereby granted, free of charge, to any person obtaining a copy
+!!       of this software and associated documentation files (the "Software"), to deal
+!!       in the Software without restriction, including without limitation the rights
+!!       to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+!!       copies of the Software, and to permit persons to whom the Software is
+!!       furnished to do so.
+!!
+!!  From MPI4 specification, thiss routine is useless aslarge-count MPI communications
+!!    can be called with the use of the MPI_count datatype (instead of INTEGER).
+!!
+!! SOURCE
+
+subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_type)
+
+!Arguments ------------------------------------
+!scalars
+ integer(KIND=int64),intent(in) :: largecount
+ integer,intent(in) :: inputtype,op_type
+ integer,intent(out) :: largetype,largetype_op
+
+!Local variables-------------------------------
+#ifdef HAVE_MPI
+!scalars
+ integer,parameter :: INT_MAX=max(1,xmpi_maxint32/2)
+ integer(KIND=int32) :: cc,rr,ierr
+ integer(KIND=XMPI_ADDRESS_KIND) :: extent,lb,remdisp
+ integer :: chunks,remainder
+!arrays
+ integer(KIND=int32) :: blklens(2)
+ integer(KIND=XMPI_ADDRESS_KIND) :: disps(2)
+ integer :: types(2)
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_MPI
+ if (XMPI_ADDRESS_KIND<int64) &
+&  call xmpi_abort(msg="Too much data to communicate for this architecture!")
+
+!Divide data in chunks
+ cc=int(largecount,kind=int32)/INT_MAX
+ rr=int(largecount,kind=int32)-cc*INT_MAX
+
+!Create user-defined datatype
+ if (rr==0) then 
+   call MPI_TYPE_VECTOR(cc,INT_MAX,INT_MAX,inputtype,largetype,ierr)
+   if (ierr==0) call MPI_TYPE_COMMIT(largetype,ierr)
+ else
+   call MPI_TYPE_VECTOR(cc,INT_MAX,INT_MAX,inputtype,chunks,ierr)
+   call MPI_TYPE_CONTIGUOUS(rr,inputtype,remainder,ierr)
+   if (ierr==0) then
+     call MPI_TYPE_GET_EXTENT(inputtype,lb,extent,ierr)
+     remdisp=cc*INT_MAX*extent
+     blklens(1:2)=1
+     disps(1)=0;disps(2)=remdisp
+     types(1)=chunks;types(2)=remainder
+#ifdef HAVE_MPI_TYPE_CREATE_STRUCT
+     call MPI_TYPE_CREATE_STRUCT(2,blklens,disps,types,largetype,ierr)
+#else
+     call MPI_TYPE_STRUCT(2,blklens,disps,types,largetype,ierr)
+#endif
+     if (ierr==0) then
+       call MPI_TYPE_COMMIT(largetype,ierr)
+       call MPI_TYPE_FREE(chunks,ierr)
+       call MPI_TYPE_FREE(remainder,ierr)
+     end if
+   end if
+ end if
+ if (ierr/=0) call xmpi_abort(msg="Cannot remove ABI_MPIABORTFILE")
+
+!Associate user-defined MPI operation
+ xmpi_largetype_size=largecount ; largetype_op=-1111
+ if (op_type==MPI_SUM) then
+   select case(inputtype)
+     case(MPI_INTEGER)
+      call MPI_OP_CREATE(largetype_sum_int  ,.true.,largetype_op,ierr)
+     case(MPI_REAL)
+      call MPI_OP_CREATE(largetype_sum_real ,.true.,largetype_op,ierr)
+     case(MPI_DOUBLE_PRECISION)
+      call MPI_OP_CREATE(largetype_sum_dble ,.true.,largetype_op,ierr)
+     case(MPI_COMPLEX)
+      call MPI_OP_CREATE(largetype_sum_cplx ,.true.,largetype_op,ierr)
+     case(MPI_DOUBLE_COMPLEX)
+      call MPI_OP_CREATE(largetype_sum_dcplx,.true.,largetype_op,ierr)
+   end select
+ else if (op_type==MPI_LOR) then
+   select case(inputtype)
+     case(MPI_LOGICAL)
+      call MPI_OP_CREATE(largetype_lor_log,.true.,largetype_op,ierr)
+   end select
+ else if (op_type==MPI_LAND) then
+   select case(inputtype)
+     case(MPI_LOGICAL)
+      call MPI_OP_CREATE(largetype_land_log,.true.,largetype_op,ierr)
+   end select
+ else if (op_type==MPI_OP_NULL) then
+   largetype_op=-1111
+ end if
+#else
+ ABI_UNUSED(largecount)
+ ABI_UNUSED(inputtype)
+ ABI_UNUSED(largetype)
+ ABI_UNUSED(largetype_op)
+ ABI_UNUSED(op_type)
+#endif
+
+end subroutine xmpi_largetype_create
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_sum_int
+!! NAME
+!!  largetype_sum_int
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_SUM for integers
+ subroutine largetype_sum_int(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  integer :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk)+invec(kk)
+    end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_sum_int
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_sum_real
+!! NAME
+!!  largetype_sum_real
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_SUM for reals
+ subroutine largetype_sum_real(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  real(sp) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk)+invec(kk)
+    end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_sum_real
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_sum_dble
+!! NAME
+!!  largetype_sum_dble
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_SUM for double precision reals
+ subroutine largetype_sum_dble(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  real(dp) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk)+invec(kk)
+    end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_sum_dble
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_sum_cplx
+!! NAME
+!!  largetype_sum_cplx
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_SUM for complex
+ subroutine largetype_sum_cplx(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  complex(spc) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk)+invec(kk)
+    end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_sum_cplx
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_sum_dcplx
+!! NAME
+!!  largetype_sum_dcplx
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_SUM for double commplex
+ subroutine largetype_sum_dcplx(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  complex(dpc) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk)+invec(kk)
+    end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_sum_dcplx
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_lor_log
+!! NAME
+!!  largetype_lor_log
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_LOR for logicals
+ subroutine largetype_lor_log(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  logical :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk).or.invec(kk)
+    end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_lor_log
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_lang_log
+!! NAME
+!!  largetype_lang_log
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_LANG for logicals
+ subroutine largetype_land_log(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  logical :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk).and.invec(kk)
+    end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_land_log
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_largetype_free
+!! NAME
+!!  xmpi_largetype_free
+!!
+!! FUNCTION
+!!  This function release a large-count contiguous datatype.
+!!
+!! SIDE EFFECTS
+!!  largetype= (INTEGER) MPI type to release
+!!  largetype_op= (INTEGER) MPI user-defined operation associated to largetype type
+!!
+!! SOURCE
+
+subroutine xmpi_largetype_free(largetype,largetype_op)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(inout) :: largetype,largetype_op
+!Local variables-------------------------------
+#ifdef HAVE_MPI
+ integer :: ierr
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_MPI
+   xmpi_largetype_size=0
+   if (largetype_op/=-1111) call MPI_OP_FREE(largetype_op,ierr)
+   call MPI_TYPE_FREE(largetype,ierr)
+#else
+ ABI_UNUSED(largetype)
+ ABI_UNUSED(largetype_op)
+#endif
+
+end subroutine xmpi_largetype_free
+!!***
+
+!----------------------------------------------------------------------
+
 ! Include files providing wrappers for some of the most commonly used MPI primitives.
 
 #include "xmpi_allgather.finc"
@@ -2601,6 +2936,7 @@ end function xmpi_distrib_with_replicas
 #include "xmpi_ialltoallv.finc"
 
 #include "xmpi_bcast.finc"
+
 #include "xmpi_ibcast.finc"
 
 #include "xmpi_exch.finc"

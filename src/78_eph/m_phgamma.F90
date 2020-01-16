@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_phgamma
 !! NAME
 !!
@@ -74,6 +73,7 @@ module m_phgamma
  use m_pawrad,         only : pawrad_type
  use m_pawtab,         only : pawtab_type
  use m_pawfgr,         only : pawfgr_type
+ use m_io_tools,       only : get_unit
 
  implicit none
 
@@ -838,7 +838,7 @@ subroutine phgamma_eval_qibz(gams, cryst, ifc, iq_ibz, spin, phfrq, gamma_ph, la
  gam_atm = reshape(gams%vals_qibz(:,:,:,iq_ibz,spin), [2, natom3, natom3])
  call ephtk_gam_atm2qnu(natom3, displ_red, gam_atm, gamma_ph)
 
- if (present (gamma_ph_ee)) then
+ if (present (gamma_ph_ee) .and. gams%my_iqibz(iq_ibz) /= -1) then
    do iene = 1, gams%nene
      do jene = 1, gams%nene
        gam_atm = reshape(gams%vals_ee(:,jene,iene,:,:,iq_ibz,spin), [2, natom3, natom3])

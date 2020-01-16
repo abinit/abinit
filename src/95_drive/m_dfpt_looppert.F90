@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_loopert
 !! NAME
 !!  m_dfpt_loopert
@@ -870,7 +869,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &   nsym1,phnons1,symaf1,symrc1,symrl1,tnons1,dtset%typat,xred)
    if (psps%usepaw==1) then
 !    Allocate/initialize only zarot in pawang1 datastructure
-     call pawang_init(pawang1,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
+     call pawang_init(pawang1,0,0,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
      call setsym_ylm(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
    end if
 
@@ -1779,7 +1778,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
            kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
            dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-           occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,ucvol,wtk_rbz)
+           occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
          call transgrid(cplex,mpi_enreg,nspden,+1,1,1,dtset%paral_kgb,pawfgr,rho1wfg,rhog1,rho1wfr,rhor1)
          ABI_DEALLOCATE(rho1wfg)
          ABI_DEALLOCATE(rho1wfr)
@@ -1788,7 +1787,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
            kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
            dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-           occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,ucvol,wtk_rbz)
+           occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
        end if
 
      else if (.not. found_eq_gkk) then
@@ -1843,7 +1842,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       paw_an_pert,paw_ij_pert,pawang,pawang1,pawfgr,pawfgrtab_pert,pawrad,pawrhoij_pert,pawrhoij1,pawtab,&
 &       pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
 &       dtset%qptn,resid,residm,rhog,rhog1,&
-&       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,&
+&       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
 &       wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode,&
 &       kramers_deg)
@@ -1862,7 +1861,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       paw_an_pert,paw_ij_pert,pawang,pawang1,pawfgr,pawfgrtab_pert,pawrad,pawrhoij_pert,pawrhoij1,pawtab,&
 &       pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
 &       dtset%qptn,resid,residm,rhog,rhog1,&
-&       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,&
+&       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
 &       wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode,&
 &       kramers_deg,&
@@ -2220,9 +2219,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ! Clean band structure datatypes (should use it more in the future !)
    call ebands_free(ebands_k)
    call ebands_free(ebands_kq)
-   if(.not.kramers_deg) then
-     call ebands_free(ebands_kmq)
-   end if
+   if(.not.kramers_deg) call ebands_free(ebands_kmq)
 
 !  %%%% Parallelization over perturbations %%%%%
 !  *Redefine output/log files
@@ -2397,20 +2394,18 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_DEALLOCATE(npwarr_pert)
    ABI_DEALLOCATE(cg0_pert)
 
-   if(dtset%prtefmas==1)then
-     fname = strcat(dtfil%filnam_ds(4),"_EFMAS.nc")
-     !write(std_out,*)' dfpt_looppert: will write ',fname
+   if (dtset%prtefmas == 1 .and. me == master) then
+     fname = strcat(dtfil%filnam_ds(4), "_EFMAS.nc")
 #ifdef HAVE_NETCDF
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EFMAS file")
      NCF_CHECK(crystal%ncwrite(ncid))
-!    NCF_CHECK(ebands_ncwrite(ebands_k, ncid)) ! At this stage, ebands_k is not available
-     call print_efmas(efmasdeg,efmasval,kpt_rbz_pert,ncid)
+     !NCF_CHECK(ebands_ncwrite(ebands_k, ncid)) ! At this stage, ebands_k is not available
+     call print_efmas(efmasdeg, efmasval, kpt_rbz_pert, ncid)
      NCF_CHECK(nf90_close(ncid))
 #endif
    endif
 
    call efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz_pert,mpi_enreg,nkpt_rbz,rprimd)
-
    ABI_DEALLOCATE(kpt_rbz_pert)
  end if
 

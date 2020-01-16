@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_cut3d
 !! NAME
 !!  m_cut3d
@@ -1724,7 +1723,8 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
  real(dp),allocatable :: cg_k(:,:),cgcband(:,:),denpot(:,:,:),eig_k(:)
  real(dp),allocatable :: fofgout(:,:),fofr(:,:,:,:),k1(:,:)
  real(dp),allocatable :: kpgnorm(:),occ_k(:),ph1d(:,:),ph3d(:,:,:),rint(:)
- real(dp),allocatable :: sum_1atom_1ll(:,:,:),sum_1atom_1lm(:,:,:)
+ real(dp),allocatable :: sum_1ll_1atom(:,:,:),sum_1lm_1atom(:,:,:)
+ real(dp),allocatable :: cplx_1lm_1atom(:,:,:,:)
  real(dp),allocatable :: xfit(:),yfit(:),ylm_k(:,:)
  real(dp),allocatable :: ylmgr_dum(:,:,:)
  character(len=fnlen) :: fileqps
@@ -2081,8 +2081,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 !      Get full phases exp (2 pi i (k+G).x_tau) in ph3d
        call ph1d3d(1,natom,kg_k,natom,natom,npw_k,nr1,nr2,nr3,phkxred,ph1d,ph3d)
 
-       ABI_ALLOCATE(sum_1atom_1ll,(nspinor**2,mlang,natom))
-       ABI_ALLOCATE(sum_1atom_1lm,(nspinor**2,mlang**2,natom))
+       ABI_ALLOCATE(sum_1ll_1atom,(nspinor**2,mlang,natom))
+       ABI_ALLOCATE(sum_1lm_1atom,(nspinor**2,mlang**2,natom))
+       ABI_ALLOCATE(cplx_1lm_1atom,(2,nspinor,mlang**2,natom))
        prtsphere=1
        ratsph_arr(:)=ratsph
 
@@ -2091,7 +2092,7 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
 
        call recip_ylm (bess_fit,cgcband,istwfk(ckpt),mpi_enreg,&
 &       nradint,nradintmax,mlang,mpw,natom,typat,mlang_type,npw_k,nspinor,ph3d,prtsphere,rint,&
-&       ratsph_arr,rc_ylm,sum_1atom_1ll,sum_1atom_1lm,ucvol,ylm_k,znucl_atom)
+&       ratsph_arr,rc_ylm,sum_1ll_1atom,sum_1lm_1atom,cplx_1lm_1atom,ucvol,ylm_k,znucl_atom)
 
        call dens_in_sph(cmax,cgcband(:,(cspinor-1)*npw_k+1:cspinor*npw_k),gmet,istwfk(ckpt),&
 &       kg_k,natom,ngfft,mpi_enreg,npw_k,ph1d,ratsph_arr,ucvol)
@@ -2101,8 +2102,9 @@ subroutine cut3d_wffile(wfk_fname,ecut,exchn2n3d,istwfk,kpt,natom,nband,nkpt,npw
          write(std_out,'(a,i4,a,f14.8)' ) ' Atom number ',iatom,' :  charge =',cmax(iatom)
        end do
 
-       ABI_DEALLOCATE(sum_1atom_1ll)
-       ABI_DEALLOCATE(sum_1atom_1lm)
+       ABI_DEALLOCATE(sum_1ll_1atom)
+       ABI_DEALLOCATE(sum_1lm_1atom)
+       ABI_DEALLOCATE(cplx_1lm_1atom)
        ABI_DEALLOCATE(ph3d)
        ABI_DEALLOCATE(iindex)
        ABI_DEALLOCATE(yfit)

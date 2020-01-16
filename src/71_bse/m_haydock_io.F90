@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_haydock_io
 !! NAME
 !! m_haydock_io

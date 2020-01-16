@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mover
 !! NAME
 !!  m_mover
@@ -76,7 +75,10 @@ module m_mover
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef
-
+#if defined DEV_MS_SCALEUP 
+ use scup_global, only : global_set_parent_iter,global_set_print_parameters 
+#endif 
+ use m_scup_dataset
  implicit none
 
  private
@@ -122,6 +124,8 @@ contains
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
 !!   | mpsang= 1+maximum angular momentum for nonlocal pseudopotentials
 !!  rprimd(3,3)=dimensional primitive translations (bohr)
+!!  scup_dtset <type(scup_dtset_type) = derived datatype holding all options 
+ !!            for the evaluation of an effective electronic model using SCALE UP
 !!
 !! OUTPUT
 !!  results_gs <type(results_gs_type)>=results (energy and its components,
@@ -200,7 +204,7 @@ contains
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,filename_ddb,verbose,writeHIST)
+& effective_potential,filename_ddb,verbose,writeHIST,scup_dtset)
 
 !Arguments ------------------------------------
 !scalars
@@ -218,6 +222,7 @@ real(dp), intent(in),target :: amu_curr(:) !(scfcv%dtset%ntypat)
 real(dp), pointer :: rhog(:,:),rhor(:,:)
 real(dp), intent(inout) :: xred(3,scfcv_args%dtset%natom),xred_old(3,scfcv_args%dtset%natom)
 real(dp), intent(inout) :: vel(3,scfcv_args%dtset%natom),vel_cell(3,3),rprimd(3,3)
+type(scup_dtset_type),optional, intent(inout) :: scup_dtset  
 
 !Local variables-------------------------------
 !scalars
@@ -230,19 +235,19 @@ type(delocint) :: deloc
 type(mttk_type) :: mttk_vars
 integer :: itime,icycle,itime_hist,iexit=0,ifirst,ihist_prev,ihist_prev2,timelimit_exit,ncycle,nhisttot,kk,jj,me
 integer :: ntime,option,comm
-integer :: nerr_dilatmx,my_quit,ierr,quitsum_request,unit_out
+integer :: nerr_dilatmx,my_quit,ierr,quitsum_request
 integer ABI_ASYNC :: quitsum_async
 character(len=500) :: message
 !character(len=500) :: dilatmx_errmsg
 character(len=8) :: stat4xml
 character(len=35) :: fmt
-character(len=fnlen) :: filename,fname_ddb
+character(len=fnlen) :: filename,fname_ddb, name_file
 character(len=500) :: MY_NAME = "mover"
 real(dp) :: favg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
-logical :: need_scfcv_cycle = .TRUE.
+logical :: need_scfcv_cycle = .TRUE., need_elec_eval = .FALSE.
 logical :: change,useprtxfase
-logical :: skipcycle, file_opened
+logical :: skipcycle
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 real(dp) :: minE,wtime_step,now,prev
@@ -401,6 +406,10 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
    end if
+   need_elec_eval = .FALSE.
+   if(present(scup_dtset))then 
+     need_elec_eval = scup_dtset%scup_elec_model
+   endif 
  else
    if(need_verbose)then
      write(message,'(a,a,i2,a,a,a,80a)')&
@@ -607,19 +616,31 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
          else
 !          For monte carlo don't need to recompute energy here
 !          (done in pred_montecarlo)
-
-           INQUIRE(FILE='anharmonic_energy_terms.out',OPENED=file_opened,number=unit_out)
-             if(file_opened .eqv. .TRUE.)then
-               write(unit_out,'(I7)',advance='no') itime  !Write cycle to anharmonic_energy_contribution file
-             endif
+           name_file='MD_anharmonic_terms_energy.dat'
              if(itime == 1 .and. ab_mover%restartxf==-3)then
                call effective_potential_file_mapHistToRef(effective_potential,hist,comm,need_verbose) ! Map Hist to Ref to order atoms
                xred(:,:) = hist%xred(:,:,1) ! Fill xred with new ordering
+               hist%ihist = 1 
              end if
+
+#if defined DEV_MS_SCALEUP 
+           !If we a SCALE UP effective electron model give the iteration and set print-options
+           if(need_elec_eval)then
+              call global_set_parent_iter(itime)
+              ! Set all print options to false. 
+              call global_set_print_parameters(geom=.FALSE.,eigvals=.FALSE.,eltic=.FALSE.,&
+&                      orbocc=.FALSE.,bands=.FALSE.)
+              if(itime == 1 .or. modulo(itime,scup_dtset%scup_printniter) == 0)then 
+                 call global_set_print_parameters(scup_dtset%scup_printgeom,scup_dtset%scup_printeigv,scup_dtset%scup_printeltic,& 
+&                         scup_dtset%scup_printorbocc,scup_dtset%scup_printbands)
+              end if 
+           end if
+#endif
+
            call effective_potential_evaluate( &
-&           effective_potential,scfcv_args%results_gs%etotal,&
-&           scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
-&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose)
+&           effective_potential,scfcv_args%results_gs%etotal,scfcv_args%results_gs%fcart,scfcv_args%results_gs%fred,&
+&           scfcv_args%results_gs%strten,ab_mover%natom,rprimd,xred=xred,verbose=need_verbose,& 
+&           filename=name_file,elec_eval=need_elec_eval)
 
 !          Check if the simulation did not diverge...
            if(itime > 3 .and.ABS(scfcv_args%results_gs%etotal - hist%etot(1)) > 1E5)then

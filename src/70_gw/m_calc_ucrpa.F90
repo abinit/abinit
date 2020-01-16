@@ -39,7 +39,6 @@ MODULE m_calc_ucrpa
 !!***
 
 contains
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/calc_ucrpa
 !! NAME
 !! calc_ucrpa
@@ -342,6 +341,7 @@ contains
    MSG_ERROR(message)
  end if
  rewind(unt)
+ read(unt,*) message
  read(unt,*) message, lpawu_read
  read(unt,*) message, ib1, ib2
  close(unt)

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_stress
 !! NAME
 !!  m_stress
@@ -117,6 +116,7 @@ contains
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  typat(natom)=type integer for each atom in cell
 !!  usefock=1 if fock operator is used; 0 otherwise.
+!!  usekden=1 is kinetic energy density has to be taken into account, 0 otherwise
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
 !!  vdw_tol= Van der Waals tolerance
 !!  vdw_tol_3bt= Van der Waals tolerance on the 3-body term (only effective
@@ -124,10 +124,13 @@ contains
 !!  vdw_xc= Van der Waals correction flag
 !!  vlspl(mqgrid,2,ntypat)=local psp spline
 !!  vxc(nfft,nspden)=exchange-correlation potential (hartree) in real space
+!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA) derivative of XC energy density
+!!                                wrt kinetic energy density (depsxcdtau)
 !!  vxc_hf(nfft,nspden)=exchange-correlation potential (hartree) in real space for Hartree-Fock corrections
 !!  xccc1d(n1xccc*(1-usepaw),6,ntypat)=1D core charge function and five derivatives,
 !!                          for each type of atom, from psp (used in Norm-conserving only)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
+!!  xcctau3d(n3xccc*usekden)=(only for meta-GGA): 3D core electron kinetic energy density for XC core correction
 !!  xcccrc(ntypat)=XC core correction cutoff radius (bohr) for each atom type
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  zion(ntypat)=valence charge of each type of atom
@@ -175,14 +178,14 @@ contains
 &                  mgfft,mpi_enreg,mqgrid,n1xccc,n3xccc,natom,nattyp,&
 &                  nfft,ngfft,nlstr,nspden,nsym,ntypat,psps,pawrad,pawtab,ph1d,&
 &                  prtvol,qgrid,red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
-&                  typat,usefock,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
-&                  vlspl,vxc,vxc_hf,xccc1d,xccc3d,xcccrc,xred,zion,znucl,qvpotzero,&
+&                  typat,usefock,usekden,usepaw,vdw_tol,vdw_tol_3bt,vdw_xc,&
+&                  vlspl,vxc,vxctau,vxc_hf,xccc1d,xccc3d,xcctau3d,xcccrc,xred,zion,znucl,qvpotzero,&
 &                  electronpositron) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: berryopt,ixc,mgfft,mqgrid,n1xccc,n3xccc,natom,nfft,nspden
- integer,intent(in) :: nsym,ntypat,prtvol,usefock,usepaw,vdw_xc
+ integer,intent(in) :: nsym,ntypat,prtvol,usefock,usekden,usepaw,vdw_xc
  real(dp),intent(in) :: eei,ehart,eii,gsqcut,vdw_tol,vdw_tol_3bt,qvpotzero
  type(efield_type),intent(in) :: dtefield
  type(pseudopotential_type),intent(in) :: psps
@@ -195,30 +198,29 @@ contains
  real(dp),intent(in) :: efield(3),kinstr(6),nlstr(6)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*natom),qgrid(mqgrid)
  real(dp),intent(in) :: red_efieldbar(3),rhog(2,nfft),rprimd(3,3),strsxc(6)
- real(dp),intent(in) :: vlspl(mqgrid,2,ntypat),vxc(nfft,nspden)
+ real(dp),intent(in) :: vlspl(mqgrid,2,ntypat),vxc(nfft,nspden),vxctau(nfft,nspden,4*usekden)
  real(dp),allocatable,intent(in) :: vxc_hf(:,:)
  real(dp),intent(in) :: xccc1d(n1xccc*(1-usepaw),6,ntypat),xcccrc(ntypat)
  real(dp),intent(in) :: xred(3,natom),zion(ntypat),znucl(ntypat)
- real(dp),intent(inout) :: xccc3d(n3xccc)
+ real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*usekden)
  real(dp),intent(out) :: strten(6)
  type(pawrad_type),intent(in) :: pawrad(ntypat*usepaw)
  type(pawtab_type),intent(in) :: pawtab(ntypat*usepaw)
 
 !Local variables-------------------------------
 !scalars
- integer :: coredens_method,iatom,icoulomb,idir,ii,ipositron,mu,optatm,optdyfr,opteltfr,opt_hybr,optgr,option
- integer :: optn,optn2,optstr,optv,sdir,vloc_method
+ integer :: coredens_method,coretau_method,iatom,icoulomb,idir,ii,ipositron,mu
+ integer :: optatm,optdyfr,opteltfr,opt_hybr,optgr,option,optn,optn2,optstr,optv,sdir,vloc_method
  real(dp),parameter :: tol=1.0d-15
  real(dp) :: e_dum,strsii,ucvol,vol_element
  character(len=500) :: message
  logical :: calc_epaw3_stress, efield_flag
 !arrays
  integer :: qprtrb_dum(3)
- real(dp) :: corstr(6),ep3(3),epaws3red(6),ewestr(6),gmet(3,3)
-!Maxwell-stress constribution, and magnitude of efield
- real(dp) :: Maxstr(6),ModE
- real(dp) :: gprimd(3,3),harstr(6),lpsstr(6),rmet(3,3),tsec(2),uncorr(3)
+ real(dp) :: corstr(6),dumstr(6),ep3(3),epaws3red(6),ewestr(6),gmet(3,3)
+ real(dp) :: gprimd(3,3),harstr(6),lpsstr(6),rmet(3,3),taustr(6),tsec(2),uncorr(3)
  real(dp) :: vdwstr(6),vprtrb_dum(2)
+ real(dp) :: Maxstr(6),ModE !Maxwell-stress constribution, and magnitude of efield
  real(dp) :: dummy_in(0)
  real(dp) :: dummy_out1(0),dummy_out2(0),dummy_out3(0),dummy_out4(0),dummy_out5(0),dummy_out6(0),dummy_out7(0)
  real(dp),allocatable :: dummy(:),dyfr_dum(:,:,:),gr_dum(:,:),rhog_ep(:,:),v_dum(:)
@@ -231,8 +233,10 @@ contains
 
 !Compute different geometric tensor, as well as ucvol, from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
- opt_hybr=0
- if (allocated(vxc_hf)) opt_hybr=1
+
+ opt_hybr=0;if (allocated(vxc_hf)) opt_hybr=1
+ icoulomb=0 ! not yet compatible with icoulomb
+
 !=======================================================================
 !========= Local pseudopotential and core charge contributions =========
 !=======================================================================
@@ -251,13 +255,15 @@ contains
  if (psps%nc_xccc_gspace==1) coredens_method=1
  if (psps%nc_xccc_gspace==0) coredens_method=2
  if (psps%usewvl==1) coredens_method=2
+ coretau_method=0
+ if (usekden==1.and.psps%usepaw==1) then
+   coretau_method=1;if (psps%nc_xccc_gspace==0) coretau_method=2
+ end if
 
 !Local ionic potential and/or pseudo core charge by method 1
- if (vloc_method==1.or.coredens_method==1) then
+ if (vloc_method==1.or.coredens_method==1.or.coretau_method==1) then
    call timab(551,1,tsec)
-   optv=0;if (vloc_method==1) optv=1
-   optn=0;if (coredens_method==1) optn=n3xccc/nfft
-   optatm=0;optdyfr=0;opteltfr=0;optgr=0;optstr=1;optn2=1
+!  Compute Vxc in reciprocal space
    if (coredens_method==1.and.n3xccc>0) then
      ABI_ALLOCATE(v_dum,(nfft))
      ABI_ALLOCATE(vxctotg,(2,nfft))
@@ -269,14 +275,38 @@ contains
    else
      ABI_ALLOCATE(vxctotg,(0,0))
    end if
-   call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
-&   dummy_out5,dummy_in,gmet,gprimd,dummy_out6,dummy_out7,gsqcut,&
-&   mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
-&   psps,pawtab,ph1d,qgrid,qprtrb_dum,rhog,corstr,lpsstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
-&   comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
-&   paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
-   ABI_DEALLOCATE(vxctotg)
+!  Compute contribution to stresses from Vloc and/or pseudo core density
+   optv=0;if (vloc_method==1) optv=1
+   optn=0;if (coredens_method==1) optn=n3xccc/nfft
+   optatm=0;optdyfr=0;opteltfr=0;optgr=0;optstr=1;optn2=1
+   if (vloc_method==1.or.coredens_method==1) then
+     call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
+&     dummy_out5,dummy_in,gmet,gprimd,dummy_out6,dummy_out7,gsqcut,&
+&     mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
+&     psps,pawtab,ph1d,qgrid,qprtrb_dum,rhog,corstr,lpsstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
+&     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
+&     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
+   end if
    if (n3xccc==0.and.coredens_method==1) corstr=zero
+   ABI_DEALLOCATE(vxctotg)
+   if (usekden==1.and.coretau_method==1..and.n3xccc>0) then
+!    Compute contribution to stresses from pseudo kinetic energy core density
+     optv=0;optn=1;optn2=4
+     ABI_ALLOCATE(v_dum,(nfft))
+     ABI_ALLOCATE(vxctotg,(2,nfft))
+     v_dum(:)=vxctau(:,1,1);if (nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxctau(:,2,1))
+     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
+     call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
+&     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+     ABI_DEALLOCATE(v_dum)
+     call atm2fft(atindx1,dummy_out1,dummy_out2,dummy_out3,dummy_out4,&
+&     dummy_out5,dummy_in,gmet,gprimd,dummy_out6,dummy_out7,gsqcut,&
+&     mgfft,mqgrid,natom,nattyp,nfft,ngfft,ntypat,optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,&
+&     psps,pawtab,ph1d,qgrid,qprtrb_dum,rhog,taustr,dumstr,ucvol,usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,vlspl,&
+&     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
+&     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
+     corstr(1:6)=corstr(1:6)+taustr(1:6)
+   end if
    call timab(551,2,tsec)
  end if
 
@@ -295,28 +325,36 @@ contains
  end if
 
 !Pseudo core electron density by method 2
- if (coredens_method==2) then
+ if (coredens_method==2.or.coretau_method==2) then
    if (n1xccc/=0) then
      call timab(55,1,tsec)
      option=3
      ABI_ALLOCATE(dyfr_dum,(3,3,natom))
      ABI_ALLOCATE(gr_dum,(3,natom))
      ABI_ALLOCATE(v_dum,(nfft))
-     icoulomb=0 ! not yet compatible with icoulomb
-     if (psps%usewvl==0.and.usepaw==0.and.icoulomb==0) then
-       if(opt_hybr==0) then
-         call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
-&         n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc,&
-&         xcccrc,xccc1d,xccc3d,xred)
-       else
-         call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
-&         n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc_hf,&
-&         xcccrc,xccc1d,xccc3d,xred)
+     if (coredens_method==2) then
+       if (psps%usewvl==0.and.usepaw==0.and.icoulomb==0) then
+         if(opt_hybr==0) then
+           call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
+&           n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc,&
+&           xcccrc,xccc1d,xccc3d,xred)
+         else
+           call mkcore(corstr,dyfr_dum,gr_dum,mpi_enreg,natom,nfft,nspden,ntypat,ngfft(1),&
+&           n1xccc,ngfft(2),ngfft(3),option,rprimd,typat,ucvol,vxc_hf,&
+&           xcccrc,xccc1d,xccc3d,xred)
+         end if
+       else if (psps%usewvl==0.and.(usepaw==1.or.icoulomb==1)) then
+         call mkcore_alt(atindx1,corstr,dyfr_dum,gr_dum,icoulomb,mpi_enreg,natom,nfft,&
+&         nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
+&         ucvol,vxc,xcccrc,xccc1d,xccc3d,xred,pawrad,pawtab,usepaw)
        end if
-     else if (psps%usewvl==0.and.(usepaw==1.or.icoulomb==1)) then
-       call mkcore_alt(atindx1,corstr,dyfr_dum,gr_dum,icoulomb,mpi_enreg,natom,nfft,&
+     end if
+     if (usekden==1.and.coretau_method==2) then
+       call mkcore_alt(atindx1,taustr,dyfr_dum,gr_dum,icoulomb,mpi_enreg,natom,nfft,&
 &       nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
-&       ucvol,vxc,xcccrc,xccc1d,xccc3d,xred,pawrad,pawtab,usepaw)
+&       ucvol,vxctau(:,:,1),xcccrc,xccc1d,xcctau3d,xred,pawrad,pawtab,usepaw,&
+&       usekden=.true.)
+
      end if
      ABI_DEALLOCATE(dyfr_dum)
      ABI_DEALLOCATE(gr_dum)
@@ -495,8 +533,10 @@ contains
 
  strten(:)=kinstr(:)+ewestr(:)+corstr(:)+strsxc(:)+harstr(:)+lpsstr(:)+nlstr(:)
 
- if (usefock==1 .and. associated(fock).and.fock%fock_common%optstr) then
-   strten(:)=strten(:)+fock%fock_common%stress(:)
+ if (usefock==1 .and. associated(fock)) then
+   if (fock%fock_common%optstr) then
+     strten(:)=strten(:)+fock%fock_common%stress(:)
+   end if
  end if
 
 !Add contributions for constant E or D calculation.

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fold2block
 !! NAME
 !!  m_fold2block

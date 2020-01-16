@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_harmonics_terms
 !!
 !! NAME
@@ -570,8 +569,8 @@ end subroutine harmonics_terms_setDynmat
 !!
 !! SOURCE
 
-subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_uc,ncell,nrpt,&
-&                                      atmrpt_index,index_cells,sc_size,rpt,comm)
+subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_uc,&
+&                                      ncell,nrpt,atmrpt_index,index_cells,sc_size,rpt,comm)
 
  implicit none
 
@@ -591,8 +590,11 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
 ! scalar
   integer :: i1,i2,i3,ia,ib,icell,ierr,irpt,irpt_tmp,ii,jj,kk,ll
   integer :: mu,nu
-  real(dp):: disp1,disp2,ifc,tmp,tmp2
-! array
+  real(dp):: disp1,disp2,ifc,tmp_etot1,tmp_etot2
+!Variables for separation of short and dipdip ifc contribution 
+ !real(dp):: short_ifc,ewald_ifc
+ !real(dp):: tmp_ewald1,tmp_ewald2,tmp_short1,tmp_short2
+  ! array
   character(500) :: msg
 
 ! *************************************************************************
@@ -626,13 +628,14 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
             do mu=1,3
               disp1 = disp(mu,kk)
               ifc = atmfrc(mu,ia,nu,ib,irpt)
+              
 !              if(abs(ifc) > tol10)then
-                tmp = disp2 * ifc
+                tmp_etot1  = disp2 * ifc
 !               accumule energy
-                tmp2 = disp1*tmp
-                energy =  energy + tmp2
+                tmp_etot2  = disp1*tmp_etot1
+                energy =  energy + tmp_etot2
 !               accumule forces
-                fcart(mu,kk) = fcart(mu,kk) + tmp
+                fcart(mu,kk) = fcart(mu,kk) + tmp_etot1
 !              end if
             end do
           end do
@@ -642,7 +645,6 @@ subroutine harmonics_terms_evaluateIFC(atmfrc,disp,energy,fcart,natom_sc,natom_u
   end do
 
   energy = half * energy
-
 ! MPI_SUM
   call xmpi_sum(energy, comm, ierr)
   call xmpi_sum(fcart , comm, ierr)

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_hdr
 !! NAME
 !! m_hdr
@@ -309,7 +308,8 @@ module m_hdr
  integer,private,parameter :: HDR_KNOWN_HEADFORMS(1) = [80]
  ! The list of headforms used so far.
 
- integer,public,parameter :: HDR_LATEST_HEADFORM = HDR_KNOWN_HEADFORMS(size(HDR_KNOWN_HEADFORMS))
+ integer,private,parameter :: size_hdr_known_headforms = size(HDR_KNOWN_HEADFORMS) ! Need this for Flang
+ integer,public,parameter :: HDR_LATEST_HEADFORM = HDR_KNOWN_HEADFORMS(size_hdr_known_headforms)
  ! The latest headform to be used for writing.
 !!***
 

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/anaddb
 !! NAME
 !! anaddb
@@ -96,7 +95,7 @@ program anaddb
  integer,parameter :: rftyp4=4
  integer :: comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
  integer :: ierr,iphl2,lenstr,lwsym,mtyp,mpert,msize,natom
- integer :: nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid,prt_internalstr
+ integer :: nsym,ntypat,usepaw,nproc,my_rank,ana_ncid,prt_internalstr
  logical :: iam_master
  integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
  integer :: count_wminmax(2)
@@ -116,8 +115,7 @@ program anaddb
  real(dp),allocatable :: zeff(:,:,:)
  real(dp),allocatable :: qdrp_cart(:,:,:,:)
  character(len=10) :: procstr
- character(len=24) :: codename
- character(len=24) :: start_datetime
+ character(len=24) :: codename, start_datetime
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(7),elph_base_name,tmpfilename, phibz_prefix
  character(len=500) :: msg
@@ -173,8 +171,8 @@ program anaddb
  call timab(1, 0, tsec)
 
  ! Initialise the code: write heading, and read names of files.
- if (iam_master) call anaddb_init(filnam)
- call xmpi_bcast (filnam, master, comm, ierr)
+ if (iam_master) call anaddb_init(args%input_path, filnam)
+ call xmpi_bcast(filnam, master, comm, ierr)
 
  ! make log file for non-master procs
  if (.not. iam_master) then
@@ -204,10 +202,8 @@ program anaddb
 
  ! Read the input file, and store the information in a long string of characters
  ! strlen from defs_basis module
- option=1
  if (iam_master) then
-   call instrng (filnam(1),lenstr,option,strlen,string)
-
+   call instrng(filnam(1), lenstr, 1, strlen, string)
    ! To make case-insensitive, map characters to upper case.
    call inupper(string(1:lenstr))
  end if

@@ -1,6 +1,6 @@
 
-.Version 8.5.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.13 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Sep 2017.
-- ( at 16h33 )
+.Starting date : Sun 29 Dec 2019.
+- ( at 18h14 )
   
-- input  file    -> t89.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v7_t85-t86-t87-t88-t89/t89.in
 - output file    -> t89.out
 - root for input  files -> t89i
 - root for output files -> t89o
@@ -258,8 +258,8 @@ P           mkmem           8
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -279,12 +279,12 @@ P           mkmem           8
 ================================================================================
  prteigrs : about to open file t89o_DS1_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  1.33E-15  5.06E-15  8.67E-15  9.60E-15  8.96E-10
+  1.33E-15  5.06E-15  8.67E-15  9.58E-15  8.96E-10
  -1.6101E-01  7.5164E-01  7.5171E-01  7.5171E-01  8.1448E-01
   prteigrs : nnsclo,ikpt=   30    1 max resid (incl. the buffer)=  8.96435E-10
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
-  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  2.96117E-09
+  prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  2.96118E-09
   prteigrs : nnsclo,ikpt=   30    3 max resid (incl. the buffer)=  9.82244E-09
   prteigrs : nnsclo,ikpt=   30    4 max resid (incl. the buffer)=  3.13171E-13
   prteigrs : nnsclo,ikpt=   30    5 max resid (incl. the buffer)=  4.68603E-09
@@ -303,7 +303,7 @@ P           mkmem           8
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.0318E-07; max=  9.8224E-09
+ Mean square residual over all n,k,spin=   20.318E-08; max=  78.528E-10
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -360,7 +360,7 @@ P           mkmem           8
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   7.4129E-09; max=  2.3838E-07
+ Mean square residual over all n,k,spin=   74.129E-10; max=  95.876E-16
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -824,56 +824,56 @@ P           mkmem           8
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - [2] Optimized norm-conserving Vanderbilt pseudopotentials.
 - D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
 - Comment: Some pseudopotential generated using the ONCVPSP code were used.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#hamann2013
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
 -
-- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [5] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.1
+- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered   8 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.0  wall=          1.1
+.Delivered   3 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=          2.2  wall=          2.4

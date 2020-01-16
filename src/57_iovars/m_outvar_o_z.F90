@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outvar_o_z
 !! NAME
 !!  m_outvar_o_z
@@ -566,6 +565,9 @@ contains
 
  intarr(1,:)=dtsets(:)%prtposcar
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtposcar','INT',0)
+
+ intarr(1,:)=dtsets(:)%prtprocar
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtprocar','INT',0)
 
  intarr(1,:)=dtsets(:)%prtpot
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtpot','INT',0)

@@ -1,31 +1,25 @@
 # compute Chern number for 3 values of nuclear dipole: 0, +1, -1
-# with and without symmetry
 # see test v7[32] for discussion of nuclear dipole 
 
-ndtset 6
-udtset 2 3
+ndtset 3
 
-kptopt1? 3
-nsym1? 1
-symrel1? 1 0 0 0 1 0 0 0 1
-
-kptopt2? 4
-nsym2? 0
-
+kptopt 3
+nsym 1
+symrel 1 0 0 0 1 0 0 0 1
 
 orbmag 1 # activates Chern number
 
-nucdipmom?1
+nucdipmom1
 0.0 0.0 0.0
 0.0 0.0 0.0
 
-pawcpxocc?1 1
+pawcpxocc1 1
 
-nucdipmom?2
+nucdipmom2
 0.0 0.0 0.0
 0.0 0.0 1.0
 
-nucdipmom?3
+nucdipmom3
 0.0 0.0 0.0
 0.0 0.0 -1.0
 
@@ -53,6 +47,8 @@ symmorphi 0
 prtwf 0
 prtden 0
 prteig 0
+
+paral_atom 0
 
 acell    3*10.620260682  
 

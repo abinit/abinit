@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pretty_rec
 !! NAME
 !!  m_pretty_rec

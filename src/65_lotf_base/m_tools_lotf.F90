@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/tools_lotf
 !! NAME
 !! tools_lotf

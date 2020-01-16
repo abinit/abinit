@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_optics
 !! NAME
 !!  m_paw_optics
@@ -247,8 +246,8 @@ CONTAINS  !=====================================================================
        if (cprj_paral_band) then
          ABI_DATATYPE_ALLOCATE(cprj_k,(natom,my_nspinor*nband_k))
          call pawcprj_alloc(cprj_k,0,dimcprj)
-         call pawcprj_mpi_allgather(cprj_k_loc,cprj_k,natom,my_nspinor*nband_cprj_k,dimcprj,0,&
-&         mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.false.)
+         call pawcprj_mpi_allgather(cprj_k_loc,cprj_k,natom,my_nspinor*nband_cprj_k,mpi_enreg%bandpp,&
+&         dimcprj,0,mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.false.)
        else
          cprj_k => cprj_k_loc
        end if
@@ -353,8 +352,10 @@ CONTAINS  !=====================================================================
 
          if (mpi_enreg%paral_kgb==1) then
            if (mod(jb-1,mpi_enreg%nproc_band)/=mpi_enreg%me_band) cycle
+         else if (xmpi_paral==1) then
            if (abs(mpi_enreg%proc_distrb(ikpt,jb,isppol)-me_kpt)/=0) cycle
          end if
+
          do ib=1,jb
            ibsp=(ib-1)*my_nspinor;jbsp=(jb-1)*my_nspinor
 
@@ -544,7 +545,7 @@ CONTAINS  !=====================================================================
  integer :: me,me_kpt,my_nspinor,nband_cprj_k,nband_k,nphicor
  integer :: sender,spaceComm_bandspin,spaceComm_k,spaceComm_w
  integer :: iomode,fformopt
- logical :: already_has_nabla,cprj_paral_band,ex,mykpt
+ logical :: already_has_nabla,cprj_paral_band,ex,mykpt,abinitcorewf,xmlcorewf
  character(len=fnlen) :: filecore
  real(dp) :: cpnm1,cpnm2
 !arrays
@@ -566,12 +567,17 @@ CONTAINS  !=====================================================================
 !------------------------------------------------------------------------------------------------
 
 !Note: core WF is read for itypat=1
- filecore=trim(filpsp(1))//'.corewf'
+ filecore=trim(filpsp(1)) ; iln=len(trim(filecore))
+ abinitcorewf=.false. ; if (iln>3) abinitcorewf=(filecore(iln-6:iln)=='.abinit')
+ xmlcorewf=.false. ; if (iln>3) xmlcorewf=(filecore(iln-3:iln)=='.xml')
+ if ((.not.xmlcorewf).and.(.not.abinitcorewf)) filecore=filecore(1:iln)//'.corewf'
+ if (abinitcorewf) filecore=filecore(1:iln-6)//'corewf.abinit'
+ if (xmlcorewf) filecore=filecore(1:iln-3)//'corewf.xml'
  inquire(file=filecore,exist=ex)
  if (ex) then
-   !Use <filepsp>.corewf
+   !Use <filepsp>.corewf.xml or <filepsp>.corewf.abinit
    call pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,pawrad(1),phi_cor,&
-&   filename=filecore)
+&                          filename=filecore)
  else
    !Use default name
    call pawpsp_read_corewf(energy_cor,indlmn_core,lcor,lmncmax,ncor,nphicor,pawrad(1),phi_cor)
@@ -664,8 +670,8 @@ CONTAINS  !=====================================================================
        if (cprj_paral_band) then
          ABI_DATATYPE_ALLOCATE(cprj_k,(natom,my_nspinor*nband_k))
          call pawcprj_alloc(cprj_k,0,dimcprj)
-         call pawcprj_mpi_allgather(cprj_k_loc,cprj_k,natom,my_nspinor*nband_cprj_k,dimcprj,0,&
-&         mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.false.)
+         call pawcprj_mpi_allgather(cprj_k_loc,cprj_k,natom,my_nspinor*nband_cprj_k,mpi_enreg%bandpp,&
+&         dimcprj,0,mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.false.)
        else
          cprj_k => cprj_k_loc
        end if
@@ -678,7 +684,7 @@ CONTAINS  !=====================================================================
 
          if (mpi_enreg%paral_kgb==1) then
            if (mod(jb-1,mpi_enreg%nproc_band)/=mpi_enreg%me_band) cycle
-         elseif (xmpi_paral==1) then
+         else if (xmpi_paral==1) then
            if (abs(mpi_enreg%proc_distrb(ikpt,jb,isppol)-me_kpt)/=0) cycle
          end if
          jbsp=(jb-1)*my_nspinor
@@ -747,13 +753,6 @@ CONTAINS  !=====================================================================
            write(ount) ((psinablapsi(1:2,2,ib,jb,iatom),ib=1,nband_k),jb=1,nphicor)
            write(ount) ((psinablapsi(1:2,3,ib,jb,iatom),ib=1,nband_k),jb=1,nphicor)
          end do
-!DEBUG
-!         do iatom=1,natom
-!           write(138,*) ((psinablapsi(1:2,1,ib,jb,iatom),ib=1,nband_k),jb=1,nphicor)
-!           write(138,*) ((psinablapsi(1:2,2,ib,jb,iatom),ib=1,nband_k),jb=1,nphicor)
-!           write(138,*) ((psinablapsi(1:2,3,ib,jb,iatom),ib=1,nband_k),jb=1,nphicor)
-!         end do
-!DEBUG
 
        elseif (mpi_enreg%me_band==0.and.mpi_enreg%me_fft==0) then
          call xmpi_exch(psinablapsi,etiq,me_kpt,psinablapsi,0,spaceComm_k,ierr)
@@ -767,14 +766,6 @@ CONTAINS  !=====================================================================
          write(ount) ((psinablapsi(1:2,2,ib,jb,iatom),ib=1,nband_k),jb=1,nphicor)
          write(ount) ((psinablapsi(1:2,3,ib,jb,iatom),ib=1,nband_k),jb=1,nphicor)
        end do
-
-!DEBUG
-!      do iatom=1,natom
-!         write(138,*) ((psinablapsi(1:2,1,ib,jb,iatom),ib=1,nband_k),jb=1,nphicor)
-!         write(138,*) ((psinablapsi(1:2,2,ib,jb,iatom),ib=1,nband_k),jb=1,nphicor)
-!         write(138,*) ((psinablapsi(1:2,3,ib,jb,iatom),ib=1,nband_k),jb=1,nphicor)
-!       end do
-!DEBUG
 
      end if ! mykpt
 
@@ -857,7 +848,7 @@ CONTAINS  !=====================================================================
  real(dp) :: e2rot(3,3),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),rprimdinv(3,3),symd(3,3),symdinv(3,3)
  real(dp),allocatable :: e1(:,:,:),e2(:,:,:,:),epsilon_tot(:,:,:,:),eigen0(:),eig0_k(:)
  real(dp),allocatable :: kpts(:,:),occ(:),occ_k(:),oml1(:),wtk(:)
- complex,allocatable :: eps_work(:)
+ complex(dpc),allocatable :: eps_work(:)
  character(len=fnlen) :: filnam1,filnam_gen
  character(len=500) :: msg
  type(hdr_type) :: hdr
@@ -1042,7 +1033,7 @@ CONTAINS  !=====================================================================
  only_check=0 ! compute real part of eps in kk routine
  do ii = 1, 3
    do jj = 1, 3
-     eps_work(:) = cmplx(0.0,epsilon_tot(2,ii,jj,:))
+     eps_work(:) = cmplx(0.0,epsilon_tot(2,ii,jj,:), kind=dpc)
      call kramerskronig(mom,oml1,eps_work,method,only_check)
      epsilon_tot(1,ii,jj,:) = real(eps_work(:))
      if (ii /= jj) epsilon_tot(1,ii,jj,:) = epsilon_tot(1,ii,jj,:)- 1.0

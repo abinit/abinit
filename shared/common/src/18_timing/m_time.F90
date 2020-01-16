@@ -800,7 +800,7 @@ end function time_get_papiopt
 !!
 !! PARENTS
 !!      abinit,afterscfloop,atm2fft,bethe_salpeter,calc_sigc_me,calc_sigx_me
-!!      calcdensph,cchi0,cgq_builder,cgwf,chebfi,cohsex_me,corrmetalwf1,d2frnl
+!!      calcdenmagsph,cchi0,cgq_builder,cgwf,chebfi,cohsex_me,corrmetalwf1,d2frnl
 !!      density_rec,dfpt_cgwf,dfpt_dyfro,dfpt_dyxc1,dfpt_eltfrhar,dfpt_eltfrkin
 !!      dfpt_eltfrloc,dfpt_eltfrxc,dfpt_ewald,dfpt_looppert,dfpt_mkrho
 !!      dfpt_mkvxc,dfpt_mkvxc_noncoll,dfpt_mkvxcstr,dfpt_newvtr,dfpt_nstdy

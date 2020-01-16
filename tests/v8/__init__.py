@@ -105,4 +105,12 @@ inp_files = [
 "t92.in",
 "t93.in",
 "t94.in",
+#Non-collinear magnetization + nspden=4
+"t95.in",
+"t96.in",
+"t97.in",
+#Additional-multibinit tests 
+"t98.in", 
+"t99.in",
+"t100.in",
 ]

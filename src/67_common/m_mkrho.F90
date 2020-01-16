@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* m_mkrho/m_mkrho
 !! NAME
 !!  m_mkrho
@@ -729,7 +728,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  select case (ioption)
  case(0, 1)
    call symrhg(1,gprimd,irrzon,mpi_enreg,dtset%nfft,nfftot,dtset%ngfft,dtset%nspden,dtset%nsppol,dtset%nsym,&
-               phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
+               phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel,dtset%tnons)
    if(ioption==1)then
 !$OMP PARALLEL DO
      do ifft=1,dtset%nfft

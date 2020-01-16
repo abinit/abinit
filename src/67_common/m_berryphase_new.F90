@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_berryphase_new
 !! NAME
 !!  m_berryphase_new
@@ -419,7 +418,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
          call pawcprj_get(atindx1,cprj_k,cprj,natom,1,(ikpt_loc-1)*nband_k*my_nspinor,ikpt1,0,isppol,mband,&
 &         mkmem,natom,nband_k,nband_k,my_nspinor,nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-         call pawcprj_mpi_allgather(cprj_k,cprj_gat,natom,n2dim,dimlmn,ncpgr,nproc,spaceComm,ierr,rank_ordered=.true.)
+         call pawcprj_mpi_allgather(cprj_k,cprj_gat,natom,n2dim,1,dimlmn,ncpgr,nproc,spaceComm,ierr,rank_ordered=.true.)
          do iproc = 1, nproc
            icp2=nband_k*(iproc-1)*my_nspinor
            call pawcprj_get(atindx1,cprj_k,cprj_gat,natom,1,icp2,ikpt1,0,isppol,mband,&
@@ -1711,7 +1710,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 end subroutine berryphase_new
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/update_e_field_vars
 !! NAME
 !! update_e_field_vars
@@ -2653,7 +2651,6 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
 end subroutine prtefield
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/init_e_field_vars
 !! NAME
 !! init_e_field_vars
@@ -2770,7 +2767,6 @@ subroutine init_e_field_vars(dtefield,dtset,gmet,gprimd,kg,&
 end subroutine init_e_field_vars
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/initberry
 !! NAME
 !! initberry

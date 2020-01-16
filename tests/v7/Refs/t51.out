@@ -1,6 +1,6 @@
 
-.Version 8.8.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.13 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Jun 2018.
-- ( at 13h54 )
+.Starting date : Sun 29 Dec 2019.
+- ( at 18h11 )
   
-- input  file    -> t51.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v7_t50-t51-t52-t53-t54/t51.in
 - output file    -> t51.out
 - root for input  files -> t51i
 - root for output files -> t51o
@@ -139,8 +139,8 @@ P          mk1mem           8
          ecut(hartree)=     20.000   => boxcut(ratio)=   1.99384
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_rel88_smdelta/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -187,29 +187,29 @@ P          mk1mem           8
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   131.03001627231     -1.605E+02 2.451E+00 2.383E+05
- ETOT  2   56.936775844440     -7.409E+01 2.699E+00 7.574E+04
- ETOT  3   13.015485064876     -4.392E+01 4.092E-01 1.608E+03
- ETOT  4   11.765578295356     -1.250E+00 1.650E-02 1.118E+01
- ETOT  5   11.760454052442     -5.124E-03 2.911E-04 1.931E-02
- ETOT  6   11.760438592694     -1.546E-05 2.547E-05 1.026E-03
- ETOT  7   11.760438054942     -5.378E-07 8.482E-07 9.851E-05
- ETOT  8   11.760437989455     -6.549E-08 1.013E-07 2.782E-06
- ETOT  9   11.760437987369     -2.086E-09 3.885E-09 3.968E-09
- ETOT 10   11.760437987366     -2.956E-12 5.780E-10 1.190E-10
- ETOT 11   11.760437987367      2.274E-13 1.923E-11 2.260E-13
- ETOT 12   11.760437987364     -2.217E-12 2.904E-12 2.621E-15
- ETOT 13   11.760437987364     -7.958E-13 9.817E-14 4.913E-17
- ETOT 14   11.760437987366      1.990E-12 1.489E-14 2.142E-18
- ETOT 15   11.760437987365     -4.547E-13 5.146E-16 1.383E-20
- ETOT 16   11.760437987365      0.000E+00 9.493E-17 1.574E-21
+-ETOT  1   131.03001641040     -1.605E+02 2.451E+00 2.383E+05
+ ETOT  2   56.936775984867     -7.409E+01 2.699E+00 7.574E+04
+ ETOT  3   13.015485065698     -4.392E+01 4.092E-01 1.608E+03
+ ETOT  4   11.765578295281     -1.250E+00 1.650E-02 1.118E+01
+ ETOT  5   11.760454052443     -5.124E-03 2.911E-04 1.931E-02
+ ETOT  6   11.760438592695     -1.546E-05 2.547E-05 1.026E-03
+ ETOT  7   11.760438054941     -5.378E-07 8.483E-07 9.851E-05
+ ETOT  8   11.760437989454     -6.549E-08 1.013E-07 2.782E-06
+ ETOT  9   11.760437987370     -2.084E-09 3.885E-09 3.968E-09
+ ETOT 10   11.760437987366     -3.581E-12 5.780E-10 1.190E-10
+ ETOT 11   11.760437987366      1.705E-13 1.923E-11 2.260E-13
+ ETOT 12   11.760437987364     -2.387E-12 2.904E-12 2.621E-15
+ ETOT 13   11.760437987363     -7.390E-13 9.817E-14 4.913E-17
+ ETOT 14   11.760437987365      1.933E-12 1.489E-14 2.142E-18
+ ETOT 15   11.760437987365     -6.821E-13 5.146E-16 1.384E-20
+ ETOT 16   11.760437987364     -1.705E-13 9.493E-17 1.576E-21
 
  At SCF step   16   max residual=  9.49E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.4997E-17; max=  9.4931E-17
+ Mean square residual over all n,k,spin=   44.996E-18; max=  94.931E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -247,29 +247,29 @@ P          mk1mem           8
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   131.10534335390     -1.604E+02 2.156E+00 2.384E+05
- ETOT  2   57.000187134076     -7.411E+01 2.685E+00 7.584E+04
- ETOT  3   13.014154932785     -4.399E+01 4.309E-01 1.606E+03
- ETOT  4   11.765571286687     -1.249E+00 1.169E-02 1.112E+01
- ETOT  5   11.760475420464     -5.096E-03 1.997E-04 1.913E-02
- ETOT  6   11.760460201164     -1.522E-05 1.063E-05 1.057E-03
+-ETOT  1   131.10534324976     -1.604E+02 2.156E+00 2.384E+05
+ ETOT  2   57.000187064960     -7.411E+01 2.685E+00 7.584E+04
+ ETOT  3   13.014154937927     -4.399E+01 4.309E-01 1.606E+03
+ ETOT  4   11.765571286703     -1.249E+00 1.169E-02 1.112E+01
+ ETOT  5   11.760475420463     -5.096E-03 1.997E-04 1.913E-02
+ ETOT  6   11.760460201165     -1.522E-05 1.063E-05 1.057E-03
  ETOT  7   11.760459650040     -5.511E-07 6.312E-07 1.132E-04
- ETOT  8   11.760459574726     -7.531E-08 5.768E-08 2.688E-06
- ETOT  9   11.760459572681     -2.044E-09 3.223E-09 3.679E-09
- ETOT 10   11.760459572678     -3.126E-12 3.470E-10 1.186E-10
- ETOT 11   11.760459572678     -3.411E-13 1.769E-11 1.963E-13
- ETOT 12   11.760459572680      2.274E-12 2.048E-12 2.024E-15
- ETOT 13   11.760459572678     -2.387E-12 1.031E-13 3.614E-17
+ ETOT  8   11.760459574727     -7.531E-08 5.768E-08 2.688E-06
+ ETOT  9   11.760459572681     -2.046E-09 3.223E-09 3.679E-09
+ ETOT 10   11.760459572679     -2.728E-12 3.470E-10 1.186E-10
+ ETOT 11   11.760459572678     -3.979E-13 1.769E-11 1.963E-13
+ ETOT 12   11.760459572680      2.217E-12 2.048E-12 2.024E-15
+ ETOT 13   11.760459572678     -1.990E-12 1.031E-13 3.614E-17
  ETOT 14   11.760459572678      1.137E-13 1.260E-14 1.755E-18
- ETOT 15   11.760459572678      3.411E-13 6.202E-16 8.902E-21
- ETOT 16   11.760459572678     -2.842E-13 9.311E-17 1.098E-21
+ ETOT 15   11.760459572678      0.000E+00 6.203E-16 8.915E-21
+ ETOT 16   11.760459572678     -5.684E-13 9.311E-17 1.100E-21
 
  At SCF step   16   max residual=  9.31E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.4108E-17; max=  9.3110E-17
+ Mean square residual over all n,k,spin=   44.108E-18; max=  93.110E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -307,30 +307,30 @@ P          mk1mem           8
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   45.913099077136     -2.301E+02 2.875E+00 4.758E+04
- ETOT  2   12.396426478566     -3.352E+01 1.092E+00 4.413E+03
- ETOT  3   8.5203018364116     -3.876E+00 5.517E-02 5.447E+00
- ETOT  4   8.5167564956100     -3.545E-03 7.178E-03 2.854E-02
- ETOT  5   8.5167393263388     -1.717E-05 3.107E-04 6.212E-03
- ETOT  6   8.5167352538132     -4.073E-06 2.953E-05 1.300E-04
- ETOT  7   8.5167351631791     -9.063E-08 1.408E-06 2.178E-08
- ETOT  8   8.5167351631627     -1.637E-11 1.521E-07 8.844E-10
- ETOT  9   8.5167351631644      1.705E-12 7.343E-09 7.166E-11
- ETOT 10   8.5167351631630     -1.421E-12 8.097E-10 6.142E-12
- ETOT 11   8.5167351631648      1.762E-12 3.973E-11 3.066E-14
- ETOT 12   8.5167351631626     -2.217E-12 4.391E-12 1.214E-15
- ETOT 13   8.5167351631635      9.663E-13 2.175E-13 7.272E-17
- ETOT 14   8.5167351631628     -7.390E-13 2.398E-14 2.038E-18
- ETOT 15   8.5167351631630      1.705E-13 1.196E-15 1.576E-19
- ETOT 16   8.5167351631619     -1.023E-12 1.313E-16 6.465E-22
- ETOT 17   8.5167351631624      4.547E-13 9.632E-17 6.792E-24
+-ETOT  1   45.913099180713     -2.301E+02 2.875E+00 4.758E+04
+ ETOT  2   12.396426497470     -3.352E+01 1.092E+00 4.413E+03
+ ETOT  3   8.5203018362931     -3.876E+00 5.516E-02 5.447E+00
+ ETOT  4   8.5167564956038     -3.545E-03 7.177E-03 2.854E-02
+ ETOT  5   8.5167393263368     -1.717E-05 3.107E-04 6.212E-03
+ ETOT  6   8.5167352538117     -4.073E-06 2.953E-05 1.300E-04
+ ETOT  7   8.5167351631799     -9.063E-08 1.408E-06 2.178E-08
+ ETOT  8   8.5167351631636     -1.637E-11 1.521E-07 8.845E-10
+ ETOT  9   8.5167351631628     -7.958E-13 7.343E-09 7.166E-11
+ ETOT 10   8.5167351631636      8.527E-13 8.097E-10 6.142E-12
+ ETOT 11   8.5167351631649      1.251E-12 3.973E-11 3.067E-14
+ ETOT 12   8.5167351631636     -1.307E-12 4.391E-12 1.214E-15
+ ETOT 13   8.5167351631634     -1.137E-13 2.175E-13 7.272E-17
+ ETOT 14   8.5167351631631     -3.411E-13 2.398E-14 2.038E-18
+ ETOT 15   8.5167351631633      1.705E-13 1.196E-15 1.576E-19
+ ETOT 16   8.5167351631625     -7.958E-13 1.313E-16 6.472E-22
+ ETOT 17   8.5167351631627      2.274E-13 9.632E-17 6.771E-24
 
  At SCF step   17   max residual=  9.63E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.4989E-17; max=  9.6316E-17
+ Mean square residual over all n,k,spin=   44.991E-18; max=  96.316E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -368,29 +368,29 @@ P          mk1mem           8
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   131.03512758198     -1.605E+02 2.631E+00 2.384E+05
- ETOT  2   56.940000849582     -7.410E+01 2.699E+00 7.574E+04
- ETOT  3   13.015625564756     -4.392E+01 4.295E-01 1.608E+03
- ETOT  4   11.765573915670     -1.250E+00 1.328E-02 1.118E+01
- ETOT  5   11.760450620233     -5.123E-03 2.614E-04 1.933E-02
+-ETOT  1   131.03512773972     -1.605E+02 2.631E+00 2.384E+05
+ ETOT  2   56.940001010584     -7.410E+01 2.699E+00 7.574E+04
+ ETOT  3   13.015625566731     -4.392E+01 4.295E-01 1.608E+03
+ ETOT  4   11.765573915595     -1.250E+00 1.328E-02 1.118E+01
+ ETOT  5   11.760450620232     -5.123E-03 2.614E-04 1.933E-02
  ETOT  6   11.760435160504     -1.546E-05 1.066E-05 1.048E-03
- ETOT  7   11.760434613008     -5.475E-07 6.301E-07 1.076E-04
+ ETOT  7   11.760434613005     -5.475E-07 6.302E-07 1.076E-04
  ETOT  8   11.760434541449     -7.156E-08 5.768E-08 2.704E-06
- ETOT  9   11.760434539405     -2.044E-09 3.205E-09 3.821E-09
- ETOT 10   11.760434539399     -5.969E-12 3.476E-10 1.207E-10
- ETOT 11   11.760434539401      1.421E-12 1.759E-11 2.120E-13
- ETOT 12   11.760434539401     -1.137E-13 2.049E-12 2.355E-15
- ETOT 13   11.760434539400     -6.821E-13 1.024E-13 4.230E-17
- ETOT 14   11.760434539399     -5.684E-13 1.260E-14 1.980E-18
- ETOT 15   11.760434539400      5.684E-14 6.158E-16 8.580E-21
- ETOT 16   11.760434539400      0.000E+00 9.803E-17 1.066E-21
+ ETOT  9   11.760434539405     -2.044E-09 3.206E-09 3.821E-09
+ ETOT 10   11.760434539400     -5.230E-12 3.476E-10 1.207E-10
+ ETOT 11   11.760434539401      1.023E-12 1.759E-11 2.120E-13
+ ETOT 12   11.760434539401      2.274E-13 2.049E-12 2.355E-15
+ ETOT 13   11.760434539400     -9.095E-13 1.024E-13 4.230E-17
+ ETOT 14   11.760434539400     -5.116E-13 1.260E-14 1.980E-18
+ ETOT 15   11.760434539399     -3.411E-13 6.158E-16 8.580E-21
+ ETOT 16   11.760434539400      6.821E-13 9.803E-17 1.064E-21
 
  At SCF step   16   max residual=  9.80E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.6108E-17; max=  9.8029E-17
+ Mean square residual over all n,k,spin=   46.108E-18; max=  98.029E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -428,29 +428,29 @@ P          mk1mem           8
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   131.11082581137     -1.604E+02 2.671E+00 2.384E+05
- ETOT  2   57.005152080120     -7.411E+01 2.380E+00 7.584E+04
- ETOT  3   13.014410163741     -4.399E+01 4.007E-01 1.606E+03
- ETOT  4   11.765563939870     -1.249E+00 1.655E-02 1.112E+01
- ETOT  5   11.760467954554     -5.096E-03 3.425E-04 1.912E-02
+-ETOT  1   131.11082572897     -1.604E+02 2.671E+00 2.384E+05
+ ETOT  2   57.005152028937     -7.411E+01 2.380E+00 7.584E+04
+ ETOT  3   13.014410169815     -4.399E+01 4.007E-01 1.606E+03
+ ETOT  4   11.765563939889     -1.249E+00 1.655E-02 1.112E+01
+ ETOT  5   11.760467954555     -5.096E-03 3.425E-04 1.912E-02
  ETOT  6   11.760452736372     -1.522E-05 2.571E-05 1.051E-03
  ETOT  7   11.760452187775     -5.486E-07 8.407E-07 1.123E-04
- ETOT  8   11.760452113018     -7.476E-08 1.021E-07 2.700E-06
- ETOT  9   11.760452110968     -2.051E-09 3.818E-09 3.681E-09
- ETOT 10   11.760452110966     -1.648E-12 5.764E-10 1.181E-10
- ETOT 11   11.760452110962     -4.150E-12 1.873E-11 1.823E-13
- ETOT 12   11.760452110963      6.253E-13 2.873E-12 1.768E-15
- ETOT 13   11.760452110963     -5.684E-14 9.483E-14 3.220E-17
- ETOT 14   11.760452110963      7.390E-13 1.461E-14 1.445E-18
- ETOT 15   11.760452110963     -5.684E-13 4.931E-16 6.439E-21
- ETOT 16   11.760452110963     -1.137E-13 9.658E-17 8.272E-22
+ ETOT  8   11.760452113017     -7.476E-08 1.021E-07 2.700E-06
+ ETOT  9   11.760452110968     -2.049E-09 3.818E-09 3.681E-09
+ ETOT 10   11.760452110965     -2.501E-12 5.765E-10 1.181E-10
+ ETOT 11   11.760452110962     -3.581E-12 1.873E-11 1.823E-13
+ ETOT 12   11.760452110963      9.663E-13 2.873E-12 1.768E-15
+ ETOT 13   11.760452110962     -5.684E-13 9.484E-14 3.220E-17
+ ETOT 14   11.760452110964      1.364E-12 1.461E-14 1.445E-18
+ ETOT 15   11.760452110963     -7.390E-13 4.931E-16 6.447E-21
+ ETOT 16   11.760452110963     -2.842E-13 9.658E-17 8.288E-22
 
  At SCF step   16   max residual=  9.66E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.2865E-17; max=  9.6580E-17
+ Mean square residual over all n,k,spin=   42.865E-18; max=  96.575E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -488,30 +488,30 @@ P          mk1mem           8
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   45.912411781220     -2.301E+02 2.875E+00 4.758E+04
- ETOT  2   12.396318533921     -3.352E+01 1.092E+00 4.413E+03
- ETOT  3   8.5203046532080     -3.876E+00 5.513E-02 5.448E+00
- ETOT  4   8.5167584985587     -3.546E-03 7.181E-03 2.885E-02
- ETOT  5   8.5167412165922     -1.728E-05 3.105E-04 6.358E-03
- ETOT  6   8.5167370444467     -4.172E-06 2.955E-05 1.283E-04
- ETOT  7   8.5167369549721     -8.947E-08 1.406E-06 2.169E-08
- ETOT  8   8.5167369549526     -1.944E-11 1.522E-07 7.912E-10
- ETOT  9   8.5167369549533      6.821E-13 7.334E-09 5.645E-11
- ETOT 10   8.5167369549543      9.663E-13 8.103E-10 5.681E-12
- ETOT 11   8.5167369549536     -6.253E-13 3.968E-11 7.842E-14
- ETOT 12   8.5167369549528     -8.527E-13 4.394E-12 3.272E-14
- ETOT 13   8.5167369549514     -1.421E-12 2.172E-13 3.723E-15
- ETOT 14   8.5167369549530      1.592E-12 2.399E-14 4.014E-17
- ETOT 15   8.5167369549539      9.095E-13 1.194E-15 4.357E-19
- ETOT 16   8.5167369549542      2.842E-13 1.313E-16 6.567E-21
- ETOT 17   8.5167369549539     -2.842E-13 9.234E-17 8.194E-22
+-ETOT  1   45.912411882011     -2.301E+02 2.875E+00 4.758E+04
+ ETOT  2   12.396318552386     -3.352E+01 1.092E+00 4.413E+03
+ ETOT  3   8.5203046530930     -3.876E+00 5.513E-02 5.448E+00
+ ETOT  4   8.5167584985564     -3.546E-03 7.180E-03 2.885E-02
+ ETOT  5   8.5167412165909     -1.728E-05 3.105E-04 6.358E-03
+ ETOT  6   8.5167370444473     -4.172E-06 2.955E-05 1.283E-04
+ ETOT  7   8.5167369549706     -8.948E-08 1.406E-06 2.169E-08
+ ETOT  8   8.5167369549521     -1.847E-11 1.522E-07 7.912E-10
+ ETOT  9   8.5167369549532      1.080E-12 7.334E-09 5.645E-11
+ ETOT 10   8.5167369549539      7.390E-13 8.103E-10 5.681E-12
+ ETOT 11   8.5167369549539      0.000E+00 3.968E-11 7.842E-14
+ ETOT 12   8.5167369549530     -9.095E-13 4.394E-12 3.272E-14
+ ETOT 13   8.5167369549521     -9.095E-13 2.172E-13 3.723E-15
+ ETOT 14   8.5167369549528      7.390E-13 2.399E-14 4.014E-17
+ ETOT 15   8.5167369549540      1.137E-12 1.194E-15 4.357E-19
+ ETOT 16   8.5167369549544      3.979E-13 1.313E-16 6.585E-21
+ ETOT 17   8.5167369549538     -5.684E-13 9.234E-17 8.163E-22
 
  At SCF step   17   max residual=  9.23E-17 < tolwfr=  1.00E-16 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.4593E-17; max=  9.2344E-17
+ Mean square residual over all n,k,spin=   44.593E-18; max=  92.344E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -534,15 +534,15 @@ P          mk1mem           8
 
  Components of second-order derivatives of the electronic energy, EIGR2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
-   1   1   1   1   -3.4284910209E+00    0.0000000000E+00
-   1   1   2   1   -2.3653465192E+00    8.6467179294E-07
-   1   1   3   1   -1.1077860170E+00   -1.7180114940E-06
-   2   1   1   1   -2.3653465192E+00   -8.6467179294E-07
-   2   1   2   1   -3.4047081047E+00    0.0000000000E+00
-   2   1   3   1   -1.0839974114E+00   -2.2666087802E-06
-   3   1   1   1   -1.1077860170E+00    1.7180114941E-06
-   3   1   2   1   -1.0839974114E+00    2.2666087802E-06
-   3   1   3   1   -2.1917852688E+00    0.0000000000E+00
+   1   1   1   1   -3.4284908889E+00    0.0000000000E+00
+   1   1   2   1   -2.3653463710E+00    8.6467176361E-07
+   1   1   3   1   -1.1077860219E+00   -1.7180113654E-06
+   2   1   1   1   -2.3653463710E+00   -8.6467176362E-07
+   2   1   2   1   -3.4047079517E+00    0.0000000000E+00
+   2   1   3   1   -1.0839973953E+00   -2.2666086411E-06
+   3   1   1   1   -1.1077860219E+00    1.7180113654E-06
+   3   1   2   1   -1.0839973953E+00    2.2666086411E-06
+   3   1   3   1   -2.1917852576E+00    0.0000000000E+00
  
  Components of second-order derivatives of the electronic energy, EIGI2D.
  For automatic tests, printing the matrix for the first k-point, first band, first atom.
@@ -700,7 +700,7 @@ P          mk1mem           8
 
  Fan corrections to eigenvalues at T=0 (   eV  ) for nkpt=   8  k points:
  kpt#   1, nband=  8, wtk=  0.12500, kpt=  0.0000  0.0000  0.0000 (reduced coord)
- -23.25666 -137.24455 -137.24455 -137.24455 -157.76038 -157.76038 -157.76038    2.33871
+ -23.25666 -137.24455 -137.24455 -137.24455 -157.76037 -157.76037 -157.76037    2.33871
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
@@ -799,13 +799,15 @@ P          mk1mem           8
 - [1] Verification of first-principles codes: Comparison of total energies, phonon frequencies,
 - electron--phonon coupling and zero-point motion correction to the gap between ABINIT and QE/Yambo
 - S. Ponce, G. Antonius, P. Boulanger, E. Cannuccia, A. Marini, M. Cote and X. Gonze. Computational Material Science 83, 341 (2014)
-- Comment : the temperature-dependence of the electronic structure is computed (or the zero-point renormalisation).
+- Comment: the temperature-dependence of the electronic structure is computed (or the zero-point renormalisation).
 - Strong suggestion to cite this paper in your publications.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#ponce2014
 -
 - [2] Temperature dependence of the electronic structure of semiconductors and insulators 
 - S. Ponce, Y. Gillet, J. Laflamme Janssen, A. Marini, M. Verstraete and X. Gonze. J. Chem. Phys. 143, 102813 (2015)
-- Comment : the temperature-dependence of the electronic structure is computed (or the zero-point renormalisation).
+- Comment: the temperature-dependence of the electronic structure is computed (or the zero-point renormalisation).
 - Strong suggestion to cite this paper in your publications.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#ponce2015
 -
 - [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
@@ -818,49 +820,54 @@ P          mk1mem           8
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - [4] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
 - implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
 -
 - [5] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
 - interatomic force constants from density-functional perturbation theory,
 - X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [6] ABINIT : First-principles approach of materials and nanosystem properties.
+- [6] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [7] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          6.8  wall=          7.1
+- Proc.   0 individual time (sec): cpu=          6.2  wall=          6.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  81 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.8  wall=          7.1
+.Delivered   0 WARNINGs and  85 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.2  wall=          6.6

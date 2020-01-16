@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_invars1
 !! NAME
 !!  m_invars1
@@ -37,7 +36,7 @@ module m_invars1
  use netcdf
 #endif
 
- use m_fstrings, only : inupper, itoa, rmquotes
+ use m_fstrings, only : inupper, itoa, endswith, strcat, sjoin, startswith
  use m_geometry, only : mkrdim
  use m_parser,   only : intagm, chkint_ge, ab_dimensions
  use m_inkpts,   only : inkpts, inqpt
@@ -91,6 +90,8 @@ contains
 !!  mxnimage=maximal value of input nimage for all the datasets
 !!  mxntypat=maximal value of input ntypat for all the datasets
 !!  npsp=number of pseudopotentials
+!!  pseudo_paths(npsp): List of paths to pseudopotential files as read from input file.
+!!   List of empty strings if we are legacy "files file" mode. Allocated here, caller should free memory.
 !!
 !! PARENTS
 !!      m_ab7_invars_f90
@@ -100,8 +101,8 @@ contains
 !!
 !! SOURCE
 
-subroutine invars0(dtsets,istatr,istatshft,lenstr,&
-& msym,mxnatom,mxnimage,mxntypat,ndtset,ndtset_alloc,npsp,papiopt,timopt,string, comm)
+subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, mxntypat, ndtset, ndtset_alloc, &
+    npsp, pseudo_paths, papiopt, timopt, string, comm)
 
 !Arguments ------------------------------------
 !scalars
@@ -111,20 +112,26 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  character(len=*),intent(in) :: string
 !arrays
  type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc) !vz_i
+ character(len=fnlen),allocatable,intent(out) :: pseudo_paths(:)
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm
- integer :: treads,use_gpu_cuda
+ integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos,cnt
+ integer :: treads, use_gpu_cuda, ierr
  real(dp) :: cpus
  character(len=500) :: msg
+ character(len=fnlen) :: pp_dirpath, shell_var
+ character(len=20*fnlen) :: pseudos_string ! DO NOT decrease len
 !arrays
- integer,allocatable :: intarr(:)
+ integer,allocatable :: intarr(:), sidx(:)
  real(dp),allocatable :: dprarr(:)
+
 
 !******************************************************************
 
  ABI_UNUSED(comm)
+
+ !write(std_out,"(3a)")"invars1 with string:", ch10, trim(string)
 
  marr=max(9,ndtset_alloc,2)
  ABI_ALLOCATE(dprarr,(marr))
@@ -278,13 +285,13 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    if (tread==1) dtsets(idtset)%supercell_latt(:,:)=reshape(intarr(1:marr),(/3,3/))
    !This test should be update if in the future we allow non-diagonal supercell
    if (any(dtsets(idtset)%supercell_latt(:,:) < zero).or.&
-&   (dtsets(idtset)%supercell_latt(1,1) < tol10 .or.&
-&   dtsets(idtset)%supercell_latt(2,2) <tol10  .or.&
-&   dtsets(idtset)%supercell_latt(3,3) < tol10 )) then
+          (dtsets(idtset)%supercell_latt(1,1) < tol10 .or.&
+           dtsets(idtset)%supercell_latt(2,2) <tol10  .or.&
+           dtsets(idtset)%supercell_latt(3,3) < tol10 )) then
      write(msg, '(5a)' )&
-&     'supercell_latt must have positive parameters and diagonal part',ch10,&
-&     'This is not allowed.  ',ch10,&
-&     'Action: modify supercell_latt in the input file.'
+      'supercell_latt must have positive parameters and diagonal part',ch10,&
+      'This is not allowed.  ',ch10,&
+      'Action: modify supercell_latt in the input file.'
      MSG_ERROR(msg)
    end if
 !  Compute the multiplicity of the supercell
@@ -301,16 +308,16 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
      dtsets(idtset)%natom=intarr(1)
    else
      write(msg, '(a,i0,2a)' )&
-&     'Input natom must be defined, but was absent for dataset ',jdtset,ch10,&
-&     'Action: check the input file.'
+      'Input natom must be defined, but was absent for dataset ',jdtset,ch10,&
+      'Action: check the input file.'
      MSG_ERROR(msg)
    end if
 !  Check that natom is greater than 0
    if (dtsets(idtset)%natom<=0) then
      write(msg, '(a,i0,2a,i0,3a)' )&
-&     'Input natom must be > 0, but was ',dtsets(idtset)%natom,ch10,&
-&     'for dataset ',jdtset,'. This is not allowed.',ch10,&
-&     'Action: check the input file.'
+      'Input natom must be > 0, but was ',dtsets(idtset)%natom,ch10,&
+      'for dataset ',jdtset,'. This is not allowed.',ch10,&
+      'Action: check the input file.'
      MSG_ERROR(msg)
    end if
 
@@ -324,9 +331,9 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 !  Check that nimage is greater than 0
    if (dtsets(idtset)%nimage<=0) then
      write(msg, '(a,i0,4a)' )&
-&     'nimage must be > 0, but was ',dtsets(idtset)%nimage,ch10,&
-&     'This is not allowed.',ch10,&
-&     'Action: check the input file.'
+      'nimage must be > 0, but was ',dtsets(idtset)%nimage,ch10,&
+      'This is not allowed.',ch10,&
+      'Action: check the input file.'
      MSG_ERROR(msg)
    end if
 
@@ -335,21 +342,21 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 !  Check that ntypat is greater than 0
    if (dtsets(idtset)%ntypat<=0) then
      write(msg, '(a,i0,2a,i0,3a)' )&
-&     'Input ntypat must be > 0, but was ',dtsets(idtset)%ntypat,ch10,&
-&     'for dataset ',jdtset,'. This is not allowed.',ch10,&
-&     'Action: check the input file.'
+      'Input ntypat must be > 0, but was ',dtsets(idtset)%ntypat,ch10,&
+      'for dataset ',jdtset,'. This is not allowed.',ch10,&
+      'Action: check the input file.'
      MSG_ERROR(msg)
    end if
 
-!  Read msym from string
+   !  Read msym from string
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'maxnsym',tread,'INT')
    if(tread==1)dtsets(idtset)%maxnsym=intarr(1)
-!  Check that maxnsym is greater than 1
+   !  Check that maxnsym is greater than 1
    if (dtsets(idtset)%maxnsym<1) then
      write(msg, '(a,i0,2a,i0,3a)' )&
-&     'Input maxnsym must be > 1, but was ',dtsets(idtset)%maxnsym,ch10,&
-&     'for dataset ',jdtset,'. This is not allowed.',ch10,&
-&     'Action: check the input file.'
+      'Input maxnsym must be > 1, but was ',dtsets(idtset)%maxnsym,ch10,&
+      'for dataset ',jdtset,'. This is not allowed.',ch10,&
+      'Action: check the input file.'
      MSG_ERROR(msg)
    end if
 
@@ -404,12 +411,12 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    do idtset=2,ndtset_alloc
      if(mxnatom/=dtsets(idtset)%natom)then
        write(msg,'(5a,i0,a,i0,3a,i0,a)')&
-&       'When there exist one dataset with more than one image,',ch10,&
-&       'the number of atoms in each dataset must be the same.',ch10,&
-&       'However, it has been found that for dataset= ',idtset,ch10,&
-&       'natom= ',dtsets(idtset)%natom,' differs from the maximum number',ch10,&
-&       'of atoms, mxnatom= ',mxnatom,&
-&       'Action: check the input variables natom for different datasets.'
+       'When there exist one dataset with more than one image,',ch10,&
+       'the number of atoms in each dataset must be the same.',ch10,&
+       'However, it has been found that for dataset= ',idtset,ch10,&
+       'natom= ',dtsets(idtset)%natom,' differs from the maximum number',ch10,&
+       'of atoms, mxnatom= ',mxnatom,&
+       'Action: check the input variables natom for different datasets.'
        MSG_ERROR(msg)
      end if
    end do
@@ -418,6 +425,7 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 !Set up npsp
  npsp=mxntypat   ! Default value
  call intagm(dprarr,intarr,0,marr,1,string(1:lenstr),'npsp',tread,'INT')
+
  if(tread==1)then
    npsp=intarr(1)
  else
@@ -425,11 +433,11 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
      do idtset=1,ndtset_alloc
        if(dtsets(idtset)%ntypat/=mxntypat)then
          write(msg, '(5a,i0,a,i0,2a,i0,2a)' )&
-&         'When npsp is not defined, the input variable ntypat must be',ch10,&
-&         'the same for all datasets. However, it has been found that for',ch10,&
-&         'jdtset: ',dtsets(idtset)%jdtset,', ntypat= ',dtsets(idtset)%ntypat,ch10,&
-&         'differs from the maximum value of ntypat= ',mxntypat,ch10,&
-&         'Action: check the input variables npsp and ntypat.'
+         'When npsp is not defined, the input variable ntypat must be',ch10,&
+         'the same for all datasets. However, it has been found that for',ch10,&
+         'jdtset: ',dtsets(idtset)%jdtset,', ntypat= ',dtsets(idtset)%ntypat,ch10,&
+         'differs from the maximum value of ntypat= ',mxntypat,ch10,&
+         'Action: check the input variables npsp and ntypat.'
          MSG_ERROR(msg)
        end if
      end do
@@ -438,7 +446,67 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  dtsets(0)%npsp = mxntypat   ! Default value
  dtsets(1:ndtset_alloc)%npsp = npsp
 
-!KGB parallelism information (needed at this stage)
+ ! Read pseudopotential directory and pseudo paths from input.
+ ! Remember that in "files file mode", this info is passed through the files file so these variables are optional
+ pp_dirpath = ""
+ call intagm(dprarr, intarr, 0, marr, 1, string(1:lenstr), 'pp_dirpath', tread, 'KEY', key_value=pp_dirpath)
+ if (tread == 1) then
+   if (pp_dirpath(1:1) == "$") then
+     shell_var = pp_dirpath(2:)
+     call get_environment_variable(shell_var, pp_dirpath, status=ierr)
+     if (ierr == -1) MSG_ERROR(sjoin(shell_var, "is present but string too short for the environment variable"))
+     if (ierr == +1) MSG_ERROR(sjoin(shell_var, "does not exist"))
+     if (ierr == +2) MSG_ERROR(sjoin(shell_var, "used in input file but processor does not support environment variables"))
+     call wrtout(std_out, sjoin(shell_var, "found in env. Assuming pseudos located in:",  pp_dirpath))
+   end if
+   if (.not. endswith(pp_dirpath, "/")) pp_dirpath = strcat(pp_dirpath, "/")
+ end if
+
+ ! String must be large enough to contain ntypat filepaths.
+ pseudos_string = ""
+ call intagm(dprarr, intarr, 0, marr, 1, string(1:lenstr), "pseudos", tread_pseudos, 'KEY', key_value=pseudos_string)
+
+ ABI_MALLOC(pseudo_paths, (npsp))
+ pseudo_paths = ""
+
+ if (tread_pseudos == 1) then
+   ! Split pseudos_string using comma and transfer results to pseudos_paths
+   ! Make sure string lenght is large enough and input string is consistent with npsp
+   ! Lot of checks must be done here!
+   !print *, "pseudos_string: ", trim(pseudos_string)
+   ABI_ICALLOC(sidx, (npsp + 1))
+   sidx(1) = 1; sidx(npsp + 1) = len(pseudos_string)
+   cnt = 1
+   do ii=1,len(pseudos_string)
+     if (pseudos_string(ii:ii) == ",") then
+       pseudos_string(ii:ii) = " "
+       cnt = cnt + 1
+       sidx(cnt) = ii
+       ABI_CHECK(cnt <= npsp, "Too many commas in pseudos string!")
+     end if
+   end do
+   if (cnt /= npsp) then
+     MSG_ERROR(sjoin("Not enough pseudos in input `pseudos` string, expecting npsp:", itoa(npsp)))
+   end if
+
+   do ii=1,npsp
+     i1 = sidx(ii)
+     i2 = sidx(ii + 1)
+     cnt = len(adjustl(trim(pseudos_string(i1:i2))))
+     ABI_CHECK(cnt <= fnlen, "pseudo path too small, increase fnlen")
+     pseudo_paths(ii) = adjustl(trim(pseudos_string(i1:i2)))
+     if (len_trim(pp_dirpath) > 0) then
+       if (len_trim(pp_dirpath) + len_trim(pseudo_paths(ii)) > fnlen) then
+         MSG_ERROR(sjoin("String of len fnlen:", itoa(fnlen), " too small to contain full pseudo path"))
+       end if
+       pseudo_paths(ii) = strcat(pp_dirpath, pseudo_paths(ii))
+     end if
+   end do
+   ABI_FREE(sidx)
+   !print *, "pp_dirpath: ", trim(pp_dirpath), "pseudos: ", trim(pseudos_string)
+ end if
+
+ ! KGB parallelism information (needed at this stage)
  dtsets(:)%paral_kgb=0
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
@@ -447,9 +515,9 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
 
    if (dtsets(idtset)%paral_kgb<0 .or. dtsets(idtset)%paral_kgb>1) then
      write(msg,'(a,i0,2a,i0,3a)')&
-&     'Input paral_kgb must be 0 or 1, but was ',dtsets(idtset)%paral_kgb,ch10,&
-&     'for dataset ',jdtset,'. This is not allowed.',ch10,&
-&     'Action: check the input file.'
+      'Input paral_kgb must be 0 or 1, but was ',dtsets(idtset)%paral_kgb,ch10,&
+      'for dataset ',jdtset,'. This is not allowed.',ch10,&
+      'Action: check the input file.'
      MSG_ERROR(msg)
    end if
  end do
@@ -493,9 +561,9 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
  ABI_DEALLOCATE(dprarr)
  ABI_DEALLOCATE(intarr)
 
-!We allocate the internal array, depending on the computed values.
-!WARNING: do not forget to deallocate these arrays in the routine dtset_free
-!(should make a separate subroutine for allocating/deallocating these records)
+ ! We allocate the internal array, depending on the computed values.
+ ! WARNING: do not forget to deallocate these arrays in the routine dtset_free
+ ! (should make a separate subroutine for allocating/deallocating these records)
  do idtset=0,ndtset_alloc
    ABI_ALLOCATE(dtsets(idtset)%acell_orig,(3,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%algalch,(mxntypat))
@@ -528,13 +596,11 @@ subroutine invars0(dtsets,istatr,istatshft,lenstr,&
    ABI_ALLOCATE(dtsets(idtset)%shiftk,(3,MAX_NSHIFTK))
    ABI_ALLOCATE(dtsets(idtset)%typat,(mxnatom))
    ABI_ALLOCATE(dtsets(idtset)%upawu,(mxntypat,mxnimage))
-!   if (dtsets(idtset)%plowan_compute>0) then
    ABI_ALLOCATE(dtsets(idtset)%plowan_iatom,(mxnatom))
    ABI_ALLOCATE(dtsets(idtset)%plowan_it,(100*3))
    ABI_ALLOCATE(dtsets(idtset)%plowan_nbl,(mxnatom))
    ABI_ALLOCATE(dtsets(idtset)%plowan_lcalc,(12*mxnatom))
    ABI_ALLOCATE(dtsets(idtset)%plowan_projcalc,(12*mxnatom))
-!   endif
    ABI_ALLOCATE(dtsets(idtset)%vel_orig,(3,mxnatom,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%vel_cell_orig,(3,3,mxnimage))
    ABI_ALLOCATE(dtsets(idtset)%xred_orig,(3,mxnatom,mxnimage))
@@ -646,8 +712,9 @@ subroutine invars1m(dmatpuflag, dtsets, iout, lenstr, mband_upper_, mx,&
 
  ! Loop on datasets
  do idtset=1,ndtset_alloc
-   !write(std_out,'(2a,i0)') ch10,' invars1m : enter jdtset= ',jdtset
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
+   write(std_out,'(2a)') ch10,'======================================================= '
+   write(std_out,'(a,i0)') 'invars1m : enter jdtset= ',jdtset
 
    ! Input default values
    dtsets(idtset)%bravais(:)=0
@@ -1477,7 +1544,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 
  ! or from KERANGE file.
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr), "getkerange_path", tread, 'KEY', key_value=key_value)
- if (tread==1) dtset%getkerange_path = rmquotes(key_value)
+ if (tread==1) dtset%getkerange_path = key_value
 
 #ifdef HAVE_NETCDF
  if (dtset%getkerange_path /= ABI_NOFILE) then
@@ -2478,7 +2545,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtdosm=0
    dtsets(idtset)%prtebands=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
    dtsets(idtset)%prtefg=0
-   dtsets(idtset)%prtefmas=0
+   dtsets(idtset)%prtefmas=1
    dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtelf=0
    dtsets(idtset)%prtfc=0
@@ -2495,6 +2562,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtphdos=1
    dtsets(idtset)%prtphsurf=0
    dtsets(idtset)%prtposcar=0
+   dtsets(idtset)%prtprocar=0
    dtsets(idtset)%prtpot=0
    dtsets(idtset)%prtpsps=0
    dtsets(idtset)%prtspcur=0

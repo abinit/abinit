@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_energy
 !! NAME
 !!  m_energy
@@ -436,7 +435,7 @@ subroutine compute_energy(cryst_struc,energies_dmft,green,paw_dmft,pawprtvol,paw
 &       energies_dmft%e_hu_tot,energies_dmft%e_hu_mig_tot,occ_type
        MSG_ERROR(message)
      endif
-   else if(paw_dmft%dmft_solv==2.or.paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
+   else if(paw_dmft%dmft_solv==2.or.paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7.or.paw_dmft%dmft_solv==9) then
      energies_dmft%e_hu= energies_dmft%e_hu_mig
      energies_dmft%e_hu_tot= energies_dmft%e_hu_mig_tot
      energies_dmft%e_hu_qmc_tot = energies_dmft%e_hu_tot

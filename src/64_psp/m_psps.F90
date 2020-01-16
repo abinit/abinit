@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psps
 !! NAME
 !!  m_psps
@@ -1261,12 +1260,14 @@ subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
  nctab%has_tcore = has_tcore
  nctab%dncdq0 = zero; nctab%d2ncdq0 = zero
  ABI_CALLOC(nctab%tcorespl, (mqgrid_vl, 2))
-
+ nctab%tcorespl = zero
+ 
  ! tvalespl is allocated only if available.
  nctab%has_tvale = has_tvale
  nctab%dnvdq0 = zero
  if (has_tvale) then
    ABI_MALLOC(nctab%tvalespl, (mqgrid_vl, 2))
+   nctab%tvalespl = zero
  end if
 
 end subroutine nctab_init

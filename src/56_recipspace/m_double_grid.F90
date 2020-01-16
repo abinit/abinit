@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_double_grid
 !! NAME
 !!  m_double_grid

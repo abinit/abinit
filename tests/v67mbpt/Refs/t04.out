@@ -1,6 +1,6 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.13 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 12 Nov 2018.
-- ( at 02h07 )
+.Starting date : Sun 29 Dec 2019.
+- ( at 17h41 )
   
-- input  file    -> t04.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v67mbpt_t04-t05/t04.in
 - output file    -> t04.out
 - root for input  files -> t04i
 - root for output files -> t04o
@@ -34,7 +34,7 @@
 -    mband =           5        mffmem =           1         mkmem =          10
        mpw =          87          nfft =        3375          nkpt =          10
 ================================================================================
-P This job should need less than                       1.531 Mbytes of memory.
+P This job should need less than                       1.521 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.068 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.068 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =           6
        mpw =          92          nfft =        3375          nkpt =           6
 ================================================================================
-P This job should need less than                       1.241 Mbytes of memory.
+P This job should need less than                       1.230 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.170 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.170 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =           6
        mpw =          70          nfft =        1728          nkpt =           6
 ================================================================================
-P This job should need less than                       1.166 Mbytes of memory.
+P This job should need less than                       1.157 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =          20        mffmem =           1         mkmem =           6
        mpw =          70          nfft =        1728          nkpt =           6
 ================================================================================
-P This job should need less than                       1.166 Mbytes of memory.
+P This job should need less than                       1.157 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.130 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -367,8 +367,8 @@ P           mkmem4          6
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -395,7 +395,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
  ETOT  3  -11.653056786854    -4.943E-06 7.680E-05 1.653E-04
  ETOT  4  -11.653056865562    -7.871E-08 8.974E-06 2.442E-07
  ETOT  5  -11.653056865652    -8.939E-11 2.556E-05 1.090E-10
- ETOT  6  -11.653056865652    -8.882E-14 3.364E-06 2.618E-13
+ ETOT  6  -11.653056865652    -9.237E-14 3.364E-06 2.618E-13
 
  At SCF step    6       vres2   =  2.62E-13 < tolvrs=  1.00E-10 =>converged.
 
@@ -459,6 +459,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
  Other information on the energy :
     Total energy(eV)= -3.17095803513661E+02 ; Band energy (Ha)=   1.3210544331E+00
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  4.47191737E-03  sigma(3 2)=  0.00000000E+00
@@ -528,7 +530,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   66.059E-08; max=  34.298E-06
+ Mean square residual over all n,k,spin=   66.059E-08; max=  98.799E-12
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -572,8 +574,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -645,7 +647,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
-        0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
+       -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
     2   0.000  -7.488   0.000  -1.122  -0.002  -1.124  -0.003  -1.119   0.009
        -0.000   0.000  -2.509   0.002  -0.826   0.000  -0.826   0.003  -0.819
@@ -668,19 +670,19 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.088   0.005  -0.005  -0.014   0.014   0.014  -0.014  -0.005   0.005
-      0.000   0.005   0.005  -0.014  -0.014   0.014   0.014  -0.005  -0.005
+     -0.000   0.005   0.005  -0.014  -0.014   0.014   0.014  -0.005  -0.005
        1       2       3       4       5       6       7       8       9
       0.088   0.005  -0.005  -0.014   0.014   0.014  -0.014  -0.005   0.005
-      0.000  -0.005  -0.005   0.014   0.014  -0.014  -0.014   0.005   0.005
+     -0.000  -0.005  -0.005   0.014   0.014  -0.014  -0.014   0.005   0.005
 
 
    Upper and lower wings at the    2 th omega   0.0000  31.1373 [eV]
        1       2       3       4       5       6       7       8       9
       0.534   0.006  -0.006  -0.018   0.018   0.018  -0.018  -0.006   0.006
-      0.000   0.006   0.006  -0.018  -0.018   0.018   0.018  -0.006  -0.006
+     -0.000   0.006   0.006  -0.018  -0.018   0.018   0.018  -0.006  -0.006
        1       2       3       4       5       6       7       8       9
       0.534   0.006  -0.006  -0.018   0.018   0.018  -0.018  -0.006   0.006
-      0.000  -0.006  -0.006   0.018   0.018  -0.018  -0.018   0.006   0.006
+     -0.000  -0.006  -0.006   0.018   0.018  -0.018  -0.018   0.006   0.006
 
 
 
@@ -691,10 +693,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -7.801  -1.239  -0.795  -0.794  -1.238  -0.794  -1.238  -1.236  -0.797
-        0.000  -1.235   0.795  -0.794   1.238  -0.795   1.239  -1.238   0.795
+       -0.000  -1.235   0.795  -0.794   1.238  -0.795   1.239  -1.238   0.795
 
     2  -1.239  -5.647  -0.001  -0.598  -0.001  -0.600  -0.002  -0.569   0.007
-        1.235   0.000  -1.244   0.002  -0.094  -0.002  -0.093  -0.007  -0.271
+        1.235  -0.000  -1.244   0.002  -0.094  -0.002  -0.093  -0.007  -0.271
 
   chi0(G,G') at the    2 th omega   0.0000  31.1373 [eV]
        1       2       3       4       5       6       7       8       9
@@ -702,7 +704,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
        -0.000  -0.387   0.195  -0.194   0.390  -0.195   0.390  -0.390   0.195
 
     2  -0.390  -2.486  -0.001  -0.212  -0.001  -0.214  -0.001  -0.097   0.006
-        0.387  -0.000  -0.290   0.001  -0.081  -0.002  -0.080  -0.006  -0.067
+        0.387   0.000  -0.290   0.001  -0.081  -0.002  -0.080  -0.006  -0.067
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     71.42  [%]
 
@@ -724,7 +726,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
         0.000  -0.301  -0.082  -0.232   0.234   0.082   0.301  -0.235   0.233
 
     2  -0.301  -2.628  -0.000  -0.197   0.001  -0.205   0.000  -0.196   0.002
-        0.301   0.000  -0.426   0.005  -0.110  -0.000  -0.117  -0.004  -0.100
+        0.301  -0.000  -0.426   0.005  -0.110  -0.000  -0.117  -0.004  -0.100
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    3 :     74.11  [%]
 
@@ -735,10 +737,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -6.128  -1.061  -0.995  -1.061  -0.996  -1.061  -0.995  -0.777   0.966
-        0.000  -1.061   0.996  -1.061   0.996  -1.061   0.996  -0.779  -0.966
+       -0.000  -1.061   0.996  -1.061   0.996  -1.061   0.996  -0.779  -0.966
 
     2  -1.061  -8.151  -0.001  -0.980   0.003  -0.983   0.003  -0.428  -0.001
-        1.061  -0.000  -1.348   0.001  -0.231   0.000  -0.229   0.000  -0.518
+        1.061   0.000  -1.348   0.001  -0.231   0.000  -0.229   0.000  -0.518
 
   chi0(G,G') at the    2 th omega   0.0000  31.1373 [eV]
        1       2       3       4       5       6       7       8       9
@@ -768,7 +770,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
        -0.000  -0.379   0.101  -0.425   0.378  -0.379   0.425  -0.101   0.377
 
     2  -0.380  -2.057   0.002  -0.074  -0.001  -0.121  -0.000  -0.121   0.004
-        0.379  -0.000  -0.266   0.000  -0.068   0.001  -0.073   0.001  -0.082
+        0.379   0.000  -0.266   0.000  -0.068   0.001  -0.073   0.001  -0.082
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    5 :     71.87  [%]
 
@@ -779,7 +781,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -4.146  -0.864  -0.183  -0.183  -0.864  -0.864  -0.183  -0.183  -0.864
-        0.000  -0.865   0.182  -0.183   0.863  -0.865   0.183  -0.183   0.864
+       -0.000  -0.865   0.182  -0.183   0.863  -0.865   0.183  -0.183   0.864
 
     2  -0.864  -6.942  -0.000  -1.048   0.001  -1.101  -0.006  -1.048   0.002
         0.865  -0.000  -1.859  -0.004  -0.498  -0.000  -0.604   0.003  -0.483
@@ -790,7 +792,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
         0.000  -0.207  -0.013   0.012   0.205  -0.207  -0.012   0.012   0.206
 
     2  -0.206  -2.990  -0.000  -0.265   0.001  -0.231  -0.005  -0.266   0.002
-        0.207   0.000  -0.471  -0.003  -0.134  -0.000  -0.139   0.002  -0.122
+        0.207  -0.000  -0.471  -0.003  -0.134  -0.000  -0.139   0.002  -0.122
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    6 :     79.54  [%]
 
@@ -876,8 +878,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
 
   Number of electrons    =    7.9781
 
-  QP Band energy    [Ha] =  1.34160597426197E+00
-  QP Hartree energy [Ha] =  8.13336905266484E-01
+  QP Band energy    [Ha] =  1.34160597426198E+00
+  QP Hartree energy [Ha] =  8.13336905266456E-01
 
 --------------------------------------------------------------------------------
 
@@ -919,101 +921,113 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
 
  Self-Consistent on Energies and Wavefunctions
 
- k =   -0.250  -0.250   0.000
- Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-    1    -6.620   -14.984    -6.620     8.364   -24.080     8.665     1.000     0.000   -15.415    -0.432    -7.051    -7.052
-    2     9.059   -16.229     9.059    25.288   -19.502     3.943     1.000     0.000   -15.559     0.670     9.729     9.725
-    3     9.731   -15.646     9.731    25.377   -18.078     3.475     1.000     0.000   -14.603     1.043    10.774    10.771
-    4     9.731   -15.646     9.731    25.377   -18.080     3.475     1.000     0.000   -14.605     1.041    10.772    10.774
-    5    17.957   -14.218    17.957    32.174    -7.892    -4.114     1.000     0.000   -12.006     2.211    20.168    20.169
-    6    22.962   -13.446    22.962    36.407    -6.011    -5.119     1.000     0.000   -11.130     2.316    25.277    25.281
-    7    27.315   -15.766    27.315    43.081    -6.819    -5.234     1.000     0.000   -12.052     3.713    31.029    31.021
-    8    27.315   -15.766    27.315    43.081    -6.819    -5.240     1.000     0.000   -12.059     3.707    31.022    31.030
+--- !SelfEnergy_ee
+kpoint     : [  -0.250,   -0.250,    0.000, ]
+spin       : 1
+KS_gap     :    8.226
+QP_gap     :    9.396
+Delta_QP_KS:    1.170
+data: !SigmaeeData |
+     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -6.620   -14.984    -6.620     8.364   -24.080     8.665     1.000     0.000   -15.415    -0.432    -7.051    -7.052
+        2     9.059   -16.229     9.059    25.288   -19.502     3.943     1.000     0.000   -15.559     0.670     9.729     9.725
+        3     9.731   -15.646     9.731    25.377   -18.078     3.475     1.000     0.000   -14.603     1.043    10.774    10.771
+        4     9.731   -15.646     9.731    25.377   -18.080     3.475     1.000     0.000   -14.605     1.041    10.772    10.774
+        5    17.957   -14.218    17.957    32.174    -7.892    -4.114     1.000     0.000   -12.006     2.211    20.168    20.169
+        6    22.962   -13.446    22.962    36.407    -6.011    -5.119     1.000     0.000   -11.130     2.316    25.277    25.281
+        7    27.315   -15.766    27.315    43.081    -6.819    -5.234     1.000     0.000   -12.052     3.713    31.029    31.021
+        8    27.315   -15.766    27.315    43.081    -6.819    -5.240     1.000     0.000   -12.059     3.707    31.022    31.030
+...
 
- E^0_gap          8.226
- E^GW_gap         9.396
- DeltaE^GW_gap    1.170
+--- !SelfEnergy_ee
+kpoint     : [  -0.250,    0.250,    0.000, ]
+spin       : 1
+KS_gap     :    9.926
+QP_gap     :   11.284
+Delta_QP_KS:    1.358
+data: !SigmaeeData |
+     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -4.273   -15.183    -4.273    10.910   -23.547     7.851     1.000     0.000   -15.696    -0.513    -4.786    -4.787
+        2     4.526   -15.666     4.526    20.192   -20.517     5.044     1.000     0.000   -15.473     0.193     4.719     4.711
+        3     6.092   -14.987     6.092    21.078   -18.572     4.060     1.000     0.000   -14.513     0.474     6.566     6.565
+        4    11.516   -15.986    11.516    27.501   -18.145     3.311     1.000     0.000   -14.834     1.152    12.668    12.668
+        5    21.442   -14.227    21.442    35.669    -7.067    -4.650     1.000     0.000   -11.717     2.510    23.952    23.945
+        6    25.318   -15.301    25.318    40.619    -6.746    -5.178     1.000     0.000   -11.924     3.377    28.695    28.695
+        7    27.074   -15.126    27.074    42.201    -6.798    -5.174     1.000     0.000   -11.972     3.155    30.229    30.231
+        8    27.568   -14.931    27.568    42.499    -5.657    -5.988     1.000     0.000   -11.645     3.286    30.854    30.870
+...
 
+--- !SelfEnergy_ee
+kpoint     : [   0.500,    0.500,    0.000, ]
+spin       : 1
+KS_gap     :   10.135
+QP_gap     :   11.282
+Delta_QP_KS:    1.147
+data: !SigmaeeData |
+     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -0.013   -15.456    -0.013    15.442   -22.190     6.480     1.000     0.000   -15.710    -0.255    -0.268    -0.290
+        2    -0.013   -15.456    -0.013    15.442   -22.190     6.480     1.000     0.000   -15.710    -0.254    -0.268    -0.249
+        3     7.315   -15.547     7.315    22.862   -18.921     4.125     1.000     0.000   -14.796     0.751     8.066     8.066
+        4     7.315   -15.547     7.315    22.862   -18.915     4.122     1.000     0.000   -14.792     0.754     8.070     8.070
+        5    17.450   -13.534    17.450    30.984    -7.397    -4.236     1.000     0.000   -11.633     1.902    19.351    19.349
+        6    17.450   -13.534    17.450    30.984    -7.397    -4.236     1.000     0.000   -11.633     1.902    19.352    19.357
+        7    33.419   -16.023    33.419    49.442    -4.867    -6.775     1.000     0.000   -11.642     4.381    37.800    37.795
+        8    33.419   -16.023    33.419    49.442    -4.872    -6.775     1.000     0.000   -11.646     4.377    37.796    37.801
+...
 
- k =   -0.250   0.250   0.000
- Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-    1    -4.273   -15.183    -4.273    10.910   -23.547     7.851     1.000     0.000   -15.696    -0.513    -4.786    -4.787
-    2     4.526   -15.666     4.526    20.192   -20.517     5.044     1.000     0.000   -15.473     0.193     4.719     4.711
-    3     6.092   -14.987     6.092    21.078   -18.572     4.060     1.000     0.000   -14.513     0.474     6.566     6.565
-    4    11.516   -15.986    11.516    27.501   -18.145     3.311     1.000     0.000   -14.834     1.152    12.668    12.668
-    5    21.442   -14.227    21.442    35.669    -7.067    -4.650     1.000     0.000   -11.717     2.510    23.952    23.945
-    6    25.318   -15.301    25.318    40.619    -6.746    -5.178     1.000     0.000   -11.924     3.377    28.695    28.695
-    7    27.074   -15.126    27.074    42.201    -6.798    -5.174     1.000     0.000   -11.972     3.155    30.229    30.231
-    8    27.568   -14.931    27.568    42.499    -5.657    -5.988     1.000     0.000   -11.645     3.286    30.854    30.870
+--- !SelfEnergy_ee
+kpoint     : [  -0.250,    0.500,    0.250, ]
+spin       : 1
+KS_gap     :   19.559
+QP_gap     :   21.774
+Delta_QP_KS:    2.215
+data: !SigmaeeData |
+     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1     0.961   -15.798     0.961    16.759   -22.430     6.321     1.000     0.000   -16.109    -0.312     0.650     0.636
+        2     0.961   -15.798     0.961    16.759   -22.430     6.322     1.000     0.000   -16.108    -0.310     0.651     0.660
+        3     5.172   -14.734     5.172    19.907   -18.521     4.249     1.000     0.000   -14.272     0.462     5.635     5.619
+        4     5.172   -14.734     5.172    19.907   -18.521     4.250     1.000     0.000   -14.271     0.464     5.636     5.641
+        5    24.731   -13.805    24.731    38.536    -6.235    -4.892     1.000     0.000   -11.127     2.678    27.410    27.403
+        6    24.731   -13.805    24.731    38.536    -6.235    -4.892     1.000     0.000   -11.126     2.679    27.410    27.427
+        7    26.269   -15.429    26.269    41.698    -6.459    -5.636     1.000     0.000   -12.095     3.334    29.602    29.592
+        8    26.269   -15.429    26.269    41.698    -6.459    -5.636     1.000     0.000   -12.095     3.334    29.603    29.619
+...
 
- E^0_gap          9.926
- E^GW_gap        11.284
- DeltaE^GW_gap    1.358
+--- !SelfEnergy_ee
+kpoint     : [   0.500,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    9.269
+QP_gap     :   10.485
+Delta_QP_KS:    1.216
+data: !SigmaeeData |
+     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -3.087   -15.573    -3.087    12.486   -23.738     7.657     1.000     0.000   -16.082    -0.508    -3.596    -3.597
+        2    -0.289   -14.591    -0.289    14.302   -20.755     6.076     1.000     0.000   -14.679    -0.088    -0.377    -0.378
+        3    12.053   -16.173    12.053    28.226   -18.303     3.267     1.000     0.000   -15.036     1.137    13.190    13.189
+        4    12.053   -16.173    12.053    28.226   -18.288     3.269     1.000     0.000   -15.019     1.154    13.207    13.208
+        5    21.322   -15.292    21.322    36.615    -8.050    -4.873     1.000     0.000   -12.922     2.370    23.692    23.694
+        6    23.226   -14.564    23.226    37.790    -7.040    -4.671     1.000     0.000   -11.711     2.853    26.079    26.077
+        7    23.226   -14.564    23.226    37.790    -7.040    -4.671     1.000     0.000   -11.711     2.853    26.079    26.082
+        8    29.916   -12.642    29.916    42.558    -3.720    -6.196     1.000     0.000    -9.915     2.727    32.643    32.644
+...
 
-
- k =    0.500   0.500   0.000
- Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-    1    -0.013   -15.456    -0.013    15.442   -22.190     6.480     1.000     0.000   -15.710    -0.255    -0.268    -0.290
-    2    -0.013   -15.456    -0.013    15.442   -22.190     6.480     1.000     0.000   -15.710    -0.254    -0.268    -0.249
-    3     7.315   -15.547     7.315    22.862   -18.921     4.125     1.000     0.000   -14.796     0.751     8.066     8.066
-    4     7.315   -15.547     7.315    22.862   -18.915     4.122     1.000     0.000   -14.792     0.754     8.070     8.070
-    5    17.450   -13.534    17.450    30.984    -7.397    -4.236     1.000     0.000   -11.633     1.902    19.351    19.349
-    6    17.450   -13.534    17.450    30.984    -7.397    -4.236     1.000     0.000   -11.633     1.902    19.352    19.357
-    7    33.419   -16.023    33.419    49.442    -4.867    -6.775     1.000     0.000   -11.642     4.381    37.800    37.795
-    8    33.419   -16.023    33.419    49.442    -4.872    -6.775     1.000     0.000   -11.646     4.377    37.796    37.801
-
- E^0_gap         10.135
- E^GW_gap        11.282
- DeltaE^GW_gap    1.147
-
-
- k =   -0.250   0.500   0.250
- Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-    1     0.961   -15.798     0.961    16.759   -22.430     6.321     1.000     0.000   -16.109    -0.312     0.650     0.636
-    2     0.961   -15.798     0.961    16.759   -22.430     6.322     1.000     0.000   -16.108    -0.310     0.651     0.660
-    3     5.172   -14.734     5.172    19.907   -18.521     4.249     1.000     0.000   -14.272     0.462     5.635     5.619
-    4     5.172   -14.734     5.172    19.907   -18.521     4.250     1.000     0.000   -14.271     0.464     5.636     5.641
-    5    24.731   -13.805    24.731    38.536    -6.235    -4.892     1.000     0.000   -11.127     2.678    27.410    27.403
-    6    24.731   -13.805    24.731    38.536    -6.235    -4.892     1.000     0.000   -11.126     2.679    27.410    27.427
-    7    26.269   -15.429    26.269    41.698    -6.459    -5.636     1.000     0.000   -12.095     3.334    29.602    29.592
-    8    26.269   -15.429    26.269    41.698    -6.459    -5.636     1.000     0.000   -12.095     3.334    29.603    29.619
-
- E^0_gap         19.559
- E^GW_gap        21.774
- DeltaE^GW_gap    2.215
-
-
- k =    0.500   0.000   0.000
- Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-    1    -3.087   -15.573    -3.087    12.486   -23.738     7.657     1.000     0.000   -16.082    -0.508    -3.596    -3.597
-    2    -0.289   -14.591    -0.289    14.302   -20.755     6.076     1.000     0.000   -14.679    -0.088    -0.377    -0.378
-    3    12.053   -16.173    12.053    28.226   -18.303     3.267     1.000     0.000   -15.036     1.137    13.190    13.189
-    4    12.053   -16.173    12.053    28.226   -18.288     3.269     1.000     0.000   -15.019     1.154    13.207    13.208
-    5    21.322   -15.292    21.322    36.615    -8.050    -4.873     1.000     0.000   -12.922     2.370    23.692    23.694
-    6    23.226   -14.564    23.226    37.790    -7.040    -4.671     1.000     0.000   -11.711     2.853    26.079    26.077
-    7    23.226   -14.564    23.226    37.790    -7.040    -4.671     1.000     0.000   -11.711     2.853    26.079    26.082
-    8    29.916   -12.642    29.916    42.558    -3.720    -6.196     1.000     0.000    -9.915     2.727    32.643    32.644
-
- E^0_gap          9.269
- E^GW_gap        10.485
- DeltaE^GW_gap    1.216
-
-
- k =    0.000   0.000   0.000
- Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
-    1    -9.000   -14.857    -9.000     5.857   -24.729     9.601     1.000     0.000   -15.128    -0.270    -9.270    -9.270
-    2    15.682   -16.502    15.682    32.184   -17.631     2.628     1.000     0.000   -15.003     1.499    17.181    17.177
-    3    15.682   -16.502    15.682    32.184   -17.627     2.632     1.000     0.000   -14.995     1.507    17.189    17.181
-    4    15.682   -16.502    15.682    32.184   -17.628     2.628     1.000     0.000   -14.999     1.503    17.184    17.196
-    5    20.572   -15.038    20.572    35.611    -7.970    -4.217     1.000     0.000   -12.187     2.852    23.424    23.420
-    6    20.572   -15.038    20.572    35.611    -7.956    -4.217     1.000     0.000   -12.173     2.865    23.438    23.421
-    7    20.572   -15.038    20.572    35.611    -7.971    -4.216     1.000     0.000   -12.187     2.851    23.423    23.444
-    8    25.745   -15.802    25.745    41.547    -6.896    -6.139     1.000     0.000   -13.035     2.766    28.512    28.512
-
- E^0_gap          4.890
- E^GW_gap         6.239
- DeltaE^GW_gap    1.349
-
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    4.890
+QP_gap     :    6.239
+Delta_QP_KS:    1.349
+data: !SigmaeeData |
+     Band     E_lda   <Vxclda>   E(N-1)  <Hhartree>   SigX  SigC[E(N-1)]    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago
+        1    -9.000   -14.857    -9.000     5.857   -24.729     9.601     1.000     0.000   -15.128    -0.270    -9.270    -9.270
+        2    15.682   -16.502    15.682    32.184   -17.631     2.628     1.000     0.000   -15.003     1.499    17.181    17.177
+        3    15.682   -16.502    15.682    32.184   -17.627     2.632     1.000     0.000   -14.995     1.507    17.189    17.181
+        4    15.682   -16.502    15.682    32.184   -17.628     2.628     1.000     0.000   -14.999     1.503    17.184    17.196
+        5    20.572   -15.038    20.572    35.611    -7.970    -4.217     1.000     0.000   -12.187     2.852    23.424    23.420
+        6    20.572   -15.038    20.572    35.611    -7.956    -4.217     1.000     0.000   -12.173     2.865    23.438    23.421
+        7    20.572   -15.038    20.572    35.611    -7.971    -4.216     1.000     0.000   -12.187     2.851    23.423    23.444
+        8    25.745   -15.802    25.745    41.547    -6.896    -6.139     1.000     0.000   -13.035     2.766    28.512    28.512
+...
 
  New Fermi energy :        6.715087E-01 Ha ,    1.827268E+01 eV
  New Exchange energy :    -2.971909E+00 Ha ,   -8.086975E+01 eV
@@ -1032,7 +1046,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
 .  kptgw no:  2; Maximum DeltaE = (   3.377  -0.000) for band index:  6
 .  kptgw no:  3; Maximum DeltaE = (   4.381  -0.000) for band index:  7
 .  kptgw no:  4; Maximum DeltaE = (   3.334   0.000) for band index:  8
-.  kptgw no:  5; Maximum DeltaE = (   2.853   0.000) for band index:  6
+.  kptgw no:  5; Maximum DeltaE = (   2.853  -0.000) for band index:  6
 .  kptgw no:  6; Maximum DeltaE = (   2.865  -0.000) for band index:  6
 
 == END DATASET(S) ==============================================================
@@ -1307,8 +1321,8 @@ P           mkmem4          6
 -
 - [1] Effect of self-consistency on quasiparticles in solids
 - F. Bruneval, N. Vast, L. Reining, Phys. Rev. B 74, 045102 (2006).
-- Comment : in case gwcalctyp >= 10.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#bruneval2006
+- Comment: in case gwcalctyp >= 10.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#bruneval2006
 -
 - [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
@@ -1322,51 +1336,51 @@ P           mkmem4          6
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [5] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          4.6  wall=          4.8
+- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.6  wall=          4.8
+.Delivered   5 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=          4.0  wall=          4.1

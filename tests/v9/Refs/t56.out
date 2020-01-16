@@ -1,6 +1,6 @@
 
-.Version 8.9.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.13 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 27 Sep 2019.
-- ( at 15h53 )
+.Starting date : Sun 29 Dec 2019.
+- ( at 18h22 )
   
-- input  file    -> t56.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t56.in
 - output file    -> t56.out
 - root for input  files -> t56i
 - root for output files -> t56o
@@ -156,7 +156,7 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
          eph_task          -4
         ddb_ngqpt        2    2    2
        dvdb_ngqpt        2    2    2
--          fftalg         112
+-          fftalg         312
            getddb          20
            getwfk          20
            istwfk        1    0    1    0    0    0    1    0
@@ -399,8 +399,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gbrunin_eph_double_grid_fast/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gbrunin_eph_double_grid_fast/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -918,7 +918,7 @@ Notations:
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   1  -8.789   -0.001    509.1    0.000
+   1  -8.789   -0.001    509.0    0.000
    2  12.800   -0.052      6.3   21.589
    3  12.800   -0.052      6.3    0.000
    4  12.800   -0.052      6.3    0.000
@@ -1520,10 +1520,10 @@ P           mkmem           8
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.8
+- Proc.   0 individual time (sec): cpu=         67.0  wall=         67.1
 
 ================================================================================
 
  Calculation completed.
-.Delivered   9 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.6  wall=          3.8
+.Delivered   9 WARNINGs and  12 COMMENTs to log file.
++Overall time at end (sec) : cpu=         67.0  wall=         67.1

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sigma
 !! NAME
 !!  m_sigma
@@ -445,7 +444,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt,use_yaml)
  do is=1,Sr%nsppol
    write(msg,'(2a,3f8.3,a)')ch10,' k = ',Sigp%kptgw(:,ikcalc),tag_spin(is)
    call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   !call wrtout(ab_out,msg,'COLL')
 
    msg = ' Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E'
    if (Sr%usepawu/=0) then
@@ -458,10 +457,11 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt,use_yaml)
      '    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago'
    end if
    call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   !call wrtout(ab_out,msg,'COLL')
 
    ydoc = yamldoc_open('SelfEnergy_ee', "", width=11, real_fmt='(3f8.3)')
    ydoc%use_yaml = use_yaml
+   ydoc%use_yaml = 1
    call ydoc%add_real1d('kpoint', Sigp%kptgw(:,ikcalc))
    call ydoc%add_int('spin', is, int_fmt="(i1)")
    call ydoc%add_real('KS_gap', Sr%e0gap(ikibz,is)*Ha_eV)
@@ -484,7 +484,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt,use_yaml)
 
    do ib=Sigp%minbnd(ikcalc,is),Sigp%maxbnd(ikcalc,is)
      if (gwcalctyp>=10) then
-       call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=ab_out, ydoc=ydoc)
+       call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=dev_null, ydoc=ydoc)
        call print_Sigma_QPSC(Sr,ikibz,ib,is,KS_BSt,unit=std_out,prtvol=1)
 
        write(unt_gwdiag,'(i6,3f9.4)')                                 &
@@ -497,9 +497,9 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt,use_yaml)
        ! If not ppmodel, write out also the imaginary part in ab_out
        SELECT CASE(mod10)
        CASE(1,2)
-         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=ab_out,ydoc=ydoc,prtvol=1)
+         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=dev_null,ydoc=ydoc,prtvol=1)
        CASE DEFAULT
-         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=ab_out,ydoc=ydoc)
+         call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=dev_null,ydoc=ydoc)
        END SELECT
        call print_Sigma_perturbative(Sr,ikibz,ib,is,unit=std_out,prtvol=1)
      end if
@@ -516,13 +516,13 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt,use_yaml)
      ! If all the gaps are zero, this means that it could not be computed in the calling routine
      write(msg,'(2a,f8.3)')ch10,' E^0_gap       ',Sr%e0gap(ikibz,is)*Ha_eV
      call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
+     !call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,f8.3)')      ' E^GW_gap      ',Sr%egwgap(ikibz,is)*Ha_eV
      call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
+     !call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,f8.3,a)')    ' DeltaE^GW_gap ',Sr%degwgap(ikibz,is)*Ha_eV,ch10
      call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
+     !call wrtout(ab_out,msg,'COLL')
    end if
 
    call ydoc%write_and_free(ab_out)
@@ -664,7 +664,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
       REAL(SUM(Sr%sigmee  (iband,ik_ibz,:)))*Ha_eV,&
       REAL(Sr%degw        (iband,ik_ibz,1))*Ha_eV, &
       REAL(Sr%egw         (iband,ik_ibz,1))*Ha_eV
-       call wrtout(my_unt,msg,my_mode)
+     call wrtout(my_unt,msg,my_mode)
      if (present(ydoc)) call ydoc%add_tabular_line(msg)
      if (verbose/=0) then
        write(msg,'(i5,9f8.3)')                        &
@@ -743,7 +743,7 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
      AIMAG(Sr%sigmee  (iband,ik_ibz,isp))*Ha_eV,&
      AIMAG(Sr%degw    (iband,ik_ibz,isp))*Ha_eV,&
      AIMAG(Sr%egw     (iband,ik_ibz,isp))*Ha_eV
-      call wrtout(my_unt,msg,my_mode)
+     call wrtout(my_unt,msg,my_mode)
      if(present(ydoc)) call ydoc%add_tabular_line(msg)
    end if
  end if

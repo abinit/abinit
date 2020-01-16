@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/abinit
 !! NAME
 !! abinit
@@ -234,7 +233,7 @@ program abinit
 !create the name of the status file, initialize the status subroutine.
 
  call timab(41,3,tsec)
- call iofn1(filnam,filstat,xmpi_world)
+ call iofn1(args%input_path, filnam, filstat, xmpi_world)
 
 !------------------------------------------------------------------------------
 
@@ -268,7 +267,8 @@ program abinit
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
 
- call get_dtsets_pspheads(filnam(1), ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, xmpi_world)
+ call get_dtsets_pspheads(args%input_path, filnam(1), ndtset, lenstr, string, &
+                          timopt, dtsets, pspheads, mx, dmatpuflag, xmpi_world)
 
  ndtset_alloc = size(dtsets) - 1
  npsp = size(pspheads)
@@ -279,7 +279,7 @@ program abinit
  call bigdft_init_timing_categories()
 #endif
 
- ABI_DATATYPE_ALLOCATE(mpi_enregs,(0:max(1,ndtset)))
+ ABI_MALLOC(mpi_enregs, (0:max(1,ndtset)))
  call mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
  call memory_eval(dtsets,ab_out,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
@@ -289,7 +289,7 @@ program abinit
 !12) Echo input data to output file and log file
 
  ! For evolving variables, and results
- ABI_DATATYPE_ALLOCATE(results_out,(0:ndtset_alloc))
+ ABI_MALLOC(results_out, (0:ndtset_alloc))
 
  ! Initialize results_out datastructure
  call init_results_out(dtsets,1,1,mpi_enregs, mx%natom, mx%mband_upper, mx%nkpt,npsp,&
@@ -300,8 +300,8 @@ program abinit
  use_results_all=.false.
  if (test_img) then
    use_results_all=(me==0)
-   if (use_results_all)  then
-     ABI_DATATYPE_ALLOCATE(results_out_all,(0:ndtset_alloc))
+   if (use_results_all) then
+     ABI_MALLOC(results_out_all, (0:ndtset_alloc))
    end if
 
    call gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_results_all, allgather=.false.,master=0)
@@ -404,7 +404,7 @@ program abinit
  ! Gather contributions to results_out from images of the cell, if needed
  if (test_img) then
    if (use_results_all)  then
-     ABI_DATATYPE_ALLOCATE(results_out_all,(0:ndtset_alloc))
+     ABI_MALLOC(results_out_all,(0:ndtset_alloc))
    end if
 
    call gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_results_all,allgather=.false.,master=0)

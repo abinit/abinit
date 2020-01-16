@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_getshell
 !! NAME
 !!  m_getshell
@@ -205,29 +204,46 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
      flag = 1
      do ikpt2 = 1, nkpt2
 
-!      In case, the k-points differ only by one reciprocal lattice
+!      In case the k-points differ only by one reciprocal lattice
 !      vector, apply shift of one g-vector to kpt(:,ikpt3)
+!     MJV 10/2019: this appears to be using time reversal sym, instead of the G vector...
+!      could be equivalent to keep points inside the 1st BZ, but the code below is not consistent
+!      with this comment
 
+!
+!  here k3 = k2 + G 
+!
        dk_(:) = kpt3(:,ikpt3) - kpt2(:,ikpt2)
        dk(:) = dk_(:) - nint(dk_(:))
        if (dk(1)*dk(1) + dk(2)*dk(2) + dk(3)*dk(3) < tol10) then
          do ii = 1, 3
            if ((dk(ii)*dk(ii) < tol10).and.(dk_(ii)*dk_(ii) > tol10)) then
+!  transform k3 to -k3
+!  TODO: I suspect this should be k3 -= G!!
              kpt3(ii,ikpt3) = -1._dp*kpt3(ii,ikpt3)
            end if
          end do
        end if
 
+!
+! here k3 = -k2 + G
+!
        dk_(:) = kpt3(:,ikpt3) + kpt2(:,ikpt2)
        dk(:) = dk_(:) - nint(dk_(:))
        if (dk(1)*dk(1) + dk(2)*dk(2) + dk(3)*dk(3) < tol10) then
          do ii = 1, 3
            if ((dk(ii)*dk(ii) < tol10).and.(dk_(ii)*dk_(ii) > tol10)) then
+!  transform k3 to -k3
+!  TODO: I suspect this should be k3 -= G!!
              kpt3(ii,ikpt3) = -1._dp*kpt3(ii,ikpt3)
            end if
          end do
        end if
 
+
+!
+! here k3 = k2
+!
        dk(:) = kpt3(:,ikpt3) - kpt2(:,ikpt2)
        if (dk(1)*dk(1) + dk(2)*dk(2) + dk(3)*dk(3) < tol10) then
          kptindex(1,ikpt3) = ikpt2
@@ -236,6 +252,9 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
          exit
        end if
 
+!
+! here k3 = -k2
+!
        dk(:) = kpt3(:,ikpt3) + kpt2(:,ikpt2)
        if (dk(1)*dk(1) + dk(2)*dk(2) + dk(3)*dk(3) < tol10) then
          kptindex(1,ikpt3) = ikpt2
@@ -295,12 +314,13 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
    dist(ishell) = max_dist
 !  !!  border_flag = 1
 
-!  Find the (squared) radius of the next shell
 !  !write(std_out,*)'gmet'
 !  !do ikpt=1,3
 !  !write(std_out,*)gmet(ikpt,:)
 !  !enddo
 !  !write(std_out,*)kpt3(:,1)
+
+!  Find the (squared) radius of the next shell
    do ikpt = 1,nkpt3
 !    !write(std_out,*)ikpt
 !    !write(std_out,*)kpt3(:,ikpt)
@@ -398,7 +418,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 
    last_dist = dist(ishell)
 
-!  For each k-point in halft the BZ get the shells of nearest neighbours.
+!  For each k-point in half the BZ get the shells of nearest neighbours.
 !  These neighbours can be out of the zone sampled by kpt2.
 !  !$write(std_out,*)'nkpt2', nkpt2, 'nkpt3', nkpt3
    do ikpt2 = 1, nkpt2              ! k-points in half the BZ
@@ -549,8 +569,9 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
    rvec(6) = rmet(3,1)
 
 !  DEBUG
+   write(std_out,*) " mat(1:6, 1:ishell) : rmet(1:6) for all 6 products dx^2... dxdy..."
    do ii = 1, 6
-     write(std_out,*)mat(ii,1:ishell), ' : ', rvec(ii)
+     write(std_out,*) mat(ii,1:ishell), ' : ', rvec(ii)
    end do
 !  ENDDEBUG
 
@@ -590,7 +611,7 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
    end if
 
 !  DEBUG
-   write(std_out,*) ishell, nneigh, irank, resdm
+   write(std_out,*) "ishell, nneigh, irank, resdm ", ishell, nneigh, irank, resdm
 !  ENDDEBUG
 
 !  end of loop over shells
@@ -608,8 +629,8 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
  end do  ! ikpt
 
 !Report weights
- write(std_out,*) 'Neighbors', neigh(1:ishell,1)
- write(std_out,*) 'Weights', rvec(1:ishell)
+ write(std_out,*) 'Neighbors(1:ishell,1) ', neigh(1:ishell,1)
+ write(std_out,*) 'Weights (1:ishell) ', rvec(1:ishell)
  write(std_out,*) mvwtk(1:nneigh,1)
 
 !Check the computed weights
@@ -624,7 +645,9 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
            dk(:) = dk(:) + real(kg_neigh(ineigh,ikpt,:),dp)
            s1 = s1 + dk(ii)*dk(jj)*mvwtk(ineigh,ikpt)
          end do
-         if (abs(s1 - rmet(ii,jj)) > tol6) wtkflg = 1
+         if (abs(s1 - rmet(ii,jj)) > tol6) then
+           wtkflg = 1
+         end if
        end do
      end do
    end do
@@ -640,7 +663,9 @@ subroutine getshell(gmet,kneigh,kg_neigh,kptindex,kptopt,kptrlatt,kpt2,&
 
  if (wtkflg /= 0) then
 
-   message = ' There is a problem with the finite difference expression of the ddk '
+   message = ' There is a problem with the finite difference expression of the ddk '//ch10&
+&        //' If you are very close to a symmetric structure, you might be confusing the algorithm with'//ch10&
+&        //' sets of k-points which are not quite part of the same shell. Try rectifying angles and acell.'
    MSG_BUG(message)
 
  else

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_vtorhorec
 !! NAME
 !!  m_vtorhorec
@@ -925,7 +924,7 @@ subroutine vtorhorec(dtset,&
 
  call symrhg(1,gprimd,irrzon,rset%mpi,nfftf,&
 & dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3),dtset%ngfft,dtset%nspden,&
-& dtset%nsppol,dtset%nsym,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
+& dtset%nsppol,dtset%nsym,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel,dtset%tnons)
 
 end subroutine vtorhorec
 !!***
@@ -2145,7 +2144,6 @@ end subroutine nlenergyrec
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/first_rec
 !! NAME
 !! first_rec

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/pbc_lotf
 !! NAME
 !! pbc_lotf

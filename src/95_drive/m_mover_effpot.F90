@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mover_effpot
 !! NAME
 !!  m_mover_effpot
@@ -116,6 +115,7 @@ contains
 
 subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 
+ use m_scup_dataset,       only : scup_dtset_type 
 
 !Arguments --------------------------------
 !scalar
@@ -129,7 +129,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !scalar
  integer :: filetype,icoeff_bound,ii, unit_out
 !integer :: iexit,initialized
- integer :: jj,kk,nproc,icoeff,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
+ integer :: jj,kk,nproc,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
  integer :: model_bound,model_ncoeffbound,my_rank
 !integer :: mtypalch,,npsp,paw_size,type
 !integer,save :: paw_size_old=-1
@@ -137,8 +137,10 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 ! real(dp):: time_q,time_b
  logical :: iam_master
  integer, parameter:: master=0
- logical :: verbose,writeHIST
-!real(dp) :: cpui
+ logical :: verbose,writeHIST,file_opened
+ !type 
+ type(scup_dtset_type) :: scup_inp
+ !real(dp) :: cpui
 !character(len=6) :: codvsn
 
 !TEST_AM
@@ -174,8 +176,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename
- character(len=50) :: name_file
- character(len=200):: term_name
+ character(len=fnlen) :: name_file 
 !character(len=fnlen) :: filename_psp(3)
  type(electronpositron_type),pointer :: electronpositron
 ! type(pspheader_type),allocatable :: pspheads(:)
@@ -254,7 +255,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
    dtset%dmft_entropy = 0
    dtset%nctime = inp%nctime ! NetCdf TIME between output of molecular dynamics informations
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
-   dtset%dilatmx = one  ! DILATation : MaXimal value
+   dtset%dilatmx = 1.5  ! DILATation : MaXimal value
    dtset%chkdilatmx = 0 ! No check on dilatmx is needed in multibilint
    dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY
    dtset%friction = 0.0001d0 ! internal FRICTION coefficient
@@ -312,7 +313,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !    else
 !    Need to init some values
    ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
-   symrel = 1
+   symrel = reshape((/1,0,0,0,1,0,0,0,1/),shape(symrel)) 
    call alloc_copy(symrel,dtset%symrel)
    ABI_ALLOCATE(tnons,(3,dtset%nsym))
    tnons = zero
@@ -438,7 +439,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !      filename_psp(2) = "/home/alex/calcul/psp/Ti.LDA_PW-JTH.xml"
 !      filename_psp(3) = "/home/alex/calcul/psp/O.LDA_PW-JTH.xml"
 !      ABI_DATATYPE_ALLOCATE(pspheads,(npsp))
-!      call inpspheads(filename_psp,npsp,pspheads,ecut_tmp)
+!      call inpspheads-rw-rw-r-- 1 mschmitt mschmitt  22004 Nov 28 14:30 log-MPI16-t98-new-4-8-from-ddb-large-coeff_ini-(filename_psp,npsp,pspheads,ecut_tmp)
 !      call psps_init_global(mtypalch, npsp, psps, pspheads)
 !      call psps_init_from_dtset(dtset, 1, psps, pspheads)
 !    end if
@@ -469,7 +470,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !      ABI_ALLOCATE(npwtot,(dtset%nkpt))
 !    end if
 !  initialisation of results_gs
-   call init_results_gs(dtset%natom,1,results_gs)
+   call init_results_gs(dtset%natom,1,1,results_gs)
 
 !  Set the pointers of scfcv_args
    zero_integer = 0
@@ -498,12 +499,17 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
    ab_xfh%nxfh = 0
    ab_xfh%mxfh = 1
    ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
-   if (any((/2,3,10,11,22/)==dtset%ionmov)) then
+   if (any((/3,10,11/)==dtset%ionmov)) then
      write(message, '(3a)' )&
 &     ' This dynamics can not be used with effective potential',ch10,&
 &     'Action: correct dynamics input'
      MSG_BUG(message)
    end if
+
+  !Get SCALE-UP INPUT
+
+  scup_inp = inp%scup_dtset
+
 
 !***************************************************************
 !2  initialization of the structure for the dynamics
@@ -544,30 +550,10 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
      ! and print anharmonic contribution to file anharmonic_energy_terms.out
      ! Open File and write header
      ncoeff = effective_potential%anharmonics_terms%ncoeff
-     name_file='anharmonic_energy_terms.out'
-     unit_out = get_unit()
+     name_file='MD' 
      if(inp%analyze_anh_pot == 1)then
-       open(unit=unit_out,file=name_file,status='replace',form='formatted')
-       write(unit_out,*) '#---------------------------------------------#'
-       write(unit_out,*) '#    Anharmonic Terms Energy Contribution     #'
-       write(unit_out,*) '#---------------------------------------------#'
-       write(unit_out,*) ''
-       write(unit_out,'(A,I5)') 'Number of Terms: ', ncoeff
-       write(unit_out,*) ''
-       write(unit_out,'(A)') 'Terms     Names'
-       do icoeff=1,ncoeff
-         term_name = effective_potential%anharmonics_terms%coefficients(icoeff)%name
-         write(unit_out,'(I5,A,A)') icoeff,'     ',trim(term_name)
-       enddo
-       write(unit_out,*) ''
-       write(unit_out,'(A)',advance='no')  'Cycle/Terms'
-       do icoeff=1,ncoeff
-         if(icoeff<ncoeff)then
-         write(unit_out,'(I5)',advance='no') icoeff
-         else
-         write(unit_out,'(I5)',advance='yes') icoeff
-         endif
-       enddo
+       call effective_potential_writeAnhHead(ncoeff,name_file,&
+&                        effective_potential%anharmonics_terms)      
      end if
 
      call wrtout(ab_out,message,'COLL')
@@ -575,8 +561,9 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
-&     verbose=verbose,writeHIST=writeHIST)
-     close(unit_out)
+&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp)     
+     INQUIRE(FILE='MD_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_out)
+     if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then
      !*************************************************************
      !   Try to bound the model

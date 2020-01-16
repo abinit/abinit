@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_datafordmft
 !! NAME
 !!  m_datafordmft
@@ -238,6 +237,7 @@ subroutine datafordmft(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
    call wrtout(std_out,  message,'COLL')
    write(message, '(a,a)' ) ch10,&
 &   '---------------------------------------------------------------'
+   call wrtout(std_out, message, 'COLL')
  end if
  if(dtset%nstep==0.and.dtset%nbandkss==0) then
    message = 'nstep should be greater than 1'
@@ -799,6 +799,7 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
    rewind(unt)
 
 !  Header for calc_uCRPA.F90
+   write(unt,*) "# isppol   nspinor   natom   m    Re(<psi|chi>)   Im(<psi|chi>)"
    if  (COUNT(pawtab(:)%lpawu.NE.-1).EQ.1) then
      do  itypat=1,ntypat
        if(t2g) then
@@ -868,19 +869,19 @@ subroutine psichi_print(dtset,nattyp,ntypat,nkpt,my_nspinor,&
                        if(t2g) then
                          if(m1==1.or.m1==2.or.m1==4) then
                            m1_t2g=m1_t2g+1
-                           write(unt,'(3i6,3x,2f23.15)') isppol, iat, m1,&
+                           write(unt,'(4i6,3x,2f23.15)') isppol, ispinor, iat, m1,&
 &                           real(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_t2g))/chinorm,&
 &                           aimag(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_t2g))/chinorm
                          end if
                        else if(x2my2d) then
                          if(m1==5) then
                            m1_x2my2d=1
-                           write(unt,'(3i6,3x,2f23.15)') isppol, iat, m1,&
+                           write(unt,'(4i6,3x,2f23.15)') isppol, ispinor, iat, m1,&
 &                           real(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2my2d))/chinorm,&
 &                           aimag(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1_x2my2d))/chinorm
                          end if
                        else
-                         write(unt,'(3i6,3x,2f23.15)') isppol, iat, m1,&
+                         write(unt,'(4i6,3x,2f23.15)') isppol, ispinor, iat, m1,&
 &                         real(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1))/chinorm,&
 &                         aimag(paw_dmft%psichi(isppol,ikpt,ibandc,ispinor,iat,m1))/chinorm
                        end if
