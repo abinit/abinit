@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_geometry
 !! NAME
 !!  m_geometry
@@ -70,7 +69,9 @@ MODULE m_geometry
  public :: strconv            ! Convert from symmetric storage mode in reduced coords to cart coords.
  public :: littlegroup_pert   ! Determines the set of symmetries that leaves a perturbation invariant.
  public :: irreducible_set_pert  ! Determines a set of perturbations that form a basis
-
+ public :: wedge_basis        ! compute rprimd x gprimd vectors needed for generalized cross product
+ public :: wedge_product      ! compute wedge product given wedge basis
+ 
  interface normv
   module procedure normv_rdp_vector
   module procedure normv_int_vector
@@ -431,6 +432,122 @@ subroutine acrossb(a,b,c)
  c(3) =  a(1)*b(2) - b(1)*a(2)
 
 end subroutine acrossb
+!!***
+
+!!****f* m_geometry/wedge_basis
+!! NAME
+!! wedge_basis
+!!
+!! FUNCTION
+!! Calculates the basis vectors a ^ a* for a in rprimd and
+!! a* in gprimd, needed for some generalized cross products
+!!
+!! INPUTS
+!!   rprimd(3,3) : real(dp) matrix
+!!   gprimd(3,3) : real(dp) matrix
+!!   normalize,optional : whether to normalize the output vectors
+!!
+!! OUTPUT
+!!   wedge(3,3,3) : 9 basis vectors of rprimd ^ gprimd
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine wedge_basis(gprimd,rprimd,wedge,normalize)
+
+
+  !Arguments ---------------------------------------------
+  ! scalars
+  logical,optional,intent(in) :: normalize
+!arrays
+ real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
+ real(dp),intent(out) :: wedge(3,3,3)
+
+ ! local
+ !scalars
+ integer :: igprimd, irprimd
+ real(dp) :: nfac
+ logical :: nvec
+
+! *********************************************************************
+
+ if(present(normalize)) then
+    nvec = normalize
+ else
+    nvec = .FALSE.
+ end if
+ 
+ do irprimd = 1, 3
+    do igprimd = 1, 3
+       wedge(1,irprimd,igprimd) = rprimd(2,irprimd)*gprimd(3,igprimd) - rprimd(3,irprimd)*gprimd(2,igprimd)
+       wedge(2,irprimd,igprimd) = rprimd(3,irprimd)*gprimd(1,igprimd) - rprimd(1,irprimd)*gprimd(3,igprimd)
+       wedge(3,irprimd,igprimd) = rprimd(1,irprimd)*gprimd(2,igprimd) - rprimd(2,irprimd)*gprimd(1,igprimd)
+    end do
+ end do
+
+ if (nvec) then
+    do irprimd = 1, 3
+       do igprimd = 1, 3
+          if(any(abs(wedge(1:3,irprimd,igprimd)).GT.tol8)) then
+             nfac = SQRT(DOT_PRODUCT(wedge(1:3,irprimd,igprimd),wedge(1:3,irprimd,igprimd)))
+             wedge(1:3,irprimd,igprimd) = wedge(1:3,irprimd,igprimd)/nfac
+          end if
+       end do
+    end do
+ end if
+
+end subroutine wedge_basis
+!!***
+
+!!****f* m_geometry/wedge_product
+!! NAME
+!! wedge_product
+!!
+!! FUNCTION
+!! Calculates the wedge product u^w, given the wedge product basis a^b
+!! typically u=(u1 a + u2 b + u3 c) and w = (w1 a* + w2 b* + w3 c*)
+!!
+!! INPUTS
+!!   u(3) :: real(dp) input vector
+!!   v(3) :: real(dp) input vector
+!!   wedgebasis(3,3,3) :: real(dp) input matrix
+!!
+!! OUTPUT
+!!   produv(3) :: real(dp) output vector
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine wedge_product(produv,u,v,wedgebasis)
+
+
+!Arguments ---------------------------------------------
+!arrays
+ real(dp),intent(in) :: u(3),v(3),wedgebasis(3,3,3)
+ real(dp),intent(out) :: produv(3)
+
+ ! local
+ !scalars
+ integer :: igprimd, ii, irprimd
+
+! *********************************************************************
+
+ produv(:) = zero
+ do irprimd = 1, 3
+    do igprimd = 1, 3
+       do ii = 1, 3
+          produv(ii) = produv(ii) + u(irprimd)*v(igprimd)*wedgebasis(ii,irprimd,igprimd)
+       end do
+    end do
+ end do
+
+end subroutine wedge_product
 !!***
 
 !!****f* m_geometry/wigner_seitz

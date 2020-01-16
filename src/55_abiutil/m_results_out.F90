@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_results_out
 !! NAME
 !!  m_results_out

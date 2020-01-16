@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_positron
 !! NAME
 !!  m_positron
@@ -157,7 +156,10 @@ contains
 !!  vhartr(nfftf)=array for holding Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
+!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA) derivative of XC energy density
+!!                                wrt kinetic energy density (depsxcdtau)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
+!!  xcctau3d(n3xccc*usekden)=(only for meta-GGA): 3D core electron kinetic energy density for XC core correction
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
 !!  ylmgr(mpw*mkmem,3,mpsang*mpsang*useylm)= gradients of real spherical harmonics
@@ -188,8 +190,8 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 &          energies,fock,forces_needed,fred,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcut,hdr,ifirst_gs,indsym,istep,istep_mix,kg,&
 &          kxc,maxfor,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc,nattyp,nfft,ngfft,ngrvdw,nhat,nkxc,npwarr,nvresid,occ,optres,&
 &          paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
-&          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,&
-&          xccc3d,xred,ylm,ylmgr)
+&          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
+&          xccc3d,xcctau3d,xred,ylm,ylmgr)
 
 !Arguments ------------------------------------
 !scalars
@@ -216,6 +218,7 @@ type(fock_type),pointer, intent(inout) :: fock
  real(dp),intent(in) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),ph1dc(2,(3*(2*dtset%mgfft+1)*dtset%natom)*dtset%usepaw)
  real(dp),intent(in) :: rprimd(3,3),strsxc(6),vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
+ real(dp),intent(in) :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(inout) :: cg(2,mcg)
@@ -224,7 +227,7 @@ type(fock_type),pointer, intent(inout) :: fock
  real(dp),intent(inout) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol),fred(3,dtset%natom)
  real(dp),intent(inout) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(inout) :: rhog(2,nfft),rhor(nfft,dtset%nspden)
- real(dp),intent(inout) :: xccc3d(n3xccc),xred(3,dtset%natom)
+ real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
  type(pawcprj_type),intent(inout) :: cprj(dtset%natom,mcprj*usecprj)
  type(paw_ij_type),intent(in) :: paw_ij(my_natom*dtset%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*dtset%usepaw)
@@ -387,7 +390,7 @@ type(fock_type),pointer, intent(inout) :: fock
 &       indsym,kg,kxc,maxfor_dum,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc0,nattyp,nfft,ngfft,&
 &       ngrvdw,nhat,nkxc,npwarr,dtset%ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
 &       pawfgrtab,pawrad,pawrhoij,pawtab,ph1dc,ph1d,psps,rhog,rhor,rprimd,optstr,strsxc,str_tmp,symrec,&
-&       synlgr_dum,ucvol,usecprj,vhartr,vpsp,vxc,wvl,xccc3d,xred,ylm,ylmgr,0.0_dp)
+&       synlgr_dum,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,0.0_dp)
        electronpositron%calctype=icalctype
        if (optfor>0) electronpositron%fred_ep(:,:)=fred_tmp(:,:)
        if (optstr>0) electronpositron%stress_ep(:)=str_tmp(:)
@@ -1180,11 +1183,11 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
        opt_dens=1;if (include_nhat_in_gamma) opt_dens=0
        call pawdensities(rdum,cplex,iatom,lmselect,lmselect_dum,lm_size,nhat1,nspden_ep,1,&
 &       0,opt_dens,-1,0,pawang,0,pawrad(itypat),pawrhoij(iatom),&
-&       pawtab(itypat),rho1,trho1,0)
+&       pawtab(itypat),rho1,trho1)
        lmselect_ep(:)=.true.
        call pawdensities(rdum,cplex,iatom,lmselect_ep,lmselect_dum,lm_size,nhat1_ep,nspden_ep,1,&
 &       0,opt_dens,-1,0,pawang,0,pawrad(itypat),pawrhoij_ep_(iatom),&
-&       pawtab(itypat),rho1_ep,trho1_ep,0)
+&       pawtab(itypat),rho1_ep,trho1_ep)
 
 !      For state dependent scheme in Doppler                                       =====
 !      Compute "on-site" densities (n1, ntild1, nhat1) for a given electron state j=====
@@ -1192,7 +1195,7 @@ subroutine poslifetime(dtset,electronpositron,gprimd,my_natom,mpi_enreg,n3xccc,n
          opt_dens=1;if (include_nhat_in_gamma) opt_dens=0
          call pawdensities(rdum,cplex,iatom,lmselect,lmselect_dum,lm_size,nhat1_j,nspden_ep,1,&
 &         0,opt_dens,-1,0,pawang,0,pawrad(itypat),pawrhoij_dop_el(iatom),&
-&         pawtab(itypat),rho1_j,trho1_j,0)
+&         pawtab(itypat),rho1_j,trho1_j)
        end if
 
 !      Compute contribution to annihilation rate:
@@ -3449,11 +3452,11 @@ subroutine posratecore(dtset,electronpositron,iatom,my_natom,mesh_sizej,mpi_enre
  opt_dens=1;if (include_nhat_in_gamma) opt_dens=0
  call pawdensities(rdum,cplex,iatom,lmselect,lmselect_dum,lm_size,nhat1,nspden_ep,1,&
 & 0,opt_dens,-1,0,pawang,0,pawrad(itypat),pawrhoij(iatom),&
-& pawtab(itypat),rho1,trho1,0)
+& pawtab(itypat),rho1,trho1)
  lmselect_ep(:)=.true.
  call pawdensities(rdum,cplex,iatom,lmselect_ep,lmselect_dum,lm_size,nhat1_ep,nspden_ep,1,&
 & 0,opt_dens,-1,0,pawang,0,pawrad(itypat),pawrhoij_ep_(iatom),&
-& pawtab(itypat),rho1_ep,trho1_ep,0)
+& pawtab(itypat),rho1_ep,trho1_ep)
 !Compute contribution to annihilation rate
 
  ABI_ALLOCATE(rhocore,(mesh_size))

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_chkinp
 !! NAME
 !!  m_chkinp
@@ -104,8 +103,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  integer :: bantot,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
  integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,mgga,miniatsph,minidyn,mod10,mpierr,all_nprocs
- integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu,nproc,nspden,nspinor,nsppol,optdriver,response,usepaw,usewvl
- integer :: fftalg !,fftalga,fftalgc,
+ integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu,nproc,nspden,nspinor,nsppol,optdriver,response
+ integer :: fftalg,need_kden,usepaw,usewvl
  real(dp) :: delta,dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
  character(len=1000) :: msg
  type(dataset_type) :: dt
@@ -170,6 +169,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    nproc=mpi_enregs(idtset)%nproc
    mgga=0;if(dt%ixc>=31.and.dt%ixc<=34)mgga=1
    if (dt%ixc<0.and.libxc_functionals_ismgga()) mgga=1
+   need_kden=mgga;if (dt%ixc==31.or.dt%ixc==34) need_kden=0
 
 !  =====================================================================================================
 !  Check the values of variables, using alphabetical order
@@ -1984,12 +1984,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
 
-!    nucdipmom requires kptopt > 2
-     if(dt%kptopt<=2) then
+!    nucdipmom requires kptopt 3 or zero
+     if( (dt%kptopt .EQ. 1) .OR. (dt%kptopt .EQ. 2) .OR. (dt%kptopt .EQ. 4) ) then
        write(msg, '(a,i4,a,a,a)' )&
        ' Nuclear dipole moments (variable nucdipmom) break time reveral symmetry but kptopt = ',dt%kptopt,&
        ' => stop ',ch10,&
-       'Action: re-run with kptopt greater than 2 '
+       'Action: re-run with kptopt of 3 or 0 '
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
 
@@ -2212,6 +2212,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end if
      end if
    end if
+   !PAW+mGGA function restricted to pawxcdev=0
+   if (dt%usepaw==1.and.mgga==1.and.dt%pawxcdev/=0) then
+     write(msg,'(5a)' ) &
+&     'You are performing a PAW calculation using a meta-GGA XC functional:',ch10,&
+&     '  This is restricted to pawxcdev=0!',ch10,&
+&     '  Action: change pawxcdev value in your input file!'
+     MSG_ERROR_NOSTOP(msg, ierr)
+   end if
    !Non linear Response function only for LDA (restricted to ixc=3/7/8)
    allow=(dt%ixc>0).and.(dt%ixc/=3.and.dt%ixc/=7.and.dt%ixc/=8)
    if(.not.allow) allow=(dt%ixc<0).and.(libxc_functionals_isgga().or.libxc_functionals_ismgga())
@@ -2245,20 +2253,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
   !  orbmag
-  ! only values of 0 (default) 1, 2, 3 are allowed
-  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,4,(/0,1,2,3/),iout)
+  ! only values of 0 (default) 1, 2, 3, -1, -2, -3 are allowed
+  call chkint_eq(0,0,cond_string,cond_values,ierr,'orbmag',dt%orbmag,7,(/-3,-2,-1,0,1,2,3/),iout)
   ! when orbmag /= 0, symmorphi must be 0 (no tnons)
   if(dt%orbmag .NE. 0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'symmorphi',dt%symmorphi,1,(/0/),iout)
   end if
-  ! only kptopt 4 and 3 are allowed for Chern number
-  if((dt%orbmag.EQ.1).OR.(dt%orbmag.EQ.3)) then
-     cond_string(1)='orbmag';cond_values(1)=dt%orbmag
-     call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,2,(/3,4/),iout)
-  end if
-  ! only kptopt 3 is allowed for orbmag
-  if(dt%orbmag.GT.1) then
+  ! only kptopt 3 is allowed
+  if(dt%orbmag.NE.0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,1,(/3/),iout)
   end if
@@ -2689,12 +2692,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      MSG_ERROR(' pawprtdos/=2  and prtdosm=2 are not compatible')
    end if
 
-!  prtefmas
+   !  prtefmas
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,2,(/0,1/),iout)
-   if(optdriver/=RUNL_RESPFN)then
-     cond_string(1)='optdriver' ; cond_values(1)=optdriver
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,1,(/0/),iout)
-   end if
+   !if(optdriver/=RUNL_RESPFN)then
+   !  cond_string(1)='optdriver' ; cond_values(1)=optdriver
+   !  call chkint_eq(0,1,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,1,(/0/),iout)
+   !end if
 
 !  prtelf
    call chkint_ge(0,0,cond_string,cond_values,ierr,'prtelf',dt%prtkden,0,iout)
@@ -2749,7 +2752,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  prtgden
    call chkint(0,0,cond_string,cond_values,ierr,'prtgden',dt%prtgden,1,(/0/),1,0,iout)
-
    if(optdriver/=RUNL_GSTATE)then
      cond_string(1)='optdriver' ; cond_values(1)=optdriver
      call chkint(0,1,cond_string,cond_values,ierr,'prtgden',dt%prtgden,1,(/0/),0,0,iout)
@@ -2765,22 +2767,21 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='optdriver' ; cond_values(1)=optdriver
      call chkint_eq(0,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
    end if
-   if(usepaw/=0)then
-     cond_string(1)='usepaw' ; cond_values(1)=usepaw
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
-   end if
+   !if(usepaw/=0)then
+   !  cond_string(1)='usepaw' ; cond_values(1)=usepaw
+   !  call chkint_eq(0,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
+   !end if
 
 !  prtlden
    call chkint(0,0,cond_string,cond_values,ierr,'prtlden',dt%prtlden,1,(/0/),1,0,iout)
-
    if(optdriver/=RUNL_GSTATE)then
      cond_string(1)='optdriver' ; cond_values(1)=optdriver
      call chkint(0,1,cond_string,cond_values,ierr,'prtlden',dt%prtlden,1,(/0/),0,0,iout)
    end if
-   if(usepaw/=0)then
-     cond_string(1)='usepaw' ; cond_values(1)=usepaw
-     call chkint(0,1,cond_string,cond_values,ierr,'prtlden',dt%prtlden,1,(/0/),0,0,iout)
-   end if
+   !if(usepaw/=0)then
+   !  cond_string(1)='usepaw' ; cond_values(1)=usepaw
+   !  call chkint(0,1,cond_string,cond_values,ierr,'prtlden',dt%prtlden,1,(/0/),0,0,iout)
+   !end if
 
 !  prtstm
    call chkint_ge(0,0,cond_string,cond_values,ierr,'prtstm',dt%prtstm,0,iout)
@@ -3192,7 +3193,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%usekden==0)then
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
-     if(mgga==1)then
+     if(mgga/=need_kden)then
        write(msg, '(3a)' )&
 &       'The functional is a MGGA, but the kinetic energy density',ch10, &
 &       'is not present. Please set "usekden 1" in the input file.'

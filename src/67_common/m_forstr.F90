@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_forstr
 !! NAME
 !!  m_forstr
@@ -192,7 +191,10 @@ contains
 !!  vhartr(nfftf)=array for holding Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
+!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA): derivative of XC energy density
+!!                                wrt kinetic energy density (depsxcdtau)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
+!!  xcctau3d(n3xccc*usekden)=(only for meta-GGA): 3D core electron kinetic energy density for XC core correction
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
 !!  ylmgr(mpw*mkmem,3,mpsang*mpsang*useylm)= gradients of real spherical harmonics
@@ -253,7 +255,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &                 ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
 &                 pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,psps,rhog,rhor,rprimd,stress_needed,&
 &                 strsxc,strten,symrec,synlgr,ucvol,usecprj,vhartr,vpsp,&
-&                 vxc,wvl,xccc3d,xred,ylm,ylmgr,qvpotzero)
+&                 vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero)
 
 !Arguments ------------------------------------
 !scalars
@@ -282,12 +284,12 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: ph1df(2,3*(2*mgfftf+1)*dtset%natom)
  real(dp),intent(in) :: rhog(2,nfftf),rprimd(3,3),strsxc(6),vhartr(nfftf)
- real(dp),intent(in) :: vpsp(nfftf),vxc(nfftf,dtset%nspden)
+ real(dp),intent(in) :: vpsp(nfftf),vxc(nfftf,dtset%nspden),vxctau(nfftf,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(inout) :: forold(3,dtset%natom)
  real(dp),intent(inout) :: nhat(nfftf,dtset%nspden*psps%usepaw),rhor(nfftf,dtset%nspden)
- real(dp),intent(inout) :: xccc3d(n3xccc),xred(3,dtset%natom)
+ real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
  real(dp),intent(inout),target :: nvresid(nfftf,dtset%nspden)
  real(dp),intent(out) :: favg(3)
  real(dp),intent(inout) :: fcart(3,dtset%natom),fred(3,dtset%natom)
@@ -472,7 +474,7 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfftf,&
 &   mpi_enreg,psps%n1xccc,n3xccc,nattyp,&
 &   nfftf,ngfftf,ngrvdw,ntypat,pawrad,pawtab,ph1df,psps,rhog,&
-&   rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,wvl%descr,wvl%den,xred,&
+&   rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,vxctau,wvl%descr,wvl%den,xred,&
 &   electronpositron=electronpositron)
 
    if (apply_residual) then
@@ -505,9 +507,9 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   mpi_enreg,psps%mqgrid_vl,psps%n1xccc,n3xccc,dtset%natom,nattyp,&
 &   nfftf,ngfftf,nlstr,dtset%nspden,dtset%nsym,ntypat,psps,pawrad,pawtab,ph1df,&
 &   dtset%prtvol,psps%qgrid_vl,dtset%red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
-&   dtset%typat,dtset%usefock,psps%usepaw,&
-&   dtset%vdw_tol,dtset%vdw_tol_3bt,dtset%vdw_xc,psps%vlspl,vxc,vxc_hf,psps%xccc1d,xccc3d,psps%xcccrc,xred,&
-&   psps%ziontypat,psps%znucltypat,qvpotzero,&
+&   dtset%typat,dtset%usefock,dtset%usekden,psps%usepaw,&
+&   dtset%vdw_tol,dtset%vdw_tol_3bt,dtset%vdw_xc,psps%vlspl,vxc,vxctau,vxc_hf,&
+&   psps%xccc1d,xccc3d,xcctau3d,psps%xcccrc,xred,psps%ziontypat,psps%znucltypat,qvpotzero,&
 &   electronpositron=electronpositron)
  end if
 

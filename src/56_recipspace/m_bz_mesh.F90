@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_bz_mesh
 !! NAME
 !!  m_bz_mesh

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mklocl_realspace
 !! NAME
 !!  m_mklocl_realspace

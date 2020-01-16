@@ -433,8 +433,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
  At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.974E-11 < toldfe=  1.000E-07
 
- Compute kinetic energy density
-
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
@@ -566,8 +564,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
 
  At SCF step    3, etot is converged : 
   for the second time, diff in etot=  1.613E-09 < toldfe=  1.000E-07
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 
@@ -712,8 +708,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
  At SCF step    8, etot is converged : 
   for the second time, diff in etot=  3.798E-09 < toldfe=  1.000E-07
 
- Compute kinetic energy density
-
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
@@ -845,8 +839,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
 
  At SCF step    3, etot is converged : 
   for the second time, diff in etot=  2.152E-09 < toldfe=  1.000E-07
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 
@@ -987,8 +979,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
  At SCF step    8, etot is converged : 
   for the second time, diff in etot=  3.798E-09 < toldfe=  1.000E-07
 
- Compute kinetic energy density
-
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
@@ -1120,8 +1110,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
 
  At SCF step    3, etot is converged : 
   for the second time, diff in etot=  2.152E-09 < toldfe=  1.000E-07
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 

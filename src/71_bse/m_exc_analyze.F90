@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_exc_analyze
 !! NAME
 !!  m_exc_analyze

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/work_var_lotf
 !! NAME
 !! work_var_lotf

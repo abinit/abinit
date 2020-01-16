@@ -30,7 +30,7 @@
      lnmax =       2     mgfft =      36  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =        1618          nfft =       46656          nkpt =           2
 ================================================================================
@@ -47,7 +47,7 @@ _ WF disk file :      0.200 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
      lnmax =       2     mgfft =      36  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =        1618          nfft =       46656          nkpt =           2
 ================================================================================
@@ -64,7 +64,7 @@ _ WF disk file :      0.200 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
      lnmax =       2     mgfft =      36  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =        1618          nfft =       46656          nkpt =           2
 ================================================================================
@@ -81,7 +81,7 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
      lnmax =       2     mgfft =      36  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =        1618          nfft =       46656          nkpt =           2
 ================================================================================
@@ -295,8 +295,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
  ETOT  7  -7.9357468372047    -5.951E-13 1.941E-14 2.621E-11
  ETOT  8  -7.9357468372051    -4.050E-13 2.785E-16 1.657E-13
 
- Compute kinetic energy density
-
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
@@ -444,8 +442,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
  ETOT  7  -7.9357468372046    -5.889E-13 1.941E-14 2.621E-11
  ETOT  8  -7.9357468372049    -2.451E-13 2.785E-16 1.657E-13
 
- Compute kinetic energy density
-
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
@@ -592,8 +588,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
  ETOT  6  -7.9357468372041    -3.049E-10 3.401E-12 1.026E-08
  ETOT  7  -7.9357468372047    -6.395E-13 1.941E-14 5.241E-11
  ETOT  8  -7.9357468372051    -3.606E-13 2.785E-16 3.314E-13
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 
@@ -766,8 +760,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
  ETOT  6  -7.9357468372040    -3.048E-10 3.401E-12 1.026E-08
  ETOT  7  -7.9357468372046    -6.004E-13 1.941E-14 5.241E-11
  ETOT  8  -7.9357468372049    -2.434E-13 2.785E-16 3.314E-13
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 

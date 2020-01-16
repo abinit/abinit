@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_optics_vloc
 !! NAME
 !!  m_optics_vloc

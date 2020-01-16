@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pseudo_pwscf
 !! NAME
 !!  m_pseudo_pwscf

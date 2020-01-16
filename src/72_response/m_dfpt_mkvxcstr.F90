@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_mkvxcstr
 !! NAME
 !!  m_dfpt_mkvxcstr
@@ -506,8 +505,8 @@ subroutine dfpt_mkvxcstrgga(cplex,gprimd,istr,kxc,mpi_enreg,nfft,ngfft,&
  ABI_DEALLOCATE(rhodgnow)
 
  vxc1(:,:)=zero
- call xcpot(cplex,dnexcdn,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-& nspgrad,qphon,rho1now,vxc1)
+ call xcpot(cplex,gprimd,ishift,mgga,mpi_enreg,nfft,ngfft,ngrad,nspden,&
+& nspgrad,qphon,depsxc=dnexcdn,rhonow=rho1now,vxc=vxc1)
 
 !if you uncomment the following line, you will have to modify
 !the original function call to pass in gmet and gsqcut

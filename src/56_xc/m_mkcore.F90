@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mkcore
 !! NAME
 !!  m_mkcore
@@ -664,6 +663,7 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
  real(dp) :: scale(3),tau(3),tsec(2),tt(3)
  real(dp),allocatable :: dtcore(:),d2tcore(:),rnorm(:)
  real(dp),allocatable :: rrdiff(:,:),tcore(:)
+ real(dp),allocatable,target :: tcoretau(:,:)
  real(dp), ABI_CONTIGUOUS pointer :: corespl(:,:),vxc_eff(:)
 
 !************************************************************************
@@ -678,8 +678,8 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
     'Must be 1, 2, 3 or 4.'
    MSG_BUG(message)
  end if
- if (usekden_.and.usepaw==0) then
-   message='usekden=1 and NCPP is not allowed!'
+ if (usekden_) then
+   message='usekden=1 not yet allowed!'
    MSG_BUG(message)
  end if
 
@@ -759,7 +759,9 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
    if (usepaw==1) then
      if (usekden_) then
        msz=pawtab(itypat)%coretau_mesh_size
-       corespl => pawtab(itypat)%tcoretau
+       ABI_ALLOCATE(tcoretau,(msz,1))
+       tcoretau(:,1)=pawtab(itypat)%coretau(:)
+       corespl => tcoretau
      else
        msz=pawtab(itypat)%core_mesh_size
        corespl => pawtab(itypat)%tcoredens
@@ -995,6 +997,9 @@ subroutine mkcore_alt(atindx1,corstr,dyfrx2,grxc,icoulomb,mpi_enreg,natom,nfft,n
      ABI_DEALLOCATE(rnorm)
      if (allocated(tcore)) then
        ABI_DEALLOCATE(tcore)
+     end if
+     if (allocated(tcoretau)) then
+       ABI_DEALLOCATE(tcoretau)
      end if
      if (allocated(dtcore)) then
        ABI_DEALLOCATE(dtcore)

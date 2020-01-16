@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/contstr25a
 !! NAME
 !! contstr25a

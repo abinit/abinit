@@ -2,7 +2,7 @@
 authors: JW, MT
 ---
 
-# Electron-positron annihilation  
+# Electron-positron annihilation
 
 ## Calculation of positron lifetime and momentum distribution in silicon
 
@@ -40,8 +40,8 @@ In a perfect material the positron is delocalized. We can assume that its
 density approaches zero and that it cannot affect the electron density. We will
 perform a calculation in only two steps:
 
-  1. Calculation of the ground-state electron density without the positron. 
-  2. Calculation of the ground-state positron density in the presence of the electron density from step 1. 
+  1. Calculation of the ground-state electron density without the positron.
+  2. Calculation of the ground-state positron density in the presence of the electron density from step 1.
 
 The two densities are used to calculate the positron lifetime, which is
 proportional to the inverse of the overlap of the electron and positron
@@ -79,7 +79,7 @@ Then, issue:
 
 This calculation should only take a few seconds.
 
-You can look at the *tpositron_1.out* file. 
+You can look at the *tpositron_1.out* file.
 We find the positron lifetime calculated in the RPA limit:
 
     ########## Lifetime computation 2
@@ -163,7 +163,7 @@ densities. As this calculation will take a few minutes, you can already issue
 {% dialog tests/tutorial/Input/tpositron_3.in %}
 
 This calculation is significantly longer than the previous one, because the
-electron and positron steps will be repeated until the convergence criterion is reached. 
+electron and positron steps will be repeated until the convergence criterion is reached.
 
 In *tpositron_3.in* we only have one dataset and we set
 [[positron]] = -10 to perform an automatic calculation of electrons and positron
@@ -193,11 +193,11 @@ electron densities are allowed to relax.
 In addition to the self-consistency, the lifetime of a positron inside a
 vacancy can be strongly affected by the relaxation of the atoms due to the
 forces coming from both the electrons and the positron. You can already start
-the relaxation of the vacancy by issuing:  
+the relaxation of the vacancy by issuing:
 
     abinit < tpositron_4.files > log 2> err &
 
-!!! important 
+!!! important
 
     Don't forget to put *tpositron_4.in* in *tpositron_x.files*.
 
@@ -250,7 +250,7 @@ You can already issue (putting *tpositron_5.in* in *tpositron_x.files*):
 
     abinit < tpositron_5.files > log 2> err &
 
-Now take a look at the input file *tpositron_5.in*. 
+Now take a look at the input file *tpositron_5.in*.
 
 {% dialog tests/tutorial/Input/tpositron_5.in %}
 
@@ -302,7 +302,7 @@ method are very sensitive to the number of valence electrons in the **PAW
 dataset**. It is due to the fact that it is not easy to describe the positron
 _wavefunction_, tending to zero at the nucleus, using the electron atomic
 orbitals. The **PAW basis set** in this case needs to be more complete than only
-for describing the electron _wavefunctions_. 
+for describing the electron _wavefunctions_.
 
 The simplest way to make the **PAW
 dataset** more complete is to include `semicore electrons`. It is also possible to
@@ -311,7 +311,7 @@ used only for the positron wave function description, while keeping the
 initial number of valence electrons (as done in [[cite:Wiktor2015]]). However, this second method is less straightforward.
 
 The previous calculations were done with only **4 valence electrons** (`3s` and `3p`).
-We will now see what happens if we include the `2s` and `2p` states in the **PAW dataset**. 
+We will now see what happens if we include the `2s` and `2p` states in the **PAW dataset**.
 In *tpositron_12el_x.files* we have replaced the *Si.LDA-PW-paw.abinit*
 dataset with *Si.12el.LDA-PW-paw.abinit*. We can now rerun the lifetime calculation:
 

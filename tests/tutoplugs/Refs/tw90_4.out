@@ -481,7 +481,7 @@ P newkpt: treating     14 bands with npw=     144 for ikpt=   8 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   13.608E-08; max=  99.590E-07
+ Mean square residual over all n,k,spin=   13.608E-08; max=  92.832E-12
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -638,7 +638,7 @@ P newkpt: treating     14 bands with npw=     144 for ikpt=   8 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   92.419E-09; max=  25.212E-07
+ Mean square residual over all n,k,spin=   92.419E-09; max=  95.601E-12
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000

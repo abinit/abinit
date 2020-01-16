@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.13 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h35 )
+.Starting date : Sun 29 Dec 2019.
+- ( at 18h12 )
   
-- input  file    -> t85.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v7_t85-t86-t87-t88-t89/t85.in
 - output file    -> t85.out
 - root for input  files -> t85i
 - root for output files -> t85o
@@ -1407,8 +1407,8 @@ P          mk1mem9        512
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1618,7 +1618,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1 -0.14707428999291     -1.023E+01 1.729E-01 3.909E+00
+-ETOT  1 -0.14707428999291     -1.023E+01 2.031E-01 3.909E+00
  ETOT  2 -0.15320744389269     -6.133E-03 6.407E-03 3.447E-02
  ETOT  3 -0.15332415628679     -1.167E-04 1.250E-04 4.758E-04
  ETOT  4 -0.15332569128147     -1.535E-06 4.608E-04 1.368E-06
@@ -1736,8 +1736,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.96751
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1788,11 +1788,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   5.9002735343723     -2.293E+01 3.150E+00 9.150E+03
- ETOT  2   1.1073655917364     -4.793E+00 4.492E-02 1.187E+03
+ ETOT  2   1.1073655917364     -4.793E+00 2.395E+00 1.187E+03
  ETOT  3  0.39912304941512     -7.082E-01 1.214E-01 1.065E-01
- ETOT  4  0.39904415161006     -7.890E-05 1.320E-03 1.593E-04
+ ETOT  4  0.39904415161006     -7.890E-05 4.264E-02 1.593E-04
  ETOT  5  0.39904377144277     -3.802E-07 7.867E-03 9.165E-06
- ETOT  6  0.39904376181277     -9.630E-09 9.150E-05 1.287E-07
+ ETOT  6  0.39904376181277     -9.630E-09 3.226E-04 1.287E-07
  ETOT  7  0.39904376172939     -8.338E-11 5.430E-04 8.544E-10
 
  At SCF step    7       vres2   =  8.54E-10 < tolvrs=  1.00E-07 =>converged.
@@ -1944,8 +1944,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.88496
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1998,16 +1998,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
 -ETOT  1   2.7360651115480     -2.485E+01 1.514E+00 7.620E+02
  ETOT  2   1.2324018455197     -1.504E+00 1.832E-01 1.057E+01
  ETOT  3   1.2127991615763     -1.960E-02 3.071E-03 4.695E-03
- ETOT  4   1.2127920299078     -7.132E-06 1.611E-04 8.609E-05
+ ETOT  4   1.2127920299078     -7.132E-06 4.103E-04 8.609E-05
  ETOT  5   1.2127918499847     -1.799E-07 3.072E-03 1.205E-06
- ETOT  6   1.2127918476577     -2.327E-09 2.655E-06 1.341E-09
+ ETOT  6   1.2127918476577     -2.327E-09 4.101E-04 1.341E-09
 
  At SCF step    6       vres2   =  1.34E-09 < tolvrs=  1.00E-07 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -44.166E-03; max=  26.545E-07
+ Mean square residual over all n,k,spin=  -44.166E-03; max=  41.014E-05
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2048,7 +2048,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  1.58919589403084E-02 -1.091E+01 2.805E+00 1.854E+00
- ETOT  2  1.38393137941968E-02 -2.053E-03 1.254E-02 1.041E-02
+ ETOT  2  1.38393137941968E-02 -2.053E-03 1.336E-02 1.041E-02
  ETOT  3  1.38249277470983E-02 -1.439E-05 1.698E-01 1.132E-04
  ETOT  4  1.38247236994253E-02 -2.040E-07 1.724E-03 1.626E-06
  ETOT  5  1.38247205611712E-02 -3.138E-09 1.698E-01 8.319E-09
@@ -2150,8 +2150,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.96843
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2309,8 +2309,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.88399
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2562,8 +2562,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.97214
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2769,8 +2769,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.88883
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2928,8 +2928,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
          ecut(hartree)=      6.000   => boxcut(ratio)=   1.89270
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2979,7 +2979,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   1.7781238076314     -1.702E+01 6.142E-01 1.072E+02
- ETOT  2   1.4723344136862     -3.058E-01 4.788E-03 2.862E-01
+ ETOT  2   1.4723344136862     -3.058E-01 5.584E-03 2.862E-01
  ETOT  3   1.4720606203689     -2.738E-04 2.359E-05 2.683E-03
  ETOT  4   1.4720545180852     -6.102E-06 1.035E-06 5.713E-05
  ETOT  5   1.4720543689322     -1.492E-07 1.356E-08 3.170E-07
@@ -3031,8 +3031,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.244      74.168
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   1.3601527809813     -1.939E+01 1.755E-01 1.527E+02
- ETOT  2  0.92173224060175     -4.384E-01 1.117E-02 3.997E-01
- ETOT  3  0.92143472949525     -2.975E-04 9.200E-06 1.862E-03
+ ETOT  2  0.92173224060175     -4.384E-01 1.153E-02 3.997E-01
+ ETOT  3  0.92143472949525     -2.975E-04 1.039E-05 1.862E-03
  ETOT  4  0.92143254727725     -2.182E-06 8.332E-07 1.287E-05
  ETOT  5  0.92143252115512     -2.612E-08 1.745E-09 8.011E-08
 
@@ -4405,10 +4405,10 @@ P          mk1mem9        512
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         81.0  wall=         82.5
+- Proc.   0 individual time (sec): cpu=         71.3  wall=         72.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and 114 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         81.0  wall=         82.5
++Overall time at end (sec) : cpu=         71.3  wall=         72.2

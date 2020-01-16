@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dyson_solver
 !! NAME
 !!  m_dyson_solver

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_frskerker1
 !! NAME
 !! m_frskerker1

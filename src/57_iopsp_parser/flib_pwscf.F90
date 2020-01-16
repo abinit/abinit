@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/flib_pwscf
 !! NAME
 !!  flib_pwscf

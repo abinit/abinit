@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_invars1
 !! NAME
 !!  m_invars1
@@ -2536,7 +2535,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%prtdosm=0
    dtsets(idtset)%prtebands=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prtebands=0
    dtsets(idtset)%prtefg=0
-   dtsets(idtset)%prtefmas=0
+   dtsets(idtset)%prtefmas=1
    dtsets(idtset)%prteig=1;if (dtsets(idtset)%nimage>1) dtsets(idtset)%prteig=0
    dtsets(idtset)%prtelf=0
    dtsets(idtset)%prtfc=0

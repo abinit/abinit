@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_vdw_dftd3
 !! NAME
 !!  m_vdw_dftd3

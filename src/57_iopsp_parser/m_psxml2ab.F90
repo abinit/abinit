@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psxml2ab
 !! NAME
 !! m_psxml2ab
@@ -380,7 +379,6 @@ end subroutine psxml2abheader
 end module m_psxml2ab
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/psml_die
 !! NAME
 !! psml_die

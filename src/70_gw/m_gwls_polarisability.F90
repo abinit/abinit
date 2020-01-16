@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_polarisability
 !! NAME
 !! m_gwls_polarisability

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_rhotov
 !! NAME
 !!  m_rhotov
@@ -135,6 +134,7 @@ contains
 !!    vres2=square of the norm of the residual
 !!    [vxctau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density with respect to
 !!      kinetic energy density (metaGGA cases) (optional output)
+!!    [vtauresid(nfft,nspden*dtset%usekden)]=array for vxctau residue (see vtau below))
 !!
 !! SIDE EFFECTS
 !! Input/Output:
@@ -166,7 +166,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
 &  nhat,nhatgr,nhatgrdim,nkxc,vresidnew,n3xccc,optene,optres,optxc,&
 &  rhog,rhor,rprimd,strsxc,ucvol,usepaw,usexcnhat,&
 &  vhartr,vnew_mean,vpsp,vres_mean,vres2,vtrial,vxcavg,vxc,wvl,xccc3d,xred,&
-&  electronpositron,taur,vxc_hybcomp,vxctau,add_tfw,xcctau3d) ! optional arguments
+&  electronpositron,taur,vxc_hybcomp,vxctau,vtauresid,add_tfw,xcctau3d) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -193,7 +193,8 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
  real(dp),intent(out) :: kxc(nfft,nkxc),strsxc(6),vnew_mean(dtset%nspden)
  real(dp),intent(out) :: vres_mean(dtset%nspden),vresidnew(nfft,dtset%nspden)
  real(dp),intent(in),optional :: taur(nfft,dtset%nspden*dtset%usekden)
- real(dp),intent(out),optional :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(inout),optional :: vtauresid(nfft,dtset%nspden*dtset%usekden)
+ real(dp),intent(out),optional,target :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(out),optional :: vxc_hybcomp(:,:) ! (nfft,nspden)
  real(dp),intent(out),optional :: xcctau3d(n3xccc)
 
@@ -209,7 +210,9 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
  type(xcdata_type) :: xcdata
 !arrays
  real(dp) :: evxc,tsec(2),vmean(dtset%nspden),vzeeman(dtset%nspden)
+ real(dp),target :: vxctau_dum(0,0,0)
  real(dp),allocatable :: rhowk(:,:),v_constr_dft_r(:,:),vnew(:,:),xcart(:,:)
+ real(dp),pointer :: vxctau_(:,:,:)
 !real(dp),allocatable :: vzeemanHarm(:,:)   !SPr: debug Zeeman field q/=0 real space
 
 ! *********************************************************************
@@ -220,6 +223,10 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
 
 !Check that usekden is not 0 if want to use vxctau
  with_vxctau = (present(vxctau).and.present(taur).and.(dtset%usekden/=0))
+ vxctau_ => vxctau_dum ; if (with_vxctau) vxctau_ => vxctau
+ if (with_vxctau.and.optres==0.and.(.not.present(vtauresid))) then
+   MSG_BUG('need vtauresid!')
+ end if
 
 !Check if we're in hybrid norm conserving pseudopotential with a core correction
  is_hybrid_ncpp=(usepaw==0 .and. n3xccc/=0 .and. &
@@ -248,6 +255,8 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
  end if
 
  if (ipositron/=1) then
+!  if metaGGA, save current value of vxctau potential
+   if (with_vxctau) vtauresid(:,:)=vxctau(:,:,1)
 !  Compute xc potential (separate up and down if spin-polarized)
    if (dtset%icoulomb == 0 .and. dtset%usewvl == 0) then
      call hartre(1,gsqcut,usepaw,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr)
@@ -258,21 +267,14 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
      non_magnetic_xc=(dtset%usepaw==1.and.mod(abs(dtset%usepawu),10)==4)
 
 !    Use the periodic solver to compute Hxc.
-     nk3xc=1
-     !write(80,*) "rhotov"
-     !xccc3d=zero
-     !DEBUG
-     !write(std_out,*)' rhotov : is_hybrid_ncpp=',is_hybrid_ncpp
-     !write(std_out,*)' rhotov : n3xccc=',n3xccc
-     !ENDDEBUG
-
      call timab(941,1,tsec)
+     nk3xc=1
      if (ipositron==0) then
        if(.not.is_hybrid_ncpp .or. mod(dtset%fockoptmix,100)==11)then
          call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &         nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
 &         rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&         taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,xcctau3d=xcctau3d)
+&         taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,xcctau3d=xcctau3d)
          if(mod(dtset%fockoptmix,100)==11)then
            energies%e_xc=energies%e_xc*dtset%auxc_scal
            vxc(:,:)=vxc(:,:)*dtset%auxc_scal
@@ -285,7 +287,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
        call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 &       nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,non_magnetic_xc,n3xccc,optxc,&
 &       rhor,rprimd,strsxc,usexcnhat,vxc,vxcavg,xccc3d,xcdata,&
-&       taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_,&
+&       taur=taur,vhartr=vhartr,vxctau=vxctau_,add_tfw=add_tfw_,&
 &       electronpositron=electronpositron,xcctau3d=xcctau3d)
      end if
      call timab(941,2,tsec)
@@ -306,7 +308,6 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
 !  For PAW we recalculate this since nhat was not taken into account
 !  in psolver_rhohxc: E_H= int v_H (n+nhat) dr
    if(.not. wvlbigdft .and. (dtset%icoulomb==0 .or. dtset%usepaw==1 ) ) then
-
      call timab(942,1,tsec)
      call dotprod_vn(1,rhor,energies%e_hartree,doti,nfft,nfftot,1,1,vhartr,ucvol,mpi_comm_sphgrid=mpi_comm_sphgrid)
      energies%e_hartree=half*energies%e_hartree
@@ -356,17 +357,17 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
      if (usepaw==0.or.usexcnhat/=0) then
        call dotprod_vn(1,rhor,energies%e_xcdc,doti,nfft,nfftot,dtset%nspden,1,vxc,ucvol,&
 &       mpi_comm_sphgrid=mpi_comm_sphgrid)
-       if (with_vxctau)then
-         call dotprod_vn(1,taur,e_xcdc_vxctau,doti,nfft,nfftot,dtset%nspden,1,vxctau(:,:,1),&
-&         ucvol,mpi_comm_sphgrid=mpi_comm_sphgrid)
-         energies%e_xcdc=energies%e_xcdc+e_xcdc_vxctau
-       end if
      else
        ABI_ALLOCATE(rhowk,(nfft,dtset%nspden))
        rhowk=rhor-nhat
        call dotprod_vn(1,rhowk,energies%e_xcdc,doti,nfft,nfftot,dtset%nspden,1,vxc,ucvol,&
 &       mpi_comm_sphgrid=mpi_comm_sphgrid)
        ABI_DEALLOCATE(rhowk)
+     end if
+     if (with_vxctau)then
+       call dotprod_vn(1,taur,e_xcdc_vxctau,doti,nfft,nfftot,dtset%nspden,1,vxctau(:,:,1),&
+&       ucvol,mpi_comm_sphgrid=mpi_comm_sphgrid)
+       energies%e_xcdc=energies%e_xcdc+e_xcdc_vxctau
      end if
      if (ipositron==2) energies%e_xcdc=energies%e_xcdc-electronpositron%e_xcdc
    else
@@ -452,7 +453,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
  ABI_ALLOCATE(v_constr_dft_r, (nfft,dtset%nspden))
  v_constr_dft_r = zero
  if (dtset%magconon==1.or.dtset%magconon==2) then
-   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred) 
+   call mag_penalty(constrained_dft,mpi_enreg,rhor,v_constr_dft_r,xred)
  end if
 
  if (optres==0) then
@@ -547,6 +548,12 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
 
 !  Compute square norm vres2 of potential residual vresid
    call sqnorm_v(1,nfft,vres2,dtset%nspden,optres,vresidnew(1+offset, 1),mpi_comm_sphgrid=mpi_comm_sphgrid)
+
+!  Now take care of Vxctau residual (metaGGA)
+   if (with_vxctau) then
+     if (ipositron/=1) vtauresid(:,:)=vxctau(:,:,1)-vtauresid(:,:)
+     if (ipositron==1) vtauresid(:,:)=zero
+   end if
 
  else ! optres/=0
 

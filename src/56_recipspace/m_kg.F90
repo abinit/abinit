@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_kg
 !! NAME
 !! m_kg
@@ -45,7 +44,6 @@ MODULE m_kg
  public :: getcut       ! Compute cutoff G^2
  public :: getmpw       ! Compute recommended npw from ecut, ucvol and gmet
  public :: mkkin        ! Compute elements of kinetic energy operator in reciprocal space at a given k point
- public :: mknucdipmom_k ! Compute elements of magnetic nuclear dipole moment array in reciprocal space at a given k point
  public :: kpgio        ! Do initialization of kg data.
  public :: ph1d3d       ! Compute the three-dimensional phase factor $e^{i 2 \pi (k+G) cdot xred}$
  public :: getph        ! Compute three factors of one-dimensional structure factor phase
@@ -1169,153 +1167,6 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
   ABI_DEALLOCATE(kg1_k)
 
 end subroutine mkpwind_k
-!!***
-
-!{\src2tex{textfont=tt}}
-!!****f* ABINIT/mknucdipmom_k
-!! NAME
-!! mknucdipmom_k
-!!
-!! FUNCTION
-!! compute Hamiltonian in reciprocal space due to array of nuclear
-!! dipole moments, at a given k point
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
-!!
-!! INPUTS
-!! gmet(3,3)=metric for reciprocal space vectors
-!! gprimd(3,3)=recip space translation vectors
-!! kg(3,npw)=reduced planewave coordinates at current k point
-!! kpt(3)=current k point, reduced coordinates
-!! natom=number of atoms in cell
-!! nucdipmom(3,natom)=nuclear dipole moment vectors, at each atom (cartesian coords, atomic units)
-!! npw=number of planewaves
-!! rprimd(3,3)=real space translation vectors
-!! ucvol=unit cell volume
-!! xred(3,natom)=location of atoms in unit cell, in reduced coordinates
-!!
-!! OUTPUT
-!!  nucdipmom_k(npw*(npw+1)/2) = nuclear dipole moment Hamiltonian matrix, in
-!!                                 lower diagonal Hermitian packed storage, at current k point
-!!
-!! SIDE EFFECTS
-!!
-!! NOTES
-!! Given nuclear magnetic dipoles on the atomic sites, the first-order Hamiltonian term
-!! is $(-q/m)(\mu_0/4\pi)\sum\frac{m_I\times(r-I)}{|r-I|^3}\cdot p$, where the sum is over
-!! atomic positions I and m_I is the nuclear magnetic dipole moment vector on site I
-!! (may be zero). This is in SI units. In atomic units, the formula for electrons is
-!! $\alpha^2 \sum \frac{m_I\times(r-I)}{|r-I|^3}\cdot p$ where \alpha is the fine structure
-!! constant.
-!! In reciprocal space, the <G'+k|H|G+k> matrix element is
-!! 4\pi i \alpha^2/\Omega \exp(2\pi i (G-G')) m\cdot (G-G')\times (k+G) / |(G-G')|^2
-!! below we handle the scalar triple product m\cdot (G-G')\times (k+G) fully in reduced coords
-!
-!!
-!! PARENTS
-!!
-!! CHILDREN
-!!
-!! SOURCE
-
-subroutine mknucdipmom_k(gmet,kg,kpt,natom,nucdipmom,nucdipmom_k,npw,rprimd,ucvol,xred)
-
-  !Arguments ------------------------------------
-  !scalars
-  integer,intent(in) :: natom,npw
-  real(dp),intent(in) :: ucvol
-
-  !arrays
-  integer,intent(in) :: kg(3,npw)
-  real(dp),intent(in) :: gmet(3,3),kpt(3),nucdipmom(3,natom),rprimd(3,3),xred(3,natom)
-  complex(dpc),intent(out) :: nucdipmom_k(npw*(npw+1)/2)
-
-  !Local variables-------------------------------
-  !scalars
-  integer :: atom_nd_tot,col,iatom,ndp_index,row
-  real(dp) :: dg2,phasefac,scale_conversion
-  complex(dpc) :: cphasefac,cscale_conversion
-  !arrays
-  integer :: atom_nd(natom)
-  real(dp) :: crpr(3), crpr_cart(3), dgp_red(3), gpk_red(3)
-
-  ! *************************************************************************
-  !
-
-  ! scale conversion from SI to atomic units,
-  ! here \alpha^2 where \alpha is the fine structure constant
-  scale_conversion = 1.d0/(InvFineStruct*InvFineStruct)
-  ! real(dp), parameter :: InvFineStruct=137.035999679_dp  ! Inverse of fine structure constant
-  ! 4\pi i comes from series expansion of plane waves, and ucvol comes from integration over space
-  cscale_conversion = CMPLX(zero,four_pi*scale_conversion/ucvol)
-
-  ! make list of atoms with non-zero nuclear magnetic dipoles
-  atom_nd_tot = 0
-  do iatom = 1, natom
-     if(any(abs(nucdipmom(:,iatom))>tol12)) then
-        atom_nd_tot = atom_nd_tot + 1
-        atom_nd(atom_nd_tot) = iatom
-     end if
-  end do
-
-  ndp_index = 0
-  do col=1,npw ! enumerate plane waves G
-     ! form k + G at this k point for current plane wave (this is the ket |k+G> )
-     ! in reduced coordinates
-     gpk_red(1)=dble(kg(1,col))+kpt(1)
-     gpk_red(2)=dble(kg(2,col))+kpt(2)
-     gpk_red(3)=dble(kg(3,col))+kpt(3)
-
-     do row=col,npw ! enumerate lower diagonal from 1 to G
-        ! index of the current matrix element, in lower triangular packed storage
-        ! "packed sequentially, column by column"
-        ndp_index = ndp_index + 1
-        nucdipmom_k(ndp_index) = czero
-
-        ! form G-G' = \Delta G at this k pt (this is the bra <k+G'| )
-        ! in reduced coordinates
-        dgp_red(1)=dble(kg(1,col)-kg(1,row))
-        dgp_red(2)=dble(kg(2,col)-kg(2,row))
-        dgp_red(3)=dble(kg(3,col)-kg(3,row))
-
-        ! compute |\Delta G|^2
-        ! must use gmet metric because G's are in reduced coords in reciprocal space
-        dg2 = DOT_PRODUCT(dgp_red,MATMUL(gmet,dgp_red))
-        ! if \Delta G = 0, Hamiltonian term is zero and move on to next one
-        if (abs(dg2)<tol8) then
-           nucdipmom_k(ndp_index)=czero
-           cycle
-        end if
-
-        ! form \Delta G x (k+G) ; note that both are in reduced coords at this point
-        crpr(1) =  dgp_red(2)*gpk_red(3) - dgp_red(3)*gpk_red(2)
-        crpr(2) = -dgp_red(1)*gpk_red(3) + dgp_red(3)*gpk_red(1)
-        crpr(3) =  dgp_red(1)*gpk_red(2) - dgp_red(2)*gpk_red(1)
-
-        ! convert to cart coords using gprimd(\Delta G) x gprimd(k+G) =
-        ! det(gprimd)*(gprimd^{-1,T})(\Delta G x (k+G)) =
-        ! 1/ucvol * rprimd * (\Delta G x (k+G))
-        crpr_cart(1:3) = MATMUL(rprimd(1:3,1:3),crpr(1:3))/ucvol
-
-        ! loop over the atoms with non-zero nuclear dipoles
-        ! phase factors exp(i*\Delta G*I) where I is ion position,
-        ! might be retrievable from ph1d, need to check
-        do iatom = 1, atom_nd_tot
-           phasefac = two_pi*DOT_PRODUCT(dgp_red,xred(:,atom_nd(iatom)))
-           cphasefac = CMPLX(cos(phasefac),sin(phasefac))
-           nucdipmom_k(ndp_index) = nucdipmom_k(ndp_index) + &
-                & cscale_conversion*cphasefac*DOT_PRODUCT(nucdipmom(1:3,atom_nd(iatom)),crpr_cart(1:3))/dg2
-        end do ! end loop over atoms with nonzero dipoles
-
-     end do ! end loop over G' = G to npw
-
-  end do ! end loop over G = 1 to npw
-
-end subroutine mknucdipmom_k
 !!***
 
 end module m_kg

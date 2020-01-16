@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/dummy_tests
 !! NAME
 !! dummy_tests
