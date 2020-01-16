@@ -3889,6 +3889,7 @@ end subroutine dfpt_ciflexoout
 
  DBG_EXIT("COLL")
  end subroutine dfpt_ddmdqout
+!!***
 
 !!****f* ABINIT/dfpt_isdqout
 !! NAME
@@ -4656,6 +4657,7 @@ end subroutine dfpt_ciflexoout
 
  DBG_EXIT("COLL")
  end subroutine dfpt_isdqout
+!!***
 
 end module m_dfpt_lw
 !!***

@@ -1079,6 +1079,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
  DBG_EXIT("COLL")
 
  end subroutine dtlattflexo
+!!***
 
 !!****f* m_ddb/dm_psinv
 !! NAME

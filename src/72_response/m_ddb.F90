@@ -4534,6 +4534,7 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
  end if
 
  end subroutine dtqdrp
+!!***
 
 
 !!****f* m_ddb/ddb_lw_copy
@@ -4608,6 +4609,7 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
    end do
 
  end subroutine ddb_lw_copy
+!!***
 
 #endif
 
