@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_exc_spectra
 !! NAME
 !! m_exc_spectra

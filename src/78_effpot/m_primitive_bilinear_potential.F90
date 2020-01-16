@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_primitive_bilinear_potential
 !! NAME
 !! m_primitive_bilinear_potential

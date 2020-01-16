@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_invars2
 !! NAME
 !!  m_invars2
@@ -2382,7 +2381,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) then
    dtset%usekden=intarr(1)
  else
-   dtset%usekden=merge(1,0,libxc_functionals_ismgga())
+   dtset%usekden=merge(1,0,libxc_functionals_ismgga().or.dtset%ixc==31.or.dtset%ixc==34)
  end if
  if (dtset%usekden == 1 .and. dtset%nimage == 1) dtset%prtkden = 1
 

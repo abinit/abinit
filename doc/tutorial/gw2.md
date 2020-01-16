@@ -2,18 +2,18 @@
 authors: FBruneval, XG
 ---
 
-# Second tutorial on GW  
+# Second tutorial on GW
 
-## Treatment of metals.  
+## Treatment of metals.
 
 This tutorial aims at showing how to obtain self-energy corrections to the DFT
 Kohn-Sham eigenvalues within the GW approximation, in the metallic case,
-without the use of a plasmon-pole model. 
-The band width and Fermi energy of Aluminum will be computed.  
+without the use of a plasmon-pole model.
+The band width and Fermi energy of Aluminum will be computed.
 
 The user may read the papers
 
-  * F. Bruneval, N. Vast, and L. Reining, Phys. Rev. B **74** , 045102 (2006) [[cite:Bruneval2006]], 
+  * F. Bruneval, N. Vast, and L. Reining, Phys. Rev. B **74** , 045102 (2006) [[cite:Bruneval2006]],
 for some information and results about the GW treatment of Aluminum. He will
 also find there an analysis of the effect of self-consistency on
 quasiparticles in solids (not present in this tutorial, however available in
@@ -21,12 +21,12 @@ Abinit). The description of the contour deformation technique that bypasses
 the use of a plasmon-pole model to calculate the frequency convolution of G
 and W can be found in
 
-  * S. Lebegue, S. Arnaud, M. Alouani, P. Bloechl, Phys. Rev. B **67**, 155208 (2003) [[cite:Lebegue2003]], 
+  * S. Lebegue, S. Arnaud, M. Alouani, P. Bloechl, Phys. Rev. B **67**, 155208 (2003) [[cite:Lebegue2003]],
 
-with the relevant formulas. 
+with the relevant formulas.
 
 A brief description of the equations implemented in the code can be found in the [[theory:mbt|GW notes]]
-Also, it is suggested to acknowledge the efforts of developers of the GW part of ABINIT, 
+Also, it is suggested to acknowledge the efforts of developers of the GW part of ABINIT,
 by citing the [[cite:Gonze2005|2005 ABINIT publication]].
 
 The user should be familiarized with the four basic tutorials of ABINIT, see the
@@ -65,35 +65,35 @@ cp ../tgw2_1.in .
 ```
 
 Then issue:
-    
+
     abinit < tgw2_x.files > tgw2_1.log 2> err &
 
 {% dialog tests/tutorial/Input/tgw2_x.files tests/tutorial/Input/tgw2_1.in %}
-    
+
 This run generates the WFK file for the subsequent GW computation and also
 provides the band width of Aluminum. Note that the simple Fermi-Dirac smearing
 functional is used ([[occopt]] = 3), with a large smearing ([[tsmear]] = 0.05 Ha).
-The **k**-point grid is quite rough, an unshifted 4x4x4 Monkhorst-Pack grid 
+The **k**-point grid is quite rough, an unshifted 4x4x4 Monkhorst-Pack grid
 (64 **k**-points in the full Brillouin Zone, folding to 8 **k**-points in the Irreducible
 wedge, [[ngkpt]] = 4 4 4). Converged results would need a 4x4x4 grid with 4
 shifts (256 **k**-points in the full Brillouin zone). This grid contains the $\Gamma$
 point, at which the valence band structure reaches its minimum.
 
 The output file presents the Fermi energy
-    
+
      Fermi (or HOMO) energy (eV) =   7.14774   Average Vxc (eV)=  -9.35982
 
 as well as the lowest energy, at the $\Gamma$ point
-    
+
      Eigenvalues (   eV  ) for nkpt=   8  k points:
      kpt#   1, nband=  6, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
       -3.76175  19.92114  19.92114  19.92114  21.00078  21.00078
 
-So, the occupied band width is 10.90 eV. More converged calculations would give 11.06 eV (see [[cite:Bruneval2006]]).  
+So, the occupied band width is 10.90 eV. More converged calculations would give 11.06 eV (see [[cite:Bruneval2006]]).
 This is to be compared to the experimental value of 10.6 eV (see references in [[cite:Bruneval2006]]).
 
 ## Calculation of the screening file
-  
+
 In order not to lose time, let us start the calculation of the screening file
 before the examination of the corresponding input file. So, copy the file
 *tgw2_2.in*, and modify the *tgw2_x.files* file as usual (replace occurrences of
@@ -109,7 +109,7 @@ consider a much wider range of energy: the bottom of the valence band lies
 around -11 eV below the Fermi level. Unfortunately, this energy is of the same
 order of magnitude as the plasmon excitations. With a rough evaluation, the
 classical plasma frequency for a homogeneous electron gas with a density equal
-to the average valence density of Aluminum is 15.77 eV. Hence, using 
+to the average valence density of Aluminum is 15.77 eV. Hence, using
 plasmon-pole models may be not really appropriate.
 
 In what follows, one will compute the GW band structure without a plasmon-pole
@@ -120,7 +120,7 @@ integration path can be deformed: one transforms an integral along the real
 axis into an integral along the imaginary axis plus residues enclosed in the
 new contour of integration. The method is extensively described in [[cite:Lebegue2003]].
 
-Examine the input file *tgw2_2.in*. 
+Examine the input file *tgw2_2.in*.
 
 {% dialog tests/tutorial/Input/tgw2_2.in %}
 
@@ -138,7 +138,7 @@ smooth in this direction. In contrast, the number of frequencies needed along
 the real axis set with the variable [[nfreqre]] is usually larger.
 
 ## Finding the Fermi energy and the bottom of the valence band
-  
+
 In order not to lose time, let us start the calculation of the band width
 before the study of the input file. So, copy the file *tgw2_3.in*, and modify
 the *tgw3_x.files* file as usual (replace occurrences of twg2_x by tgw2_3).
@@ -156,7 +156,7 @@ Examine the input file *tgw2_3.in*:
 
 {% dialog tests/tutorial/Input/tgw2_3.in %}
 
-The first thirty lines contain the important information. 
+The first thirty lines contain the important information.
 There, you find some input variables with values that you are
 already familiarized with, like [[optdriver]], [[ecutsigx]], [[ecutwfn]].
 Then, comes the input variable [[gwcalctyp]] = 12. The value _x2_ corresponds to
@@ -174,7 +174,7 @@ from LDA to GW. Of course, it would have been easier to select an homogeneous ra
 for the whole Brillouin zone, e.g. from 1 to 5, but this would have been more time-consuming.
 
 In the output file, one finds the quasiparticle energy at $\Gamma$, for the lowest band:
-    
+
 ```yaml
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
@@ -187,9 +187,9 @@ data: !SigmaeeData |
         1    -3.762    -9.451    -3.762     5.689   -15.617     5.940     0.761    -0.313    -9.623    -0.173    -3.934    -3.988
 ...
 ```
-    
+
 (the last column is the relevant quantity). The updated Fermi energy is also mentioned:
-    
+
      New Fermi energy :        2.558310E-01 Ha ,    6.961515E+00 eV
 
 The last information is not printed in case of [[gwcalctyp]] lower than 10.
@@ -199,11 +199,11 @@ band width, 10.404 eV. Using converged parameters, the band width will be
 10.54 eV (see [[cite:Bruneval2006]]). This is in excellent agreement with the experimental value of 10.6 eV.
 
 ## Computing a GW spectral function, and the plasmon satellite of Aluminum
-  
+
 The access to the non-plasmon-pole-model self-energy (real and imaginary part)
 has additional benefit, e.g. an accurate spectral function can be computed,
 see [[cite:Lebegue2003]]. You may be interested to see the plasmon satellite of
-Aluminum, which can be accounted for within the GW approximation. 
+Aluminum, which can be accounted for within the GW approximation.
 
 Remember that the spectral function is proportional to (with some multiplicative matrix elements) the spectrum which
 is measured in photoemission spectroscopy (PES). In PES, a photon impinges the
@@ -235,9 +235,9 @@ the GW self-energy is done only at the $\Gamma$ point.
 The spectral function is written in the file *tgw2_4o_SIG*. It is a simple text
 file. It contains, as a function of the frequency (eV), the real part of the
 self-energy, the imaginary part of the self-energy, and the spectral function.
-You can visualize it using your preferred software. 
+You can visualize it using your preferred software.
 For instance, start |gnuplot| and issue
-    
+
 ```gnuplot
 p 'tgw2_4o_SIG' u 1:4 w l
 ```

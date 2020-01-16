@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pred_lotf
 !! NAME
 !! m_pred_lotf
@@ -42,7 +41,6 @@ module m_pred_lotf
 CONTAINS !===========================================================
  !!***
 
- !{\src2tex{textfont=tt}}
  !!****f* ABINIT/m_pred_lotf/pred_lotf
  !! NAME
  !! pred_lotf

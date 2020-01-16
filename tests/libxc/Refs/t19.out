@@ -372,8 +372,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1042.844    1042.781
  ETOT  8  -17.810421177019    -3.029E-06 1.311E-11 4.076E-08
  ETOT  9  -17.810419824238     1.353E-06 1.881E-13 1.000E-09
 
- Compute kinetic energy density
-
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
@@ -490,15 +488,13 @@ Result for kinetic energy density :
   prteigrs : nnsclo,ikpt=    9    1 max resid (incl. the buffer)=  1.17239E-16
 
 
- Compute kinetic energy density
-
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
  Total kinetic energy density [Ha/Bohr^3]
-      Maximum=    1.2889E+00  at reduced coord.    0.0000    0.0000    0.0000
-      Minimum=    8.5115E-07  at reduced coord.    0.5000    0.5000    0.5000
-   Integrated=    8.5096E+00
+      Maximum=    1.2287E+00  at reduced coord.    0.0000    0.0000    0.0000
+      Minimum=    4.9223E-05  at reduced coord.    0.5000    0.5000    0.5000
+   Integrated=    8.1639E+00
 --------------------------------------------------------------------------------
  Integrated electronic density in atomic spheres:
  ------------------------------------------------

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_polynomial_potential
 !! NAME
 !! m_polynomial_potential

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wfk_analyze
 !! NAME
 !!  m_wfk_analyze
@@ -323,7 +322,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    if (psp_gencond==1 .or. call_pawinit) then
      call timab(553,1,tsec)
      gsqcut_shp = two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
-     call pawinit(gnt_option,gsqcut_shp,zero,dtset%pawlcutd,dtset%pawlmix,&
+     call pawinit(dtset%effmass_free,gnt_option,gsqcut_shp,zero,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,cryst%nsym,dtset%pawntheta,pawang,Pawrad,&
 &     dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,0,dtset%usepotzero)
      call timab(553,2,tsec)

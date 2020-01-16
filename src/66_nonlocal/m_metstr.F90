@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_metstr
 !! NAME
 !!  m_metstr

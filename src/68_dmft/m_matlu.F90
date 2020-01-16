@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_matlu
 !! NAME
 !!  m_matlu
@@ -537,7 +536,6 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
 end subroutine print_matlu
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* m_matlu/sym_matlu
 !! NAME
 !! sym_matlu

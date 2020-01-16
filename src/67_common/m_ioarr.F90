@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ioarr
 !! NAME
 !! m_ioarr
@@ -51,7 +50,7 @@ MODULE m_ioarr
  use defs_wvltypes,   only : wvl_denspot_type
  use m_time,          only : cwtime, cwtime_report
  use m_io_tools,      only : iomode_from_fname, iomode2str, open_file, get_unit
- use m_fstrings,      only : sjoin, itoa, endswith
+ use m_fstrings,      only : sjoin, itoa, endswith, ltoa
  use m_numeric_tools, only : interpolate_denpot
  use m_geometry,      only : metric
  use m_mpinfo,        only : destroy_mpi_enreg, ptabs_fourdp, initmpi_seq
@@ -1070,10 +1069,10 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
      ! Check important dimensions.
      ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
-     if (fform /= fform_den) then
-       write(msg, "(2a, 2(a, i0))")' File: ',trim(my_fname),' is not a density file. fform: ',fform,", expecting: ", fform_den
-       MSG_WARNING(msg)
-     end if
+     !if (fform /= fform_den) then
+     !  write(msg, "(3a, 2(a, i0))")' File: ',trim(my_fname),ch10,' is not a density file. fform: ',fform,", expecting: ", fform_den
+     !  MSG_WARNING(msg)
+     !end if
      cplex_file = 1
      if (ohdr%pertcase /= 0) then
        cplex_file = 2; if (ohdr%qptn(1)**2 + ohdr%qptn(2)**2 + ohdr%qptn(3)**2 <1.d-14) cplex_file= 1
@@ -1095,10 +1094,10 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
      ! Check important dimensions.
      ABI_CHECK(fform /= 0, sjoin("fform == 0 while reading:", my_fname))
-     if (fform /= fform_den) then
-       write(msg, "(2a, 2(a, i0))")' File: ',trim(my_fname),' is not a density file: fform= ',fform,", expecting:", fform_den
-       MSG_WARNING(msg)
-     end if
+     !if (fform /= fform_den) then
+     !  write(msg, "(2a, 2(a, i0))")' File: ',trim(my_fname),' is not a density file: fform= ',fform,", expecting:", fform_den
+     !  MSG_WARNING(msg)
+     !end if
 
      cplex_file = 1
      if (ohdr%pertcase /= 0) then
@@ -1122,28 +1121,9 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
 
    need_interp = any(ohdr%ngfft(1:3) /= ngfft(1:3))
    if (need_interp .and. allow_interp__) then
-     MSG_COMMENT("Real space meshes (DEN file, input rhor) are different. Will interpolate rhor(r).")
-
-#if 0
-     ABI_CHECK(cplex == 1, "cplex != 1 not coded!")
-     ngfft_file(1:3) = ohdr%ngfft(1:3)
-     ngfft_file(4) = 2*(ngfft_file(1)/2)+1 ! 4:18 are used in fourdp
-     ngfft_file(5) = 2*(ngfft_file(2)/2)+1
-     ngfft_file(6) = ngfft_file(3)
-     ngfft_file(7:18) = ngfft(7:18)
-     optin  = 0 ! Input is taken from rhor
-     optout = 0 ! Output is only in real space
-
-     ! Fake MPI_type for the sequential part.
-     !call initmpi_seq(MPI_enreg_seq)
-     !call init_distribfft_seq(MPI_enreg_seq%distribfft, 'c', ngfftc(2), ngfftc(3), 'all')
-     !call init_distribfft_seq(MPI_enreg_seq%distribfft, 'f', ngfftf(2), ngfftf(3), 'all')
-
-     call fourier_interpol(cplex,ohdr%nspden,optin,optout,nfftot_file,ngfft_file,nfft,ngfft,&
-       mpi_enreg,rhor_file,orhor,rhogdum,rhogdum)
-
-     !call destroy_mpi_enreg(MPI_enreg_seq)
-#endif
+     msg = sjoin("Different FFT meshes. Caller:", ltoa(ngfft(1:3)), &
+                 ". File: ", ltoa(ohdr%ngfft(1:3)), ". Will interpolate rhor(r).")
+     MSG_COMMENT(msg)
 
      ABI_MALLOC(rhor_tmp, (cplex*product(ngfft(1:3)), ohdr%nspden))
      call interpolate_denpot(cplex, ohdr%ngfft(1:3), ohdr%nspden, rhor_file, ngfft(1:3), rhor_tmp)
@@ -1246,7 +1226,7 @@ subroutine read_rhor(fname, cplex, nspden, nfft, ngfft, pawread, mpi_enreg, orho
            mybase  = 1 + cplex * (n1 * (i2-1 + n2*(i3_local-1)))
            globase = 1 + cplex * (n1 * (i2-1 + n2*(i3-1)))
            call denpot_spin_convert(rhor_file,ohdr%nspden,orhor,nspden,fform,&
-&                  istart_in=globase,istart_out=mybase,nelem=n1*cplex)
+                                    istart_in=globase,istart_out=mybase,nelem=n1*cplex)
          end do
        end do
      end if

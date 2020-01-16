@@ -575,7 +575,7 @@ end subroutine atompaw_shapebes
    vhtnzc_sph(1:meshsz)=vhtnzc(1:meshsz)
  end if
 
-!Initiialize Kij with Dij0
+!Initialize Kij with Dij0
 !=========================
  kij(1:lmn2_size)=pawtab%dij0(1:lmn2_size)
 

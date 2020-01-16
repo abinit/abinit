@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ab7_symmetry
 !! NAME
 !! m_ab7_symmetry

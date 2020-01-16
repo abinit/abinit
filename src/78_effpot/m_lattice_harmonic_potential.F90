@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lattice_harmonic_potential
 !! NAME
 !! m_lattice_harmonic_potential

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_polynomial_coeff
 !!
 !! NAME

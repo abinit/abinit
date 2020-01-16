@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_m1geo
 !! NAME
 !! m_m1geo

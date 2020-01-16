@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_defs_ptgroups
 !! NAME
 !! m_defs_ptgroups

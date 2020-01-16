@@ -464,7 +464,7 @@ P newkpt: treating     35 bands with npw=     116 for ikpt=   8 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   60.161E-07; max=  81.951E-05
+ Mean square residual over all n,k,spin=   60.161E-07; max=  97.311E-12
    0.0000  0.0000  0.0000    1  4.93260E-06 kpt; spin; max resid(k); each band:
   1.17E-11 4.33E-12 1.64E-11 2.38E-11 8.65E-13 4.36E-12 1.93E-11 4.95E-12
   8.81E-12 7.44E-11 1.34E-11 1.26E-11 1.73E-11 5.24E-11 6.03E-11 2.86E-11

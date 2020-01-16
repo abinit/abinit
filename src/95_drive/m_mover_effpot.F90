@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mover_effpot
 !! NAME
 !!  m_mover_effpot

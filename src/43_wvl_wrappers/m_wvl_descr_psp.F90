@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_descr_psp
 !! NAME
 !!  wvl_descr_psp

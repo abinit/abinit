@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_projectors
 !! NAME
 !!  m_wvl_projectors

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_effective_potential_file
 !! NAME
 !! m_effective_potential_file

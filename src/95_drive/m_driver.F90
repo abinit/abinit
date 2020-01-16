@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_driver
 !! NAME
 !!  m_driver
@@ -26,11 +25,9 @@
 module m_driver
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_errors
  use m_dtset
- use m_dtfil
  use m_results_out
  use m_results_respfn
  use m_yaml
@@ -39,6 +36,7 @@ module m_driver
  use m_abi_linalg
  use m_abicore
  use m_exit
+ use m_dtfil
  use m_fftcore
  use libxc_functionals
 #if defined DEV_YP_VDWXC
@@ -46,7 +44,7 @@ module m_driver
 #endif
  use m_xgScalapack
 
- use defs_datatypes, only : pseudopotential_type
+ use defs_datatypes, only : pseudopotential_type, pspheader_type
  use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
  use m_xg,           only : xg_finalize
@@ -58,7 +56,6 @@ module m_driver
  use m_fftw3,        only : fftw3_init_threads, fftw3_cleanup
  use m_psps,         only : psps_init_global, psps_init_from_dtset, psps_free
  use m_mpinfo,       only : mpi_distrib_is_ok
- use m_dtfil,        only : dtfil_init, dtfil_init_img
  use m_respfn_driver,    only : respfn
  use m_screening_driver, only : screening
  use m_sigma_driver,     only : sigma

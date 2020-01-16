@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
   !!****m* ABINIT/m_multibinit_main2
   !! NAME
   !! m_multibinit_main2

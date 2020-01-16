@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_bandfft_kpt
 !! NAME
 !!  m_bandfft_kpt

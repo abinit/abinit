@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_model_screening
 !! NAME
 !! m_model_screening

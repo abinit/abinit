@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_suscep_stat
 !! NAME
 !! m_suscep_stat

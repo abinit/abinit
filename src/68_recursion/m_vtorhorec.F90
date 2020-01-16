@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_vtorhorec
 !! NAME
 !!  m_vtorhorec
@@ -2145,7 +2144,6 @@ end subroutine nlenergyrec
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/first_rec
 !! NAME
 !! first_rec

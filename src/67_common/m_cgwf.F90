@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_cgwf
 !! NAME
 !!  m_cgwf
@@ -2000,7 +1999,6 @@ subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
 end subroutine mksubham
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_grad_berry
 !! NAME
 !! make_grad_berry

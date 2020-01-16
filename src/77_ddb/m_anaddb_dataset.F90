@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_anaddb_dataset
 !! NAME
 !!  m_anaddb_dataset
