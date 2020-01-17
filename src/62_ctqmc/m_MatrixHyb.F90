@@ -11,7 +11,7 @@
 !!  Perform varius operation on matrices.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +43,7 @@ PRIVATE
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -101,7 +101,7 @@ CONTAINS
 !!  initialize
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -170,7 +170,7 @@ END SUBROUTINE MatrixHyb_init
 !!  impose size of the this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -219,7 +219,7 @@ END SUBROUTINE MatrixHyb_setSize
 !!  This subroutine enlarges memory space
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -305,7 +305,7 @@ END SUBROUTINE MatrixHyb_enlarge
 !!  Clear this
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -343,7 +343,7 @@ END SUBROUTINE MatrixHyb_clear
 !!  assign this=matrix2
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -400,7 +400,7 @@ END SUBROUTINE MatrixHyb_assign
 !!  inverse the matrix and compute the determinant
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -517,7 +517,7 @@ END SUBROUTINE MatrixHyb_inverse
 !!  LU decomposition
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -626,7 +626,7 @@ END SUBROUTINE MatrixHyb_LU
 !!  Just get the determinant 
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -671,7 +671,7 @@ END SUBROUTINE MatrixHyb_getDet
 !!  print Matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -743,7 +743,7 @@ END SUBROUTINE MatrixHyb_print
 !!  Destroy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

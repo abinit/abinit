@@ -6,7 +6,7 @@
 !! Interface with want code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (CMorari)
+!! Copyright (C) 2005-2020 ABINIT group (CMorari)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

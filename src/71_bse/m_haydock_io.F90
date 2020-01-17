@@ -6,7 +6,7 @@
 !!  This module provides routines to read the Haydock file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (YG)
+!!  Copyright (C) 2013-2020 ABINIT group (YG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

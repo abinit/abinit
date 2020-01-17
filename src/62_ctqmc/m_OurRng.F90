@@ -11,7 +11,7 @@
 !!  Should be modify and merge with uniformrandom and zbq
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,7 +51,7 @@ CONTAINS
 !!  Efficient on GPU and MIC
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2013-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
