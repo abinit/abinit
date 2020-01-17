@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/predict_ga
 !! NAME
 !! predict_ga

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_abstract_potential
 !! NAME
 !! m_abstract_potential

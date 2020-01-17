@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_hamiltonian
 !! NAME
 !! m_gwls_hamiltonian

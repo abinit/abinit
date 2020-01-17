@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_generate_training_set
 !! NAME
 !!  m_generate_training_set

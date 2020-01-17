@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_bs_defs
 !! NAME
 !!  m_bs_defs

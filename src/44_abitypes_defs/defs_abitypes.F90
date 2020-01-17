@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/defs_abitypes
 !! NAME
 !! defs_abitypes

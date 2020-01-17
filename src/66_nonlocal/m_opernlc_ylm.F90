@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_opernlc_ylm
 !! NAME
 !!  m_opernlc_ylm

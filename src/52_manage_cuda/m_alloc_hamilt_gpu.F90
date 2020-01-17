@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_alloc_hamilt_gpu
 !! NAME
 !!  m_alloc_hamilt_gpu

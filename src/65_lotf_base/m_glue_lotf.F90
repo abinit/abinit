@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/glue_lotf
 !! NAME
 !! glue_lotf

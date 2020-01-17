@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_rec_tools
 !! NAME
 !!  m_rec_tools

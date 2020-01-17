@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_spin_ncfile
 !! NAME
 !! m_spin_ncfile

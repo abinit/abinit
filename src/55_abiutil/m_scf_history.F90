@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_scf_history
 !! NAME
 !!  m_scf_history

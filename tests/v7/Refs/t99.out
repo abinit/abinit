@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.13 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h36 )
+.Starting date : Sun 29 Dec 2019.
+- ( at 18h14 )
   
-- input  file    -> t99.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v7_t99/t99.in
 - output file    -> t99.out
 - root for input  files -> t99i
 - root for output files -> t99o
@@ -172,8 +172,8 @@ P          mk1mem2          4
          ecut(hartree)=      5.513   => boxcut(ratio)=   2.00903
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/B-q3
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/B-q3
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/B-q3
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/B-q3
 - Goedecker pseudopotential for B
 -  5.00000   3.00000     70301                znucl, zion, pspdat
    10   11    1    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -203,8 +203,8 @@ P          mk1mem2          4
              1    0.000000
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/7n.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/7n.psphgh
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/7n.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/7n.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Nitrogen,  from PRB58, 3641 (1998) paper
 -  7.00000   5.00000    980509                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -267,7 +267,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.500      73.455
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   65.336E-23; max=  67.870E-26
+ Mean square residual over all n,k,spin=   65.336E-23; max=  57.987E-26
  reduced coordinates (array xred) for    2 atoms
       -0.000000000000      0.000000000000      0.240000000000
        0.333333333333      0.666666666667      0.750000000000
@@ -450,23 +450,23 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.500      73.455
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   22.914444457167     -3.703E+01 4.564E-02 3.721E+03
- ETOT  2   9.1555941426831     -1.376E+01 8.292E-03 2.094E+01
+ ETOT  2   9.1555941426831     -1.376E+01 1.216E-02 2.094E+01
  ETOT  3   9.0406270827809     -1.150E-01 1.854E-04 3.629E-01
  ETOT  4   9.0395860034006     -1.041E-03 5.852E-07 6.417E-03
- ETOT  5   9.0395696040003     -1.640E-05 1.926E-09 1.406E-05
- ETOT  6   9.0395695608876     -4.311E-08 4.573E-11 3.538E-07
- ETOT  7   9.0395695592773     -1.610E-09 8.729E-13 3.553E-09
- ETOT  8   9.0395695592619     -1.538E-11 8.997E-15 2.395E-11
+ ETOT  5   9.0395696040003     -1.640E-05 4.086E-09 1.406E-05
+ ETOT  6   9.0395695608876     -4.311E-08 5.537E-11 3.538E-07
+ ETOT  7   9.0395695592773     -1.610E-09 2.237E-12 3.553E-09
+ ETOT  8   9.0395695592619     -1.538E-11 1.992E-14 2.395E-11
  ETOT  9   9.0395695592618     -1.137E-13 1.089E-16 1.307E-13
- ETOT 10   9.0395695592618      2.132E-14 2.892E-19 1.125E-15
- ETOT 11   9.0395695592618     -4.263E-14 1.003E-21 1.058E-17
+ ETOT 10   9.0395695592618      2.132E-14 4.644E-19 1.125E-15
+ ETOT 11   9.0395695592618     -4.263E-14 1.380E-21 1.058E-17
 
  At SCF step   11       vres2   =  1.06E-17 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -33.333E-03; max=  10.032E-22
+ Mean square residual over all n,k,spin=  -33.333E-03; max=  13.804E-22
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -563,20 +563,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.500      73.455
  ETOT  2   10.160109440543     -1.041E+02 7.766E-02 1.947E+02
  ETOT  3   9.0506850868193     -1.109E+00 1.807E-03 2.655E+00
  ETOT  4   9.0433901569684     -7.295E-03 3.237E-06 3.719E-02
- ETOT  5   9.0432898283775     -1.003E-04 3.709E-08 2.290E-04
- ETOT  6   9.0432889740280     -8.543E-07 7.393E-10 5.684E-06
- ETOT  7   9.0432889507476     -2.328E-08 2.011E-11 2.782E-08
- ETOT  8   9.0432889506282     -1.193E-10 8.170E-14 7.361E-11
+ ETOT  5   9.0432898283775     -1.003E-04 6.890E-08 2.290E-04
+ ETOT  6   9.0432889740280     -8.543E-07 1.260E-09 5.684E-06
+ ETOT  7   9.0432889507476     -2.328E-08 3.281E-11 2.782E-08
+ ETOT  8   9.0432889506282     -1.193E-10 2.006E-13 7.361E-11
  ETOT  9   9.0432889506282     -8.527E-14 3.109E-16 5.173E-13
  ETOT 10   9.0432889506260     -2.217E-12 1.663E-18 2.530E-15
- ETOT 11   9.0432889506269      9.948E-13 1.829E-21 4.113E-17
+ ETOT 11   9.0432889506269      9.948E-13 3.224E-21 4.113E-17
 
  At SCF step   11       vres2   =  4.11E-17 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -33.333E-03; max=  18.294E-22
+ Mean square residual over all n,k,spin=  -33.333E-03; max=  32.235E-22
 
  Fourteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -615,14 +615,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.500      73.455
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   1.6256207964264     -1.879E+02 7.769E-01 1.404E+02
- ETOT  2  0.89389453646510     -7.317E-01 6.603E-04 1.042E+01
- ETOT  3  0.85130922575581     -4.259E-02 2.866E-05 2.285E-01
- ETOT  4  0.84962901590558     -1.680E-03 4.422E-07 1.880E-02
- ETOT  5  0.84942591005321     -2.031E-04 3.217E-08 5.408E-04
- ETOT  6  0.84942281005797     -3.100E-06 1.199E-09 9.427E-07
- ETOT  7  0.84942280655937     -3.499E-09 1.338E-12 8.440E-09
+ ETOT  2  0.89389453646510     -7.317E-01 1.098E-03 1.042E+01
+ ETOT  3  0.85130922575581     -4.259E-02 3.661E-05 2.285E-01
+ ETOT  4  0.84962901590558     -1.680E-03 1.351E-06 1.880E-02
+ ETOT  5  0.84942591005321     -2.031E-04 7.532E-08 5.408E-04
+ ETOT  6  0.84942281005797     -3.100E-06 1.695E-09 9.427E-07
+ ETOT  7  0.84942280655937     -3.499E-09 3.832E-12 8.440E-09
  ETOT  8  0.84942280652856     -3.081E-11 2.366E-14 6.702E-11
- ETOT  9  0.84942280652819     -3.695E-13 1.637E-16 8.675E-13
+ ETOT  9  0.84942280652819     -3.695E-13 1.689E-16 8.675E-13
  ETOT 10  0.84942280652817     -2.842E-14 1.771E-18 5.600E-15
  ETOT 11  0.84942280652819      2.842E-14 1.249E-20 9.194E-17
 
@@ -674,22 +674,22 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.500      73.455
 -ETOT  1   1.6401601393171     -1.879E+02 8.616E-01 1.424E+02
  ETOT  2  0.89813316326535     -7.420E-01 8.081E-04 1.133E+01
  ETOT  3  0.85135743993177     -4.678E-02 3.895E-05 2.377E-01
- ETOT  4  0.84963174992140     -1.726E-03 6.213E-07 1.911E-02
+ ETOT  4  0.84963174992140     -1.726E-03 8.033E-07 1.911E-02
  ETOT  5  0.84942598248585     -2.058E-04 5.188E-08 5.440E-04
  ETOT  6  0.84942272010491     -3.262E-06 2.134E-09 1.040E-06
  ETOT  7  0.84942271600206     -4.103E-09 2.329E-12 1.139E-08
- ETOT  8  0.84942271595932     -4.275E-11 2.864E-14 1.550E-10
- ETOT  9  0.84942271595866     -6.537E-13 4.532E-16 1.315E-12
- ETOT 10  0.84942271595844     -2.274E-13 1.670E-18 8.993E-15
- ETOT 11  0.84942271595861      1.705E-13 1.441E-20 1.426E-16
- ETOT 12  0.84942271595866      5.684E-14 2.835E-22 7.507E-19
+ ETOT  8  0.84942271595932     -4.275E-11 3.023E-14 1.550E-10
+ ETOT  9  0.84942271595866     -6.537E-13 5.065E-16 1.315E-12
+ ETOT 10  0.84942271595844     -2.274E-13 1.801E-18 8.993E-15
+ ETOT 11  0.84942271595861      1.705E-13 1.908E-20 1.426E-16
+ ETOT 12  0.84942271595866      5.684E-14 3.118E-22 7.507E-19
 
  At SCF step   12       vres2   =  7.51E-19 < tolvrs=  1.00E-16 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -33.333E-03; max=  28.348E-23
+ Mean square residual over all n,k,spin=  -33.333E-03; max=  31.178E-23
 
  Eighteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -729,14 +729,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.500      73.455
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   8.9467369074045     -1.259E+01 4.078E-02 8.944E+01
+-ETOT  1   8.9467369074045     -1.259E+01 5.760E-02 8.944E+01
  ETOT  2   8.5785916285108     -3.681E-01 3.981E-04 2.274E+00
- ETOT  3   8.5664234470723     -1.217E-02 4.429E-06 5.860E-02
- ETOT  4   8.5662093163327     -2.141E-04 1.602E-07 1.769E-04
+ ETOT  3   8.5664234470723     -1.217E-02 1.819E-05 5.860E-02
+ ETOT  4   8.5662093163327     -2.141E-04 2.415E-07 1.769E-04
  ETOT  5   8.5662087988350     -5.175E-07 9.604E-10 2.061E-06
- ETOT  6   8.5662087940575     -4.778E-09 1.556E-12 1.471E-08
+ ETOT  6   8.5662087940575     -4.778E-09 3.166E-12 1.471E-08
  ETOT  7   8.5662087940226     -3.488E-11 2.107E-14 1.876E-10
- ETOT  8   8.5662087940220     -6.377E-13 5.048E-16 1.639E-12
+ ETOT  8   8.5662087940220     -6.377E-13 5.463E-16 1.639E-12
  ETOT  9   8.5662087940220      8.882E-15 4.990E-18 1.642E-14
  ETOT 10   8.5662087940220      0.000E+00 2.465E-20 1.200E-16
  ETOT 11   8.5662087940220      5.329E-15 2.699E-22 4.193E-19
@@ -788,14 +788,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.500      73.455
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   8.6894253204993     -2.215E+01 6.013E-02 1.210E+01
  ETOT  2   8.5427521901890     -1.467E-01 4.753E-05 2.185E-01
- ETOT  3   8.5404067437237     -2.345E-03 5.998E-07 7.103E-03
+ ETOT  3   8.5404067437237     -2.345E-03 1.625E-06 7.103E-03
  ETOT  4   8.5403216821457     -8.506E-05 3.641E-08 7.597E-04
  ETOT  5   8.5403128376405     -8.845E-06 2.451E-09 5.067E-07
  ETOT  6   8.5403128343102     -3.330E-09 1.137E-11 7.142E-09
- ETOT  7   8.5403128342652     -4.502E-11 1.435E-14 2.390E-10
- ETOT  8   8.5403128342641     -1.041E-12 6.169E-16 1.231E-12
- ETOT  9   8.5403128342641      7.105E-15 7.465E-18 3.215E-14
- ETOT 10   8.5403128342641     -1.066E-14 6.987E-20 3.008E-16
+ ETOT  7   8.5403128342652     -4.502E-11 1.721E-14 2.390E-10
+ ETOT  8   8.5403128342641     -1.041E-12 1.081E-15 1.231E-12
+ ETOT  9   8.5403128342641      7.105E-15 7.767E-18 3.215E-14
+ ETOT 10   8.5403128342641     -1.066E-14 8.390E-20 3.008E-16
  ETOT 11   8.5403128342641     -1.066E-14 1.051E-21 1.975E-18
 
  At SCF step   11       vres2   =  1.98E-18 < tolvrs=  1.00E-16 =>converged.
@@ -1419,10 +1419,10 @@ P          mk1mem2          4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          3.5  wall=          3.7
+- Proc.   0 individual time (sec): cpu=          3.0  wall=          3.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and  40 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.5  wall=          3.7
++Overall time at end (sec) : cpu=          3.0  wall=          3.2

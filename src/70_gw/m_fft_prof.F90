@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_FFT_prof
 !! NAME
 !! m_FFT_prof

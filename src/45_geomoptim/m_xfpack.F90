@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_xfpack
 !! NAME
 !!  m_xfpack

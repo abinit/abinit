@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_multibinit_dataset
 !! NAME
 !!  m_multibinit_dataset

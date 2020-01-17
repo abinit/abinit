@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mpi_setup
 !! NAME
 !! m_mpi_setup

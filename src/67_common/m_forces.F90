@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_forces
 !! NAME
 !!  m_forces
@@ -122,8 +121,11 @@ contains
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  symrec(3,3,nsym)=symmetries in reciprocal space, reduced coordinates
 !!  usefock=1 if fock operator is used; 0 otherwise.
+!!  usekden= 1 is kinetic energy density has to be computed, 0 otherwise
 !!  vresid(nfft,nspden)=potential residual (if non-collinear magn., only trace of it)
 !!  vxc(nfft,nspden)=exchange-correlation potential (hartree) in real space
+!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA): derivative of XC energy density
+!!                                wrt kinetic energy density (depsxcdtau)
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  xred_old(3,natom)=previous reduced dimensionless atomic coordinates
 !!
@@ -176,7 +178,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 &                  maxfor,mgfft,mpi_enreg,n1xccc,n3xccc,&
 &                  nattyp,nfft,ngfft,ngrvdw,ntypat,&
 &                  pawrad,pawtab,ph1d,psps,rhog,rhor,rprimd,symrec,synlgr,usefock,&
-&                  vresid,vxc,wvl,wvl_den,xred,&
+&                  vresid,vxc,vxctau,wvl,wvl_den,xred,&
 &                  electronpositron) ! optional argument
 
 !Arguments ------------------------------------
@@ -198,7 +200,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  real(dp),intent(in) :: grchempottn(3,dtset%natom),grewtn(3,dtset%natom),grvdw(3,ngrvdw),grnl(3*dtset%natom)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom)
  real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rprimd(3,3)
- real(dp),intent(in) :: vxc(nfft,dtset%nspden)
+ real(dp),intent(in) :: vxc(nfft,dtset%nspden),vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(inout) :: fcart(3,dtset%natom),forold(3,dtset%natom)
  real(dp),intent(inout) :: vresid(nfft,dtset%nspden),xred(3,dtset%natom)
  real(dp),intent(out) :: favg(3),fred(3,dtset%natom),gresid(3,dtset%natom)
@@ -210,7 +212,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 
 !Local variables-------------------------------
 !scalars
- integer :: coredens_method,fdir,iatom,idir,indx,ipositron,itypat,mu
+ integer :: coredens_method,coretau_method,fdir,iatom,idir,indx,ipositron,itypat,mu
  integer :: optatm,optdyfr,opteltfr,optgr,option,optn,optn2,optstr,optv,vloc_method
  real(dp) :: eei_dum1,eei_dum2,ucvol,ucvol_local,vol_element
  logical :: calc_epaw3_forces, efield_flag
@@ -222,8 +224,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  real(dp),allocatable :: atmrho_dum(:),atmvloc_dum(:),dyfrlo_dum(:,:,:)
  real(dp),allocatable :: dyfrn_dum(:,:,:),dyfrv_dum(:,:,:)
  real(dp),allocatable :: dyfrx2_dum(:,:,:),eltfrn_dum(:,:),gauss_dum(:,:)
- real(dp),allocatable :: epawf3red(:,:),fin(:,:),fionred(:,:),grl(:,:),grnl_tmp(:,:),grtn(:,:)
- real(dp),allocatable :: grtn_indx(:,:),v_dum(:),vxctotg(:,:)
+ real(dp),allocatable :: epawf3red(:,:),fin(:,:),fionred(:,:),grl(:,:),grl_dum(:,:)
+ real(dp),allocatable :: grnl_tmp(:,:),grtn(:,:),grtn_indx(:,:),grxctau(:,:),v_dum(:),vxctotg(:,:)
  real(dp),allocatable :: xccc3d_dum(:)
 
 ! *************************************************************************
@@ -240,6 +242,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !Check if we're in hybrid norm conserving pseudopotential
  is_hybrid_ncpp=(psps%usepaw==0 .and. &
 & (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid()))
+
 !=======================================================================
 !========= Local pseudopotential and core charge contributions =========
 !=======================================================================
@@ -261,16 +264,25 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  if (psps%nc_xccc_gspace==1) coredens_method=1
  if (psps%nc_xccc_gspace==0) coredens_method=2
  if (psps%usewvl==1) coredens_method=2
+ coretau_method=0
+ if (dtset%usekden==1.and.psps%usepaw==1) then
+   coretau_method=1;if (psps%nc_xccc_gspace==0) coretau_method=2
+ end if
 
 !Local ionic potential and/or pseudo core charge by method 1
- if (vloc_method==1.or.coredens_method==1) then
-   call timab(550,1,tsec)
-   optv=0;if (vloc_method==1) optv=1
-   optn=0;if (coredens_method==1) optn=n3xccc/nfft
-   optatm=0;optdyfr=0;optgr=1;optstr=0;optn2=1;opteltfr=0
+ if (vloc_method==1.or.coredens_method==1.or.coretau_method==1) then
    if (psps%nc_xccc_gspace==1.and.psps%usepaw==0.and.is_hybrid_ncpp) then
      MSG_BUG(' Not yet implemented !')
    end if
+   call timab(550,1,tsec)
+!  Allocate (unused) dummy variables, otherwise some compilers complain
+   ABI_ALLOCATE(gauss_dum,(0,0))
+   ABI_ALLOCATE(atmrho_dum,(0))
+   ABI_ALLOCATE(atmvloc_dum,(0))
+   ABI_ALLOCATE(dyfrn_dum,(0,0,0))
+   ABI_ALLOCATE(dyfrv_dum,(0,0,0))
+   ABI_ALLOCATE(eltfrn_dum,(0,0))
+!  Compute Vxc in reciprocal space
    if (coredens_method==1.and.n3xccc>0) then
      ABI_ALLOCATE(v_dum,(nfft))
      ABI_ALLOCATE(vxctotg,(2,nfft))
@@ -282,28 +294,52 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
    else
      ABI_ALLOCATE(vxctotg,(0,0))
    end if
-!  Allocate (unused) dummy variables, otherwise some compilers complain
-   ABI_ALLOCATE(gauss_dum,(0,0))
-   ABI_ALLOCATE(atmrho_dum,(0))
-   ABI_ALLOCATE(atmvloc_dum,(0))
-   ABI_ALLOCATE(dyfrn_dum,(0,0,0))
-   ABI_ALLOCATE(dyfrv_dum,(0,0,0))
-   ABI_ALLOCATE(eltfrn_dum,(0,0))
-   call atm2fft(atindx1,atmrho_dum,atmvloc_dum,dyfrn_dum,dyfrv_dum,&
-&   eltfrn_dum,gauss_dum,gmet,gprimd,&
-&   grxc,grl,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
-&   optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,qprtrb_dum,&
-&   rhog,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,psps%vlspl,&
-&   comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
-&   paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
+!  Compute contribution to forces from Vloc and/or pseudo core density
+   optv=0;if (vloc_method==1) optv=1
+   optn=0;if (coredens_method==1) optn=n3xccc/nfft
+   optatm=0;optdyfr=0;optgr=1;optstr=0;optn2=1;opteltfr=0
+   if (vloc_method==1.or.coredens_method==1) then
+     call atm2fft(atindx1,atmrho_dum,atmvloc_dum,dyfrn_dum,dyfrv_dum,&
+&     eltfrn_dum,gauss_dum,gmet,gprimd,&
+&     grxc,grl,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
+&     optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,qprtrb_dum,&
+&     rhog,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,psps%vlspl,&
+&     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
+&     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
+   end if
+   if (n3xccc==0.and.coredens_method==1) grxc=zero
+   ABI_DEALLOCATE(vxctotg)
+   if (dtset%usekden==1.and.coretau_method==1..and.n3xccc>0) then
+!    Compute contribution to forces from pseudo kinetic energy core density
+     optv=0;optn=1;optn2=4
+     ABI_ALLOCATE(grxctau,(3,dtset%natom))
+     ABI_ALLOCATE(grl_dum,(0,0))
+     ABI_ALLOCATE(v_dum,(nfft))
+     ABI_ALLOCATE(vxctotg,(2,nfft))
+     v_dum(:)=vxctau(:,1,1);if (dtset%nspden>=2) v_dum(:)=0.5_dp*(v_dum(:)+vxctau(:,2,1))
+     call fourdp(1,vxctotg,v_dum,-1,mpi_enreg,nfft,1,ngfft,0)
+     call zerosym(vxctotg,2,ngfft(1),ngfft(2),ngfft(3),&
+&     comm_fft=mpi_enreg%comm_fft,distribfft=mpi_enreg%distribfft)
+     ABI_DEALLOCATE(v_dum)
+     call atm2fft(atindx1,atmrho_dum,atmvloc_dum,dyfrn_dum,dyfrv_dum,&
+&     eltfrn_dum,gauss_dum,gmet,gprimd,&
+&     grxctau,grl_dum,gsqcut,mgfft,psps%mqgrid_vl,dtset%natom,nattyp,nfft,ngfft,ntypat,&
+&     optatm,optdyfr,opteltfr,optgr,optn,optn2,optstr,optv,psps,pawtab,ph1d,psps%qgrid_vl,qprtrb_dum,&
+&     rhog,strn_dummy6,strv_dummy6,ucvol,psps%usepaw,vxctotg,vxctotg,vxctotg,vprtrb_dum,psps%vlspl,&
+&     comm_fft=mpi_enreg%comm_fft,me_g0=mpi_enreg%me_g0,&
+&     paral_kgb=mpi_enreg%paral_kgb,distribfft=mpi_enreg%distribfft)
+     grxc(:,:)=grxc(:,:)+grxctau(:,:)
+     ABI_DEALLOCATE(grl_dum)
+     ABI_DEALLOCATE(grxctau)
+     ABI_DEALLOCATE(vxctotg)
+   end if
+!  Deallocate temporary arrays
    ABI_DEALLOCATE(gauss_dum)
    ABI_DEALLOCATE(atmrho_dum)
    ABI_DEALLOCATE(atmvloc_dum)
    ABI_DEALLOCATE(dyfrn_dum)
    ABI_DEALLOCATE(dyfrv_dum)
    ABI_DEALLOCATE(eltfrn_dum)
-   ABI_DEALLOCATE(vxctotg)
-   if (n3xccc==0.and.coredens_method==1) grxc=zero
    call timab(550,2,tsec)
  end if
 
@@ -334,38 +370,49 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
  end if
 
 !Pseudo core electron density by method 2
- if (coredens_method==2) then
+ if (coredens_method==2.or.coretau_method==2) then
    if (n1xccc/=0) then
      call timab(53,1,tsec)
      option=2
      ABI_ALLOCATE(dyfrx2_dum,(3,3,dtset%natom))
      ABI_ALLOCATE(xccc3d_dum,(n3xccc))
-     if (is_hybrid_ncpp) then
-       call xchybrid_ncpp_cc(dtset,eei_dum1,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
-&       dummy6,eei_dum2,xccc3d_dum,grxc=grxc,xcccrc=psps%xcccrc,xccc1d=psps%xccc1d,xred=xred,n1xccc=n1xccc)
-     else
-       if (psps%usewvl==0.and.psps%usepaw==0.and.dtset%icoulomb==0) then
-         call mkcore(dummy6,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
-&         ngfft(1),n1xccc, ngfft(2),ngfft(3),option,rprimd,dtset%typat,ucvol,vxc,&
-&         psps%xcccrc,psps%xccc1d,xccc3d_dum,xred)
-       else if (psps%usewvl==0.and.(psps%usepaw==1.or.dtset%icoulomb==1)) then
-         call mkcore_alt(atindx1,dummy6,dyfrx2_dum,grxc,dtset%icoulomb,mpi_enreg,dtset%natom,nfft,&
-&         dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
-&         ucvol,vxc,psps%xcccrc,psps%xccc1d,xccc3d_dum,xred,pawrad,pawtab,psps%usepaw)
-       else if (psps%usewvl==1.and.psps%usepaw==1) then
-         ucvol_local=ucvol
+     if (coredens_method==2) then
+       if (is_hybrid_ncpp) then
+         call xchybrid_ncpp_cc(dtset,eei_dum1,mpi_enreg,nfft,ngfft,n3xccc,rhor,rprimd,&
+&         dummy6,eei_dum2,xccc3d_dum,grxc=grxc,xcccrc=psps%xcccrc,xccc1d=psps%xccc1d,xred=xred,n1xccc=n1xccc)
+       else
+         if (psps%usewvl==0.and.psps%usepaw==0.and.dtset%icoulomb==0) then
+           call mkcore(dummy6,dyfrx2_dum,grxc,mpi_enreg,dtset%natom,nfft,dtset%nspden,ntypat,&
+&           ngfft(1),n1xccc, ngfft(2),ngfft(3),option,rprimd,dtset%typat,ucvol,vxc,&
+&           psps%xcccrc,psps%xccc1d,xccc3d_dum,xred)
+         else if (psps%usewvl==0.and.(psps%usepaw==1.or.dtset%icoulomb==1)) then
+           call mkcore_alt(atindx1,dummy6,dyfrx2_dum,grxc,dtset%icoulomb,mpi_enreg,dtset%natom,nfft,&
+&           dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
+&           ucvol,vxc,psps%xcccrc,psps%xccc1d,xccc3d_dum,xred,pawrad,pawtab,psps%usepaw)
+         else if (psps%usewvl==1.and.psps%usepaw==1) then
+           ucvol_local=ucvol
 #if defined HAVE_BIGDFT
-!        ucvol_local=product(wvl_den%denspot%dpbox%hgrids)*real(product(wvl_den%denspot%dpbox%ndims),dp)
-!        call mkcore_wvl_old(atindx1,dummy6,dyfrx2_dum,wvl%atoms%astruct%geocode,grxc,wvl%h,dtset%natom,&
+!          ucvol_local=product(wvl_den%denspot%dpbox%hgrids)*real(product(wvl_den%denspot%dpbox%ndims),dp)
+!          call mkcore_wvl_old(atindx1,dummy6,dyfrx2_dum,wvl%atoms%astruct%geocode,grxc,wvl%h,dtset%natom,&
 ! &           nattyp,nfft,wvl_den%denspot%dpbox%nscatterarr(mpi_enreg%me_wvl,:),dtset%nspden,ntypat,&
 ! &           wvl%Glr%d%n1,wvl%Glr%d%n1i,wvl%Glr%d%n2,wvl%Glr%d%n2i,wvl%Glr%d%n3,wvl_den%denspot%dpbox%n3pi,&
 ! &           n3xccc,option,pawrad,pawtab,psps%gth_params%psppar,rprimd,ucvol_local,vxc,xccc3d_dum,xred,&
 ! &           mpi_comm_wvl=mpi_enreg%comm_wvl)
-         call mkcore_wvl(atindx1,dummy6,grxc,dtset%natom,nattyp,nfft,dtset%nspden,ntypat,&
-&         n1xccc,n3xccc,option,pawrad,pawtab,rprimd,vxc,psps%xccc1d,xccc3d_dum,&
-&         psps%xcccrc,xred,wvl_den,wvl,mpi_comm_wvl=mpi_enreg%comm_wvl)
+           call mkcore_wvl(atindx1,dummy6,grxc,dtset%natom,nattyp,nfft,dtset%nspden,ntypat,&
+&           n1xccc,n3xccc,option,pawrad,pawtab,rprimd,vxc,psps%xccc1d,xccc3d_dum,&
+&           psps%xcccrc,xred,wvl_den,wvl,mpi_comm_wvl=mpi_enreg%comm_wvl)
 #endif
+         end if
        end if
+     end if
+     if (dtset%usekden==1.and.coretau_method==2) then
+       ABI_ALLOCATE(grxctau,(3,dtset%natom))
+       call mkcore_alt(atindx1,dummy6,dyfrx2_dum,grxctau,dtset%icoulomb,mpi_enreg,dtset%natom,nfft,&
+&       dtset%nspden,nattyp,ntypat,ngfft(1),n1xccc,ngfft(2),ngfft(3),option,rprimd,&
+&       ucvol,vxctau(:,:,1),psps%xcccrc,psps%xccc1d,xccc3d_dum,xred,pawrad,pawtab,psps%usepaw,&
+&       usekden=.true.)
+       grxc(:,:)=grxc(:,:)+grxctau(:,:)
+       ABI_DEALLOCATE(grxctau)
      end if
      ABI_DEALLOCATE(xccc3d_dum)
      ABI_DEALLOCATE(dyfrx2_dum)

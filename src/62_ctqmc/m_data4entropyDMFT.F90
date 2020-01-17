@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_data4entropyDMFT
 !! NAME
 !!  m_data4entropyDMFT
