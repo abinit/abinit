@@ -330,7 +330,7 @@ subroutine add_vnlr_commutator(vkbr,cryst,psps,npw,nspinor,ug1,ug2,rhotwx)
 
 !************************************************************************
 
- ABI_CHECK(nspinor == 1, "nspinor/=1 not coded")
+ ABI_CHECK(nspinor == 1, "inclvkb > 0 with nspinor == 2 is not coded")
 
  ! Adding term i <c,k|[Vnl,r]|v,k> ===
  select case (vkbr%inclvkb)
