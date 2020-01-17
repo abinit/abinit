@@ -1,5 +1,5 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Dec 2019.
-- ( at 17h35 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h19 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v4_t20/t20.in
 - output file    -> t20.out
@@ -348,7 +348,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2274.000    2273.976
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   76.179E-08; max=  99.330E-10
+ Mean square residual over all n,k,spin=   62.170E-10; max=  99.330E-10
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -540,10 +540,10 @@ P           mkmem2          3
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          5.2  wall=          5.3
+- Proc.   0 individual time (sec): cpu=          5.2  wall=          5.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.2  wall=          5.3
++Overall time at end (sec) : cpu=          5.2  wall=          5.4

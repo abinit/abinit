@@ -1,5 +1,5 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Dec 2019.
-- ( at 17h29 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h14 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/paral_t51_MPI1-t52_MPI1-t53_MPI1/t51.in
 - output file    -> t51_MPI1.out
@@ -1149,24 +1149,24 @@ P           mkmem          10
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   0.244  40.5      0.247  34.2           2870      -1.00        0.99       0.99
-- nonlop(apply)                  0.036   6.0      0.037   5.1           2870      -1.00        0.99       0.99
-- invars2                        0.031   5.2      0.032   4.4              1      -1.00        0.98       0.98
-- projbd                         0.026   4.4      0.027   3.7           4300      -1.00        0.99       0.99
-- getghc-other                   0.016   2.7      0.015   2.0             -1      -1.00        1.09       1.09
-- abinit(2)                      0.015   2.5      0.015   2.1              1      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.015   2.4      0.015   2.0             -1      -1.00        1.00       1.00
-- ewald                          0.011   1.8      0.011   1.6              1      -1.00        0.97       0.97
-- scfcv-scprqt                   0.011   1.8      0.104  14.4             10      -1.00        0.10       0.10
-- fourwf%(den)                   0.010   1.7      0.011   1.5            230      -1.00        0.97       0.97
+- fourwf%(pot)                   0.244  40.1      0.246  34.6           2870      -1.00        0.99       0.99
+- nonlop(apply)                  0.038   6.2      0.038   5.3           2870      -1.00        0.99       0.99
+- invars2                        0.032   5.2      0.032   4.6              1      -1.00        0.98       0.98
+- projbd                         0.028   4.5      0.028   4.0           4300      -1.00        0.98       0.98
+- getghc-other                   0.016   2.6      0.015   2.1             -1      -1.00        1.09       1.09
+- abinit(2)                      0.015   2.5      0.015   2.2              1      -1.00        0.98       0.98
+- vtowfk(ssdiag)                 0.015   2.4      0.015   2.1             -1      -1.00        1.00       1.00
+- scfcv-scprqt                   0.012   1.9      0.091  12.7             10      -1.00        0.13       0.13
+- ewald                          0.011   1.8      0.011   1.5              1      -1.00        1.00       1.00
+- fourwf%(den)                   0.010   1.7      0.010   1.4            230      -1.00        1.00       1.00
 - stress                         0.009   1.5      0.009   1.3              1      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.009   1.4      0.009   1.2              1      -1.00        1.00       1.00
-- vtowfk(contrib)                0.005   0.9      0.005   0.7            100      -1.00        0.99       0.99
-- fourdp                         0.004   0.7      0.004   0.6             51      -1.00        0.99       0.99
-- others (120)                   0.011   1.9      0.011   1.6             -1      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.009   1.5      0.009   1.2              1      -1.00        1.00       1.00
+- vtowfk(contrib)                0.005   0.9      0.005   0.7            100      -1.00        1.00       1.00
+- fourdp                         0.004   0.7      0.004   0.6             51      -1.00        1.00       1.00
+- others (120)                   0.011   1.9      0.012   1.6             -1      -1.00        0.98       0.98
 -<END_TIMER>
 -
-- subtotal                       0.455  75.3      0.551  76.4                                  0.82       0.82
+- subtotal                       0.459  75.4      0.540  76.0                                  0.85       0.85
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
@@ -1176,24 +1176,24 @@ P           mkmem          10
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   0.244  40.5      0.247  34.2           2870      -1.00        0.99       0.99
-- nonlop(apply)                  0.036   6.0      0.037   5.1           2870      -1.00        0.99       0.99
-- invars2                        0.031   5.2      0.032   4.4              1      -1.00        0.98       0.98
-- projbd                         0.026   4.4      0.027   3.7           4300      -1.00        0.99       0.99
-- getghc-other                   0.016   2.7      0.015   2.0             -1      -1.00        1.09       1.09
-- abinit(2)                      0.015   2.5      0.015   2.1              1      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.015   2.4      0.015   2.0             -1      -1.00        1.00       1.00
-- ewald                          0.011   1.8      0.011   1.6              1      -1.00        0.97       0.97
-- scfcv-scprqt                   0.011   1.8      0.104  14.4             10      -1.00        0.10       0.10
-- fourwf%(den)                   0.010   1.7      0.011   1.5            230      -1.00        0.97       0.97
+- fourwf%(pot)                   0.244  40.1      0.246  34.6           2870      -1.00        0.99       0.99
+- nonlop(apply)                  0.038   6.2      0.038   5.3           2870      -1.00        0.99       0.99
+- invars2                        0.032   5.2      0.032   4.6              1      -1.00        0.98       0.98
+- projbd                         0.028   4.5      0.028   4.0           4300      -1.00        0.98       0.98
+- getghc-other                   0.016   2.6      0.015   2.1             -1      -1.00        1.09       1.09
+- abinit(2)                      0.015   2.5      0.015   2.2              1      -1.00        0.98       0.98
+- vtowfk(ssdiag)                 0.015   2.4      0.015   2.1             -1      -1.00        1.00       1.00
+- scfcv-scprqt                   0.012   1.9      0.091  12.7             10      -1.00        0.13       0.13
+- ewald                          0.011   1.8      0.011   1.5              1      -1.00        1.00       1.00
+- fourwf%(den)                   0.010   1.7      0.010   1.4            230      -1.00        1.00       1.00
 - stress                         0.009   1.5      0.009   1.3              1      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.009   1.4      0.009   1.2              1      -1.00        1.00       1.00
-- vtowfk(contrib)                0.005   0.9      0.005   0.7            100      -1.00        0.99       0.99
-- fourdp                         0.004   0.7      0.004   0.6             51      -1.00        0.99       0.99
-- others (120)                   0.011   1.9      0.011   1.6             -1      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.009   1.5      0.009   1.2              1      -1.00        1.00       1.00
+- vtowfk(contrib)                0.005   0.9      0.005   0.7            100      -1.00        1.00       1.00
+- fourdp                         0.004   0.7      0.004   0.6             51      -1.00        1.00       1.00
+- others (120)                   0.011   1.9      0.012   1.6             -1      -1.00        0.98       0.98
 -<END_TIMER>
 
-- subtotal                       0.455  75.3      0.551  76.4                                  0.82       0.82
+- subtotal                       0.459  75.4      0.540  76.0                                  0.85       0.85
 
 ================================================================================
 
