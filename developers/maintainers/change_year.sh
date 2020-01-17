@@ -11,9 +11,9 @@
 # Then should be called from the top directory  (here a list of generic filenames, ordered on the basis of the alphanumeric string)
 # developers/maintainers/change_year.sh *.ac */*.ac */*/*.am */*/*.bat */*/*/*.bat */*/*.c */*/*/*.c */*/*.cf */*/*.cnf */*/*.com */*/*.conf */*/*.cu */*/*.csh 
 # developers/maintainers/change_year.sh */*/*.dep */*/*.dir */*.env */*/*.finc */*/*.f90 */*/*.F90 */*/*/*.F90 *.in */*.in */*/*.in 
-# developers/maintainers/change_year.sh */*/*.h */*/*.help */*/*/*.help */*/*.html */*/*/*/html */*/*/*.log */*/*.m */*/*/*.m */*/make* 
+# developers/maintainers/change_year.sh */*/*.h */*/*/*.h */*/*.help */*/*/*.help */*/*.html */*/*/*/html */*/*/*.log */*/*.m */*/*/*.m */*/make* */*/*/*bindings*
 # developers/maintainers/change_year.sh */*/*.mk */*/*.m4 */*/*/*.m4 */*/Makefile */*/*/*.out */*/*.pl */*/*/*.pl bindings/README fallbacks/README tests/README */*/README 
-# developers/maintainers/change_year.sh */*/*.sav */*.sh */*/*.src */*/*/*.stdout */*/*.tex */*/*/*.tex */*/*.txt */*/*_ */*/*_ext
+# developers/maintainers/change_year.sh */*/*.sav */*.sh */*/*.src */*/*/*.src */*/*/*.stdout */*/*.tex */*/*/*.tex */*/*.txt */*/*/*/.txt */*/*_ */*/*/*_ */*/*_ext
 
 # Please do not change the permission of py files. Not all py modules must be executable! 
 # Simply issue the in-place command
@@ -26,7 +26,7 @@
 # So, also issue, one after the other (cut and paste the following):
 # developers/maintainers/change_year.sh config/scripts/a* config/scripts/clean* config/scripts/u* 
 # developers/maintainers/change_year.sh developers/maintainers/change2.sh developers/maintainers/change.sh developers/various/fixed_to_free tests/cpu/Refs/changeref 
-# developers/maintainers/change_year.sh developers/maintainers/suppress.sh scripts/*/*.sh
+# developers/maintainers/change_year.sh developers/maintainers/suppress.sh scripts/*/*.sh scripts/*/*/*.sh
 # developers/maintainers/change_year.sh developers/various/*.sh developers/various/fixed_to_free doc/config/scripts/make* fallbacks/config/scripts/make* INSTALL 
 # developers/maintainers/change_year.sh tests/config/scripts/make-makefiles-tests tests/cpu/Refs/changeref scripts/configure/upgrade-build-config packages/debian/copyright 
 # 
