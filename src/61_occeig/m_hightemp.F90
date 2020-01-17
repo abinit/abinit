@@ -352,6 +352,7 @@ contains
     end do
     ! Verifier la constante (/nspden**2)
     this%edc_kin_freeel=this%edc_kin_freeel*this%nfreeel/nspden/nfftf/nspden
+    if(this%e_kin_freeel<tol16) this%e_kin_freeel=zero
   end subroutine compute_e_kin_freeel_approx
 
   !!****f* ABINIT/m_hightemp/compute_e_ent_freeel
@@ -1040,6 +1041,7 @@ contains
     gamma=(fermie-e_shiftfactor)/tsmear
 
     nfreeel=factor*djp12(xcut,gamma)
+    if(nfreeel<tol16) nfreeel=zero
   end subroutine hightemp_get_nfreeel_approx
 
   !!****f* ABINIT/m_hightemp/hightemp_prt_eigocc
@@ -1053,22 +1055,6 @@ contains
   !! This file is intended to be used for custom DOS computation with external tools for example.
   !!
   !! INPUTS
-  !! eigen(mband*nkpt*nsppol)=eigenvalues (hartree)
-  !! etotal=total energy
-  !! energies=object which contains all energies of the computation
-  !! fnameabo_eig=filename for printing of the eigenenergies
-  !! iout=unit number for formatted output file
-  !! kptns(3,nkpt)=k points in reduced coordinates
-  !! mband=maximum number of bands
-  !! nband(nkpt)=number of bands at each k point
-  !! nkpt=number of k points
-  !! nsppol=1 for unpolarized, 2 for spin-polarized
-  !! occ(maxval(nband(:))*nkpt*nsppol)=occupancies for each band and k point
-  !! rprimd(3,3)=lattice vectors in Bohr
-  !! strten(6)=components of the stress tensor (hartree/bohr^3)
-  !! tsmear=smearing width (or temperature)
-  !! usepaw= 0 for non paw calculation; =1 for paw calculation
-  !! wtk(nkpt)=k-point weights
   !!
   !! OUTPUT
   !!
@@ -1077,27 +1063,29 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_prt_eigocc(e_shiftfactor,eigen,etotal,energies,fnameabo_eig,&
-    & iout,iter,kptns,mband,nband,nkpt,nsppol,occ,rprimd,strten,tsmear,usepaw,wtk)
+  subroutine hightemp_prt_eigocc(e_shiftfactor,eigen,etotal,energies,fnameabo,&
+  & iout,iter,kptns,mband,nband,nfreeel,nkpt,nsppol,occ,rprimd,tsmear,usepaw,wtk,&
+  & strten,istep) ! Optional arguments
 
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: iout,iter,mband,nkpt,nsppol,usepaw
-    real(dp),intent(in) :: etotal,tsmear
-    real(dp),intent(in) :: e_shiftfactor
-    character(len=*),intent(in) :: fnameabo_eig
+    real(dp),intent(in) :: e_shiftfactor,etotal,nfreeel,tsmear
+    character(len=*),intent(in) :: fnameabo
     type(energies_type),intent(in) :: energies
+    integer,intent(in),optional :: istep
     ! Arrays
     integer,intent(in) :: nband(nkpt*nsppol)
     real(dp),intent(in) :: eigen(mband*nkpt*nsppol),kptns(3,nkpt)
-    real(dp),intent(in) :: rprimd(3,3),strten(6)
+    real(dp),intent(in) :: rprimd(3,3)
     real(dp),intent(in) :: occ(mband*nkpt*nsppol)
     real(dp),intent(in) :: wtk(nkpt)
+    real(dp),intent(in),optional :: strten(6)
 
     ! Local variables -------------------------
     ! Scalars
     integer :: band_index,iband,ii,ikpt,isppol,nband_k,temp_unit
-    real(dp) :: ucvol
+    real(dp) :: ucvol,pressure
     character(len=200) :: fnameabo_eigocc
     character(len=39) :: kind_of_output
     character(len=500) :: msg
@@ -1109,7 +1097,7 @@ contains
     band_index=0
     call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
-    fnameabo_eigocc=trim(fnameabo_eig) // trim('OCC')
+    fnameabo_eigocc=trim(fnameabo) // trim('_EIGOCC')
     write(msg,'(a,a)') ' prt_eigocc : about to open file ',trim(fnameabo_eigocc)
     call wrtout(iout,msg,'COLL')
     if (open_file(fnameabo_eigocc,msg,newunit=temp_unit,status='unknown',form='formatted') /= 0) then
@@ -1156,9 +1144,19 @@ contains
       & ' Entropy energy     = ',energies%e_entropy,' Ha         Band energy        = ',energies%e_eigenvalues,&
       & ' Ha         Internal energy    = ',etotal-energies%e_entropy, ' Ha'
     call wrtout(temp_unit,msg,'COLL')
+    if(present(strten)) then
+      pressure=-(strten(1)+strten(2)+strten(3))*HaBohr3_GPa/3.0_dp
+    else
+      pressure=zero
+    end if
     write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
-      & ' Unit cell vol      = ',ucvol,' Bohr^3     Elec. temperature  = ',tsmear,&
-      & ' Ha         Pressure           = ',-(strten(1)+strten(2)+strten(3))*HaBohr3_GPa/3.0_dp,' GPa'
+    & ' Unit cell vol      = ',ucvol,' Bohr^3     Elec. temperature  = ',tsmear,&
+    & ' Ha         Pressure           = ',pressure,' GPa'
+    call wrtout(temp_unit,msg,'COLL')
+
+    write(msg, '(a,i12,a,i12,a,ES15.8)') &
+    & ' N. elec. iter      = ',istep,'            MD iteration       = ',iter,&
+    & '            N. free electrons  = ',nfreeel
     call wrtout(temp_unit,msg,'COLL')
 
     ! Loop over spins

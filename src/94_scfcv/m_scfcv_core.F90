@@ -2150,6 +2150,22 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 & taur,tollist,usecprj,vectornd,vhartr,vpsp,vtrial,vxc,vxcavg,with_vectornd,wvl,&
 & xccc3d,xred,ylm,ylmgr,dtset%charge*SUM(vpotzero(:)),conv_retcode)
 
+
+!blanchet write eigocc file with pressure
+if(associated(hightemp)) then
+  call hightemp_prt_eigocc(hightemp%e_shiftfactor,eigen,&
+  & results_gs%etotal,results_gs%energies,dtfil%filnam_ds(4),&
+  & std_out,scfcv_itime,dtset%kptns,dtset%mband,dtset%nband,&
+  & hightemp%nfreeel,dtset%nkpt,dtset%nsppol,occ,rprimd,&
+  & dtset%tsmear,psps%usepaw,dtset%wtk,strten=results_gs%strten,istep=istep)
+else
+  call hightemp_prt_eigocc(zero,eigen,&
+  & results_gs%etotal,results_gs%energies,dtfil%filnam_ds(4),&
+  & std_out,scfcv_itime,dtset%kptns,dtset%mband,dtset%nband,&
+  & zero,dtset%nkpt,dtset%nsppol,occ,rprimd,&
+  & dtset%tsmear,psps%usepaw,dtset%wtk,strten=results_gs%strten,istep=istep)
+end if
+
 !Before leaving the present routine, save the current value of xred.
  xred_old(:,:)=xred(:,:)
 

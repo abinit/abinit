@@ -753,23 +753,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 #endif
 
 !    ###########################################################
-!    ### TEMPORARY. BLANCHET : write eigen values and occupations
-
-     if(associated(scfcv_args%hightemp)) then
-       e_shiftfactor=scfcv_args%hightemp%e_shiftfactor
-     else
-       e_shiftfactor=zero
-     end if
-
-     if(abs(scfcv_args%results_gs%etotal)>tol14) then
-       call hightemp_prt_eigocc(e_shiftfactor,scfcv_args%eigen,&
-&       scfcv_args%results_gs%etotal,scfcv_args%results_gs%energies,scfcv_args%dtfil%fnameabo_eig,&
-&       std_out,itime,scfcv_args%dtset%kptns,scfcv_args%dtset%mband,scfcv_args%dtset%nband,&
-&       scfcv_args%dtset%nkpt,scfcv_args%dtset%nsppol,scfcv_args%occ,rprimd,&
-&       scfcv_args%results_gs%strten,scfcv_args%dtset%tsmear,scfcv_args%psps%usepaw,scfcv_args%dtset%wtk)
-     end if
-
-!    ###########################################################
 !    ### 14. Output after SCFCV
      if(need_verbose.and.need_scfcv_cycle)then
        write(message,'(a,3a,a,72a)')&

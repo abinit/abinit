@@ -850,7 +850,14 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !Initialize (eventually) hightemp object
  if(dtset%useria==6661) then
    ABI_DATATYPE_ALLOCATE(hightemp,)
-   call hightemp%init(dtset%useric,dtset%mband,dtset%userib,rprimd)
+   if(dtset%mband<25) then
+     write(message, '(a,i0,a)' )&
+&     "Not enough bands to activate hightemp routines: nband=",dtset%nband,&
+&     " < 25. Action: Increase nband."
+     MSG_ERROR(message)
+   else
+     call hightemp%init(dtset%useric,dtset%mband,dtset%userib,rprimd)
+   end if
  end if
 
 !Timing for initialisation period
@@ -1467,10 +1474,6 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 & dtfil%fnameabo_dos,dtfil%fnameabo_eig,results_gs%fred,&
 & mpi_enreg,nfftf,ngfftf,occ,dtset%optforces,&
 & resid,rhor,rprimd,results_gs%vxcavg,xred)
-
- call hightemp_prt_eigocc(hightemp%e_shiftfactor,eigen,results_gs%etotal,results_gs%energies,dtfil%fnameabo_eig,std_out,&
-& 0,dtset%kptns,dtset%mband,dtset%nband,dtset%nkpt,dtset%nsppol,occ,rprimd,results_gs%strten,&
-& dtset%tsmear,psps%usepaw,dtset%wtk)
 
  if ( (dtset%iscf>=0 .or. dtset%iscf==-3) .and. dtset%prtstm==0) then
    call prtene(dtset,results_gs%energies,ab_out,psps%usepaw)
