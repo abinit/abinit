@@ -125,7 +125,7 @@ subroutine outresid(dtset,kptns,mband,&
      nband_k=nband(ikpt+(spin-1)*nkpt)
      nband_eff=max(1,nband_k-dtset%nbdbuf)
      residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
-     resims=resims     +      resid(ibdkpt:ibdkpt+nband_eff-1)
+     resims=resims     +  sum(resid(ibdkpt:ibdkpt+nband_eff-1))
      ibdkpt=ibdkpt+nband_k
      band_index=band_index + nband_eff
    end do
