@@ -13,7 +13,8 @@
 # developers/maintainers/change_year.sh */*/*.dep */*/*.dir */*.env */*/*.finc */*/*.f90 */*/*.F90 */*/*/*.F90 *.in */*.in */*/*.in 
 # developers/maintainers/change_year.sh */*/*.h */*/*/*.h */*/*.help */*/*/*.help */*/*.html */*/*/*/html */*/*/*.log */*/*.m */*/*/*.m */*/make* */*/*/*bindings*
 # developers/maintainers/change_year.sh */*/*.mk */*/*.m4 */*/*/*.m4 */*/Makefile */*/*/*.out */*/*.pl */*/*/*.pl bindings/README fallbacks/README tests/README */*/README 
-# developers/maintainers/change_year.sh */*/*.sav */*.sh */*/*.src */*/*/*.src */*/*/*.stdout */*/*.tex */*/*/*.tex */*/*.txt */*/*/*/.txt */*/*_ */*/*/*_ */*/*_ext
+# developers/maintainers/change_year.sh */*/*.sav */*.sh */*/*.src */*/*/*.src */*/*/*.stdout */*/*.tex */*/*/*.tex */*/*.txt */*/*/*.txt */*/*_ */*/*/*_ */*/*_ext
+# developers/maintainers/change_year.sh */*/*/*/*_ */*/*/*/*.src */*/*/*/*.c */*/*/*/*.finc */*/*/*/*.h */*/*/*/*.F90 */*/*/*/*.f90 */*/*/*/*.in */*/*/*/*.cu
 
 # Please do not change the permission of py files. Not all py modules must be executable! 
 # Simply issue the in-place command
@@ -35,7 +36,7 @@
 # and treat by hand the remaining files ...
 #
 #XG 100118 Still other problems with copyrights might be detected by using the following command (replace 2018 by the present year !):
-# grep -i opyright * */* */*/* */*/*/* */*/*/*/* | grep -v 2018 | grep -v '!! COPYRIGHT' | grep -v 'Oldenburg' | grep -v 'Stefan Goedecker' | grep -v 'doc/rel' | grep -v 'Remove' | grep -v 'tests/' | grep -v 'EXC group' | grep -v 'PWSCF group' | grep -v 'Makefile' | grep -v 'abinit.d' | grep -v 'fallbacks' | grep -v 'doc/features/features' | grep -v 'doc/install_notes/install' | grep -v 'COPYING' | grep -v 'gui' | grep -v 'default' | grep -v js_files
+# grep -i opyright * */* */*/* */*/*/* */*/*/*/* | grep -v 2020 | grep -v '!! COPYRIGHT' | grep -v 'Oldenburg' | grep -v 'Stefan Goedecker' | grep -v 'doc/rel' | grep -v 'Remove' | grep -v 'tests/' | grep -v 'EXC group' | grep -v 'PWSCF group' | grep -v 'Makefile' | grep -v 'abinit.d' | grep -v 'fallbacks' | grep -v 'doc/features/features' | grep -v 'doc/install_notes/install' | grep -v 'COPYING' | grep -v 'gui' | grep -v 'default' | grep -v js_files
 
 for file in "$@"
 do
