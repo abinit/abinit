@@ -17,7 +17,7 @@
 
 # Please do not change the permission of py files. Not all py modules must be executable! 
 # Simply issue the in-place command
-# sed -i 's!2018 ABINIT!2019 ABINIT!' */*/*.py */*/*/*.py
+# sed -i 's!2019 ABINIT!2020 ABINIT!' */*.py */*/*.py */*/*/*.py
 #
 # In the previous list, files without an extension are not treated (except the Makefile and README files - warning some README are only links ...), 
 # and */*/*.sh are not treated (except tests/*/*.sh), because of conflict with the present script file extension !!
@@ -26,6 +26,7 @@
 # So, also issue, one after the other (cut and paste the following):
 # developers/maintainers/change_year.sh config/scripts/a* config/scripts/clean* config/scripts/u* 
 # developers/maintainers/change_year.sh developers/maintainers/change2.sh developers/maintainers/change.sh developers/various/fixed_to_free tests/cpu/Refs/changeref 
+# developers/maintainers/change_year.sh developers/maintainers/suppress.sh scripts/*/*.sh
 # developers/maintainers/change_year.sh developers/various/*.sh developers/various/fixed_to_free doc/config/scripts/make* fallbacks/config/scripts/make* INSTALL 
 # developers/maintainers/change_year.sh tests/config/scripts/make-makefiles-tests tests/cpu/Refs/changeref scripts/configure/upgrade-build-config packages/debian/copyright 
 # 
@@ -40,15 +41,13 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.yr*  
- sed -i 's&Copyright (c)&Copyright (C)&' $file 
 #The primitive command was
 #sed -i 's&(C) 2018-2019 ABINIT&(C) 2018-2020 ABINIT&' $file
 #for different values replacing 2018 
-#The following uses a regexp. One should change the two last digits of the year.
- sed -i 's&\((C) ....-20\)19\( ABINIT\)&\120\2&' $file
-#sed -i 's&(C) ....-2019 ABINIT&(C) \1\2\3\4-2020 ABINIT&' $file
+#The following uses a regexp. This change the two last digits of the year.
+ sed -i 's&\(([cC]) ....-20\)19\( ABINIT\)&\120\2&' $file
 #The next line is also needed, as some developers decide to use this syntax, and some the other ...
- sed -i 's&(C) 2019 ABINIT&(C) 2019-2020 ABINIT&' $file
+ sed -i 's&\(([cC]) 20\)19\( ABINIT\)&\119-2020\2&' $file
  echo "file $file treated "
 done
 #chmod 755 */*/*.sh */*/*.py */*/*.pl */*/*.com config/*/make* developers/*/make*  */config/scripts/* */*.sh
