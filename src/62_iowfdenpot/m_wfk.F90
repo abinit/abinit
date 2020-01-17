@@ -3002,6 +3002,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  integer,allocatable :: symrelT(:,:,:)
  integer,allocatable :: rbz2ibz(:,:),kg_disk(:,:),iperm(:),rbz2ibz_sort(:)
  real(dp) :: kf(3),kibz(3), ksym(3)
+ real(dp) :: kdiff(3)
  real(dp),allocatable :: cg_disk(:,:),eig_disk(:),occ_disk(:),work(:,:,:,:)
 
 ! *************************************************************************
@@ -3078,13 +3079,15 @@ print *, 'ik_ibz, nkibz ', ik_ibz, nkibz
    foundk = .false.
    do ik_disk=1,wfk_disk%nkpt
 print *, ' kpt disk vs irred ', ebands_ibz%kptns(:,ik_disk), '   ', kptns_in(:,ibz2rbz(ik_ibz))
-     if (sum(abs(ebands_ibz%kptns(:,ik_disk) - kptns_in(:,ibz2rbz(ik_ibz)))) < tol6) then
+     kdiff = mod(ebands_ibz%kptns(:,ik_disk) - kptns_in(:,ibz2rbz(ik_ibz)), one)
+     if (sum(abs(kdiff)) < tol6) then
        ibz2disk(ik_ibz) = ik_disk
        foundk = .true.
        exit
      end if
 !TODO: make sure the algorithm prefers +kibz to the time reversed copy. May be ok as is.
-     if (sum(abs(ebands_ibz%kptns(:,ik_disk) + kptns_in(:,ibz2rbz(ik_ibz)))) < tol6) then
+     kdiff = mod(ebands_ibz%kptns(:,ik_disk) + kptns_in(:,ibz2rbz(ik_ibz)), one)
+     if (sum(abs(kdiff)) < tol6) then
        ibz2disk(ik_ibz) = -ik_disk
        foundk = .true.
        exit
