@@ -48,7 +48,6 @@ module m_longwave
  use m_pawfgr,      only : pawfgr_type, pawfgr_init
  use m_pawrhoij,    only : pawrhoij_type
  use m_paw_dmft,    only : paw_dmft_type
- use m_pawang,      only : pawang_type
  use m_pawrad,      only : pawrad_type
  use m_pawtab,      only : pawtab_type
  use m_drivexc,     only : check_kxc
@@ -91,7 +90,6 @@ contains
 !!  dtfil <type(datafiles_type)> = variables related to files
 !!  dtset <type(dataset_type)> = all input variables for this dataset
 !!  etotal = new total energy (no meaning at output)
-!!  iexit= exit flag
 !!  mpi_enreg=informations about MPI pnarallelization
 !!  occ(mband*nkpt*nsppol) = occupation number for each band and k
 !!  xred(3,natom) = reduced atomic coordinates
@@ -100,7 +98,6 @@ contains
 !!  npwtot(nkpt) = total number of plane waves at each k point
 !!
 !! SIDE EFFECTS
-!!  pawang <type(pawang_type)>=paw angular mesh and related data
 !!  pawrad(ntypat*usepaw) <type(pawrad_type)>=paw radial mesh and related data
 !!  pawtab(ntypat*usepaw) <type(pawtab_type)>=paw tabulated starting data
 !!  psps <type(pseudopotential_type)> = variables related to pseudopotentials
@@ -114,8 +111,8 @@ contains
 !!
 !! SOURCE
 
-subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
-&                   pawang,pawrad,pawtab,psps,xred)
+subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
+&                   pawrad,pawtab,psps,xred)
     
 #ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
@@ -126,13 +123,11 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enreg,npwtot,occ,&
 
 !Arguments ------------------------------------
  !scalars
- integer,intent(in) :: iexit
  real(dp),intent(inout) :: etotal
  character(len=6),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
- type(pawang_type),intent(inout) :: pawang
  type(pseudopotential_type),intent(inout) :: psps
  !arrays
  integer,intent(out) :: npwtot(dtset%nkpt)

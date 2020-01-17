@@ -2694,11 +2694,11 @@ subroutine dfpt_ewalddq(dyewdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,ucvol,
 !nr, ng affect convergence of sums (nr=3,ng=5 is not good enough):
 !scalars
  integer,parameter :: im=2,nng=10,nnr=6,re=1
- integer ::ia,ia0,ib,ierr,ig1,ig2,ig3,ii,i1,iq,ir1,ir2,ir3,mu,my_comm_atom,newg,newr,ng,nr,nu
+ integer ::ia,ia0,ib,ierr,ig1,ig2,ig3,ii,iq,ir1,ir2,ir3,mu,my_comm_atom,newg,newr,ng,nr,nu
  logical :: my_atmtab_allocated,paral_atom
- real(dp) :: arg,arga,argb,c1i,c1r,da1,da2,da3,delag,delbg,derfc_arg
+ real(dp) :: arg,arga,argb,c1i,c1r,delag,delbg,derfc_arg
  real(dp) :: direct,dot1,dot2,dot3,dotr1,dotr2,dotr3
- real(dp) :: eta,fac,fac2,gdot12,gdot13,gdot23,gsq,gpqdq,gsum,gterms,norm1
+ real(dp) :: eta,fac,fac2,gdot12,gdot13,gdot23,gsq,gpqdq,gterms,norm1
  real(dp) :: r1,r2,r3,rdot12,rdot13,rdot23,recip,reta
  real(dp) :: reta3m,rmagn,rsq,term,term1,term2,term3
  character(len=500) :: message
@@ -3032,11 +3032,11 @@ subroutine dfpt_ewalddqdq(dyewdqdq,gmet,my_natom,natom,qphon,rmet,sumg0,typat,uc
 !nr, ng affect convergence of sums (nr=3,ng=5 is not good enough):
 !scalars
  integer,parameter :: im=2,nng=10,nnr=6,re=1
- integer :: ia,ia0,ib,ierr,ig1,ig2,ig3,ii,i1,iq1,iq2,ir1,ir2,ir3,mu,my_comm_atom,newg,newr,ng,nr,nu
+ integer :: ia,ia0,ib,ierr,ig1,ig2,ig3,ii,iq1,iq2,ir1,ir2,ir3,mu,my_comm_atom,newg,newr,ng,nr,nu
  logical :: my_atmtab_allocated,paral_atom
- real(dp) :: arg,arga,argb,c1i,c1r,da1,da2,da3,delad,delag,delbd,delbg,derfc_arg
+ real(dp) :: arg,arga,argb,c1i,c1r,delad,delag,delbd,delbg,derfc_arg
  real(dp) :: direct,dot1,dot2,dot3,dotr1,dotr2,dotr3
- real(dp) :: eta,fac,fac2,fac8,fac2sqr,gdot12,gdot13,gdot23,gsq,gsqsq,gpqdq1,gpqdq2,gsum,gterms,g0term,norm1
+ real(dp) :: eta,fac,fac2,fac8,fac2sqr,gdot12,gdot13,gdot23,gsq,gsqsq,gpqdq1,gpqdq2,gterms,g0term,norm1
  real(dp) :: r1,r2,r3,rdot12,rdot13,rdot23,recip,reta
  real(dp) :: reta3m,rmagn,rsq,term,term1,term2,term3
  character(len=500) :: message

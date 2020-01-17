@@ -382,9 +382,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 !Local variables -------------------------
 !scalars
  integer,parameter :: timrev1=1,iout0=0,chksymbreak0=0
-#ifdef MR_DEV
- integer :: ia,ib,mu,nu
-#endif
  integer :: mpert,iout,iqpt,mqpt,nsym,ntypat,iq_ibz,iq_bz,ii,natom
  integer :: nqbz,option,plus,sumg0,irpt,irpt_new
  integer :: nprocs,my_rank,my_ierr,ierr
@@ -404,9 +401,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  real(dp),allocatable :: dyew(:,:,:,:,:),out_d2cart(:,:,:,:,:)
  real(dp),allocatable :: dynmatfull(:,:,:,:,:,:),dynmat_sr(:,:,:,:,:,:),dynmat_lr(:,:,:,:,:,:) ! for OmegaSRLR
  real(dp),allocatable :: wtq(:),wtq_folded(:),qbz(:,:)
-#ifdef MR_DEV
- real(dp),allocatable :: dist(:,:,:)
-#endif
 
 !******************************************************************
 
@@ -683,40 +677,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    end if
  end do
 
-!#ifdef MR_DEV
-!! Write the short-range ifc in case quadrupoles play a role
-!! if (abs(Ifc%dipdip)==1.and.any(qdrp_cart/=zero)) then
-!   ! Compute the distances between atoms
-!   ! dist(ia,ib,irpt) contains the distance from atom ia to atom ib in unit cell
-!   ! irpt.
-!   ABI_MALLOC(dist,(natom,natom,Ifc%nrpt))
-!   call dist9(ddb%acell,dist,gprim,natom,Ifc%nrpt,rcan,rprim,Ifc%rpt)
-!
-!   write(ab_out, '(a)' )'    '                            
-!   write(ab_out, '(a)' )' Short-range IFCs after removing dipole and quadrupole Ewald contributions '
-!   write(ab_out, '(a)' )' (not ordered by distance) '
-!   write(ab_out, '(a)' )' Start IFC writting... '
-!   do ia=1,natom
-!     write(ab_out,'(a,i4)' )' generic atom number',ia
-!     ii=0
-!     do ib=1, natom
-!       do irpt = 1, ifc%nrpt
-!         ii=ii+1
-!         write(ab_out, '(i8,a,i6,a,i8)' )ii,' interaction with atom',ib,' cell',irpt
-!         write(ab_out, '(a,es16.6)' )' with distance ', dist(ia,ib,irpt)
-!         do nu=1,3
-!           write(ab_out, '(1x,3f16.10)' ) (Ifc%atmfrc(mu,ia,nu,ib,irpt)*Ifc%wghatm(ia,ib,irpt)+tol10,mu=1,3)
-!         end do
-!         write(ab_out, '(a)' )'    '                            
-!       end do
-!     end do
-!     write(ab_out, '(a)' )'    '                            
-!   end do
-!   write(ab_out, '(a)' )' ...Finish IFC writting '
-!   ABI_FREE(dist)
-!! end if
-!#endif
-
  !write(std_out,*)"nrpt before filter:", ifc_tmp%nrpt, ", after: ", ifc%nrpt
  !do irpt=1,ifc%nrpt
  !  write(std_out,*)ifc%rpt(:,irpt), (ifc%wghatm(ii,ii,irpt), ii=1,natom)
@@ -856,7 +816,7 @@ subroutine ifc_init_fromFile(dielt,filename,Ifc,natom,ngqpt,nqshift,qshift,ucell
  ABI_ALLOCATE(zeff,(3,3,natom))
  ABI_ALLOCATE(qdrp_cart,(3,3,3,natom))
  iblok = ddb%get_dielt_zeff(ucell_ddb,1,1,0,dielt,zeff)
- iblok = ddb%get_quadrupoles(ucell_ddb,1,3,qdrp_cart)
+ iblok = ddb%get_quadrupoles(1,3,qdrp_cart)
 
  ! Try to get dielt, in case just the DDE are present
  if (iblok == 0) then

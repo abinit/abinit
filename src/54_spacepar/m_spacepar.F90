@@ -2526,7 +2526,6 @@ subroutine hartredq(cplex,gmet,gsqcut,mpi_enreg,nfft,ngfft,qdir,rhog,vqgradhart)
  real(dp) :: cutoff,gfact,gnorm,num
  real(dp), parameter :: piinv2= piinv*two
  real(dp),parameter :: tolfix=1.000000001e0_dp
- character(len=500) :: msg                   
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn2_distrib(:),ffti2_local(:)
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)

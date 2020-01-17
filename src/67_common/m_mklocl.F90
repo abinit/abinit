@@ -1336,7 +1336,6 @@ end subroutine vlocalstr
 !!  qphon(3)=wavevector of the phonon
 !!  ucvol=unit cell volume (Bohr**3).
 !!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
-!!  xred(3,natom)=reduced atomic coordinates
 !!
 !! OUTPUT
 !!  vpsp1dq(cplex*nfft)=q-gradient (at q=0) of the first-order local 
@@ -1365,7 +1364,7 @@ end subroutine vlocalstr
 
 subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,ph1d,qdir,qgrid,qphon,ucvol,vlspl,vpsp1dq,xred)
+& ntypat,n1,n2,n3,ph1d,qdir,qgrid,qphon,ucvol,vlspl,vpsp1dq)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1386,15 +1385,14 @@ subroutine dfpt_vlocaldq(atindx,cplex,gmet,gsqcut,idir,ipert,&
  integer,intent(in) :: atindx(natom),nattyp(ntypat),ngfft(18)
  real(dp),intent(in) :: gmet(3,3),ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
  real(dp),intent(in) :: qgrid(mqgrid),qphon(3),vlspl(mqgrid,2,ntypat)
- real(dp),intent(in) :: xred(3,natom)
  real(dp),intent(out) :: vpsp1dq(cplex*nfft)
 
 !Local variables -------------------------
 !scalars
  integer :: i1,i2,i3,ia1,iatom,id1,id2,id3,ig1,ig2,ig3,ii,ii1,im=2
- integer :: itypat,jj,re=1
+ integer :: itypat,re=1
  real(dp),parameter :: tolfix=1.000000001_dp
- real(dp) :: aa,bb,cc,cutoff,dd,diff,gfact,gmag,gq1
+ real(dp) :: cutoff,gfact,gmag,gq1
  real(dp) :: gq2,gq3,gsquar
  real(dp) :: sfi,sfr,xnorm
  logical :: qeq0
@@ -1677,7 +1675,6 @@ end subroutine dfpt_vlocaldq
 !!  qphon(3)=wavevector of the phonon
 !!  ucvol=unit cell volume (Bohr**3).
 !!  vlspl(mqgrid,2,ntypat)=spline fit of q^2 V(q) for each type of atom.
-!!  xred(3,natom)=reduced atomic coordinates
 !!
 !! OUTPUT
 !!  vpsp1dqdq(cplex*nfft)=2nd q-gradient (at q=0) of the first-order local 
@@ -1708,7 +1705,7 @@ end subroutine dfpt_vlocaldq
 
 subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
 & mpi_enreg,mqgrid,natom,nattyp,nfft,ngfft,&
-& ntypat,n1,n2,n3,ph1d,qdir1,qdir2,qgrid,qphon,ucvol,vlspl,vpsp1dqdq,xred)
+& ntypat,n1,n2,n3,ph1d,qdir1,qdir2,qgrid,qphon,ucvol,vlspl,vpsp1dqdq)
 
 
 !This section has been created automatically by the script Abilint (TD).
@@ -1729,16 +1726,15 @@ subroutine dfpt_vlocaldqdq(atindx,cplex,gmet,gsqcut,idir,ipert,&
  integer,intent(in) :: atindx(natom),nattyp(ntypat),ngfft(18)
  real(dp),intent(in) :: gmet(3,3),ph1d(2,(2*n1+1+2*n2+1+2*n3+1)*natom)
  real(dp),intent(in) :: qgrid(mqgrid),qphon(3),vlspl(mqgrid,2,ntypat)
- real(dp),intent(in) :: xred(3,natom)
  real(dp),intent(out) :: vpsp1dqdq(cplex*nfft)
 
 !Local variables -------------------------
 !scalars
  integer :: alpha, delta, gamma
  integer :: i1,i2,i3,ia1,iatom,id1,id2,id3,ig1,ig2,ig3,ii,ii1,im=2
- integer :: itypat,jj,re=1
+ integer :: itypat,re=1
  real(dp),parameter :: tolfix=1.000000001_dp
- real(dp) :: aa,bb,cc,cutoff,dd,delad,delag,diff,gfact,gfact1,gfact2,gmag,gq1
+ real(dp) :: cutoff,delad,delag,gfact,gfact1,gfact2,gmag,gq1
  real(dp) :: gq2,gq3,gsquar
  real(dp) :: sfi,sfr,term1,term2,xnorm
  logical :: qeq0
@@ -2111,7 +2107,7 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
  integer :: ia,i1,i2,i3,ia1,ia2,id1,id2,id3,ig1,ig2,ig3,ii,ii1,im=2
  integer :: itypat,re=1
  real(dp),parameter :: tolfix=1.000000001_dp
- real(dp) :: cutoff,dd,delbd,delbg,deldg,gfact,gmag,gq1
+ real(dp) :: cutoff,delbd,delbg,deldg,gfact,gmag,gq1
  real(dp) :: gq2,gq3,gsquar,pisqrinv
  real(dp) :: sfi,sfr,term1,term2,uogsquar,work1re,xnorm
  logical :: qeq0

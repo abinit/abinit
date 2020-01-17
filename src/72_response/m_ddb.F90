@@ -1180,7 +1180,7 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
  integer,parameter :: msppol=2,mtyplo=6
  integer :: iblok,isym
  integer :: nsize,timrev
- integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,npert
+ integer :: i1dir,i1pert,i2dir,i2pert,i3dir,i3pert
  real(dp),parameter :: tolsym8=tol8
  character(len=500) :: message
  type(ddb_hdr_type) :: ddb_hdr
@@ -2577,7 +2577,6 @@ end function ddb_get_dielt
 !!
 !! INPUTS
 !!  ddb<type(ddb_type)>=Derivative database.
-!!  Crystal<type(crystal_t)>=Crystal structure parameters
 !!  lwsym  = 0 do not symmetrize the tensor wrt efield and qvec derivative 
 !!             |-> 1st gradient of polarization response to atomic displacement
 !!         = 1 symmetrize the tensor wrt efield and qvec derivative 
@@ -2600,20 +2599,17 @@ end function ddb_get_dielt
 !!
 !! SOURCE
 
-integer function ddb_get_quadrupoles(ddb, crystal, lwsym,rftyp, quadrupoles) result(iblok)
+integer function ddb_get_quadrupoles(ddb, lwsym,rftyp, quadrupoles) result(iblok)
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: lwsym,rftyp
  class(ddb_type),intent(in) :: ddb
- type(crystal_t),intent(in) :: crystal
 !arrays
  real(dp),intent(out) :: quadrupoles(3,3,3,ddb%natom)
 
 !Local variables -------------------------
 !scalars
- integer :: ii 
- integer :: quad_unt
  character(len=500) :: msg
 !arrays
  integer :: rfelfd(4),rfphon(4),rfstrs(4)
@@ -2641,9 +2637,9 @@ integer function ddb_get_quadrupoles(ddb, crystal, lwsym,rftyp, quadrupoles) res
    call wrtout(std_out, msg,'COLL')
 
    if (lwsym==1) then
-     write(msg, '(3a)' ) ch10, ' Dynamical Quadrupoles Tensor (units: e·Bohr)',ch10
+     write(msg, '(3a)' ) ch10, ' Dynamical Quadrupoles Tensor (units: e Bohr)',ch10
    else if (lwsym==0) then
-     write(msg, '(3a)' ) ch10,' First moment of Polarization induced by atomic displacement (1/ucvol factor not included) (units: e·Bohr) ',ch10
+     write(msg, '(3a)' ) ch10,' First moment of Polarization induced by atomic displacement (1/ucvol factor not included) (units: e Bohr) ',ch10
    endif
    call wrtout([std_out, ab_out], msg,'COLL')
 
@@ -4236,7 +4232,6 @@ subroutine dfpt_lw_doutput(blkflg,d3,mpert,natom,ntypat,unddb)
 !Local variables -------------------------
 !scalars
  integer :: idir1,idir2,idir3,ii,index,ipert1,ipert2,ipert3,msize,nelmts
- character(len=500) :: message
  type(ddb_type) :: ddb
 
 !*************************************************************************

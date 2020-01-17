@@ -758,8 +758,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 #ifdef MR_DEV
    case(RUNL_LONGWAVE)
 
-     call longwave(codvsn,dtfil,dtset,etotal,iexit,mpi_enregs(idtset),npwtot,occ,&
-&     pawang,pawrad,pawtab,psps,xred)
+     call longwave(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,&
+&     pawrad,pawtab,psps,xred)
 #endif
 
    case default

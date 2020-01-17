@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_lwwf
 !! NAME
 !!  m_dfpt_lwwf
@@ -210,7 +209,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 !scalars
  integer :: berryopt,iatpert,iband,idir,idirq1,idirq2,ii,ipert
  integer :: iq1grad,iq2grad,iq1q2grad
- integer :: jband,nkpg,npw_disk,nq2grad_3d,sij_opt,opt_gvnl1,optlocal,optnl
+ integer :: jband,nkpg,nkpg1,npw_disk,nq2grad_3d,sij_opt,opt_gvnl1,optlocal,optnl
  integer :: tim_getgh1c,usevnl
  integer :: useylmgr1
  real(dp) :: cprodi,cprodr,doti,dotr,dum_lambda
@@ -304,7 +303,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
    kpt,kpt,idir,ipert,dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&    ! In
    npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,dum_ylmgr1_k,&                     ! In
-   dkinpw,nkpg,nkpg,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
+   dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
 
    !LOOP OVER KET BANDS
    do iband=1,nband_k
@@ -395,7 +394,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
    kpt,kpt,idir,ipert,dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&    ! In
    npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,dum_ylmgr1_k,&                     ! In
-   dkinpw,nkpg,nkpg,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
+   dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
 
    !LOOP OVER KET BANDS
    do iband=1,nband_k
@@ -564,7 +563,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
    kpt,kpt,idir,ipert,dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&    ! In
    npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,ylmgr_k,&                          ! In
-   dkinpw,nkpg,nkpg,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
+   dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
 
    !LOOP OVER BANDS
    do iband=1,nband_k
@@ -777,7 +776,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
      &  psps%mqgrid_vl,dtset%natom,&
      &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3), &
      &  ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
-     &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq,xred)
+     &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq)
 
 
      !Set up q-gradient of local potential vlocal1dq with proper dimensioning
@@ -792,7 +791,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,q1grad(2,iq1grad), &
    & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
-   & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
+   & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
 
      !LOOP OVER BANDS
      do iband=1,nband_k
@@ -1999,9 +1998,9 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
 !Local variables-------------------------------
 !scalars
  integer :: berryopt,iatpert,iband,idir,ii,ipert,iq1grad
- integer :: jatpert,jband,jdir,jpert,nkpg,npw_disk,nylmgreff
+ integer :: jatpert,jband,jdir,jpert,nkpg,nkpg1,npw_disk,nylmgreff
  integer :: opt_gvnl1,optlocal,optnl,sij_opt,tim_getgh1c,usevnl,useylmgr1
- real(dp) :: cprodi,cprodr,cpu,doti,dotr,dum_lambda,gflops,wall
+ real(dp) :: cprodi,cprodr,doti,dotr,dum_lambda
  character(len=500) :: msg                   
  type(pawfgr_type) :: pawfgr
  type(rf_hamiltonian_type) :: rf_hamkq
@@ -2086,7 +2085,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
    kpt,kpt,idir,ipert,dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&    ! In
    npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,dum_ylmgr1_k,&                     ! In
-   dkinpw,nkpg,nkpg,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
+   dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
 
    !LOOP OVER KET BANDS
    do iband=1,nband_k
@@ -2216,7 +2215,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
    kpt,kpt,idir,ipert,dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&    ! In
    npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,part_ylmgr_k,&                    ! In
-   dkinpw,nkpg,nkpg,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
+   dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
 
    !LOOP OVER BANDS
    do iband=1,nband_k
@@ -2359,7 +2358,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
      &  psps%mqgrid_vl,dtset%natom,&
      &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3), &
      &  ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
-     &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq,xred)
+     &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq)
 
      !Set up q-gradient of local potential vlocal1dq with proper dimensioning
      call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
@@ -2373,7 +2372,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,jdir,jpert,q1grad(2,iq1grad), &
    & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgreff,useylmgr1,kg_k, &
-   & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
+   & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
 
      !LOOP OVER BANDS
      do iband=1,nband_k
@@ -2845,7 +2844,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    call getgh1c_setup(gs_hamkq,rf_hamkq,dtset,psps,&                              ! In
    kpt,kpt,idir,ipert,dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,&    ! In
    npw_k,npw_k,useylmgr1,kg_k,ylm_k,kg_k,ylm_k,dum_ylmgr1_k,&                     ! In
-   dkinpw,nkpg,nkpg,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
+   dkinpw,nkpg,nkpg1,kpg_k,kpg1_k,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)                   ! Out
 
    !LOOP OVER KET BANDS
    do iband=1,nband_k
@@ -3313,7 +3312,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
      &  psps%mqgrid_vl,dtset%natom,&
      &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3), &
      &  ph1d,q1grad(2,iq1grad),psps%qgrid_vl,&
-     &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq,xred)
+     &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq)
 
      !Set up q-gradient of local potential vlocal1dq with proper dimensioning
      call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
@@ -3327,7 +3326,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,q1grad(2,iq1grad), &
    & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrpart,useylmgr1,kg_k, &
-   & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
+   & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
 
      !LOOP OVER BANDS
      do iband=1,nband_k
@@ -3513,7 +3512,6 @@ end subroutine dfpt_isdqwf
 !!  gsqcut=large sphere cut-off
 !!  icg=shift to be applied on the location of data in the array cg
 !!  ikpt=number of the k-point
-!!  indkpt1(nkpt_rbz)=non-symmetrized indices of the k-points
 !!  isppol=1 for unpolarized, 2 for spin-polarized
 !!  istwf_k=parameter that describes the storage of wfs
 !!  kg_k(3,npw_k)=reduced planewave coordinates.
@@ -3539,7 +3537,6 @@ end subroutine dfpt_isdqwf
 !!  pert_strain(6,nstrpert)=array with the info for the strain perturbations
 !!  ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)=1-dimensional phases
 !!  psps <type(pseudopotential_type)>=variables related to pseudopotentials
-!!  q1grad(3,nq1grad)=array with the info for the q1 (q_{\gamma}) gradients
 !!  rmet(3,3)=real space metric (bohr**2)
 !!  ucvol=unit cell volume in bohr**3.
 !!  useylmgr= if 1 use the derivative of spherical harmonics
@@ -3566,10 +3563,10 @@ end subroutine dfpt_isdqwf
 !!
 !! SOURCE
            
-subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,indkpt1,&
+subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
        &  isppol,istwf_k,kg_k,kpt,mkmem,mpi_enreg,matom,mpw,natpert,nattyp,nband_k,nfft,&
        &  ngfft,nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
-       &  pert_strain,ph1d,psps,q1grad,rmet,ucvol,useylmgr,wtk_k,xred,ylm_k,ylmgr_k)
+       &  pert_strain,ph1d,psps,rmet,ucvol,useylmgr,wtk_k,xred,ylm_k,ylmgr_k)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3593,9 +3590,8 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 
 !arrays
  integer,intent(in) :: atindx(dtset%natom)
- integer,intent(in) :: indkpt1(nkpt_rbz),kg_k(3,npw_k),nattyp(dtset%ntypat),ngfft(18)
+ integer,intent(in) :: kg_k(3,npw_k),nattyp(dtset%ntypat),ngfft(18)
  integer,intent(in) :: pert_atdis(3,natpert),pert_strain(6,nstrpert)
- integer,intent(in) :: q1grad(3,nq1grad)
  real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband*mkmem*nsppol)
  real(dp),intent(out) :: frwfdq_k(2,matom,3,3,3,nq1grad)
  real(dp),intent(in) :: kpt(3),occ_k(nband_k)
@@ -3607,9 +3603,9 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
 
 !Local variables-------------------------------
 !scalars
- integer :: ia1,iatdir,iatom,iatpert,iband,idir,ii,ipert,ipw,iq1grad,iq2grad,istrpert,itypat,ka,kb
- integer :: nkpg,nylmgrpart,optlocal,optnl,tim_getgh1c,useylmgr1
- real(dp) :: doti,dotr,delad,delag,delbd,delbg,fac,frwfdq_g0
+ integer :: iatdir,iatom,iatpert,iband,idir,ipert,ipw,iq1grad,iq2grad,istrpert,ka,kb
+ integer :: nkpg,nkpg1,nylmgrpart,optlocal,optnl,tim_getgh1c,useylmgr1
+ real(dp) :: doti,dotr
  type(pawfgr_type) :: pawfgr
  type(rf_hamiltonian_type) :: rf_hamkq
 
@@ -3623,7 +3619,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
  real(dp),allocatable :: c0_ghatdisdqdq_pk_c0(:,:,:,:,:,:)
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg1_k(:,:),kpg_pk(:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1dq(:,:,:,:), dum_vpsp(:)
- real(dp),allocatable :: vpsp1(:),vpsp1dq(:), dum_ylmgr1_k(:,:,:),part_ylmgr_k(:,:,:)
+ real(dp),allocatable :: vpsp1(:),vpsp1dq(:),part_ylmgr_k(:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
 
 
@@ -3673,7 +3669,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
      &  psps%mqgrid_vl,dtset%natom,&
      &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3), &
      &  ph1d,iq1grad,psps%qgrid_vl,&
-     &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq,xred)
+     &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq)
 
      !Set up q-gradient of local potential vlocal1dq with proper dimensioning
      call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
@@ -3687,7 +3683,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
      !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
      call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,iq1grad, &
    & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgrpart,useylmgr1,kg_k, &
-   & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
+   & ylm_k,kg_k,ylm_k,part_ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1)   
 
      !LOOP OVER BANDS
      do iband=1,nband_k
@@ -3730,7 +3726,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
  ABI_DEALLOCATE(part_ylmgr_k)
 
 !-----------------------------------------------------------------------------------------------
-!  2nd q-gradient of atomic displacement 1st order hamiltonian · momentum operator : 
+!  2nd q-gradient of atomic displacement 1st order hamiltonian * momentum operator : 
 !  <u_{i,k}^{(0)} | H^{\tau_{\kappa\alpha}}_{\gamma\delta} (k+G)_{\beta} | u_{i,k}^{(0)} >
 !-----------------------------------------------------------------------------------------------
 
@@ -3759,7 +3755,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
        &  psps%mqgrid_vl,dtset%natom,&
        &  nattyp,nfft,ngfft,dtset%ntypat,ngfft(1),ngfft(2),ngfft(3), &
        &  ph1d,iq1grad,iq2grad,psps%qgrid_vl,&
-       &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq,xred)
+       &  dtset%qptn,ucvol,psps%vlspl,vpsp1dq)
 
        !Set up q-gradient of local potential vlocal1dq with proper dimensioning
        call rf_transgrid_and_pack(isppol,nspden,psps%usepaw,2,nfft,dtset%nfft,dtset%ngfft,&
@@ -3773,7 +3769,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
        !Set up the ground-state Hamiltonian, and some parts of the 1st-order Hamiltonian
        call getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpt,kpt,idir,ipert,iq1grad, &
      & dtset%natom,rmet,gs_hamkq%gprimd,gs_hamkq%gmet,istwf_k,npw_k,npw_k,nylmgr,useylmgr1,kg_k, &
-     & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1, &
+     & ylm_k,kg_k,ylm_k,ylmgr_k,nkpg,nkpg1,kpg_k,kpg1_k,dkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1, &
      & qdir2=iq2grad)   
 
        !LOOP OVER BANDS
@@ -3862,7 +3858,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,i
          if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
 
          !First accumulate the term involving the 2nd q-gradient of atdis Hamiltonian:
-         !Take here into account the -i·(-i)^{\dagger} prefactors.
+         !Take here into account the -i*(-i)^{\dagger} prefactors.
          frwfdq_bks(1,iband,iatom,iatdir,ka,kb,iq1grad)=c0_ghatdisdqdq_pk_c0(1,iband,ka,iq1grad,kb,iatpert)
          frwfdq_bks(2,iband,iatom,iatdir,ka,kb,iq1grad)=-c0_ghatdisdqdq_pk_c0(2,iband,ka,iq1grad,kb,iatpert)
 

@@ -153,7 +153,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
    ! Extract the P^(1) tensor from the DDB
    if (.not.intstrn_only) then
      lwsym=0
-     iblok = ddb_lw%get_quadrupoles(crystal,lwsym,33,pol1)
+     iblok = ddb_lw%get_quadrupoles(lwsym,33,pol1)
    end if
 
    rfphon(:)=0
@@ -482,7 +482,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
 
 !Local variables -------------------------
 !scalars
- integer :: elfd,iat,iatd,ivar,jat,jatd,jvar,kat,katd,qvecd,qvecd2
+ integer :: elfd,iat,iatd,ivar,jat,jatd,jvar,katd,qvecd,qvecd2
  logical :: iwrite
  real(dp),parameter :: confac=e_Cb/Bohr_meter*1.d9
  character(len=500) :: msg
@@ -733,9 +733,9 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
  real(dp) :: sqrbkt_t1(3,3,3,3)
  real(dp) :: stress(3,3)
 
-!tmp
- integer :: i,j,k,l
- real(dp) :: delik,deljk,delil,deljl
+! MR: Kept for testing 
+! integer :: i,j,k,l
+! real(dp) :: delik,deljk,delil,deljl
 
 ! *********************************************************************
 
