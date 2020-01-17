@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Copyright (C) 1998-2019 ABINIT group (XG)
+# Copyright (C) 1998-2020 ABINIT group (XG)
 # 
 # The purpose of this script is to change the copyright year
 # in nearly all files in the ABINIT package. 
 # First you should reapply the present script without changing it, because it has been seen that some people bring
 # routines with erroneous date during a few months after the beginning of a new one ... !
 #
-# Then one should update the present script to put the current year (at present, valid for going from 2018 to 2019 !) !
+# Then one should update the present script to put the current year (at present, valid for going from 2019 to 2020 !) !
 #
 # Then should be called from the top directory  (here a list of generic filenames, ordered on the basis of the alphanumeric string)
 # developers/maintainers/change_year.sh *.ac */*.ac */*/*.am */*/*.bat */*/*/*.bat */*/*.c */*/*/*.c */*/*.cf */*/*.cnf */*/*.com */*/*.conf */*/*.cu */*/*.csh 
@@ -40,42 +40,12 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.yr*  
- sed -e 's&Copyright (c)&Copyright (C)&' $file > tmp.yrup
- sed -e 's&(C) 1987-2018 ABINIT&(C) 1987-2019 ABINIT&' tmp.yrup > tmp.yr87
- sed -e 's&(C) 1991-2018 ABINIT&(C) 1991-2019 ABINIT&' tmp.yr87 > tmp.yr91
- sed -e 's&(C) 1992-2018 ABINIT&(C) 1992-2019 ABINIT&' tmp.yr91 > tmp.yr92
- sed -e 's&(C) 1993-2018 ABINIT&(C) 1993-2019 ABINIT&' tmp.yr92 > tmp.yr93
- sed -e 's&(C) 1996-2018 ABINIT&(C) 1996-2019 ABINIT&' tmp.yr93 > tmp.yr96
- sed -e 's&(C) 1997-2018 ABINIT&(C) 1997-2019 ABINIT&' tmp.yr96 > tmp.yr97
- sed -e 's&(C) 1998-2018 ABINIT&(C) 1998-2019 ABINIT&' tmp.yr97 > tmp.yr98
- sed -e 's&(C) 1999-2018 ABINIT&(C) 1999-2019 ABINIT&' tmp.yr98 > tmp.yr99
- sed -e 's&(C) 2000-2018 ABINIT&(C) 2000-2019 ABINIT&' tmp.yr99 > tmp.yr00
- sed -e 's&(C) 2001-2018 ABINIT&(C) 2001-2019 ABINIT&' tmp.yr00 > tmp.yr01
- sed -e 's&(C) 2002-2018 ABINIT&(C) 2002-2019 ABINIT&' tmp.yr01 > tmp.yr02
- sed -e 's&(C) 2003-2018 ABINIT&(C) 2003-2019 ABINIT&' tmp.yr02 > tmp.yr03
- sed -e 's&(C) 2004-2018 ABINIT&(C) 2004-2019 ABINIT&' tmp.yr03 > tmp.yr04
- sed -e 's&(C) 2005-2018 ABINIT&(C) 2005-2019 ABINIT&' tmp.yr04 > tmp.yr05
- sed -e 's&(C) 2006-2018 ABINIT&(C) 2006-2019 ABINIT&' tmp.yr05 > tmp.yr06
- sed -e 's&(C) 2007-2018 ABINIT&(C) 2007-2019 ABINIT&' tmp.yr06 > tmp.yr07
- sed -e 's&(C) 2008-2018 ABINIT&(C) 2008-2019 ABINIT&' tmp.yr07 > tmp.yr08
- sed -e 's&(C) 2009-2018 ABINIT&(C) 2009-2019 ABINIT&' tmp.yr08 > tmp.yr09
- sed -e 's&(C) 2010-2018 ABINIT&(C) 2010-2019 ABINIT&' tmp.yr09 > tmp.yr10
- sed -e 's&(C) 2011-2018 ABINIT&(C) 2011-2019 ABINIT&' tmp.yr10 > tmp.yr11
- sed -e 's&(C) 2012-2018 ABINIT&(C) 2012-2019 ABINIT&' tmp.yr11 > tmp.yr12
- sed -e 's&(C) 2013-2018 ABINIT&(C) 2013-2019 ABINIT&' tmp.yr12 > tmp.yr13
- sed -e 's&(C) 2014-2018 ABINIT&(C) 2014-2019 ABINIT&' tmp.yr13 > tmp.yr14
- sed -e 's&(C) 2015-2018 ABINIT&(C) 2015-2019 ABINIT&' tmp.yr14 > tmp.yr15
- sed -e 's&(C) 2016-2018 ABINIT&(C) 2016-2019 ABINIT&' tmp.yr15 > tmp.yr16
- sed -e 's&(C) 2017-2018 ABINIT&(C) 2017-2019 ABINIT&' tmp.yr16 > tmp.yr17
-#The next lines are both needed, as some developers decide to use one, and some the other ...
- sed -e 's&(C) 2018-2018 ABINIT&(C) 2018-2019 ABINIT&' tmp.yr17 > tmp.yr18
- sed -e 's&(C) 2018 ABINIT&(C) 2018-2019 ABINIT&' tmp.yr18 > tmp.yr
- echo "changes done "
- # put the modified file at the correct place
- mv tmp.yr $file
- echo "file $file written "
+ sed -i 's&Copyright (c)&Copyright (C)&' $file 
+ sed -i 's&(C) ....-2019 ABINIT&(C) \1\2\3\4-2020 ABINIT&' $file
+#The next line is also needed, as some developers decide to use this syntax, and some the other ...
+ sed -i 's&(C) 2019 ABINIT&(C) 2019-2020 ABINIT&' $file
+ echo "file $file treated "
 done
-rm -f tmp.yr*  
 #chmod 755 */*/*.sh */*/*.py */*/*.pl */*/*.com config/*/make* developers/*/make*  */config/scripts/* */*.sh
 # Please do not change the permission of py files. Not all py modules must be executable!
 chmod 755 */*/*.sh */*/*.pl config/*/make* */config/scripts/* */*.sh
