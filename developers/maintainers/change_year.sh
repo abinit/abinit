@@ -13,7 +13,7 @@
 # developers/maintainers/change_year.sh */*/*.dep */*/*.dir */*.env */*/*.finc */*/*.f90 */*/*.F90 */*/*/*.F90 *.in */*.in */*/*.in 
 # developers/maintainers/change_year.sh */*/*.h */*/*.help */*/*/*.help */*/*.html */*/*/*/html */*/*/*.log */*/*.m */*/*/*.m */*/make* 
 # developers/maintainers/change_year.sh */*/*.mk */*/*.m4 */*/*/*.m4 */*/Makefile */*/*/*.out */*/*.pl */*/*/*.pl bindings/README fallbacks/README tests/README */*/README 
-# developers/maintainers/change_year.sh */*/*.sav */*.sh */*/*.src */*/*/*.stdout */*/*.tex */*/*/*.tex */*/*.txt */*/*_ 
+# developers/maintainers/change_year.sh */*/*.sav */*.sh */*/*.src */*/*/*.stdout */*/*.tex */*/*/*.tex */*/*.txt */*/*_ */*/*_ext
 
 # Please do not change the permission of py files. Not all py modules must be executable! 
 # Simply issue the in-place command
