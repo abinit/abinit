@@ -29,6 +29,9 @@ module m_hightemp_top
   use m_pawcprj
   use m_xmpi
   use m_hamiltonian,    only : gs_hamiltonian_type
+  use m_geometry,       only : metric
+  use m_gsphere,        only : getkpgnorm
+  use m_kg,             only : kpgio
 
   implicit none
 
@@ -52,7 +55,8 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_prt_cg(cg_k,ecut,exchn2n3d,istwfk,kpt,mpi_enreg,mpw,nband,nkpt,npwarr,nsppol,rprimd)
+  subroutine hightemp_prt_cg(ecut,exchn2n3d,istwfk,kpt,&
+  & mpi_enreg,mpw,nband,nkpt,npwarr,nsppol,rprimd)
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: mpw,nkpt,nsppol,exchn2n3d
@@ -79,77 +83,78 @@ contains
     call metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
     ABI_ALLOCATE(kg,(3,mpw*nkpt))
 
-    ! PENSER A LA BOUCLE SUR LES KPOINTS
+    do ckpt=1,nkpt
+      ! PENSER A LA BOUCLE SUR LES KPOINTS
 
-    npw_k=npwarr(ckpt)
-    ABI_ALLOCATE(kg_k,(3,npw_k))
-    ABI_ALLOCATE(kpgnorm,(npw_k))
-    ABI_ALLOCATE(npwarr1,(nkpt))
-    ABI_ALLOCATE(npwtot1,(nkpt))
-    mkmem=nkpt
+      npw_k=npwarr(ckpt)
+      ABI_ALLOCATE(kg_k,(3,npw_k))
+      ABI_ALLOCATE(kpgnorm,(npw_k))
+      ABI_ALLOCATE(npwarr1,(nkpt))
+      ABI_ALLOCATE(npwtot1,(nkpt))
+      mkmem=nkpt
 
-    ! S'OCCUPER DE CA !!!
-    !    Create positions index for pw
-    call kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kpt,mkmem,nband,nkpt,&
-    & mode_paral,mpi_enreg,mpw,npwarr1,npwtot1,nsppol)
+      ! S'OCCUPER DE CA !!!
+      !    Create positions index for pw
+      call kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kpt,mkmem,nband,nkpt,&
+      & mode_paral,mpi_enreg,mpw,npwarr1,npwtot1,nsppol)
 
-    ioffkg=0
-    do ikpt=1,ckpt-1
-      ioffkg=ioffkg+npwarr1(mkmem)
+      ioffkg=0
+      do ikpt=1,ckpt-1
+        ioffkg=ioffkg+npwarr1(mkmem)
+      end do
+      kg_k(:,1:npw_k)=kg(:,1+ioffkg:npw_k+ioffkg)
+      call getkpgnorm(gprimd,kpt(:,ckpt),kg_k,kpgnorm,npw_k)
+
+
+      ABI_ALLOCATE(tempwfk,(mpw, 3))
+      ABI_ALLOCATE(buf,(2))
+      write(std_out,*) nband(ckpt)
+      do iband=1, nband(ckpt)
+        tempwfk(:,:) = 0_DP
+        cgshift=(iband-1)*npw_k
+        do ipw=1, npw_k
+          tempwfk(ipw,2) = ABS(dcmplx(cg_k(1,cgshift+ipw), cg_k(2,cgshift+ipw)))
+          ! Hartree to eV * Kinetic energy of the pw
+          tempwfk(ipw,1) = 27.2114*(2*pi*kpgnorm(ipw))**2/2.
+          tempwfk(ipw,3) = ipw
+        end do
+
+        ! Sorting in energies
+        do ipw=1, npw_k
+          krow = minloc(tempwfk(ipw:npw_k, 1), dim=1) + ipw - 1
+          buf(:) = tempwfk(ipw, :)
+          tempwfk(ipw, :) = tempwfk(krow, :)
+          tempwfk(krow, :) = buf(:)
+        end do
+
+        ! Normalization constant
+        tot_cgsum = sum(tempwfk(:,2))
+
+        write(filenameoutpw, '(A,I4.4,A,I4.4)') 'outpw_k', ckpt, '_b', iband
+        open(file=filenameoutpw, unit=23)
+
+        ! do ipw = 1, npw_k
+        !    write(23,*) tempwfk(ipw-1, 1), tempwfk(ipw,2), 1, tempwfk(ipw-1, 3)
+        ! end do
+
+        ! Degenerescence in energies
+        incrdegcg = 1
+        energmin = tempwfk(1,1)
+        cgsum = tempwfk(1,2)
+        do ipw=2, npw_k
+          if (abs(tempwfk(ipw,1)-energmin) .LE. 1E-10) then
+             cgsum = cgsum + tempwfk(ipw,2)
+             incrdegcg = incrdegcg + 1
+          else
+             write(23,*) tempwfk(ipw-1, 1), cgsum/tot_cgsum, incrdegcg, tempwfk(ipw-1, 3)
+             energmin = tempwfk(ipw, 1)
+             cgsum = tempwfk(ipw,2)
+             incrdegcg = 1
+          end if
+        end do
+        close(23)
+      end do
     end do
-    kg_k(:,1:npw_k)=kg(:,1+ioffkg:npw_k+ioffkg)
-    call getkpgnorm(gprimd,kpt(:,ckpt),kg_k,kpgnorm,npw_k)
-
-
-    ABI_ALLOCATE(tempwfk,(mpw, 3))
-    ABI_ALLOCATE(buf,(2))
-    write(std_out,*) nband(ckpt)
-    do iband=1, nband(ckpt)
-      tempwfk(:,:) = 0_DP
-      cgshift=(iband-1)*npw_k
-      do ipw=1, npw_k
-        tempwfk(ipw,2) = ABS(dcmplx(cg_k(1,cgshift+ipw), cg_k(2,cgshift+ipw)))
-        ! Hartree to eV * Kinetic energy of the pw
-        tempwfk(ipw,1) = 27.2114*(2*pi*kpgnorm(ipw))**2/2.
-        tempwfk(ipw,3) = ipw
-      end do
-
-      ! Sorting in energies
-      do ipw=1, npw_k
-        krow = minloc(tempwfk(ipw:npw_k, 1), dim=1) + ipw - 1
-        buf(:) = tempwfk(ipw, :)
-        tempwfk(ipw, :) = tempwfk(krow, :)
-        tempwfk(krow, :) = buf(:)
-      end do
-
-      ! Normalization constant
-      tot_cgsum = sum(tempwfk(:,2))
-
-      write(filenameoutpw, '(A,I4.4,A,I4.4)') 'outpw_k', ckpt, '_b', iband
-      open(file=filenameoutpw, unit=23)
-
-      ! do ipw = 1, npw_k
-      !    write(23,*) tempwfk(ipw-1, 1), tempwfk(ipw,2), 1, tempwfk(ipw-1, 3)
-      ! end do
-
-      ! Degenerescence in energies
-      incrdegcg = 1
-      energmin = tempwfk(1,1)
-      cgsum = tempwfk(1,2)
-      do ipw=2, npw_k
-        if (abs(tempwfk(ipw,1)-energmin) .LE. 1E-10) then
-           cgsum = cgsum + tempwfk(ipw,2)
-           incrdegcg = incrdegcg + 1
-        else
-           write(23,*) tempwfk(ipw-1, 1), cgsum/tot_cgsum, incrdegcg, tempwfk(ipw-1, 3)
-           energmin = tempwfk(ipw, 1)
-           cgsum = tempwfk(ipw,2)
-           incrdegcg = 1
-        end if
-      end do
-      close(23)
-    end do
-
   end subroutine hightemp_prt_cg
 
   !!****f* ABINIT/m_hightemp/hightemp_prt_cprj
@@ -169,7 +174,8 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_prt_cprj(cprj,eigen,gs_hamk,istep,mband,mcprj,mpi_enreg,natom,nkpt,nsppol,occ)
+  subroutine hightemp_prt_cprj(cprj,eigen,gs_hamk,istep,mband,&
+  & mcprj,mpi_enreg,natom,nkpt,nsppol,occ)
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: istep,mband,mcprj,natom,nkpt,nsppol
