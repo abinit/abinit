@@ -41,7 +41,12 @@ do
  echo "working on $file"
  rm -f tmp.yr*  
  sed -i 's&Copyright (c)&Copyright (C)&' $file 
- sed -i 's&(C) ....-2019 ABINIT&(C) \1\2\3\4-2020 ABINIT&' $file
+#The primitive command was
+#sed -i 's&(C) 2018-2019 ABINIT&(C) 2018-2020 ABINIT&' $file
+#for different values replacing 2018 
+#The following uses a regexp. One should change the two last digits of the year.
+ sed -i 's&\((C) ....-20\)19\( ABINIT\)&\120\2&' $file
+#sed -i 's&(C) ....-2019 ABINIT&(C) \1\2\3\4-2020 ABINIT&' $file
 #The next line is also needed, as some developers decide to use this syntax, and some the other ...
  sed -i 's&(C) 2019 ABINIT&(C) 2019-2020 ABINIT&' $file
  echo "file $file treated "
