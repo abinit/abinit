@@ -2639,7 +2639,8 @@ integer function ddb_get_quadrupoles(ddb, lwsym,rftyp, quadrupoles) result(iblok
    if (lwsym==1) then
      write(msg, '(3a)' ) ch10, ' Dynamical Quadrupoles Tensor (units: e Bohr)',ch10
    else if (lwsym==0) then
-     write(msg, '(3a)' ) ch10,' First moment of Polarization induced by atomic displacement (1/ucvol factor not included) (units: e Bohr) ',ch10
+     write(msg, '(3a)' ) ch10, &
+   & ' First moment of Polarization induced by atomic displacement (1/ucvol factor not included) (units: e Bohr) ',ch10
    endif
    call wrtout([std_out, ab_out], msg,'COLL')
 
@@ -4509,7 +4510,8 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
        call wrtout([ab_out,std_out],msg,'COLL')
      end do
    else if (lwsym==0) then
-     write(msg,*)' atom   dir       Pxx         Pyy         Pzz         Pyz         Pxz         Pxy         Pzy         Pzx         Pyx'
+     write(msg,*) &
+   & ' atom   dir       Pxx         Pyy         Pzz         Pyz         Pxz         Pxy         Pzy         Pzx         Pyx'
      call wrtout([ab_out,std_out],msg,'COLL')
      do iatom= 1, natom
        write(msg,'(2x,i3,3x,a3,2x,9f12.6)') iatom, 'x',lwtens(1,1,1,iatom),lwtens(2,2,1,iatom),lwtens(3,3,1,iatom), &

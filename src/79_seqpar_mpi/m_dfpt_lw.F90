@@ -2204,9 +2204,12 @@ end if
        
          call dotprod_vn(2,rhor1_tmp,dotr,doti,nfft,nfftot,nspden,2,vqgradhart,ucvol)
 
-         isdq_qgradhart(re,pert_atdis(1,iatpert),pert_atdis(2,iatpert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=dotr*half
-         isdq_qgradhart(im,pert_atdis(1,iatpert),pert_atdis(2,iatpert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=doti*half
-         isdq_flg(pert_atdis(1,iatpert),pert_atdis(2,iatpert),q1grad(2,iq1grad),pert_strain(3,istrpert),pert_strain(4,istrpert))=1
+         isdq_qgradhart(re,pert_atdis(1,iatpert),pert_atdis(2,iatpert),q1grad(2,iq1grad), &
+       & pert_strain(3,istrpert),pert_strain(4,istrpert))=dotr*half
+         isdq_qgradhart(im,pert_atdis(1,iatpert),pert_atdis(2,iatpert),q1grad(2,iq1grad), &
+       & pert_strain(3,istrpert),pert_strain(4,istrpert))=doti*half
+         isdq_flg(pert_atdis(1,iatpert),pert_atdis(2,iatpert),q1grad(2,iq1grad), &
+       & pert_strain(3,istrpert),pert_strain(4,istrpert))=1
 
          blkflg(pert_atdis(2,iatpert),pert_atdis(1,iatpert), &
        &        pert_strain(2,istrpert),pert_strain(1,istrpert), &
