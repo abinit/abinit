@@ -7,7 +7,7 @@
 !! and also includes the computation of integrated atomic charge and magnetization, as well as Hirshfeld charges.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (MT,ILuk,MVer,EB,SPr)
+!! Copyright (C) 1998-2020 ABINIT group (MT,ILuk,MVer,EB,SPr)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

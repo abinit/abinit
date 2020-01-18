@@ -6,7 +6,7 @@
 !!  This module provides tools for the computation of the irreducible polarizability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (MG, FB)
+!! Copyright (C) 1999-2020 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

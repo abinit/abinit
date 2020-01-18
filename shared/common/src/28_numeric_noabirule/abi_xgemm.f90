@@ -15,7 +15,7 @@
 !! *  an m by k matrix,  op( B )  a  k by n matrix and  C an m by n matrix.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2019 ABINIT group (LNguyen,FDahm (CS))
+!!  Copyright (C) 2001-2020 ABINIT group (LNguyen,FDahm (CS))
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
