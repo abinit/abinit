@@ -1,5 +1,5 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Dec 2019.
-- ( at 17h32 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h45 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/paral_t56_MPI1/t56.in
 - output file    -> t56_MPI1.out
@@ -488,7 +488,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     311.000     311.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  13.682E-17
+ Mean square residual over all n,k,spin=   19.262E-18; max=  13.682E-17
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -770,26 +770,26 @@ P          mk1mem2         16
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   1.680  43.6      1.687  41.8          12662      -1.00        1.00       1.00
-- projbd                         0.392  10.2      0.395   9.8          20332      -1.00        0.99       0.99
-- pspini                         0.354   9.2      0.355   8.8              2      -1.00        1.00       1.00
+- fourwf%(pot)                   1.675  43.5      1.679  41.5          12662      -1.00        1.00       1.00
+- projbd                         0.394  10.2      0.396   9.8          20332      -1.00        1.00       1.00
+- pspini                         0.354   9.2      0.356   8.8              2      -1.00        1.00       1.00
 - nonlop(apply)                  0.284   7.4      0.286   7.1          10934      -1.00        0.99       0.99
-- fourwf%(G->r)                  0.191   5.0      0.192   4.8           2728      -1.00        1.00       1.00
-- nonlop(forces)                 0.095   2.5      0.095   2.4           2160      -1.00        1.00       1.00
-- getghc-other                   0.066   1.7      0.060   1.5             -1      -1.00        1.10       1.10
-- dfpt_vtowfk(contrib)           0.057   1.5      0.057   1.4             -1      -1.00        1.00       1.00
+- fourwf%(G->r)                  0.192   5.0      0.193   4.8           2728      -1.00        0.99       0.99
+- nonlop(forces)                 0.094   2.4      0.094   2.3           2160      -1.00        0.99       0.99
+- getghc-other                   0.066   1.7      0.061   1.5             -1      -1.00        1.08       1.08
+- dfpt_vtowfk(contrib)           0.056   1.4      0.055   1.4             -1      -1.00        1.01       1.01
 - invars2                        0.050   1.3      0.051   1.3              2      -1.00        0.98       0.98
-- fourwf%(den)                   0.049   1.3      0.049   1.2            670      -1.00        0.99       0.99
+- fourwf%(den)                   0.049   1.3      0.050   1.2            670      -1.00        0.99       0.99
 - xc:pot/=fourdp                 0.040   1.0      0.040   1.0             53      -1.00        1.00       1.00
 - vtowfk(ssdiag)                 0.033   0.8      0.033   0.8             -1      -1.00        1.00       1.00
-- dfpt_vtorho-kpt loop           0.030   0.8      0.030   0.7             26      -1.00        0.99       0.99
-- fourdp                         0.026   0.7      0.026   0.7            303      -1.00        1.00       1.00
-- mkrho/=                        0.026   0.7      0.026   0.7             42      -1.00        0.99       0.99
-- symrhg(no FFT)                 0.023   0.6      0.023   0.6            102      -1.00        1.00       1.00
-- others (118)                  -0.148  -3.8     -0.151  -3.7             -1      -1.00        0.98       0.98
+- dfpt_vtorho-kpt loop           0.030   0.8      0.030   0.8             26      -1.00        0.99       0.99
+- mkrho/=                        0.026   0.7      0.026   0.6             42      -1.00        0.99       0.99
+- fourdp                         0.026   0.7      0.026   0.6            303      -1.00        1.00       1.00
+- symrhg(no FFT)                 0.024   0.6      0.024   0.6            102      -1.00        1.00       1.00
+- others (118)                  -0.145  -3.8     -0.147  -3.6             -1      -1.00        0.99       0.99
 -<END_TIMER>
 -
-- subtotal                       3.248  84.2      3.254  80.7                                  1.00       1.00
+- subtotal                       3.248  84.2      3.254  80.4                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
@@ -799,26 +799,26 @@ P          mk1mem2         16
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   1.680  43.6      1.687  41.8          12662      -1.00        1.00       1.00
-- projbd                         0.392  10.2      0.395   9.8          20332      -1.00        0.99       0.99
-- pspini                         0.354   9.2      0.355   8.8              2      -1.00        1.00       1.00
+- fourwf%(pot)                   1.675  43.5      1.679  41.5          12662      -1.00        1.00       1.00
+- projbd                         0.394  10.2      0.396   9.8          20332      -1.00        1.00       1.00
+- pspini                         0.354   9.2      0.356   8.8              2      -1.00        1.00       1.00
 - nonlop(apply)                  0.284   7.4      0.286   7.1          10934      -1.00        0.99       0.99
-- fourwf%(G->r)                  0.191   5.0      0.192   4.8           2728      -1.00        1.00       1.00
-- nonlop(forces)                 0.095   2.5      0.095   2.4           2160      -1.00        1.00       1.00
-- getghc-other                   0.066   1.7      0.060   1.5             -1      -1.00        1.10       1.10
-- dfpt_vtowfk(contrib)           0.057   1.5      0.057   1.4             -1      -1.00        1.00       1.00
+- fourwf%(G->r)                  0.192   5.0      0.193   4.8           2728      -1.00        0.99       0.99
+- nonlop(forces)                 0.094   2.4      0.094   2.3           2160      -1.00        0.99       0.99
+- getghc-other                   0.066   1.7      0.061   1.5             -1      -1.00        1.08       1.08
+- dfpt_vtowfk(contrib)           0.056   1.4      0.055   1.4             -1      -1.00        1.01       1.01
 - invars2                        0.050   1.3      0.051   1.3              2      -1.00        0.98       0.98
-- fourwf%(den)                   0.049   1.3      0.049   1.2            670      -1.00        0.99       0.99
+- fourwf%(den)                   0.049   1.3      0.050   1.2            670      -1.00        0.99       0.99
 - xc:pot/=fourdp                 0.040   1.0      0.040   1.0             53      -1.00        1.00       1.00
 - vtowfk(ssdiag)                 0.033   0.8      0.033   0.8             -1      -1.00        1.00       1.00
-- dfpt_vtorho-kpt loop           0.030   0.8      0.030   0.7             26      -1.00        0.99       0.99
-- fourdp                         0.026   0.7      0.026   0.7            303      -1.00        1.00       1.00
-- mkrho/=                        0.026   0.7      0.026   0.7             42      -1.00        0.99       0.99
-- symrhg(no FFT)                 0.023   0.6      0.023   0.6            102      -1.00        1.00       1.00
-- others (118)                  -0.148  -3.8     -0.151  -3.7             -1      -1.00        0.98       0.98
+- dfpt_vtorho-kpt loop           0.030   0.8      0.030   0.8             26      -1.00        0.99       0.99
+- mkrho/=                        0.026   0.7      0.026   0.6             42      -1.00        0.99       0.99
+- fourdp                         0.026   0.7      0.026   0.6            303      -1.00        1.00       1.00
+- symrhg(no FFT)                 0.024   0.6      0.024   0.6            102      -1.00        1.00       1.00
+- others (118)                  -0.145  -3.8     -0.147  -3.6             -1      -1.00        0.99       0.99
 -<END_TIMER>
 
-- subtotal                       3.248  84.2      3.254  80.7                                  1.00       1.00
+- subtotal                       3.248  84.2      3.254  80.4                                  1.00       1.00
 
 ================================================================================
 

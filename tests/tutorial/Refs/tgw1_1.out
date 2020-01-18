@@ -1,6 +1,6 @@
 
-.Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 8.11.14 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h22 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 23h43 )
   
-- input  file    -> tgw1_1.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mverstra_develop/tests/Test_suite/tutorial_tgw1_1/tgw1_1.in
 - output file    -> tgw1_1.out
 - root for input  files -> tgw1_1i
 - root for output files -> tgw1_1o
@@ -301,8 +301,8 @@ P           mkmem           6
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mverstra_develop/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mverstra_develop/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -465,7 +465,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     286.594     286.400
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   34.863E-09; max=  97.890E-20
+ Mean square residual over all n,k,spin=   33.755E-20; max=  97.890E-20
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -511,8 +511,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     286.594     286.400
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mverstra_develop/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mverstra_develop/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1043,10 +1043,57 @@ P           mkmem           6
 
 ================================================================================
 
+- Total cpu        time (s,m,h):          7.4        0.12      0.002
+- Total wall clock time (s,m,h):          7.6        0.13      0.002
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            7.4, wall_time =            7.6
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                  2.377  32.0      2.377  31.4              1      -1.00        1.00       1.00
+- fourwf%(pot)                   1.184  15.9      1.185  15.6           9038      -1.00        1.00       1.00
+- projbd                         0.711   9.6      0.723   9.5          12860      -1.00        0.98       0.98
+- pspini                         0.678   9.1      0.681   9.0              4      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.324   4.4      0.322   4.2             -1      -1.00        1.01       1.01
+- ewald                          0.277   3.7      0.276   3.6              4      -1.00        1.00       1.00
+- nonlop(apply)                  0.172   2.3      0.174   2.3           9038      -1.00        0.99       0.99
+- timing timab                   0.146   2.0      0.146   1.9             10      -1.00        1.00       1.00
+- invars2                        0.115   1.5      0.115   1.5              4      -1.00        1.00       1.00
+- getghc-other                   0.094   1.3      0.092   1.2             -1      -1.00        1.02       1.02
+- stress                         0.041   0.5      0.041   0.5              1      -1.00        0.99       0.99
+- ewald2 (+vdw_dftd)             0.039   0.5      0.039   0.5              1      -1.00        1.00       1.00
+- others (122)                   0.099   1.3      0.098   1.3             -1      -1.00        1.01       1.01
+-<END_TIMER>
+-
+- subtotal                       6.257  84.1      6.269  82.7                                  1.00       1.00
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =           7.4, wall_time =           7.6
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- sigma/=fourdp                  2.377  32.0      2.377  31.4              1      -1.00        1.00       1.00
+- fourwf%(pot)                   1.184  15.9      1.185  15.6           9038      -1.00        1.00       1.00
+- projbd                         0.711   9.6      0.723   9.5          12860      -1.00        0.98       0.98
+- pspini                         0.678   9.1      0.681   9.0              4      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.324   4.4      0.322   4.2             -1      -1.00        1.01       1.01
+- ewald                          0.277   3.7      0.276   3.6              4      -1.00        1.00       1.00
+- nonlop(apply)                  0.172   2.3      0.174   2.3           9038      -1.00        0.99       0.99
+- timing timab                   0.146   2.0      0.146   1.9             10      -1.00        1.00       1.00
+- invars2                        0.115   1.5      0.115   1.5              4      -1.00        1.00       1.00
+- getghc-other                   0.094   1.3      0.092   1.2             -1      -1.00        1.02       1.02
+- stress                         0.041   0.5      0.041   0.5              1      -1.00        0.99       0.99
+- ewald2 (+vdw_dftd)             0.039   0.5      0.039   0.5              1      -1.00        1.00       1.00
+- others (122)                   0.099   1.3      0.098   1.3             -1      -1.00        1.01       1.01
+-<END_TIMER>
 
+- subtotal                       6.257  84.1      6.269  82.7                                  1.00       1.00
 
 ================================================================================
 
@@ -1116,10 +1163,10 @@ P           mkmem           6
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          7.8  wall=          8.6
+- Proc.   0 individual time (sec): cpu=          7.4  wall=          7.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.8  wall=          8.6
++Overall time at end (sec) : cpu=          7.4  wall=          7.6

@@ -1,5 +1,5 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Dec 2019.
-- ( at 18h15 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h36 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v8_t41-t42-t43-t44/t44.in
 - output file    -> t44.out
@@ -361,6 +361,7 @@ Values initialized with zeros
 -Debye temperature from partial sums:     0.1598189845E+04 (K)
 
 - Writing phonon DOS to file: t44o_DS1_PHDOS
+- Writing phonon DOS to netcdf file: t44o_DS1_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -573,6 +574,7 @@ Values initialized with zeros
 -Debye temperature from partial sums:     0.1598189845E+04 (K)
 
 - Writing phonon DOS to file: t44o_DS2_PHDOS
+- Writing phonon DOS to netcdf file: t44o_DS2_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -766,6 +768,7 @@ Values initialized with zeros
 -Debye temperature from partial sums:     0.1598189845E+04 (K)
 
 - Writing phonon DOS to file: t44o_DS3_PHDOS
+- Writing phonon DOS to netcdf file: t44o_DS3_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -854,6 +857,7 @@ Values initialized with zeros
 -Debye temperature from partial sums:     0.1598189845E+04 (K)
 
 - Writing phonon DOS to file: t44o_DS4_PHDOS
+- Writing phonon DOS to netcdf file: t44o_DS4_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1069,6 +1073,7 @@ Values initialized with zeros
 -Debye temperature from partial sums:     0.1598189845E+04 (K)
 
 - Writing phonon DOS to file: t44o_DS5_PHDOS
+- Writing phonon DOS to netcdf file: t44o_DS5_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1268,6 +1273,7 @@ Values initialized with zeros
 -Debye temperature from partial sums:     0.1598189845E+04 (K)
 
 - Writing phonon DOS to file: t44o_DS6_PHDOS
+- Writing phonon DOS to netcdf file: t44o_DS6_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1661,10 +1667,10 @@ P           mkmem           8
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         28.6  wall=         28.7
+- Proc.   0 individual time (sec): cpu=         28.7  wall=         28.7
 
 ================================================================================
 
  Calculation completed.
-.Delivered   3 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         28.6  wall=         28.7
+.Delivered   8 WARNINGs and   6 COMMENTs to log file.
++Overall time at end (sec) : cpu=         28.7  wall=         28.7

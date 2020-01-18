@@ -1,5 +1,5 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Dec 2019.
-- ( at 17h33 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h16 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/paral_t72_MPI1/t72.in
 - output file    -> t72_MPI1.out
@@ -542,7 +542,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     211.750     211.714
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   46.498E-09; max=  99.479E-20
+ Mean square residual over all n,k,spin=   28.060E-20; max=  99.479E-20
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000

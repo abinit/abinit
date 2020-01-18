@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h26 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h18 )
   
-- input  file    -> t09.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v3_t09/t09.in
 - output file    -> t09.out
 - root for input  files -> t09i
 - root for output files -> t09o
@@ -214,8 +214,8 @@ P          mk1mem3          2
          ecut(hartree)=      4.500   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/70yb.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/70yb.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/70yb.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/70yb.pspnc
 -  Troullier-Martins psp for element  Yb        Thu Oct 27 17:54:17 EDT 1994
 - 70.00000  16.00000    940714                znucl, zion, pspdat
     1    1    3    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -394,7 +394,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     456.000     456.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   34.542E-16; max=  66.654E-16
+ Mean square residual over all n,k,spin=   36.462E-16; max=  62.034E-16
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
 
@@ -484,7 +484,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     456.000     456.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -19.439E-03; max=  15.327E-04
+ Mean square residual over all n,k,spin=   70.106E-05; max=  15.327E-04
  dfpt_looppert : ek2=    1.2633093633E+01
           f-sum rule ratio=    8.1910714120E-01
  prteigrs : about to open file t09t_1WF1_EIG
@@ -708,10 +708,10 @@ P          mk1mem3          2
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          2.0
+- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.8  wall=          2.0
++Overall time at end (sec) : cpu=          1.5  wall=          1.7

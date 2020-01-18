@@ -1,5 +1,5 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Dec 2019.
-- ( at 17h40 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h25 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v67mbpt_t02/t02.in
 - output file    -> t02.out
@@ -495,7 +495,7 @@ cartesian_forces: !CartForces
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   31.335E-08; max=  89.676E-12
+ Mean square residual over all n,k,spin=   24.752E-13; max=  89.676E-12
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -1843,10 +1843,10 @@ P           mkmem          16
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         57.3  wall=         57.4
+- Proc.   0 individual time (sec): cpu=         57.5  wall=         57.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         57.3  wall=         57.4
++Overall time at end (sec) : cpu=         57.5  wall=         57.6

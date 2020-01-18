@@ -1,5 +1,5 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Dec 2019.
-- ( at 17h57 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h14 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/etsf_io_t30/t30.in
 - output file    -> t30.out
@@ -399,7 +399,7 @@ P newkpt: treating     10 bands with npw=    1377 for ikpt=  10 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   12.933E-08; max=  93.274E-18
+ Mean square residual over all n,k,spin=   37.005E-18; max=  93.274E-18
    0.1250  0.1250  0.1250    1  2.24082E-07 kpt; spin; max resid(k); each band:
   6.12E-17 1.03E-17 9.96E-18 8.81E-18 5.34E-17 1.66E-17 4.89E-17 5.16E-17
   7.57E-11 2.24E-07

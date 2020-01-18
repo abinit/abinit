@@ -1,5 +1,5 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Dec 2019.
-- ( at 17h35 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h18 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v3_t85/t85.in
 - output file    -> t85.out
@@ -1849,7 +1849,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      69.000      69.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   91.639E-08; max=  98.494E-20
+ Mean square residual over all n,k,spin=   37.185E-20; max=  98.494E-20
    0.2500  0.2500  0.2917    1  3.52894E-06 kpt; spin; max resid(k); each band:
   2.47E-20 8.05E-19 1.43E-19 7.98E-20 3.03E-19 4.52E-20 5.59E-19 4.10E-19
   8.20E-19 4.70E-19 3.40E-19 1.72E-19 9.23E-19 5.88E-19 5.85E-19 8.24E-19
@@ -2057,7 +2057,7 @@ P newkpt: treating     18 bands with npw=      73 for ikpt=   4 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -11.111E-03; max=  43.336E-18
+ Mean square residual over all n,k,spin=   94.859E-19; max=  43.336E-18
    0.2500  0.2500  0.2500    1  3.07322E-17 kpt; spin; max resid(k); each band:
   6.30E-18 7.19E-18 4.45E-18 5.31E-18 5.76E-18 9.85E-18 9.01E-18 4.63E-18
   9.64E-18 2.49E-18 2.83E-18 6.38E-18 5.47E-18 6.47E-18 3.07E-17 2.79E-17
@@ -2164,7 +2164,7 @@ P newkpt: treating     18 bands with npw=      73 for ikpt=   2 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -11.111E-03; max=  11.961E-19
+ Mean square residual over all n,k,spin=   30.771E-20; max=  11.961E-19
    0.2500  0.2500  0.2500    1  1.19611E-18 kpt; spin; max resid(k); each band:
   2.14E-19 4.32E-19 3.21E-19 1.06E-19 2.11E-19 2.52E-19 3.94E-19 6.86E-20
   3.81E-19 1.42E-19 4.74E-20 4.81E-20 6.34E-19 4.17E-19 1.20E-18 3.98E-19
@@ -2259,7 +2259,7 @@ P newkpt: treating     18 bands with npw=      73 for ikpt=   4 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -11.111E-03; max=  43.021E-18
+ Mean square residual over all n,k,spin=   11.000E-18; max=  43.021E-18
    0.2500  0.2500  0.2500    1  1.93180E-17 kpt; spin; max resid(k); each band:
   4.68E-18 1.73E-17 9.33E-18 6.18E-18 7.86E-18 1.23E-17 1.75E-17 1.07E-17
   6.26E-18 5.29E-18 2.49E-18 5.96E-18 3.16E-18 3.97E-18 1.93E-17 1.36E-17
@@ -2368,7 +2368,7 @@ P newkpt: treating     18 bands with npw=      73 for ikpt=   2 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -11.111E-03; max=  18.786E-18
+ Mean square residual over all n,k,spin=   48.856E-19; max=  18.786E-18
    0.2500  0.2500  0.2500    1  1.87862E-17 kpt; spin; max resid(k); each band:
   1.53E-18 4.65E-19 3.40E-18 6.68E-19 3.12E-18 8.06E-18 1.78E-18 2.45E-18
   1.81E-18 4.98E-19 1.01E-18 5.95E-18 1.56E-17 1.88E-17 4.77E-18 4.61E-18
