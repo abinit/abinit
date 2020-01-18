@@ -6,7 +6,7 @@
 !!  Module to copy objects from ABINIT to BigDFT and viceversa.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2019 ABINIT group (TR,DC,MT)
+!!  Copyright (C) 2012-2020 ABINIT group (TR,DC,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -7,7 +7,7 @@
 !!  Helper functions used for post-processing.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2019 ABINIT group (MG, ZL, MJV, BXu)
+!! Copyright (C) 2002-2020 ABINIT group (MG, ZL, MJV, BXu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

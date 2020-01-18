@@ -21,7 +21,7 @@
 // This function calls different gpu functions to carry out ffts and operation in reciprocal space
 //
 // COPYRIGHT
-// Copyright (C) 1998-2019 ABINIT group (FDahm)
+// Copyright (C) 1998-2020 ABINIT group (FDahm)
 // This file is distributed under the terms of the
 // GNU General Public License, see ~abinit/COPYING
 // or http://www.gnu.org/copyleft/gpl.txt .

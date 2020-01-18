@@ -4,7 +4,7 @@
 # Object: compare 2 output files from ABINIT line by line with arithmetic
 # comparisons of floating point substrings
 #
-# Copyright (C) 1999-2019 ABINIT group (LSi,XG)
+# Copyright (C) 1999-2020 ABINIT group (LSi,XG)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .

@@ -7,7 +7,7 @@
 # v1, v2, ... directories.
 # Before running this script, read README in this directory.
 
-# Copyright (C) 2004-2019 ABINIT group (LSi)
+# Copyright (C) 2004-2020 ABINIT group (LSi)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .
