@@ -2750,7 +2750,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 ! EPH variables
    dtsets(idtset)%asr = 1
    dtsets(idtset)%dipdip = 1
-   dtsets(idtset)%chneut = 0
+   dtsets(idtset)%chneut = 1
    dtsets(idtset)%symdynmat = 1
 
    dtsets(idtset)%ph_freez_disp_addStrain = 0
