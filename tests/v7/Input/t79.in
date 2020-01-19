@@ -46,6 +46,7 @@ istwfk *1
 #For all the dataset
 nsym 0
 icutcoul 6
+symsigma 0
 
 #----------------------------------------------------------------------------
 #-- Parameters for screening for different datasets

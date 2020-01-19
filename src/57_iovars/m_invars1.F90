@@ -2630,7 +2630,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%strprecon=one
    dtsets(idtset)%strtarget(1:6)=zero
    dtsets(idtset)%symchi=1
-   dtsets(idtset)%symsigma=0
+   dtsets(idtset)%symsigma=1
 !  T
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
