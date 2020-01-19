@@ -1545,11 +1545,12 @@ Variable(
     vartype="integer",
     topics=['Phonons_useful'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval=1,
     mnemonics="CHarge NEUTrality treatment",
     text=r"""
 Set the treatment of the Charge Neutrality requirement for the effective charges.
 Same meaning as the corresponding anaddb variable.
+Note the different default value in abinit and anaddb
 """,
 ),
 
@@ -16857,9 +16858,10 @@ Variable(
     vartype="integer",
     topics=['SelfEnergy_expert'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval=1,
     mnemonics="SYMmetrization of SIGMA matrix elements",
     requires="[[optdriver]] in [4, 7]",
+    commentdefault="The default value changed in Abinitv9 from 0 to 1",
     text=r"""
 This option activates the symmetrization of the self-energy matrix elements ([[symsigma]] = 1).
 In this case the BZ integration defining the self-energy

@@ -2630,6 +2630,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  if (Sigp%symsigma/=0.and.gwcalctyp>=20) then
    MSG_WARNING("SC-GW with symmetries is still under development. Use at your own risk!")
+   MSG_ERROR("SC-GW requires symsigma == 0 in input. New default in Abinit9 is symsigma 1!")
  end if
 
  ! Setup parameters for Spectral function.
