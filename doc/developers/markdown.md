@@ -368,7 +368,7 @@ Namespace      | Markdown                         | Result
  `theory`      | `[[theory:mbt]]`                 | [[theory:mbt]]
  `varset`      | `[[varset:bse]]`                 | [[varset:bse]]
  `cite`        | `[[cite:Amadon2008]]`            | [[cite:Amadon2008]]
- `ac`          | `[[ac:abiref_gnu_5.3_debug.ac]]` | [[ac:abiref_gnu_5.3_debug.ac]]
+ `ac`          | `[[ac:abiref_gnu_9.2_debug.ac]]` | [[ac:abiref_gnu_9.2_debug.ac]]
  `pdf`         | `[[pdf:howto_chebfi.pdf]]`       | [[pdf:howto_chebfi.pdf]]
  `pdf`         | `[[pdf:howto_chebfi]]`           | [[pdf:howto_chebfi]]
  `src`         | `[[src:94_scfcv/m_scfcv.F90]]`   | [[src:94_scfcv/m_scfcv.F90]]
