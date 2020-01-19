@@ -3220,7 +3220,7 @@ subroutine sigmaph_write(self, dtset, cryst, ebands, wfk_hdr, dtfil, comm)
 
  call xmpi_barrier(comm)
 
- ! Now reopen the file inside ncwrite_comm to perform pararallel-IO (required for k-point parallelism).
+ ! Now reopen the file inside ncwrite_comm to perform parallel-IO (required for k-point parallelism).
  if (self%ncwrite_comm%value /= xmpi_comm_null) then
    NCF_CHECK(nctk_open_modify(self%ncid, path, self%ncwrite_comm%value))
    NCF_CHECK(nctk_set_datamode(self%ncid))
