@@ -435,7 +435,7 @@ New versions of Fortran compilers have been integrated in the test farm:
 - IBM xlf compiler 14.1
 - NAG 5.3
 
-Corresponding examples are available in [[ac:abiref_gnu_9.2_debug.ac]]
+Corresponding examples are available in [[ac:abiref_gnu_9.2_debug.ac9]]
 ```
 
 produces a nice report with links to the features available in the new version:
@@ -458,7 +458,7 @@ New versions of Fortran compilers have been integrated in the test farm:
 - IBM xlf compiler 14.1
 - NAG 5.3
 
-Corresponding examples are available in [[ac:abiref_gnu_9.2_debug.ac]].
+Corresponding examples are available in [[ac:abiref_gnu_9.2_debug.ac9]].
 
 !!! important
     We are already using Markdown on gitlab to document our merge requests.

@@ -109,14 +109,18 @@ inc = ""
 sub = ""
 
 # Process special include dirs
-inc_blocks = {"common": "shared/common/src", "core":"src"}
+inc_blocks = {
+    "common":"shared/common/src",
+    "core":"src",
+    "libpaw":"shared/libpaw",
+}
 for block, subdir in inc_blocks.items():
-  inc += "  src_%s_incs='" % block
+  inc += "  src_%s_fcflags='" % block
   for incdir in ["incs", "mods"]:
     inc += " -I$(top_builddir)/{path} -I$(top_srcdir)/{path}".format(
       path=os.path.join(subdir, incdir))
   inc += "'\n"
-  sub += "  AC_SUBST(src_%s_incs)\n" % (block)
+  sub += "  AC_SUBST(src_%s_fcflags)\n" % (block)
 
 # Process libraries
 for lib in abinit_corelibs:
@@ -127,9 +131,9 @@ for lib in abinit_corelibs:
   else:
     par_dir = "src/%s" % lib
 
-  inc += "  src_{name}_incs='-I$(top_builddir)/{path} -I$(top_srcdir)/{path}'\n".format(
+  inc += "  src_{name}_fcflags='-I$(top_builddir)/{path} -I$(top_srcdir)/{path}'\n".format(
     name=lib, path=par_dir)
-  sub += "  AC_SUBST(src_%s_incs)\n" % (lib)
+  sub += "  AC_SUBST(src_%s_fcflags)\n" % (lib)
 
 # Update macro
 mac = macro_header(my_name,now)

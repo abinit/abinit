@@ -83,8 +83,9 @@ class WebsiteTest(AbimkdocsTest):
         assert e.get("href") == "../tests/libxc/Input/t41.in" and e.text == "libxc[41]"
         e = element("src:94_scfcv/scfcv.F90")
         assert e.get("href") == "https://github.com/abinit/abinit/blob/master/src/94_scfcv/scfcv.F90"
-        e = element("ac:abiref_gnu_9.2_debug.ac")
-        assert e.get("href") == "../abichecks/buildsys/Refs/abiref_gnu_9.2_debug.ac"
+        # FIXME: buildsys refs are not needed anymore (YP)
+        #e = element("ac:abiref_gnu_5.3_debug.ac")
+        #assert e.get("href") == "../abichecks/buildsys/Refs/abiref_gnu_5.3_debug.ac"
         e = element("pdf:howto_chebfi.pdf|chebfi")
         #assert e.get("href") == "/build/config-examples/abiref_gnu_9.2_debug.ac" and e.text == "chebfi"
         #e = element("[gitsha:f74dba1ed8346ca586dc95fd10fe4b8ced108d5e]")

@@ -1,4 +1,4 @@
-#ifdef HAVE_FFT_DFTI
+#ifdef HAVE_DFTI
 !Local variables-------------------------------
 !scalars
  integer :: status 

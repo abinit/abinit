@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# Init
+fallbacks_prefix="@abinit_builddir@/fallbacks/install/@abi_fc_vendor@/@abi_fc_version@"
+
+# Unpack tarball
+cd @abinit_builddir@/fallbacks
+tar xzf @abinit_srcdir@/fallbacks/abinit-fallbacks-[0-9].[0-9].[0-9].tar.gz
+cd abinit-fallbacks-*
+
+# Configure
+./configure \
+  --prefix="${fallbacks_prefix}" \
+  --srcdir="@abinit_srcdir@/fallbacks" \
+  --enable-atompaw="" \
+  --enable-bigdft="yes" \
+  --enable-libxc="yes" \
+  --enable-linalg="yes" \
+  --enable-netcdf="yes" \
+  --enable-wannier90="yes" \
+  --with-fc-vendor="@abi_fc_vendor@" \
+  --with-fc-version="@abi_fc_version@" \
+  --with-tardir="${HOME}/.abinit/tarballs" \
+  --with-libxc-incs="@sd_libxc_cppflags@" \
+  --with-libxc-libs="@sd_libxc_libs@" \
+  --with-linalg-incs="@sd_linalg_fcflags@" \
+  --with-linalg-libs="@sd_linalg_libs@" \
+  --with-netcdf4-incs="@sd_netcdf_cppflags@" \
+  --with-netcdf4-libs="@sd_netcdf_libs@" \
+  --with-netcdf4-fortran-incs="@sd_netcdf_fortran_cppflags@" \
+  --with-netcdf4-fortran-libs="@sd_netcdf_fortran_libs@" \
+  CC="@CC@" \
+  CXX="@CXX@" \
+  FC="@FC@"
+
+# Build and install
+# Note: 'make -j' might not work, this is why it is disabled
+make
+make install

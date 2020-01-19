@@ -9,18 +9,18 @@ To address this issue, you may:
   \\* make sure that the prerequisites of the external
     packages are available and enabled, e.g.
     --with-dft-flavor=\\"libxc+bigdft\\"\\ or
-    --with-trio-flavor=\\"netcdf+etsf_io\\";
+    --with-trio-flavor=\\"netcdf\\";
 
   \\* use the --with-\\*-bins, --with-\\*-incs, and
     --with-\\*-libs options of configure to provide
     additional information\\; please see the section related
     to connectors in
-    \\~abinit/doc/build/config-template.ac for available
+    \\~abinit/doc/build/config-template.ac9 for available
     options and details\\;
 
   \\* disable the corresponding extensions, by using the
     associated --with-\\*-flavor=\\"none\\" options of
     configure\\; please see the section associated to
-    connectors in \\~abinit/doc/build/config-template.ac for
+    connectors in \\~abinit/doc/build/config-template.ac9 for
     details.
 

@@ -279,7 +279,7 @@ contains
 subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 & rho_grho,deltae_vdw,exc_vdw,decdrho_vdw,decdgrho_vdw,stress_vdw)
 
-#if defined HAVE_FFT_FFTW3
+#if defined HAVE_FFTW3
   include "fftw3.f03"
 #endif
 
@@ -382,7 +382,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   end do
 
   ! Fourier-transform theta
-#if defined HAVE_FFT_FFTW3
+#if defined HAVE_FFTW3
   do iq1=1,nqpts
     call dfftw_plan_dft_r2c_3d(fftw3_plan,nr1,nr2,nr3, &
 &     t3dr(:,:,:,iq1),t3dg(:,:,:,iq1),FFTW_ESTIMATE)
@@ -490,7 +490,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   end do !ip1=1,npts_rho
 
   ! Fourier-transform back the integrand
-#if defined HAVE_FFT_FFTW3
+#if defined HAVE_FFTW3
   !write(msg,'(a)') ch10
   !call wrtout(std_out,msg,'COLL')
   do iq1=1,nqpts
