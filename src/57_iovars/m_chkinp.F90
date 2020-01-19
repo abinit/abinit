@@ -727,12 +727,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        !  MSG_ERROR_NOSTOP("Self-energy with symsigma 1 and nspinor 2 not implemented", ierr)
        !end if
        if (optdriver == RUNL_SIGMA .and. &
-       any(mod(dt%gwcalctyp, 10) == [SIG_GW_AC, SIG_QPGW_PPM, SIG_QPGW_CD])) then
+           any(mod(dt%gwcalctyp, 10) == [SIG_GW_AC, SIG_QPGW_PPM, SIG_QPGW_CD])) then
          MSG_ERROR_NOSTOP("analytic-continuation, model GW with nspinor 2 are not implemented", ierr)
        end if
        !if (optdriver == RUNL_SIGMA .and. mod(dt%gwcalctyp, 100) >= 10) then
        !  MSG_ERROR_NOSTOP("Self-consistent GW with nspinor == 2 not implemented", ierr)
        !end if
+       if (optdriver == RUNL_SIGMA .and. dt%symsigma > 0 .and. dt%gwcalctyp >= 20) then
+         MSG_ERROR_NOSTOP("gwcalctyp >= 0 requires symsigma == 0 in input. New default in Abinit9 is symsigma 1!", ierr)
+       end if
+       if (optdriver == RUNL_SIGMA .and. dt%symsigma > 0 .and. dt%ucrpa > 0) then
+         MSG_ERROR_NOSTOP("ucrpa requires symsigma == 0 in input. New default in Abinit9 is symsigma 1!", ierr)
+       end if
        if (dt%gwcomp /= 0) then
          MSG_ERROR_NOSTOP("gwcomp /= 0 with nspinor 2 not implemented", ierr)
        end if
