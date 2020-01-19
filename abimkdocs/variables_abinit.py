@@ -20001,28 +20001,6 @@ Note also that relative paths are interpreted according to the working directory
 ),
 
 Variable(
-    abivarname="ddb_qrefine",
-    varset="eph",
-    vartype="integer",
-    topics=['ElPhonInt_expert'],
-    dimensions=[3],
-    defaultval=[1, 1, 1],
-    mnemonics="Q-point REFINEment order (experimental)",
-    text=r"""
-If **ddb_qrefine** is superior to 1, the EPH code attempts to initialize a first set of
-dynamical matrices from the DDB file and DFPT potentials from the DVDB file, with a q-point grid which is
-[[ddb_ngqpt]] divided by **qrefine** (e.g. ddb_ngqpt 4 4 2 ddb_qrefine 2 2 1 starts with a 2x2x2 grid).
-The dynamical matrices and DFPT potentials are interpolated onto the full
-[[ddb_ngqpt]] grid and any additional information found in the DDB file is
-imposed, before proceeding to normal band structure and other interpolations.
-Should implement Gaal-Nagy's algorithm in [[cite:GaalNagy2006]].
-
-A similar option is also available in anaddb. The main difference is that ddb_qrefine will also densify
-the q-mesh used for the Fourier transform of the DFPT potentials.
-""",
-),
-
-Variable(
     abivarname="getwfk_path",
     varset="files",
     vartype="string",

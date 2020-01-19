@@ -3808,7 +3808,7 @@ subroutine eph_phgamma(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dv
    comm_rpt = xmpi_comm_self
    !comm_rpt = bqs_comm%value
    method = dtset%userid
-   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfftf, ngfftf, method, comm_rpt)
  end if
 
  ! Initialize the wave function descriptor.
