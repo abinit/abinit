@@ -23,6 +23,7 @@
     enunit      2
 
     ndtset      5
+    symsigma    0
 
 # Self-consistent run to get the density
     tolwfr1     1.00d-10
