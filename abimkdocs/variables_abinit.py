@@ -8108,10 +8108,14 @@ methods:
 In theory, all methods give identical results. However, due to different
 implementation approaches, the round-off errors can lead to slight differences
 intermediate and final results obtained using methods 1,2 and 3. The choice of
-the method can also affect the convergence. For more details, see [[cite:Ricci2019]].
+the method can also affect the convergence. For more details, see [[cite:Ricci2019]] or [[cite:Gonze2020]]. 
+WARNING: in [[cite:Ricci2019]], the meaning of [[ixcrot]]=2 or 3 is inverted with respect to the implementation. On the contrary,
+the implemention and [[cite:Gonze2020]] agree. More explicitly, the method refered to as method 1' in [[cite:Ricci2019]]
+is [[ixcrot]]=2, and method refereed to as method 2 in [[cite:Ricci2019]] is [[ixcrot]]=3.
 
 !!! note
-    For non-zero perturbation wavevector, only ixcrot=3 implementation is currently available.
+    For non-zero perturbation wavevector ([[qpt]]/=0), only the [[ixcrot]]=3 implementation is currently available. 
+    The code will stop with the default [[ixcrot]] value for non-zero perturbation wavevector. The user should then set [[ixcrot]]=3 and restart.
 """,
 ),
 
