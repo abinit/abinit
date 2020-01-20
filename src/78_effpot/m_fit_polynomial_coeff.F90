@@ -2440,7 +2440,7 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank
  !&                    eff_pot%supercell%typat,eff_pot%crystal%amu,eff_pot%crystal%znucl,&
  !&                    real(100,dp),(/real(100,dp),real(100,dp)/))
 
-   mse  = mse  + abs(hist%etot(ii) - energy)
+   mse  = mse  + ((hist%etot(ii) - energy))**2
    do ia=1,natom ! Loop over atoms
      do mu=1,3   ! Loop over cartesian directions
        msef = msef + (hist%fcart(mu,ia,ii)  - fcart(mu,ia))**2

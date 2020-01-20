@@ -668,12 +668,12 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 &                                              natom_sc,ntime,fit_data%training_set%sqomega,comm,&
 &                                              compute_anharmonic=.TRUE.,print_file=.FALSE.)
  
-                  write(message,'(a,I2,a,ES24.16)') "cycle ",i," (msef+mses)/(msef_ini+mses_ini): ",(msef+mses)/(msef_ini+mses_ini)
+                  write(message,'(a,I2,a,ES24.16)') "cycle ",i," (mse+msef+mses)/(mse_ini+msef_ini+mses_ini): ",(mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
                   call wrtout(std_out,message,'COLL')
-                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
+                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (mse+msef+mses): ", (mse+msef+mses)
                   call wrtout(std_out,message,'COLL')
                   coeff_opt(i) =  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient
-                  msefs_arr(i) =  (msef+mses)/(msef_ini+mses_ini)
+                  msefs_arr(i) =  (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
                   if(i==2 .and. abs(msefs_arr(1)-msefs_arr(2)) < tol8)then 
                      eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient =& 
                      eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient*10d5 
@@ -695,8 +695,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
                 call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                               natom_sc,ntime,fit_data%training_set%sqomega,comm,&
  &                                               compute_anharmonic=.TRUE.,print_file=.FALSE.)
-                write(message,'(a,ES24.16)') "(msef+mses)/(msef_ini+mses_ini) after_opt: ", (msef+mses)/(msef_ini+mses_ini)
+                write(message,'(a,ES24.16)') "(mse+msef+mses)/(mse_ini+msef_ini+mses_ini) after_opt: ", (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
                 call wrtout(std_out,message,'COLL')
+                mse_ini  = mse
                 msef_ini = msef
                 mses_ini = mses
            endif
@@ -791,7 +792,8 @@ subroutine opt_getHOforterm(term,order_range,order_start,order_stop)
 !Strings 
 !Local variables ------------------------------
 !scalars
- integer :: idisp,ndisp,nterm_of_term,power_tot 
+ integer :: idisp,ndisp,nstrain,nterm_of_term,power_tot 
+ integer :: nbody_tot 
 !arrays 
  integer,allocatable :: powers(:) 
 !Logicals
@@ -800,27 +802,30 @@ subroutine opt_getHOforterm(term,order_range,order_start,order_stop)
 
      !Get/Initialize variables
      ndisp = term%terms(1)%ndisp
+     nstrain = term%terms(1)%nstrain
+     nbody_tot = ndisp + nstrain
      nterm_of_term = term%nterm
 
-     ABI_ALLOCATE(powers,(ndisp)) 
-     powers = term%terms(1)%power_disp
-
+     ABI_ALLOCATE(powers,(nbody_tot)) 
+     powers(:ndisp) = term%terms(1)%power_disp
+     powers(ndisp+1:) = term%terms(1)%power_strain
      power_tot = 0 
-
+     !write(std_out,*) "powers in getHOforterm", powers
 
      !Get rid off odd displacements
-     do idisp=1,ndisp
-       if(mod(term%terms(1)%power_disp(idisp),2) == 1)then 
+     do idisp=1,nbody_tot
+       if(idisp <= ndisp .and. mod(powers(idisp),2) == 1)then 
           powers(idisp) = powers(idisp) + 1
-       end if 
+       else if(mod(powers(idisp),2) == 1)then 
+          powers(idisp) = powers(idisp) + 1
+       endif 
      enddo !idisp
      ! Count order
-     do idisp=1,ndisp
+     do idisp=1,nbody_tot
         power_tot = power_tot + powers(idisp)
      enddo 
-
      ! Get start and stop order for this term 
-     ! If term doesn't fit in order range give back order_start = ordre_stop = 0 
+     ! If term doesn't fit in order range give back order_start = order_stop = 0 
      if(power_tot >= order_range(1) .and. power_tot <=order_range(2))then
         order_start = power_tot 
         order_stop  = order_range(2) 
@@ -935,6 +940,7 @@ enddo !order
 !write(*,*) ncombi_order(:)
 !write(*,*) 'ncombi for term is:', ncombi, 'are we happy?'
 
+
 end subroutine opt_getCombisforterm
 !!***
 
@@ -984,7 +990,7 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi_order)
 !scalars
  integer :: i,icombi,icombi2,icombi_start,icombi_stop,idisp,nterm_of_term
  integer :: order,iterm_of_term,jdisp,power_tot
- integer :: jdisp1,jdisp2,sec
+ integer :: jdisp1,jdisp2,sec,nstrain,nbody_tot
  real(sp) :: to_divide,divider1,divider2,divided
 !arrays 
 !integer 
@@ -995,6 +1001,8 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi_order)
 !*************************************************************************
      !Get Variables 
      nterm_of_term = terms(1)%nterm
+     nstrain = terms(1)%terms(1)%nstrain
+     nbody_tot = ndisp + nstrain
 
      ! Create all possible combinaions for the specified orders
      ! If anybody has ever, ever to read and understand this I'm terribly sorry 
@@ -1004,25 +1012,30 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi_order)
      i = 0
      !write(*,*) "what is ncombi?", ncombi
      !write(*,*) "what is ncmobi_order", ncombi_order 
+
      !write(*,*) "order_start", order_start
      !write(*,*) "order_stop", order_stop
      order = order_start
      ! TODO work here icombi start and order conting does not work yet. 
      do order=order_start,order_stop,2
-        !write(*,*) 'Was I now here?!(order-loop)'
+        !write(std_out,*) 'Was I now here?!(order-loop)'
         i = i + 1
         icombi_stop = icombi_start + ncombi_order(i) - 1
         equal_term_done = .FALSE.
-        !write(*,*) 'order', order
-        !write(*,*) 'icombi_start', icombi_start
-        !write(*,*) 'icombi_stop', icombi_stop
+        !write(std_out,*) 'order', order
+        !write(std_out,*) 'icombi_start', icombi_start
+        !write(std_out,*) 'icombi_stop', icombi_stop
         icombi=icombi_start 
         do while (icombi<=icombi_stop)
            power_tot = 0 
-           do idisp=1,ndisp
+           do idisp=1,nbody_tot
               !write(*,*) "what is icombi here?", icombi 
               !write(*,*) "what is icombi_stop here?", icombi_stop
-              power_tot = power_tot + terms(icombi)%terms(1)%power_disp(idisp)
+              if(idisp<=ndisp)then
+                power_tot = power_tot + terms(icombi)%terms(1)%power_disp(idisp)
+              else 
+                power_tot = power_tot + terms(icombi)%terms(1)%power_strain(idisp-ndisp)
+              endif
            enddo
            ! Probably have to increase order at same time 
            ! If the term already has the right order we cycle 
@@ -1041,19 +1054,29 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi_order)
               ! Treat single permutations from the bottom of the order 
               ! so start from ^2^2^2 and get ^6^2^2,^2^6^2, and ^2^2^6 f.E.
               ! do loop over displacements 
-              do while(jdisp1<=ndisp .and. sec < 100)                    
+              do while(jdisp1<=nbody_tot .and. sec < 100)                    
                  !write(*,*) "what is jdisp1 here?", jdisp1
                  !write(*,*) "what is icombi here?", icombi
                  !write(*,*) "what is icombi_sotp?", icombi_stop
                  ! Increase the order of the displacements 
                  do iterm_of_term=1,nterm_of_term
-                    terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) =&
+                    if(jdisp1 <= ndisp)then
+                       terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) =&
 &                            terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) + 2 
+                    else
+                       terms(icombi)%terms(iterm_of_term)%power_strain(jdisp1-ndisp) =&
+&                            terms(icombi)%terms(iterm_of_term)%power_strain(jdisp1-ndisp) + 2 
+      
+                    endif
                  enddo
-                 ! Check total order of term after increse
+                 ! Check total order of term after increase
                  power_tot=0
-                 do jdisp2=1,ndisp 
-                    power_tot = power_tot + terms(icombi)%terms(1)%power_disp(jdisp2)
+                 do jdisp2=1,nbody_tot 
+                    if(jdisp2 <= ndisp)then
+                       power_tot = power_tot + terms(icombi)%terms(1)%power_disp(jdisp2)
+                    else 
+                       power_tot = power_tot + terms(icombi)%terms(1)%power_strain(jdisp2-ndisp)
+                    endif
                  enddo
                  ! If the term is at the right order do next displacement 
                  ! increase icombi and icombi_start to go to next term in array 
@@ -1068,28 +1091,43 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi_order)
                enddo!jdisp1
                !Treat permutations in terms ndisp > 2 and order >= 10 
                !Start f.E. from ^4^4^4 and get ^4^2^4, ^2^4^4,^4^4^2
-               if(icombi_stop - icombi > 1 .and. ndisp >2 )then    
-                  do icombi2=icombi,icombi+ndisp-1
-                      do jdisp=1,ndisp
+               if(icombi_stop - icombi > 1 .and. nbody_tot >2 )then    
+                  do icombi2=icombi,icombi+nbody_tot-1
+                      do jdisp=1,nbody_tot
                          do iterm_of_term=1,nterm_of_term
-                            terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp) = &
+                            if(jdisp <= ndisp)then
+                               terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp) = &
 &                                    terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp) +2
                             !write(*,*) "What's the power now?", terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp)
+                             else 
+                               terms(icombi2)%terms(iterm_of_term)%power_strain(jdisp-ndisp) = &
+&                                    terms(icombi2)%terms(iterm_of_term)%power_strain(jdisp-ndisp) +2
+                             endif
                          enddo                     
                       enddo !jdisp
                   enddo 
                   jdisp1 = 1                  
-                  do while(jdisp1<=ndisp .and. sec < 100) 
+                  do while(jdisp1<=nbody_tot .and. sec < 100) 
                       sec = sec + 1  
                       !write(*,*) "how often did I go here, hu ?"                  
                      !write(*,*) "I did at least one displacement" 
                      do iterm_of_term=1,nterm_of_term
-                        terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) = &
-&                                terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) - 2 
+                        if(jdisp1 <= ndisp)then
+                           terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) =&
+&                                terms(icombi)%terms(iterm_of_term)%power_disp(jdisp1) + 2 
+                        else
+                           terms(icombi)%terms(iterm_of_term)%power_strain(jdisp1-ndisp) =&
+&                                terms(icombi)%terms(iterm_of_term)%power_strain(jdisp1-ndisp) + 2 
+                     
+                        endif
                      enddo
                      power_tot=0
-                     do jdisp2=1,ndisp 
-                        power_tot = power_tot + terms(icombi)%terms(1)%power_disp(jdisp2)
+                     do jdisp2=1,nbody_tot 
+                        if(jdisp2 <= ndisp)then
+                           power_tot = power_tot + terms(icombi)%terms(1)%power_disp(jdisp2)
+                        else 
+                           power_tot = power_tot + terms(icombi)%terms(1)%power_strain(jdisp2-ndisp)
+                        endif
                      enddo
                      if(power_tot == order)then 
                         icombi = icombi + 1
@@ -1109,24 +1147,32 @@ subroutine opt_getHoTerms(terms,order_start,order_stop,ndisp,ncombi_order)
                endif! (icombi_stop - icombi)  
                !write(*,*) 'I was here!'
                to_divide = real(order)
-               divider1 = real(ndisp)
+               divider1 = real(nbody_tot)
                divided = real(to_divide/divider1)
                divider2 = real(2)
                !write(*,*) 'divided', divided, 'divider2', divider2
                !Treat terms with even power f.E. ^2^2^2^2, ^4^4 etc...
-               if(mod(divided,divider2) == 0 .and. .not. equal_term_done .and. ndisp > 1)then 
+               if(mod(divided,divider2) == 0 .and. .not. equal_term_done .and. nbody_tot > 1)then 
                   !write(*,*) "Sometimes I should be here sometimes I shouldn't" 
-                  do jdisp=1,ndisp
+                  do jdisp=1,nbody_tot
                      do iterm_of_term=1,nterm_of_term
-                        terms(icombi)%terms(iterm_of_term)%power_disp(jdisp) = order/ndisp 
+                        if(jdisp<=ndisp)then
+                           terms(icombi)%terms(iterm_of_term)%power_disp(jdisp) = order/ndisp 
+                        else 
+                           terms(icombi)%terms(iterm_of_term)%power_strain(jdisp-ndisp) = order/ndisp 
+                        endif
                      enddo                     
                   enddo !jdisp
                   if(order < order_stop)then
-                     do icombi2=icombi+1,icombi+ndisp
-                         do jdisp=1,ndisp
-                            do iterm_of_term=1,nterm_of_term
-                               terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp) = order/ndisp 
-                            enddo                     
+                     do icombi2=icombi+1,icombi+nbody_tot
+                         do jdisp=1,nbody_tot
+                             do iterm_of_term=1,nterm_of_term
+                                if(jdisp<=ndisp)then
+                                   terms(icombi2)%terms(iterm_of_term)%power_disp(jdisp) = order/ndisp 
+                                else 
+                                   terms(icombi2)%terms(iterm_of_term)%power_strain(jdisp-ndisp) = order/ndisp 
+                                endif
+                             enddo                     
                          enddo !jdisp
                      enddo
                   endif 
@@ -1355,15 +1401,16 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
 !Strings 
 !Local variables ------------------------------
 !scalars
- integer ::  ndisp,nterm_of_term
+ integer ::  ndisp,nterm_of_term,nstrain,nbody_tot
  integer ::  order_start,order_stop,norder
+ integer ::  order_start_str,order_stop_str
  integer ::  icombi,idisp,iterm_of_term
- integer :: ncombi_tot 
+ integer ::  ncombi_tot,ncombi_str
 !reals
  real(dp) :: coeff_ini 
 !arrays
  type(polynomial_coeff_type) :: term
- integer,allocatable :: ncombi_order(:),dummy(:)
+ integer,allocatable :: ncombi_order(:),ncombi_order_str(:),dummy(:)
 !Logicals
  logical :: had_strain 
 !Strings
@@ -1372,7 +1419,9 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
        !Get/Set Variables         
        norder = abs(((power_disp(2)-power_disp(1))/2)) + 1 
        ABI_ALLOCATE(ncombi_order,(norder))
+       ABI_ALLOCATE(ncombi_order_str,(norder))
        ncombi_order = 0 
+       ncombi_order_str = 0 
 
        ncombi = 0 
        !Get this term (iterm) and infromations about it 
@@ -1381,7 +1430,9 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
        !Get minimum oder for this term
        !Get total number of terms in effpot for message
        ndisp = term_in%terms(1)%ndisp
-       nterm_of_term = term_in%nterm
+       nstrain = term_in%terms(1)%nstrain
+       nbody_tot = ndisp + nstrain  
+       nterm_of_term = term_in%nterm      
        ABI_ALLOCATE(dummy,(5))      
        call polynomial_coeff_init(coeff_ini,nterm_of_term,term,term_in%terms,term_in%name,check=.true.)
        ABI_DEALLOCATE(dummy)      
@@ -1420,12 +1471,15 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
        end if
        
        ! get total amount of combinations and combinations per order for the term
-       call opt_getCombisforterm(order_start,order_stop,ndisp,ncombi,ncombi_order)
-             
+       call opt_getCombisforterm(order_start,order_stop,ndisp,ncombi,ncombi_order)             
+       !write(std_out,*) "I was here ncombi is: ", ncombi
        ! Allocate terms with ncombi free space to work with 
        if(had_strain)then 
-          ABI_DATATYPE_ALLOCATE(terms_out,(3*ncombi))
-          ncombi_tot = 3*ncombi  
+          call opt_getHOforterm(term_in,power_disp,order_start_str,order_stop_str)
+          call opt_getCombisforterm(order_start_str,order_stop_str,nbody_tot,ncombi_str,ncombi_order_str)
+          !write(std_out,*) "I was here ncombi_str is: ", ncombi_str
+          ABI_DATATYPE_ALLOCATE(terms_out,(ncombi+ncombi_str))
+          ncombi_tot = ncombi+ncombi_str 
        else 
           ABI_DATATYPE_ALLOCATE(terms_out,(ncombi)) 
           ncombi_tot = ncombi 
@@ -1448,14 +1502,14 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
            ! Change the weight of the term to 1 (even terms have allways weight=1)
            do iterm_of_term=1,nterm_of_term 
              terms_out(icombi)%terms(iterm_of_term)%weight = 1
-             if(icombi > ncombi .and. icombi <= 2*ncombi)then 
+             if(icombi > ncombi)then 
                 terms_out(icombi)%terms(iterm_of_term)%power_strain = 2
                 coeff_ini = 10d3 !abs(terms_out(icombi)%coefficient / 2)
                 terms_out(icombi)%coefficient = coeff_ini
-             elseif(icombi>2*ncombi)then
-                terms_out(icombi)%terms(iterm_of_term)%power_strain = 4
-                coeff_ini = 10d5 !abs(terms_out(icombi)%coefficient / 2)
-                terms_out(icombi)%coefficient = coeff_ini
+!             elseif(icombi>2*ncombi)then
+!                terms_out(icombi)%terms(iterm_of_term)%power_strain = 4
+!                coeff_ini = 10d5 !abs(terms_out(icombi)%coefficient / 2)
+!                terms_out(icombi)%coefficient = coeff_ini
              endif 
              do idisp=1,ndisp
                 terms_out(icombi)%terms(iterm_of_term)%power_disp(idisp) = 2
@@ -1467,18 +1521,18 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
        !Refree memory
        !if(had_strain) 
        call polynomial_coeff_free(term)  
-      
+       
        ! Get high order combinations 
        if(had_strain)then           
           call opt_getHoTerms(terms_out(:ncombi),order_start,order_stop,ndisp,ncombi_order) 
-          call opt_getHoTerms(terms_out(ncombi+1:2*ncombi),order_start,order_stop,ndisp,ncombi_order) 
-          call opt_getHoTerms(terms_out(2*ncombi+1:),order_start,order_stop,ndisp,ncombi_order) 
+          call opt_getHoTerms(terms_out(ncombi+1:),order_start_str,order_stop_str,ndisp,ncombi_order_str) 
           ncombi = ncombi_tot
        else 
           call opt_getHoTerms(terms_out,order_start,order_stop,ndisp,ncombi_order) 
        endif
        !DEALLOCATION 
        ABI_DEALLOCATE(ncombi_order)
+       ABI_DEALLOCATE(ncombi_order_str)
 
 end subroutine opt_getHOcrossdisp
 !!***
