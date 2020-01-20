@@ -42,7 +42,7 @@
  
 ================================================================================
  
- Dynamical Quadrupoles Tensor (units: e·Bohr)
+ Dynamical Quadrupoles Tensor (units: e Bohr)
  
   atom   dir       Qxx         Qyy         Qzz         Qyz         Qxz         Qxy
     1     x      0.000000   -0.000000    0.000000   13.473552    0.000000    0.000000
@@ -104,7 +104,7 @@
    -0.000000   -0.000000   -0.000000    0.000000   -0.229349    0.000000    0.000000   -0.229349    0.000000
    -0.000000   -0.000000   -0.000000    0.000000    0.000000   -0.229349    0.000000    0.000000   -0.229349
  
- First moment of Polarization induced by atomic displacement (1/ucvol factor not included) (units: e·Bohr) 
+ First moment of Polarization induced by atomic displacement (1/ucvol factor not included) (units: e Bohr) 
  
   atom   dir       Pxx         Pyy         Pzz         Pyz         Pxz         Pxy         Pzy         Pzx         Pyx
     1     x      0.000000   -0.000000    0.000000    6.736776    0.000000    0.000000    6.736776   -0.000000    0.000000

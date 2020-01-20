@@ -133,7 +133,7 @@
  
 ================================================================================
  
- Dynamical Quadrupoles Tensor (units: e·Bohr)
+ Dynamical Quadrupoles Tensor (units: e Bohr)
  
   atom   dir       Qxx         Qyy         Qzz         Qyz         Qxz         Qxy
     1     x      0.000000   -0.000000   -0.000000   11.999598    0.000000    0.000000
