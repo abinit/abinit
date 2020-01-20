@@ -8094,12 +8094,12 @@ Variable(
     vartype="integer",
     topics=['DFPT_expert', 'xc_expert'],
     dimensions="scalar",
-    defaultval=3,
+    defaultval=1,
     mnemonics="Index of the XC ROTation method used to calculate first-order exchange-correlation potential in non-collinear DFPT calculations",
     text=r"""
 Method of calculation of the 1st order XC potential in non-collinear DFPT
 calculations. The possible values 1,2 and 3 correspond to the following
-methods
+methods:
 
   * If ixcrot=1, the spinor rotation matrix U at each FFT point is not calculated explicitly. Instead the needed expressions involving U are derived based on the general properties of the U matrix.
   * If ixcrot=2, U is computed explicitly

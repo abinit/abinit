@@ -1315,6 +1315,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  ixcrot
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,3,(/1,2,3/),iout)
+   if(abs(dt%zeemanfield(1))>tol8)then
+     cond_string(1)='zeemanfield(1)' ; cond_values(1)=dt%zeemanfield(1)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,1,(/3/),iout)
+   end if
+   if(abs(dt%zeemanfield(2))>tol8)then
+     cond_string(1)='zeemanfield(2)' ; cond_values(1)=dt%zeemanfield(2)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,1,(/3/),iout)
+   end if
+   if(abs(dt%zeemanfield(3))>tol8)then
+     cond_string(1)='zeemanfield(3)' ; cond_values(1)=dt%zeemanfield(3)
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,1,(/3/),iout)
+   end if
 
 !  tim1rev
    call chkint_eq(0,0,cond_string,cond_values,ierr,'tim1rev',dt%tim1rev,2,(/0,1/),iout)
