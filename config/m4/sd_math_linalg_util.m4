@@ -41,6 +41,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS], [
 AC_DEFUN([_SD_LINALG_CHECK_BLAS_EXTS], [
   # AXPBY family?
   AC_MSG_CHECKING([for AXPBY support in the BLAS libraries])
+  AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call saxpby
@@ -48,6 +49,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_EXTS], [
       call caxpby
       call zaxpby
     ]])], [sd_linalg_has_axpby="yes"], [sd_linalg_has_axpby="no"])
+  AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_axpby}])
 
   if test "${sd_linalg_has_axpby}" = "yes"; then
@@ -57,11 +59,13 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_EXTS], [
 
   # gemm3m family
   AC_MSG_CHECKING([for GEMM3M in the BLAS libraries])
+  AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call cgemm3m
       call zgemm3m
     ]])], [sd_linalg_has_gemm3m="yes"], [sd_linalg_has_gemm3m="no"])
+  AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_gemm3m}])
 
   if test "${sd_linalg_has_gemm3m}" = "yes"; then
@@ -79,6 +83,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_EXTS], [
 AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
   # mkl_imatcopy family
   AC_MSG_CHECKING([for mkl_imatcopy in the specified libraries])
+  AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call mkl_simatcopy
@@ -86,6 +91,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
       call mkl_cimatcopy
       call mkl_zimatcopy
     ]])], [sd_linalg_mkl_has_imatcopy="yes"], [sd_linalg_mkl_has_imatcopy="no"])
+  AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_mkl_has_imatcopy}])
 
   if test "${sd_linalg_mkl_has_imatcopy}" = "yes"; then
@@ -95,6 +101,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
 
   # mkl_omatcopy family
   AC_MSG_CHECKING([for mkl_omatcopy in the specified libraries])
+  AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call mkl_somatcopy
@@ -102,6 +109,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
       call mkl_comatcopy
       call mkl_zomatcopy
     ]])], [sd_linalg_mkl_has_omatcopy="yes"], [sd_linalg_mkl_has_omatcopy="no"])
+  AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_mkl_has_omatcopy}])
 
   if test "${sd_linalg_mkl_has_omatcopy}" = "yes"; then
@@ -111,6 +119,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
 
   # mkl_omatadd family
   AC_MSG_CHECKING([for mkl_omatadd in the specified libraries])
+  AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call mkl_somatadd
@@ -118,6 +127,7 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
       call mkl_domatadd
       call mkl_zomatadd
     ]])], [sd_linalg_mkl_has_omatadd="yes"], [sd_linalg_mkl_has_omatadd="no"])
+  AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_mkl_has_omatadd}])
 
   if test "${sd_linalg_mkl_has_omatadd}" = "yes"; then
@@ -127,12 +137,14 @@ AC_DEFUN([_SD_LINALG_CHECK_BLAS_MKL_EXTS], [
 
   # mkl_threads support functions
   AC_MSG_CHECKING([for mkl_set/get_threads in the specified libraries])
+  AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       integer :: a
       a = mkl_get_max_threads()
       call mkl_set_num_threads
     ]])], [sd_linalg_mkl_has_threads="yes"], [sd_linalg_mkl_has_threads="no"])
+  AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_mkl_has_threads}])
 
   if test "${sd_linalg_mkl_has_threads}" = "yes"; then
@@ -334,6 +346,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2013], [
   sd_linalg_has_elpa_2013="unknown"
 
   AC_MSG_CHECKING([for ELPA 2013 API support in the specified libraries])
+  AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use elpa1
@@ -344,6 +357,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2013], [
       call solve_evp_real(na, nev, a, lda, ev, q, ldq, nblk, comm_r, comm_c)
       call invert_trm_complex(na, ac, lda, nblk, comm_r, comm_c)
     ]])], [sd_linalg_has_elpa_2013="yes"], [sd_linalg_has_elpa_2013="no"])
+  AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_elpa_2013}])
 
   if test "${sd_linalg_has_elpa_2013}" = "yes"; then
@@ -362,6 +376,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2014], [
   sd_linalg_has_elpa_2014="unknown"
 
   AC_MSG_CHECKING([for ELPA 2014 API support in the specified libraries])
+  AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use elpa1
@@ -374,6 +389,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2014], [
 &       comm_r, comm_c)
       call invert_trm_complex(na, ac, lda, nblk, comm_r, comm_c, success)
     ]])], [sd_linalg_has_elpa_2014="yes"], [sd_linalg_has_elpa_2014="no"])
+  AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_elpa_2014}])
 
   if test "${sd_linalg_has_elpa_2014}" = "yes"; then
@@ -392,6 +408,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2015], [
   sd_linalg_has_elpa_2015="unknown"
 
   AC_MSG_CHECKING([for ELPA 2015 API support in the specified libraries])
+  AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use elpa1
@@ -405,6 +422,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2015], [
       call cholesky_complex(na, ac, lda, nblk, comm_r, comm_c, debug, success1)
       success2 = get_elpa_row_col_comms(comm_g, na, na, comm_r, comm_c)
     ]])], [sd_linalg_has_elpa_2015="yes"], [sd_linalg_has_elpa_2015="no"])
+  AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_elpa_2015}])
 
   if test "${sd_linalg_has_elpa_2015}" = "yes"; then
@@ -423,6 +441,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2016], [
   sd_linalg_has_elpa_2016="unknown"
 
   AC_MSG_CHECKING([for ELPA 2016 API support in the specified libraries])
+  AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use elpa1
@@ -437,6 +456,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2016], [
 &       comm_r, comm_c, debug)
       success2 = get_elpa_communicators(comm_g, na, na, comm_r, comm_c)
     ]])], [sd_linalg_has_elpa_2016="yes"], [sd_linalg_has_elpa_2016="no"])
+  AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_elpa_2016}])
 
   if test "${sd_linalg_has_elpa_2016}" = "yes"; then
@@ -455,6 +475,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2017], [
   sd_linalg_has_elpa_2017="unknown"
 
   AC_MSG_CHECKING([for ELPA 2017 API support in the specified libraries])
+  AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       use elpa
@@ -464,6 +485,7 @@ AC_DEFUN([_SD_LINALG_CHECK_ELPA_2017], [
       call e%eigenvectors(a,ev,q,err)
       call e%cholesky(a,err)
     ]])], [sd_linalg_has_elpa_2017="yes"], [sd_linalg_has_elpa_2017="no"])
+  AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_elpa_2017}])
 
   if test "${sd_linalg_has_elpa_2017}" = "yes"; then
@@ -514,11 +536,13 @@ AC_DEFUN([_SD_LINALG_CHECK_MAGMA_15], [
   sd_linalg_has_magma_15="unknown"
 
   AC_MSG_CHECKING([for MAGMA 1.5 support in the specified libraries])
+  AC_LANG_PUSH([Fortran])
   AC_LINK_IFELSE([AC_LANG_PROGRAM([],
     [[
       call magmaf_init
       call magma_finalize
     ]])], [sd_linalg_has_magma_15="yes"], [sd_linalg_has_magma_15="no"])
+  AC_LANG_POP([Fortran])
   AC_MSG_RESULT([${sd_linalg_has_magma_15}])
 
   if test "${sd_linalg_has_magma_15}" = "yes"; then
