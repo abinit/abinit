@@ -453,8 +453,9 @@ P           mkmem           8
          2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
          2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
  Now, the imaginary part of the dynamical matrix is zeroed
-- Found dielectric tensor and Born effective charges in DDB file: t160o_DS20_DDB
-- Cannot find quadrupole tensor in DDB file: t160o_DS20_DDB
+- Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
+- Cannot find quadrupole tensor in DDB file: t60o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00

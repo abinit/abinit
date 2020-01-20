@@ -583,6 +583,10 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
    MSG_BUG(message)
  end if
 
+#ifdef MR_DEV
+ rfqvec_(:)=0; if(present(rfqvec))rfqvec_(:)=rfqvec(:)
+#endif
+
 !In case of a second-derivative, a second phonon wavevector is provided.
  if(nder==2)then
    do ii=1,3
@@ -610,7 +614,7 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 
    if(gamma(ider)==0)then
 #ifdef MR_DEV
-     if(rfstrs(ider)/=0.or.rfelfd(ider)/=0.or.rfqvec(ider)/=0)then
+     if(rfstrs(ider)/=0.or.rfelfd(ider)/=0.or.rfqvec_(ider)/=0)then
 #else
      if(rfstrs(ider)/=0.or.rfelfd(ider)/=0)then
 #endif
@@ -625,10 +629,6 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 !Initialise the perturbation table
  ABI_MALLOC(worki,(mpert,4))
  worki(:,1:nder)=0
-
-#ifdef MR_DEV
- rfqvec_(:)=0; if(present(rfqvec))rfqvec_(:)=rfqvec(:)
-#endif
 
 !Build the perturbation table
  do ider=1,nder
