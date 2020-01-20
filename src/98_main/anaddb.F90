@@ -314,6 +314,7 @@ program anaddb
 !**********************************************************************
 
  ! Get Quadrupole tensor
+ qdrp_cart=zero
  if (mtyp==33) then
    write(msg,'(2a,(80a),2a)') ch10,('=',ii=1,80)
    call wrtout([ab_out,std_out],msg,'COLL')

@@ -431,10 +431,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  Ifc%brav = brav
  Ifc%dipdip = abs(dipdip)
 #ifdef MR_DEV
- if (present(dipquad).and.present(quadquad)) then
-   Ifc%dipquad = dipquad
-   Ifc%quadquad = quadquad
- end if
+ if (present(dipquad)) Ifc%dipquad = dipquad
+ if (present(quadquad)) Ifc%quadquad = quadquad
 #endif
  Ifc%symdynmat = symdynmat
  Ifc%nqshft = nqshft
@@ -455,7 +453,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    qpt(:)=zero
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
 #ifdef MR_DEV
-   if (present(dipquad).and.present(quadquad)) then
+   if (present(dipquad).or.present(quadquad)) then
    call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                Crystal%xred,zeff,qdrp_cart,ifc%ewald_option,dipquad=dipquad,quadquad=quadquad)
    else
@@ -466,6 +464,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                Crystal%xred,zeff,qdrp_cart,ifc%ewald_option)
 #endif
+
    call q0dy3_calc(natom,dyewq0,dyew,Ifc%asr)
    ABI_FREE(dyew)
  end if
@@ -561,7 +560,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      qpt(:)=qbz(:,iqpt)
      sumg0=0
 #ifdef MR_DEV
-     if (present(dipquad).and.present(quadquad)) then
+     if (present(dipquad).or.present(quadquad)) then
        call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                  Crystal%xred,zeff,qdrp_cart,ifc%ewald_option,dipquad=dipquad,quadquad=quadquad)
      else
