@@ -186,6 +186,7 @@ pages:
     - EPH:
         - tutorial/eph.md
         - tutorial/tdepes.md
+        - tutorial/eph4mob.md
     - Many-Body:
         - GW1: tutorial/gw1.md
         - GW2: tutorial/gw2.md
