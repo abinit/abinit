@@ -121,6 +121,11 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
  ciflexo(:,:,:,:)=zero
  if (flexoflg==1.or.flexoflg==2) then
   
+   rfphon(:)=0
+   rfelfd(:)=0
+   rfstrs(:)=0
+   rfqvec(:)=0
+
    ! Look for the Gamma Block in the DDB
    qphon(:,:)=zero
    qphnrm(:)=one

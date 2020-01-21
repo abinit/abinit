@@ -1,6 +1,6 @@
 
 .Version 8.11.14 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_intel19.0 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 16 Jan 2020.
-- ( at 16h56 )
+.Starting date : Tue 21 Jan 2020.
+- ( at 17h47 )
   
-- input  file    -> /Users/mroyo/Treball/Investigació/Flexoelectrics/Src/abinit/tests/Test_suite/tutorespfn_tlw_1-tlw_2-tlw_3/tlw_1.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mroyo_develop/tests/Test_suite/tutorespfn_tlw_1-tlw_2-tlw_3/tlw_1.in
 - output file    -> tlw_1.out
 - root for input  files -> tlw_1i
 - root for output files -> tlw_1o
- 
- 
+
+
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -38,8 +38,8 @@ P This job should need less than                       1.490 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.065 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
- 
- 
+
+
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2 (RF).
@@ -56,8 +56,8 @@ P This job should need less than                       3.097 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.815 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
- 
- 
+
+
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3 (RF).
@@ -74,8 +74,8 @@ P This job should need less than                       3.097 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.815 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
- 
- 
+
+
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4 (RF).
@@ -92,8 +92,8 @@ P This job should need less than                       5.152 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.815 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
- 
- 
+
+
  DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5.
@@ -109,13 +109,13 @@ P This job should need less than                       2.428 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.815 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -125,7 +125,7 @@ _ WF disk file :      0.815 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
               amu      2.80855000E+01
            diemac      1.30000000E+01
              ecut      4.00000000E+00 Hartree
--          fftalg         112
+-          fftalg         312
            getddk1          0
            getddk2          0
            getddk3          2
@@ -578,41 +578,41 @@ P          mk1mem5         64
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl       14.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   1.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   2.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   3.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   4.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   5.
- 
+
 ================================================================================
 == DATASET  1 ==================================================================
 -   nproc =    2
- 
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.0510000  5.0510000  G(1)= -0.0989903  0.0989903  0.0989903
  R(2)=  5.0510000  0.0000000  5.0510000  G(2)=  0.0989903 -0.0989903  0.0989903
  R(3)=  5.0510000  5.0510000  0.0000000  G(3)=  0.0989903  0.0989903 -0.0989903
  Unit cell volume ucvol=  2.5772830E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  15  15  15
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.18799
- 
+
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /Users/mroyo/Treball/Investigació/Flexoelectrics/Src/abinit/tests/Psps_for_tests/14si.fhi
-- pspatm: opening atomic psp file    /Users/mroyo/Treball/Investigació/Flexoelectrics/Src/abinit/tests/Psps_for_tests/14si.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mroyo_develop/tests/Psps_for_tests/14si.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mroyo_develop/tests/Psps_for_tests/14si.fhi
 - Si, fhi98PP : LDA PerdewWang, l=2 local
 - 14.00000   4.00000    150901                znucl, zion, pspdat
     6    7    2    2       495   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -623,41 +623,41 @@ P          mk1mem5         64
              0    3.275194
              1    1.826241
  pspatm: atomic psp has been read  and splines computed
- 
+
   -1.28723869E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
+
 _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
- 
+
 ================================================================================
- 
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -7.8974755385800    -7.897E+00 8.390E-04 2.642E+00
- ETOT  2  -7.9020333870086    -4.558E-03 8.754E-10 7.925E-02
- ETOT  3  -7.9021304324595    -9.705E-05 5.182E-07 9.160E-04
- ETOT  4  -7.9021310896621    -6.572E-07 3.317E-09 1.121E-06
- ETOT  5  -7.9021310905726    -9.105E-10 5.709E-12 8.809E-09
- ETOT  6  -7.9021310905847    -1.210E-11 8.154E-14 5.096E-11
- ETOT  7  -7.9021310905848    -8.615E-14 4.432E-16 1.466E-13
- ETOT  8  -7.9021310905848    -2.043E-14 1.075E-18 9.706E-17
- ETOT  9  -7.9021310905848     1.776E-14 5.431E-22 5.540E-19
- 
+ ETOT  1  -7.8974755385801    -7.897E+00 8.390E-04 2.642E+00
+ ETOT  2  -7.9020333870087    -4.558E-03 8.754E-10 7.925E-02
+ ETOT  3  -7.9021304324596    -9.705E-05 5.182E-07 9.160E-04
+ ETOT  4  -7.9021310896623    -6.572E-07 3.317E-09 1.121E-06
+ ETOT  5  -7.9021310905728    -9.105E-10 5.709E-12 8.809E-09
+ ETOT  6  -7.9021310905849    -1.208E-11 8.154E-14 5.096E-11
+ ETOT  7  -7.9021310905849    -5.418E-14 4.432E-16 1.466E-13
+ ETOT  8  -7.9021310905850    -5.684E-14 1.075E-18 9.706E-17
+ ETOT  9  -7.9021310905850     2.398E-14 5.431E-22 5.540E-19
+
  At SCF step    9       vres2   =  5.54E-19 < tolvrs=  1.00E-18 =>converged.
- 
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.36656106E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.36656106E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.36656106E-04  sigma(2 1)=  0.00000000E+00
- 
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
     1        2.00000          1.74719669
     2        2.00000          1.82053787
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   20.232E-23; max=  54.313E-23
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
@@ -665,19 +665,19 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
- 
+
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      1.33643704029404     1.33643704029404     1.33643704029404
- 
+
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000     0.00000000000000
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
- 
+
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000     0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000     0.00000000000000
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.102000000000 10.102000000000 10.102000000000 bohr
               =  5.345748161176  5.345748161176  5.345748161176 angstroms
@@ -687,98 +687,98 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  kpt#   1, nband=  4, wtk=  0.09375, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
   -0.17000    0.12951    0.19608    0.20078
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
- 
+
+
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
- 
+
     Kinetic energy  =  3.00624766405742E+00
-    Hartree energy  =  5.16347550764810E-01
+    Hartree energy  =  5.16347550764809E-01
     XC energy       = -2.41088738212600E+00
-    Ewald energy    = -8.53185198042655E+00
-    PspCore energy  = -4.99455710555873E-02
-    Loc. psp. energy= -2.47512203160974E+00
+    Ewald energy    = -8.53185198042656E+00
+    PspCore energy  = -4.99455710557063E-02
+    Loc. psp. energy= -2.47512203160975E+00
     NL   psp  energy=  2.04308065981083E+00
-    >>>>>>>>> Etotal= -7.90213109058483E+00
- 
+    >>>>>>>>> Etotal= -7.90213109058495E+00
+
  Other information on the energy :
-    Total energy(eV)= -2.15027922417944E+02 ; Band energy (Ha)=   4.6190767727E-01
+    Total energy(eV)= -2.15027922417948E+02 ; Band energy (Ha)=   4.6190767727E-01
 --------------------------------------------------------------------------------
- 
- 
- 
+
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.36656106E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.36656106E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.36656106E-04  sigma(2 1)=  0.00000000E+00
- 
+
 -Cartesian components of stress tensor (GPa)         [Pressure= -4.0206E+00 GPa]
 - sigma(1 1)=  4.02056078E+00  sigma(3 2)=  0.00000000E+00
 - sigma(2 2)=  4.02056078E+00  sigma(3 1)=  0.00000000E+00
 - sigma(3 3)=  4.02056078E+00  sigma(2 1)=  0.00000000E+00
- 
+
 ================================================================================
 == DATASET  2 ==================================================================
 -   nproc =    2
- 
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
- 
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.0510000  5.0510000  G(1)= -0.0989903  0.0989903  0.0989903
  R(2)=  5.0510000  0.0000000  5.0510000  G(2)=  0.0989903 -0.0989903  0.0989903
  R(3)=  5.0510000  5.0510000  0.0000000  G(3)=  0.0989903  0.0989903 -0.0989903
  Unit cell volume ucvol=  2.5772830E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  15  15  15
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.18799
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
- 
+
  ==>  initialize data related to q vector <== 
- 
+
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   3
     2)    idir= 2    ipert=   3
     3)    idir= 3    ipert=   3
- 
+
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : derivative vs k along direction   1
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -8.7619220029065     -8.762E+00 1.852E-02 0.000E+00
- ETOT  2  -8.7639361335457     -2.014E-03 8.160E-06 0.000E+00
- ETOT  3  -8.7639370849709     -9.514E-07 8.998E-09 0.000E+00
- ETOT  4  -8.7639370857860     -8.151E-10 8.470E-12 0.000E+00
- ETOT  5  -8.7639370857870     -9.432E-13 1.246E-14 0.000E+00
- ETOT  6  -8.7639370857869      1.776E-14 1.991E-17 0.000E+00
- ETOT  7  -8.7639370857870     -1.954E-14 3.039E-20 0.000E+00
- ETOT  8  -8.7639370857870      8.882E-15 9.921E-21 0.000E+00
- 
+-ETOT  1  -8.7619220032219     -8.762E+00 1.852E-02 0.000E+00
+ ETOT  2  -8.7639361335452     -2.014E-03 8.160E-06 0.000E+00
+ ETOT  3  -8.7639370849706     -9.514E-07 8.998E-09 0.000E+00
+ ETOT  4  -8.7639370857858     -8.152E-10 8.470E-12 0.000E+00
+ ETOT  5  -8.7639370857867     -9.166E-13 1.246E-14 0.000E+00
+ ETOT  6  -8.7639370857867      1.776E-15 1.991E-17 0.000E+00
+ ETOT  7  -8.7639370857867     -5.329E-15 3.039E-20 0.000E+00
+ ETOT  8  -8.7639370857867      0.000E+00 9.921E-21 0.000E+00
+
  At SCF step    8   max residual=  9.92E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   42.989E-22; max=  99.208E-22
  dfpt_looppert : ek2=    1.8568902922E+01
           f-sum rule ratio=    1.0096420919E+00
@@ -788,8 +788,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  kpt#   1, nband=  4, wtk=  0.00781, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
   -0.04353   -0.18145    0.20115    0.30958
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
- 
+
+
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   2.79406716E+01 eigvalue=  -8.32660291E+00  local=  -2.25950241E+01
@@ -802,36 +802,36 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
  2DEtotal=   -0.8763937086E+01 Ha. Also 2DEtotal=   -0.238478856166E+03 eV
     (  non-var. 2DEtotal :   -8.7639370856E+00 Ha)
- 
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : derivative vs k along direction   2
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -8.7619220028079     -8.762E+00 1.852E-02 0.000E+00
- ETOT  2  -8.7639361334471     -2.014E-03 8.160E-06 0.000E+00
- ETOT  3  -8.7639370848723     -9.514E-07 8.998E-09 0.000E+00
- ETOT  4  -8.7639370856875     -8.152E-10 8.470E-12 0.000E+00
- ETOT  5  -8.7639370856884     -9.202E-13 1.246E-14 0.000E+00
- ETOT  6  -8.7639370856884      1.776E-15 1.991E-17 0.000E+00
- ETOT  7  -8.7639370856884      3.553E-15 3.039E-20 0.000E+00
- ETOT  8  -8.7639370856884      3.553E-15 9.921E-21 0.000E+00
- 
+-ETOT  1  -8.7619220031233     -8.762E+00 1.852E-02 0.000E+00
+ ETOT  2  -8.7639361334466     -2.014E-03 8.160E-06 0.000E+00
+ ETOT  3  -8.7639370848721     -9.514E-07 8.998E-09 0.000E+00
+ ETOT  4  -8.7639370856872     -8.151E-10 8.470E-12 0.000E+00
+ ETOT  5  -8.7639370856881     -9.219E-13 1.246E-14 0.000E+00
+ ETOT  6  -8.7639370856881     -1.776E-14 1.991E-17 0.000E+00
+ ETOT  7  -8.7639370856881      1.066E-14 3.039E-20 0.000E+00
+ ETOT  8  -8.7639370856881     -3.553E-15 9.921E-21 0.000E+00
+
  At SCF step    8   max residual=  9.92E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   42.989E-22; max=  99.208E-22
  dfpt_looppert : ek2=    1.8568902922E+01
           f-sum rule ratio=    1.0096420918E+00
@@ -841,8 +841,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  kpt#   1, nband=  4, wtk=  0.00781, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
   -0.20401    0.66340    0.12781    0.17401
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
- 
+
+
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   2.79406716E+01 eigvalue=  -8.32660291E+00  local=  -2.25950241E+01
@@ -855,36 +855,36 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
  2DEtotal=   -0.8763937086E+01 Ha. Also 2DEtotal=   -0.238478856164E+03 eV
     (  non-var. 2DEtotal :   -8.7639370855E+00 Ha)
- 
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : derivative vs k along direction   3
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -8.7619220027094     -8.762E+00 1.852E-02 0.000E+00
- ETOT  2  -8.7639361333485     -2.014E-03 8.160E-06 0.000E+00
- ETOT  3  -8.7639370847737     -9.514E-07 8.998E-09 0.000E+00
- ETOT  4  -8.7639370855888     -8.151E-10 8.470E-12 0.000E+00
- ETOT  5  -8.7639370855898     -9.557E-13 1.246E-14 0.000E+00
- ETOT  6  -8.7639370855897      1.776E-14 1.991E-17 0.000E+00
- ETOT  7  -8.7639370855897      1.954E-14 3.039E-20 0.000E+00
- ETOT  8  -8.7639370855897      3.553E-15 9.921E-21 0.000E+00
- 
+-ETOT  1  -8.7619220030247     -8.762E+00 1.852E-02 0.000E+00
+ ETOT  2  -8.7639361333480     -2.014E-03 8.160E-06 0.000E+00
+ ETOT  3  -8.7639370847734     -9.514E-07 8.998E-09 0.000E+00
+ ETOT  4  -8.7639370855886     -8.151E-10 8.470E-12 0.000E+00
+ ETOT  5  -8.7639370855895     -9.379E-13 1.246E-14 0.000E+00
+ ETOT  6  -8.7639370855895      3.375E-14 1.991E-17 0.000E+00
+ ETOT  7  -8.7639370855895      0.000E+00 3.039E-20 0.000E+00
+ ETOT  8  -8.7639370855895      1.776E-15 9.921E-21 0.000E+00
+
  At SCF step    8   max residual=  9.92E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   42.989E-22; max=  99.208E-22
  dfpt_looppert : ek2=    1.8568902922E+01
           f-sum rule ratio=    1.0096420918E+00
@@ -894,8 +894,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  kpt#   1, nband=  4, wtk=  0.00781, kpt= -0.1250 -0.2500  0.0000 (reduced coord)
    0.12377   -0.24097   -0.16448   -0.24179
  prteigrs : prtvol=0 or 1, do not print more k-points.
- 
- 
+
+
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   2.79406716E+01 eigvalue=  -8.32660291E+00  local=  -2.25950241E+01
@@ -909,10 +909,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  2DEtotal=   -0.8763937086E+01 Ha. Also 2DEtotal=   -0.238478856161E+03 eV
     (  non-var. 2DEtotal :   -8.7639370854E+00 Ha)
 ================================================================================
- 
+
  ---- first-order wavefunction calculations are completed ----
- 
- 
+
+
  Total localisation tensor (bohr^2) in cartesian coordinates
   WARNING : still subject to testing - especially symmetries.
       direction              matrix element
@@ -926,66 +926,66 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
      3        1       1.9103268328    0.0000000000
      3        2       1.9103268328    0.0000000000
      3        3       3.8206536655    0.0000000000
- 
+
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
- 
+
 ================================================================================
 == DATASET  3 ==================================================================
 -   nproc =    2
- 
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
- 
+
  mkfilename : getddk/=0, take file _1WF from output of DATASET   2.
- 
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.0510000  5.0510000  G(1)= -0.0989903  0.0989903  0.0989903
  R(2)=  5.0510000  0.0000000  5.0510000  G(2)=  0.0989903 -0.0989903  0.0989903
  R(3)=  5.0510000  5.0510000  0.0000000  G(3)=  0.0989903  0.0989903 -0.0989903
  Unit cell volume ucvol=  2.5772830E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  15  15  15
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.18799
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
- 
+
  ==>  initialize data related to q vector <== 
- 
+
  The list of irreducible perturbations for this q vector is:
- 
+
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : 2nd derivative wrt k, idir1 = 1 idir2 = 1
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 -dfpt_looppert : read the wavefunctions from file: tlw_1o_DS2_1WF7
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   107.62333918619      1.076E+02 9.874E-21 0.000E+00
- 
+-ETOT  1   107.62333918623      1.076E+02 9.874E-21 0.000E+00
+
  At SCF step    1   max residual=  9.87E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   27.919E-22; max=  98.736E-22
- 
+
  One components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.04784193E+03 eigvalue=  -1.18533258E+03  local=  -3.49844707E+03
@@ -994,32 +994,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.63203028E+03   enl1=   0.00000000E+00
- 
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : 2nd derivative wrt k, idir1 = 2 idir2 = 2
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 -dfpt_looppert : read the wavefunctions from file: tlw_1o_DS2_1WF8
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   107.62333918852      1.076E+02 9.874E-21 0.000E+00
- 
+-ETOT  1   107.62333918856      1.076E+02 9.874E-21 0.000E+00
+
  At SCF step    1   max residual=  9.87E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   27.919E-22; max=  98.736E-22
- 
+
  One components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.04784193E+03 eigvalue=  -1.18533258E+03  local=  -3.49844707E+03
@@ -1028,32 +1028,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.63203028E+03   enl1=   0.00000000E+00
- 
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : 2nd derivative wrt k, idir1 = 3 idir2 = 3
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 -dfpt_looppert : read the wavefunctions from file: tlw_1o_DS2_1WF9
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   107.62333919083      1.076E+02 9.874E-21 0.000E+00
- 
+-ETOT  1   107.62333919086      1.076E+02 9.874E-21 0.000E+00
+
  At SCF step    1   max residual=  9.87E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   27.919E-22; max=  98.736E-22
- 
+
  One components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.04784193E+03 eigvalue=  -1.18533258E+03  local=  -3.49844707E+03
@@ -1062,33 +1062,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   1.63203028E+03   enl1=   0.00000000E+00
- 
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : 2nd derivative wrt k, idir1 = 2 idir2 = 3
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 -dfpt_looppert : read the wavefunctions from file: tlw_1o_DS2_1WF8
 -dfpt_looppert : read the wavefunctions from file: tlw_1o_DS2_1WF9
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -61.174554296595     -6.117E+01 9.228E-21 0.000E+00
- 
+-ETOT  1  -61.174554297060     -6.117E+01 9.228E-21 0.000E+00
+
  At SCF step    1   max residual=  9.23E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   26.412E-22; max=  92.281E-22
- 
+
  One components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.53500060E+03 eigvalue=  -4.34387741E+02  local=  -1.24024109E+03
@@ -1097,33 +1097,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   5.70715771E+02   enl1=   0.00000000E+00
- 
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : 2nd derivative wrt k, idir1 = 1 idir2 = 3
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 -dfpt_looppert : read the wavefunctions from file: tlw_1o_DS2_1WF7
 -dfpt_looppert : read the wavefunctions from file: tlw_1o_DS2_1WF9
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -61.174554291261     -6.117E+01 9.228E-21 0.000E+00
- 
+-ETOT  1  -61.174554291727     -6.117E+01 9.228E-21 0.000E+00
+
  At SCF step    1   max residual=  9.23E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   26.326E-22; max=  92.281E-22
- 
+
  One components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.53500060E+03 eigvalue=  -4.34387741E+02  local=  -1.24024109E+03
@@ -1132,33 +1132,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   5.70715771E+02   enl1=   0.00000000E+00
- 
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : 2nd derivative wrt k, idir1 = 1 idir2 = 2
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 -dfpt_looppert : read the wavefunctions from file: tlw_1o_DS2_1WF7
 -dfpt_looppert : read the wavefunctions from file: tlw_1o_DS2_1WF8
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -61.174554301213     -6.117E+01 9.228E-21 0.000E+00
- 
+-ETOT  1  -61.174554301678     -6.117E+01 9.228E-21 0.000E+00
+
  At SCF step    1   max residual=  9.23E-21 < tolwfr=  1.00E-20 =>converged.
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   26.295E-22; max=  92.281E-22
- 
+
  One components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.53500060E+03 eigvalue=  -4.34387741E+02  local=  -1.24024109E+03
@@ -1168,41 +1168,41 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  7,8,9: eventually, occupation + non-local contributions
     edocc=   0.00000000E+00     enl0=   5.70715771E+02   enl1=   0.00000000E+00
 ================================================================================
- 
+
  ---- first-order wavefunction calculations are completed ----
- 
- 
+
+
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
- 
+
 ================================================================================
 == DATASET  4 ==================================================================
 -   nproc =    2
- 
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
- 
+
  mkfilename : getddk/=0, take file _1WF from output of DATASET   2.
- 
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.0510000  5.0510000  G(1)= -0.0989903  0.0989903  0.0989903
  R(2)=  5.0510000  0.0000000  5.0510000  G(2)=  0.0989903 -0.0989903  0.0989903
  R(3)=  5.0510000  5.0510000  0.0000000  G(3)=  0.0989903  0.0989903 -0.0989903
  Unit cell volume ucvol=  2.5772830E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  15  15  15
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.18799
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
  symkchk : k-point set has full space-group symmetry.
- 
+
  ==>  initialize data related to q vector <== 
- 
+
  The list of irreducible perturbations for this q vector is:
     1)    idir= 1    ipert=   1
     2)    idir= 2    ipert=   1
@@ -1219,42 +1219,42 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
    13)    idir= 1    ipert=   6
    14)    idir= 2    ipert=   6
    15)    idir= 3    ipert=   6
- 
+
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : displacement of atom   1   along direction   1
  Found     2 symmetries that leave the perturbation invariant.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   15.054961662114     -3.517E+01 5.274E-02 1.909E+03
- ETOT  2   7.0439212321014     -8.011E+00 6.927E-03 4.454E+00
- ETOT  3   7.0219485494529     -2.197E-02 1.691E-05 3.167E-01
- ETOT  4   7.0211724665876     -7.761E-04 7.289E-07 1.705E-03
- ETOT  5   7.0211696537016     -2.813E-06 2.410E-09 2.526E-05
- ETOT  6   7.0211696141923     -3.951E-08 4.362E-11 4.478E-07
- ETOT  7   7.0211696132356     -9.567E-10 8.696E-13 2.321E-09
- 
+-ETOT  1   15.054961657001     -3.517E+01 5.274E-02 1.909E+03
+ ETOT  2   7.0439212322455     -8.011E+00 6.927E-03 4.454E+00
+ ETOT  3   7.0219485494531     -2.197E-02 1.691E-05 3.167E-01
+ ETOT  4   7.0211724665878     -7.761E-04 7.289E-07 1.705E-03
+ ETOT  5   7.0211696537018     -2.813E-06 2.410E-09 2.526E-05
+ ETOT  6   7.0211696141925     -3.951E-08 4.362E-11 4.478E-07
+ ETOT  7   7.0211696132358     -9.567E-10 8.696E-13 2.320E-09
+
  At SCF step    7       vres2   =  2.32E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
 -open ddk wf file :tlw_1o_DS2_1WF8
 -open ddk wf file :tlw_1o_DS2_1WF9
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   27.288E-14; max=  86.957E-14
- 
+
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   5.82591637E+01 eigvalue=  -6.78752255E+00  local=  -4.30226277E+01
@@ -1273,41 +1273,41 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  2DEtotal=    0.7021169613E+01 Ha. Also 2DEtotal=    0.191055741492E+03 eV
     (2DErelax=   -4.3208461432E+01 Ha. 2DEnonrelax=    5.0229631045E+01 Ha)
     (  non-var. 2DEtotal :    7.0211696481E+00 Ha)
- 
- 
+
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : displacement of atom   1   along direction   2
  Found     2 symmetries that leave the perturbation invariant.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   15.055294046918     -3.517E+01 5.274E-02 1.909E+03
- ETOT  2   7.0439157433793     -8.011E+00 6.927E-03 4.453E+00
- ETOT  3   7.0219483069471     -2.197E-02 1.692E-05 3.166E-01
- ETOT  4   7.0211724455918     -7.759E-04 7.286E-07 1.694E-03
- ETOT  5   7.0211696530211     -2.793E-06 2.391E-09 2.503E-05
- ETOT  6   7.0211696139505     -3.907E-08 4.320E-11 4.443E-07
- ETOT  7   7.0211696130017     -9.487E-10 8.633E-13 2.321E-09
- 
+-ETOT  1   15.055294060172     -3.517E+01 5.274E-02 1.909E+03
+ ETOT  2   7.0439157430137     -8.011E+00 6.927E-03 4.453E+00
+ ETOT  3   7.0219483069390     -2.197E-02 1.692E-05 3.166E-01
+ ETOT  4   7.0211724455914     -7.759E-04 7.286E-07 1.694E-03
+ ETOT  5   7.0211696530213     -2.793E-06 2.391E-09 2.503E-05
+ ETOT  6   7.0211696139506     -3.907E-08 4.320E-11 4.443E-07
+ ETOT  7   7.0211696130020     -9.486E-10 8.633E-13 2.321E-09
+
  At SCF step    7       vres2   =  2.32E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
 -open ddk wf file :tlw_1o_DS2_1WF8
 -open ddk wf file :tlw_1o_DS2_1WF9
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   27.133E-14; max=  86.331E-14
- 
+
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   5.82591636E+01 eigvalue=  -6.78752254E+00  local=  -4.30226277E+01
@@ -1326,41 +1326,41 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  2DEtotal=    0.7021169613E+01 Ha. Also 2DEtotal=    0.191055741486E+03 eV
     (2DErelax=   -4.3208461432E+01 Ha. 2DEnonrelax=    5.0229631045E+01 Ha)
     (  non-var. 2DEtotal :    7.0211697047E+00 Ha)
- 
- 
+
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : displacement of atom   1   along direction   3
  Found     2 symmetries that leave the perturbation invariant.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   15.055839261264     -3.517E+01 5.274E-02 1.909E+03
- ETOT  2   7.0438982362362     -8.012E+00 6.927E-03 4.451E+00
- ETOT  3   7.0219465897467     -2.195E-02 1.693E-05 3.163E-01
- ETOT  4   7.0211722637421     -7.743E-04 7.275E-07 1.678E-03
- ETOT  5   7.0211695031666     -2.761E-06 2.365E-09 2.460E-05
- ETOT  6   7.0211694649755     -3.819E-08 4.242E-11 4.343E-07
- ETOT  7   7.0211694640508     -9.248E-10 8.463E-13 2.258E-09
- 
+-ETOT  1   15.055839265534     -3.517E+01 5.274E-02 1.909E+03
+ ETOT  2   7.0438982371174     -8.012E+00 6.927E-03 4.451E+00
+ ETOT  3   7.0219465897300     -2.195E-02 1.693E-05 3.163E-01
+ ETOT  4   7.0211722637431     -7.743E-04 7.275E-07 1.678E-03
+ ETOT  5   7.0211695031668     -2.761E-06 2.365E-09 2.460E-05
+ ETOT  6   7.0211694649758     -3.819E-08 4.242E-11 4.343E-07
+ ETOT  7   7.0211694640510     -9.247E-10 8.463E-13 2.258E-09
+
  At SCF step    7       vres2   =  2.26E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
 -open ddk wf file :tlw_1o_DS2_1WF8
 -open ddk wf file :tlw_1o_DS2_1WF9
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   26.491E-14; max=  84.630E-14
- 
+
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   5.82591641E+01 eigvalue=  -6.78752270E+00  local=  -4.30226284E+01
@@ -1379,41 +1379,41 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  2DEtotal=    0.7021169464E+01 Ha. Also 2DEtotal=    0.191055737432E+03 eV
     (2DErelax=   -4.3208461581E+01 Ha. 2DEnonrelax=    5.0229631045E+01 Ha)
     (  non-var. 2DEtotal :    7.0211695621E+00 Ha)
- 
- 
+
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : displacement of atom   2   along direction   1
  Found     2 symmetries that leave the perturbation invariant.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   15.054947343360     -3.517E+01 5.274E-02 1.909E+03
- ETOT  2   7.0438962408774     -8.011E+00 6.927E-03 4.454E+00
- ETOT  3   7.0219235333481     -2.197E-02 1.691E-05 3.167E-01
- ETOT  4   7.0211474520648     -7.761E-04 7.288E-07 1.706E-03
- ETOT  5   7.0211446380194     -2.814E-06 2.411E-09 2.526E-05
- ETOT  6   7.0211445985113     -3.951E-08 4.362E-11 4.479E-07
- ETOT  7   7.0211445975544     -9.569E-10 8.698E-13 2.322E-09
- 
+-ETOT  1   15.054947338248     -3.517E+01 5.274E-02 1.909E+03
+ ETOT  2   7.0438962410214     -8.011E+00 6.927E-03 4.454E+00
+ ETOT  3   7.0219235333483     -2.197E-02 1.691E-05 3.167E-01
+ ETOT  4   7.0211474520649     -7.761E-04 7.288E-07 1.706E-03
+ ETOT  5   7.0211446380197     -2.814E-06 2.411E-09 2.526E-05
+ ETOT  6   7.0211445985115     -3.951E-08 4.362E-11 4.479E-07
+ ETOT  7   7.0211445975546     -9.568E-10 8.698E-13 2.322E-09
+
  At SCF step    7       vres2   =  2.32E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
 -open ddk wf file :tlw_1o_DS2_1WF8
 -open ddk wf file :tlw_1o_DS2_1WF9
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   27.291E-14; max=  86.977E-14
- 
+
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   5.82591954E+01 eigvalue=  -6.78751739E+00  local=  -4.30226993E+01
@@ -1432,41 +1432,41 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  2DEtotal=    0.7021144598E+01 Ha. Also 2DEtotal=    0.191055060781E+03 eV
     (2DErelax=   -4.3208486447E+01 Ha. 2DEnonrelax=    5.0229631045E+01 Ha)
     (  non-var. 2DEtotal :    7.0211446341E+00 Ha)
- 
- 
+
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : displacement of atom   2   along direction   2
  Found     2 symmetries that leave the perturbation invariant.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   15.055279738627     -3.517E+01 5.274E-02 1.909E+03
- ETOT  2   7.0438907518502     -8.011E+00 6.927E-03 4.453E+00
- ETOT  3   7.0219232908414     -2.197E-02 1.692E-05 3.166E-01
- ETOT  4   7.0211474310722     -7.759E-04 7.286E-07 1.695E-03
- ETOT  5   7.0211446373408     -2.794E-06 2.392E-09 2.503E-05
- ETOT  6   7.0211445982714     -3.907E-08 4.320E-11 4.444E-07
- ETOT  7   7.0211445973225     -9.489E-10 8.635E-13 2.322E-09
- 
+-ETOT  1   15.055279751882     -3.517E+01 5.274E-02 1.909E+03
+ ETOT  2   7.0438907514846     -8.011E+00 6.927E-03 4.453E+00
+ ETOT  3   7.0219232908335     -2.197E-02 1.692E-05 3.166E-01
+ ETOT  4   7.0211474310715     -7.759E-04 7.286E-07 1.695E-03
+ ETOT  5   7.0211446373411     -2.794E-06 2.392E-09 2.503E-05
+ ETOT  6   7.0211445982716     -3.907E-08 4.320E-11 4.444E-07
+ ETOT  7   7.0211445973228     -9.489E-10 8.635E-13 2.322E-09
+
  At SCF step    7       vres2   =  2.32E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
 -open ddk wf file :tlw_1o_DS2_1WF8
 -open ddk wf file :tlw_1o_DS2_1WF9
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   27.136E-14; max=  86.351E-14
- 
+
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   5.82591953E+01 eigvalue=  -6.78751738E+00  local=  -4.30226993E+01
@@ -1485,41 +1485,41 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  2DEtotal=    0.7021144597E+01 Ha. Also 2DEtotal=    0.191055060774E+03 eV
     (2DErelax=   -4.3208486448E+01 Ha. 2DEnonrelax=    5.0229631045E+01 Ha)
     (  non-var. 2DEtotal :    7.0211446907E+00 Ha)
- 
- 
+
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : displacement of atom   2   along direction   3
  Found     2 symmetries that leave the perturbation invariant.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   15.055825247353     -3.517E+01 5.274E-02 1.909E+03
- ETOT  2   7.0438735419030     -8.012E+00 6.927E-03 4.451E+00
- ETOT  3   7.0219218710874     -2.195E-02 1.693E-05 3.163E-01
- ETOT  4   7.0211475466784     -7.743E-04 7.275E-07 1.679E-03
- ETOT  5   7.0211447849408     -2.762E-06 2.366E-09 2.459E-05
- ETOT  6   7.0211447467511     -3.819E-08 4.242E-11 4.344E-07
- ETOT  7   7.0211447458262     -9.249E-10 8.465E-13 2.260E-09
- 
+-ETOT  1   15.055825251628     -3.517E+01 5.274E-02 1.909E+03
+ ETOT  2   7.0438735428021     -8.012E+00 6.927E-03 4.451E+00
+ ETOT  3   7.0219218710734     -2.195E-02 1.693E-05 3.163E-01
+ ETOT  4   7.0211475466796     -7.743E-04 7.275E-07 1.679E-03
+ ETOT  5   7.0211447849411     -2.762E-06 2.366E-09 2.459E-05
+ ETOT  6   7.0211447467514     -3.819E-08 4.242E-11 4.344E-07
+ ETOT  7   7.0211447458264     -9.249E-10 8.465E-13 2.260E-09
+
  At SCF step    7       vres2   =  2.26E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
 -open ddk wf file :tlw_1o_DS2_1WF8
 -open ddk wf file :tlw_1o_DS2_1WF9
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   26.640E-14; max=  84.649E-14
- 
+
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   5.82591948E+01 eigvalue=  -6.78751724E+00  local=  -4.30226988E+01
@@ -1538,42 +1538,42 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  2DEtotal=    0.7021144746E+01 Ha. Also 2DEtotal=    0.191055064815E+03 eV
     (2DErelax=   -4.3208486299E+01 Ha. 2DEnonrelax=    5.0229631045E+01 Ha)
     (  non-var. 2DEtotal :    7.0211448417E+00 Ha)
- 
- 
+
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : homogeneous electric field along direction   1
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 -dfpt_looppert : read the wavefunctions from file: tlw_1o_DS2_1WF7
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -272.63442032730     -2.726E+02 2.493E+00 1.801E+03
- ETOT  2  -280.78280598992     -8.148E+00 6.111E-03 6.006E+00
- ETOT  3  -280.82067309799     -3.787E-02 3.157E-05 2.200E-01
- ETOT  4  -280.82140285646     -7.298E-04 9.358E-07 4.846E-03
- ETOT  5  -280.82141997498     -1.712E-05 1.430E-08 2.141E-04
- ETOT  6  -280.82142080334     -8.284E-07 3.886E-10 4.651E-07
- ETOT  7  -280.82142080451     -1.169E-09 8.252E-13 1.625E-09
- 
+-ETOT  1  -272.63442038917     -2.726E+02 2.493E+00 1.801E+03
+ ETOT  2  -280.78280598895     -8.148E+00 6.111E-03 6.006E+00
+ ETOT  3  -280.82067309782     -3.787E-02 3.157E-05 2.200E-01
+ ETOT  4  -280.82140285641     -7.298E-04 9.358E-07 4.846E-03
+ ETOT  5  -280.82141997495     -1.712E-05 1.430E-08 2.141E-04
+ ETOT  6  -280.82142080331     -8.284E-07 3.886E-10 4.651E-07
+ ETOT  7  -280.82142080448     -1.170E-09 8.252E-13 1.625E-09
+
  At SCF step    7       vres2   =  1.62E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
 -open ddk wf file :tlw_1o_DS2_1WF8
 -open ddk wf file :tlw_1o_DS2_1WF9
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   28.838E-14; max=  82.521E-14
- 
+
  Seven components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.06148934E+03 eigvalue=  -3.51980408E+02  local=  -9.39819942E+02
@@ -1586,41 +1586,41 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
  2DEtotal=   -0.2808214208E+03 Ha. Also 2DEtotal=   -0.764153947762E+04 eV
     (  non-var. 2DEtotal :   -2.8082142488E+02 Ha)
- 
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : homogeneous electric field along direction   2
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 -dfpt_looppert : read the wavefunctions from file: tlw_1o_DS2_1WF8
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -272.63442033087     -2.726E+02 2.493E+00 1.801E+03
- ETOT  2  -280.78280599361     -8.148E+00 6.111E-03 6.006E+00
- ETOT  3  -280.82067310168     -3.787E-02 3.157E-05 2.200E-01
- ETOT  4  -280.82140286014     -7.298E-04 9.358E-07 4.846E-03
- ETOT  5  -280.82141997867     -1.712E-05 1.430E-08 2.141E-04
- ETOT  6  -280.82142080702     -8.284E-07 3.886E-10 4.651E-07
- ETOT  7  -280.82142080820     -1.171E-09 8.252E-13 1.625E-09
- 
+-ETOT  1  -272.63442039274     -2.726E+02 2.493E+00 1.801E+03
+ ETOT  2  -280.78280599264     -8.148E+00 6.111E-03 6.006E+00
+ ETOT  3  -280.82067310151     -3.787E-02 3.157E-05 2.200E-01
+ ETOT  4  -280.82140286009     -7.298E-04 9.358E-07 4.846E-03
+ ETOT  5  -280.82141997864     -1.712E-05 1.430E-08 2.141E-04
+ ETOT  6  -280.82142080700     -8.284E-07 3.886E-10 4.651E-07
+ ETOT  7  -280.82142080817     -1.171E-09 8.252E-13 1.625E-09
+
  At SCF step    7       vres2   =  1.62E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
 -open ddk wf file :tlw_1o_DS2_1WF8
 -open ddk wf file :tlw_1o_DS2_1WF9
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   28.838E-14; max=  82.521E-14
- 
+
  Seven components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.06148934E+03 eigvalue=  -3.51980408E+02  local=  -9.39819942E+02
@@ -1633,41 +1633,41 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
  2DEtotal=   -0.2808214208E+03 Ha. Also 2DEtotal=   -0.764153947772E+04 eV
     (  non-var. 2DEtotal :   -2.8082142488E+02 Ha)
- 
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Perturbation : homogeneous electric field along direction   3
  The set of symmetries contains only one element for this perturbation.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 -dfpt_looppert : read the wavefunctions from file: tlw_1o_DS2_1WF9
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -272.63442033443     -2.726E+02 2.493E+00 1.801E+03
- ETOT  2  -280.78280599729     -8.148E+00 6.111E-03 6.006E+00
- ETOT  3  -280.82067310536     -3.787E-02 3.157E-05 2.200E-01
- ETOT  4  -280.82140286383     -7.298E-04 9.358E-07 4.846E-03
- ETOT  5  -280.82141998235     -1.712E-05 1.430E-08 2.141E-04
- ETOT  6  -280.82142081071     -8.284E-07 3.886E-10 4.651E-07
- ETOT  7  -280.82142081188     -1.170E-09 8.252E-13 1.625E-09
- 
+-ETOT  1  -272.63442039630     -2.726E+02 2.493E+00 1.801E+03
+ ETOT  2  -280.78280599632     -8.148E+00 6.111E-03 6.006E+00
+ ETOT  3  -280.82067310519     -3.787E-02 3.157E-05 2.200E-01
+ ETOT  4  -280.82140286378     -7.298E-04 9.358E-07 4.846E-03
+ ETOT  5  -280.82141998232     -1.712E-05 1.430E-08 2.141E-04
+ ETOT  6  -280.82142081068     -8.284E-07 3.886E-10 4.651E-07
+ ETOT  7  -280.82142081185     -1.169E-09 8.252E-13 1.625E-09
+
  At SCF step    7       vres2   =  1.62E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
 -open ddk wf file :tlw_1o_DS2_1WF8
 -open ddk wf file :tlw_1o_DS2_1WF9
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   28.838E-14; max=  82.521E-14
- 
+
  Seven components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   1.06148934E+03 eigvalue=  -3.51980408E+02  local=  -9.39819942E+02
@@ -1680,38 +1680,38 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
  2DEtotal=   -0.2808214208E+03 Ha. Also 2DEtotal=   -0.764153947782E+04 eV
     (  non-var. 2DEtotal :   -2.8082142488E+02 Ha)
- 
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Found    16 symmetries that leave the perturbation invariant.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.8107554393020     -3.296E+00 4.108E-03 3.981E+01
- ETOT  2   1.6820612691233     -1.287E-01 6.179E-05 1.064E+00
- ETOT  3   1.6797726063634     -2.289E-03 8.538E-07 2.996E-02
- ETOT  4   1.6797161609271     -5.645E-05 4.687E-08 3.281E-04
- ETOT  5   1.6797156783109     -4.826E-07 6.291E-10 2.811E-07
- ETOT  6   1.6797156776669     -6.440E-10 4.184E-13 5.817E-10
- 
+-ETOT  1   1.8107554393848     -3.296E+00 4.108E-03 3.981E+01
+ ETOT  2   1.6820612691572     -1.287E-01 6.179E-05 1.064E+00
+ ETOT  3   1.6797726064080     -2.289E-03 8.538E-07 2.996E-02
+ ETOT  4   1.6797161609717     -5.645E-05 4.687E-08 3.281E-04
+ ETOT  5   1.6797156783555     -4.826E-07 6.291E-10 2.811E-07
+ ETOT  6   1.6797156777115     -6.440E-10 4.184E-13 5.817E-10
+
  At SCF step    6       vres2   =  5.82E-10 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
 -open ddk wf file :tlw_1o_DS2_1WF8
 -open ddk wf file :tlw_1o_DS2_1WF9
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   20.806E-14; max=  41.837E-14
- 
+
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   5.10992463E+00 eigvalue=  -8.95035111E-01  local=  -2.89077051E+00
@@ -1729,42 +1729,42 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  17 Non-relaxation  contributions : pseudopotential core energy
   pspcore=  -4.99455711E-02
  Resulting in :
- 2DEtotal=    0.1679715678E+01 Ha. Also 2DEtotal=    0.457073880807E+02 eV
-    (2DErelax=   -3.4266187885E+00 Ha. 2DEnonrelax=    5.1063344662E+00 Ha)
+ 2DEtotal=    0.1679715678E+01 Ha. Also 2DEtotal=    0.457073880819E+02 eV
+    (2DErelax=   -3.4266187885E+00 Ha. 2DEnonrelax=    5.1063344663E+00 Ha)
     (  non-var. 2DEtotal :    1.6797151670E+00 Ha)
- 
- 
+
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Found    16 symmetries that leave the perturbation invariant.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.8107155283578     -3.296E+00 4.108E-03 3.981E+01
- ETOT  2   1.6820639349612     -1.287E-01 6.178E-05 1.065E+00
- ETOT  3   1.6797725867653     -2.291E-03 8.553E-07 2.996E-02
- ETOT  4   1.6797161609120     -5.643E-05 4.686E-08 3.281E-04
- ETOT  5   1.6797156783120     -4.826E-07 6.291E-10 2.817E-07
- ETOT  6   1.6797156776692     -6.428E-10 4.184E-13 5.870E-10
- 
+-ETOT  1   1.8107155281908     -3.296E+00 4.108E-03 3.981E+01
+ ETOT  2   1.6820639349596     -1.287E-01 6.178E-05 1.065E+00
+ ETOT  3   1.6797725868102     -2.291E-03 8.553E-07 2.996E-02
+ ETOT  4   1.6797161609566     -5.643E-05 4.686E-08 3.281E-04
+ ETOT  5   1.6797156783566     -4.826E-07 6.291E-10 2.817E-07
+ ETOT  6   1.6797156777137     -6.428E-10 4.184E-13 5.870E-10
+
  At SCF step    6       vres2   =  5.87E-10 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
 -open ddk wf file :tlw_1o_DS2_1WF8
 -open ddk wf file :tlw_1o_DS2_1WF9
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   20.718E-14; max=  41.845E-14
- 
+
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   5.10992468E+00 eigvalue=  -8.95035119E-01  local=  -2.89077054E+00
@@ -1782,42 +1782,42 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  17 Non-relaxation  contributions : pseudopotential core energy
   pspcore=  -4.99455711E-02
  Resulting in :
- 2DEtotal=    0.1679715678E+01 Ha. Also 2DEtotal=    0.457073880807E+02 eV
+ 2DEtotal=    0.1679715678E+01 Ha. Also 2DEtotal=    0.457073880819E+02 eV
     (2DErelax=   -3.4266187885E+00 Ha. 2DEnonrelax=    5.1063344662E+00 Ha)
     (  non-var. 2DEtotal :    1.6797151445E+00 Ha)
- 
- 
+
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Found    16 symmetries that leave the perturbation invariant.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.8107090982107     -3.296E+00 4.378E-03 3.981E+01
- ETOT  2   1.6820624704965     -1.286E-01 6.178E-05 1.065E+00
- ETOT  3   1.6797726053672     -2.290E-03 8.549E-07 2.996E-02
- ETOT  4   1.6797161606121     -5.644E-05 4.687E-08 3.280E-04
- ETOT  5   1.6797156783114     -4.823E-07 6.288E-10 2.810E-07
- ETOT  6   1.6797156776694     -6.420E-10 4.185E-13 5.797E-10
- 
+-ETOT  1   1.8107090985344     -3.296E+00 4.378E-03 3.981E+01
+ ETOT  2   1.6820624705724     -1.286E-01 6.178E-05 1.065E+00
+ ETOT  3   1.6797726054116     -2.290E-03 8.549E-07 2.996E-02
+ ETOT  4   1.6797161606567     -5.644E-05 4.687E-08 3.280E-04
+ ETOT  5   1.6797156783560     -4.823E-07 6.288E-10 2.810E-07
+ ETOT  6   1.6797156777140     -6.420E-10 4.185E-13 5.797E-10
+
  At SCF step    6       vres2   =  5.80E-10 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
 -open ddk wf file :tlw_1o_DS2_1WF8
 -open ddk wf file :tlw_1o_DS2_1WF9
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   20.546E-14; max=  41.846E-14
- 
+
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   5.10992461E+00 eigvalue=  -8.95035105E-01  local=  -2.89077049E+00
@@ -1835,42 +1835,42 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  17 Non-relaxation  contributions : pseudopotential core energy
   pspcore=  -4.99455711E-02
  Resulting in :
- 2DEtotal=    0.1679715678E+01 Ha. Also 2DEtotal=    0.457073880807E+02 eV
+ 2DEtotal=    0.1679715678E+01 Ha. Also 2DEtotal=    0.457073880819E+02 eV
     (2DErelax=   -3.4266187885E+00 Ha. 2DEnonrelax=    5.1063344662E+00 Ha)
-    (  non-var. 2DEtotal :    1.6797151684E+00 Ha)
- 
- 
+    (  non-var. 2DEtotal :    1.6797151685E+00 Ha)
+
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Found     8 symmetries that leave the perturbation invariant.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.7483037134652     -2.814E+00 7.559E-03 1.814E+02
- ETOT  2   1.0730860673183     -6.752E-01 5.161E-04 1.238E+00
- ETOT  3   1.0693988190860     -3.687E-03 2.737E-06 8.707E-02
- ETOT  4   1.0692014614770     -1.974E-04 1.756E-07 2.711E-04
- ETOT  5   1.0692010582125     -4.033E-07 3.228E-10 4.641E-07
- ETOT  6   1.0692010570767     -1.136E-09 1.111E-12 1.885E-09
- 
+-ETOT  1   1.7483037099555     -2.814E+00 7.559E-03 1.814E+02
+ ETOT  2   1.0730860672001     -6.752E-01 5.161E-04 1.238E+00
+ ETOT  3   1.0693988190692     -3.687E-03 2.737E-06 8.707E-02
+ ETOT  4   1.0692014614629     -1.974E-04 1.756E-07 2.711E-04
+ ETOT  5   1.0692010581984     -4.033E-07 3.228E-10 4.641E-07
+ ETOT  6   1.0692010570626     -1.136E-09 1.111E-12 1.885E-09
+
  At SCF step    6       vres2   =  1.89E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
 -open ddk wf file :tlw_1o_DS2_1WF8
 -open ddk wf file :tlw_1o_DS2_1WF9
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   40.700E-14; max=  11.111E-13
- 
+
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.58395924E+00 eigvalue=  -7.43911756E-01  local=  -1.74617432E+00
@@ -1888,42 +1888,42 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  17 Non-relaxation  contributions : pseudopotential core energy
   pspcore=   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1069201057E+01 Ha. Also 2DEtotal=    0.290944403876E+02 eV
+ 2DEtotal=    0.1069201057E+01 Ha. Also 2DEtotal=    0.290944403872E+02 eV
     (2DErelax=   -3.4931985834E+00 Ha. 2DEnonrelax=    4.5623996405E+00 Ha)
     (  non-var. 2DEtotal :    1.0692020783E+00 Ha)
- 
- 
+
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Found     8 symmetries that leave the perturbation invariant.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.7483124333033     -2.814E+00 7.559E-03 1.814E+02
- ETOT  2   1.0730874069475     -6.752E-01 5.161E-04 1.238E+00
- ETOT  3   1.0693987928066     -3.689E-03 2.738E-06 8.707E-02
- ETOT  4   1.0692014617030     -1.973E-04 1.756E-07 2.713E-04
- ETOT  5   1.0692010582038     -4.035E-07 3.236E-10 4.637E-07
- ETOT  6   1.0692010570714     -1.132E-09 1.106E-12 1.888E-09
- 
+-ETOT  1   1.7483124387281     -2.814E+00 7.559E-03 1.814E+02
+ ETOT  2   1.0730874071342     -6.752E-01 5.161E-04 1.238E+00
+ ETOT  3   1.0693987927955     -3.689E-03 2.738E-06 8.707E-02
+ ETOT  4   1.0692014616890     -1.973E-04 1.756E-07 2.713E-04
+ ETOT  5   1.0692010581897     -4.035E-07 3.236E-10 4.637E-07
+ ETOT  6   1.0692010570574     -1.132E-09 1.106E-12 1.888E-09
+
  At SCF step    6       vres2   =  1.89E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
 -open ddk wf file :tlw_1o_DS2_1WF8
 -open ddk wf file :tlw_1o_DS2_1WF9
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   40.504E-14; max=  11.062E-13
- 
+
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.58395923E+00 eigvalue=  -7.43911758E-01  local=  -1.74617432E+00
@@ -1941,42 +1941,42 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  17 Non-relaxation  contributions : pseudopotential core energy
   pspcore=   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1069201057E+01 Ha. Also 2DEtotal=    0.290944403875E+02 eV
+ 2DEtotal=    0.1069201057E+01 Ha. Also 2DEtotal=    0.290944403871E+02 eV
     (2DErelax=   -3.4931985834E+00 Ha. 2DEnonrelax=    4.5623996405E+00 Ha)
     (  non-var. 2DEtotal :    1.0692020829E+00 Ha)
- 
- 
+
+
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
  Found     8 symmetries that leave the perturbation invariant.
  symkpt : not enough symmetry to change the number of k points.
- 
+
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 --------------------------------------------------------------------------------
- 
+
  Initialisation of the first-order wave-functions :
   ireadwf=   0
- 
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   1.7482087388094     -2.814E+00 7.559E-03 1.814E+02
- ETOT  2   1.0730871435740     -6.751E-01 5.161E-04 1.238E+00
- ETOT  3   1.0693988360517     -3.688E-03 2.737E-06 8.706E-02
- ETOT  4   1.0692014627700     -1.974E-04 1.756E-07 2.717E-04
- ETOT  5   1.0692010581808     -4.046E-07 3.227E-10 4.592E-07
- ETOT  6   1.0692010570645     -1.116E-09 1.099E-12 1.928E-09
- 
+-ETOT  1   1.7482087356035     -2.814E+00 7.559E-03 1.814E+02
+ ETOT  2   1.0730871433875     -6.751E-01 5.161E-04 1.238E+00
+ ETOT  3   1.0693988360363     -3.688E-03 2.737E-06 8.706E-02
+ ETOT  4   1.0692014627559     -1.974E-04 1.756E-07 2.717E-04
+ ETOT  5   1.0692010581667     -4.046E-07 3.227E-10 4.592E-07
+ ETOT  6   1.0692010570504     -1.116E-09 1.099E-12 1.928E-09
+
  At SCF step    6       vres2   =  1.93E-09 < tolvrs=  1.00E-08 =>converged.
 -open ddk wf file :tlw_1o_DS2_1WF7
 -open ddk wf file :tlw_1o_DS2_1WF8
 -open ddk wf file :tlw_1o_DS2_1WF9
 ================================================================================
- 
+
  ----iterations are completed or convergence reached----
- 
+
  Mean square residual over all n,k,spin=   40.194E-14; max=  10.992E-13
- 
+
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
      kin0=   4.58395903E+00 eigvalue=  -7.43911735E-01  local=  -1.74617423E+00
@@ -1994,15 +1994,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  17 Non-relaxation  contributions : pseudopotential core energy
   pspcore=   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.1069201057E+01 Ha. Also 2DEtotal=    0.290944403873E+02 eV
+ 2DEtotal=    0.1069201057E+01 Ha. Also 2DEtotal=    0.290944403869E+02 eV
     (2DErelax=   -3.4931985835E+00 Ha. 2DEnonrelax=    4.5623996405E+00 Ha)
     (  non-var. 2DEtotal :    1.0692021696E+00 Ha)
- 
+
 ================================================================================
- 
+
  ---- first-order wavefunction calculations are completed ----
- 
- 
+
+
  ==> Compute Derivative Database <==
   
   2nd-order matrix (non-cartesian coordinates, masses not included,
@@ -2019,8 +2019,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
    1    1   2    2        -3.5105392357         0.0000000000
    1    1   3    2        -3.5105392357        -0.0000000000
    1    1   1    4       -25.3750239443         0.0000000000
-   1    1   2    4        -0.0000000000         0.0000000000
-   1    1   3    4         0.0000000000         0.0000000000
+   1    1   2    4         0.0000000000         0.0000000000
+   1    1   3    4        -0.0000000000         0.0000000000
    1    1   1    5         0.0000000186         0.0000000000
    1    1   2    5         0.0000000145         0.0000000000
    1    1   3    5         0.0000000112         0.0000000000
@@ -2034,15 +2034,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
    2    1   1    2        -3.5105392357         0.0000000000
    2    1   2    2        -7.0210784713         0.0000000000
    2    1   3    2        -3.5105392357        -0.0000000000
-   2    1   1    4        -0.0000000000         0.0000000000
+   2    1   1    4         0.0000000000         0.0000000000
    2    1   2    4       -25.3750239443         0.0000000000
-   2    1   3    4         0.0000000000         0.0000000000
+   2    1   3    4        -0.0000000000         0.0000000000
    2    1   1    5         0.0000000145         0.0000000000
    2    1   2    5         0.0000000186         0.0000000000
    2    1   3    5         0.0000000112         0.0000000000
    2    1   1    6        -1.0025444318         0.0000000000
    2    1   2    6         0.0000000147         0.0000000000
-   2    1   3    6        -1.0025446881         0.0000000000
+   2    1   3    6        -1.0025446882         0.0000000000
   
    3    1   1    1         3.5105785901         0.0000000000
    3    1   2    1         3.5105785901         0.0000000000
@@ -2050,8 +2050,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
    3    1   1    2        -3.5105392357        -0.0000000000
    3    1   2    2        -3.5105392357        -0.0000000000
    3    1   3    2        -7.0210784713        -0.0000000000
-   3    1   1    4        -0.0000000000         0.0000000000
-   3    1   2    4         0.0000000000         0.0000000000
+   3    1   1    4         0.0000000000         0.0000000000
+   3    1   2    4        -0.0000000000         0.0000000000
    3    1   3    4       -25.3750239443         0.0000000000
    3    1   1    5        -0.0000000035         0.0000000000
    3    1   2    5        -0.0000000035         0.0000000000
@@ -2067,7 +2067,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
    1    2   2    2         3.5105785901         0.0000000000
    1    2   3    2         3.5105785901         0.0000000000
    1    2   1    4       -25.3750239443         0.0000000000
-   1    2   2    4        -0.0000000000         0.0000000000
+   1    2   2    4         0.0000000000         0.0000000000
    1    2   3    4         0.0000000000         0.0000000000
    1    2   1    5         0.0000000186         0.0000000000
    1    2   2    5         0.0000000144         0.0000000000
@@ -2082,9 +2082,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
    2    2   1    2         3.5105785901         0.0000000000
    2    2   2    2         7.0211571802         0.0000000000
    2    2   3    2         3.5105785901         0.0000000000
-   2    2   1    4        -0.0000000000         0.0000000000
+   2    2   1    4         0.0000000000         0.0000000000
    2    2   2    4       -25.3750239443         0.0000000000
-   2    2   3    4        -0.0000000000         0.0000000000
+   2    2   3    4         0.0000000000         0.0000000000
    2    2   1    5         0.0000000144         0.0000000000
    2    2   2    5         0.0000000186         0.0000000000
    2    2   3    5         0.0000000112         0.0000000000
@@ -2099,7 +2099,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
    3    2   2    2         3.5105785901         0.0000000000
    3    2   3    2         7.0211571802         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
-   3    2   2    4        -0.0000000000         0.0000000000
+   3    2   2    4         0.0000000000         0.0000000000
    3    2   3    4       -25.3750239443         0.0000000000
    3    2   1    5        -0.0000000035         0.0000000000
    3    2   2    5        -0.0000000035         0.0000000000
@@ -2110,10 +2110,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
   
    1    4   1    1       -25.3750158484         0.0000000000
    1    4   2    1         0.0000000000         0.0000000000
-   1    4   3    1        -0.0000000000         0.0000000000
+   1    4   3    1         0.0000000000         0.0000000000
    1    4   1    2       -25.3750158484         0.0000000000
    1    4   2    2         0.0000000000         0.0000000000
-   1    4   3    2        -0.0000000000         0.0000000000
+   1    4   3    2         0.0000000000         0.0000000000
    1    4   1    4      -280.8214248800         0.0000000000
    1    4   2    4        93.6071416267         0.0000000000
    1    4   3    4        93.6071416267         0.0000000000
@@ -2126,10 +2126,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
   
    2    4   1    1        -0.0000000000         0.0000000000
    2    4   2    1       -25.3750158484         0.0000000000
-   2    4   3    1        -0.0000000000         0.0000000000
-   2    4   1    2         0.0000000000         0.0000000000
+   2    4   3    1         0.0000000000         0.0000000000
+   2    4   1    2        -0.0000000000         0.0000000000
    2    4   2    2       -25.3750158484         0.0000000000
-   2    4   3    2        -0.0000000000         0.0000000000
+   2    4   3    2         0.0000000000         0.0000000000
    2    4   1    4        93.6071416267         0.0000000000
    2    4   2    4      -280.8214248800         0.0000000000
    2    4   3    4        93.6071416267         0.0000000000
@@ -2137,19 +2137,19 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
    2    4   2    5        -0.0000000167         0.0000000000
    2    4   3    5        -0.0000000146         0.0000000000
    2    4   1    6         0.0000013878         0.0000000000
-   2    4   2    6        -0.0000013858         0.0000000000
+   2    4   2    6        -0.0000013857         0.0000000000
    2    4   3    6         0.0000014514         0.0000000000
   
    3    4   1    1         0.0000000000         0.0000000000
-   3    4   2    1         0.0000000000         0.0000000000
+   3    4   2    1        -0.0000000000         0.0000000000
    3    4   3    1       -25.3750158484         0.0000000000
    3    4   1    2         0.0000000000         0.0000000000
-   3    4   2    2         0.0000000000         0.0000000000
+   3    4   2    2        -0.0000000000         0.0000000000
    3    4   3    2       -25.3750158484         0.0000000000
    3    4   1    4        93.6071416267         0.0000000000
    3    4   2    4        93.6071416267         0.0000000000
    3    4   3    4      -280.8214248800         0.0000000000
-   3    4   1    5        -0.0000000458         0.0000000000
+   3    4   1    5        -0.0000000459         0.0000000000
    3    4   2    5        -0.0000000458         0.0000000000
    3    4   3    5         0.0000000790         0.0000000000
    3    4   1    6         0.0000015649         0.0000000000
@@ -2158,7 +2158,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
   
    1    5   1    5         1.6797151670         0.0000000000
    1    5   2    5         0.6143033780         0.0000000000
-   1    5   3    5         0.6143033994         0.0000000000
+   1    5   3    5         0.6143033993         0.0000000000
    1    5   1    6        -0.0000000000         0.0000000000
    1    5   2    6         0.0000000000         0.0000000000
    1    5   3    6        -0.0000000000         0.0000000000
@@ -2170,9 +2170,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
    2    5   2    6         0.0000000000         0.0000000000
    2    5   3    6        -0.0000000000         0.0000000000
   
-   3    5   1    5         0.6143034011         0.0000000000
+   3    5   1    5         0.6143034010         0.0000000000
    3    5   2    5         0.6143033762         0.0000000000
-   3    5   3    5         1.6797151684         0.0000000000
+   3    5   3    5         1.6797151685         0.0000000000
    3    5   1    6         0.0000000000         0.0000000000
    3    5   2    6         0.0000000000         0.0000000000
    3    5   3    6         0.0000000000         0.0000000000
@@ -2206,61 +2206,61 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
   
    1    1   1    1         0.1376017518         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
-   1    1   3    1         0.0000000000         0.0000000000
+   1    1   3    1        -0.0000000000         0.0000000000
    1    1   1    2        -0.1376002092        -0.0000000000
-   1    1   2    2        -0.0000000000         0.0000000000
+   1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000        -0.0000000000
   
    2    1   1    1         0.0000000000         0.0000000000
    2    1   2    1         0.1376017518         0.0000000000
-   2    1   3    1         0.0000000000         0.0000000000
-   2    1   1    2        -0.0000000000         0.0000000000
+   2    1   3    1        -0.0000000000         0.0000000000
+   2    1   1    2         0.0000000000         0.0000000000
    2    1   2    2        -0.1376002092        -0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
    3    1   1    1        -0.0000000000         0.0000000000
-   3    1   2    1         0.0000000000         0.0000000000
+   3    1   2    1        -0.0000000000         0.0000000000
    3    1   3    1         0.1376017518         0.0000000000
    3    1   1    2         0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
    3    1   3    2        -0.1376002092         0.0000000000
   
    1    2   1    1        -0.1376002092         0.0000000000
-   1    2   2    1        -0.0000000000        -0.0000000000
+   1    2   2    1         0.0000000000        -0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
    1    2   1    2         0.1376017518         0.0000000000
    1    2   2    2         0.0000000000         0.0000000000
    1    2   3    2        -0.0000000000         0.0000000000
   
-   2    2   1    1        -0.0000000000        -0.0000000000
+   2    2   1    1         0.0000000000        -0.0000000000
    2    2   2    1        -0.1376002092         0.0000000000
-   2    2   3    1        -0.0000000000         0.0000000000
+   2    2   3    1         0.0000000000         0.0000000000
    2    2   1    2         0.0000000000         0.0000000000
    2    2   2    2         0.1376017518         0.0000000000
-   2    2   3    2         0.0000000000         0.0000000000
+   2    2   3    2        -0.0000000000         0.0000000000
   
    3    2   1    1         0.0000000000         0.0000000000
-   3    2   2    1        -0.0000000000         0.0000000000
+   3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1        -0.1376002092        -0.0000000000
-   3    2   1    2         0.0000000000         0.0000000000
-   3    2   2    2         0.0000000000         0.0000000000
+   3    2   1    2        -0.0000000000         0.0000000000
+   3    2   2    2        -0.0000000000         0.0000000000
    3    2   3    2         0.1376017518         0.0000000000
   
   Dielectric tensor, in cartesian coordinates,
      j1       j2             matrix element
   dir pert dir pert     real part    imaginary part
   
-   1    4   1    4        12.7980909116         0.0000000000
-   1    4   2    4        -0.0000000000         0.0000000000
-   1    4   3    4        -0.0000000000         0.0000000000
+   1    4   1    4        12.7980909116        -0.0000000000
+   1    4   2    4         0.0000000000        -0.0000000000
+   1    4   3    4         0.0000000000        -0.0000000000
   
-   2    4   1    4        -0.0000000000         0.0000000000
-   2    4   2    4        12.7980909116         0.0000000000
-   2    4   3    4         0.0000000000         0.0000000000
+   2    4   1    4         0.0000000000        -0.0000000000
+   2    4   2    4        12.7980909116        -0.0000000000
+   2    4   3    4         0.0000000000        -0.0000000000
   
-   3    4   1    4        -0.0000000000         0.0000000000
-   3    4   2    4         0.0000000000         0.0000000000
-   3    4   3    4        12.7980909116         0.0000000000
+   3    4   1    4         0.0000000000        -0.0000000000
+   3    4   2    4         0.0000000000        -0.0000000000
+   3    4   3    4        12.7980909116        -0.0000000000
   
   Effective charges, in cartesian coordinates,
   (from electric field response) 
@@ -2269,10 +2269,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
   dir pert dir pert     real part    imaginary part
   
    1    1   1    4        -0.0385604918         0.0000000000
-   2    1   1    4         0.0000000000         0.0000000000
+   2    1   1    4        -0.0000000000         0.0000000000
    3    1   1    4         0.0000000000         0.0000000000
    1    2   1    4        -0.0385604918         0.0000000000
-   2    2   1    4         0.0000000000         0.0000000000
+   2    2   1    4        -0.0000000000         0.0000000000
    3    2   1    4         0.0000000000         0.0000000000
   
    1    1   2    4        -0.0000000000         0.0000000000
@@ -2296,12 +2296,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
   dir pert dir pert     real part    imaginary part
   
    1    4   1    1        -0.0385592033         0.0000000000
-   2    4   1    1         0.0000000000         0.0000000000
-   3    4   1    1         0.0000000000         0.0000000000
+   2    4   1    1        -0.0000000000         0.0000000000
+   3    4   1    1        -0.0000000000         0.0000000000
   
-   1    4   2    1        -0.0000000000         0.0000000000
+   1    4   2    1         0.0000000000         0.0000000000
    2    4   2    1        -0.0385592033         0.0000000000
-   3    4   2    1        -0.0000000000         0.0000000000
+   3    4   2    1         0.0000000000         0.0000000000
   
    1    4   3    1         0.0000000000         0.0000000000
    2    4   3    1         0.0000000000         0.0000000000
@@ -2440,7 +2440,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
    3    4   1    6         0.0000000000         0.0000000000
    3    4   2    6         0.0000000000         0.0000000000
    3    4   3    6         0.0000000091         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    5.489067E-06  5.489067E-06  5.489067E-06  2.318487E-03  2.318487E-03
@@ -2448,7 +2448,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  Phonon frequencies in cm-1    :
 -  1.204711E+00  1.204711E+00  1.204711E+00  5.088490E+02  5.088490E+02
 -  5.088490E+02
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -2457,7 +2457,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  Phonon frequencies in cm-1    :
 -  1.204711E+00  1.204711E+00  3.480087E+00  5.088490E+02  5.088490E+02
 -  5.088490E+02
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  1.00000  0.00000
  Phonon energies in Hartree :
@@ -2466,7 +2466,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  Phonon frequencies in cm-1    :
 -  1.204711E+00  1.204711E+00  3.480087E+00  5.088490E+02  5.088490E+02
 -  5.088490E+02
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  0.00000  0.00000  1.00000
  Phonon energies in Hartree :
@@ -2475,42 +2475,42 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
  Phonon frequencies in cm-1    :
 -  1.204711E+00  1.204711E+00  3.480087E+00  5.088490E+02  5.088490E+02
 -  5.088490E+02
- 
+
 ================================================================================
 == DATASET  5 ==================================================================
 -   nproc =    2
- 
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
- 
+
  mkfilename : get1wf/=0, take file _1WF from output of DATASET   4.
- 
+
  mkfilename : getddk/=0, take file _1WF from output of DATASET   2.
- 
+
  mkfilename : getdkdk/=0, take file _1WF from output of DATASET   3.
- 
+
  mkfilename : get1den/=0, take file _DEN from output of DATASET   4.
- 
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
- 
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.0510000  5.0510000  G(1)= -0.0989903  0.0989903  0.0989903
  R(2)=  5.0510000  0.0000000  5.0510000  G(2)=  0.0989903 -0.0989903  0.0989903
  R(3)=  5.0510000  5.0510000  0.0000000  G(3)=  0.0989903  0.0989903 -0.0989903
  Unit cell volume ucvol=  2.5772830E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
- 
+
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  15  15  15
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.18799
 --------------------------------------------------------------------------------
- 
+
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
- 
+
 ================================================================================
  ==> Compute Quadrupole Tensor <== 
- 
+
  symkpt : not enough symmetry to change the number of k points.
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 -open atomic displacement wf1 file :tlw_1o_DS4_1WF1
@@ -2531,9 +2531,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
 -open d2_dkdk wf2 file :tlw_1o_DS3_1WF28
 -open d2_dkdk wf2 file :tlw_1o_DS3_1WF29
 -open d2_dkdk wf2 file :tlw_1o_DS3_1WF30
- 
+
  Quadrupole tensor calculation completed 
- 
+
   
   Quadrupole tensor, in cartesian coordinates,
   efidir   atom   atddir   qgrdir          real part        imaginary part
@@ -2598,7 +2598,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
   to an atomic displacementatom, in cartesian coordinates,
   (1/ucvol factor not included),
   efidir   atom   atddir   qgrdir          real part        imaginary part
-    1       1       1       1            0.0000002809         0.0000000000
+    1       1       1       1            0.0000002810         0.0000000000
     1       2       1       1           -0.0000003651         0.0000000000
     1       1       2       1           -0.0000000202         0.0000000000
     1       2       2       1           -0.0000000202         0.0000000000
@@ -2612,7 +2612,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
     2       2       3       1           -6.7367985242         0.0000000000
     3       1       1       1            0.0000003000         0.0000000000
     3       2       1       1           -0.0000003158         0.0000000000
-    3       1       2       1            6.7367758172         0.0000000000
+    3       1       2       1            6.7367758173         0.0000000000
     3       2       2       1           -6.7367982282         0.0000000000
     3       1       3       1           -0.0000000045         0.0000000000
     3       2       3       1           -0.0000000345         0.0000000000
@@ -2659,41 +2659,41 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
   Electronic (frozen-ion) contribution to the piezoelectric tensor,
   in cartesian coordinates, (from quadrupole calculation)
   atddir   qgrdir   efidir        real part           imaginary part
-    1       1       1            0.0000000003         0.0000000000
-    2       1       1            0.0000000002         0.0000000000
-    3       1       1            0.0000000052         0.0000000000
-    1       1       2           -0.0000000006         0.0000000000
-    2       1       2            0.0000000002         0.0000000000
-    3       1       2            0.0000000891         0.0000000000
-    1       1       3           -0.0000000043         0.0000000000
-    2       1       3            0.0000000849         0.0000000000
-    3       1       3           -0.0000000003         0.0000000000
+    1       1       1            0.0000000003        -0.0000000000
+    2       1       1            0.0000000002        -0.0000000000
+    3       1       1            0.0000000052        -0.0000000000
+    1       1       2           -0.0000000006        -0.0000000000
+    2       1       2            0.0000000002        -0.0000000000
+    3       1       2            0.0000000891        -0.0000000000
+    1       1       3           -0.0000000043        -0.0000000000
+    2       1       3            0.0000000849        -0.0000000000
+    3       1       3           -0.0000000003        -0.0000000000
   
-    1       2       1            0.0000000002         0.0000000000
-    2       2       1           -0.0000000006         0.0000000000
-    3       2       1            0.0000000891         0.0000000000
-    1       2       2            0.0000000002         0.0000000000
-    2       2       2            0.0000000003         0.0000000000
-    3       2       2            0.0000000052         0.0000000000
-    1       2       3            0.0000000849         0.0000000000
-    2       2       3           -0.0000000043         0.0000000000
-    3       2       3           -0.0000000003         0.0000000000
+    1       2       1            0.0000000002        -0.0000000000
+    2       2       1           -0.0000000006        -0.0000000000
+    3       2       1            0.0000000891        -0.0000000000
+    1       2       2            0.0000000002        -0.0000000000
+    2       2       2            0.0000000003        -0.0000000000
+    3       2       2            0.0000000052        -0.0000000000
+    1       2       3            0.0000000849        -0.0000000000
+    2       2       3           -0.0000000043        -0.0000000000
+    3       2       3           -0.0000000003        -0.0000000000
   
-    1       3       1            0.0000000052         0.0000000000
-    2       3       1            0.0000000891         0.0000000000
-    3       3       1            0.0000000006         0.0000000000
-    1       3       2            0.0000000891         0.0000000000
-    2       3       2            0.0000000052         0.0000000000
-    3       3       2            0.0000000006         0.0000000000
-    1       3       3           -0.0000000003         0.0000000000
-    2       3       3           -0.0000000003         0.0000000000
-    3       3       3           -0.0000000009         0.0000000000
+    1       3       1            0.0000000052        -0.0000000000
+    2       3       1            0.0000000891        -0.0000000000
+    3       3       1            0.0000000006        -0.0000000000
+    1       3       2            0.0000000891        -0.0000000000
+    2       3       2            0.0000000052        -0.0000000000
+    3       3       2            0.0000000006        -0.0000000000
+    1       3       3           -0.0000000003        -0.0000000000
+    2       3       3           -0.0000000003        -0.0000000000
+    3       3       3           -0.0000000009        -0.0000000000
   
 ================================================================================
- 
+
 ================================================================================
  ==> Compute Flexoelectric Tensor Related Magnitudes <== 
- 
+
  symkpt : not enough symmetry to change the number of k points.
 -inwffil : will read wavefunctions from disk file tlw_1o_DS1_WFK
 -open atomic displacement wf1 file :tlw_1o_DS4_1WF1
@@ -2720,15 +2720,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
 -open d2_dkdk wf2 file :tlw_1o_DS3_1WF28
 -open d2_dkdk wf2 file :tlw_1o_DS3_1WF29
 -open d2_dkdk wf2 file :tlw_1o_DS3_1WF30
- 
+
  Frozen-ion flexoelectric tensor calculation completed 
- 
- 
+
+
  Dynamical matrix 1st q-gradient calculation completed 
- 
- 
+
+
  Piezoelectric force response 1st q-gradient calculation completed 
- 
+
   
   Frozen-ion flexoelectric tensor, in cartesian coordinates,
   efidir  qgrdir  strdir1  strdir2         real part          imaginary part
@@ -2824,9 +2824,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
   
   
   First moment of real space IFC, in cartesian coordinates,
-  iatom   iatdir   jatom   jatddir   qgrdir           real part          imagina
- ry part
-    1        1        1        1        1            -0.0000000000         0.0000000000
+  iatom   iatdir   jatom   jatddir   qgrdir           real part          imaginary part
+    1        1        1        1        1             0.0000000000         0.0000000000
     2        1        1        1        1            -0.0000000000         0.0000000000
     1        2        1        1        1             0.0000000016         0.0000000000
     2        2        1        1        1            -0.0000000003         0.0000000000
@@ -2854,7 +2853,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
     2        1        1        3        1            -0.0000000127         0.0000000000
     1        2        1        3        1             0.0000000051         0.0000000000
     2        2        1        3        1            -0.1935346724         0.0000000000
-    1        3        1        3        1            -0.0000000000         0.0000000000
+    1        3        1        3        1             0.0000000000         0.0000000000
     2        3        1        3        1             0.0000000045         0.0000000000
     1        1        2        3        1            -0.0000000082         0.0000000000
     2        1        2        3        1             0.0000000013         0.0000000000
@@ -2863,7 +2862,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
     1        3        2        3        1            -0.0000000045         0.0000000000
     2        3        2        3        1            -0.0000000000         0.0000000000
   
-    1        1        1        1        2            -0.0000000000         0.0000000000
+    1        1        1        1        2             0.0000000000         0.0000000000
     2        1        1        1        2            -0.0000000086         0.0000000000
     1        2        1        1        2             0.0000000048         0.0000000000
     2        2        1        1        2             0.0000000015         0.0000000000
@@ -2891,7 +2890,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
     2        1        1        3        2            -0.1935346670         0.0000000000
     1        2        1        3        2             0.0000000015         0.0000000000
     2        2        1        3        2            -0.0000000125         0.0000000000
-    1        3        1        3        2            -0.0000000000         0.0000000000
+    1        3        1        3        2             0.0000000000         0.0000000000
     2        3        1        3        2             0.0000000041         0.0000000000
     1        1        2        3        2             0.1935346569         0.0000000000
     2        1        2        3        2            -0.0000000153         0.0000000000
@@ -2900,7 +2899,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
     1        3        2        3        2            -0.0000000041         0.0000000000
     2        3        2        3        2            -0.0000000000         0.0000000000
   
-    1        1        1        1        3            -0.0000000000         0.0000000000
+    1        1        1        1        3             0.0000000000         0.0000000000
     2        1        1        1        3            -0.0000000068         0.0000000000
     1        2        1        1        3            -0.0000000090         0.0000000000
     2        2        1        1        3            -0.1935346593         0.0000000000
@@ -2914,14 +2913,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
     2        3        2        1        3            -0.0000000049         0.0000000000
     1        1        1        2        3             0.0000000090         0.0000000000
     2        1        1        2        3            -0.1935346593         0.0000000000
-    1        2        1        2        3             0.0000000000         0.0000000000
+    1        2        1        2        3            -0.0000000000         0.0000000000
     2        2        1        2        3            -0.0000000048         0.0000000000
     1        3        1        2        3            -0.0000000029         0.0000000000
     2        3        1        2        3             0.0000000063         0.0000000000
     1        1        2        2        3             0.1935346593         0.0000000000
     2        1        2        2        3            -0.0000000090         0.0000000000
     1        2        2        2        3             0.0000000048         0.0000000000
-    2        2        2        2        3            -0.0000000000         0.0000000000
+    2        2        2        2        3             0.0000000000         0.0000000000
     1        3        2        2        3             0.0000000015         0.0000000000
     2        3        2        2        3            -0.0000000023         0.0000000000
     1        1        1        3        3             0.0000000003         0.0000000000
@@ -2935,7 +2934,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
     1        2        2        3        3            -0.0000000063         0.0000000000
     2        2        2        3        3             0.0000000023         0.0000000000
     1        3        2        3        3            -0.0000000000         0.0000000000
-    2        3        2        3        3            -0.0000000000         0.0000000000
+    2        3        2        3        3             0.0000000000         0.0000000000
   
 ================================================================================
   
@@ -2977,7 +2976,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
     1        3        2        2             0.0000000110         0.0000000000
     1        3        3        2            -0.0000000041         0.0000000000
     2        3        1        2            -0.1935346417         0.0000000000
-    2        3        2        2             0.0000000088         0.0000000000
+    2        3        2        2             0.0000000089         0.0000000000
     2        3        3        2             0.0000000041         0.0000000000
   
     1        1        1        3             0.0000000068         0.0000000000
@@ -3034,7 +3033,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
     1       1       2       2       1            0.5537461519         0.0000000000
     1       2       2       2       1            0.0000000372         0.0000000000
     1       3       2       2       1           -0.0000000020         0.0000000000
-    2       1       2       2       1            0.5537450893         0.0000000000
+    2       1       2       2       1            0.5537450892         0.0000000000
     2       2       2       2       1           -0.0000000354         0.0000000000
     2       3       2       2       1            0.0000000002         0.0000000000
   
@@ -3062,7 +3061,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
     1       1       3       3       1            0.5537461042         0.0000000000
     1       2       3       3       1            0.0000000014         0.0000000000
     1       3       3       3       1           -0.0000000044         0.0000000000
-    2       1       3       3       1            0.5537450606         0.0000000000
+    2       1       3       3       1            0.5537450605         0.0000000000
     2       2       3       3       1            0.0000000045         0.0000000000
     2       3       3       3       1           -0.0000000016         0.0000000000
   
@@ -3076,7 +3075,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
     1       1       2       1       2            0.5537461519         0.0000000000
     1       2       2       1       2            0.0000000372         0.0000000000
     1       3       2       1       2           -0.0000000020         0.0000000000
-    2       1       2       1       2            0.5537450893         0.0000000000
+    2       1       2       1       2            0.5537450892         0.0000000000
     2       2       2       1       2           -0.0000000354         0.0000000000
     2       3       2       1       2            0.0000000002         0.0000000000
   
@@ -3146,7 +3145,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
     1       1       3       1       3            0.5537461042         0.0000000000
     1       2       3       1       3            0.0000000014         0.0000000000
     1       3       3       1       3           -0.0000000044         0.0000000000
-    2       1       3       1       3            0.5537450606         0.0000000000
+    2       1       3       1       3            0.5537450605         0.0000000000
     2       2       3       1       3            0.0000000045         0.0000000000
     2       3       3       1       3           -0.0000000016         0.0000000000
   
@@ -3288,7 +3287,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
     3        3        3        3             0.0067578263         0.0000000000
   
 ================================================================================
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -3299,16 +3298,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      98.781      98.764
              ecut      4.00000000E+00 Hartree
            etotal1    -7.9021310906E+00
            etotal2    -8.7639370856E+00
-           etotal3    -6.1174554301E+01
+           etotal3    -6.1174554302E+01
            etotal4     1.0692010571E+00
            etotal5     0.0000000000E+00
-            fcart1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-                       0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
+            fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart5     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         312
            getddk1          0
            getddk2          0
            getddk3          2
@@ -3767,7 +3766,7 @@ P          mk1mem5         64
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl       14.00000
- 
+
 ================================================================================
 
 
@@ -3860,10 +3859,10 @@ P          mk1mem5         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         18.8  wall=         18.8
- 
+- Proc.   0 individual time (sec): cpu=         36.0  wall=         37.8
+
 ================================================================================
- 
+
  Calculation completed.
 .Delivered   1 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         37.5  wall=         37.6
++Overall time at end (sec) : cpu=         73.7  wall=         75.6
