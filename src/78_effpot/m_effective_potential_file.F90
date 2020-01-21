@@ -2277,7 +2277,11 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
 !Initialisation of usefull values
   natom = ddb%natom
   nblok = ddb%nblok
+#ifdef MR_DEV
+  mpert=natom+MPERT_MAX
+#else
   mpert=natom+6
+#endif
   msize=3*mpert*3*mpert;
 
 !Tranfert the ddb into usable array (ipert and idir format like in abinit)
