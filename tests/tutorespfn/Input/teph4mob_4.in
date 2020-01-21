@@ -69,3 +69,20 @@ tolwfr3 1.0d-20
                        # is described in the "dielng" input variable section.
                        # The dielectric constant of AlAs is smaller that the one of Si (=12).
 
+
+#%%<BEGIN TEST_INFO>
+#%% [setup]
+#%% executable = abinit
+#%% test_chain =  teph4mob_1.in, teph4mob_2.in, teph4mob_3.in, teph4mob_4.in, teph4mob_5.in, teph4mob_6.in, teph4mob_7.in
+#%% [files]
+#%% files_to_test = 
+#%%   teph4mob_4.out, tolnlines= 57, tolabs=  3.000e-02, tolrel=  6.000e-03
+#%% psp_files =  13al.981214.fhi, 33as.pspnc 
+#%% [paral_info]
+#%% max_nprocs = 4
+#%% [extra_info]
+#%% authors = G. BRunin, M. Giantomassi
+#%% keywords = NC, DFPT, EPH
+#%% description = 
+#%%   E-ph for the mobility in semiconductors
+#%%<END TEST_INFO>
