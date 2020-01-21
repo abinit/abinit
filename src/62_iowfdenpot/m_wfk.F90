@@ -82,7 +82,7 @@ module m_wfk
  use m_time,         only : cwtime, cwtime_report, asctime
  use m_fstrings,     only : sjoin, strcat, endswith, itoa, ktoa
  use m_io_tools,     only : get_unit, mvrecord, iomode_from_fname, iomode2str, open_file, close_unit, delete_file, file_exists
- use m_numeric_tools,only : mask2blocks
+ use m_numeric_tools,only : mask2blocks,wrap2_pmhalf
  use m_cgtk,         only : cgtk_rotate
  use m_fftcore,      only : get_kg, ngfft_seq
  use m_distribfft,   only : init_distribfft_seq
@@ -2984,7 +2984,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  integer :: ik_disk
  integer :: spin_saved, spin_sym
  integer :: itimrev_disk
- real(dp) :: ecut_eff,cpu,wall,gflops
+ real(dp) :: ecut_eff,cpu,wall,gflops, res
  character(len=500) :: msg
  logical :: isirred_kf, foundk
  logical :: needthisk
@@ -3079,14 +3079,18 @@ print *, 'ik_ibz, nkibz ', ik_ibz, nkibz
    foundk = .false.
    do ik_disk=1,wfk_disk%nkpt
 print *, ' kpt disk vs irred ', ebands_ibz%kptns(:,ik_disk), '   ', kptns_in(:,ibz2rbz(ik_ibz))
-     kdiff = mod(ebands_ibz%kptns(:,ik_disk) - kptns_in(:,ibz2rbz(ik_ibz)), one)
+     call wrap2_pmhalf(ebands_ibz%kptns(1,ik_disk) - kptns_in(1,ibz2rbz(ik_ibz)), kdiff(1), res)
+     call wrap2_pmhalf(ebands_ibz%kptns(2,ik_disk) - kptns_in(2,ibz2rbz(ik_ibz)), kdiff(2), res)
+     call wrap2_pmhalf(ebands_ibz%kptns(3,ik_disk) - kptns_in(3,ibz2rbz(ik_ibz)), kdiff(3), res)
      if (sum(abs(kdiff)) < tol6) then
        ibz2disk(ik_ibz) = ik_disk
        foundk = .true.
        exit
      end if
 !TODO: make sure the algorithm prefers +kibz to the time reversed copy. May be ok as is.
-     kdiff = mod(ebands_ibz%kptns(:,ik_disk) + kptns_in(:,ibz2rbz(ik_ibz)), one)
+     call wrap2_pmhalf(ebands_ibz%kptns(1,ik_disk) + kptns_in(1,ibz2rbz(ik_ibz)), kdiff(1), res)
+     call wrap2_pmhalf(ebands_ibz%kptns(2,ik_disk) + kptns_in(2,ibz2rbz(ik_ibz)), kdiff(2), res)
+     call wrap2_pmhalf(ebands_ibz%kptns(3,ik_disk) + kptns_in(3,ibz2rbz(ik_ibz)), kdiff(3), res)
      if (sum(abs(kdiff)) < tol6) then
        ibz2disk(ik_ibz) = -ik_disk
        foundk = .true.

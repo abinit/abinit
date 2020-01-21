@@ -1347,6 +1347,7 @@ print *, ' mpw, mpw1 ', mpw, mpw1
 &     dtset%nsppol,nsym,occ_rbz,optorth,&
 &     dtset%symafm,dtset%symrel,dtset%tnons,&
 &     dtfil%unkg1,wffkq,wfftkq,dtfil%unwffkq,dtfil%fnamewffq,wvl)
+print *, ' mkqmem_rbz, ', mkqmem_rbz
    !transfer to local array
    icg=0
    icg_tmp=0
@@ -1360,9 +1361,11 @@ print *, ' mpw, mpw1 ', mpw, mpw1
            cycle
          end if
          iband_me = iband_me + 1
-print *, 'is ik ib cgq ', isppol, ikpt, iband
 if (sum(abs(cgq(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol6) then
+print *, 'is ik ib cgq ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
 print *, ' diff in cgq ', cgq(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+else
+write (200, *) 'is ik ib cgq ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
 end if
          !cgq(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
          icg = icg + npw
