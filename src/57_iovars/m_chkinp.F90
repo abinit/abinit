@@ -1316,16 +1316,16 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  ixcrot
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,3,(/1,2,3/),iout)
    if(dt%rfmagn/=0)then
-     if(abs(dt%qpt(1))>tol8)then
-       cond_string(1)='qpt(1)' ; cond_values(1)=dt%qpt(1)
+     if(abs(dt%qptn(1))>tol8)then
+       cond_string(1)='qptn(1)' ; cond_values(1)=dt%qptn(1)
        call chkint_eq(1,1,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,1,(/3/),iout)
      end if
-     if(abs(dt%qpt(2))>tol8)then
-       cond_string(1)='qpt(2)' ; cond_values(1)=dt%qpt(2)
+     if(abs(dt%qptn(2))>tol8)then
+       cond_string(1)='qptn(2)' ; cond_values(1)=dt%qptn(2)
        call chkint_eq(1,1,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,1,(/3/),iout)
      end if
-     if(abs(dt%qpt(3))>tol8)then
-       cond_string(1)='qpt(3)' ; cond_values(1)=dt%qpt(3)
+     if(abs(dt%qptn(3))>tol8)then
+       cond_string(1)='qptn(3)' ; cond_values(1)=dt%qptn(3)
        call chkint_eq(1,1,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,1,(/3/),iout)
      end if
    endif
