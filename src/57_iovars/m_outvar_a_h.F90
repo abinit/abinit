@@ -830,11 +830,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ddb_ngqpt','INT',0)
 
  do idtset=0,ndtset_alloc
-   intarr(1:3,idtset)=dtsets(idtset)%ddb_qrefine
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ddb_qrefine','INT',0)
-
- do idtset=0,ndtset_alloc
    intarr(1:3,idtset)=dtsets(idtset)%dvdb_ngqpt
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'dvdb_ngqpt','INT',0)

@@ -1545,11 +1545,12 @@ Variable(
     vartype="integer",
     topics=['Phonons_useful'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval=1,
     mnemonics="CHarge NEUTrality treatment",
     text=r"""
 Set the treatment of the Charge Neutrality requirement for the effective charges.
 Same meaning as the corresponding anaddb variable.
+Note the different default value in abinit and anaddb
 """,
 ),
 
@@ -16861,9 +16862,10 @@ Variable(
     vartype="integer",
     topics=['SelfEnergy_expert'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval=1,
     mnemonics="SYMmetrization of SIGMA matrix elements",
     requires="[[optdriver]] in [4, 7]",
+    commentdefault="The default value changed in Abinitv9 from 0 to 1",
     text=r"""
 This option activates the symmetrization of the self-energy matrix elements ([[symsigma]] = 1).
 In this case the BZ integration defining the self-energy
@@ -19999,28 +20001,6 @@ that should be used in input.
 At present, it is mainly used in EPH code when performing calculation with the Sternheimer equation.
 Note that the path must be inserted between quotation marks.
 Note also that relative paths are interpreted according to the working directory in which Abinit is executed!
-""",
-),
-
-Variable(
-    abivarname="ddb_qrefine",
-    varset="eph",
-    vartype="integer",
-    topics=['ElPhonInt_expert'],
-    dimensions=[3],
-    defaultval=[1, 1, 1],
-    mnemonics="Q-point REFINEment order (experimental)",
-    text=r"""
-If **ddb_qrefine** is superior to 1, the EPH code attempts to initialize a first set of
-dynamical matrices from the DDB file and DFPT potentials from the DVDB file, with a q-point grid which is
-[[ddb_ngqpt]] divided by **qrefine** (e.g. ddb_ngqpt 4 4 2 ddb_qrefine 2 2 1 starts with a 2x2x2 grid).
-The dynamical matrices and DFPT potentials are interpolated onto the full
-[[ddb_ngqpt]] grid and any additional information found in the DDB file is
-imposed, before proceeding to normal band structure and other interpolations.
-Should implement Gaal-Nagy's algorithm in [[cite:GaalNagy2006]].
-
-A similar option is also available in anaddb. The main difference is that ddb_qrefine will also densify
-the q-mesh used for the Fourier transform of the DFPT potentials.
 """,
 ),
 
