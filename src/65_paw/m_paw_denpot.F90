@@ -1681,9 +1681,9 @@ subroutine pawkindensities(cplex,lmselectin,lm_size,nspden,nzlmopt,&
                phiphj=pawtab%phi(ir,iln)*pawtab%phi(ir,jln)
                tphitphj=pawtab%tphi(ir,iln)*pawtab%tphi(ir,jln)
                tau1(cplex*ir-dplex:ir*cplex,ilm,ispden)=tau1(cplex*ir-dplex:ir*cplex,ilm,ispden)&
-&               +ro_rg(1:cplex)*phiphj*one_over_rad2_(ir)
+&               +ro_rg(1:cplex)*phiphj*one_over_rad2_(ir)**2
                ttau1(cplex*ir-dplex:ir*cplex,ilm,ispden)=ttau1(cplex*ir-dplex:ir*cplex,ilm,ispden)&
-&               +ro_rg(1:cplex)*tphitphj*one_over_rad2_(ir)
+&               +ro_rg(1:cplex)*tphitphj*one_over_rad2_(ir)**2
               end do
            end if
          end if
@@ -1719,7 +1719,7 @@ subroutine pawkindensities(cplex,lmselectin,lm_size,nspden,nzlmopt,&
              do ir=2,mesh_size
                phiphj=pawtab%phi(ir,iln)*pawtab%phi(ir,jln)
                tau1(cplex*ir-dplex:ir*cplex,ilm,ispden)=tau1(cplex*ir-dplex:ir*cplex,ilm,ispden)&
-&               +ro_rg(1:cplex)*phiphj*one_over_rad2_(ir)
+&               +ro_rg(1:cplex)*phiphj*one_over_rad2_(ir)**2
               end do
            end if
          end if

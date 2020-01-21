@@ -1217,9 +1217,10 @@ subroutine drivexc(ixc,order,npts,nspden,usegradient,uselaplacian,usekden,&
 !    Compute first LDA XC (exc,vxc) and then add fake MGGA XC (exc,vxc)
      call xcpbe(exc,npts,nspden,optpbe,1,rho_updn,vxcrho,0,0)
      if (nspden==1) then
-!        it should be : exc_tot= exc_spin up + exc_spin down = 2*exc_spin up but this applies to tau and rho (so it cancels)
        exc(:)=exc(:)+alpha*tau_updn(:,1)/rho_updn(:,1)
      else
+!      It should be : exc_tot= exc_spin up + exc_spin down = 2*exc_spin up
+!       but this applies to tau and rho (so it cancels)
        do ispden=1,nspden
          exc(:)=exc(:)+alpha*tau_updn(:,ispden)/(rho_updn(:,1)+rho_updn(:,2))
        end do

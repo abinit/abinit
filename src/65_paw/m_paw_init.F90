@@ -460,8 +460,8 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
        call nderiv_gen(der,pawtab(itypat)%tphi(1:pw_mesh_size,iln),pawrad(itypat))
        pawtab(itypat)%tnablaphi(2:pw_mesh_size,iln)=der(2:pw_mesh_size) &
 &          -pawtab(itypat)%tphi(2:pw_mesh_size,iln)/pawrad(itypat)%rad(2:pw_mesh_size)
-       call pawrad_deducer0(pawtab(itypat)%nablaphi(:,iln),pw_mesh_size,pawrad(itypat))
-       call pawrad_deducer0(pawtab(itypat)%tnablaphi(:,iln),pw_mesh_size,pawrad(itypat))
+       call pawrad_deducer0(pawtab(itypat)%nablaphi(1:pw_mesh_size,iln),pw_mesh_size,pawrad(itypat))
+       call pawrad_deducer0(pawtab(itypat)%tnablaphi(1:pw_mesh_size,iln),pw_mesh_size,pawrad(itypat))
      end do
      ABI_DEALLOCATE(der)
      pawtab(itypat)%has_nablaphi=2
