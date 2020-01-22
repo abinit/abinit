@@ -1254,13 +1254,13 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 !    Blanchet write eigocc file with pressure
      if(associated(hightemp)) then
-       call hightemp_prt_eigocc(hightemp%e_shiftfactor,eigen,&
+       call hightemp_prt_eigocc(hightemp%e_kin_freeel,hightemp%e_shiftfactor,eigen,&
        & etotal,energies,dtfil%filnam_ds(4)(1:len(trim(dtfil%filnam_ds(4))))//'_el',&
        & std_out,0,dtset%kptns,dtset%mband,dtset%nband,&
        & hightemp%nfreeel,dtset%nkpt,dtset%nsppol,occ,rprimd,&
        & dtset%tsmear,psps%usepaw,dtset%wtk,istep=istep)
      else
-       call hightemp_prt_eigocc(zero,eigen,&
+       call hightemp_prt_eigocc(zero,zero,eigen,&
        & etotal,energies,dtfil%filnam_ds(4)(1:len(trim(dtfil%filnam_ds(4))))//'_el',&
        & std_out,0,dtset%kptns,dtset%mband,dtset%nband,&
        & zero,dtset%nkpt,dtset%nsppol,occ,rprimd,&

@@ -1063,14 +1063,14 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_prt_eigocc(e_shiftfactor,eigen,etotal,energies,fnameabo,&
+  subroutine hightemp_prt_eigocc(e_kin_freeel,e_shiftfactor,eigen,etotal,energies,fnameabo,&
   & iout,iter,kptns,mband,nband,nfreeel,nkpt,nsppol,occ,rprimd,tsmear,usepaw,wtk,&
   & strten,istep) ! Optional arguments
 
     ! Arguments -------------------------------
     ! Scalars
     integer,intent(in) :: iout,iter,mband,nkpt,nsppol,usepaw
-    real(dp),intent(in) :: e_shiftfactor,etotal,nfreeel,tsmear
+    real(dp),intent(in) :: e_kin_freeel,e_shiftfactor,etotal,nfreeel,tsmear
     character(len=*),intent(in) :: fnameabo
     type(energies_type),intent(in) :: energies
     integer,intent(in),optional :: istep
@@ -1120,8 +1120,8 @@ contains
     call wrtout(temp_unit,msg,'COLL')
 
     write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
-    & ' Kinetic energy     = ',energies%e_kinetic,' Ha         Kin. free el. E    = ',energies%e_kin_freeel,&
-    & ' Ha         Total kin. energy  = ',energies%e_kinetic+energies%e_kin_freeel, ' Ha'
+    & ' Kinetic energy     = ',energies%e_kinetic,' Ha         Kin. free el. E    = ',e_kin_freeel,&
+    & ' Ha         Total kin. energy  = ',energies%e_kinetic+e_kin_freeel, ' Ha'
     call wrtout(temp_unit,msg,'COLL')
 
     write(msg, '(a,ES12.5,a,ES12.5,a,ES15.8,a)') &
