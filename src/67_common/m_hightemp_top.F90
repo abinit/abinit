@@ -108,9 +108,7 @@ contains
 
     write(filenameoutpw, '(A,I4.4,A,I4.4)') 'eigocc_k',ckpt
     open(file="pwcoef/"//filenameoutpw, unit=23)
-    do iband=1,nband(ckpt)
-      write(23,*) eig_k(iband)
-    end do
+    write(23,'(ES12.5)') eig_k
     close(23)
 
     ABI_ALLOCATE(tempwfk,(mpw, 3))
@@ -153,7 +151,7 @@ contains
            cgsum = cgsum + tempwfk(ipw,2)
            incrdegcg = incrdegcg + 1
         else
-           write(23,*) tempwfk(ipw-1, 1), cgsum/tot_cgsum, incrdegcg,&
+           write(23,'(ES12.5,ES12.5,i12,ES12.5)') tempwfk(ipw-1, 1), cgsum/tot_cgsum, incrdegcg,&
            & tempwfk(ipw-1, 3)
            energmin = tempwfk(ipw, 1)
            cgsum = tempwfk(ipw,2)
