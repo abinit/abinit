@@ -968,8 +968,8 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 
        !blanchet PRINT WAVE FUNCTIONS COEFFICIENTS
-       call hightemp_prt_cg(cg,ikpt,dtset%ecut,eig_k,0,dtset%istwfk,dtset%kptns,&
-       & mcg,mpi_enreg,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,rprimd)
+!       call hightemp_prt_cg(cg,ikpt,dtset%ecut,eig_k,0,dtset%istwfk,dtset%kptns,&
+!       & mcg,mpi_enreg,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,rprimd)
 
        call timab(985,1,tsec)
 
@@ -1250,6 +1250,21 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 !          call hightemp_prt_cprj(cprj,eigen,gs_hamk,istep,dtset%mband,&
 ! &         mcprj_local,mpi_enreg,natom,dtset%nkpt,dtset%nsppol,occ)
 !        end if
+     end if
+
+!    Blanchet write eigocc file with pressure
+     if(associated(hightemp)) then
+       call hightemp_prt_eigocc(hightemp%e_shiftfactor,eigen,&
+       & etotal,energies,dtfil%filnam_ds(4)(1:len(trim(dtfil%filnam_ds(4))))//'_el',&
+       & std_out,0,dtset%kptns,dtset%mband,dtset%nband,&
+       & hightemp%nfreeel,dtset%nkpt,dtset%nsppol,occ,rprimd,&
+       & dtset%tsmear,psps%usepaw,dtset%wtk,istep=istep)
+     else
+       call hightemp_prt_eigocc(zero,eigen,&
+       & etotal,energies,dtfil%filnam_ds(4)(1:len(trim(dtfil%filnam_ds(4))))//'_el',&
+       & std_out,0,dtset%kptns,dtset%mband,dtset%nband,&
+       & zero,dtset%nkpt,dtset%nsppol,occ,rprimd,&
+       & dtset%tsmear,psps%usepaw,dtset%wtk,istep=istep)
      end if
 
 !    !=========  DMFT call begin ============================================
