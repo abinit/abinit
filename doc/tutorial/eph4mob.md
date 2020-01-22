@@ -103,7 +103,7 @@ The file *$\$ABI_TUTORESPFN/Input/teph4mob_4.in* is an example of such computati
 It consists of two datasets: the first one computes the ground state wavefunction,
 and the second one computes the dense WFK that will be used to compute the transport.
 We want to compute the mobility of electrons in the conduction band, therefore
-we need to consider conduction bands in the computation of the WFK ([[nband = 8]]).
+we need to consider conduction bands in the computation of the WFK ([[nband]] = 8).
 You can copy it in the *Work_eph4mob* directory, and run ABINIT:
 
     abinit < teph4mob_4.files > teph4mob_4.log 2> err &
@@ -227,7 +227,7 @@ The temperature is first given then the electron and hole densities, and electro
 In this computation, we consider only the electrons, so the values for the holes are 0. 
 Note that the transport driver is automatically run after the e-ph driver.
 You can also run only the transport driver, if you have the lifetimes in a SIGEPH.nc file, by setting
-[[eph_task 7]]. This task can be performed only in serial and is very fast.
+[[eph_task]] = 7. This task can be performed only in serial and is very fast.
 
 Now that you know how to obtain the mobility in a semiconductor for given k- and q-meshes, we can
 give more details about convergence and tricks that can be used to decrease the computational cost.
