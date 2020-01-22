@@ -1,8 +1,8 @@
 
-.Version 8.11.11 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(sequential version, prepared for a x86_64_linux_gnu7.4 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,13 +14,13 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 16 Jan 2020.
-- ( at 15h09 )
+.Starting date : Tue 21 Jan 2020.
+- ( at 17h06 )
   
-- input  file    -> teph2_4.in
-- output file    -> teph2_4.out
-- root for input  files -> teph2_4i
-- root for output files -> teph2_4o
+- input  file    -> /home/gbrunin/Software/abinit/eph_tuto/build/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_4.in
+- output file    -> teph4mob_4.out
+- root for input  files -> teph4mob_4i
+- root for output files -> teph4mob_4o
 
 
  DATASET    1 : space group F-4 3 m (#216); Bravais cF (face-center cubic)
@@ -32,11 +32,11 @@
     nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =           8
-       mpw =          80          nfft =        1728          nkpt =           8
+       mpw =          76          nfft =        1728          nkpt =           8
 ================================================================================
-P This job should need less than                       1.486 Mbytes of memory.
+P This job should need less than                       1.481 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      0.080 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
+_ WF disk file :      0.076 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
 
@@ -49,11 +49,11 @@ _ WF disk file :      0.080 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
     nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =         413
-       mpw =          80          nfft =        1728          nkpt =         413
+       mpw =          79          nfft =        1728          nkpt =         413
 ================================================================================
-P This job should need less than                       6.095 Mbytes of memory.
+P This job should need less than                       6.040 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :      4.035 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
+_ WF disk file :      3.985 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
 
@@ -66,11 +66,11 @@ _ WF disk file :      4.035 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
     nsppol =       1      nsym =      24    n1xccc =    2501    ntypat =       2
     occopt =       1   xclevel =       1
 -    mband =           8        mffmem =           1         mkmem =        2769
-       mpw =          80          nfft =        1728          nkpt =        2769
+       mpw =          79          nfft =        1728          nkpt =        2769
 ================================================================================
-P This job should need less than                      34.136 Mbytes of memory.
+P This job should need less than                      33.766 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
-_ WF disk file :     27.043 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
+_ WF disk file :     26.705 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
 
 --------------------------------------------------------------------------------
@@ -95,15 +95,15 @@ _ WF disk file :     27.043 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
              iscf1          7
              iscf2         -2
              iscf3         -2
-           istwfk1       1    0    1    0    0    0    1    0
-           istwfk2       1    0    0    0    0    0    0    0    0    0
-                         0    0    1    0    0    0    0    0    0    0
+           istwfk1       2    0    3    0    0    0    7    0
+           istwfk2       2    0    0    0    0    0    0    0    0    0
+                         0    0    3    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
-           istwfk3       1    0    0    0    0    0    0    0    0    0
+           istwfk3       2    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
-                         0    0    0    0    1    0    0    0    0    0
+                         0    0    0    0    3    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                        outvar_i_n : Printing only first  50 k-points.
@@ -323,8 +323,8 @@ P           mkmem3       2769
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.05142
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/gbrunin/Software/abinit/eph_tuto/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/gbrunin/Software/abinit/eph_tuto/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -336,8 +336,8 @@ P           mkmem3       2769
              1    0.900554
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is Psps_for_tests/33as.pspnc
-- pspatm: opening atomic psp file    Psps_for_tests/33as.pspnc
+- pspini: atom type   2  psp file is /home/gbrunin/Software/abinit/eph_tuto/tests/Psps_for_tests/33as.pspnc
+- pspatm: opening atomic psp file    /home/gbrunin/Software/abinit/eph_tuto/tests/Psps_for_tests/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -359,19 +359,19 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -9.7523488605233    -9.752E+00 1.311E-03 1.012E+00
- ETOT  2  -9.7569403323306    -4.591E-03 6.125E-07 5.271E-02
- ETOT  3  -9.7571805313617    -2.402E-04 1.313E-05 3.733E-03
- ETOT  4  -9.7571932299513    -1.270E-05 4.443E-07 7.407E-05
- ETOT  5  -9.7571933487666    -1.188E-07 7.132E-09 3.884E-07
- ETOT  6  -9.7571933493281    -5.616E-10 3.742E-11 8.918E-09
- ETOT  7  -9.7571933493412    -1.304E-11 1.109E-12 1.342E-10
- ETOT  8  -9.7571933493414    -2.469E-13 6.088E-14 3.548E-13
- ETOT  9  -9.7571933493414    -2.132E-14 4.554E-15 1.637E-15
- ETOT 10  -9.7571933493415    -1.776E-14 6.124E-16 1.442E-18
- ETOT 11  -9.7571933493414     3.197E-14 4.081E-17 9.409E-21
+ ETOT  1  -9.7524358209150    -9.752E+00 1.922E-03 1.010E+00
+ ETOT  2  -9.7569449951238    -4.509E-03 2.745E-06 5.186E-02
+ ETOT  3  -9.7571805517698    -2.356E-04 1.290E-05 3.719E-03
+ ETOT  4  -9.7571932315233    -1.268E-05 4.462E-07 7.340E-05
+ ETOT  5  -9.7571933487539    -1.172E-07 7.043E-09 3.921E-07
+ ETOT  6  -9.7571933493279    -5.741E-10 3.860E-11 9.004E-09
+ ETOT  7  -9.7571933493411    -1.319E-11 1.121E-12 1.432E-10
+ ETOT  8  -9.7571933493414    -2.860E-13 6.195E-14 3.955E-13
+ ETOT  9  -9.7571933493414    -3.197E-14 4.608E-15 1.946E-15
+ ETOT 10  -9.7571933493414     1.776E-14 6.158E-16 1.490E-18
+ ETOT 11  -9.7571933493414     3.197E-14 4.134E-17 5.833E-21
 
- At SCF step   11       vres2   =  9.41E-21 < tolvrs=  1.00E-18 =>converged.
+ At SCF step   11       vres2   =  5.83E-21 < tolvrs=  1.00E-18 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.80097263E-04  sigma(3 2)=  0.00000000E+00
@@ -387,7 +387,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   10.867E-19; max=  40.809E-18
+ Mean square residual over all n,k,spin=   11.341E-19; max=  41.336E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -410,7 +410,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
  frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 10.610000000000 10.610000000000 10.610000000000 bohr
               =  5.614570183140  5.614570183140  5.614570183140 angstroms
- prteigrs : about to open file teph2_4o_DS1_EIG
+ prteigrs : about to open file teph4mob_4o_DS1_EIG
  Fermi (or HOMO) energy (hartree) =   0.08660   Average Vxc (hartree)=  -0.33422
  Eigenvalues (hartree) for nkpt=   8  k points:
  kpt#   1, nband=  8, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -421,17 +421,17 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  2.93664316618175E+00
-    Hartree energy  =  7.98938376772186E-01
-    XC energy       = -3.93723883317438E+00
+    Kinetic energy  =  2.93664316618341E+00
+    Hartree energy  =  7.98938376773701E-01
+    XC energy       = -3.93723883317501E+00
     Ewald energy    = -8.47989583509473E+00
     PspCore energy  =  7.65414498117480E-01
-    Loc. psp. energy= -2.43103083154720E+00
-    NL   psp  energy=  5.89976109403465E-01
-    >>>>>>>>> Etotal= -9.75719334934142E+00
+    Loc. psp. energy= -2.43103083154897E+00
+    NL   psp  energy=  5.89976109402722E-01
+    >>>>>>>>> Etotal= -9.75719334934140E+00
 
  Other information on the energy :
-    Total energy(eV)= -2.65506733625169E+02 ; Band energy (Ha)=  -6.9871995632E-01
+    Total energy(eV)= -2.65506733625168E+02 ; Band energy (Ha)=  -6.9871995632E-01
 --------------------------------------------------------------------------------
 
 
@@ -470,9 +470,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
 
 
 ================================================================================
- prteigrs : about to open file teph2_4o_DS2_EIG
+ prteigrs : about to open file teph4mob_4o_DS2_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  3.96E-22  5.70E-21  4.59E-21  1.07E-21  4.53E-21  3.99E-21  7.25E-21  7.90E-21
+  1.06E-21  2.79E-21  2.90E-21  1.21E-21  1.70E-22  2.80E-21  3.58E-21  2.83E-21
  -3.5284E-01  8.6598E-02  8.6598E-02  8.6598E-02  1.7315E-01  2.3439E-01
   2.3439E-01  2.3439E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
@@ -524,7 +524,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25   55 max resid (incl. the buffer)=  4.86397E-16
   prteigrs : nnsclo,ikpt=   25   56 max resid (incl. the buffer)=  7.11233E-17
   prteigrs : nnsclo,ikpt=   25   57 max resid (incl. the buffer)=  3.00940E-18
-  prteigrs : nnsclo,ikpt=   25   58 max resid (incl. the buffer)=  3.63226E-18
+  prteigrs : nnsclo,ikpt=   25   58 max resid (incl. the buffer)=  3.63233E-18
   prteigrs : nnsclo,ikpt=   25   59 max resid (incl. the buffer)=  3.30149E-18
   prteigrs : nnsclo,ikpt=   25   60 max resid (incl. the buffer)=  2.68952E-14
   prteigrs : nnsclo,ikpt=   25   61 max resid (incl. the buffer)=  6.18561E-16
@@ -543,12 +543,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25   74 max resid (incl. the buffer)=  3.44458E-15
   prteigrs : nnsclo,ikpt=   25   75 max resid (incl. the buffer)=  1.32781E-14
   prteigrs : nnsclo,ikpt=   25   76 max resid (incl. the buffer)=  3.78963E-17
-  prteigrs : nnsclo,ikpt=   25   77 max resid (incl. the buffer)=  5.39593E-16
+  prteigrs : nnsclo,ikpt=   25   77 max resid (incl. the buffer)=  5.39607E-16
   prteigrs : nnsclo,ikpt=   25   78 max resid (incl. the buffer)=  8.53436E-13
   prteigrs : nnsclo,ikpt=   25   79 max resid (incl. the buffer)=  3.90698E-14
   prteigrs : nnsclo,ikpt=   25   80 max resid (incl. the buffer)=  5.62338E-16
   prteigrs : nnsclo,ikpt=   25   81 max resid (incl. the buffer)=  1.45748E-17
-  prteigrs : nnsclo,ikpt=   25   82 max resid (incl. the buffer)=  8.31690E-20
+  prteigrs : nnsclo,ikpt=   25   82 max resid (incl. the buffer)=  8.31691E-20
   prteigrs : nnsclo,ikpt=   25   83 max resid (incl. the buffer)=  2.40068E-20
   prteigrs : nnsclo,ikpt=   25   84 max resid (incl. the buffer)=  6.37412E-20
   prteigrs : nnsclo,ikpt=   25   85 max resid (incl. the buffer)=  3.00208E-17
@@ -560,10 +560,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25   91 max resid (incl. the buffer)=  2.61319E-14
   prteigrs : nnsclo,ikpt=   25   92 max resid (incl. the buffer)=  9.28164E-16
   prteigrs : nnsclo,ikpt=   25   93 max resid (incl. the buffer)=  2.28583E-15
-  prteigrs : nnsclo,ikpt=   25   94 max resid (incl. the buffer)=  4.79459E-14
+  prteigrs : nnsclo,ikpt=   25   94 max resid (incl. the buffer)=  4.79446E-14
   prteigrs : nnsclo,ikpt=   25   95 max resid (incl. the buffer)=  3.38393E-12
   prteigrs : nnsclo,ikpt=   25   96 max resid (incl. the buffer)=  2.91106E-13
-  prteigrs : nnsclo,ikpt=   25   97 max resid (incl. the buffer)=  1.90898E-16
+  prteigrs : nnsclo,ikpt=   25   97 max resid (incl. the buffer)=  1.90897E-16
   prteigrs : nnsclo,ikpt=   25   98 max resid (incl. the buffer)=  5.52337E-18
   prteigrs : nnsclo,ikpt=   25   99 max resid (incl. the buffer)=  3.16121E-20
   prteigrs : nnsclo,ikpt=   25  102 max resid (incl. the buffer)=  4.36031E-18
@@ -621,7 +621,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25  154 max resid (incl. the buffer)=  4.88532E-11
   prteigrs : nnsclo,ikpt=   25  155 max resid (incl. the buffer)=  8.82791E-10
   prteigrs : nnsclo,ikpt=   25  156 max resid (incl. the buffer)=  4.40294E-08
-  prteigrs : nnsclo,ikpt=   25  157 max resid (incl. the buffer)=  3.16151E-11
+  prteigrs : nnsclo,ikpt=   25  157 max resid (incl. the buffer)=  4.45474E-11
   prteigrs : nnsclo,ikpt=   25  158 max resid (incl. the buffer)=  2.06494E-20
   prteigrs : nnsclo,ikpt=   25  159 max resid (incl. the buffer)=  4.48880E-19
   prteigrs : nnsclo,ikpt=   25  160 max resid (incl. the buffer)=  8.59900E-19
@@ -887,7 +887,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   96.952E-10; max=  22.399E-06
+ Mean square residual over all n,k,spin=   35.603E-22; max=  99.673E-22
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -897,7 +897,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
     2      1.40364254578497     1.40364254578497     1.40364254578497
  length scales= 10.610000000000 10.610000000000 10.610000000000 bohr
               =  5.614570183140  5.614570183140  5.614570183140 angstroms
- prteigrs : about to open file teph2_4o_DS2_EIG
+ prteigrs : about to open file teph4mob_4o_DS2_EIG
  Eigenvalues (hartree) for nkpt= 413  k points:
  kpt#   1, nband=  8, wtk=  0.00007, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.35284    0.08660    0.08660    0.08660    0.17315    0.23439    0.23439    0.23439
@@ -928,9 +928,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
 
 
 ================================================================================
- prteigrs : about to open file teph2_4o_DS3_EIG
+ prteigrs : about to open file teph4mob_4o_DS3_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
-  3.96E-22  5.70E-21  4.59E-21  1.07E-21  4.53E-21  3.99E-21  7.25E-21  7.90E-21
+  1.06E-21  2.79E-21  2.90E-21  1.21E-21  1.70E-22  2.80E-21  3.58E-21  2.83E-21
  -3.5284E-01  8.6598E-02  8.6598E-02  8.6598E-02  1.7315E-01  2.3439E-01
   2.3439E-01  2.3439E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
@@ -1006,7 +1006,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25   95 max resid (incl. the buffer)=  4.06402E-19
   prteigrs : nnsclo,ikpt=   25   96 max resid (incl. the buffer)=  1.03830E-19
   prteigrs : nnsclo,ikpt=   25   97 max resid (incl. the buffer)=  4.17045E-19
-  prteigrs : nnsclo,ikpt=   25   98 max resid (incl. the buffer)=  7.78490E-20
+  prteigrs : nnsclo,ikpt=   25   98 max resid (incl. the buffer)=  7.78489E-20
   prteigrs : nnsclo,ikpt=   25   99 max resid (incl. the buffer)=  3.37481E-18
   prteigrs : nnsclo,ikpt=   25  100 max resid (incl. the buffer)=  9.74971E-17
   prteigrs : nnsclo,ikpt=   25  101 max resid (incl. the buffer)=  1.63088E-15
@@ -1101,7 +1101,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25  199 max resid (incl. the buffer)=  7.11233E-17
   prteigrs : nnsclo,ikpt=   25  200 max resid (incl. the buffer)=  4.38516E-18
   prteigrs : nnsclo,ikpt=   25  201 max resid (incl. the buffer)=  3.00940E-18
-  prteigrs : nnsclo,ikpt=   25  202 max resid (incl. the buffer)=  1.53560E-19
+  prteigrs : nnsclo,ikpt=   25  202 max resid (incl. the buffer)=  1.53559E-19
   prteigrs : nnsclo,ikpt=   25  203 max resid (incl. the buffer)=  1.12242E-18
   prteigrs : nnsclo,ikpt=   25  204 max resid (incl. the buffer)=  2.21864E-17
   prteigrs : nnsclo,ikpt=   25  205 max resid (incl. the buffer)=  9.10442E-17
@@ -1140,7 +1140,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25  238 max resid (incl. the buffer)=  7.49145E-17
   prteigrs : nnsclo,ikpt=   25  239 max resid (incl. the buffer)=  3.20954E-16
   prteigrs : nnsclo,ikpt=   25  240 max resid (incl. the buffer)=  6.66678E-17
-  prteigrs : nnsclo,ikpt=   25  241 max resid (incl. the buffer)=  3.63226E-18
+  prteigrs : nnsclo,ikpt=   25  241 max resid (incl. the buffer)=  3.63233E-18
   prteigrs : nnsclo,ikpt=   25  242 max resid (incl. the buffer)=  1.58174E-16
   prteigrs : nnsclo,ikpt=   25  243 max resid (incl. the buffer)=  3.30149E-18
   prteigrs : nnsclo,ikpt=   25  244 max resid (incl. the buffer)=  1.21523E-14
@@ -1177,7 +1177,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25  275 max resid (incl. the buffer)=  1.32781E-14
   prteigrs : nnsclo,ikpt=   25  276 max resid (incl. the buffer)=  3.30818E-15
   prteigrs : nnsclo,ikpt=   25  277 max resid (incl. the buffer)=  3.78963E-17
-  prteigrs : nnsclo,ikpt=   25  278 max resid (incl. the buffer)=  1.31631E-15
+  prteigrs : nnsclo,ikpt=   25  278 max resid (incl. the buffer)=  1.31641E-15
   prteigrs : nnsclo,ikpt=   25  279 max resid (incl. the buffer)=  1.65928E-18
   prteigrs : nnsclo,ikpt=   25  280 max resid (incl. the buffer)=  4.48461E-16
   prteigrs : nnsclo,ikpt=   25  281 max resid (incl. the buffer)=  2.16192E-14
@@ -1211,7 +1211,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25  310 max resid (incl. the buffer)=  2.68189E-15
   prteigrs : nnsclo,ikpt=   25  311 max resid (incl. the buffer)=  9.52513E-14
   prteigrs : nnsclo,ikpt=   25  312 max resid (incl. the buffer)=  1.24057E-14
-  prteigrs : nnsclo,ikpt=   25  313 max resid (incl. the buffer)=  5.39593E-16
+  prteigrs : nnsclo,ikpt=   25  313 max resid (incl. the buffer)=  5.39607E-16
   prteigrs : nnsclo,ikpt=   25  314 max resid (incl. the buffer)=  4.21735E-14
   prteigrs : nnsclo,ikpt=   25  315 max resid (incl. the buffer)=  8.53436E-13
   prteigrs : nnsclo,ikpt=   25  316 max resid (incl. the buffer)=  1.83108E-13
@@ -1221,7 +1221,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25  320 max resid (incl. the buffer)=  7.19436E-17
   prteigrs : nnsclo,ikpt=   25  321 max resid (incl. the buffer)=  1.45748E-17
   prteigrs : nnsclo,ikpt=   25  322 max resid (incl. the buffer)=  5.19119E-18
-  prteigrs : nnsclo,ikpt=   25  323 max resid (incl. the buffer)=  8.31690E-20
+  prteigrs : nnsclo,ikpt=   25  323 max resid (incl. the buffer)=  8.31691E-20
   prteigrs : nnsclo,ikpt=   25  325 max resid (incl. the buffer)=  2.40068E-20
   prteigrs : nnsclo,ikpt=   25  327 max resid (incl. the buffer)=  6.37412E-20
   prteigrs : nnsclo,ikpt=   25  328 max resid (incl. the buffer)=  1.95348E-20
@@ -1242,7 +1242,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25  343 max resid (incl. the buffer)=  9.28164E-16
   prteigrs : nnsclo,ikpt=   25  344 max resid (incl. the buffer)=  5.38189E-15
   prteigrs : nnsclo,ikpt=   25  345 max resid (incl. the buffer)=  2.28583E-15
-  prteigrs : nnsclo,ikpt=   25  346 max resid (incl. the buffer)=  2.53424E-16
+  prteigrs : nnsclo,ikpt=   25  346 max resid (incl. the buffer)=  2.53407E-16
   prteigrs : nnsclo,ikpt=   25  347 max resid (incl. the buffer)=  2.56621E-12
   prteigrs : nnsclo,ikpt=   25  348 max resid (incl. the buffer)=  3.05799E-12
   prteigrs : nnsclo,ikpt=   25  349 max resid (incl. the buffer)=  2.57428E-14
@@ -1268,13 +1268,13 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25  374 max resid (incl. the buffer)=  2.64530E-14
   prteigrs : nnsclo,ikpt=   25  375 max resid (incl. the buffer)=  9.13125E-18
   prteigrs : nnsclo,ikpt=   25  376 max resid (incl. the buffer)=  2.89837E-16
-  prteigrs : nnsclo,ikpt=   25  377 max resid (incl. the buffer)=  4.79459E-14
+  prteigrs : nnsclo,ikpt=   25  377 max resid (incl. the buffer)=  4.79446E-14
   prteigrs : nnsclo,ikpt=   25  378 max resid (incl. the buffer)=  1.54597E-10
   prteigrs : nnsclo,ikpt=   25  379 max resid (incl. the buffer)=  3.38393E-12
   prteigrs : nnsclo,ikpt=   25  380 max resid (incl. the buffer)=  1.02547E-12
   prteigrs : nnsclo,ikpt=   25  381 max resid (incl. the buffer)=  2.91106E-13
   prteigrs : nnsclo,ikpt=   25  382 max resid (incl. the buffer)=  8.47372E-16
-  prteigrs : nnsclo,ikpt=   25  383 max resid (incl. the buffer)=  1.90898E-16
+  prteigrs : nnsclo,ikpt=   25  383 max resid (incl. the buffer)=  1.90897E-16
   prteigrs : nnsclo,ikpt=   25  384 max resid (incl. the buffer)=  8.21510E-17
   prteigrs : nnsclo,ikpt=   25  385 max resid (incl. the buffer)=  5.52337E-18
   prteigrs : nnsclo,ikpt=   25  386 max resid (incl. the buffer)=  1.95484E-18
@@ -1293,7 +1293,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25  403 max resid (incl. the buffer)=  1.12553E-15
   prteigrs : nnsclo,ikpt=   25  404 max resid (incl. the buffer)=  8.20664E-16
   prteigrs : nnsclo,ikpt=   25  405 max resid (incl. the buffer)=  2.28864E-16
-  prteigrs : nnsclo,ikpt=   25  406 max resid (incl. the buffer)=  8.37497E-15
+  prteigrs : nnsclo,ikpt=   25  406 max resid (incl. the buffer)=  8.37505E-15
   prteigrs : nnsclo,ikpt=   25  407 max resid (incl. the buffer)=  2.67603E-10
   prteigrs : nnsclo,ikpt=   25  408 max resid (incl. the buffer)=  1.53849E-12
   prteigrs : nnsclo,ikpt=   25  409 max resid (incl. the buffer)=  3.53826E-12
@@ -1487,7 +1487,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25  598 max resid (incl. the buffer)=  2.43866E-10
   prteigrs : nnsclo,ikpt=   25  599 max resid (incl. the buffer)=  1.13719E-10
   prteigrs : nnsclo,ikpt=   25  600 max resid (incl. the buffer)=  5.21801E-10
-  prteigrs : nnsclo,ikpt=   25  601 max resid (incl. the buffer)=  3.16151E-11
+  prteigrs : nnsclo,ikpt=   25  601 max resid (incl. the buffer)=  4.45474E-11
   prteigrs : nnsclo,ikpt=   25  606 max resid (incl. the buffer)=  4.91706E-20
   prteigrs : nnsclo,ikpt=   25  607 max resid (incl. the buffer)=  5.21875E-20
   prteigrs : nnsclo,ikpt=   25  608 max resid (incl. the buffer)=  3.44924E-18
@@ -1509,7 +1509,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25  624 max resid (incl. the buffer)=  5.88358E-20
   prteigrs : nnsclo,ikpt=   25  627 max resid (incl. the buffer)=  2.45895E-20
   prteigrs : nnsclo,ikpt=   25  628 max resid (incl. the buffer)=  1.67504E-19
-  prteigrs : nnsclo,ikpt=   25  629 max resid (incl. the buffer)=  5.53024E-19
+  prteigrs : nnsclo,ikpt=   25  629 max resid (incl. the buffer)=  5.53025E-19
   prteigrs : nnsclo,ikpt=   25  630 max resid (incl. the buffer)=  4.42802E-18
   prteigrs : nnsclo,ikpt=   25  631 max resid (incl. the buffer)=  1.76215E-17
   prteigrs : nnsclo,ikpt=   25  632 max resid (incl. the buffer)=  2.44797E-15
@@ -1766,7 +1766,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25  890 max resid (incl. the buffer)=  2.48376E-16
   prteigrs : nnsclo,ikpt=   25  891 max resid (incl. the buffer)=  7.81884E-18
   prteigrs : nnsclo,ikpt=   25  892 max resid (incl. the buffer)=  3.70706E-18
-  prteigrs : nnsclo,ikpt=   25  893 max resid (incl. the buffer)=  6.81791E-20
+  prteigrs : nnsclo,ikpt=   25  893 max resid (incl. the buffer)=  6.81790E-20
   prteigrs : nnsclo,ikpt=   25  894 max resid (incl. the buffer)=  1.17642E-20
   prteigrs : nnsclo,ikpt=   25  897 max resid (incl. the buffer)=  9.72123E-20
   prteigrs : nnsclo,ikpt=   25  898 max resid (incl. the buffer)=  3.78419E-20
@@ -1818,7 +1818,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25  945 max resid (incl. the buffer)=  4.03454E-16
   prteigrs : nnsclo,ikpt=   25  946 max resid (incl. the buffer)=  6.64327E-18
   prteigrs : nnsclo,ikpt=   25  947 max resid (incl. the buffer)=  1.04355E-18
-  prteigrs : nnsclo,ikpt=   25  948 max resid (incl. the buffer)=  9.78330E-20
+  prteigrs : nnsclo,ikpt=   25  948 max resid (incl. the buffer)=  9.78331E-20
   prteigrs : nnsclo,ikpt=   25  950 max resid (incl. the buffer)=  5.63428E-19
   prteigrs : nnsclo,ikpt=   25  951 max resid (incl. the buffer)=  4.15815E-20
   prteigrs : nnsclo,ikpt=   25  952 max resid (incl. the buffer)=  1.26061E-20
@@ -1844,8 +1844,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25  972 max resid (incl. the buffer)=  8.22378E-19
   prteigrs : nnsclo,ikpt=   25  973 max resid (incl. the buffer)=  3.95986E-20
   prteigrs : nnsclo,ikpt=   25  974 max resid (incl. the buffer)=  3.82394E-20
-  prteigrs : nnsclo,ikpt=   25  975 max resid (incl. the buffer)=  8.81885E-20
-  prteigrs : nnsclo,ikpt=   25  976 max resid (incl. the buffer)=  1.30046E-19
+  prteigrs : nnsclo,ikpt=   25  975 max resid (incl. the buffer)=  8.81884E-20
+  prteigrs : nnsclo,ikpt=   25  976 max resid (incl. the buffer)=  1.30047E-19
   prteigrs : nnsclo,ikpt=   25  977 max resid (incl. the buffer)=  1.67172E-19
   prteigrs : nnsclo,ikpt=   25  978 max resid (incl. the buffer)=  1.46502E-18
   prteigrs : nnsclo,ikpt=   25  979 max resid (incl. the buffer)=  2.33899E-17
@@ -2154,7 +2154,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25 1282 max resid (incl. the buffer)=  4.65041E-19
   prteigrs : nnsclo,ikpt=   25 1283 max resid (incl. the buffer)=  2.13216E-20
   prteigrs : nnsclo,ikpt=   25 1284 max resid (incl. the buffer)=  8.09588E-20
-  prteigrs : nnsclo,ikpt=   25 1285 max resid (incl. the buffer)=  6.45202E-20
+  prteigrs : nnsclo,ikpt=   25 1285 max resid (incl. the buffer)=  6.45203E-20
   prteigrs : nnsclo,ikpt=   25 1286 max resid (incl. the buffer)=  3.68244E-20
   prteigrs : nnsclo,ikpt=   25 1287 max resid (incl. the buffer)=  3.36828E-20
   prteigrs : nnsclo,ikpt=   25 1288 max resid (incl. the buffer)=  5.48784E-17
@@ -2581,7 +2581,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25 1711 max resid (incl. the buffer)=  1.29694E-17
   prteigrs : nnsclo,ikpt=   25 1712 max resid (incl. the buffer)=  5.75609E-19
   prteigrs : nnsclo,ikpt=   25 1713 max resid (incl. the buffer)=  1.23523E-18
-  prteigrs : nnsclo,ikpt=   25 1714 max resid (incl. the buffer)=  2.08334E-20
+  prteigrs : nnsclo,ikpt=   25 1714 max resid (incl. the buffer)=  2.08335E-20
   prteigrs : nnsclo,ikpt=   25 1715 max resid (incl. the buffer)=  4.02447E-18
   prteigrs : nnsclo,ikpt=   25 1716 max resid (incl. the buffer)=  7.62844E-17
   prteigrs : nnsclo,ikpt=   25 1717 max resid (incl. the buffer)=  5.56843E-16
@@ -3093,7 +3093,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25 2223 max resid (incl. the buffer)=  5.98739E-16
   prteigrs : nnsclo,ikpt=   25 2224 max resid (incl. the buffer)=  2.00794E-13
   prteigrs : nnsclo,ikpt=   25 2225 max resid (incl. the buffer)=  6.41108E-11
-  prteigrs : nnsclo,ikpt=   25 2226 max resid (incl. the buffer)=  4.75219E-11
+  prteigrs : nnsclo,ikpt=   25 2226 max resid (incl. the buffer)=  4.75220E-11
   prteigrs : nnsclo,ikpt=   25 2227 max resid (incl. the buffer)=  3.42354E-11
   prteigrs : nnsclo,ikpt=   25 2228 max resid (incl. the buffer)=  1.38097E-13
   prteigrs : nnsclo,ikpt=   25 2229 max resid (incl. the buffer)=  4.05634E-15
@@ -3627,7 +3627,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25 2763 max resid (incl. the buffer)=  1.30221E-17
   prteigrs : nnsclo,ikpt=   25 2765 max resid (incl. the buffer)=  2.17826E-18
   prteigrs : nnsclo,ikpt=   25 2766 max resid (incl. the buffer)=  7.30511E-19
-  prteigrs : nnsclo,ikpt=   25 2767 max resid (incl. the buffer)=  5.83512E-20
+  prteigrs : nnsclo,ikpt=   25 2767 max resid (incl. the buffer)=  5.83513E-20
   prteigrs : nnsclo,ikpt=   25 2768 max resid (incl. the buffer)=  2.18446E-19
   prteigrs : nnsclo,ikpt=   25 2769 max resid (incl. the buffer)=  4.27425E-20
 
@@ -3640,7 +3640,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   14.479E-09; max=  23.266E-05
+ Mean square residual over all n,k,spin=   35.167E-22; max=  99.998E-22
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -3650,7 +3650,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
     2      1.40364254578497     1.40364254578497     1.40364254578497
  length scales= 10.610000000000 10.610000000000 10.610000000000 bohr
               =  5.614570183140  5.614570183140  5.614570183140 angstroms
- prteigrs : about to open file teph2_4o_DS3_EIG
+ prteigrs : about to open file teph4mob_4o_DS3_EIG
  Eigenvalues (hartree) for nkpt=2769  k points:
  kpt#   1, nband=  8, wtk=  0.00001, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.35284    0.08660    0.08660    0.08660    0.17315    0.23439    0.23439    0.23439
@@ -3675,15 +3675,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
              iscf1          7
              iscf2         -2
              iscf3         -2
-           istwfk1       1    0    1    0    0    0    1    0
-           istwfk2       1    0    0    0    0    0    0    0    0    0
-                         0    0    1    0    0    0    0    0    0    0
+           istwfk1       2    0    3    0    0    0    7    0
+           istwfk2       2    0    0    0    0    0    0    0    0    0
+                         0    0    3    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
-           istwfk3       1    0    0    0    0    0    0    0    0    0
+           istwfk3       2    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
-                         0    0    0    0    1    0    0    0    0    0
+                         0    0    0    0    3    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                          0    0    0    0    0    0    0    0    0    0
                        outvar_i_n : Printing only first  50 k-points.
@@ -3879,51 +3879,51 @@ P           mkmem3       2769
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         46.1        0.77      0.013
-- Total wall clock time (s,m,h):         46.2        0.77      0.013
+- Total cpu        time (s,m,h):         43.0        0.72      0.012
+- Total wall clock time (s,m,h):         43.0        0.72      0.012
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           46.1, wall_time =           46.2
+- cpu_time =           43.0, wall_time =           43.0
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                  16.487  35.7     16.478  35.7         756169      -1.00        1.00       1.00
-- nonlop(apply)                  5.407  11.7      5.407  11.7         756169      -1.00        1.00       1.00
-- getghc-other                   4.839  10.5      4.801  10.4             -1      -1.00        1.01       1.01
-- projbd                         4.805  10.4      4.779  10.3        1142610      -1.00        1.01       1.01
-- vtowfk(ssdiag)                 4.411   9.6      4.473   9.7             -1      -1.00        0.99       0.99
-- invars2                        0.816   1.8      0.816   1.8              3      -1.00        1.00       1.00
-- abinit(2)                      0.788   1.7      0.789   1.7              1      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )          0.462   1.0      0.451   1.0             -1      -1.00        1.02       1.02
-- pspini                         0.263   0.6      0.262   0.6              3      -1.00        1.00       1.00
-- others (125)                   0.475   1.0      0.479   1.0             -1      -1.00        0.99       0.99
+- fourwf%(pot)                  15.435  35.9     15.398  35.8         756157      -1.00        1.00       1.00
+- nonlop(apply)                  5.111  11.9      5.217  12.1         756157      -1.00        0.98       0.98
+- projbd                         4.571  10.6      4.500  10.5        1142586      -1.00        1.02       1.02
+- getghc-other                   4.423  10.3      4.366  10.2             -1      -1.00        1.01       1.01
+- vtowfk(ssdiag)                 3.992   9.3      4.029   9.4             -1      -1.00        0.99       0.99
+- invars2                        0.821   1.9      0.821   1.9              3      -1.00        1.00       1.00
+- abinit(2)                      0.788   1.8      0.788   1.8              1      -1.00        1.00       1.00
+- newkpt(excl. rwwf   )          0.432   1.0      0.432   1.0             -1      -1.00        1.00       1.00
+- pspini                         0.250   0.6      0.249   0.6              3      -1.00        1.00       1.00
+- others (125)                   0.449   1.0      0.457   1.1             -1      -1.00        0.98       0.98
 -<END_TIMER>
 -
-- subtotal                      38.753  84.0     38.735  83.8                                  1.00       1.00
+- subtotal                      36.272  84.4     36.257  84.4                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          46.1, wall_time =          46.2
+- cpu_time =          43.0, wall_time =          43.0
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                  16.487  35.7     16.478  35.7         756169      -1.00        1.00       1.00
-- nonlop(apply)                  5.407  11.7      5.407  11.7         756169      -1.00        1.00       1.00
-- getghc-other                   4.839  10.5      4.801  10.4             -1      -1.00        1.01       1.01
-- projbd                         4.805  10.4      4.779  10.3        1142610      -1.00        1.01       1.01
-- vtowfk(ssdiag)                 4.411   9.6      4.473   9.7             -1      -1.00        0.99       0.99
-- invars2                        0.816   1.8      0.816   1.8              3      -1.00        1.00       1.00
-- abinit(2)                      0.788   1.7      0.789   1.7              1      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )          0.462   1.0      0.451   1.0             -1      -1.00        1.02       1.02
-- pspini                         0.263   0.6      0.262   0.6              3      -1.00        1.00       1.00
-- others (125)                   0.475   1.0      0.479   1.0             -1      -1.00        0.99       0.99
+- fourwf%(pot)                  15.435  35.9     15.398  35.8         756157      -1.00        1.00       1.00
+- nonlop(apply)                  5.111  11.9      5.217  12.1         756157      -1.00        0.98       0.98
+- projbd                         4.571  10.6      4.500  10.5        1142586      -1.00        1.02       1.02
+- getghc-other                   4.423  10.3      4.366  10.2             -1      -1.00        1.01       1.01
+- vtowfk(ssdiag)                 3.992   9.3      4.029   9.4             -1      -1.00        0.99       0.99
+- invars2                        0.821   1.9      0.821   1.9              3      -1.00        1.00       1.00
+- abinit(2)                      0.788   1.8      0.788   1.8              1      -1.00        1.00       1.00
+- newkpt(excl. rwwf   )          0.432   1.0      0.432   1.0             -1      -1.00        1.00       1.00
+- pspini                         0.250   0.6      0.249   0.6              3      -1.00        1.00       1.00
+- others (125)                   0.449   1.0      0.457   1.1             -1      -1.00        0.98       0.98
 -<END_TIMER>
 
-- subtotal                      38.753  84.0     38.735  83.8                                  1.00       1.00
+- subtotal                      36.272  84.4     36.257  84.4                                  1.00       1.00
 
 ================================================================================
 
@@ -3940,7 +3940,30 @@ P           mkmem3       2769
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- using density-functional theory.
+- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- Comment: Some pseudopotential generated using the FHI code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -3954,17 +3977,11 @@ P           mkmem3       2769
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
-- using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
-- Comment: Some pseudopotential generated using the FHI code were used.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
--
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -3973,11 +3990,13 @@ P           mkmem3       2769
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [4] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [5] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -3985,24 +4004,15 @@ P           mkmem3       2769
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [5] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=         46.1  wall=         46.2
+- Proc.   0 individual time (sec): cpu=         43.0  wall=         43.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         46.1  wall=         46.2
+.Delivered   1 WARNINGs and   5 COMMENTs to log file.
++Overall time at end (sec) : cpu=         43.0  wall=         43.0
