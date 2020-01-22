@@ -19738,6 +19738,23 @@ A negative entry can be used to exclude either holes or electrons from the calcu
 ),
 
 Variable(
+    abivarname="transport_ngkpt",
+    varset="eph",
+    topics=['SelfEnergy_useful'],
+    vartype="integer",
+    defaultval=[0,0,0],
+    dimensions=[3],
+    requires="[[optdriver]] == 7 and [[eph_task]] in [-4,7]",
+    mnemonics="TRANSPORT: Number of Grid points for K PoinTs integration in transport computations",
+    text=r"""
+This variable allows the user to specify the k-grid that should be used by the transport
+driver ([[eph_task]] = -4 or [[eph_task]] = 7). It should be equal to [[sigma_ngkpt]] or a
+mesh that is smaller and commensurate to it, since all the electron lifetimes and velocities
+should be obtained from the SIGEPH.nc file created previously.
+""",
+),
+
+Variable(
     abivarname="eph_tols_idelta",
     varset="eph",
     topics=['SelfEnergy_expert'],
