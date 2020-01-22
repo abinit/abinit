@@ -7,7 +7,7 @@
 !!   observables (PAW approach).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (JWZ, MT)
+!! Copyright (C) 2018-2020 ABINIT group (JWZ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

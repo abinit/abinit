@@ -6,7 +6,7 @@
 !!  Initialize MPI parameters and datastructures for parallel execution
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (FJ, MT, FD)
+!!  Copyright (C) 1999-2020 ABINIT group (FJ, MT, FD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

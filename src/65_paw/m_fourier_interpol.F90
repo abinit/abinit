@@ -7,7 +7,7 @@
 !!  Mainly used in PAW to interpol data from/to the coarse FFT grid from/to the fine FFT grid.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (FJ, MT, MG)
+!! Copyright (C) 2018-2020 ABINIT group (FJ, MT, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

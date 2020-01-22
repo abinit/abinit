@@ -6,7 +6,7 @@
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (JB)
+!!  Copyright (C) 2014-2020 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,7 +75,7 @@ module m_scfcv
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (JB)
+!!  Copyright (C) 2014-2020 ABINIT group (JB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

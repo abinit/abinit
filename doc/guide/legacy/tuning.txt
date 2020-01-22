@@ -25,7 +25,7 @@ These files can be found in the ~abinit/doc subdirectory.
 Any comment or suggestion to improve the 'tuning' file will be welcome,
 simply contact the ABINIT group.
 
-Copyright (C) 1999-2019 ABINIT group (XG,DCA)
+Copyright (C) 1999-2020 ABINIT group (XG,DCA)
 This file is distributed under the terms of the
 GNU General Public License, see ~abinit/COPYING
 or http://www.gnu.org/copyleft/gpl.txt .

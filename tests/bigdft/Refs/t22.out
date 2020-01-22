@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h17 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h13 )
   
-- input  file    -> t22.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/bigdft_t22/t22.in
 - output file    -> t22.out
 - root for input  files -> t22i
 - root for output files -> t22o
@@ -118,8 +118,8 @@ P           mkmem           1
          ecut(hartree)=     40.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/HGH/1h.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/HGH/1h.1.hgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/HGH/1h.1.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/HGH/1h.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
 -  1.00000   1.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -137,8 +137,8 @@ P           mkmem           1
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/HGH/8o.6.hgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/HGH/8o.6.hgh
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/HGH/8o.6.hgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/HGH/8o.6.hgh
 - Hartwigsen-Goedecker-Hutter psp for O,  from PRB58, 3641 (1998)
 -  8.00000   6.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -195,7 +195,7 @@ _setup2: Arith. and geom. avg. npw (full set) are   12053.000   12053.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   36.434E-09; max=  14.163E-10
+ Mean square residual over all n,k,spin=   56.028E-11; max=  14.163E-10
  reduced coordinates (array xred) for    3 atoms
        0.538433565045      0.637982888935      0.500000000000
        0.538433565045      0.362017111065      0.500000000000
@@ -388,10 +388,10 @@ P           mkmem           1
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         16.8  wall=         20.2
+- Proc.   0 individual time (sec): cpu=         14.1  wall=         14.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.8  wall=         20.2
++Overall time at end (sec) : cpu=         14.1  wall=         14.2

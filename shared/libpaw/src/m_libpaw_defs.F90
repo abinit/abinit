@@ -7,7 +7,7 @@
 !! Several definitions used in libPAW: named constants, physical constants, datatypes
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2019 ABINIT group
+!! Copyright (C) 2000-2020 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

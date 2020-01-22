@@ -5,12 +5,13 @@
 # Dataset 7: HSE06 calculation in the planewave basis set
 # Dataset 8-13: G0W0 calculations, on top of GGA, HSE06 (Kohn-Sham) and HSE06 (planewaves).
 #
- ndtset  13
+ndtset  13
 gwpara   2
 enunit   1
 gw_qprange -14  # Compute correction for all the bands 
 #gw_qprange -30  # Compute correction for all the bands 
 prtvol   2
+symsigma 0
 
 # Dataset1: usual self-consistent ground-state calculation
 # Definition of the k-point grid

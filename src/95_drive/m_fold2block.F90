@@ -6,7 +6,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (AB)
+!! Copyright (C) 2008-2020 ABINIT group (AB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

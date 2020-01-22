@@ -6,7 +6,7 @@
 !! Initialize pspcod=9 (pseudopotentials from the PSML XML format):
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (JJ, MVer, YP)
+!!  Copyright (C) 1999-2020 ABINIT group (JJ, MVer, YP)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

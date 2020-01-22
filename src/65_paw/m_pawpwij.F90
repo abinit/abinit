@@ -9,7 +9,7 @@
 !!    - pawpwij_t: Onsite matrix elements of a plane wave for a given atom type.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG,GKA)
+!! Copyright (C) 2008-2020 ABINIT group (MG,GKA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

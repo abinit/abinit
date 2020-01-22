@@ -9,7 +9,7 @@
 !!  Procedures to deal with the singularity for q-->0 are also provided.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (MG, FB)
+!! Copyright (C) 1999-2020 ABINIT group (MG, FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

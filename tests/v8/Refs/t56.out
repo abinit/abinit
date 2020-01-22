@@ -1,8 +1,8 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Dec 2019.
-- ( at 18h15 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h37 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v8_t56/t56.in
 - output file    -> t56.out
@@ -313,7 +313,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1496.891    1496.853
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   17.098E-07; max=  20.326E-11
+ Mean square residual over all n,k,spin=   26.970E-13; max=  20.326E-11
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -419,7 +419,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1496.891    1496.853
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   71.261E-16; max=  84.355E-24
+ Mean square residual over all n,k,spin=   54.658E-24; max=  84.355E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -547,7 +547,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1496.891    1496.853
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  94.651E-24
+ Mean square residual over all n,k,spin=   48.405E-24; max=  94.651E-24
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    1.3608957166E+00
  prteigrs : about to open file t56t_1WF1_EIG
@@ -611,7 +611,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1496.891    1496.853
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  93.814E-24
+ Mean square residual over all n,k,spin=   53.776E-24; max=  93.814E-24
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    1.3609000759E+00
  prteigrs : about to open file t56t_1WF1_EIG
@@ -675,7 +675,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1496.891    1496.853
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  93.129E-24
+ Mean square residual over all n,k,spin=   48.986E-24; max=  93.129E-24
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    1.3609000570E+00
  prteigrs : about to open file t56t_1WF1_EIG
@@ -1108,10 +1108,10 @@ P          mk1mem3          2
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         17.4  wall=         17.7
+- Proc.   0 individual time (sec): cpu=         17.4  wall=         17.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.4  wall=         17.7
++Overall time at end (sec) : cpu=         17.4  wall=         17.8

@@ -412,7 +412,7 @@ for topic "parallelism" and topic "GW".
 
 ## Release Notes
 
-Release notes are written in Markdown so it's possible to use the [wikilink syntax](markdown.md#wiki-links)
+Release notes are written in Markdown so it is possible to use the [wikilink syntax](markdown.md#wiki-links)
 to insert links to new tests, new autoconf files and even links to pull-requests and issues that will redirect
 the reader to the Abinit repository on github.
 For example, the following markdown text
@@ -433,9 +433,9 @@ New versions of Fortran compilers have been integrated in the test farm:
 - intel 16.0
 - gnu 6.1 and 6.2
 - IBM xlf compiler 14.1
-- NAG 5.3
+- NAG 7.0
 
-Corresponding examples are available in [[ac:abiref_gnu_9.2_debug.ac9]]
+Corresponding examples are available in [[ac:abiref_nag_7.0_openmpi.ac]]
 ```
 
 produces a nice report with links to the features available in the new version:
@@ -456,9 +456,9 @@ New versions of Fortran compilers have been integrated in the test farm:
 - intel 16.0
 - gnu 6.1 and 6.2
 - IBM xlf compiler 14.1
-- NAG 5.3
+- NAG 7.0
 
-Corresponding examples are available in [[ac:abiref_gnu_9.2_debug.ac9]].
+Corresponding examples are available in [[ac:abiref_nag_7.0_openmpi.ac]].
 
 !!! important
     We are already using Markdown on gitlab to document our merge requests.

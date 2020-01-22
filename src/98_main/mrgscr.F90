@@ -7,7 +7,7 @@
 !! can be used to perform a sigma calculation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (RS, MG, MS)
+!! Copyright (C) 2005-2020 ABINIT group (RS, MG, MS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

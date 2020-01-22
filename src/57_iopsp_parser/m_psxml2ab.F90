@@ -7,7 +7,7 @@
 !!  convert to abinit internal datastructures for pspheader.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (MJV).
+!! Copyright (C) 2005-2020 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -388,7 +388,7 @@ end module m_psxml2ab
 !!  allows calling software to decide how fatal the PSML die call actually is.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (MJV).
+!! Copyright (C) 2005-2020 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

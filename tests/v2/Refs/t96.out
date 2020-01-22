@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h26 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h18 )
   
-- input  file    -> t96.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v2_t96/t96.in
 - output file    -> t96.out
 - root for input  files -> t96i
 - root for output files -> t96o
@@ -439,8 +439,8 @@ P          mk1mem3         64
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/3li.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/3li.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/3li.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/3li.pspnc
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -488,7 +488,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.375      84.328
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   19.687E-24; max=  98.236E-24
+ Mean square residual over all n,k,spin=   19.362E-24; max=  98.236E-24
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -608,8 +608,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.375      84.328
  ETOT  2  1.28893444823405E-05 -3.023E-04 3.959E-06 1.717E-02
  ETOT  3  2.10960056028220E-07 -1.268E-05 7.582E-08 1.397E-04
  ETOT  4  5.91803667668311E-08 -1.518E-07 9.329E-10 1.304E-06
- ETOT  5  5.67698127881822E-08 -2.411E-09 7.396E-12 2.709E-08
- ETOT  6  5.67171433638047E-08 -5.267E-11 2.066E-13 1.407E-10
+ ETOT  5  5.67698127881822E-08 -2.411E-09 8.718E-12 2.709E-08
+ ETOT  6  5.67171433638047E-08 -5.267E-11 3.942E-13 1.407E-10
  ETOT  7  5.67169519613553E-08 -1.914E-13 1.154E-15 4.612E-13
 
  At SCF step    7, etot is converged : 
@@ -618,7 +618,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.375      84.328
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -33.333E-03; max=  11.542E-16
+ Mean square residual over all n,k,spin=   47.681E-17; max=  11.542E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -773,7 +773,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.375      84.328
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -33.333E-03; max=  19.020E-17
+ Mean square residual over all n,k,spin=   72.278E-18; max=  19.020E-17
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1253,10 +1253,10 @@ P          mk1mem3         64
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.3
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and  27 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.2  wall=          1.3
++Overall time at end (sec) : cpu=          1.0  wall=          1.2

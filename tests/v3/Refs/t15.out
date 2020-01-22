@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h26 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h18 )
   
-- input  file    -> t15.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v3_t15/t15.in
 - output file    -> t15.out
 - root for input  files -> t15i
 - root for output files -> t15o
@@ -167,8 +167,8 @@ P          mk1mem           1
          ecut(hartree)=     22.000   => boxcut(ratio)=   2.06089
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -358,8 +358,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     331.000     331.000
  ETOT  2  0.77950856186690     -4.070E+01 2.550E-02 1.533E+03
  ETOT  3  6.83237052327001E-03 -7.727E-01 2.675E-04 1.921E+01
  ETOT  4  5.77917916061210E-04 -6.254E-03 1.537E-05 3.608E-02
- ETOT  5  5.66833688580459E-04 -1.108E-05 2.016E-07 4.974E-05
- ETOT  6  5.66822300797298E-04 -1.139E-08 1.762E-10 9.361E-08
+ ETOT  5  5.66833688580459E-04 -1.108E-05 2.018E-07 4.974E-05
+ ETOT  6  5.66822300797298E-04 -1.139E-08 2.230E-10 9.361E-08
  ETOT  7  5.66820608227658E-04 -1.693E-09 4.296E-12 1.276E-07
  ETOT  8  5.66821416768448E-04  8.085E-10 2.777E-14 7.117E-08
  ETOT  9  5.66822554546320E-04  1.138E-09 4.280E-15 9.599E-08
@@ -372,7 +372,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     331.000     331.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -20.000E-03; max=  15.559E-18
+ Mean square residual over all n,k,spin=   52.981E-19; max=  15.559E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -618,10 +618,10 @@ P          mk1mem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.4  wall=          2.1
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.4  wall=          2.1
++Overall time at end (sec) : cpu=          1.2  wall=          1.3

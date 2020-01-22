@@ -6,7 +6,7 @@
 !!  This module contains miscelaneous routines used in the PAW context.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (FJ,MT)
+!! Copyright (C) 2018-2020 ABINIT group (FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -262,7 +262,7 @@ end subroutine chkpawovlp
 !! To be called at the end of the SCF cycle
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (FJ,MT,BA)
+!! Copyright (C) 1998-2020 ABINIT group (FJ,MT,BA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

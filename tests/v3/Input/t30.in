@@ -18,6 +18,7 @@
  ecuteps  1.50304505
  prtgsr  0
  gwpara  1
+ symsigma 0
 
 # wavefunction calculation
  nband1       15

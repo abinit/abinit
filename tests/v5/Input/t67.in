@@ -18,6 +18,7 @@
  intxc  1
 
  ndtset 7
+ symsigma 0
 
 # wavefunction calculation
  nband1       15
