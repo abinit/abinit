@@ -6,6 +6,7 @@
 
 optdriver    4
 gwcalctyp    2
+symsigma     0
 nband       30
 ecutsigx    4.0
 ecutwfn     4.0

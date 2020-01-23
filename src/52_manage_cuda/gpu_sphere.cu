@@ -13,7 +13,7 @@
 // by a constant factor, in the case iflag=-1.
 //
 // COPYRIGHT
-// Copyright (C) 1998-2019 ABINIT group (FDahm)
+// Copyright (C) 1998-2020 ABINIT group (FDahm)
 // This file is distributed under the terms of the
 // GNU General Public License, see ~abinit/COPYING
 // or http://www.gnu.org/copyleft/gpl.txt .
@@ -206,7 +206,7 @@ extern "C" void gpu_sphere_in_(double *cg,double *cfft,int *kg_k,int *npw,int *n
 // of n1*n2*n3 points defined by array cfft for fft box.
 //
 // COPYRIGHT
-// Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, AR)
+// Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, AR)
 // This file is distributed under the terms of the
 // GNU General Public License, see ~abinit/COPYING
 // or http://www.gnu.org/copyleft/gpl.txt .

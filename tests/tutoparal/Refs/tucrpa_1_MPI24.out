@@ -2,7 +2,7 @@
 .Version 8.11.8 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -1796,7 +1796,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   95.155E-09; max=  12.822E-16
+ Mean square residual over all n,k,spin=   54.920E-17; max=  12.822E-16
  reduced coordinates (array xred) for    5 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000

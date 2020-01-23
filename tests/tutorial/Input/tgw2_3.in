@@ -8,6 +8,7 @@ ecutsigx    6.5
 ecutwfn     6.5
 
 gwcalctyp   12
+symsigma     0
 
 nkptgw       8
 kptgw

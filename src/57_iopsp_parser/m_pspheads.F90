@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pspheads
 !! NAME
 !! m_pspheads
@@ -7,7 +6,7 @@
 !!  Functions used to read the pseudopotential header of each psp file, in order to initialize pspheads(1:npsp).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

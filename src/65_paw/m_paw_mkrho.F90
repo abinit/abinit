@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_mkrho
 !! NAME
 !!  m_paw_mkrho
@@ -7,7 +6,7 @@
 !!  This module contains routines used to compute PAW density on the real space fine grid.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (MT, JWZ)
+!! Copyright (C) 2018-2020 ABINIT group (MT, JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

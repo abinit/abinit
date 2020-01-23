@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 "Check binaries configuration"
 #
-# Copyright (C) 2012-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2012-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source

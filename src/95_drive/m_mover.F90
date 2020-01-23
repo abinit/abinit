@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mover
 !! NAME
 !!  m_mover
@@ -7,7 +6,7 @@
 !! Move ion or change acell according to forces and stresses
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, SE)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, SE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1625,7 +1624,7 @@ end subroutine prtxfase
 !!  - POSABIN : values of coordinates and velocities for the next time step
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (FLambert,MT)
+!! Copyright (C) 1998-2020 ABINIT group (FLambert,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

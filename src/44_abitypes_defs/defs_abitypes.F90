@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/defs_abitypes
 !! NAME
 !! defs_abitypes
@@ -23,7 +22,7 @@
 !! * MPI_type: the data related to MPI parallelization
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (XG)
+!! Copyright (C) 2001-2020 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

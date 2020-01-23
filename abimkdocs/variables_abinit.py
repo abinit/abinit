@@ -1545,11 +1545,12 @@ Variable(
     vartype="integer",
     topics=['Phonons_useful'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval=1,
     mnemonics="CHarge NEUTrality treatment",
     text=r"""
 Set the treatment of the Charge Neutrality requirement for the effective charges.
 Same meaning as the corresponding anaddb variable.
+Note the different default value in abinit and anaddb
 """,
 ),
 
@@ -2125,7 +2126,7 @@ Variable(
 It is the value of the "scissors operator", the shift of conduction band
 eigenvalues, used in response function calculations.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[ecut]] has the
-'[[ENERGY]]' characteristics (1 Ha=27.2113845 eV).
+'[[ENERGY]]' characteristics (1 Ha = 27.2113845 eV).
 Typical use is for response to electric field ([[rfelfd]] = 3), but NOT for d/dk
 ([[rfelfd]] = 2) and phonon responses.
 """,
@@ -2146,7 +2147,7 @@ the dielectric matrix:
 $(1/2) [ 2 \pi \GG_{diel,max}]^2$ =[[diecut]] with $\GG_{diel,max}$ being the maximum
 length of the reciprocal space planewave wavevectors for the dielectric matrix.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[diecut]] has
-the '[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV)
+the '[[ENERGY]]' characteristics. (1 Ha = 27.2113845 eV)
 All planewaves inside this "basis sphere" centered at $\GG$=0 are included in the
 basis. This is useful only when [[iprcel]] > =21, which means that a
 preconditioning scheme based on the dielectric matrix is used.
@@ -2174,7 +2175,7 @@ Gives a rough estimation of the dielectric gap between the highest energy
 level computed in the run, and the set of bands not represented. Used to
 extrapolate dielectric matrix when [[iprcel]] >= 21.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[diegap]] has
-the '[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV).
+the '[[ENERGY]]' characteristics. (1 Ha = 27.2113845 eV).
 
 No meaning for RF calculations yet.
 """,
@@ -3169,7 +3170,7 @@ $\frac{1}{2}(2\pi)^2 (\vec{k}+\vec{G})^2<$[[ecut]].
 
 All planewaves inside this "basis sphere" centered at k are included in the basis (except if [[dilatmx]] is defined).
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[ecut]] has the
-'[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV)
+'[[ENERGY]]' characteristics. (1 Ha = 27.2113845 eV)
 This is the single parameter which can have an enormous effect on the quality
 of a calculation; basically the larger [[ecut]] is, the better converged the
 calculation is. For fixed geometry, the total energy MUST always decrease as
@@ -3265,7 +3266,7 @@ Note that $x^2(3+x-6x^2+3x^3)$ is 0 at x=0, with vanishing derivative,
 and that at x=1, it is 1, with also vanishing derivative.
 If [[ecutsm]] is zero, the unmodified kinetic energy is used.
 [[ecutsm]] can be specified in Ha (the default), Ry, eV or Kelvin, since
-[[ecutsm]] has the '[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV).
+[[ecutsm]] has the '[[ENERGY]]' characteristics. (1 Ha = 27.2113845 eV).
 A few test for Silicon (diamond structure, 2 k-points) have shown 0.5 Ha to be
 largely enough for [[ecut]] between 2Ha and 6Ha, to get smooth curves. It is
 likely that this value is OK as soon as [[ecut]] is larger than 4Ha.
@@ -3572,7 +3573,7 @@ denominator of the sum-over-states in the perturbation,
 $(e_{nk}-e_{n'k'}+i$[[elph2_imagden]]). One should use a width comparable with
 the Debye frequency or the maximum phonon frequency.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[ecut]] has the
-'[[ENERGY]]' characteristics (1 Ha=27.2113845 eV).
+'[[ENERGY]]' characteristics (1 Ha = 27.2113845 eV).
 """,
 ),
 
@@ -3642,8 +3643,7 @@ Only relevant for [[optdriver]]=7 and [[eph_task]]=6.
 If set to 1, use the dynamical matrix at Gamma, the Born effective charges, the dielectric tensor, as well as
 the effective masses (must give a _EFMAS file as input, see [[prtefmas]] and [[getefmas]] or [[irdefmas]]),
 as the parameters of a Frohlich Hamiltonian.
-Then use these to compute the
-change of electronic eigenvalues due to electron-phonon interaction,
+Then use these to compute the change of electronic eigenvalues due to electron-phonon interaction,
 using second-order time-dependent perturbation theory. Can deliver (approximate) zero-point renormalisation
 as well as temperature dependence.
 """,
@@ -3747,7 +3747,7 @@ DDB file i.e. [[ddb_ngqpt]] (default behavior).
 
 !!! important
 
-    The computation of the electron-phonon matrix elements requires the knowledge of $\psi_{\bf k}$
+    The computation of the e-ph matrix elements requires the knowledge of $\psi_{\bf k}$
     and $\psi_{\bf k + q}$. This means that the k-mesh for electrons found in the WFK must be
     compatible with the one given in *eph_ngqpt_fine*.
     The code can interpolate DFPT potentials but won't try to interpolate KS wavefunctions.
@@ -3769,11 +3769,11 @@ Select the electron-phonon task to be performed when [[optdriver]] == 7.
 The choice is among:
 
 * 0 --> No computation (mainly used to access the post-processing tools)
-* 1 --> Compute phonon linewidths in metals.
-* 2 --> Compute electron-phonon matrix elements. Save results in GKK.nc file format.
-* -2 --> Compute electron-phonon matrix elements. Save results in GKQ.nc file format that can be post-processed with AbiPy.
+* 1 --> Compute phonon linewidths in metals and superconducting properties (isotropic formalism).
+* 2 --> Compute e-ph matrix elements. Save results in GKK.nc file.
+* -2 --> Compute e-ph matrix elements. Save results in GKQ.nc file that can be post-processed with AbiPy.
 * 3 --> Compute phonon self-energy.
-* 4 --> Compute electron-phonon self-energy (Fan-Migdal + Debye-Waller) and QP corrections. Generate SIGEPH.nc file.
+* 4 --> Compute electron self-energy (Fan-Migdal + Debye-Waller) and QP corrections. Generate SIGEPH.nc file.
 * -4 --> Compute electron lifetimes due to e-ph interaction (imaginary part of Fan-Migdal self-energy). Generate SIGEPH.nc file.
 * 5 --> Interpolate DFPT potentials to produce a new DVDB file on the [[eph_ngqpt_fine]] q-mesh that can be read with [[getdvdb]]
 * -5 --> Interpolate DFPT potentials on the q-path specified by [[ph_qpath]] and [[ph_nqpath]]. Note that, in this case,
@@ -3783,8 +3783,8 @@ The choice is among:
 * 15, -15 --> Write the average in r-space of the DFPT potentials to the V1QAVG.nc file.
               In the first case (+15) the q-points are specified via [[ph_nqpath]] and [[ph_qpath]]. The code assumes the
               input DVDB contains q-points in the IBZ and the potentials along the path are interpolated with Fourier transform.
+              An array D(R) with the decay of the W(R,r) as a function of R is computed and saved to file
               In the second case (-15) the q-points are taken directly from the DVDB file.
-* 16 -> Produce WRMAX.nc file with the decay of the W(R,r) as a function of R
 """,
 ),
 
@@ -3798,8 +3798,8 @@ Variable(
     mnemonics="Electron-PHonon: TRANSPORT flag",
     text=r"""
 NB - this does not work yet. This variable can be used to turn on the
-calculation of transport quantities in the eph module of abinit. Value of 1
-corresponds to elastic LOVA as in [[cite:Savrasov1996]].
+calculation of transport quantities in the eph module of abinit.
+Value of 1 corresponds to elastic LOVA as in [[cite:Savrasov1996]].
 """,
 ),
 
@@ -3817,7 +3817,7 @@ Variable(
 [[eshift]] gives the shift of the energy used in the shifted Hamiltonian
 squared. The algorithm will determine eigenvalues and eigenvectors centered on [[eshift]].
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[eshift]] has the
-'[[ENERGY]]' characteristics. (1 Ha=27.2113845 eV)
+'[[ENERGY]]' characteristics. (1 Ha = 27.2113845 eV)
 """,
 ),
 
@@ -3837,7 +3837,7 @@ the delta function, $\delta(e_{nk}-e_{n'k'})$, present in the expression of the
 lifetimes. One should use a width comparable with the Debye frequency or the
 maximum phonon frequency.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[ecut]] has the
-'[[ENERGY]]' characteristics (1 Ha=27.2113845 eV).
+'[[ENERGY]]' characteristics (1 Ha = 27.2113845 eV).
 """,
 ),
 
@@ -5689,7 +5689,7 @@ Variable(
 Sets a tolerance for absolute differences of QP energies that will cause one
 self-consistent GW cycle to stop.
 Can be specified in Ha (the default), Ry, eV or Kelvin, since **toldfe** has
-the '[[ENERGY]]' characteristics (1 Ha=27.2113845 eV)
+the '[[ENERGY]]' characteristics (1 Ha = 27.2113845 eV)
 """,
 ),
 
@@ -6540,9 +6540,9 @@ Variable(
     defaultval=0,
     mnemonics="Integer for second-order EIGenvalues from Response-Function",
     text=r"""
-If [[ieig2rf]] is greater then 0, the code will produce a file, named with the
-trailing suffix _EIGR2D, containing the second-order electronic eigenvalues
-for the perturbation. These files are used in the calculation of the thermal
+If [[ieig2rf]] is greater than 0, the code will produce a file, named with the
+suffix _EIGR2D, containing the second-order electronic eigenvalues for the perturbation.
+These files are used in the calculation of the thermal
 correction to the electronic eigenvalues.
 
   * If [[ieig2rf]] is set to 1, the second-order electronic eigenvalues will be
@@ -6571,11 +6571,11 @@ correction to the electronic eigenvalues.
     less disk space and memory (but run a little bit slower).
 
 !!! note
+
     [[ieig2rf]] = 4 and 5 can only be used if Abinit is compiled with NETCDF support.
 
 
-Related variables:
-[[bdeigrf]],[[elph2_imagden]],[[getgam_eig2nkq]],[[smdelta]]
+Related variables: [[bdeigrf]], [[elph2_imagden]], [[getgam_eig2nkq]], [[smdelta]]
 """,
 ),
 
@@ -6610,6 +6610,7 @@ presenting the interplay between the different above-mentioned input
 variables, as well as with the parallelism (see input variable [[npimage]]).
 
 ```fortran
+
     do itimimage=1,ntimimage
       do iimage=1,nimage
         (possibly, parallelisation over images)
@@ -6705,7 +6706,9 @@ off [[inclvkb]] is to let to the choice of the user.
 In general, the use of [[inclvkb]] = 0 is fine for GW calculations in
 crystalline systems provided that the k-point sampling is sufficiently converged.
 
-The use of [[inclvkb]] = 2 is strongly recommended for the calculation of optical properties.
+!!! important
+
+    The use of [[inclvkb]] = 2 is strongly recommended for the calculation of optical properties.
 """,
 ),
 
@@ -6724,14 +6727,13 @@ Variable(
    (doubles number of grid points)--the high accuracy version is only valid for boxcut>=2. If boxcut < 2, the code stops.
 
 For RF calculations only [[intxc]] = 0 is allowed yet. Moreover, the GS
-preparation runs (giving the density file and zero-order wavefunctions) must
-be done with [[intxc]] = 0
+preparation runs (giving the density file and zero-order wavefunctions) must be done with [[intxc]] = 0
 
 Prior to ABINITv2.3, the choice [[intxc]] = 1 was favoured (it was the default),
 but the continuation of the development of the code lead to prefer the default
 [[intxc]] = 0. Indeed, the benefit of [[intxc]] = 1 is rather small, while making
-it available for all cases is a non-negligible development effort. Other
-targets are prioritary. You will notice that many automatic tests use
+it available for all cases is a non-negligible development effort.
+Other targets are prioritary. You will notice that many automatic tests use
 [[intxc]] = 1. Please, do not follow this historical choice for your production runs.
 """,
 ),
@@ -6746,41 +6748,42 @@ Variable(
     mnemonics="Input-Output MODE",
     characteristics=['[[DEVELOP]]'],
     text=r"""
-This option selects the format used to produce the output wavefunction files
-and the files containing densities and potentials. It mainly affects the
-creation of the output files since several parts of Abinit are able to read
-data from files independently of their format (either binary files or netcdf
-files). The possible values are:
+This option selects the format used to produce "large" binary files such as the output wavefunction files,
+the files with densities and potentials (DEN, POT) as well as the SCR file produced by the GW code.
+Other "small" files such as the GSR.nc are always produced indipendently of the value of **iomode**.
+
+Note that this variable mainly defines the format of the output files since Abinit is able to read
+data from files independently of their format (either Fortran binary files or netcdf files).
+The possible values are:
 
   * 0 --> Use standard Fortran IO (ok for sequential runs, not suitable for large parallel runs)
   * 1 --> Use MPI/IO routines (ok both for sequential and large parallel runs)
   * 3 --> Use NetCDF library to produce files according to the ETSF specification [[cite:Gonze2008]]
     (ok for sequential, requires netcdf4 + hdf5 + MPI-IO support for large parallel runs)
 
-By default, Abinit produces Fortran files and uses parallel MPI-IO under the
-hood when these operations cannot be implemented in terms of simple Fortran
-write/read statements. For example, [[paral_kgb]] = 1 uses the MPI-IO API
-provided by your MPI library.
+By default, Abinit produces Fortran files and uses the MPI-IO API when these operations
+cannot be implemented in terms of simple Fortran write/read statements.
+For example, [[paral_kgb]] = 1 uses the MPI-IO API to generate a Fortran binary file that can be read with
+plain Fortran read statements.
 
-In a nutshell, use the default value and make sure that your MPI library
-supports MPI-IO before embarking yourself in large parallel runs (HAVE_MPI_IO
-should be set to 1 in ~abinit/config.h). Many MPI libraries, nowadays, support
-the MPI-2 standard so it's very likely that your MPI supports parallel IO. If
-you encounter problems, please ask your sysadmin to install a MPI library with MPI-IO capabilities.
+There are cases, however, in which you would like to change the default behaviour.
+For example, you may want to generate WFK or DEN files in netcdf
+format because you need data in this format.
+In this case, you have to use iomode == 3 in the input file to override the default behaviour.
+Note, however, that you still need parallel IO capabilities enabled in the netcdf library if
+you want to produce netcdf files in parallel with [[paral_kgb]] = 1
+(i.e. netcdf4 + hdf5 + MPI-IO).
+At present, the internal fallbacks provided by Abinit do not support netcdf4 so you have
+to link against an external netcdf library that supports hdf5+MPI-IO
+and is compatible with the mpif90 used to compile Abinit.
+See ~abinit/doc/build/config-examples/ubu_intel_17.0_openmpi.ac for a typical configuration file.
 
-There are cases, however, in which you would like to change the default
-behaviour. For example, you may want to generate WFK or DEN files in etsf-io
-format because you need data in this format. In this case, you have to use
-iomode==3 in the input file to override the default behaviour. Note however
-that you still need parallel IO capabilities enabled in the netcdf library if
-you want to produce netcdf files in parallel with [[paral_kgb]] = 1 (i.e.
-netcdf4 + hdf5 + MPI-IO). At present, the internal fallbacks provided by
-Abinit do not support netcdf4 so you have to link against an external netcdf
-library that supports hdf5+MPI-IO and is compatible with the mpif90 used to
-compile Abinit. See ~abinit/doc/build/config-examples/ubu_intel_17.0_openmpi.ac for a typical configuration file.
+!!! important
 
-Additional note: The use of the ETSF_IO library [[cite:Caliste2008]] has been disabled, and replaced by direct NetCDF calls.
-The ETSF_IO library is not maintained anymore.
+    The use of the ETSF_IO library [[cite:Caliste2008]] has been disabled, and replaced
+    by direct NetCDF calls since the ETSF_IO library is not maintained anymore.
+    The netcdf files, however, are still written following the ETSF-IO specifications [[cite:Gonze2008]]
+    and extended with Abinit-specific quantities.
 """,
 ),
 
@@ -6802,8 +6805,7 @@ Choice of algorithm to control the displacements of ions, and eventually (see
 **Purpose:** Molecular dynamics (if [[vis]] = 0), Structural optimization (if
 [[vis]] >0)
 **Cell optimization:** No (Use [[optcell]] = 0 only)
-**Related variables:** Viscous parameter [[vis]], time step [[dtion]], index
-of atoms fixed [[iatfix]]
+**Related variables:** Viscous parameter [[vis]], time step [[dtion]], index of atoms fixed [[iatfix]]
 
   * 2 --> Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS). This is much more efficient for structural optimization than viscous damping, when there are less than about 10 degrees of freedom to optimize. Another version of the BFGS is available with [[ionmov]]==22, and is apparently more robust and efficient than [[ionmov]]==2.
 **Purpose:** Structural optimization
@@ -8093,12 +8095,12 @@ Variable(
     vartype="integer",
     topics=['DFPT_expert', 'xc_expert'],
     dimensions="scalar",
-    defaultval=3,
+    defaultval=1,
     mnemonics="Index of the XC ROTation method used to calculate first-order exchange-correlation potential in non-collinear DFPT calculations",
     text=r"""
 Method of calculation of the 1st order XC potential in non-collinear DFPT
 calculations. The possible values 1,2 and 3 correspond to the following
-methods
+methods:
 
   * If ixcrot=1, the spinor rotation matrix U at each FFT point is not calculated explicitly. Instead the needed expressions involving U are derived based on the general properties of the U matrix.
   * If ixcrot=2, U is computed explicitly
@@ -8107,10 +8109,14 @@ methods
 In theory, all methods give identical results. However, due to different
 implementation approaches, the round-off errors can lead to slight differences
 intermediate and final results obtained using methods 1,2 and 3. The choice of
-the method can also affect the convergence. For more details, see [[cite:Ricci2019]].
+the method can also affect the convergence. For more details, see [[cite:Ricci2019]] or [[cite:Gonze2020]]. 
+WARNING: in [[cite:Ricci2019]], the meaning of [[ixcrot]]=2 or 3 is inverted with respect to the implementation. On the contrary,
+the implemention and [[cite:Gonze2020]] agree. More explicitly, the method refered to as method 1' in [[cite:Ricci2019]]
+is [[ixcrot]]=2, and method refereed to as method 2 in [[cite:Ricci2019]] is [[ixcrot]]=3.
 
 !!! note
-    For non-zero perturbation wavevector, only ixcrot=3 implementation is currently available.
+    For non-zero perturbation wavevector ([[qpt]]/=0), only the [[ixcrot]]=3 implementation is currently available. 
+    The code will stop with the default [[ixcrot]] value for non-zero perturbation wavevector. The user should then set [[ixcrot]]=3 and restart.
 """,
 ),
 
@@ -13955,7 +13961,7 @@ Variable(
     vartype="integer",
     topics=['printing_prngs', 'EffectiveMass_useful'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval=1,
     mnemonics="PRint EFfective MASs data",
     requires="[[efmas]] == 1",
     text=r"""
@@ -16856,9 +16862,10 @@ Variable(
     vartype="integer",
     topics=['SelfEnergy_expert'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval=1,
     mnemonics="SYMmetrization of SIGMA matrix elements",
     requires="[[optdriver]] in [4, 7]",
+    commentdefault="The default value changed in Abinitv9 from 0 to 1",
     text=r"""
 This option activates the symmetrization of the self-energy matrix elements ([[symsigma]] = 1).
 In this case the BZ integration defining the self-energy
@@ -17114,7 +17121,7 @@ Variable(
 Sets a tolerance for absolute differences of total energy that, reached TWICE
 successively, will cause one SCF cycle to stop (and ions to be moved).
 Can be specified in Ha (the default), Ry, eV or Kelvin, since [[toldfe]] has
-the '[[ENERGY]]' characteristics (1 Ha=27.2113845 eV).
+the '[[ENERGY]]' characteristics (1 Ha = 27.2113845 eV).
 If set to zero, this stopping condition is ignored.
 Effective only when SCF cycles are done ([[iscf]]>0).
 Because of machine precision, it is not worth to try to obtain differences in
@@ -19933,7 +19940,6 @@ allocated for the wavefunctions, especially when we have to sum over empty state
     are under control and you need to boost the calculation. Note also that in this case the output results are written to
     different text files, only the SIGEPH.nc file will contains all the k-points and spins.
 
-
 [[eph_task]] = -4
     The number of bands in the self-energy sum is usually small so it does not make sense to
     parallelize along this dimension. The parallelization over q-points seem to be more efficient than
@@ -19995,28 +20001,6 @@ that should be used in input.
 At present, it is mainly used in EPH code when performing calculation with the Sternheimer equation.
 Note that the path must be inserted between quotation marks.
 Note also that relative paths are interpreted according to the working directory in which Abinit is executed!
-""",
-),
-
-Variable(
-    abivarname="ddb_qrefine",
-    varset="eph",
-    vartype="integer",
-    topics=['ElPhonInt_expert'],
-    dimensions=[3],
-    defaultval=[1, 1, 1],
-    mnemonics="Q-point REFINEment order (experimental)",
-    text=r"""
-If **ddb_qrefine** is superior to 1, the EPH code attempts to initialize a first set of
-dynamical matrices from the DDB file and DFPT potentials from the DVDB file, with a q-point grid which is
-[[ddb_ngqpt]] divided by **qrefine** (e.g. ddb_ngqpt 4 4 2 ddb_qrefine 2 2 1 starts with a 2x2x2 grid).
-The dynamical matrices and DFPT potentials are interpolated onto the full
-[[ddb_ngqpt]] grid and any additional information found in the DDB file is
-imposed, before proceeding to normal band structure and other interpolations.
-Should implement Gaal-Nagy's algorithm in [[cite:GaalNagy2006]].
-
-A similar option is also available in anaddb. The main difference is that ddb_qrefine will also densify
-the q-mesh used for the Fourier transform of the DFPT potentials.
 """,
 ),
 

@@ -1222,7 +1222,7 @@ The bibtex file is available [here](../abiref.bib).
                 html_classes.append("abifile-wikilink")
 
             elif namespace == "ac":
-                # Handle [[ac:abiref_gnu_5.3_debug.ac]]
+                # Handle [[ac:abiref_gnu_9.2_debug.ac]]
                 # The following is incorrect: files in /build/config-examples are generated when makemake is issued.
                 # url = "/build/config-examples/%s" % name
                 # By contrast, the following is a permanent reference

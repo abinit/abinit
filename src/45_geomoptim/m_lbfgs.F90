@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lbfgs
 !! NAME
 !!  m_lbfgs
@@ -10,7 +9,7 @@
 !!  They have been reshaped and translated into modern fortran here.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2019 ABINIT group (FB)
+!! Copyright (C) 2012-2020 ABINIT group (FB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

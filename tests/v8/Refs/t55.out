@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h38 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h37 )
   
-- input  file    -> t55.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v8_t55/t55.in
 - output file    -> t55.out
 - root for input  files -> t55i
 - root for output files -> t55o
@@ -237,8 +237,8 @@ P          mk1mem3          1
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.14352
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -251,8 +251,8 @@ P          mk1mem3          1
              1   -6.605901   -2.664074
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -305,7 +305,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   13.534E-15; max=  12.267E-13
+ Mean square residual over all n,k,spin=   84.833E-28; max=  23.158E-27
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -405,7 +405,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   43.026E-24; max=  90.022E-24
+ Mean square residual over all n,k,spin=   37.890E-24; max=  90.022E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -445,8 +445,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.14352
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -459,8 +459,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
              1   -6.605901   -2.664074
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -519,7 +519,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  57.531E-24
+ Mean square residual over all n,k,spin=   20.186E-24; max=  57.531E-24
  dfpt_looppert : ek2=    5.8681353568E+01
           f-sum rule ratio=    1.5279875991E+00
  prteigrs : about to open file t55t_1WF1_EIG
@@ -571,7 +571,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  72.832E-24
+ Mean square residual over all n,k,spin=   32.828E-24; max=  72.832E-24
  dfpt_looppert : ek2=    5.8681353568E+01
           f-sum rule ratio=    1.5279875990E+00
  prteigrs : about to open file t55t_1WF1_EIG
@@ -623,7 +623,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  98.601E-24
+ Mean square residual over all n,k,spin=   29.156E-24; max=  98.601E-24
  dfpt_looppert : ek2=    5.8681353568E+01
           f-sum rule ratio=    1.5279875990E+00
  prteigrs : about to open file t55t_1WF1_EIG
@@ -1000,10 +1000,10 @@ P          mk1mem3          1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         10.7  wall=         11.1
+- Proc.   0 individual time (sec): cpu=          9.5  wall=         10.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.7  wall=         11.1
++Overall time at end (sec) : cpu=          9.5  wall=         10.0
