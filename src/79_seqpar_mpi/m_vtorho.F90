@@ -968,8 +968,10 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 
        !blanchet PRINT WAVE FUNCTIONS COEFFICIENTS
-       call hightemp_prt_cg(cg,ikpt,dtset%ecut,eig_k,0,dtset%istwfk,dtset%kptns,&
-       & mcg,mpi_enreg,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,rprimd)
+       if(mpi_enreg%me==0) then
+         call hightemp_prt_cg(cg,ikpt,dtset%ecut,eig_k,0,dtset%istwfk,dtset%kptns,&
+         & mcg,mpi_enreg,dtset%mpw,dtset%nband,dtset%nkpt,npwarr,dtset%nsppol,rprimd)
+       end if
 
        call timab(985,1,tsec)
 

@@ -81,6 +81,9 @@ contains
     integer,allocatable :: kg(:,:),kg_k(:,:),npwarr1(:),npwtot1(:)
     real(dp),allocatable :: buf(:),kpgnorm(:),tempwfk(:,:)
 
+    ! *********************************************************************
+
+    write(std_out,'(a,I4.4,a)') 'Writing plane waves coefs of kpt=',ckpt,'...'
     mode_paral='PERS'
     iout=-1
     call metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
@@ -104,7 +107,6 @@ contains
     end do
     kg_k(:,1:npw_k)=kg(:,1+ioffkg:npw_k+ioffkg)
     call getkpgnorm(gprimd,kpt(:,ckpt),kg_k,kpgnorm,npw_k)
-
 
     write(filenameoutpw, '(A,I4.4,A,I4.4)') 'eigocc_k',ckpt
     open(file="pwcoef/"//filenameoutpw, unit=23)
