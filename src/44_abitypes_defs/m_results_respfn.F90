@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_results_results
 !! NAME
 !!  m_results_results
@@ -8,7 +7,7 @@
 !!  to store results from RESPFN calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MT,GG)
+!! Copyright (C) 2008-2020 ABINIT group (MT,GG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

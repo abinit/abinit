@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wffile
 !! NAME
 !!  m_wffile
@@ -8,7 +7,7 @@
 !!  As the type contains MPI-dependent fields, it has to be declared in a MPI-managed directory.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MT,MB,MVer,ZL,MD)
+!! Copyright (C) 2009-2020 ABINIT group (MT,MB,MVer,ZL,MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

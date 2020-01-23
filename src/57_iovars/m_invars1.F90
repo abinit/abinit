@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_invars1
 !! NAME
 !!  m_invars1
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2331,7 +2330,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ixc=1
    dtsets(idtset)%ixc_sigma=1
    dtsets(idtset)%ixcpositron=1
-   dtsets(idtset)%ixcrot=3
+   dtsets(idtset)%ixcrot=1
 !  J
    dtsets(idtset)%f4of2_sla(:)=-one
    dtsets(idtset)%f6of2_sla(:)=-one
@@ -2631,7 +2630,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%strprecon=one
    dtsets(idtset)%strtarget(1:6)=zero
    dtsets(idtset)%symchi=1
-   dtsets(idtset)%symsigma=0
+   dtsets(idtset)%symsigma=1
 !  T
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
@@ -2751,7 +2750,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 ! EPH variables
    dtsets(idtset)%asr = 1
    dtsets(idtset)%dipdip = 1
-   dtsets(idtset)%chneut = 0
+   dtsets(idtset)%chneut = 1
    dtsets(idtset)%symdynmat = 1
 
    dtsets(idtset)%ph_freez_disp_addStrain = 0

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_optics_vloc
 !! NAME
 !!  m_optics_vloc
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2019 ABINIT group (SM,VR,FJ,MT)
+!!  Copyright (C) 2010-2020 ABINIT group (SM,VR,FJ,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

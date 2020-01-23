@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sigma_driver
 !! NAME
 !!  m_sigma_driver
@@ -7,7 +6,7 @@
 !! Calculate the matrix elements of the self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!!  Copyright (C) 1999-2020 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2631,6 +2630,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  if (Sigp%symsigma/=0.and.gwcalctyp>=20) then
    MSG_WARNING("SC-GW with symmetries is still under development. Use at your own risk!")
+   MSG_ERROR("SC-GW requires symsigma == 0 in input. New default in Abinit9 is symsigma 1!")
  end if
 
  ! Setup parameters for Spectral function.

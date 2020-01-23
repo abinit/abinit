@@ -4,7 +4,7 @@
 #	-dp will replace the double precision statements using kind
 # 	-lf will replace labelled format statements by character strings
 #
-# Copyright (C) 1998-2019 ABINIT group (LSi)
+# Copyright (C) 1998-2020 ABINIT group (LSi)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~abinit/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .

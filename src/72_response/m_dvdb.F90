@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dvdb
 !! NAME
 !!  m_dvdb
@@ -11,7 +10,7 @@
 !!  to compute the matrix elements <k+q| dvscf_{idir, ipert, qpt} |k>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG,GA)
+!! Copyright (C) 2009-2020 ABINIT group (MG,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2848,7 +2847,7 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
 
 ! *************************************************************************
 
- !ngqpt_coarse = ngqpt / qrefine
+ ABI_CHECK(all(qrefine == 1), "qrefine not coded")
 
  ! Set communicator for R-point parallelism.
  ! Note that client code is responsible for calling the interpolation routine dvdb_get_ftqbz (R -> q)
@@ -3070,12 +3069,6 @@ subroutine dvdb_ftinterp_setup(db, ngqpt, qrefine, nqshift, qshift, nfft, ngfft,
  !  end do
  !end do
 
- ! Now we have W(R,r)
- if (any(qrefine > 1)) then
-   call dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt1, nqshift, qshift, nfft, ngfft, method)
-   !call dvdb_enforce_asr(db)
- end if
-
  call cwtime_report(" Construction of W(R,r)", cpu_all, wall_all, gflops_all)
 
 end subroutine dvdb_ftinterp_setup
@@ -3258,221 +3251,6 @@ integer :: imyp, idir, ipert, ifft, nfft, ierr, irpt, ispden
  ABI_FREE(asr_work)
 
 end subroutine dvdb_enforce_asr1
-!!***
-
-!----------------------------------------------------------------------
-
-!!****f* m_dvdb/dvdb_ftinterp_refine
-!! NAME
-!!  dvdb_ftinterp_refine
-!!
-!! FUNCTION
-!!
-
-subroutine dvdb_ftinterp_refine(db, qrefine, ngqpt, qptopt, nqshift, qshift, nfft, ngfft, method)
-
-!Arguments ------------------------------------
-!scalars
- integer,intent(in) :: nqshift, qptopt, nfft, method
- class(dvdb_t),target,intent(inout) :: db
-!arrays
- integer,intent(in) :: ngqpt(3), ngfft(18), qrefine(3)
- real(dp),intent(in) :: qshift(3,nqshift)
-
-!Local variables-------------------------------
-!scalars
- integer,parameter :: sppoldbl1 = 1, timrev1 = 1
- integer :: i1, i2, i3, ii, jj, nq_zone, iq, nqbz_fine, nqibz_fine, nrtot_fine, my_nrpt_fine
- integer :: ifft, ierr, my_rstart, my_rstop, iatom, iq_bz, imyp, ispden, in_microzone
- integer :: idir, ipert !, isym, itimrev
- !logical :: isirr_q
- real(dp) :: dksqmax
- type(crystal_t),pointer :: cryst
-!arrays
- integer :: ngqpt_fine(3) !, g0q(3)
- integer,allocatable :: indqq(:,:),qzone2ibz(:,:),iperm(:), nqsts(:),iqs_dvdb(:)
- real(dp) :: qpt_bz(3)
- real(dp),allocatable :: qibz_fine(:,:), qbz_fine(:,:), emiqr(:,:), all_rpt_fine(:,:), all_wghatm(:,:,:)
- real(dp),allocatable :: v1r_qbz(:,:,:,:), v1r_lr(:,:) !, v1r_qibz(:,:,:,:), work_qbz(:,:,:,:),
- real(dp),allocatable :: microzone(:,:), my_rpt_fine(:,:)
- real(kind=dp),allocatable :: v1scf_rpt(:,:,:,:,:)
-
-! *************************************************************************
-
- MSG_ERROR("Not implemented")
-
- ! Dense q-mesh
- ngqpt_fine = qrefine * ngqpt
- cryst => db%cryst
- !nqbz = product(ngqpt) * nqshift
-
- ! Build q-points in the microzone (assume unshifted mesh).
- nq_zone = product(2 * qrefine - 1) - 1
- ABI_MALLOC(microzone, (3, nq_zone))
- iq = 0
- do i1=-qrefine(1) + 1, qrefine(1) - 1
-   do i2=-qrefine(2) + 1, qrefine(2) - 1
-     do i3=-qrefine(3) + 1 , qrefine(3) - 1
-       if (all([i1, i2, i3] == 0)) continue
-       iq = iq + 1
-       microzone(:, iq) = (one * [i1, i2, i3]) / ngqpt_fine
-     end do
-   end do
- end do
-
- ! Compute tables for ngqpt_fine
- ! TODO: iqs_dvdb will likely fail here
- call prepare_ftinterp(db, method, ngqpt_fine, qptopt, nqshift, qshift, &
-     qibz_fine, qbz_fine, indqq, iperm, nqsts, iqs_dvdb, all_rpt_fine, all_wghatm, db%comm)
-
- nqibz_fine = size(qibz_fine, dim=2); nqbz_fine = size(qbz_fine, dim=2); nrtot_fine = size(all_rpt_fine, dim=2)
- write(std_out, "(a, i0)")" Using method for integration weights: ", method
- write(std_out, "(a, i0)")" Number of R-points in real-space big box: ", nrtot_fine
-
- ! Find correspondence Microzone --> IBZ. Note:
- ! q --> -q symmetry is always used for phonons.
- ! we use symrec instead of symrel
- ABI_MALLOC(qzone2ibz, (nq_zone * sppoldbl1, 6))
- call listkk(dksqmax, cryst%gmet, qzone2ibz, qibz_fine, microzone, nqibz_fine, nq_zone, cryst%nsym, &
-   sppoldbl1, cryst%symafm, cryst%symrec, timrev1, db%comm, exit_loop=.True., use_symrec=.True.)
-
- write(std_out, "(a)")" Microzone --> IBZ"
- do iq=1,nq_zone
-   write(std_out,"(3a)" )trim(ktoa(microzone(:, iq))), " --> ", trim(ktoa(qibz_fine(:, qzone2ibz(iq, 1))))
- end do
-
- if (dksqmax > tol12) then
-   MSG_BUG("Cannot map microzone to IBZ")
- end if
-
- !iq_dvdb = db%findq(qbz(:,iq_bz))
-
- ! Distribute R-points fine inside comm_rpt.
- call xmpi_split_work(nrtot_fine, db%comm_rpt, my_rstart, my_rstop)
- my_nrpt_fine = 0
- ii = minval(db%my_pinfo(2,:)); jj = maxval(db%my_pinfo(2,:))
- if (my_rstop >= my_rstart) then
-   my_nrpt_fine = my_rstop - my_rstart + 1
-   ABI_MALLOC(my_rpt_fine, (3, my_nrpt_fine))
-   my_rpt_fine = all_rpt_fine(:, my_rstart:my_rstop)
- end if
- ABI_CHECK(my_nrpt_fine /= 0, "my_nrpt_fine == 0!")
- ABI_SFREE(all_rpt_fine)
-
- ! Allocate potential in the supercell. Memory is distributed over my_nrpt_fine and my_npert.
- call wrtout(std_out, sjoin(" Memory required for W(R,r): ", &
-    ftoa(two * my_nrpt_fine * nfft * db%nspden * db%my_npert * dp * b2Mb, fmt="f8.1"), "[Mb] <<< MEM"))
-
- ABI_MALLOC(emiqr, (2, my_nrpt_fine))
- ABI_MALLOC(v1r_qbz, (2, nfft, db%nspden, db%my_npert))
- ABI_MALLOC_OR_DIE(v1scf_rpt, (2, my_nrpt_fine, nfft, db%nspden, db%my_npert), ierr)
- v1scf_rpt = zero
-
- do iq_bz=1,nqbz_fine
-   qpt_bz = qbz_fine(:, iq_bz)
-   ! IS(q_ibz) + g0q = q_bz
-   !isym = indqq(iq_bz, 2); itimrev = indqq(iq_bz, 6) + 1; g0q = indqq(iq_bz, 3:5)
-   !isirr_q = (isym == 1 .and. itimrev == 1 .and. all(g0q == 0))
-   in_microzone = 0
-   do ii=1,nq_zone
-     if (all(abs(qpt_bz - microzone(:, ii)) < tol12)) then
-       in_microzone = 1; exit
-     end if
-   end do
-
-   if (in_microzone == 0) then
-     ! Note add_lr = 0 because we want the short-range part.
-     call db%ftinterp_qpt(qpt_bz, nfft, ngfft, v1r_qbz, db%comm_rpt, add_lr=0)
-   else
-     !
-     ! Here all procs get all potentials for this IBZ q-point on the real-space FFT mesh.
-     ! This call allocates v1r_qibz(cplex_qibz, nfft, nspden, 3*natom)
-     ! Note that here we need all 3*natom perturbations because of v1phq_rotate
-     !call db%readsym_allv1(iqs_dvdb(iq_ibz), cplex_qibz, nfft, ngfft, v1r_qibz, db%comm)
-
-     ! q /= Gamma. Get the periodic part of the potential in BZ (v1r_qbz)
-     !if (isirr_q) then
-     !  do imyp=1,db%my_npert
-     !    v1r_qbz(:,:,:,imyp) = v1r_qibz(:,:,:,db%my_pinfo(3, imyp))
-     !  end do
-     !else
-     !  ABI_MALLOC(work_qbz, (2, nfft, db%nspden, db%natom3))
-     !  call v1phq_rotate(db%cryst, qibz(:,iq_ibz), isym, itimrev, g0q, &
-     !    ngfft, cplex_qibz, nfft, db%nspden, db%nsppol, db%mpi_enreg, v1r_qibz, work_qbz, xmpi_comm_self)
-     !  do imyp=1,db%my_npert
-     !    v1r_qbz(:,:,:,imyp) = work_qbz(:,:,:,db%my_pinfo(3, imyp))
-     !  end do
-     !  ABI_FREE(work_qbz)
-     !end if
-     !ABI_FREE(v1r_qibz)
-
-     ! Remove LR part
-     ABI_MALLOC(v1r_lr, (2, nfft))
-     do imyp=1,db%my_npert
-       idir = db%my_pinfo(1, imyp); ipert = db%my_pinfo(2, imyp)
-       call db%get_v1r_long_range(qpt_bz, idir, ipert, nfft, ngfft, v1r_lr)
-       v1r_qbz(:, :, 1, imyp) = v1r_qbz(:, :, 1, imyp) - v1r_lr
-       if (db%nspden /= 1) v1r_qbz(:, :, 2, imyp) = v1r_qbz(:, :, 2, imyp) - v1r_lr
-     end do
-     ABI_FREE(v1r_lr)
-   end if
-
-   ! Multiply by e^{iqpt_bz.r}
-   call times_eikr(qpt_bz, ngfft, nfft, db%nspden * db%my_npert, v1r_qbz)
-
-   ! Compute FT phases for this qpt_bz.
-   call calc_eiqr(-qpt_bz, my_nrpt_fine, my_rpt_fine, emiqr)
-
-   ! Slow FT.
-   do imyp=1,db%my_npert
-     do ispden=1,db%nspden
-       do ifft=1,nfft
-         v1scf_rpt(1, :, ifft, ispden, imyp) = v1scf_rpt(1, :, ifft, ispden, imyp) &
-            + emiqr(1, :) * v1r_qbz(1, ifft, ispden, imyp) &
-            - emiqr(2, :) * v1r_qbz(2, ifft, ispden, imyp)
-
-         v1scf_rpt(2, :, ifft, ispden, imyp) = v1scf_rpt(2, :, ifft, ispden, imyp) &
-            + emiqr(1, :) * v1r_qbz(2, ifft, ispden, imyp) &
-            + emiqr(2, :) * v1r_qbz(1, ifft, ispden, imyp)
-       end do
-     end do ! ispden
-   end do ! imyp
- end do
- v1scf_rpt = v1scf_rpt / nqbz_fine
-
- ABI_FREE(iperm)
- ABI_FREE(emiqr)
- ABI_FREE(qibz_fine)
- ABI_FREE(qbz_fine)
- ABI_FREE(indqq)
- ABI_FREE(qzone2ibz)
- ABI_FREE(iqs_dvdb)
- ABI_FREE(nqsts)
- ABI_FREE(v1r_qbz)
- ABI_FREE(microzone)
-
- ! Redefine dimensions and reallocate R-arrays.
- db%my_nrpt = my_nrpt_fine
- ABI_MOVE_ALLOC(my_rpt_fine, db%my_rpt)
- ABI_MOVE_ALLOC(v1scf_rpt, db%v1scf_rpt)
-
- ! TODO
- !ABI_MALLOC(db%my_irpt2tot, (db%my_nrpt))
- !do irpt=1,db%my_nrpt
- !  db%my_irpt2tot(irpt) = my_rstart + (irpt - 1)
- !end do
- ! Copy weights for the atoms treated by this proc.
- ii = minval(db%my_pinfo(2,:)); jj = maxval(db%my_pinfo(2,:))
- ABI_REMALLOC(db%my_wratm, (db%my_nrpt, ii:jj))
- db%my_wratm = one
- if (method == 1) then
-   do iatom=1,db%cryst%natom
-     if (iatom >= ii .and. iatom <= jj) db%my_wratm(:, iatom) = all_wghatm(iatom, iatom, my_rstart:my_rstop)
-   end do
- end if
- ABI_SFREE(all_wghatm)
-
-end subroutine dvdb_ftinterp_refine
 !!***
 
 !----------------------------------------------------------------------
@@ -5362,7 +5140,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  end do
 
  ! Read the headers
- ABI_DT_MALLOC(hdr1_list, (nfiles))
+ ABI_MALLOC(hdr1_list, (nfiles))
  nperts = size(hdr1_list)
 
  ! Write dvdb file (we only support fortran binary format)
@@ -6090,7 +5868,7 @@ subroutine dvdb_write_v1qavg(dvdb, dtset, out_ncpath)
    this_qpts => dtset%ph_qpath(:, 1:this_nqpt)
    comm_rpt = xmpi_comm_self
    method = dtset%userid
-   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, nfft, ngfft, method, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%dvdb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfft, ngfft, method, comm_rpt)
    interpolated = 1
  else
    MSG_ERROR(sjoin("Invalid value for eph_task:", itoa(dtset%eph_task)))

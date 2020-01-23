@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_dfptnl
 !! NAME
 !!  m_paw_dfptnl
@@ -8,7 +7,7 @@
 !!   or 2nd-order PAW occupancies.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (LB)
+!! Copyright (C) 2018-2020 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

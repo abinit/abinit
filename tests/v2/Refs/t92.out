@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h26 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h18 )
   
-- input  file    -> t92.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v2_t92/t92.in
 - output file    -> t92.out
 - root for input  files -> t92i
 - root for output files -> t92o
@@ -573,8 +573,8 @@ P          mk1mem4         64
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.02747
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/3li.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/3li.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/3li.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/3li.pspnc
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -622,7 +622,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      63.000      62.905
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   43.210E-24; max=  81.088E-24
+ Mean square residual over all n,k,spin=   39.229E-24; max=  94.678E-24
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -735,8 +735,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      63.000      62.905
  ETOT  2  1.29390719412967E-05 -3.123E-04 3.833E-06 9.731E-03
  ETOT  3  2.96978040680018E-07 -1.264E-05 8.187E-08 7.400E-05
  ETOT  4  1.58118540781460E-07 -1.389E-07 6.939E-10 7.446E-07
- ETOT  5  1.55748401141353E-07 -2.370E-09 6.776E-12 1.654E-08
- ETOT  6  1.55692062207835E-07 -5.634E-11 2.152E-13 8.616E-11
+ ETOT  5  1.55748401141353E-07 -2.370E-09 1.039E-11 1.654E-08
+ ETOT  6  1.55692062207835E-07 -5.634E-11 3.397E-13 8.616E-11
  ETOT  7  1.55691869473118E-07 -1.927E-13 8.826E-16 2.326E-13
 
  At SCF step    7, etot is converged : 
@@ -745,7 +745,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      63.000      62.905
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -33.333E-03; max=  88.260E-17
+ Mean square residual over all n,k,spin=   43.220E-17; max=  88.260E-17
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -858,8 +858,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      63.000      62.905
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.82472
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/3li.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/3li.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/3li.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/3li.pspnc
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -917,7 +917,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      63.000      62.905
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -33.333E-03; max=  24.279E-17
+ Mean square residual over all n,k,spin=   81.923E-18; max=  24.279E-17
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1009,8 +1009,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      63.000      62.905
          ecut(hartree)=      5.000   => boxcut(ratio)=   1.92609
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/3li.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/3li.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/3li.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/3li.pspnc
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1068,7 +1068,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      63.000      62.905
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -33.333E-03; max=  37.012E-17
+ Mean square residual over all n,k,spin=   99.868E-18; max=  37.012E-17
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1673,10 +1673,10 @@ P          mk1mem4         64
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          1.9  wall=          2.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  28 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.2  wall=          2.4
++Overall time at end (sec) : cpu=          1.9  wall=          2.1

@@ -141,7 +141,7 @@
 
 # C compiler additional custom flags
 #
-CFLAGS_EXTRA="-I/usr/include/libxml2"
+CFLAGS_EXTRA="`xml2-config --cflags`"
 
 # Forced C compiler flags
 # Note: will override build-system configuration - USE AT YOUR OWN RISKS!

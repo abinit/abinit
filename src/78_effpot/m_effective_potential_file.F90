@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_effective_potential_file
 !! NAME
 !! m_effective_potential_file
@@ -9,7 +8,7 @@
 !! (XML or DDB)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2019 ABINIT group (AM)
+!! Copyright (C) 2000-2020 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

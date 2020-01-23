@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/conducti
 !! NAME
 !! conducti
@@ -9,7 +8,7 @@
 !! from the Kubo-Greenwood formula.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (FJ,SMazevet)
+!! Copyright (C) 2006-2020 ABINIT group (FJ,SMazevet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

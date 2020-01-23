@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ephtk
 !! NAME
 !!  m_ephtk
@@ -7,7 +6,7 @@
 !!  Helper functions common to e-ph calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outqmc
 !! NAME
 !! m_outqmc
@@ -10,7 +9,7 @@
 !!   N.D.M.Hine (nicholas.hine at imperial.ac.uk) November 2004
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

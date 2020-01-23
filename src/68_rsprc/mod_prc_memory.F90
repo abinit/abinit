@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/mod_prc_memory
 !! NAME
 !! mod_prc_memory
@@ -8,7 +7,7 @@
 !! preconditionning of potential residuals.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (PMA).
+!! Copyright (C) 2009-2020 ABINIT group (PMA).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

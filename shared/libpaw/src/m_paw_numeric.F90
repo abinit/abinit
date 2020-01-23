@@ -7,7 +7,7 @@
 !!  Wrappers for various numeric operations (spline, sort, ...)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2019 ABINIT group (MT,TR)
+!!  Copyright (C) 2012-2020 ABINIT group (MT,TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

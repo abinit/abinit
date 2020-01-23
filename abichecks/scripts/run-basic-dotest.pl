@@ -1,6 +1,6 @@
 # This file will run one abinit built-in test in a separate process
 
-# Copyright (C) 1999-2019 ABINIT group (LSi)
+# Copyright (C) 1999-2020 ABINIT group (LSi)
 # This file is distributed under the terms of the
 # GNU General Public License, see ~ABINIT/COPYING
 # or http://www.gnu.org/copyleft/gpl.txt .

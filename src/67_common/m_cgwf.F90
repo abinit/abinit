@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_cgwf
 !! NAME
 !!  m_cgwf
@@ -7,7 +6,7 @@
 !!  Conjugate-gradient eigensolver.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
+!!  Copyright (C) 2008-2020 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -2000,7 +1999,6 @@ subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
 end subroutine mksubham
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_grad_berry
 !! NAME
 !! make_grad_berry
@@ -2010,7 +2008,7 @@ end subroutine mksubham
 !! electric field case
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group
+!! Copyright (C) 1998-2020 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
