@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lattice_harmonic_potential
 !! NAME
 !! m_lattice_harmonic_potential
@@ -13,7 +12,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,6 +35,7 @@ module m_lattice_harmonic_potential
   use m_abstract_potential, only: abstract_potential_t
   use m_spmat_coo, only: COO_mat_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
+  use m_hashtable_strval, only: hash_table_t
   implicit none
 !!***
 
@@ -116,7 +116,7 @@ contains
   ! Input:
   !   displacement: required.
   !-------------------------------------------------------------------!
-  subroutine calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, energy)
+  subroutine calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, energy, energy_table)
     ! This function calculate the energy and its first derivative
     ! the inputs and outputs are optional so that each effpot can adapt to its
     ! own.
@@ -125,6 +125,8 @@ contains
 
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
+    type(hash_table_t),optional, intent(inout) :: energy_table
+    real(dp) :: etmp
     real(dp) :: f(3,self%natom)
     ! if present in input
     ! calculate if required
@@ -135,10 +137,20 @@ contains
     ABI_UNUSED_A(bfield)
     ABI_UNUSED_A(lwf_force)
 
+    etmp=0.0_dp
+
+    call self%coeff%mv(displacement, f)
     if (present(force)) then
-       call self%coeff%mv(displacement, f)
        force(:,:) = force(:,:) - f
-       energy =energy + 0.5_dp * sum(f*displacement)
+    endif
+
+    !energy =energy + 0.5_dp * sum(f*displacement)
+    etmp=0.5_dp * sum(f*displacement)
+    if (present(energy)) then
+       energy=energy+etmp
+    endif
+    if(present(energy_table)) then
+       call energy_table%put(self%label, etmp)
     endif
   end subroutine calculate
 

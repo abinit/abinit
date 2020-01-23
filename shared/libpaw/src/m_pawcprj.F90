@@ -11,7 +11,7 @@
 !!         |Cnk> are wave functions
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2019 ABINIT group (MT,JWZ)
+!! Copyright (C) 2012-2020 ABINIT group (MT,JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2062,6 +2062,9 @@ end subroutine pawcprj_mpi_sum
 !!  cprj_loc= The cprj on the local proc being all-gathered
 !!  natom=Number of atoms (size of first dimension of cprj_loc).
 !!  n2dim=Size of the second dimension of cprj_loc.
+!!  n2std=Stride of n2 dimension
+!!   if n2std=1, cprj_loc(:,1) is on proc 0, cprj_loc(:,2) is on proc 1, cprj_loc(:,3) is on proc 2, etc.
+!!   if n2std>1, cprj_loc(:,1:n2std) are on proc 0, cprj_loc(:,n2std+1,2*n2std) are on proc 1, etc.
 !!  nlmn(natom)=Number of nlm partial waves for each atom.
 !!  ncpgr = number of gradients in cprj_loc
 !!  nproc=number of processors being gathered
@@ -2082,22 +2085,22 @@ end subroutine pawcprj_mpi_sum
 !!
 !! SOURCE
 
-subroutine pawcprj_mpi_allgather(cprj_loc,cprj_gat,natom,n2dim,nlmn,ncpgr,nproc,spaceComm,ierr,&
+subroutine pawcprj_mpi_allgather(cprj_loc,cprj_gat,natom,n2dim,n2std,nlmn,ncpgr,nproc,spaceComm,ierr,&
 &                                rank_ordered)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,n2dim,ncpgr,nproc,spaceComm
+ integer,intent(in) :: natom,n2dim,n2std,ncpgr,nproc,spaceComm
  integer,intent(out) :: ierr
  logical,optional,intent(in) :: rank_ordered
 !arrays
  integer,intent(in) :: nlmn(natom)
  type(pawcprj_type),intent(in) :: cprj_loc(:,:)
- type(pawcprj_type),intent(inout) :: cprj_gat(:,:) !vz_i
+ type(pawcprj_type),intent(inout) :: cprj_gat(:,:)
 
 !Local variables-------------------------------
 !scalars
- integer :: iat,jj,t2dim,tcpgr,tg2dim,n1dim,nn
+ integer :: iat,ii,jj,t2dim,tcpgr,tg2dim,n1dim,nn
  integer :: ntotcp,ibuf,ipck,iproc
  logical :: rank_ordered_
  character(len=100) :: msg
@@ -2134,6 +2137,10 @@ subroutine pawcprj_mpi_allgather(cprj_loc,cprj_gat,natom,n2dim,nlmn,ncpgr,nproc,
    msg='size mismatch in ncpgr (pawcprj_mpi_allgather)!'
    MSG_BUG(msg)
  end if
+ if (mod(n2dim,n2std)/=0) then
+   msg='n2std should divide n2dim (pawcprj_mpi_allgather)!'
+   MSG_BUG(msg)
+ end if
 
  rank_ordered_=.false.;if(present(rank_ordered)) rank_ordered_=rank_ordered
 
@@ -2159,18 +2166,20 @@ subroutine pawcprj_mpi_allgather(cprj_loc,cprj_gat,natom,n2dim,nlmn,ncpgr,nproc,
 !=== second dimension is rank-ordered if rank_ordered_=true
  ipck=0
  do iproc=1,nproc
-   do jj=1,n2dim
-     if (rank_ordered_) then
-       ibuf=jj+(iproc-1)*n2dim
-     else
-       ibuf=iproc+(jj-1)*nproc
-     end if
-     do iat=1,natom
-       nn=nlmn(iat)
-       cprj_gat(iat,ibuf)%cp(:,1:nn)=buffer_cpgr_all(:,1,ipck+1:ipck+nn)
-       if (ncpgr/=0) cprj_gat(iat,ibuf)%dcp(:,1:ncpgr,1:nn)=&
-&          buffer_cpgr_all(:,2:1+ncpgr,ipck+1:ipck+nn)
-       ipck=ipck+nn
+   do jj=1,n2dim/n2std
+     do ii=1,n2std
+       if (rank_ordered_) then
+         ibuf=(iproc-1)*n2dim+(jj-1)*n2std+ii
+       else
+         ibuf=(iproc+(jj-1)*nproc-1)*n2std+ii
+       end if
+       do iat=1,natom
+         nn=nlmn(iat)
+         cprj_gat(iat,ibuf)%cp(:,1:nn)=buffer_cpgr_all(:,1,ipck+1:ipck+nn)
+         if (ncpgr/=0) cprj_gat(iat,ibuf)%dcp(:,1:ncpgr,1:nn)=&
+&            buffer_cpgr_all(:,2:1+ncpgr,ipck+1:ipck+nn)
+         ipck=ipck+nn
+       end do
      end do
    end do
  end do

@@ -1,8 +1,8 @@
 
 .Version 8.11.12 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.(sequential version, prepared for a x86_64_linux_gnu7.4 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -15,14 +15,14 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 25 Nov 2019.
-- ( at 08h36 )
+- ( at 14h29 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/v8/Input/t14_sys.xml
+-t14_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -39,12 +39,14 @@
  fit_initializeDat  0
         fit_cutoff  0.00000000E+00
         fit_option  0
+         fit_iatom  -1
         fit_ncoeff  2
           fit_grid  1  1  1
          ts_option  0
     fit_rangePower  3  4
     fit_anhaStrain  0
     fit_SPCoupling  1
+      fit_SPC_maxS  1
      fit_nfixcoeff  2
       fit_fixcoeff          1      2
  Miscellaneous information :
@@ -70,8 +72,8 @@ dipdip_range         1         1         1
 
 ================================================================================
 
--Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/v8/Input/t14_sys.xml
--Reading the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/v8/Input/t14_sys.xml with LibXML library
+-Opening the file t14_sys.xml
+-Reading the file t14_sys.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -158,13 +160,13 @@ dipdip_range         1         1         1
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/v8/Input/t14_coeffs.xml
--Reading the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/v8/Input/t14_coeffs.xml with LibXML library
+-Opening the file t14_coeffs.xml
+-Reading the file t14_coeffs.xml with LibXML library
 
 ================================================================================
 
--Reading the file the HIST file :
--/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/v8/Input/t13_HIST
+-Reading the training-set file :
+-t13_HIST
 
 
 ================================================================================
@@ -192,11 +194,11 @@ dipdip_range         1         1         1
  3 =>  -5.8315809708E-01 (Sr_x-O1_x)^1(Sr_y-O1_y)^1(Ru_x-O1_x)^1(Ru_y-O1_y)^1
  4 =>   9.0373997419E-02 (Ru_x-O1_x)^1(Ru_y-O1_y)^1(O1_x-O2_x)^1
 
- Mean Standard Deviation values at the end of the fit process (meV/atm):
+ Mean Standard Deviation values at the end of the fit process (meV/atm): 
    Energy          :   4.0062562511725458E-01
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   3.7876180836315530E-03
-   Forces          :   3.6336164702180981E-03
+   Forces+Stresses :   3.7876180836315539E-03
+   Forces          :   3.6336164702180985E-03
    Stresses        :   1.5400161341345506E-04
 
 
@@ -207,10 +209,10 @@ dipdip_range         1         1         1
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
+- Proc.   0 individual time (sec): cpu=          3.1  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.062  and wall time      0.126 sec
++Total cpu time      3.121  and wall time      0.137 sec
 
  multibinit : the run completed succesfully.

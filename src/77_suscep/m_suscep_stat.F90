@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_suscep_stat
 !! NAME
 !! m_suscep_stat
@@ -7,7 +6,7 @@
 !! Compute the susceptibility matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG, AR, MB)
+!!  Copyright (C) 2008-2020 ABINIT group (XG, AR, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -379,8 +378,8 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
            call pawcprj_get(atindx1,cprj_loc,cprj,natom,1,ibg,ikpt,iorder_cprj,isp,&
 &           mband/mpi_enreg%nproc_band,mkmem,natom,nband_loc,nband_loc,my_nspinor,nsppol,unpaw,&
 &           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-           call pawcprj_mpi_allgather(cprj_loc,cprj_k,natom,my_nspinor*nband_loc,dimcprj,0,&
-&           mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.true.)
+           call pawcprj_mpi_allgather(cprj_loc,cprj_k,natom,my_nspinor*nband_loc,mpi_enreg%bandpp,&
+&           dimcprj,0,mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.true.)
            call pawcprj_free(cprj_loc)
            ABI_DATATYPE_DEALLOCATE(cprj_loc)
          end if

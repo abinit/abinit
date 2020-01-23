@@ -2,7 +2,7 @@
 .Version 8.11.12 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -417,7 +417,7 @@ _setup2: Arith. and geom. avg. npw (full set) are       9.000       9.000
  Mean square residual over all n,k,spin=  -12.000E-01; max=  19.669E-18
  dfpt_looppert : ek2=    6.5797362674E+01
           f-sum rule ratio=    3.9492633410E-01
- prteigrs : about to open file t25_1WF1_EIG
+ prteigrs : about to open file t25t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   1  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  5, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)

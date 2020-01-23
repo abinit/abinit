@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_primitive_potential
 !! NAME
 !! m_primitive_potential
@@ -16,7 +15,7 @@
 !!  * save_to_file: save to file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -90,19 +89,23 @@ end subroutine finalize
 !> @param[in]  input
 !> @param[out] output
 !----------------------------------------------------------------------
-subroutine fill_supercell(self, scmaker, scpot)
+subroutine fill_supercell(self, scmaker, params, scpot)
     class(primitive_potential_t), intent(inout) :: self
-    type(supercell_maker_t), intent(inout) :: scmaker
-    class(abstract_potential_t), pointer, intent(inout) :: scpot
-    ! Note that sc_pot is a pointer
+    type(supercell_maker_t),      intent(inout) :: scmaker
+    type(multibinit_dtset_type),  intent(inout) :: params
+    class(abstract_potential_t), pointer, intent(inout) :: scpot 
 
+    ! Note that sc_pot is a pointer
     ! use a pointer to the specific potential which will be filled
     ! e.g. type(spin_potential_t), pointer :: tmp
     ! call tmp%initialize(....)
     ! set tmp
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(scmaker)
+    ABI_UNUSED_A(params)
     ABI_UNUSED_A(scpot)
+    ABI_UNUSED_A(params)
+
   end subroutine fill_supercell
 
   !----------------------------------------------------------------------

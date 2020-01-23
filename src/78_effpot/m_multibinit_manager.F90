@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_multibinit_manager
 !! NAME
 !! m_multibinit_manager
@@ -17,7 +16,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,6 +39,7 @@ module m_multibinit_manager
 
   use m_init10, only: init10
   use m_mathfuncs, only: diag
+  use m_hashtable_strval, only: hash_table_t
   use m_multibinit_dataset, only: multibinit_dtset_type, invars10, &
        outvars_multibinit, multibinit_dtset_free
  ! random number generator
@@ -77,10 +77,13 @@ module m_multibinit_manager
   use m_lattice_verlet_mover, only: lattice_verlet_mover_t
   use m_lattice_berendsen_NVT_mover, only: lattice_berendsen_NVT_mover_t
   use m_lattice_berendsen_NPT_mover, only: lattice_berendsen_NPT_mover_t
-
+  use m_lattice_dummy_mover, only: lattice_dummy_mover_t
 
   ! Spin lattice coupling
-  use m_spin_lattice_coupling_effpot, only : spin_lattice_coupling_effpot_t
+  use m_slc_primitive_potential, only: slc_primitive_potential_t
+  use m_slc_potential, only : slc_potential_t
+  use m_slc_dynamics
+
   implicit none
   private
 
@@ -99,14 +102,29 @@ module m_multibinit_manager
      type(primitive_potential_list_t) :: prim_pots  ! list of primitive potentials
      type(potential_list_t) :: pots     ! potential list
      ! a polymorphic lattice mover so multiple mover could be used.
-     class(lattice_mover_t), pointer :: lattice_mover=> null()
-     ! as for the spin, there is only one mover which has several  methods
+     class(lattice_mover_t), pointer :: lattice_mover => null()
+     ! as for the spin, there is only one mover which has several methods
      type(spin_mover_t) :: spin_mover  
      ! type(lwf_mover_t) :: lwf_mover
+
+     type(slc_mover_t) :: slc_mover
 
      ! spin netcdf hist file
      type(spin_ncfile_t) :: spin_ncfile
      type(rng_t) :: rng
+     type(hash_table_t) :: energy_table
+     ! DOC: The energy table contains
+     ! The elements are updated by:
+     !  - The movers: kinetic energy
+     !  - The potentials: potential energy. 
+     !   Note that for potential_list, do not update the 
+     !   TODO: should we add a tag in the potential list to make it aware of 
+     !       whether to save itself as a whole in the energy table or ask its components 
+     !       to save the energy terms?
+     !   FIXME: the extra white spaces are also saved to the keys of the table.
+     !   usage:call energy_table%put("Name", value): update/insert energy term.
+     !         call energy_table%print_all()       : print all energy terms to screen.
+     !         s= energy_table%sum_val()           : sum up all energy terms.
 
      ! TODO: this is temporary. Remove after moving to multibinit_main2
      ! It means the parsing of the params are already done outside the manager.
@@ -128,7 +146,6 @@ module m_multibinit_manager
      procedure :: run_spin_dynamics
      procedure :: run_MvT
      procedure :: run_lattice_dynamics
-     procedure :: run_spin_latt_dynamics
      procedure :: run_coupled_spin_latt_dynamics
      procedure :: run
      procedure :: run_all
@@ -183,6 +200,8 @@ contains
 
     ! lwf
 
+    call self%energy_table%init()
+
   end subroutine initialize
 
 
@@ -217,6 +236,7 @@ contains
     self%has_strain=.False.
     self%has_spin=.False.
     self%has_lwf=.False.
+    call self%energy_table%free()
   end subroutine finalize
 
   !-------------------------------------------------------------------!
@@ -260,6 +280,11 @@ contains
     ! It is only for lattice potential
     if(.False.) then
        call effective_potential_file_getDimSystem(self%filenames(3),natom,ntypat,nph1l,nrpt)
+    else
+       natom=0
+       ntypat=0
+       nph1l=0
+       nrpt=0
     endif
 
     !Read the input file, and store the information in a long string of characters
@@ -272,7 +297,6 @@ contains
 
        !Check whether the string only contains valid keywords
        call chkvars(string)
-
     end if
 
     call xmpi_bcast(string,master, comm, ierr)
@@ -304,6 +328,7 @@ contains
     if(self%has_displacement) then
        self%params%temperature = self%params%temperature/Ha_K
     end if
+
   end subroutine prepare_params
 
 
@@ -313,7 +338,9 @@ contains
   subroutine read_potentials(self)
     class(mb_manager_t), intent(inout) :: self
     class(primitive_potential_t), pointer :: spin_pot
+    class(primitive_potential_t), pointer :: slc_pot
     class(primitive_potential_t), pointer :: lat_ham_pot
+
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
     call init_mpi_info(master, iam_master, my_rank, comm, nproc) 
@@ -351,6 +378,17 @@ contains
 
 
     !LWF : TODO
+
+    ! spin-lattice coupling
+    if(self%params%slc_coupling>0) then
+       ABI_DATATYPE_ALLOCATE_SCALAR(slc_primitive_potential_t, slc_pot)
+       select type(slc_pot)
+       type is (slc_primitive_potential_t)
+          call slc_pot%initialize(self%unitcell)
+          call slc_pot%load_from_files(self%params, self%filenames)
+          call self%prim_pots%append(slc_pot)
+       end select 
+    endif
   end subroutine read_potentials
 
   !-------------------------------------------------------------------!
@@ -358,6 +396,7 @@ contains
   !-------------------------------------------------------------------!
   subroutine fill_supercell(self)
     class(mb_manager_t), target, intent(inout) :: self
+
     ! build supercell structure
     !call self%unitcell%fill_supercell(self%sc_maker, self%supercell)
     call self%supercell%from_unitcell(self%sc_maker, self%unitcell)
@@ -365,7 +404,7 @@ contains
     ! supercell potential
     call self%pots%initialize()
     call self%pots%set_supercell(self%supercell)
-    call self%prim_pots%fill_supercell_list(self%sc_maker,self%pots)
+    call self%prim_pots%fill_supercell_list(self%sc_maker, self%params, self%pots)
 
     ! why do this twice.
     call self%pots%set_supercell(self%supercell)
@@ -386,11 +425,13 @@ contains
   !-------------------------------------------------------------------!
   subroutine set_movers(self)
     class(mb_manager_t), intent(inout) :: self
+    character(len=fnlen) :: fname
     if (self%params%spin_dynamics>0) then
+       fname=trim(self%filenames(2))//"_spinhist_input.nc"
        call self%spin_mover%initialize(params=self%params,&
-            & supercell=self%supercell, rng=self%rng)
+            & supercell=self%supercell, rng=self%rng, &
+            & restart_hist_fname=fname)
     end if
-
 
     if (self%params%dynamics>0) then
        call self%set_lattice_mover()
@@ -414,12 +455,15 @@ contains
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_NVT_mover_t, self%lattice_mover)
     case(104)   ! Berendsen NPT (not yet avaliable)
        ABI_DATATYPE_ALLOCATE_SCALAR(lattice_berendsen_NPT_mover_t, self%lattice_mover)
+    case(120)   ! Dummy mover (Do not move atoms, For test only.)
+       ABI_DATATYPE_ALLOCATE_SCALAR(lattice_dummy_mover_t, self%lattice_mover)
     end select
     call self%lattice_mover%initialize(params=self%params, supercell=self%supercell, rng=self%rng)
+    ! FIXME: should be able to set to different mode using input.
+    ! Mode=1: Using Boltzman's distribution to initialize the velocities.
+    ! Mode=2
+    call self%lattice_mover%set_initial_state(mode=1)
   end subroutine set_lattice_mover
-
- 
-
 
 
   !-------------------------------------------------------------------!
@@ -433,7 +477,7 @@ contains
     call self%fill_supercell()
     call self%set_movers()
     call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
-    call self%spin_mover%run_time(self%pots)
+    call self%spin_mover%run_time(self%pots, energy_table=self%energy_table)
     call self%spin_mover%spin_ncfile%close()
   end subroutine run_spin_dynamics
 
@@ -445,7 +489,7 @@ contains
     call self%read_potentials()
     call self%fill_supercell()
     call self%set_movers()
-    call self%spin_mover%run_MvT(self%pots, self%filenames(2))
+    call self%spin_mover%run_MvT(self%pots, self%filenames(2), energy_table=self%energy_table)
   end subroutine run_MvT
 
 
@@ -459,22 +503,8 @@ contains
     call self%sc_maker%initialize(diag(self%params%ncell))
     call self%fill_supercell()
     call self%set_movers()
-    call self%lattice_mover%run_time(self%pots)
+    call self%lattice_mover%run_time(self%pots, energy_table=self%energy_table)
   end subroutine run_lattice_dynamics
-
-  !-------------------------------------------------------------------!
-  ! Run  spin and lattice dynamics sequentially.
-  !-------------------------------------------------------------------!
-  subroutine run_spin_latt_dynamics(self)
-    class(mb_manager_t), intent(inout) :: self
-    call self%prim_pots%initialize()
-    call self%read_potentials()
-    call self%sc_maker%initialize(diag(self%params%ncell))
-    call self%fill_supercell()
-    call self%set_movers()
-    call self%spin_mover%run_time(self%pots)
-    call self%lattice_mover%run_time(self%pots)
-  end subroutine run_spin_latt_dynamics
 
   !-------------------------------------------------------------------!
   ! Run coupled lattice spin dynamics
@@ -484,36 +514,59 @@ contains
   !-------------------------------------------------------------------!
   subroutine run_coupled_spin_latt_dynamics(self)
     class(mb_manager_t), intent(inout) :: self
-    integer :: istep
+
     character(len=90) :: msg
+    real(dp) :: etotal
+    integer :: i
 
     call self%prim_pots%initialize()
     call self%read_potentials()
     
     call self%sc_maker%initialize(diag(self%params%ncell))
     call self%fill_supercell()
-    call self%set_movers()
-    ! use
-    msg=repeat("=", 90)
-    call wrtout(std_out,msg,'COLL')
-    call wrtout(ab_out, msg, 'COLL')
-    do istep = 1 , self%params%ntime
-       call self%spin_mover%run_one_step(self%pots)
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out, msg, 'COLL')
-       call self%lattice_mover%run_one_step(self%pots)
-       write(msg, "(A13, 4X,  I13)")  "Latt_Iter", istep
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out, msg, 'COLL')
 
-       call self%spin_mover%run_one_step(self%pots)
-       write(msg, "(A13, 4X,  I13)")  "Spin_Iter", istep
-       call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out, msg, 'COLL')
-    end do
-    msg=repeat("=", 90)
+    ! calculate various quantities for reference spin structure
+    do i =1, self%pots%size
+      select type (scpot => self%pots%list(i)%ptr)  ! use select type because properties only defined for slc_potential are used
+      type is (slc_potential_t) 
+        call scpot%calculate_ref()
+      end select
+    enddo
+
+    call self%set_movers()
+
+    call self%spin_mover%set_ncfile_name(self%params, self%filenames(2))
+    call self%slc_mover%initialize(self%spin_mover, self%lattice_mover)
+    call self%slc_mover%run_time(self%pots, displacement=self%lattice_mover%displacement, &
+        & spin=self%spin_mover%Stmp, energy_table=self%energy_table)
+    msg=repeat("=", 80)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
+    msg='Energy contributions'
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    msg=' Lattice contributions'
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    call self%energy_table%print_entry(label='Lattice kinetic energy')
+    call self%energy_table%print_entry(label='Lattice_harmonic_potential')
+    msg=' Spin contributions'
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    call self%energy_table%print_entry(label='SpinPotential')
+    msg=' Spin-lattice coupling contributions'
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    call self%energy_table%print_entry(prefix='SLCPotential')
+    etotal=self%energy_table%sum_val()
+    write(msg, "(A12, 29X, ES13.5)") 'Total energy', etotal
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+    msg=repeat("=", 80)
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out, msg, 'COLL')
+
+    call self%spin_mover%spin_ncfile%close()
   end subroutine run_coupled_spin_latt_dynamics
 
 

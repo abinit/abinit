@@ -43,6 +43,7 @@ diemac  12.0      # Although this is not mandatory, it is worth to
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = abinit
+#%% use_files_file = yes
 #%% test_chain = t01.in, t02.in
 #%% [files]
 #%% files_to_test = t02.out, tolnlines=   28,   tolabs=  1.10e-03,   tolrel=  1.40e-04, fld_options = -medium

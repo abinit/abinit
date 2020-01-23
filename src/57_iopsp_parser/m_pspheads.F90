@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pspheads
 !! NAME
 !! m_pspheads
@@ -7,7 +6,7 @@
 !!  Functions used to read the pseudopotential header of each psp file, in order to initialize pspheads(1:npsp).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,7 +56,7 @@ MODULE m_pspheads
 
  public :: inpspheads      ! Initialize pspheads(1:npsp).
  public :: pspheads_comm   ! Communicate pspheads to all processors
- public ::  pawpsxml2ab
+ public :: pawpsxml2ab
  public :: upfxc2abi       ! UPF XcC to Abinit pspxc
 
 contains
@@ -133,7 +132,7 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
 
  do ipsp=1,npsp
 
-!  Check if the file is written in XML
+   ! Check if the file is written in XML
    pspheads(ipsp)%filpsp=trim(filnam(ipsp))
 
    usexml = 0
@@ -246,14 +245,11 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
      pspheads(ipsp)%pspso = 0
    end if
 
-!  DEBUG
-!  write(std_out,*) pspheads(ipsp)%znuclpsp
-!  write(std_out,*) pspheads(ipsp)%zionpsp
-!  write(std_out,*) pspheads(ipsp)%pspcod
-!  write(std_out,*) pspheads(ipsp)%pspxc
-!  write(std_out,*) pspheads(ipsp)%lmax
-!  stop
-!  ENDDEBUG
+   ! write(std_out,*) pspheads(ipsp)%znuclpsp
+   ! write(std_out,*) pspheads(ipsp)%zionpsp
+   ! write(std_out,*) pspheads(ipsp)%pspcod
+   ! write(std_out,*) pspheads(ipsp)%pspxc
+   ! write(std_out,*) pspheads(ipsp)%lmax
 
 !  Initialize nproj, nprojso, pspso, as well as xccc, for each type of psp
    pspheads(ipsp)%GTHradii = zero

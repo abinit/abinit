@@ -2,7 +2,7 @@
 .Version 8.11.12 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -433,8 +433,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
  At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.974E-11 < toldfe=  1.000E-07
 
- Compute kinetic energy density
-
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
@@ -566,8 +564,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
 
  At SCF step    3, etot is converged : 
   for the second time, diff in etot=  1.613E-09 < toldfe=  1.000E-07
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 
@@ -712,8 +708,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
  At SCF step    8, etot is converged : 
   for the second time, diff in etot=  3.798E-09 < toldfe=  1.000E-07
 
- Compute kinetic energy density
-
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
@@ -845,8 +839,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
 
  At SCF step    3, etot is converged : 
   for the second time, diff in etot=  2.152E-09 < toldfe=  1.000E-07
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 
@@ -987,8 +979,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
  At SCF step    8, etot is converged : 
   for the second time, diff in etot=  3.798E-09 < toldfe=  1.000E-07
 
- Compute kinetic energy density
-
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
@@ -1120,8 +1110,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1045.000    1045.000
 
  At SCF step    3, etot is converged : 
   for the second time, diff in etot=  2.152E-09 < toldfe=  1.000E-07
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 

@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.13 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h37 )
+.Starting date : Fri 29 Nov 2019.
+- ( at 09h50 )
   
 - input  file    -> t24.in
 - output file    -> t24.out
@@ -355,6 +355,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.000     783.000
  Atom  Sphere_radius  Integrated_density
     1        1.00000          0.50000596
     2        1.00000          0.24061675
+
+ Integrated potential residual in atomic spheres:
+ ------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0500.
+ Atom  Sphere_radius  Integrated_potresid
+    1        1.00000          0.56241777
+    2        1.00000          0.00000592
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -472,6 +479,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.000     783.000
  Atom  Sphere_radius  Integrated_density
     1        2.00000          0.99999976
     2        2.00000          0.99999964
+
+ Integrated potential residual in atomic spheres:
+ ------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0500.
+ Atom  Sphere_radius  Integrated_potresid
+    1        2.00000         -0.01937300
+    2        2.00000         -0.01937310
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -588,6 +602,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.000     783.000
  Atom  Sphere_radius  Integrated_density
     1        2.00000          1.09999852
     2        2.00000          0.89999922
+
+ Integrated potential residual in atomic spheres:
+ ------------------------------------------------
+ Radius=ratsph(iatom), smearing ratsm=  0.0500.
+ Atom  Sphere_radius  Integrated_potresid
+    1        2.00000          0.06118253
+    2        2.00000         -0.10095432
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -677,6 +698,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.000     783.000
             fcart4     6.0269791323E-02 -0.0000000000E+00 -0.0000000000E+00
                       -6.0269791323E-02 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
+           grchrg1     0.0000000000E+00  0.0000000000E+00
+           grchrg2     5.6241776940E-01  5.9206933333E-06
+           grchrg3    -1.9373004004E-02 -1.9373096148E-02
+           grchrg4     6.1182533276E-02 -1.0095431668E-01
            istwfk        2
            jdtset        1    2    3    4
          kptrlatt        1    0    0      0    1    0      0    0    1
@@ -798,10 +823,10 @@ P           mkmem           1
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          1.9
+- Proc.   0 individual time (sec): cpu=          1.5  wall=          1.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.8  wall=          1.9
++Overall time at end (sec) : cpu=          1.5  wall=          1.7

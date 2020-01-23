@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lwf_mover
 !! NAME
 !! m_lwf_mover
@@ -20,7 +19,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,6 +42,8 @@ module m_lwf_mover
   use m_random_xoroshiro128plus, only: set_seed, rand_normal_array, rng_t
   use m_abstract_potential, only: abstract_potential_t
   use m_abstract_mover, only: abstract_mover_t
+  use m_hashtable_strval, only: hash_table_t
+  
   implicit none
   private
   !!***
@@ -53,19 +54,19 @@ module m_lwf_mover
   end type lwf_mover_t
 
 contains
-  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf)
+  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf, energy_table)
     ! run one step. (For MC also?)
     class(lwf_mover_t), intent(inout) :: self
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     class(abstract_potential_t), intent(inout) :: effpot
+    type(hash_table_t),optional, intent(inout) :: energy_table
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(effpot)
     ABI_UNUSED_A(displacement)
     ABI_UNUSED_A(strain)
     ABI_UNUSED_A(spin)
     ABI_UNUSED_A(lwf)
-
-
+    ABI_UNUSED_A(energy_table)
     MSG_ERROR("run_one_step not implemented for this mover")
   end subroutine run_one_step
 

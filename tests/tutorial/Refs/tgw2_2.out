@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 8.11.14 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h22 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 23h44 )
   
-- input  file    -> tgw2_2.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mverstra_develop/tests/Test_suite/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_2.in
 - output file    -> tgw2_2.out
 - root for input  files -> tgw2_2i
 - root for output files -> tgw2_2o
@@ -188,8 +188,8 @@ P           mkmem           8
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1466,10 +1466,39 @@ P           mkmem           8
 
 ================================================================================
 
+- Total cpu        time (s,m,h):          2.6        0.04      0.001
+- Total wall clock time (s,m,h):          2.6        0.04      0.001
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =            2.6, wall_time =            2.6
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- pspini                         0.154   6.0      0.154   5.8              1      -1.00        1.00       1.00
+- timing timab                   0.144   5.6      0.147   5.6             10      -1.00        0.98       0.98
+- invars2                        0.021   0.8      0.022   0.8              1      -1.00        0.96       0.96
+- others (131)                   0.018   0.7      0.017   0.6             -1      -1.00        1.04       1.04
+-<END_TIMER>
+-
+- subtotal                       0.337  13.1      0.340  12.9                                  0.99       0.99
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =           2.6, wall_time =           2.6
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- pspini                         0.154   6.0      0.154   5.8              1      -1.00        1.00       1.00
+- timing timab                   0.144   5.6      0.147   5.6             10      -1.00        0.98       0.98
+- invars2                        0.021   0.8      0.022   0.8              1      -1.00        0.96       0.96
+- others (131)                   0.018   0.7      0.017   0.6             -1      -1.00        1.04       1.04
+-<END_TIMER>
 
+- subtotal                       0.337  13.1      0.340  12.9                                  0.99       0.99
 
 ================================================================================
 
@@ -1545,10 +1574,10 @@ P           mkmem           8
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          2.7  wall=          3.7
+- Proc.   0 individual time (sec): cpu=          2.6  wall=          2.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.7  wall=          3.7
++Overall time at end (sec) : cpu=          2.6  wall=          2.6

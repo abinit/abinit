@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_respfn_driver
 !! NAME
 !!  m_respfn_driver
@@ -7,7 +6,7 @@
 !!  Subdriver for DFPT calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XG, DRH, MT, MKV)
+!!  Copyright (C) 1999-2020 ABINIT group (XG, DRH, MT, MKV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -631,7 +630,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    if (psp_gencond==1.or.call_pawinit) then
 !    Some gen-cond have to be added...
      call timab(553,1,tsec)
-     call pawinit(gnt_option,zero,zero,dtset%pawlcutd,dtset%pawlmix,&
+     call pawinit(dtset%effmass_free,gnt_option,zero,zero,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
 &     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,0,dtset%usepotzero)
      call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,&

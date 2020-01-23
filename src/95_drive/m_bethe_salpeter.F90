@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_bethe_salpeter
 !! NAME
 !!  m_bethe_salpeter
@@ -9,7 +8,7 @@
 !!
 !! COPYRIGHT
 !! Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!! Copyright (C) 2009-2019 ABINIT group (MG, YG)
+!! Copyright (C) 2009-2020 ABINIT group (MG, YG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -382,7 +381,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
    if (psp_gencond==1.or.call_pawinit) then
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
-     call pawinit(gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
+     call pawinit(Dtset%effmass_free,gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
 &     Psps%mpsang,Dtset%pawnphi,Cryst%nsym,Dtset%pawntheta,Pawang,Pawrad,&
 &     Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%xclevel,0,Dtset%usepotzero)
 

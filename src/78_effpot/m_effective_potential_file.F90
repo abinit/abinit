@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_effective_potential_file
 !! NAME
 !! m_effective_potential_file
@@ -9,7 +8,7 @@
 !! (XML or DDB)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2019 ABINIT group (AM)
+!! Copyright (C) 2000-2020 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2096,7 +2095,7 @@ end subroutine system_getDimFromXML
 
 !Re-generate symmetry operations from the lattice and atomic coordinates
  tolsym=tol8
- msym = 192
+ msym = 384
  ABI_ALLOCATE(spinat,(3,natom))
  ABI_ALLOCATE(ptsymrel,(3,3,msym))
  ABI_ALLOCATE(symafm,(msym))
@@ -2247,7 +2246,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  logical :: iam_master=.FALSE.
  integer,parameter :: master=0
  integer :: nptsym,nsym
- integer :: msym = 192,  use_inversion = 1, space_group
+ integer :: msym = 384,  use_inversion = 1, space_group
  real(dp):: max_phfq,tolsym = tol8
 !arrays
  integer :: bravais(11),cell_number(3),cell2(3)

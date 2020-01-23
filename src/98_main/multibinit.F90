@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/multibinit
 !! NAME
 !! multibinit
@@ -7,7 +6,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (AM)
+!! Copyright (C) 1999-2020 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -63,12 +62,14 @@ program multibinit
   use m_parser,     only : instrng
   use m_dtset,      only : chkvars
   use m_dtfil,      only : isfile
-  use m_multibinit_dataset
+
   !use m_generate_training_set, only : generate_training_set
-  use m_compute_anharmonics, only : compute_anharmonics
+  !use m_compute_anharmonics, only : compute_anharmonics
   use m_init10,              only : init10
   use m_multibinit_unittest, only: mb_test_main
   use m_multibinit_driver
+  use m_multibinit_main2, only: multibinit_main2
+
   implicit none
 
   !Arguments -----------------------------------
@@ -78,7 +79,7 @@ program multibinit
   real(dp) :: tcpu,tcpui,twall,twalli
   real(dp) :: tsec(2)
   character(len=24) :: codename,start_datetime
-  character(len=fnlen) :: filnam(17),tmpfilename
+  character(len=fnlen) :: filnam(18),tmpfilename
   character(len=500) :: message 
   type(args_t) :: args
   integer :: ii

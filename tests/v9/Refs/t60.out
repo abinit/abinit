@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h43 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h41 )
   
-- input  file    -> t60.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.in
 - output file    -> t60.out
 - root for input  files -> t60i
 - root for output files -> t60o
@@ -496,8 +496,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -511,8 +511,8 @@ All the independent perturbations are available
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/09-F.psp
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1152,7 +1152,6 @@ Transport calculation results
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS2_DVDB
 
@@ -1795,7 +1794,6 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
 
@@ -1871,6 +1869,12 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+ Computing average over the unit cell of the periodic part of the DFPT potentials
+
+ Using list of q-points specified by ph_qpath with 5 qpoints
+
+ - Results stored in: t60o_DS9_V1QAVG.nc
+ Use `abiopen.py out_V1QAVG.nc -e` to visualize results
 
 ================================================================================
 == DATASET 10 ==================================================================
@@ -1887,7 +1891,6 @@ All the independent perturbations are available
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
 
-- Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
 
@@ -1963,6 +1966,12 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 --------------------------------------------------------------------------------
 
+ Computing average over the unit cell of the periodic part of the DFPT potentials
+
+ Using list of q-points found in the DVDB file
+
+ - Results stored in: t60o_DS10_V1QAVG.nc
+ Use `abiopen.py out_V1QAVG.nc -e` to visualize results
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2264,10 +2273,10 @@ P           mkmem           8
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         27.1  wall=         27.2
+- Proc.   0 individual time (sec): cpu=         22.9  wall=         23.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         27.1  wall=         27.2
++Overall time at end (sec) : cpu=         22.9  wall=         23.0

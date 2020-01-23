@@ -2,7 +2,7 @@
 .Version 8.11.12 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -582,7 +582,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     365.000     365.000
  Mean square residual over all n,k,spin=   96.061E-24; max=  27.375E-23
  dfpt_looppert : ek2=    6.3165468167E+00
           f-sum rule ratio=    1.6341436833E+00 (note : ecutsm/=0)
- prteigrs : about to open file t64_1WF1_EIG
+ prteigrs : about to open file t64t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   4  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -646,7 +646,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     365.000     365.000
  Mean square residual over all n,k,spin=   14.810E-22; max=  58.065E-22
  dfpt_looppert : ek2=    1.7545963380E+01
           f-sum rule ratio=    6.0232354427E+00 (note : ecutsm/=0)
- prteigrs : about to open file t64_1WF1_EIG
+ prteigrs : about to open file t64t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   4  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
@@ -710,7 +710,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     365.000     365.000
  Mean square residual over all n,k,spin=   16.747E-22; max=  65.809E-22
  dfpt_looppert : ek2=    1.7545963380E+01
           f-sum rule ratio=    6.0198443053E+00 (note : ecutsm/=0)
- prteigrs : about to open file t64_1WF1_EIG
+ prteigrs : about to open file t64t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   4  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband=  4, wtk=  0.25000, kpt=  0.2500  0.2500  0.2500 (reduced coord)

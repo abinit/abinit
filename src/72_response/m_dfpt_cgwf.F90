@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_cgwf
 !! NAME
 !!  m_dfpt_cgwf
@@ -8,7 +7,7 @@
 !! Uses a conjugate-gradient algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XG,DRH,XW,FJ,MT,LB)
+!!  Copyright (C) 1999-2020 ABINIT group (XG,DRH,XW,FJ,MT,LB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

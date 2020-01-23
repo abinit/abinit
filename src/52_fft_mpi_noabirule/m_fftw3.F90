@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fftw3
 !! NAME
 !! m_fftw3
@@ -7,7 +6,7 @@
 !!  This module provides wrappers for the FFTW3 routines: in-place and out-of-place version.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG, FD)
+!! Copyright (C) 2009-2020 ABINIT group (MG, FD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

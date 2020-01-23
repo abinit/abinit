@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sigma_driver
 !! NAME
 !!  m_sigma_driver
@@ -7,7 +6,7 @@
 !! Calculate the matrix elements of the self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!!  Copyright (C) 1999-2020 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -473,7 +472,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if (psp_gencond==1.or. call_pawinit) then
      call timab(553,1,tsec)
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
-     call pawinit(gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
+     call pawinit(Dtset%effmass_free,gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
        Psps%mpsang,Dtset%pawnphi,Cryst%nsym,Dtset%pawntheta,Pawang,Pawrad,&
        Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%xclevel,0,Dtset%usepotzero)
      call timab(553,2,tsec)

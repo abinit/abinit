@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_spin_ncfile
 !! NAME
 !! m_spin_ncfile
@@ -23,7 +22,7 @@
 !! TODO hexu: should consider carefully what to write.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,6 +33,7 @@
 #if defined HAVE_CONFIG_H
 #include "config.h"
 #endif
+
 
 #include "abi_common.h"
 
@@ -74,7 +74,8 @@ module m_spin_ncfile
      integer :: xred_id,  typat_id, znucl_id,  label_id, spin_index_id
      integer ::  acell_id, rprimd_id
      ! variable ids for spin dynamics
-     integer :: entropy_id, etotal_id, S_id, snorm_id, dsdt_id, heff_id, time_id, itime_id
+     integer :: entropy_id, etotal_id, S_id, snorm_id, dsdt_id
+     integer :: heff_id, time_id, itime_id
      ! entropy
      ! etotal: total energy
      ! S: spin
@@ -102,7 +103,7 @@ module m_spin_ncfile
      integer :: itime
      ! itime: time index
 
-     integer :: write_traj=1
+     integer :: write_traj=0
      !whether to write the trajectory (S(t))
 
      character(len=fnlen) :: filename
@@ -149,9 +150,11 @@ contains
 #if defined HAVE_NETCDF
     write(std_out,*) "Write iteration in spin history file "//trim(self%filename)//"."
     !  Create netCDF file
-    ncerr = nf90_create(path=trim(filename),cmode=NF90_CLOBBER,ncid=self%ncid)
+    ncerr = nf90_create(path=trim(filename), cmode=NF90_CLOBBER, ncid=self%ncid)
+    NCF_CHECK_MSG(ncerr, "Error when creating netcdf history file")
     self%isopen=.True.
-    !NCF_CHECK_MSG(ncerr, "create netcdf history file")
+    ncerr =nf90_enddef(self%ncid)
+    NCF_CHECK_MSG(ncerr, "Error when ending def mode in spin netcdf history file")
 #endif
   end subroutine initialize
 
@@ -164,22 +167,29 @@ contains
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_hist_t),intent(in) :: hist
     integer :: ncerr
-    ! define dimensions
+
 #if defined HAVE_NETCDF
-    !write(std_out,*) "Defining variables in spinhist.nc file."
+    ncerr = nf90_redef(self%ncid)
+    NCF_CHECK_MSG(ncerr, "Error when starting defining trajectory variables in spin history file.")
+    ! define dimensions
     ncerr=nf90_def_dim(self%ncid, "three", 3, self%three)
+    NCF_CHECK_MSG(ncerr, "Error when defining dimension three in spin history file.")
     ncerr=nf90_def_dim(self%ncid, "nspin", hist%nspin, self%nspin )
+    NCF_CHECK_MSG(ncerr, "Error when defining dimension nspin in spin history file.")
     ncerr=nf90_def_dim(self%ncid, "ntime", nf90_unlimited, self%ntime)
+    NCF_CHECK_MSG(ncerr, "Error when defining dimension ntime in spin history file.")
     !call ab_define_var(ncid,dim1,typat_id,NF90_DOUBLE,&
     !     &  "typat","types of atoms","dimensionless" )
 
     if(self%write_traj==1) then
        call ab_define_var(self%ncid, (/ self%three, self%nspin, self%ntime /), &
             &         self%S_id, NF90_DOUBLE, "S", "Spin orientations", "dimensionless")
+
        call ab_define_var(self%ncid, (/ self%nspin, self%ntime /), &
             &         self%snorm_id, NF90_DOUBLE, "snorm", "Spin norm2", "Mu_B")
        call ab_define_var(self%ncid, (/ self%three, self%nspin, self%ntime /), &
             &         self%dsdt_id, NF90_DOUBLE, "dsdt", "Spin orientations derivative to time", "1/s")
+
        call ab_define_var(self%ncid, (/ self%three, self%nspin, self%ntime /), &
             &         self%Heff_id, NF90_DOUBLE, "Heff", "Effective spin torque", "Tesla")
     endif
@@ -190,10 +200,14 @@ contains
          &         self%etotal_id, NF90_DOUBLE, "etotal", "TOTAL energy", "Joule")
     call ab_define_var(self%ncid, (/ self%ntime /), &
          &         self%entropy_id, NF90_DOUBLE, "entropy", "Entropy", "Joule/K")
+
     call ab_define_var(self%ncid, (/ self%ntime /), &
          &         self%itime_id, NF90_INT, "itime", "index of time in spin timeline", "1")
+
     ncerr=nf90_enddef(self%ncid)
+    NCF_CHECK_MSG(ncerr, "Error when finishing defining variables in spin history file.")
 #endif
+
   end subroutine def_spindynamics_var
 
 
@@ -205,10 +219,12 @@ contains
     class(spin_ncfile_t), intent(inout) :: self
     type(spin_observable_t), intent(in) :: ob
     integer ncerr
+
 #if defined HAVE_NETCDF
     ncerr = nf90_redef(self%ncid)
+    NCF_CHECK_MSG(ncerr, "Error when defining observable variables in spin history file.")
     ncerr = nf90_def_dim(self%ncid, "nsublatt", ob%nsublatt, self%nsublatt)
-
+    NCF_CHECK_MSG(ncerr, "Error when defining dimension nsublatt in spin history file.")
     call ab_define_var(self%ncid, (/self%three, self%nsublatt, self%ntime/),& 
            & self%Mst_sub_id, NF90_DOUBLE, "Mst_sub", "Sublattice staggered M", "Bohr magneton")
     call ab_define_var(self%ncid, (/ self%nsublatt, self%ntime/), & 
@@ -236,7 +252,7 @@ contains
   endif
 
   ncerr=nf90_enddef(self%ncid)
-
+  NCF_CHECK_MSG(ncerr, "Error when finishing defining observable variables in spin history file.")
 #endif
 end subroutine def_observable_var
 
@@ -257,39 +273,44 @@ end subroutine def_observable_var
     if(self%write_traj ==1) then
        ncerr=nf90_put_var(self%ncid, self%S_id, hist%S(:,:,hist%ihist_prev), &
             &      start=[1, 1, itime], count=[3, hist%nspin, 1])
-
+       NCF_CHECK_MSG(ncerr, "Error when writting Spin orientations in spin history file.")
        ncerr=nf90_put_var(self%ncid, self%dsdt_id, &
             &      hist%dsdt(:,:,hist%ihist_prev), start=[1, 1, itime], &
             &      count=[3, hist%nspin, 1])
-
+       NCF_CHECK_MSG(ncerr, "Error when writting dSdt in spin history file.")
        ncerr=nf90_put_var(self%ncid, self%heff_id, &
             &      hist%heff(:,:,hist%ihist_prev), start=[1, 1, itime], count=[3, hist%nspin, 1])
-
+       NCF_CHECK_MSG(ncerr, "Error when writting Heff in spin history file.")
        ncerr=nf90_put_var(self%ncid, self%snorm_id, &
             &      hist%snorm(:,hist%ihist_prev)/mu_B, start=[1, itime], count=[hist%nspin, 1])
+       NCF_CHECK_MSG(ncerr, "Error when writting Snorm in spin history file.")
     end if
     !ncerr=nf90_put_var(self%ncid, self%ihist_g_id, [hist%ihist_latt(hist%ihist_prev)], start=[itime], count=[1])
     ncerr=nf90_put_var(self%ncid, self%itime_id, &
          &       [hist%itime(hist%ihist_prev)], start=[itime], count=[1])
+    NCF_CHECK_MSG(ncerr, "Error when writting itime in spin history file.")
     ncerr=nf90_put_var(self%ncid, self%time_id, &
          & [hist%time(hist%ihist_prev)], start=[itime], count=[1])
-    !ncerr=nf90_put_var(self%ncid, self%entropy_id, &
-    !     & [hist%entropy(hist%ihist_prev)], start=[itime], count=[1])
+    NCF_CHECK_MSG(ncerr, "Error when writting time in spin history file.")
     ncerr=nf90_put_var(self%ncid, self%etotal_id,  &
          & [hist%etot(hist%ihist_prev)], start=[itime], count=[1])
+    NCF_CHECK_MSG(ncerr, "Error when writting etotal in spin history file.")
     self%itime=itime
 
     if(present(ob)) then
        ncerr=nf90_put_var(self%ncid, self%Mst_sub_id, ob%Mst_sub, &
             &      start=[1, 1, itime], count=[3, ob%nsublatt, 1])
+       NCF_CHECK_MSG(ncerr, "Error when writting Mst_sub in spin history file.")
        ncerr=nf90_put_var(self%ncid, self%Mst_sub_norm_id, ob%Mst_sub_norm, &
             &      start=[ 1, itime], count=[ob%nsublatt, 1])
+
+       NCF_CHECK_MSG(ncerr, "Error when writting Mst_sub_norm in spin history file.")
        ncerr=nf90_put_var(self%ncid, self%Mst_norm_total_id, [ob%Mst_norm_total], &
             &      start=[itime], count=[1])
-
+       NCF_CHECK_MSG(ncerr, "Error when writting Mst_norm_total in spin history file.")
        ncerr=nf90_put_var(self%ncid, self%Snorm_total_id, [ob%Snorm_total/mu_B], &
             &      start=[itime], count=[1])
-
+       NCF_CHECK_MSG(ncerr, "Error when writting Snorm_total in spin history file.")
        if(ob%calc_traj_obs)then
        endif
        if(ob%calc_thermo_obs)then
@@ -309,35 +330,65 @@ end subroutine def_observable_var
   subroutine write_primitive_cell(self, prim)
 
     class(spin_ncfile_t), intent(inout) :: self
-    type(spin_primitive_potential_t) :: prim
-    ABI_UNUSED_A(self)
-    ABI_UNUSED_A(prim)
+    type(mbcell_t) :: prim
+
+    !integer :: natom
+    integer :: nspin
+    integer :: ms_id, rprimd_id, spin_xcart_id, gyro_ratio_id, &
+         & gilbert_damping_id, ref_spin_orientation_id, &
+         & ref_spin_qpoint_id, ref_spin_rotate_axis_id
+    integer :: ncerr
+
 
 #if defined HAVE_NETCDF
-!     ncerr=nf90_redef(self%ncid)
-!     ncerr=nf90_def_dim(self%ncid, "prim_natoms", 1, self%natoms )
-!     ncerr=nf90_def_dim(self%ncid, "ntime", nf90_unlimited, self%ntime)
-!     !ncerr=nf90_def_dim(self%ncid, "ntypat", 1, self%ntypat)
+     ncerr=nf90_redef(self%ncid)
+     NCF_CHECK_MSG(ncerr, "Error when starting defining primitive cell variables in spin history file.")
 
-!     ncerr=nf90_def_var(self%ncid, "prim_acell", NF90_DOUBLE, &
-!          & (/ self%three /), self%acell_id)
-!     ncerr=nf90_def_var(self%ncid, "prim_rprimd", NF90_DOUBLE, &
-!          & (/self%three, self%three /), self%rprimd_id)
-!     ncerr=nf90_def_var(self%ncid, "prim_xred", NF90_DOUBLE, &
-!          & (/self%three, self%natoms /), self%xred_id)
-!     !ncerr=nf90_def_var(self%ncid, "prim_typat", NF90_INT, [self%natoms],  self%typat_id)
-!     !ncerr=nf90_def_var(self%ncid, "prim_znucl", NF90_DOUBLE, [self%ntypat],  self%znucl_id)
-!     ncerr=nf90_def_var(self%ncid, "prim_spin_index", NF90_DOUBLE, &
-!          & [self%natoms], self%spin_index_id)
+     ! lattice is not yet forced to be saved in prim
+     !ncerr=nf90_def_dim(self%ncid, "prim_natoms", prim%lattice%natom, natom )
+     !NCF_CHECK_MSG(ncerr, "Error when defining dimension prim_natoms in spin history file.")
+     ncerr=nf90_def_dim(self%ncid, "prim_nspins", prim%spin%nspin, nspin)
+     NCF_CHECK_MSG(ncerr, "Error when defining dimension prim_nspins in spin history file.")
 
-!     ncerr=nf90_enddef(self%ncid)
+     call ab_define_var(self%ncid, [self%three, self%three], rprimd_id, &
+          & NF90_DOUBLE, "prim_rprimd","PRIMitive cell Real space PRIMitive translations, Dimensional", "bohr")
+     call ab_define_var(self%ncid, [nspin], ms_id, &
+          & NF90_DOUBLE, "prim_ms","PRIMitive cell Magnetic moment Scalar", "muB")
+     call ab_define_var(self%ncid, [self%three, nspin], spin_xcart_id, &
+          & NF90_DOUBLE, "prim_spin_xcart","PRIMitive cell X Cartesian coordinates", "bohr")
+     call ab_define_var(self%ncid, [self%three, nspin], ref_spin_orientation_id, &
+          & NF90_DOUBLE, "prim_ref_spin_orientation","PRIMitive cell REFerence SPIN ORIENTATION", "unitless")
+     call ab_define_var(self%ncid, [self%three], ref_spin_qpoint_id, &
+          & NF90_DOUBLE, "prim_ref_spin_qpoint","PRIMitive cell REFerence SPIN QPOINT", "unitless")
+     call ab_define_var(self%ncid, [self%three], ref_spin_rotate_axis_id, &
+          & NF90_DOUBLE, "prim_ref_spin_rotate_axis","PRIMitive cell REFerence SPIN ROTATE AXIS", "unitless")
 
-!     !ncerr=nf90_put_var(self%ncid, self%acell_id, prim%unitcell)
-!     ncerr=nf90_put_var(self%ncid, self%rprimd_id, prim%unitcell)
-!     ncerr=nf90_put_var(self%ncid, self%xred_id, prim%positions)
-!     !ncerr=nf90_put_var(self%ncid, typat_id, hist%typat)
-!     !ncerr=nf90_put_var(self%ncid, znucl_id, hist%znucl)
-!     ncerr=nf90_put_var(self%ncid, self%spin_index_id, prim%index_spin)
+     call ab_define_var(self%ncid, [nspin], gilbert_damping_id, &
+          & NF90_DOUBLE, "prim_gilbert_damping","PRIMitive cell GILBERT DAMPING", "a.u.")
+
+     call ab_define_var(self%ncid, [nspin], gyro_ratio_id, &
+          & NF90_DOUBLE, "prim_gyro_ratio","PRIMitive cell GYROmagnetic RATIO", "a.u.")
+
+     ncerr=nf90_enddef(self%ncid)
+
+     NCF_CHECK_MSG(ncerr, "Error when ending defining primitive cell variables in spin history file.")
+     ncerr = nf90_put_var(self%ncid, rprimd_id, prim%spin%rprimd)
+     NCF_CHECK_MSG(ncerr, "Error when writting rprimd in spin history file.")
+     ncerr = nf90_put_var(self%ncid, ms_id, prim%spin%ms)
+     NCF_CHECK_MSG(ncerr, "Error when writting ms in spin history file.")
+     ncerr = nf90_put_var(self%ncid, spin_xcart_id, prim%spin%spin_positions)
+     NCF_CHECK_MSG(ncerr, "Error when writting xcart in spin history file.")
+     ncerr = nf90_put_var(self%ncid, ref_spin_orientation_id, prim%spin%Sref)
+     NCF_CHECK_MSG(ncerr, "Error when writting ref_spin_orientation in spin history file.")
+     ncerr = nf90_put_var(self%ncid, ref_spin_qpoint_id, prim%spin%ref_qpoint)
+     NCF_CHECK_MSG(ncerr, "Error when writting ref_spin_qpoint in spin history file.")
+     ncerr = nf90_put_var(self%ncid, ref_spin_rotate_axis_id, prim%spin%ref_rotate_axis)
+     NCF_CHECK_MSG(ncerr, "Error when writting ref_spin_rotate_axis in spin history file.")
+     ncerr = nf90_put_var(self%ncid, gilbert_damping_id, prim%spin%gilbert_damping)
+     NCF_CHECK_MSG(ncerr, "Error when writting gilbert_damping in spin history file.")
+     ncerr = nf90_put_var(self%ncid, gyro_ratio_id, prim%spin%gyro_ratio)
+     NCF_CHECK_MSG(ncerr, "Error when writting gyro_ratio in spin history file.")
+
 #endif
   end subroutine write_primitive_cell
 
@@ -357,25 +408,28 @@ end subroutine def_observable_var
     ! sc_matric
 
 #if defined HAVE_NETCDF
-     ncerr=nf90_redef(self%ncid)
-
-    ! call ab_define_var(self%ncid, (/self%three, self%three /), rprimd_id,&
+    ncerr=nf90_redef(self%ncid)
+    NCF_CHECK_MSG(ncerr, "Error when starting to redefine supercell variables in spin history file.")
+    !call ab_define_var(self%ncid, (/self%three, self%three /), rprimd_id,&
     !      & NF90_DOUBLE, "rprimd", "primitive cell vectors in real space with&
     !      & units", "bohr")
-    call ab_define_var(self%ncid, (/self%three, self%nspin/), pos_id,&
-         & NF90_DOUBLE, "xcart_spin","position of spin in cartesian&
-         & coordinates", "bohr")
-    call ab_define_var(self%ncid, (/self%three, self%nspin/), rvec_id,&
+    call ab_define_var(self%ncid, (/self%three, self%nspin/), pos_id, &
+         & NF90_DOUBLE, "xcart_spin","position of spin in cartesian coordinates", "bohr")
+    call ab_define_var(self%ncid, (/self%three, self%nspin/), rvec_id, &
           & NF90_INT, "Rvec", "R vector for spin in supercell", "dimensionless")
     call ab_define_var(self%ncid, (/self%nspin/), ispin_prim_id,&
           & NF90_INT, "ispin_prim", "index of spin in primitive cell", "dimensionless")
 
     ncerr=nf90_enddef(self%ncid)
+    NCF_CHECK(ncerr)
 
     !ncerr=nf90_put_var(self%ncid, rprimd_id, scell%cell)
     ncerr=nf90_put_var(self%ncid, pos_id, supercell%spin%spin_positions)
+    NCF_CHECK_MSG(ncerr, "Error when writting xcart_spin in spin history file.")
     ncerr=nf90_put_var(self%ncid, ispin_prim_id, supercell%spin%ispin_prim)
+    NCF_CHECK_MSG(ncerr, "Error when writting ispin_prim in spin history file.")
     ncerr=nf90_put_var(self%ncid, rvec_id, supercell%spin%rvec)
+    NCF_CHECK_MSG(ncerr, "Error when writting Rvec in spin history file.")
     ! ncerr=nf90_put_var(self%ncid, iatoms_id, scell%iatoms)
 #endif
   end subroutine write_supercell
@@ -387,16 +441,16 @@ end subroutine def_observable_var
   subroutine write_parameters(self, params)
     class(spin_ncfile_t), intent(inout) :: self
     type(multibinit_dtset_type) :: params
+#if defined HAVE_NETCDF
     integer :: qpoint_id, temperature_id, dt_id, mfield_id, ncell_id
     integer :: dim0(0)
     integer :: ncerr
-
-#if defined HAVE_NETCDF
     ncerr=nf90_redef(self%ncid)
+    NCF_CHECK_MSG(ncerr, "Error when starting to redefining parameters in spin history file.")
     ! dims 
     ! vars
     call ab_define_var(self%ncid, (/self%three/), qpoint_id, NF90_DOUBLE,&
-         & "spin_qpoint", "spin QPOINT", "dimensionless")
+         & "spin_projection_qpoint", "spin QPOINT", "dimensionless")
     ! TODO should change ncell to 3*3 matrix
     call ab_define_var(self%ncid, (/self%three/), ncell_id, NF90_INT, "ncell",&
          & "supercell matrix (only diagonal)", "dimensionless")
@@ -416,12 +470,18 @@ end subroutine def_observable_var
     !mfield_id)
 
     ncerr=nf90_enddef(self%ncid)
+    NCF_CHECK(ncerr)
     ! put vars
-    ncerr=nf90_put_var(self%ncid, qpoint_id, params%spin_qpoint)
+    ncerr=nf90_put_var(self%ncid, qpoint_id, params%spin_projection_qpoint)
+    NCF_CHECK_MSG(ncerr, "Error when writting spin_projection_qpoint in spin history file.")
     ncerr=nf90_put_var(self%ncid, ncell_id, params%ncell)
+    NCF_CHECK_MSG(ncerr, "Error when writting ncell in spin history file.")
     ncerr=nf90_put_var(self%ncid, temperature_id, params%spin_temperature*Ha_K)
+    NCF_CHECK_MSG(ncerr, "Error when writting spin_temperature in spin history file.")
     ncerr=nf90_put_var(self%ncid, dt_id, params%spin_dt*Time_Sec)
+    NCF_CHECK_MSG(ncerr, "Error when writting spin_dt in spin history file.")
     ncerr=nf90_put_var(self%ncid, mfield_id, params%spin_mag_field/Bfield_Tesla)
+    NCF_CHECK_MSG(ncerr, "Error when writting spin_mag_field in spin history file.")
 #endif
   end subroutine write_parameters
 
@@ -431,13 +491,13 @@ end subroutine def_observable_var
   subroutine close(self)
 
     class(spin_ncfile_t), intent(inout) :: self
-    integer :: ncerr
 #if defined HAVE_NETCDF
+    integer :: ncerr
     if (self%isopen) then
        write(std_out, *) "Closing spin history file "//trim(self%filename)//"."
        ncerr=nf90_close(self%ncid)
+       NCF_CHECK_MSG(ncerr, "close netcdf spin history file"//trim(self%filename)//".")
     end if
-    !NCF_CHECK_MSG(ncerr, "close netcdf spin history file"//trim(self%filename)//".")
 #endif
   end subroutine close
 

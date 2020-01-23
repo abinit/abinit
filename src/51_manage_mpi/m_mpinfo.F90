@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mpinfo
 !! NAME
 !! m_mpinfo
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MT, GG, XG, FJ, AR, MB, CMartins)
+!!  Copyright (C) 2008-2020 ABINIT group (MT, GG, XG, FJ, AR, MB, CMartins)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

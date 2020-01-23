@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_abstract_potential
 !! NAME
 !! m_abstract_potential
@@ -17,7 +16,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,6 +39,7 @@ module m_abstract_potential
 
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
+  use m_hashtable_strval, only: hash_table_t
 
   implicit none
 !!***
@@ -150,12 +150,15 @@ contains
   !> @param[out] force (optional)
   !> @param[out] stress (optional)
   !> @param[out] bfield (optional)
+  !> @param[out] energy_table (optional)
   !----------------------------------------------------------------------
-  subroutine calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, energy)
+  subroutine calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, &
+       & energy, energy_table)
       class(abstract_potential_t), intent(inout) :: self  ! the effpot may save the states.
 
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
+    type(hash_table_t),optional, intent(inout) :: energy_table
     ! if present in input
     ! calculate if required
     ABI_UNUSED_A(self)
@@ -168,7 +171,7 @@ contains
     ABI_UNUSED_A(bfield)
     ABI_UNUSED_A(lwf_force)
     ABI_UNUSED_A(energy)
-
+    ABI_UNUSED_A(energy_table)
     MSG_ERROR("calculate not implemented for this effpot.")
   end subroutine calculate
 

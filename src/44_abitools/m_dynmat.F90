@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dynmat
 !! NAME
 !!  m_dynmat
@@ -7,7 +6,7 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
+!!  Copyright (C) 2014-2020 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

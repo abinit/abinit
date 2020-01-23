@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_rec
 !! NAME
 !!  m_rec
@@ -10,7 +9,7 @@
 !!  of recursion_type
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2019 ABINIT group (MMancini)
+!! Copyright (C) 2002-2020 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

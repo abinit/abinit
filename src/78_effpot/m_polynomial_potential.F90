@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_polynomial_potential
 !! NAME
 !! m_polynomial_potential
@@ -16,7 +15,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2018 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,6 +40,7 @@ module m_polynomial_potential
   use m_abstract_potential, only : abstract_potential_t
   use m_supercell_maker, only: supercell_maker_t
   use m_spmat_ndcoo, only: NDCOO_mat_t
+  use m_hashtable_strval, only: hash_table_t
 
   implicit none
 !!***
@@ -90,11 +90,13 @@ contains
     call self%abstract_potential_t%finalize()
   end subroutine finalize
 
-  subroutine calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, energy)
+  subroutine calculate(self, displacement, strain, spin, lwf, force, stress, bfield, lwf_force, &
+          &      energy, energy_table)
     class(polynomial_potential_t), intent(inout) :: self  ! the effpot may save the states.
 
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
+    type(hash_table_t), optional, intent(inout) :: energy_table
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(displacement)
     ABI_UNUSED_A(strain)
@@ -105,6 +107,7 @@ contains
     ABI_UNUSED_A(bfield)
     ABI_UNUSED_A(lwf_force)
     ABI_UNUSED_A(energy)
+    ABI_UNUSED_A(energy_table)
     MSG_ERROR("calculate not implemented for this effpot.")
   end subroutine calculate
 

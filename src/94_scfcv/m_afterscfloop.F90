@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_afterscfloop
 !! NAME
 !!  m_afterscfloop
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG)
+!!  Copyright (C) 2008-2020 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,7 +58,7 @@ module m_afterscfloop
  use m_paw_nhat,         only : nhatgrid,wvl_nhatgrid
  use m_paw_occupancies,  only : pawmkrhoij
  use m_paw_correlations, only : setnoccmmp
- use m_orbmag,           only : chern_number,orbmag,orbmag_type
+ use m_orbmag,           only : orbmag,orbmag_type
  use m_fock,             only : fock_type
  use m_kg,               only : getph
  use m_spin_current,     only : spin_current
@@ -71,6 +70,7 @@ module m_afterscfloop
  use m_forstr,           only : forstr
  use m_wvl_rho,          only : wvl_mkrho
  use m_wvl_psi,          only : wvl_psitohpsi, wvl_tail_corrections
+ use m_fourier_interpol, only : transgrid
 
 #ifdef HAVE_BIGDFT
  use m_abi2big
@@ -122,6 +122,7 @@ contains
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  grchempottn(3,natom)=d(E_chemical_potential)/d(xred) (hartree)
+!!  grcondft(3,natom)=d(E_constrained_DFT)/d(xred) (hartree)
 !!  grewtn(3,natom)=d(Ewald)/d(xred) (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D2 dispersion (hartree)
 !!  gsqcut=cutoff value on G**2 for (large) sphere inside FFT box.
@@ -129,6 +130,7 @@ contains
 !!  hdr <type(hdr_type)>=the header of wf, den and pot files
 !!  indsym(4,nsym,natom)=index showing transformation of atom labels
 !!                       under symmetry operations (computed in symatm)
+!!  intgres(nspden,natom)=integrated residuals from constrained DFT. They are also Lagrange parameters, or gradients with respect to constraints.
 !!  irrzon(nfft**(1-1/nsym),2,(nspden/nsppol)-3*(nspden/4))=irreducible zone data
 !!  istep=number of the SCF iteration
 !!  istep_fock_outer=number of outer SCF iteration in the double loop approach
@@ -193,8 +195,11 @@ contains
 !!  vhartr(nfftf)=Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
+!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA) derivative of XC energy density
+!!                                wrt kinetic energy density (depsxcdtau)
 !!  vxcavg=vxc average
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
+!!  xcctau3d(n3xccc*usekden)=(only for meta-GGA): 3D core electron kinetic energy density for XC core correction
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
 !!  ylmgr(mpw*mkmem,3,mpsang*mpsang*useylm)= gradients of real spherical harmonics
 !!
@@ -274,7 +279,7 @@ contains
 !!      scfcv
 !!
 !! CHILDREN
-!!      applyprojectorsonthefly,chern_number,denspot_free_history
+!!      applyprojectorsonthefly,denspot_free_history
 !!      eigensystem_info,elpolariz,energies_copy,exchange_electronpositron
 !!      forstr,getph,hdr_update,kswfn_free_scf_data,last_orthon,metric,mkrho
 !!      nhatgrid,nonlop_test,pawcprj_getdim,pawmkrho,pawmkrhoij,prtposcar
@@ -287,16 +292,16 @@ contains
 
 subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 & deltae,diffor,dtefield,dtfil,dtorbmag,dtset,eigen,electronpositron,elfr,&
-& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,&
+& energies,etotal,favg,fcart,fock,forold,fred,grchempottn,grcondft,&
 & gresid,grewtn,grhf,grhor,grvdw,&
-& grxc,gsqcut,hdr,indsym,irrzon,istep,istep_fock_outer,istep_mix,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
+& grxc,gsqcut,hdr,indsym,intgres,irrzon,istep,istep_fock_outer,istep_mix,kg,kxc,lrhor,maxfor,mcg,mcprj,mgfftf,&
 & moved_atm_inside,mpi_enreg,my_natom,n3xccc,nattyp,nfftf,ngfft,ngfftf,ngrvdw,nhat,&
 & nkxc,npwarr,nvresid,occ,optres,paw_an,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrad,pawrhoij,pawtab,pel,pel_cg,ph1d,ph1df,phnons,pion,prtfor,prtxml,&
 & psps,pwind,pwind_alloc,pwnsfac,res2,resid,residm,results_gs,&
 & rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,taug,&
-& taur,tollist,usecprj,vectornd,vhartr,vpsp,vtrial,vxc,vxcavg,with_vectornd,wvl,&
-& xccc3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
+& taur,tollist,usecprj,vectornd,vhartr,vpsp,vtrial,vxc,vxctau,vxcavg,with_vectornd,wvl,&
+& xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero,conv_retcode)
 
 !Arguments ------------------------------------
 !scalars
@@ -330,6 +335,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  integer,intent(in) :: pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
  integer,intent(out) :: conv_retcode
  real(dp),intent(in) :: grchempottn(3,dtset%natom),grewtn(3,dtset%natom),grvdw(3,ngrvdw)
+ real(dp),intent(in) :: grcondft(:,:) ! (3,natom) if constrainedDFT otherwise (3,0)
+ real(dp),intent(in) :: intgres(:,:) ! (nspden,natom) if constrainedDFT otherwise (nspden,0)
  real(dp),intent(in) :: phnons(2,dtset%nfft**(1-1/dtset%nsym),(dtset%nspden/dtset%nsppol)-3*(dtset%nspden/4))
  real(dp),intent(in) :: pwnsfac(2,pwind_alloc)
  real(dp),intent(in) :: resid(dtset%mband*dtset%nkpt*dtset%nsppol)
@@ -346,8 +353,8 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp),intent(inout) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(inout) :: ph1df(2,3*(2*mgfftf+1)*dtset%natom),pion(3)
  real(dp),intent(inout) :: rhog(2,nfftf),rhor(nfftf,dtset%nspden),strsxc(6)
- real(dp),intent(inout) :: vhartr(nfftf),vxc(nfftf,dtset%nspden)
- real(dp),intent(inout) :: xccc3d(n3xccc),xred(3,dtset%natom)
+ real(dp),intent(inout) :: vhartr(nfftf),vxc(nfftf,dtset%nspden),vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
  real(dp),intent(inout) :: favg(3),fcart(3,dtset%natom),fred(3,dtset%natom)
  real(dp),intent(inout) :: gresid(3,dtset%natom),grhf(3,dtset%natom)
  real(dp),intent(inout) :: grxc(3,dtset%natom),kxc(nfftf,nkxc),strten(6)
@@ -382,6 +389,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  real(dp) :: gmet(3,3),gprimd(3,3),pelev(3),rmet(3,3),tsec(2)
  real(dp) :: dmatdum(0,0,0,0)
  real(dp),allocatable :: mpibuf(:,:),qphon(:),rhonow(:,:,:),sqnormgrhor(:,:)
+ real(dp),allocatable :: tauwfg(:,:),tauwfr(:,:)
 #if defined HAVE_BIGDFT
  integer,allocatable :: dimcprj_srt(:)
  real(dp),allocatable :: hpsi_tmp(:),xcart(:,:)
@@ -539,12 +547,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 !----------------------------------------------------------------------
 ! Orbital magnetization calculations
 !----------------------------------------------------------------------
- if(dtset%orbmag==1) then
-    call chern_number(atindx1,cg,cprj,dtset,dtorbmag,&
-         & mcg,size(cprj,2),mpi_enreg,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
-         & rprimd,symrec,usecprj,psps%usepaw,xred)
- end if
- if(dtset%orbmag==2 .OR. dtset%orbmag==3) then
+ if(dtset%orbmag.NE.0) then
     call orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,&
          & paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,rprimd,symrec,usecprj,&
          & vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
@@ -644,10 +647,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  call timab(254,1,tsec)
 
 !We use routine mkrho with option=1 to compute kinetic energy density taur (and taug)
- if(dtset%prtkden/=0 .or. dtset%prtelf/=0)then
-   nullify(taug,taur)
+ if(dtset%usekden==0 .and. dtset%prtelf/=0)then
 !  tauX are reused in outscfcv for output
 !  should be deallocated there
+   nullify(taug,taur)
    ABI_ALLOCATE(taug,(2,nfftf))
    ABI_ALLOCATE(taur,(nfftf,dtset%nspden))
    tim_mkrho=5
@@ -661,19 +664,29 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    call wrtout(ab_out,message,'COLL')
    paw_dmft%use_sc_dmft=0 ! dmft not used here
    paw_dmft%use_dmft=0 ! dmft not used here
-   call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
-&   npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
-!  Print result
-   if(dtset%prtkden/=0) then
-     write(message,'(a,a)') ch10, "Result for kinetic energy density :"
-     call wrtout(ab_out,message,'COLL')
-     write(message,'(a,a)') ch10, "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
-     call prtrhomxmn(ab_out,mpi_enreg,nfftf,ngfftf,dtset%nspden,1,taur,optrhor=1,ucvol=ucvol)
-     write(message,'(a)') "--------------------------------------------------------------------------------"
-     call wrtout(ab_out,message,'COLL')
+   if (psps%usepaw==0) then
+     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
+&     npwarr,occ,paw_dmft,phnons,taug,taur,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+   else
+     ABI_ALLOCATE(tauwfg,(2,dtset%nfft))
+     ABI_ALLOCATE(tauwfr,(dtset%nfft,dtset%nspden))
+     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
+&     npwarr,occ,paw_dmft,phnons,tauwfg,tauwfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+     call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,tauwfg,taug,tauwfr,taur)
+     ABI_DEALLOCATE(tauwfg)
+     ABI_DEALLOCATE(tauwfr)
    end if
    ABI_DEALLOCATE(taug)
+ end if
+!Print result
+ if(dtset%prtkden/=0) then
+   write(message,'(a,a)') ch10, "Result for kinetic energy density :"
+   call wrtout(ab_out,message,'COLL')
+   write(message,'(a,a)') ch10, "--------------------------------------------------------------------------------"
+   call wrtout(ab_out,message,'COLL')
+   call prtrhomxmn(ab_out,mpi_enreg,nfftf,ngfftf,dtset%nspden,1,taur,optrhor=1,ucvol=ucvol)
+   write(message,'(a)') "--------------------------------------------------------------------------------"
+   call wrtout(ab_out,message,'COLL')
  end if
 
 !----------------------------------------------------------------------
@@ -868,6 +881,10 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
    write(message,'(a)') " End of ELF section"
    call wrtout(ab_out,message,'COLL')
 
+   if (dtset%usekden==0) then
+     ABI_DEALLOCATE(taur)
+   end if
+
  end if !endif prtelf/=0
 
 !######################################################################
@@ -926,7 +943,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   npwarr,dtset%ntypat,nvresid,occ,optfor,optres,&
 &   paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,&
 &   psps,rhog,rhor,rprimd,stress_needed,strsxc,strten,symrec,synlgr,&
-&   ucvol,usecprj,vhartr,vpsp,vxc,wvl,xccc3d,xred,ylm,ylmgr,qvpotzero)
+&   ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero)
  end if
 
  if (optfor==1) computed_forces=1
@@ -1049,6 +1066,14 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
  results_gs%synlgr(:,:)=synlgr(:,:)
  results_gs%vxcavg     =vxcavg
  if (ngrvdw>0) results_gs%grvdw(1:3,1:ngrvdw)=grvdw(1:3,1:ngrvdw)
+
+ results_gs%intgres(:,:)=zero
+ results_gs%grcondft(:,:)=zero
+ if(any(dtset%constraint_kind(:)/=0))then
+   results_gs%intgres(1:dtset%nspden,:)  =intgres(1:dtset%nspden,:)
+   results_gs%grcondft(:,:) =grcondft(:,:)
+ endif
+
  if (dtset%nstep == 0 .and. dtset%occopt>=3.and.dtset%occopt<=8) then
    results_gs%etotal = results_gs%etotal - dtset%tsmear * results_gs%entropy
  end if

@@ -20,6 +20,7 @@ abinit.dir
 build_g95
 build_gfortran
 build_ifort
+debian.ac
 config.optim
 logfile
 make.log

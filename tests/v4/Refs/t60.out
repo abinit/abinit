@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h27 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h19 )
   
-- input  file    -> t60.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v4_t60/t60.in
 - output file    -> t60.out
 - root for input  files -> t60i
 - root for output files -> t60o
@@ -452,8 +452,8 @@ P          mk1mem3         72
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.13609
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/12mg.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/12mg.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/12mg.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/12mg.pspnc
 -  Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
 - 12.00000   2.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -470,8 +470,8 @@ P          mk1mem3         72
              1    0.853613
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -640,7 +640,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     190.125     190.101
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   12.988E-10; max=  20.245E-08
+ Mean square residual over all n,k,spin=   32.418E-14; max=  38.716E-12
  reduced coordinates (array xred) for    3 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.333333333333      0.666666666667      0.343300000000
@@ -723,7 +723,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     190.125     190.101
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -25.000E-03; max=  85.007E-10
+ Mean square residual over all n,k,spin=   70.979E-12; max=  85.007E-10
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1337,10 +1337,10 @@ P          mk1mem3         72
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.9
+- Proc.   0 individual time (sec): cpu=          5.0  wall=          5.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.0  wall=          6.9
++Overall time at end (sec) : cpu=          5.0  wall=          5.2

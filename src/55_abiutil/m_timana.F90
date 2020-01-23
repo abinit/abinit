@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_timana
 !! NAME
 !!  m_timana
@@ -7,7 +6,7 @@
 !! Analyse the timing, and print in unit ab_out. Some discussion of the
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (XG, GMR)
+!!  Copyright (C) 1998-2020 ABINIT group (XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -806,7 +805,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(957)='outscfcv(prt geo misc.)         '
  names(958)='outscfcv(prt stm,vha,..)        '
  names(959)='outscfcv(prtdos)                '
- names(960)='outscfcv(calcdensph)            '
+ names(960)='outscfcv(calcdenmagsph)         '
  names(961)='outscfcv(pawprt)                '
  names(962)='outscfcv(optics)                '
  names(963)='outscfcv(pawmkaewf)             '

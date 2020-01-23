@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_nhat
 !! NAME
 !!  m_paw_nhat
@@ -8,7 +7,7 @@
 !!    charge density (i.e. n^hat(r)).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (FJ, MT, MG, TRangel)
+!! Copyright (C) 2018-2020 ABINIT group (FJ, MT, MG, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_defs_ptgroups
 !! NAME
 !! m_defs_ptgroups
@@ -18,7 +17,7 @@
 !!  compile the module in reasonable time when -O2 is used.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (MG)
+!! Copyright (C) 2010-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

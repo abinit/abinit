@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/testTransposer
 !! NAME
 !! testTransposer
@@ -8,7 +7,7 @@
 !! It includes testing of complex and real numbers, and all2all and gatherv
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (JB)
+!! Copyright (C) 1998-2020 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -154,7 +153,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (JB)
+!! Copyright (C) 1998-2020 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -210,7 +209,7 @@ program testTransposer
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (JB)
+!! Copyright (C) 1998-2020 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

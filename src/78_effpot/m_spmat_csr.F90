@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_spmat_csr
 !! NAME
 !! m_spmat_csr
@@ -15,7 +14,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,6 +60,7 @@ module m_spmat_csr
      procedure :: mv_select_row =>csr_mat_t_mv_select_row ! mv of selected rows
      !procedure :: print
   end type CSR_mat_t
+
 contains
 
   !-----------------------------------------------------------------------
@@ -75,7 +75,6 @@ contains
     self%nrow=mshape(1)
     self%ncol=mshape(2)
   end subroutine initialize
-
 
   !-----------------------------------------------------------------------
   !> @brief set the full csr matrix

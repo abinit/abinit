@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gstateimg
 !! NAME
 !!  m_gstateimg
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (XG, AR, GG, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (XG, AR, GG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -98,6 +97,7 @@ contains
 !!  etotal_img=total energy, for each image
 !!  fcart_img(3,natom,nimage)=forces, in cartesian coordinates, for each image
 !!  fred_img(3,natom,nimage)=forces, in reduced coordinates, for each image
+!!  intgres_img(nspden,natom,nimage)=gradient wrt constraints, for each image
 !!  npwtot(nkpt) = total number of plane waves at each k point
 !!  strten_img(6,nimage)=stress tensor, for each image
 !!
@@ -189,7 +189,7 @@ contains
 !! SOURCE
 
 subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
-&                    fred_img,iexit,mixalch_img,mpi_enreg,nimage,npwtot,occ_img,&
+&                    fred_img,iexit,intgres_img,mixalch_img,mpi_enreg,nimage,npwtot,occ_img,&
 &                    pawang,pawrad,pawtab,psps,&
 &                    rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
 &                    filnam,filstat,idtset,jdtset,ndtset) ! optional arguments
@@ -213,7 +213,9 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  integer,intent(out) :: npwtot(dtset%nkpt)
  character(len=fnlen),optional,intent(in) :: filnam(:)
  real(dp), intent(out) :: etotal_img(nimage),fcart_img(3,dtset%natom,nimage)
- real(dp), intent(out) :: fred_img(3,dtset%natom,nimage),strten_img(6,nimage)
+ real(dp), intent(out) :: fred_img(3,dtset%natom,nimage)
+ real(dp), intent(out) :: intgres_img(dtset%nspden,dtset%natom,nimage)
+ real(dp), intent(out) :: strten_img(6,nimage)
  real(dp),intent(inout) :: acell_img(3,nimage),amu_img(dtset%ntypat,nimage)
  real(dp),intent(inout) :: mixalch_img(dtset%npspalch,dtset%ntypalch,nimage)
  real(dp),intent(inout) :: occ_img(dtset%mband*dtset%nkpt*dtset%nsppol,nimage)
@@ -356,7 +358,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  ABI_ALLOCATE(list_dynimage,(dtset%ndynimage))
  do itimimage=1,ntimimage_stored
    res_img => results_img(:,itimimage)
-   call init_results_img(dtset%natom,dtset%npspalch,dtset%nsppol,dtset%ntypalch,&
+   call init_results_img(dtset%natom,dtset%npspalch,dtset%nspden,dtset%nsppol,dtset%ntypalch,&
 &   dtset%ntypat,res_img)
    do iimage=1,nimage
      res_img(iimage)%acell(:)     =acell_img(:,iimage)
@@ -724,11 +726,13 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      etotal_img(iimage)      =results_img(iimage,itimimage_eff)%results_gs%etotal
      fcart_img(:,:,iimage)   =results_img(iimage,itimimage_eff)%results_gs%fcart(:,:)
      fred_img(:,:,iimage)    =results_img(iimage,itimimage_eff)%results_gs%fred(:,:)
+     intgres_img(:,:,iimage) =results_img(iimage,itimimage_eff)%results_gs%intgres(:,:)
      strten_img(:,iimage)    =results_img(iimage,itimimage_eff)%results_gs%strten(:)
    else if (compute_static_images) then
      etotal_img(iimage)    =results_img(iimage,1)%results_gs%etotal
      fcart_img(:,:,iimage) =results_img(iimage,1)%results_gs%fcart(:,:)
      fred_img(:,:,iimage)  =results_img(iimage,1)%results_gs%fred(:,:)
+     intgres_img(:,:,iimage)=results_img(iimage,1)%results_gs%intgres(:,:)
      strten_img(:,iimage)  =results_img(iimage,1)%results_gs%strten(:)
    end if
  end do

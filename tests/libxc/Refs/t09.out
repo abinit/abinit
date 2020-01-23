@@ -2,7 +2,7 @@
 .Version 8.11.12 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -211,8 +211,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     327.688     327.681
  ETOT 28  -8.3923336754645     4.832E-13 1.821E-09 9.608E-20
  ETOT 29  -8.3923336754641     3.926E-13 1.507E-09 2.504E-20
  ETOT 30  -8.3923336754638     2.665E-13 9.417E-10 4.035E-21
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 

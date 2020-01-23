@@ -1,5 +1,4 @@
 
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_multibinit_main
 !! NAME
 !! m_multibinit_main
@@ -8,7 +7,7 @@
 !! Main routine MULTIBINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (AM, hexu)
+!! Copyright (C) 1999-2020 ABINIT group (AM, hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,6 +26,16 @@
 !! PARENTS
 !!
 !! CHILDREN
+!!      abi_io_redirect,abihist_bcast,abihist_free
+!!      abimem_init,abinit_doctor,compute_anharmonics
+!!      effective_potential_file_getdimsystem,effective_potential_file_gettype
+!!      effective_potential_file_maphisttoref,effective_potential_file_read
+!!      effective_potential_file_readmdfile,effective_potential_free
+!!      effective_potential_setconfinement,effective_potential_writenetcdf
+!!      effective_potential_writexml,fit_polynomial_coeff_fit
+!!      fit_polynomial_printsystemfiles,flush_unit,herald,init10,instrng
+!!      inupper,invars10,isfile,mover_effpot,multibinit_dtset_free
+!!      outvars_multibinit,timein,wrtout,xmpi_bcast,xmpi_init,xmpi_sum
 !!
 !! SOURCE
 
@@ -53,8 +62,10 @@ module m_multibinit_driver
 
   use m_effective_potential
   use m_fit_polynomial_coeff
+ use m_opt_effpot
   use m_multibinit_dataset
   use m_effective_potential_file
+ use m_scup_dataset
   !use m_spin_model, only: spin_model_t
   use m_abihist
 
@@ -62,6 +73,9 @@ module m_multibinit_driver
   use m_multibinit_main2, only: multibinit_main2
 
   use m_mover_effpot, only : mover_effpot
+#if defined DEV_MS_SCALEUP 
+ use scup_global
+#endif 
   !use m_generate_training_set, only : generate_training_set
   use m_compute_anharmonics, only : compute_anharmonics
   use m_init10,              only : init10
@@ -96,7 +110,7 @@ contains
     integer, intent(in) :: dry_run
     type(multibinit_dtset_type), target :: inp
     type(effective_potential_type) :: reference_effective_potential
-    type(abihist) :: hist
+    type(abihist) :: hist, hist_tes
 
     ! data for spin
     !type(spin_model_t) :: spin_model
@@ -108,11 +122,40 @@ contains
     integer :: filetype,ii,lenstr
     integer :: natom,nph1l,nrpt,ntypat
     integer :: option
+    logical :: need_analyze_anh_pot
+! MS
+! temporary variables for testing SCALE-UP with Multibinit
+  !Variable to pass tu effpot_evaluate routine of multibinit
+  !To declare evaluation of electronice model 
+  logical  :: elec_eval
+#if defined DEV_MS_SCALEUP 
+  !Variables needed to call SCALE-UP
+  logical :: err_init_elec
+  logical*1 :: needlattice = .FALSE.
+  logical*1 :: needelectrons = .TRUE. 
+  logical*1 :: didi = .FALSE. 
+  logical*1 :: harm_der = .FALSE. 
+  logical*1 :: initorbocc = .FALSE. 
+  logical*1 :: ismagnetic = .FALSE. 
+  logical*1 :: istddft = .FALSE.  
+  logical*4 :: printgeom = .FALSE. 
+  logical*4 :: printeigv = .FALSE. 
+  logical*4 :: printeltic = .FALSE. 
+  logical*4 :: printorbocc = .FALSE.
+  integer :: ksamp(3) 
+  real*8 :: tcharge
+#endif 
+!TEST_AM
+! integer :: natom_sp
+! real(dp),allocatable :: dynmat(:,:,:,:,:)
+!TEST_AM
+!******************************************************************
 
     integer :: master, my_rank, comm, nproc, ierr
     logical :: iam_master
 
 
+!MPI variables
     master = 0
     comm = xmpi_world
     nproc = xmpi_comm_size(comm)
@@ -205,8 +248,62 @@ contains
        end if
     end if
 
-    !****************************************************************************************
+!****************************************************************************************
+!SCALE UP Initialize the electronic model (If scale-up is available)
+!****************************************************************************************
+elec_eval = .FALSE.
 
+#if defined DEV_MS_SCALEUP
+ if(inp%scup_dtset%scup_elec_model)then 
+   write(message,'(a,(80a),4a)') ch10,('=',ii=1,80),ch10,ch10,&
+        ' Initializing Electronic Model with SCALE-UP',ch10
+   call wrtout(ab_out,message,'COLL')
+   call wrtout(std_out,message,'COLL')
+  
+   !Set Variables
+   elec_eval = .TRUE.
+   ksamp = inp%scup_dtset%scup_ksamp 
+   tcharge = inp%scup_dtset%scup_tcharge 
+   if(inp%scup_dtset%scup_ismagnetic)ismagnetic=.TRUE. 
+   if(inp%scup_dtset%scup_istddft)istddft=.TRUE. 
+   if(inp%scup_dtset%scup_initorbocc)initorbocc=.TRUE.
+
+   ! Call to Scale-Up
+   err_init_elec = global_init_model(filnam(3),inp%ncell,needlattice,needelectrons,didi,&
+&                               harm_der,tcharge,ksamp,ismagnetic,istddft,initorbocc)
+
+   !Set Print variables 
+   if(inp%scup_dtset%scup_printgeom)printgeom=.TRUE. 
+   if(inp%scup_dtset%scup_printeigv)printeigv=.TRUE. 
+   if(inp%scup_dtset%scup_printeltic)printeltic=.TRUE. 
+   if(inp%scup_dtset%scup_printorbocc)printorbocc=.TRUE.
+   
+   !Set Print Parameters within scaleup
+   call global_set_print_parameters(printgeom,printeigv,printeltic,printorbocc,&
+&                                  inp%scup_dtset%scup_printbands) 
+
+   !Set SCF controling variables (values contain defaults, if not specified in the input)
+   call global_set_scf_parameters(inp%scup_dtset%scup_scfmixing,inp%scup_dtset%scup_scfthresh,&
+&                                 inp%scup_dtset%scup_smearing,inp%scup_dtset%scup_maxscfstep,&          
+&                                 inp%scup_dtset%scup_startpulay,inp%scup_dtset%scup_freezden)
+
+
+   !Create kpath if printbands=true and pass it to SCALE UP 
+   if(inp%scup_dtset%scup_printbands)then 
+
+           call scup_kpath_new(inp%scup_dtset%scup_speck,&
+&                                      reference_effective_potential%supercell%rprimd,& 
+&                                inp%scup_dtset%scup_ndivsm,inp%scup_dtset%scup_kpath)
+           call scup_kpath_print(inp%scup_dtset%scup_kpath)
+
+           call global_set_print_bands(inp%scup_dtset%scup_printbands,&
+&               inp%scup_dtset%scup_nspeck,inp%scup_dtset%scup_kpath%ndivs,& 
+&               inp%scup_dtset%scup_speck)
+   endif 
+ endif
+#endif 
+
+    !****************************************************************************************
     ! Compute the third order derivative with finite differences
     !****************************************************************************************
     if (inp%strcpling > 0) then
@@ -216,13 +313,13 @@ contains
 
     ! If needed, fit the anharmonic part and compute the confinement potential
     !****************************************************************************************
-    if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_model/=0) then
+   if (inp%fit_coeff/=0.or.inp%confinement==2.or.inp%bound_model/=0 .or. inp%opt_effpot/=0) then
 
        if(iam_master) then
           !    Read the MD file
           write(message,'(a,(80a),7a)')ch10,('=',ii=1,80),ch10,ch10,&
-               &       '-Reading the file the HIST file :',ch10,&
-               &       '-',trim(filnam(5)),ch10
+&       '-Reading the training-set file :',ch10,&
+&       '-',trim(filnam(5)),ch10
 
           call wrtout(std_out,message,'COLL')
           call wrtout(ab_out,message,'COLL')
@@ -230,31 +327,34 @@ contains
              call effective_potential_file_readMDfile(filnam(5),hist,option=inp%ts_option)
              if (hist%mxhist == 0)then
                 write(message, '(5a)' )&
-                     &           'The MD ',trim(filnam(5)),' file is not correct ',ch10,&
-                     &           'Action: add MD file'
-                MSG_ERROR(message)
-             end if
-          else
-             if (inp%fit_coeff/=0) then
-                write(message, '(3a)' )&
-                     &           'There is no MD file to fit the coefficients ',ch10,&
-                     &           'Action: add MD file'
-                MSG_ERROR(message)
-             else
-                if (inp%bound_model/=0) then
-                   write(message, '(3a)' )&
-                        &             'There is no MD file to bound the model ',ch10,&
-                        &             'Action: add MD file'
-                   MSG_ERROR(message)
-                else if(inp%confinement==2) then
-                   write(message, '(3a)' )&
-                        &             'There is no MD file to compute the confinement',ch10,&
-                        &             'Action: add MD file'
-                   MSG_ERROR(message)
-                end if
-             end if
-          end if
+&           'The trainig-set ',trim(filnam(5)),' file is not correct ',ch10,&
+&           'Action: add training-set file'
+           MSG_ERROR(message)
+         end if
+       else
+         if (inp%fit_coeff/=0) then
+           write(message, '(3a)' )&
+&           'There is no training-set file to fit the lattice model ',ch10,&
+&           'Action: add trainings-set-file'
+           MSG_ERROR(message)
+         else if (inp%bound_model/=0) then
+             write(message, '(3a)' )&
+&             'There is no  training-set file to bound the model ',ch10,&
+&             'Action: add training-set file '
+             MSG_ERROR(message)
+         else if(inp%confinement==2) then
+             write(message, '(3a)' )&
+&             'There is no training-set file to compute the confinement',ch10,&
+&             'Action: add training-set file '
+             MSG_ERROR(message) 
+         else if(inp%opt_effpot==2) then
+             write(message, '(3a)' )&
+&             'There is no training-set file to optimize the latice model',ch10,&
+&             'Action: add training-set file '
+             MSG_ERROR(message)
+         end if
        end if
+     end if
        !  MPI BROADCAST the history of the MD
        call abihist_bcast(hist,master,comm)
        !  Map the hist in order to be consistent with the supercell into reference_effective_potential
@@ -310,16 +410,34 @@ contains
              end if
           else if (option==1.or.option==2)then
              !      option = 1
-             call fit_polynomial_coeff_fit(reference_effective_potential,&
-                  &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
-                  &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
-                  &         inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
-                  &         initialize_data=inp%fit_initializeData==1,&
-                  &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
-                  &         fit_tolMSDFS=inp%fit_tolMSDFS,&
-                  &         verbose=.true.,positive=.false.,&
-                  &         anharmstr=inp%fit_anhaStrain==1,&
-                  &         spcoupling=inp%fit_SPCoupling==1,prt_names=inp%prt_names)
+             if(inp%fit_iatom/=0)then
+               call fit_polynomial_coeff_fit(reference_effective_potential,&
+                    &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
+                    &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
+                    &         inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
+                    &         max_power_strain=inp%fit_SPC_maxS,initialize_data=inp%fit_initializeData==1,&
+                    &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
+                    &         fit_tolMSDFS=inp%fit_tolMSDFS,&
+                    &         verbose=.true.,positive=.false.,&
+                    &         anharmstr=inp%fit_anhaStrain==1,&
+                    &         spcoupling=inp%fit_SPCoupling==1,prt_names=inp%prt_names,prt_anh=inp%analyze_anh_pot,& 
+                    &         fit_iatom=inp%fit_iatom)
+             else 
+                inp%fit_nfixcoeff = -1
+                do ii=1,natom
+                  call fit_polynomial_coeff_fit(reference_effective_potential,&
+                       &         inp%fit_bancoeff,inp%fit_fixcoeff,hist,inp%fit_generateCoeff,&
+                       &         inp%fit_rangePower,inp%fit_nbancoeff,inp%fit_ncoeff,&
+                       &         inp%fit_nfixcoeff,option,comm,cutoff_in=inp%fit_cutoff,&
+                       &         max_power_strain=inp%fit_SPC_maxS,initialize_data=inp%fit_initializeData==1,&
+                       &         fit_tolMSDF=inp%fit_tolMSDF,fit_tolMSDS=inp%fit_tolMSDS,fit_tolMSDE=inp%fit_tolMSDE,&
+                       &         fit_tolMSDFS=inp%fit_tolMSDFS,&
+                       &         verbose=.true.,positive=.false.,&
+                       &         anharmstr=inp%fit_anhaStrain==1,&
+                       &         spcoupling=inp%fit_SPCoupling==1,prt_names=inp%prt_names,prt_anh=inp%analyze_anh_pot,& 
+                       &         fit_iatom=ii)
+                enddo 
+             endif 
           end if
        else
           write(message, '(3a)' )&
@@ -334,11 +452,79 @@ contains
     !we need to use the molecular dynamics
     if(inp%bound_model>0.and.inp%bound_model<=2)then
        call mover_effpot(inp,filnam,reference_effective_potential,-1*inp%bound_model,comm,hist=hist)
+   !Marcus: New option for bound_model: use optimize routine for generting specific high order terms
+   elseif(inp%bound_model == 3)then
+    write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,&
+&    'Bound Process 3: Generate equivalent high order terms',ch10            
+    call wrtout(std_out,message,'COLL')
+    call wrtout(ab_out,message,'COLL')
+    
+    call opt_effpotbound(reference_effective_potential,inp%bound_rangePower,hist,comm) 
+   
     end if
 
-    !****************************************************************************************
+!****************************************************************************************
+! OPTIMIZE SECTION, Optimize selected coefficients of effective potential while
+! keeping the others constant
+!****************************************************************************************
+ 
+ if(inp%opt_effpot == 1)then
+    write(message,'(a,(80a),4a)')ch10,('=',ii=1,80),ch10,ch10,&
+&    'Optimizing Effective Potential',ch10            
 
-    !****************************************************************************************
+    call wrtout(std_out,message,'COLL')
+    call wrtout(ab_out,message,'COLL')
+
+     need_analyze_anh_pot = .FALSE.
+     if(inp%analyze_anh_pot == 1) need_analyze_anh_pot = .TRUE. 
+
+    call opt_effpot(reference_effective_potential,inp%opt_ncoeff,inp%opt_coeff,hist,comm,& 
+&        print_anh=need_analyze_anh_pot)
+ end if 
+
+ 
+
+!****************************************************************************************
+! TEST SECTION test effective potential with regard to test-set 
+!****************************************************************************************
+   if(inp%test_effpot == 1)then 
+     if(iam_master) then
+!    Read the test-set .nc file
+       write(message,'(a,(80a),9a)')ch10,('=',ii=1,80),ch10,ch10,&
+&       'TEST - SET Option',ch10,&               
+&       '-Reading the test-set file :',ch10,&
+&       '-',trim(filnam(6)),ch10
+
+       call wrtout(std_out,message,'COLL')
+       call wrtout(ab_out,message,'COLL')
+       if(filnam(6)/=''.and.filnam(6)/='no')then
+         call effective_potential_file_readMDfile(filnam(6),hist_tes,option=inp%ts_option)
+         if (hist_tes%mxhist == 0)then
+           write(message, '(5a)' )&
+&           'The test-set ',trim(filnam(6)),' file is empty ',ch10,&
+&           'Action: add non-empty test-set'
+           MSG_ERROR(message)
+         end if
+       else
+           write(message, '(3a)' )&
+&           'There is no test-set file ',ch10,&
+&           'Action: add test-set file'
+           MSG_ERROR(message)
+       end if
+     end if
+!  MPI BROADCAST the history of the MD
+     call abihist_bcast(hist_tes,master,comm)
+!  Map the hist in order to be consistent with the supercell into reference_effective_potential
+     call effective_potential_file_mapHistToRef(reference_effective_potential,hist_tes,comm)
+     !  Initialize if to print anharmonic contribution to energy or not   
+     need_analyze_anh_pot = .FALSE.
+     if(inp%analyze_anh_pot == 1) need_analyze_anh_pot = .TRUE.  
+!  Call to test routine
+     call fit_polynomial_coeff_testEffPot(reference_effective_potential,hist_tes,master,comm,&
+&                                   print_anharmonic=need_analyze_anh_pot,scup_dtset=inp%scup_dtset)
+
+   end if ! End if(inp%test_effpot == 1)then 
+   
     !TEST_AM
     !Effective Hamiltonian, compute the energy for given patern
     ! call mover_effpot(inp,filnam,reference_effective_potential,-2,comm,hist=hist)
@@ -418,6 +604,8 @@ contains
     call effective_potential_free(reference_effective_potential)
     call multibinit_dtset_free(inp)
     call abihist_free(hist)
+    call abihist_free(hist_tes)
+!****************************************************************************************
 
   end subroutine multibinit_main
   !!***

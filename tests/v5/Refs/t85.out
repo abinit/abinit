@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h30 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h23 )
   
-- input  file    -> t85.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v5_t85-t86-t87-t88-t89-t90-t91-t92-t93-t94-t95/t85.in
 - output file    -> t85.out
 - root for input  files -> t85i
 - root for output files -> t85o
@@ -1713,8 +1713,8 @@ P          mk1mem10        64
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1879,7 +1879,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -20.000E-03; max=  10.669E-10
+ Mean square residual over all n,k,spin=   12.227E-11; max=  10.669E-10
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1929,7 +1929,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -20.000E-03; max=  14.916E-10
+ Mean square residual over all n,k,spin=   12.339E-11; max=  14.916E-10
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1979,7 +1979,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -20.000E-03; max=  14.916E-10
+ Mean square residual over all n,k,spin=   12.753E-11; max=  14.916E-10
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2086,8 +2086,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89076
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2142,7 +2142,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -20.000E-03; max=  24.419E-10
+ Mean square residual over all n,k,spin=   34.906E-11; max=  24.419E-10
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2193,7 +2193,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -20.000E-03; max=  55.484E-11
+ Mean square residual over all n,k,spin=   35.275E-12; max=  55.484E-11
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2244,7 +2244,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -20.000E-03; max=  55.501E-11
+ Mean square residual over all n,k,spin=   35.494E-12; max=  55.501E-11
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2336,8 +2336,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2390,7 +2390,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -30.000E-03; max=  98.080E-09
+ Mean square residual over all n,k,spin=  -12.500E-03; max=  98.080E-09
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2442,7 +2442,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -30.000E-03; max=  98.162E-09
+ Mean square residual over all n,k,spin=  -12.500E-03; max=  98.162E-09
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2487,14 +2487,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
  ETOT  2   139.75081883928      8.676E+01 2.853E-02 9.182E+03
  ETOT  3  -1.2483828281980     -1.410E+02 1.074E-02 4.858E-02
  ETOT  4  -1.2484960956956     -1.133E-04 5.038E-06 1.094E-04
- ETOT  5  -1.2484965415959     -4.459E-07 1.427E-08 3.094E-06
+ ETOT  5  -1.2484965415959     -4.459E-07 1.430E-08 3.094E-06
 
  At SCF step    5       vres2   =  3.09E-06 < tolvrs=  1.00E-05 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -30.000E-03; max=  14.270E-09
+ Mean square residual over all n,k,spin=  -12.500E-03; max=  14.300E-09
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2586,8 +2586,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2640,10 +2640,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -20.000E-03; max=  99.077E-16
+ Mean square residual over all n,k,spin=   25.686E-16; max=  99.077E-16
  dfpt_looppert : ek2=    1.2633093633E+01
           f-sum rule ratio=    2.5262585138E+01
- prteigrs : about to open file t85_1WF1_EIG
+ prteigrs : about to open file t85t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  64  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2693,10 +2693,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -20.000E-03; max=  99.077E-16
+ Mean square residual over all n,k,spin=   25.998E-16; max=  99.077E-16
  dfpt_looppert : ek2=    1.2633093633E+01
           f-sum rule ratio=    2.5262585138E+01
- prteigrs : about to open file t85_1WF1_EIG
+ prteigrs : about to open file t85t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  64  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2746,10 +2746,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -20.000E-03; max=  99.077E-16
+ Mean square residual over all n,k,spin=   25.686E-16; max=  99.077E-16
  dfpt_looppert : ek2=    1.2633093633E+01
           f-sum rule ratio=    2.5262585137E+01
- prteigrs : about to open file t85_1WF1_EIG
+ prteigrs : about to open file t85t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  64  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -2943,7 +2943,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   19.621E-01; max=  75.470E-01
+ Mean square residual over all n,k,spin=   24.776E-01; max=  75.470E-01
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2989,7 +2989,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   19.737E-01; max=  75.470E-01
+ Mean square residual over all n,k,spin=   24.921E-01; max=  75.470E-01
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3035,7 +3035,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   19.853E-01; max=  75.470E-01
+ Mean square residual over all n,k,spin=   25.066E-01; max=  75.470E-01
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3129,8 +3129,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89076
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3180,7 +3180,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   20.762E-01; max=  74.258E-01
+ Mean square residual over all n,k,spin=   26.202E-01; max=  74.258E-01
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3227,7 +3227,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   19.717E-01; max=  60.335E-01
+ Mean square residual over all n,k,spin=   24.896E-01; max=  60.335E-01
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3274,7 +3274,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   19.817E-01; max=  60.335E-01
+ Mean square residual over all n,k,spin=   25.021E-01; max=  60.335E-01
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3368,8 +3368,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3419,7 +3419,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   20.118E-01; max=  85.044E-01
+ Mean square residual over all n,k,spin=   25.398E-01; max=  85.044E-01
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3466,7 +3466,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   20.312E-01; max=  91.648E-01
+ Mean square residual over all n,k,spin=   25.640E-01; max=  91.648E-01
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3513,7 +3513,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   18.892E-01; max=  10.078E+00
+ Mean square residual over all n,k,spin=   23.865E-01; max=  10.078E+00
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3607,8 +3607,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3660,10 +3660,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   12.615E-02; max=  15.813E-01
+ Mean square residual over all n,k,spin=   18.269E-02; max=  15.813E-01
  dfpt_looppert : ek2=    1.2633093633E+01
           f-sum rule ratio=    2.5262964291E+01
- prteigrs : about to open file t85_1WF1_EIG
+ prteigrs : about to open file t85t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  64  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -3712,10 +3712,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   12.910E-02; max=  16.742E-01
+ Mean square residual over all n,k,spin=   18.637E-02; max=  16.742E-01
  dfpt_looppert : ek2=    1.2633093633E+01
           f-sum rule ratio=    2.5262964245E+01
- prteigrs : about to open file t85_1WF1_EIG
+ prteigrs : about to open file t85t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  64  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -3764,10 +3764,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   13.205E-02; max=  16.742E-01
+ Mean square residual over all n,k,spin=   19.006E-02; max=  16.742E-01
  dfpt_looppert : ek2=    1.2633093633E+01
           f-sum rule ratio=    2.5262964198E+01
- prteigrs : about to open file t85_1WF1_EIG
+ prteigrs : about to open file t85t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=  64  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 10, wtk=  0.01563, kpt=  0.0000  0.0000  0.0000 (reduced coord)
@@ -5364,10 +5364,10 @@ P          mk1mem10        64
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         12.2  wall=         13.8
+- Proc.   0 individual time (sec): cpu=         10.6  wall=         11.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered 651 WARNINGs and 277 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.2  wall=         13.8
+.Delivered 642 WARNINGs and 277 COMMENTs to log file.
++Overall time at end (sec) : cpu=         10.6  wall=         11.6
