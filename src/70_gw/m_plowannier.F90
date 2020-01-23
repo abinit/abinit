@@ -822,7 +822,7 @@ if (dtset%plowan_projcalc(1)==-2)then
 else
   opt=0
 end if
-opt=1
+
 if (opt==0) then
   write(message,*)ch10,"Normalization of plowannier k-point by k-point"
 else
@@ -2968,8 +2968,8 @@ subroutine normalization_plowannier(wan,opt)
   type(operwan_type), allocatable :: operwan(:,:,:)
   complex(dpc), allocatable :: operwansquare(:,:,:,:)
   complex(dpc), allocatable :: tmp_operwansquare(:,:)
-  integer :: ikpt, iband, iband1, iband2, isppol,  ispinor1, ispinor2, iatom1, &
-&  iatom2, il1, il2, im1, im2, index_c, index_l, n1,n2,n3, nkpt
+  integer :: ikpt, iband, iband1, iband2, isppol,  ispinor1, ispinor2, iatom1,nb_zeros_tot
+  integer :: iatom2, il1, il2, im1, im2, index_c, index_l, n1,n2,n3, nkpt,nb_of_zeros
   type(orbital_type), allocatable :: psichinormalized(:,:,:)
   !character(len = 50) :: mat_writing2
   !character(len = 5000) :: mat_writing
@@ -3075,13 +3075,15 @@ subroutine normalization_plowannier(wan,opt)
 
 
   !take the square root inverse of operwansquare for normalization purposes
+  nb_zeros_tot=0
   ABI_ALLOCATE(tmp_operwansquare,(wan%nspinor*wan%size_wan,wan%nspinor*wan%size_wan))
   do isppol = 1,wan%nsppol
     do ikpt = 1,nkpt
       write(std_out,*)"ikpt = ", ikpt
       tmp_operwansquare(:,:)=operwansquare(ikpt,isppol,:,:)
-      call invsqrt_matrix(tmp_operwansquare,wan%nspinor*wan%size_wan)
+      call invsqrt_matrix(tmp_operwansquare,wan%nspinor*wan%size_wan,nb_of_zeros)
       operwansquare(ikpt,isppol,:,:)=tmp_operwansquare(:,:)
+      nb_zeros_tot=nb_zeros_tot+nb_of_zeros
     end do
   end do
   ABI_DEALLOCATE(tmp_operwansquare)
@@ -3175,7 +3177,7 @@ subroutine normalization_plowannier(wan,opt)
                 do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
                   do ispinor1 = 1,wan%nspinor
                     do ispinor2 = 1,wan%nspinor
-                      if (opt==0) then
+                      if (opt==0 .and. nb_zeros_tot==0) then
                         if (iatom1.eq.iatom2 .and. il1.eq.il2 .and. im1.eq.im2 .and. ispinor1.eq.ispinor2) then
                           if (abs(cmplx(1.0,0.0,dpc)-&
                             &operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%&
@@ -3193,7 +3195,7 @@ subroutine normalization_plowannier(wan,opt)
                             MSG_ERROR(message)
                           end if
                         end if
-                      endif
+                      end if
                     end do
                   end do
                 end do
@@ -3204,7 +3206,10 @@ subroutine normalization_plowannier(wan,opt)
       end do
     end do
   end do
-
+  if (opt==0 .and. nb_zeros_tot/=1) then
+    write(message,'(a,i2,a)')"The matrix inversion detects ",nb_zeros_tot," zero(s) on the diagonals. Take results with caution or modify nkpt and/or bands for plowan"
+    MSG_COMMENT(message)
+  end if
 
   !!Uncomment to print the overlap matrix in the log file (for ikpt = 1)
 !  do isppol = 1,wan%nsppol

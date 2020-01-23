@@ -988,6 +988,8 @@ endif
             ispin=4
           endif
           if (wanbz%nsppol/=1)then
+            uomega(iomega)=4*uomega(iomega)
+            jomega(iomega)=4*jomega(iomega)
             uspin(ispin,iomega)=uomega(iomega)
             jspin(ispin,iomega)=jomega(iomega)
           endif
@@ -996,11 +998,6 @@ endif
           !call print_U(mbband1,mbband2,mbband3,mbband4,nspinor,U_m)
         enddo
 
-!   Summarize the calculation if nsppol==1
-        if (wanbz%nsppol /=1 .and. spin1==2 .and. spin2==2)then
-          uomega(:)=sum(uspin,dim=1)/4
-          jomega(:)=sum(jspin,dim=1)/4
-        endif
         call print_orbitals(spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,0)
         write(message,*)ch10,"  -------------------------------------------------------------"
         call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
@@ -1051,7 +1048,7 @@ endif
           endif
           if(nomega==1)  omega(iomega)=omegamin
         enddo
-        call print_orbitals(1,1,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,2)
+        !call print_orbitals(1,1,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,2)
         call print_uj_spin(nomega,uspin,jspin,omega,one_orbital)
       endif
       if (wanbz%nsppol/=1)then
@@ -1510,9 +1507,10 @@ endif
    complex(dpc),intent(in) :: jspin(4,nomega)
    real(dp),intent(in) :: omega(nomega)
    integer :: iomega,ispin
-   real(dp) :: uomega(nomega),jomega(nomega)
+   complex(dpc) :: uomega(nomega),jomega(nomega)
    character(len=500)::message
    
+   call print_orbitals(spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,3)
    write(message,*)ch10," --------------------------------------------------------------------" 
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    write(message,*)" Sum up of the calcul for different spin polarization and frequencies"
@@ -1544,7 +1542,7 @@ endif
    endif
    uomega(:)=sum(uspin,dim=1)/4
    jomega(:)=sum(jspin,dim=1)/4
-   call print_orbitals(spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,3)
+   !call print_orbitals(spin1,spin2,iatom1,iatom2,iatom3,iatom4,pos1,pos2,pos3,pos4,il1,il2,il3,il4,wanbz,3)
    write(message,*)ch10,"  -------------------------------------------------------------"
    call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
    write(message,*)"           Average U and J as a function of frequency   "
