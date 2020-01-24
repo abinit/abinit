@@ -71,7 +71,7 @@ fi
 if test "${#}" -ge 1; then
   cfg_old="${1}"
 else
-  cfg_old="${HOME}/.abinit/build/`hostname`.ac"
+  cfg_old="${HOME}/.abinit/build/`hostname | sed -e 's/\..*//'`.ac"
 fi
 
 # Check that old config file exists
