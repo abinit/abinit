@@ -1146,7 +1146,8 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
        qfd = qpt + hh * qfd
 
        call ewald9(ifc%acell,ifc%dielt,dyew,cryst%gmet,ifc%gprim,cryst%natom,qfd,&
-          cryst%rmet,ifc%rprim,sumg0,cryst%ucvol,cryst%xred,ifc%zeff,ifc%qdrp_cart)
+          cryst%rmet,ifc%rprim,sumg0,cryst%ucvol,cryst%xred,ifc%zeff,ifc%qdrp_cart,&
+          ifc%ewald_option,dipquad=ifc%dipquad,quadquad=ifc%quadquad)
        call q0dy3_apply(cryst%natom,ifc%dyewq0,dyew)
        dddq(:,:,:,ii) = dddq(:,:,:,ii) + (jj * half / hh) * dyew
      end do
