@@ -1681,7 +1681,7 @@ subroutine hdr_mpio_skip(mpio_fh, fform, offset)
 #ifdef HAVE_MPI_IO
 !Reading the first record of the file -------------------------------------
 !read (unitfi)   codvsn,headform,..............
- positloc = bsize_frm + 6*xmpi_bsize_ch
+ positloc = bsize_frm + 8*xmpi_bsize_ch
  call MPI_FILE_READ_AT(mpio_fh,positloc,fform,1,MPI_INTEGER,statux,ierr)
 
  if (ANY(fform == [1,2,51,52,101,102] )) then
