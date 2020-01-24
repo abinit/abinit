@@ -65,6 +65,10 @@ def macro_define_header():
 # Declares command-line arguments for the "configure" script.
 #
 AC_DEFUN([ABI_OPTIONS_DEFINE],[
+  # Count use of deprecated options
+  abi_opt_deprecated_count=0
+  abi_opt_deprecated_used=""
+
 """
 
 
@@ -151,16 +155,15 @@ def macro_changed_template():
   return """
 
 
-dnl ABI_OPTIONS_CHANGED()
-dnl ---------------------
-dnl
-dnl Display changes of user interface between versions and warns about
-dnl obsolete uses.
-dnl
-AC_DEFUN([ABI_OPTIONS_CHANGED],[
-  AC_MSG_NOTICE([reporting user interface changes:])
+# ABI_INFO_OPTIONS_CHANGED()
+# --------------------------
+#
+# Display changes of user interface between versions and warns about
+# obsolete uses.
+#
+AC_DEFUN([ABI_INFO_OPTIONS_CHANGED],[
 @MACRO@
-]) dnl ABI_OPTIONS_CHANGED
+]) # ABI_INFO_OPTIONS_CHANGED
 """
 
 
@@ -171,16 +174,16 @@ def macro_parse_template():
   return """
 
 
-dnl ABI_OPTIONS_PARSE()
-dnl -------------------
-dnl
-dnl Parses command-line arguments.
-dnl
+# ABI_OPTIONS_PARSE()
+# -------------------
+#
+# Parses command-line arguments.
+#
 AC_DEFUN([ABI_OPTIONS_PARSE],[
   AC_REQUIRE([AC_PROG_EGREP])
   AC_MSG_NOTICE([parsing command-line options])
 @MACRO@
-]) dnl ABI_OPTIONS_PARSE
+]) # ABI_OPTIONS_PARSE
 """
 
 
@@ -191,24 +194,42 @@ def macro_triggers_template():
   return """
 
 
-dnl ABI_OPTIONS_TRIGGERS()
-dnl ----------------------
-dnl
-dnl Set triggers associated to 'enable_*' options (AC_DEFINE and
-dnl AM_CONDTIONAL).
-dnl
-AC_DEFUN([ABI_OPTIONS_TRIGGERS],[
-  AC_MSG_NOTICE([setting triggers associated to command-line options])
+# ABI_OPTIONS_CPP_DEFINES()
+# -------------------------
+#
+# Set switches associated to 'enable_*' options (AC_DEFINE and
+# AM_CONDTIONAL).
+#
+AC_DEFUN([ABI_OPTIONS_CPP_DEFINES],[
+  AC_MSG_NOTICE([setting build switches associated to command-line options])
 @MACRO@
-]) dnl ABI_OPTIONS_TRIGGERS
+]) # ABI_OPTIONS_CPP_DEFINES
+"""
+
+
+
+# Config file values
+def macro_cfg_template():
+
+  return """
+
+
+# ABI_OPTIONS_CFG_TRANSFER()
+# --------------------------
+#
+# Transfer options from the config file to internal variables.
+#
+AC_DEFUN([ABI_OPTIONS_CFG_TRANSFER],[
+@MACRO@
+]) # ABI_OPTIONS_CFG_TRANSFER
 """
 
 
 
 # Option parser generator
-def parse_opt(opt,values):
+def parse_opt(opt,opt_ivar,values):
 
-  ret = "  dnl Parse %s\n" % (opt)
+  ret = "  # Parse %s\n" % (opt)
 
   if ( len(values.split()) > 1 ):
     ret += """  if test "${%s}" != ""; then
@@ -227,7 +248,7 @@ def parse_opt(opt,values):
       AC_MSG_ERROR([invalid option: %s = ${v}])
     fi
   fi
-""" % (opt,opt,values,opt,"|".join(values.split()),opt)
+""" % (opt_ivar,opt_ivar,values,opt,"|".join(values.split()),opt)
 
   else:
 
@@ -259,6 +280,18 @@ def parse_opt(opt,values):
   fi
 """ % (opt,opt,opt)
 
+    elif ( values == "@install" ):
+      ret += """ if test "${%s}" != ""; then
+    opt_ok="yes"
+    if test "${%s}" != "no" -a "${%s}" != "yes"; then
+      if test \! -d "${%s}" -o \! -r "${%s}"; then
+        opt_ok="no"
+        break
+      fi
+    fi
+  fi
+""" % (opt,opt,opt,opt,opt)
+
     elif ( values == "@integer" ):
       ret += """ if test "${%s}" != ""; then
     opt_ok="yes"
@@ -275,7 +308,13 @@ def parse_opt(opt,values):
     for v in ${%s}; do
       if test "`echo "${v}" | grep '^-[[LloW]]'`" = ""; then
         opt_ok="no"
-        break
+      fi
+      if test "${opt_ok}" = "no"; then
+        if test -s "${v}"; then
+          opt_ok="yes"
+        else
+          break
+        fi
       fi
     done
     if test "${opt_ok}" = "no"; then
@@ -284,9 +323,33 @@ def parse_opt(opt,values):
   fi
 """ % (opt,opt,opt)
 
+    elif ( re.match("@profile", values) ):
+      arg = " ".join(values.split()[1:])
+      arg = re.sub("@VALUE@", "${%s}" % opt, arg)
+      ret += """ if test "${%s}" != ""; then
+    opt_ok="no"
+    test -s "${%s}" && opt_ok="yes"
+    if test "${opt_ok}" = "no"; then
+      AC_MSG_ERROR([file for option %s not found:
+                  %s])
+    fi
+  fi
+""" % (opt,arg,opt,arg)
+
+    elif ( values == "@readabledir" ):
+      ret += """ if test "${%s}" != ""; then
+    opt_ok="yes"
+    if test \! -d "${%s}" -o \! -r "${%s}"; then
+      opt_ok="no"
+      break
+    fi
+  fi
+""" % (opt,opt,opt)
+
     else:
 
-      ret += "  dnl FIXME: NOT IMPLEMENTED!\n"
+      ret += """  # FIXME: NOT IMPLEMENTED!\n
+  AC_MSG_WARN([parsing not implemented for value type '%s'])\n""" % values
 
   return ret
 
@@ -300,7 +363,10 @@ def parse_opt(opt,values):
 
 # Initial setup
 my_name    = "make-macros-options"
-my_configs = ["config/specs/options.conf"]
+my_configs = {
+  "deps":"config/specs/dependencies.conf",
+  "opts":"config/specs/options.conf",
+}
 my_output  = "config/m4/auto-options.m4"
 
 # Check if we are in the top of the ABINIT source tree
@@ -311,8 +377,9 @@ if ( not os.path.exists("configure.ac") or
   sys.exit(1)
 
 # Read config file(s)
-cnf = MyConfigParser()
-for cnf_file in my_configs:
+cnf_deps = MyConfigParser()
+cnf_opts = MyConfigParser()
+for cnf_file in my_configs.values():
   if ( not os.path.exists(cnf_file) ):
     print("%s: Could not find config file (%s)." % (my_name,cnf_file))
     print("%s: Aborting now." % my_name)
@@ -322,18 +389,19 @@ for cnf_file in my_configs:
 now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
 
 # Init
-cnf.read(my_configs[0])
+cnf_deps.read(my_configs["deps"])
+cnf_opts.read(my_configs["opts"])
 re_en = re.compile("enable_")
 re_wi = re.compile("with_")
-all_args = cnf.sections()
+all_args = cnf_opts.sections()
 all_args.sort()
 ac_args = { "enable":list(), "with":list() }
 for arg in all_args:
-  arg_stat = cnf.get(arg,"status")
+  arg_stat = cnf_opts.get(arg,"status")
   if ( (arg_stat != "removed") and (arg_stat != "dropped") ):
-    if ( re_en.match(arg) ):
+    if ( arg.startswith("enable_") ):
       ac_args["enable"].append(arg)
-    if ( re_wi.match(arg) ):
+    if ( arg.startswith("with_") ):
       ac_args["with"].append(arg)
 ac_args["enable"].sort()
 ac_args["with"].sort()
@@ -349,51 +417,80 @@ m4.write(macro_define_header())
 defaults = ""
 parse = ""
 for arg in ("enable","with"):
-  m4.write("\n  dnl\n  dnl --%s arguments\n  dnl\n" % (arg))
-  defaults += "\n  dnl\n  dnl --%s arguments\n  dnl\n\n" % (arg)
+  m4.write("\n  #\n  # --%s arguments\n  #\n" % (arg))
+  defaults += "\n  #\n  # --%s arguments\n  #\n\n" % (arg)
   for opt in ac_args[arg]:
     var = re.sub(arg+"_","",opt)
     opt_name = re.sub("_","-",var)
-    opt_desc = cnf.get(opt,"description")
-    opt_stat = cnf.get(opt,"status")
+    opt_desc = cnf_opts.get(opt,"description")
+    opt_stat = cnf_opts.get(opt,"status")
+    if ( arg == "enable" ):
+      opt_ivar = "abi_%s_enable" % var
+    else:
+      opt_ivar = "abi_%s" % var
     try:
-      opt_dflt = cnf.get(opt,"default")
+      opt_dflt = cnf_opts.get(opt,"default")
     except:
       opt_dflt = None
     try:
-      opt_nega = cnf.get(opt,"negative")
+      opt_nega = cnf_opts.get(opt,"negative")
     except:
       opt_nega = ""
     try:
-      opt_vals = cnf.get(opt,"values")
+      opt_vals = cnf_opts.get(opt,"values")
     except:
       opt_vals = None
-    if ( (opt_stat == "hidden") and (not opt_dflt is None) ):
-      parse += """
-  dnl Hidden option: %s
-  dnl ac_configure_args="${ac_configure_args} --%s=\\\"${%s}\\\""
-  %s="%s"
-""" % \
-        (opt,re.sub("_","-",opt),opt,opt,opt_dflt)
-    else:
+
+    if ( arg == "enable" ):
       m4.write("\n  AC_ARG_%s(%s,\n" % (arg.upper(),opt_name) \
-        + "    AC_HELP_STRING([--%s-%s],\n      [%s (default: %s)]))\n" % \
-          (arg,opt_name,opt_desc,opt_dflt))
+        + "    AC_HELP_STRING([--%s-%s],\n      [%s (default: %s)]),\n" % \
+          (arg,opt_name,opt_desc,opt_dflt) \
+        + "    [abi_%s_enable=\"${enableval}\"; abi_%s_init=\"yon\"],\n" % (var,var) \
+        + "    [abi_%s_enable=\"%s\"; abi_%s_init=\"def\"])\n" % (var, opt_dflt, var))
+    else:
+      tmp_dflt = ""
+      if ( not opt_dflt is None ):
+        tmp_dflt = opt_dflt
+      tmp_init = "kwd"
+      if ( opt_vals == "@install" ):
+        tmp_init = "dir"
+      tmp_decl = """
+  AC_ARG_WITH({name},
+    AC_HELP_STRING([--with-{cmd}],
+      [{help} (default: '{default}')]),
+    [ abi_{name}="${{withval}}"
+      case "${{withval}}" in
+        no|yes)
+          abi_{name}_init="yon"
+          ;;
+        *)
+          abi_{name}_init="{init}"
+          ;;
+      esac],
+    [ abi_{name}_init="def"; abi_{name}="{default}"])
+""".format(cmd=opt_name, name=var, help=opt_desc, default=tmp_dflt, init=tmp_init)
+      m4.write(tmp_decl)
 
-      if ( opt_dflt is not None ):
-        defaults += "  if test \"${%s_%s}\" = \"\"; then\n    %s_%s=\"%s\"\n  fi\n" % \
-          (arg,var,arg,var,opt_dflt)
+    if ( opt_dflt is not None ):
+      if ( arg == "enable" ):
+        defaults += "  if test \"${%s_%s}\" = \"\"; then\n    abi_%s_%s=\"%s\"\n  fi\n" % \
+          (arg,var,var,arg,opt_dflt)
+      else:
+        defaults += "  if test \"${%s_%s}\" = \"\"; then\n    abi_%s=\"%s\"\n  fi\n" % \
+          (arg,var,var,opt_dflt)
 
-      if ( arg == "with" ):
-        defaults += "  if test \"${%s_%s}\" = \"no\"; then\n    %s_%s=\"%s\"\n  fi\n" % \
-          (arg,var,arg,var,opt_nega)
+    if ( arg == "with" ):
+      defaults += "  if test \"${%s_%s}\" = \"no\"; then\n    abi_%s=\"%s\"\n  fi\n" % \
+        (arg,var,var,opt_nega)
 
-      if ( opt_vals is not None ):
-        parse += "\n"+parse_opt(opt,opt_vals)
-      elif ( arg == "enable" ):
-        parse += "\n"+parse_opt(opt,"no yes")
+    if ( opt_vals is not None ):
+      parse += "\n"+parse_opt(opt,opt_ivar,opt_vals)
+    elif ( arg == "enable" ):
+      parse += "\n"+parse_opt(opt,opt_ivar,"no yes")
 
-      m4.write("  AC_SUBST(%s_%s)\n" % (arg,var))
+    m4.write("  AC_SUBST(%s_%s)\n" % (arg,var))
+    if ( arg == "enable" ):
+      m4.write("  AC_SUBST(abi_%s_%s)\n" % (var,arg))
 
 # Finish writing define macro
 m4.write(macro_define_footer())
@@ -412,16 +509,21 @@ m4.write(macro_backup_header())
 
 # Process arguments
 for arg in ("enable","with"):
-  m4.write("\n  dnl\n  dnl --%s arguments\n  dnl\n" % (arg))
+  m4.write("\n  #\n  # --%s arguments\n  #\n" % (arg))
   for opt in ac_args[arg]:
     var = re.sub(arg+"_","",opt)
     m4.write("  cmd_%s_%s=\"${%s_%s}\"\n" % (arg,var,arg,var))
+for dep in sorted(cnf_deps.sections()):
+  if (cnf_deps.get(dep, "detector") == "steredeg" ):
+    m4.write("  cmd_with_%s=\"${with_%s}\"\n" % (dep,dep))
+    if ( cnf_deps.has_option(dep, "flavors") ):
+      m4.write("  cmd_with_%s_flavor=\"${with_%s_flavor}\"\n" % (dep,dep))
 
 # Do not forget "prefix"
 m4.write("""
-  dnl
-  dnl Prefix
-  dnl
+  #
+  # Prefix
+  #
   if test "${prefix}" != "NONE"; then
     cmd_prefix="${prefix}"
   fi
@@ -430,22 +532,48 @@ m4.write("""
 # Finish writing backup macro
 m4.write(macro_backup_footer())
 
+# Write transfer-from-config-file macro
+transfer = ""
+for arg in ("enable","with"):
+  transfer += "\n  #\n  # --%s arguments\n  #\n" % (arg)
+  for opt in ac_args[arg]:
+    var = re.sub(arg+"_","",opt)
+    if ( arg == "enable" ):
+      transfer += "\n  if test \"${%s_%s}\" != \"\"; then\n    abi_%s_%s=\"${%s_%s}\"\n  fi\n" % \
+        (arg,var,var,arg,arg,var)
+    else:
+      transfer += "\n  if test \"${%s_%s}\" != \"\"; then\n    abi_%s=\"${%s_%s}\"\n  fi\n" % \
+        (arg,var,var,arg,var)
+m4.write(re.sub("@MACRO@", transfer, macro_cfg_template()))
+
 # Start writing recall macro
 m4.write(macro_recall_header())
 
 # Process arguments
 for arg in ("enable","with"):
-  m4.write("\n  dnl\n  dnl --%s arguments\n  dnl\n" % (arg))
+  m4.write("\n  #\n  # --%s arguments\n  #\n" % (arg))
   for opt in ac_args[arg]:
     var = re.sub(arg+"_","",opt)
-    m4.write("\n  if test \"${cmd_%s_%s}\" != \"\"; then\n    %s_%s=\"${cmd_%s_%s}\"\n  fi\n" % \
-      (arg,var,arg,var,arg,var))
+    if ( arg == "enable" ):
+      m4.write("  if test \"${cmd_%s_%s}\" != \"\"; then\n    abi_%s_%s=\"${cmd_%s_%s}\"\n  fi\n" % \
+        (arg,var,var,arg,arg,var))
+    else:
+      m4.write("  if test \"${cmd_%s_%s}\" != \"\"; then\n    %s_%s=\"${cmd_%s_%s}\"\n  fi\n" % \
+        (arg,var,arg,var,arg,var))
+for dep in sorted(cnf_deps.sections()):
+  if (cnf_deps.get(dep, "detector") == "steredeg" ):
+    m4.write("  if test \"${cmd_with_%s}\" != \"\"; then\n    with_%s=\"${cmd_with_%s}\"\n  fi\n" % \
+      (dep,dep,dep))
+    if ( cnf_deps.has_option(dep, "flavors") ):
+      m4.write("  if test \"${cmd_with_%s_flavor}\" != \"\"; then\n    with_%s_flavor=\"${cmd_with_%s_flavor}\"\n  fi\n" % \
+      (dep,dep,dep))
+
 
 # Do not forget "prefix"
 m4.write("""
-  dnl
-  dnl Prefix
-  dnl
+  #
+  # Prefix
+  #
   if test "${cmd_prefix}" != ""; then
     prefix="${cmd_prefix}"
   fi
@@ -456,58 +584,78 @@ m4.write(macro_recall_footer())
 
 # Build changed macro
 changed = ""
+chg_dep = ""
+chg_mod = ""
+chg_new = ""
+chg_rem = ""
+chg_ren = ""
 
 for arg in all_args:
 
   # Init
-  arg_stat = cnf.get(arg,"status")
+  arg_stat = cnf_opts.get(arg,"status")
   try:
-    arg_repl = cnf.get(arg,"use_instead")
+    arg_repl = cnf_opts.get(arg,"use_instead")
   except:
     arg_repl = ""
 
   # Removed options
   if ( (arg_stat == "removed") or (arg_stat == "dropped") ):
     arg1 = re.sub("_","-",arg)
-    changed += "\n  dnl Removed --%s option" % (arg1)
+    chg_rem += "\n  # Removed --%s option" % (arg1)
     if ( arg_stat == "removed" ):
-      changed += "\n  AC_MSG_NOTICE([ * --%s removed])" % (arg1)
+      chg_rem += "\n  AC_MSG_NOTICE([  * removed option --%s])" % (arg1)
       if ( arg_repl != "" ):
-        changed += "\n  AC_MSG_NOTICE([   === please use --%s instead ===])" % \
-          (re.sub("_","-",arg_repl))
-    changed += """
+        if ( arg_repl.upper() == arg_repl ):
+          chg_rem += "\n  AC_MSG_NOTICE([    >>> use %s instead])" % arg_repl
+        else:
+          chg_rem += "\n  AC_MSG_NOTICE([    >>> use --%s instead])" % \
+            (re.sub("_","-",arg_repl))
+    chg_rem += """
   if test "${%s}" != ""; then
     AC_MSG_ERROR([removed option --%s has been used])
   fi
 """ % (re.sub("-","_",arg1),arg1)
 
   # New options
-  elif ( arg_stat == "new" ):
-    arg2 = re.sub("_","-",arg)
-    changed += "\n  dnl New --%s option\n" % (arg2)
-    changed += "  AC_MSG_NOTICE([ * new option --%s is available])\n" % (arg2)
+  elif ( arg_stat.startswith("new") ):
+    arg2 = re.sub("_","-",arg.split()[0])
+    chg_new += "\n  # New --%s option\n" % (arg2)
+    chg_new += "  AC_MSG_NOTICE([  * new option --%s is available])\n" % (arg2)
+    if ( len(arg.split()) > 1 ):
+      chg_new += "  AC_MSG_NOTICE([    (%s)])\n" % (" ".join(arg.split()[1:]))
 
   # Changed UIs
   elif ( re.match("changed",arg_stat) ):
     arg1 = re.sub("_","-",arg)
-    changed += """
-  dnl UI change for --%s option
-  AC_MSG_NOTICE([ * --%s has been modified])
-  AC_MSG_NOTICE([   (%s)])
-  AC_MSG_NOTICE([   please check that --%s="${%s}" is OK for you])
+    chg_mod += """
+  # UI change for --%s option
+  AC_MSG_NOTICE([  * modified option --%s])
+  AC_MSG_NOTICE([    (%s)])
+  AC_MSG_NOTICE([    please check that --%s="${%s}" is OK for you])
 """ % (arg1,arg1,arg_stat,arg1,re.sub("-","_",arg1))
 
-  # Renamed options
-  elif ( re.match("renamed",arg_stat) ):
-    arg1 = re.sub("_","-",arg_stat.split()[1])
+  # Deprecated options
+  elif ( re.match("deprecated",arg_stat) ):
     arg2 = re.sub("_","-",arg)
-    changed += """
-  dnl --%s > --%s
-  AC_MSG_NOTICE([ * --%s renamed --%s])
+    chg_dep += """
+  # --%s deprecated
+  AC_MSG_NOTICE([  * deprecated option --%s])
   if test "${%s}" != ""; then
-    AC_MSG_ERROR([renamed option --%s has been used])
+    AC_MSG_NOTICE([    >>> --%s = '${%s}' will soon be forbidden!])
+    abi_opt_deprecated_count=`expr ${abi_opt_deprecated_count} + 1`
+    abi_opt_deprecated_used="${abi_opt_deprecated_used} %s"
   fi
-""" % (arg1,arg2,arg1,arg2,re.sub("-","_",arg1),arg1)
+""" % (arg2,arg2,arg,arg2,arg,arg)
+
+changed = chg_rem + chg_new + chg_mod + chg_ren + chg_dep
+if ( changed == "" ):
+  changed = "AC_MSG_NOTICE([no change in user interface to report])"
+else:
+  changed = """\
+  AC_MSG_NOTICE([])
+  AC_MSG_NOTICE([reporting user interface changes:])
+  AC_MSG_NOTICE([])\n""" + changed
 
 # Write changed macro
 m4.write(re.sub("@MACRO@",changed,macro_changed_template()))
@@ -519,24 +667,25 @@ m4.write(re.sub("@MACRO@",parse,macro_parse_template()))
 triggers = ""
 
 for opt in ac_args["enable"]:
-  opt_desc = cnf.get(opt,"description")
+  opt_desc = cnf_opts.get(opt,"description")
   opt_desc = opt_desc[0].lower() + opt_desc[1:]
+  opt_ivar = "abi_" + opt.replace("enable_", "") + "_enable"
   try:
-    opt_cnds = cnf.get(opt,"conditionals").split()
+    opt_cnds = cnf_opts.get(opt,"conditionals").split()
   except:
     opt_cnds = list()
   try:
-    opt_defs = cnf.get(opt,"defines").split()
+    opt_defs = cnf_opts.get(opt,"defines").split()
   except:
     opt_defs = list()
 
   if ( len(opt_cnds) + len(opt_defs) > 0 ):
     triggers += """
 
-  dnl Triggers for %s
+  # Triggers for %s
   AC_MSG_CHECKING([whether to %s])
   AC_MSG_RESULT([${%s}])
-""" % (opt,opt_desc,opt)
+""" % (opt,opt_desc,opt_ivar)
 
   if ( len(opt_cnds) > 0 ):
     for cnd in opt_cnds:
@@ -549,7 +698,7 @@ for opt in ac_args["enable"]:
   if test "${%s}" = "%s"; then
     AC_MSG_NOTICE([triggering the '%s' conditional])
   fi
-  AM_CONDITIONAL([%s],[test "${%s}" = "%s"])""" % (opt,val,cnd,cnd,opt,val)
+  AM_CONDITIONAL([%s],[test "${%s}" = "%s"])""" % (opt_ivar,val,cnd,cnd,opt_ivar,val)
 
   if ( len(opt_defs) > 0 ):
     for cpp in opt_defs:
@@ -561,9 +710,9 @@ for opt in ac_args["enable"]:
       triggers += """
   if test "${%s}" = "%s"; then
     AC_MSG_NOTICE([defining the '%s' preprocessing macro])
-    AC_DEFINE([%s],1,
+    AC_DEFINE([%s], 1,
       [Define to 1 if you want to %s.])
-  fi""" % (opt,val,cpp,cpp,opt_desc)
+  fi""" % (opt_ivar,val,cpp,cpp,opt_desc)
 
 # Write triggers macro
 m4.write(re.sub("@MACRO@",triggers,macro_triggers_template()))
@@ -579,9 +728,8 @@ if ( tmp != "" ):
 dumper = open("config.dump.in","a")
 dumper.write("# Command-line options (script: %s)\n" % (my_name))
 for arg in all_args:
-  arg_stat = cnf.get(arg,"status")
-  if ( (arg_stat != "hidden") and \
-       (arg_stat != "removed") and \
+  arg_stat = cnf_opts.get(arg,"status")
+  if ( (arg_stat != "removed") and \
        (arg_stat != "dropped") and \
        (not re.match("group", arg)) ):
     var = re.sub("-","_",opt_name)

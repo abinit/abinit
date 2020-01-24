@@ -13,6 +13,9 @@ EXTRA_DIST += \
 CLEANFILES += \
 	config.fc_info.tmp
 
+# Files that should not be left in the source tree
+DISTCLEANFILES = fallbacks/Makefile
+
 # Files to install
 install-data-local: config.pc
 	$(INSTALL) -d -m 755 $(DESTDIR)$(libdir)/pkgconfig
@@ -46,8 +49,8 @@ test_v5:
 test_bigdft:
 	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_bigdft.files >& testin_bigdft.stdout && cat testin_bigdft_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
 
-test_etsf_io:
-	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_etsf_io.files >& testin_etsf_io.stdout && cat testin_etsf_io_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
+test_netcdf:
+	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_netcdf.files >& testin_netcdf.stdout && cat testin_netcdf_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
 
 test_libxc:
 	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_libxc.files >& testin_libxc.stdout && cat testin_libxc_tmp_STATUS && rm -f abinit *DDB *EIG *out* *nc *WFK
@@ -56,7 +59,7 @@ test_wannier90:
 	cp $(top_builddir)/src/98_main/abinit $(top_srcdir)/tests/built-in/Input/abinit && cd $(top_srcdir)/tests/built-in/Input && ./abinit < testin_wannier90.files >& testin_wannier90.stdout && cat testin_wannier90_tmp_STATUS  && rm -f abinit *DDB *EIG *out* *nc *WFK *DEN *chk *eig *mmn *amn
 
 tests_in:
-	$(MAKE) test_fast test_v1 test_v5 test_bigdft test_etsf_io test_libxc test_wannier90
+	$(MAKE) test_fast test_v1 test_v5 test_bigdft test_netcdf test_libxc test_wannier90
 
 # ---------------------------------------------------------------------------- #
 
@@ -162,7 +165,7 @@ bin_prep:
 	mkdir abinitbin-$(VERSION)
 	tar -cvf abinitbin.tar AUTHORS COPYING INSTALL KNOWN_PROBLEMS NEWS README* RELNOTES THANKS src \
             doc scripts developers tests/Psps* tests/v*/Input tests/tutorial tests/paral tests/buil* tests/Scripts tests/cpu \
-            tests/tutorespfn tests/bigdft tests/etsf_io tests/libxc tests/wannier90 tests/atompaw tests/mpiio tests/psml
+            tests/tutorespfn tests/bigdft tests/netcdf tests/libxc tests/wannier90 tests/atompaw tests/mpiio tests/psml
 	mv abinitbin.tar abinitbin-$(VERSION)
 	cd abinitbin-$(VERSION) ; tar -xvf abinitbin.tar ; \
             rm -fr abinitbin.tar ; \
@@ -182,7 +185,7 @@ bin_prep:
             cd ../tests ; rm -fr */,* ; cd .. ; \
             mkdir opt ; mv src/98_main/* opt ; rm -fr src ; \
             cp ../developers/maintainers/Makefile_topdir_binarypack Makefile ; \
-            cp ../developers/maintainers/Makefile_testdir_binarypack tests/Makefile ;
+            cp ../developers/maintainers/Makefile_testdir_binarypack tests/Makefile
 
 # FIXME: there is no point anymore in having 2 binary distributions
 bin_seq: bin_prep

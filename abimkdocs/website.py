@@ -1226,10 +1226,13 @@ The bibtex file is available [here](../abiref.bib).
                 # The following is incorrect: files in /build/config-examples are generated when makemake is issued.
                 # url = "/build/config-examples/%s" % name
                 # By contrast, the following is a permanent reference
-                url = "/abichecks/buildsys/Refs/%s" % name
-                if a.text is None: a.text = name
-                target = "_blank"
-                html_classes.append("abifile-wikilink")
+                # FIXME: buildsys refs are not generated anymore (YP)
+                #url = "/abichecks/buildsys/Refs/%s" % name
+                #if a.text is None: a.text = name
+                #target = "_blank"
+                #html_classes.append("abifile-wikilink")
+                url = "/build/config-template.ac9"
+                pass
 
             elif namespace == "pdf":
                 # Handle [[pdf:howto_chebfi.pdf]] or [[pdf:howto_chebfi]]
