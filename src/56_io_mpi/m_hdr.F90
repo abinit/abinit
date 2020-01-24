@@ -2289,6 +2289,7 @@ subroutine hdr_skip_wfftype(wff,ierr)
 !Local variables-------------------------------
  integer :: headform,mu,npsp,unit,usepaw !,fform
  integer :: integers(17)
+ character(len=6) :: codvsn6
  character(len=8) :: codvsn
  character(len=500) :: msg,errmsg
 #if defined HAVE_MPI_IO
@@ -2305,8 +2306,13 @@ subroutine hdr_skip_wfftype(wff,ierr)
 
    rewind(unit, err=10, iomsg=errmsg)
 
-!  Pick off headform from WF file
-   read(unit, err=10, iomsg=errmsg) codvsn,headform ! fform
+!  Pick off headform from WF file. Support for pre-v9 (length of codvsn was changed from 6 to 8) is implemented.
+   read(unit, err=20, iomsg=errmsg) codvsn,headform ! fform
+   goto 30
+20 read(unit, err=10, iomsg=errmsg) codvsn6,headform ! fform
+   codvsn='        '
+   codvsn(1:6)=codvsn6
+30 continue
 
    if (headform==1   .or. headform==2   .or. &
        headform==51  .or. headform==52  .or. &
