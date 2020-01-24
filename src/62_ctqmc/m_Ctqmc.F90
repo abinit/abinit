@@ -1273,6 +1273,16 @@ SUBROUTINE Ctqmc_computeF(this, Gomega, F, opt_fk)
     CALL GreenHyb_backFourier(F_tmp)
     F(1:samples+1,iflavor) = (/ (-F_tmp%oper(samples+1-itau),itau=0,samples) /)
   END DO
+  IF ( this%rank .EQ. 0 ) THEN
+    DO iflavor = 1, flavors
+      write(346,*) "#",iflavor
+      do  itau=1,this%samples+1
+        write(346,*) itau,real(F(itau,iflavor))
+      enddo
+      write(346,*) 
+    END DO
+  ENDIF
+  close(346)
   FREE(F_omega)
   CALL GreenHyb_destroy(F_tmp)
 END SUBROUTINE Ctqmc_computeF

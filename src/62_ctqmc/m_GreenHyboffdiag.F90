@@ -994,8 +994,8 @@ SUBROUTINE GreenHyboffdiag_setMuD1(op,iflavor,iflavor2,mu,d1)
   if(iflavor==iflavor2) mu2=mu
 
   if(iflavor==iflavor2) then
-    !op%Mk(iflavor,iflavor2,3) = -d1-(mu*mu)
-    op%Mk(iflavor,iflavor2,3) = -(mu*mu)
+    op%Mk(iflavor,iflavor2,3) = -d1-(mu*mu)
+    !op%Mk(iflavor,iflavor2,3) = -(mu*mu)
     op%Mk(iflavor,iflavor2,2) = -mu
  !sui!write(6,*) "setmud1",iflavor,iflavor2, op%Mk(iflavor,iflavor2,2), op%Mk(iflavor,iflavor2,3)
   else
@@ -1632,7 +1632,7 @@ include 'mpif.h'
 !  DO iflavor1 = 1, nflavors
 !    op%Mk(iflavor1,iflavor1,1) = -1.d0
 !  ENDDO
-  op%Mk(:,:,3) = 0.d0
+!  op%Mk(:,:,3) = 0.d0
 
   MALLOC(omegatmp,(omegaBegin:omegaEnd))
   IF ( PRESENT(omega) ) THEN
