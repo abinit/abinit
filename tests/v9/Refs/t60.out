@@ -370,7 +370,6 @@ P           mkmem           8
                        1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
-         symsigma        1
          symv1scf        1
            tolwfr      1.00000000E-16
             tmesh      0.00000000E+00  3.00000000E+02  2.00000000E+00
@@ -442,16 +441,30 @@ P           mkmem           8
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
 
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1        0.004143        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2        0.004143        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3        0.004143        0.000000
+
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00    1.625259E-18    1.628211E-18
-         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
-         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
-         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
-         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
-         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
+         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
+         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         3    2.245748E-17    2.245748E-17    1.040868E+00
+         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -662,16 +675,30 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
 
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1        0.004143        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2        0.004143        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3        0.004143        0.000000
+
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00    1.625259E-18    1.628211E-18
-         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
-         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
-         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
-         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
-         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
+         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
+         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         3    2.245748E-17    2.245748E-17    1.040868E+00
+         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -761,16 +788,30 @@ Interpolation of the electron-phonon coupling potential completed
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
 
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1        0.004143        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2        0.004143        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3        0.004143        0.000000
+
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00    1.625259E-18    1.628211E-18
-         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
-         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
-         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
-         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
-         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
+         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
+         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         3    2.245748E-17    2.245748E-17    1.040868E+00
+         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -900,17 +941,17 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1 -19.234  -19.239   -0.006   -0.006   -0.002    0.981   -0.354    0.348    0.000    0.000
-   2  -2.697   -2.978   -0.281   -0.250   -0.200    1.125   -0.250    0.000   16.537   16.261
-   3  -0.415   -1.968   -1.553    0.143   -0.262  -10.891    0.143   -0.000    2.282    1.010
-   4  -0.415   -1.968   -1.553    0.143   -0.262  -10.891    0.143   -0.000    0.000    0.000
-   5  10.027   10.025   -0.002   -0.002   -0.001    0.992    0.094   -0.096   10.441   11.993
+   2  -2.697   -2.978   -0.281   -0.250   -0.200    1.124   -0.250    0.000   16.537   16.261
+   3  -0.415   -1.980   -1.566    0.143   -0.262  -10.980    0.143   -0.000    2.282    0.997
+   4  -0.415   -1.980   -1.566    0.143   -0.262  -10.980    0.143   -0.000    0.000    0.000
+   5  10.027   10.025   -0.002   -0.002   -0.001    0.992    0.094   -0.096   10.441   12.005
    6  15.827   15.830    0.003    0.003   -0.000    1.000    0.003   -0.000    5.800    5.805
    7  17.971   17.978    0.008    0.008   -0.001    0.994    0.109   -0.101    2.144    2.149
    8  17.971   17.978    0.008    0.008   -0.001    0.994    0.109   -0.101    0.000    0.000
  
  KS gap:   10.441 (assuming bval:4 ==> bcond:5)
- QP gap:   11.993 (OTMS:   10.297)
- QP_gap - KS_gap:    1.552 (OTMS:   -0.144)
+ QP gap:   12.005 (OTMS:   10.297)
+ QP_gap - KS_gap:    1.564 (OTMS:   -0.144)
  
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
@@ -968,16 +1009,30 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
 
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1        0.004143        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2        0.004143        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3        0.004143        0.000000
+
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00    1.625259E-18    1.628211E-18
-         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
-         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
-         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
-         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
-         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
+         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
+         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         3    2.245748E-17    2.245748E-17    1.040868E+00
+         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1088,7 +1143,7 @@ Notations:
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   1 -19.735    0.002    139.7    0.000
+   1 -19.735    0.002    139.8    0.000
    2  -0.193    0.000 999999.0   19.542
    3  -0.193    0.000 999999.0    0.000
    4  -0.193    0.000 999999.0    0.000
@@ -1105,7 +1160,7 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   1 -19.234    1.772      0.2    0.000
+   1 -19.234    1.771      0.2    0.000
    2  -2.697    0.091      3.6   16.537
    3  -0.415    0.156      2.1    2.282
    4  -0.415    0.156      2.1    0.000
@@ -1120,10 +1175,10 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
    1 -18.981    0.000 999999.0    0.000
-   2  -3.149    0.000   4163.1   15.833
-   3  -1.171    0.121      2.7    1.978
-   4  -1.171    0.121      2.7    0.000
-   5  13.987    0.005     60.7   15.158
+   2  -3.149    0.000   4166.1   15.833
+   3  -1.171    0.120      2.7    1.978
+   4  -1.171    0.120      2.7    0.000
+   5  13.987    0.005     60.6   15.158
    6  15.747    0.202      1.6    1.760
    7  16.382    0.104      3.2    0.635
    8  19.258    0.194      1.7    2.876
@@ -1173,16 +1228,30 @@ Transport calculation results
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
 
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1        0.004143        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2        0.004143        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3        0.004143        0.000000
+
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00    1.625259E-18    1.628211E-18
-         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
-         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
-         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
-         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
-         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
+         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
+         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         3    2.245748E-17    2.245748E-17    1.040868E+00
+         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1291,16 +1360,30 @@ Interpolation of the electron-phonon coupling potential completed
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
 
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1        0.004143        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2        0.004143        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3        0.004143        0.000000
+
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00    1.625259E-18    1.628211E-18
-         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
-         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
-         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
-         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
-         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
+         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
+         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         3    2.245748E-17    2.245748E-17    1.040868E+00
+         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1469,16 +1552,30 @@ Transport calculation results
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
 
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1        0.004143        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2        0.004143        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3        0.004143        0.000000
+
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00    1.625259E-18    1.628211E-18
-         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
-         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
-         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
-         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
-         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
+         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
+         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         3    2.245748E-17    2.245748E-17    1.040868E+00
+         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1628,16 +1725,30 @@ Transport calculation results
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
 
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1        0.004143        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2        0.004143        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3        0.004143        0.000000
+
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00    1.625259E-18    1.628211E-18
-         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
-         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
-         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
-         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
-         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
+         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
+         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         3    2.245748E-17    2.245748E-17    1.040868E+00
+         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1748,25 +1859,25 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1 -19.234  -19.239   -0.005   -0.005   -0.002    0.981   -0.354    0.348    0.000    0.000
-   2  -2.697   -2.978   -0.281   -0.250   -0.200    1.125   -0.250    0.000   16.537   16.261
-   3  -0.415   -2.013   -1.598    0.144   -0.262  -11.103    0.144   -0.000    2.282    0.965
-   4  -0.415   -2.013   -1.598    0.144   -0.262  -11.103    0.144   -0.000    0.000    0.000
-   5  10.027   10.025   -0.002   -0.002   -0.001    0.992    0.094   -0.096   10.441   12.038
+   2  -2.697   -2.978   -0.281   -0.250   -0.200    1.124   -0.250    0.000   16.537   16.261
+   3  -0.415   -2.026   -1.611    0.144   -0.262  -11.196    0.144   -0.000    2.282    0.952
+   4  -0.415   -2.026   -1.611    0.144   -0.262  -11.196    0.144   -0.000    0.000    0.000
+   5  10.027   10.025   -0.002   -0.002   -0.001    0.992    0.094   -0.096   10.441   12.051
    6  15.827   15.830    0.003    0.003   -0.000    1.000    0.003   -0.000    5.800    5.805
    7  17.971   17.978    0.008    0.008   -0.001    0.994    0.109   -0.101    2.144    2.149
    8  17.971   17.978    0.008    0.008   -0.001    0.994    0.109   -0.101    0.000    0.000
  
  KS gap:   10.441 (assuming bval:4 ==> bcond:5)
- QP gap:   12.038 (OTMS:   10.296)
- QP_gap - KS_gap:    1.597 (OTMS:   -0.146)
+ QP gap:   12.051 (OTMS:   10.296)
+ QP_gap - KS_gap:    1.609 (OTMS:   -0.146)
  
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1 -18.981  -18.997   -0.015   -0.015   -0.002    0.980   -0.357    0.342    0.000    0.000
    2  -3.149   -3.270   -0.122   -0.145   -0.021    0.838   -0.145    0.000   15.833   15.726
-   3  -1.171   -1.191   -0.020   -0.036   -0.124    0.570   -0.036   -0.000    1.978    2.079
-   4  -1.171   -1.191   -0.020   -0.036   -0.124    0.570   -0.036   -0.000    0.000    0.000
+   3  -1.171   -1.191   -0.020   -0.036   -0.123    0.570   -0.036   -0.000    1.978    2.079
+   4  -1.171   -1.191   -0.020   -0.036   -0.123    0.570   -0.036   -0.000    0.000    0.000
    5  13.987   13.988    0.001    0.001   -0.000    1.000    0.001   -0.000   15.158   15.179
    6  15.747   15.725   -0.022   -0.022   -0.001    0.992    0.130   -0.152    1.760    1.737
    7  16.382   16.325   -0.057   -0.057   -0.001    0.993    0.125   -0.183    0.635    0.600
@@ -1815,16 +1926,30 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
 
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1        0.004143        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2        0.004143        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3        0.004143        0.000000
+
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00    1.625259E-18    1.628211E-18
-         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
-         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
-         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
-         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
-         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
+         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
+         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         3    2.245748E-17    2.245748E-17    1.040868E+00
+         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1912,16 +2037,30 @@ All the independent perturbations are available
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
 
+ The violation of the charge neutrality conditions
+ by the effective charges is as follows :
+    atom        electric field
+ displacement     direction
+       1               1        0.004143        0.000000
+       1               2        0.000000        0.000000
+       1               3        0.000000        0.000000
+       2               1        0.000000        0.000000
+       2               2        0.004143        0.000000
+       2               3       -0.000000        0.000000
+       3               1       -0.000000        0.000000
+       3               2       -0.000000        0.000000
+       3               3        0.004143        0.000000
+
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.042939E+00    1.625259E-18    1.628211E-18
-         1         2    1.625259E-18    1.042939E+00   -1.622307E-18
-         1         3   -1.625259E-18   -1.625259E-18    1.042939E+00
-         2         1   -1.038797E+00    4.654021E-17    4.623203E-17
-         2         2    4.654021E-17   -1.038797E+00   -4.684839E-17
-         2         3   -4.654021E-17   -4.654021E-17   -1.038797E+00
+         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
+         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         3    2.245748E-17    2.245748E-17    1.040868E+00
+         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -2185,7 +2324,6 @@ P           mkmem           8
                        1 -1  0   0 -1  0   0 -1  1      -1  1  0   0  1  0   0  1 -1
                        0  0 -1   1  0 -1   0  1 -1       0  0  1  -1  0  1   0 -1  1
                       -1  1  0  -1  0  1  -1  0  0       1 -1  0   1  0 -1   1  0  0
-         symsigma        1
          symv1scf        1
            tolwfr      1.00000000E-16
             tmesh      0.00000000E+00  3.00000000E+02  2.00000000E+00
@@ -2220,7 +2358,24 @@ P           mkmem           8
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -2234,11 +2389,11 @@ P           mkmem           8
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT: First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -2247,11 +2402,13 @@ P           mkmem           8
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -2259,24 +2416,15 @@ P           mkmem           8
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [4] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=         22.9  wall=         23.0
+- Proc.   0 individual time (sec): cpu=         23.0  wall=         23.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.9  wall=         23.0
++Overall time at end (sec) : cpu=         23.0  wall=         23.1

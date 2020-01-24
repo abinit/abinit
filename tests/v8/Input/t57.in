@@ -102,6 +102,7 @@
 
     ddb_ngqpt6 1 1 1
     prtphdos6 0
+    chneut6   0  # Don't enforce ASR on BECS (not a good idea, just for testing purposes)
 
 #######################################################################   
 acell 3*9.136
