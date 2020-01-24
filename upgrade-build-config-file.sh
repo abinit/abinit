@@ -71,7 +71,15 @@ fi
 if test "${#}" -ge 1; then
   cfg_old="${1}"
 else
-  cfg_old="${HOME}/.abinit/build/`hostname`.ac"
+  declare -a PathArray=("." "./src" "${HOME}/.abinit/build" "/etc/abinit/build")
+  Hostname="`hostname | sed -e 's/\..*//'`"
+  for val in ${PathArray[@]}; do
+    cfg_old="$val/${Hostname}.ac"
+    if test -f $cfg_old; then
+       echo "found : $cfg_old"
+       break
+    fi
+  done
 fi
 
 # Check that old config file exists
