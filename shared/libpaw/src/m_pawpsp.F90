@@ -1939,8 +1939,8 @@ subroutine pawpsp_calc(core_mesh,epsatm,ffspl,imainmesh,ixc,lnmax,&
    pawang_tmp%anginit(2:3,1)=zero
    LIBPAW_ALLOCATE(pawang_tmp%ylmr,(1,1))
    pawang_tmp%ylmr(1,1)=1._dp/sqrt(four_pi)
-   LIBPAW_ALLOCATE(pawang_tmp%ylmrgr,(3,1,1))
-   pawang_tmp%ylmrgr(1:3,1,1)=zero
+   LIBPAW_ALLOCATE(pawang_tmp%ylmrgr,(9,1,1))
+   pawang_tmp%ylmrgr(1:9,1,1)=zero
  end if
 
 !==========================================================

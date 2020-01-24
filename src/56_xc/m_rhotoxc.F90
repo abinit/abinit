@@ -840,7 +840,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
 
 !      If fake meta-GGA, has to remove the core contribution
 !        when electronic effective mass has been modified
-       if (n3xccc>0.and.(ixc>=31.and.ixc<=34)) then
+       if (n3xccc>0.and.(ixc==31.or.ixc==34)) then
          if (ixc==31) then
            coeff=one-(one/1.01_dp)
            if (nspden_updn==1) then
@@ -855,7 +855,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
              end do
            end if
          else
-           message = 'MetaGGA ixc=32, 33 or 34 is not yet allowed with a core kinetic energy density!'
+           message = 'MetaGGA ixc=34 is not yet allowed with a core kinetic energy density!'
            MSG_ERROR(message)
          end if
        end if

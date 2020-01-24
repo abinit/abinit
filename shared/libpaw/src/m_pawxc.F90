@@ -55,6 +55,7 @@ module m_pawxc
  public :: pawxcm_dfpt    ! Compute 1st-order change of XC potential and contrib
                           !   to 2nd-order change of XC ene inside a PAW sphere. USE (L,M) MOMENTS
  public :: pawxc_get_nkxc    ! Compute size of XC kernel (Kxc) according to spin polarization and XC type
+ public :: pawxc_get_xclevel ! Get XC level (1=LDA, 2=GGA/mGGA, 3=TDDFT)
  public :: pawxc_get_usekden ! Assess whether kinetic energy density is used in XC functional
  public :: pawxc_get_uselaplacian ! Assess whether laplacian of density is used in XC functional
 
@@ -706,6 +707,47 @@ end subroutine pawxc_mkdenpos_wrapper
 
 !----------------------------------------------------------------------
 
+!!****f* m_pawxc/pawxc_get_xclevel
+!! NAME
+!!  pawxc_get_xclevel
+!!
+!! FUNCTION
+!!  Give the eXchange-Correlation "level" (1=LDA, 2=GGA/mGGA, 3=TDDFT)
+!!
+!! INPUTS
+!!  ixc= choice of exchange-correlation scheme
+!!
+!! SOURCE
+
+function pawxc_get_xclevel(ixc)
+!Arguments ------------------------------------
+ integer,intent(in) :: ixc
+ integer :: pawxc_get_xclevel
+
+! *************************************************************************
+
+ pawxc_get_xclevel=0
+
+!ABINIT
+ if ((1<=ixc.and.ixc<=10).or.(30<=ixc.and.ixc<=39).or.(ixc==50)) pawxc_get_xclevel=1 ! ABINIT LDA
+ if ((11<=ixc.and.ixc<=19).or.(23<=ixc.and.ixc<=29).or.ixc==1402000) pawxc_get_xclevel=2 ! ABINIT GGA
+ if (20<=ixc.and.ixc<=22) pawxc_get_xclevel=3 ! ABINIT TDDFT kernel tests
+ if (ixc>=31.and.ixc<=34) pawxc_get_xclevel=2 ! ABINIT internal fake mGGA
+ if (ixc>=41.and.ixc<=42) pawxc_get_xclevel=2 ! ABINIT internal hybrids using GGA
+
+!LibXC functionals
+ if (ixc<0) then
+   pawxc_get_xclevel=1
+   if (libxc_functionals_isgga()) pawxc_get_xclevel=2
+   if (libxc_functionals_ismgga()) pawxc_get_xclevel=2
+   if (libxc_functionals_is_hybrid()) pawxc_get_xclevel=2
+ end if
+
+end function pawxc_get_xclevel
+!!***
+
+!----------------------------------------------------------------------
+
 !!****f* m_pawxc/pawxc_get_usekden
 !! NAME
 !!  pawxc_get_usekden
@@ -913,7 +955,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
  integer :: nvxcgrho,nvxclrho,nvxctau,order
  integer :: usecoretau,usegradient,usekden,uselaplacian
  logical :: need_vxctau,with_taur
- real(dp) :: enxcr,factor,factor2,vxcrho
+ real(dp) :: enxcr,factor,vxcrho
  character(len=500) :: msg
 !arrays
  real(dp),allocatable :: dgxc(:),dlxc(:),d2lxc(:),dnexcdn(:,:),drho(:),d2rho(:),drhocore(:)
@@ -921,7 +963,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
  real(dp),allocatable :: dvxci(:,:),d2vxci(:,:),dylmdr(:,:,:)
  real(dp),allocatable :: exci(:),ff(:),grho2_updn(:,:),gxc(:,:,:,:),lxc(:,:,:)
  real(dp),allocatable :: rhoarr(:,:),rho_updn(:,:),lrho_updn(:,:),lrhocore(:)
- real(dp),allocatable :: tauarr(:,:),tau_updn(:,:),ylmgnorm(:,:),ylmlapl(:,:)
+ real(dp),allocatable :: tauarr(:,:),tau_updn(:,:),ylmlapl(:,:)
  real(dp),allocatable,target :: mag(:,:,:),rhohat(:,:,:),rhonow(:,:,:)
  real(dp),pointer :: mag_(:,:),rho_(:,:,:),tau_(:,:,:),vxctau_(:,:,:)
  real(dp), LIBPAW_CONTIGUOUS pointer :: vxc_diag(:,:),vxc_nc(:,:),vxc_updn(:,:,:)
@@ -1095,11 +1137,12 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
    LIBPAW_ALLOCATE(d2vxci,(nrad,nd2vxc))
    LIBPAW_ALLOCATE(dnexcdn,(nrad,nspgrad))
 
-!  GGA: convert Ylm derivatives from normalized to standard cartesian coordinates
-!  dYlm/dr_i = { dYlm/dr_i^hat - (r_i/r) Sum_j[dYlm/dr_j^hat (r_j/r)] } * (1/r)
+!  GGA/mGGA: convert Ylm derivatives from normalized (r_i^hat)
+!            to standard cartesian coordinates (r_i)
+!  dYlm/dr_i = { dYlm/dr_i^hat - r_i^hat * Sum_j[dYlm/dr_j^hat r_j^hat] } * (1/r)
 !  Laplacian: convert Ylm second derivatives from normalized to standard cartesian coordinates
-!  d2Ylm/d2r_i = { d2Ylm/d2r_i^hat - 2 (r_i/r) Sum_j[d2Ylm/dr_idr_j^hat (r_j/r)]
-!                  + (r_i/r)^2 Sum_jk[d2Ylm/dr_jdr_k^hat (r_j/r) (r_k/r)] } * (1/r^2)
+!  Sum_i[d^2Ylm/dr_i^2] = { Sum_j[dYlm/dr_j^hat r_j^hat]
+!                         - Sum_j>k[d^2Ylm/dr_j^hat.dr_k^hat r_j^hat r_k^hat] } * (-2/r^2)
 !  Note that we consider here r=1 (r will be used later)...
    if (xclevel==2) then
      LIBPAW_ALLOCATE(dylmdr,(3,npts,pawang%ylm_size))
@@ -1113,27 +1156,17 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
      gxc=zero
      if (uselaplacian==1) then
        LIBPAW_ALLOCATE(ylmlapl,(npts,pawang%ylm_size))
-       LIBPAW_ALLOCATE(ylmgnorm,(npts,pawang%ylm_size))
        ylmlapl(:,:)=zero
        do ilm=1,pawang%ylm_size
          do ipts=1,npts
-           factor=sum(pawang%ylmrgr(1:3,ilm,ipts)*pawang%anginit(1:3,ipts))
-           ylmgnorm(ipts,ilm)=factor
-           factor2=zero
-           do jj=-1,3
-             do kk=1,3
-               nu=mu(kk,jj)
-               factor2=factor2+pawang%ylmrgr(nu,ilm,ipts)*pawang%anginit(jj,ipts)*pawang%anginit(kk,ipts)
-             end do
-           end do
            do ii=1,3
              factor=zero
-             do jj=-1,3
+             do jj=1,ii
                nu=mu(jj,ii)
                factor=factor+pawang%ylmrgr(nu,ilm,ipts)*pawang%anginit(jj,ipts)
              end do
-             ylmlapl(ipts,ilm)=ylmlapl(ipts,ilm)+pawang%ylmrgr(3+ii,ilm,ipts) &
-&             -2*factor*pawang%anginit(ii,ipts)+factor2*pawang%anginit(ii,ipts)**2
+             ylmlapl(ipts,ilm)=ylmlapl(ipts,ilm) &
+&              -two*(pawang%ylmrgr(ii,ilm,ipts)+factor)*pawang%anginit(ii,ipts)
            end do
          end do
        end do
@@ -1196,7 +1229,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        LIBPAW_ALLOCATE(drho,(nrad))
        LIBPAW_ALLOCATE(d2rho,(nrad*uselaplacian))
        LIBPAW_ALLOCATE(ff,(nrad))
-       rhonow(:,:,2:4)=zero
+       rhonow(:,:,2:4+uselaplacian)=zero
        do ispden=1,nspden
          do ilm=1,lm_size_eff
            if (lmselect(ilm)) then
@@ -1215,9 +1248,9 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
                call pawrad_deducer0(ff,nrad,pawrad)
                drho(2:nrad)=drho(2:nrad)/pawrad%rad(2:nrad)
                call pawrad_deducer0(drho,nrad,pawrad)
-               rhonow(1:nrad,ispden,5)=ff(1:nrad)*ylmlapl(ilm,ipts) &
-&                           +2*ylmgnorm(ipts,ilm)*drho(1:nrad) &
-&                           +(d2rho(1:nrad)+two*drho(1:nrad))*pawang%ylmr(ilm,ipts)
+               rhonow(1:nrad,ispden,5)=rhonow(1:nrad,ispden,5) &
+&               +ff(1:nrad)*ylmlapl(ipts,ilm) &
+&               +(d2rho(1:nrad)+two*drho(1:nrad))*pawang%ylmr(ilm,ipts)
              end if
            end if
          end do
@@ -1298,7 +1331,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 
 !    If fake meta-GGA, has to remove the core contribution
 !      when electronic effective mass has been modified
-     if (usecoretau==1.and.ixc>=31.and.ixc<=34) then
+     if (usecoretau==1.and.(ixc==31.or.ixc==34)) then
        if (ixc==31) then
          factor=one-(one/1.01_dp)
          if (nspden_updn==1) then
@@ -1311,7 +1344,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
            end do
          end if
        else
-         msg='MetaGGA ixc=32, 33 or 34 is not yet allowed with a core kinetic energy density!'
+         msg='MetaGGA ixc=34 is not yet allowed with a core kinetic energy density!'
          MSG_ERROR(msg)
        end if
      end if
@@ -1561,9 +1594,8 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
            call pawrad_deducer0(dlxc,nrad,pawrad)
            do ipts=1,npts
              vxc_updn(1:nrad,ipts,ispden)=vxc_updn(1:nrad,ipts,ispden) &
-&               +factor*(ff(1:nrad)*ylmlapl(ilm,ipts) &
-&                       +2*ylmgnorm(ipts,ilm)*dlxc(1:nrad) &
-&                       +(d2lxc(1:nrad)+two*dlxc(1:nrad))*pawang%ylmr(ilm,ipts))
+&             +factor*(ff(1:nrad)*ylmlapl(ipts,ilm) &
+&                     +(d2lxc(1:nrad)+two*dlxc(1:nrad))*pawang%ylmr(ilm,ipts))
            end do
          end do
        end do
@@ -1678,7 +1710,6 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
      LIBPAW_DEALLOCATE(dylmdr)
      if (uselaplacian==1) then
        LIBPAW_DEALLOCATE(ylmlapl)
-       LIBPAW_DEALLOCATE(ylmgnorm)
      end if
    end if
    if (usekden==1.and.(.not.present(vxctau)).and.(option==0.or.option==2)) then

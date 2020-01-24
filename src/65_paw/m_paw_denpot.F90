@@ -429,6 +429,7 @@ subroutine pawdenpot(compch_sph,epaw,epawdc,ipert,ixc,&
    call pawdensities(compch_sph,cplex,iatom_tot,lmselect_cur,paw_an(iatom)%lmselect,lm_size,&
 &   nhat1,nspden,nzlmopt,opt_compch,1-usenhat,-1,1,pawang,pawprtvol,pawrad(itypat),&
 &   pawrhoij(iatom),pawtab(itypat),rho1,trho1,one_over_rad2=one_over_rad2)
+
    if (usekden==1) then
      ABI_ALLOCATE(lmselect_tmp,(lm_size))
      lmselect_tmp(:)=.true.

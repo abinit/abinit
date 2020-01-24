@@ -93,7 +93,7 @@ MODULE m_pawang
   integer :: nabgnt_option=-1
    ! Option for nablarealgaunt coefficients:
    ! nabgnt_option==0, nablarealgaunt coeffs are not computed (and not allocated)
-   ! nabgnt_option==1, nablarealgaunt coeffs are computed up to l_max 
+   ! nabgnt_option==1, nablarealgaunt coeffs are computed up to l_max
 
   integer :: gnt_option=-1
    ! Option for Gaunt coefficients:
@@ -176,17 +176,19 @@ CONTAINS
 !!  Initialize a pawang datastructure
 !!
 !! INPUTS
-!!  nabgnt_option=flag activated if pawang%nablagntselect and pawang%nablarealgnt have to be allocated
 !!  gnt_option=flag activated if pawang%gntselect and pawang%realgnt have to be allocated
 !!             also determine the size of these pointers
-!!  usekden=flag activated if kinetic energy density computation is activated
+!!  nabgnt_option=flag activated if pawang%nablagntselect and pawang%nablarealgnt have to be allocated
 !!  lmax=maximum value of angular momentum l
 !!  nphi,ntheta=dimensions of paw angular mesh
 !!  nsym=number of symetries
-!!  pawxcdev=choice of XC development (0=no dev. (use of angular mesh) ; 1 or 2=dev. on moments)
-!!  use_ls_ylm=flag activated if pawang%ls_ylm has to be allocated
-!!  use_ylm=flag activated if pawang%ylmr and pawang%ylmrgr have to be allocated
-!!  xclevel=XC functional level (1=LDA, 2=GGA)
+!!  ngrad2_ylm=order of spherical harmonics gradients to be stored (0, 1 or 2)
+!!  use_angular_grid=flag activated if angular grid data have to be allocated
+!!                   (pawang%angwgth, pawang%anginit)
+!!  use_ylm=flag activated if spherical harmonics have to be allocated and computed
+!!          (pawang%ylmr, pawang%ylmrgr)
+!!  use_ls_ylm=flag activated if LS operator has to be allocated and computed
+!!          (pawang%ls_ylm)
 !!
 !! OUTPUT
 !!  Pawang <type(pawang_type)>=ANGular mesh discretization and related data
@@ -198,12 +200,13 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine pawang_init(Pawang,gnt_option,nabgnt_option,usekden,lmax,nphi,nsym,ntheta,pawxcdev,use_ls_ylm,use_ylm,xclevel)
+subroutine pawang_init(Pawang,gnt_option,nabgnt_option,lmax,nphi,ntheta,nsym,ngrad2_ylm,&
+&                      use_angular_grid,use_ylm,use_ls_ylm)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: gnt_option,nabgnt_option,lmax,nphi,nsym,ntheta
- integer,intent(in) :: pawxcdev,use_ls_ylm,use_ylm,usekden,xclevel
+ integer,intent(in) :: gnt_option,nabgnt_option,lmax,nphi,nsym,ntheta,ngrad2_ylm
+ integer,intent(in) :: use_angular_grid,use_ylm,use_ls_ylm
  type(Pawang_type),intent(inout) :: Pawang
 
 !Local variables-------------------------------
@@ -221,7 +224,7 @@ subroutine pawang_init(Pawang,gnt_option,nabgnt_option,usekden,lmax,nphi,nsym,nt
  Pawang%l_size_max=2*Pawang%l_max-1
  Pawang%nsym=nsym
 
- if (pawxcdev==0) then
+ if (use_angular_grid==1) then
    Pawang%nphi=nphi
    Pawang%ntheta=ntheta
    Pawang%angl_size=ntheta*nphi
@@ -238,15 +241,14 @@ subroutine pawang_init(Pawang,gnt_option,nabgnt_option,usekden,lmax,nphi,nsym,nt
  end if
 
  if (use_ylm>0.and.Pawang%angl_size>0) then
-   if (xclevel>=0) ll=Pawang%l_size_max
-   if (xclevel>=2) ll=ll+1
+   ll=Pawang%l_size_max+1
    Pawang%ylm_size=ll**2
    LIBPAW_ALLOCATE(Pawang%ylmr,(Pawang%ylm_size,Pawang%angl_size))
-   if (usekden==1) then
+   if (ngrad2_ylm==2) then
      LIBPAW_ALLOCATE(pawang%ylmrgr,(9,Pawang%ylm_size,Pawang%angl_size))
      call initylmr(ll,0,pawang%angl_size,pawang%angwgth,3,pawang%anginit,pawang%ylmr,&
 &                  ylmr_gr=pawang%ylmrgr)
-   else if (xclevel==2) then
+   else if (ngrad2_ylm==1) then
        LIBPAW_ALLOCATE(Pawang%ylmrgr,(3,Pawang%ylm_size,Pawang%angl_size))
        call initylmr(ll,0,pawang%angl_size,pawang%angwgth,2,pawang%anginit,pawang%ylmr,&
 &                    ylmr_gr=pawang%ylmrgr)
@@ -283,7 +285,7 @@ subroutine pawang_init(Pawang,gnt_option,nabgnt_option,usekden,lmax,nphi,nsym,nt
  end if
 
  Pawang%nabgnt_option=nabgnt_option
- if (Pawang%nabgnt_option==1) then 
+ if (Pawang%nabgnt_option==1) then
    sz1=(Pawang%l_size_max)**6
    sz2=(Pawang%l_size_max)**2
    LIBPAW_ALLOCATE(nablargnt_tmp,(sz1))
