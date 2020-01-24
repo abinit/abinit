@@ -224,7 +224,7 @@ module m_hdr
   real(dp), allocatable :: znucltypat(:)
   ! znucltypat(ntypat) from alchemy
 
-  character(len=6) :: codvsn
+  character(len=8) :: codvsn
   ! version of the code
 
   character(len=132), allocatable :: title(:)
@@ -921,7 +921,7 @@ subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
 !scalars
  integer,intent(in) :: pertcase
  integer,intent(in),optional :: comm_atom
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(ebands_t),intent(in) :: ebands
  type(dataset_type),intent(in) :: dtset
  type(hdr_type),intent(inout) :: hdr !vz_i
@@ -1304,7 +1304,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
  integer,intent(in) :: kptopt,nshiftk_orig,nshiftk,icoulomb
  integer, intent(in),optional :: comm_atom
  real(dp),intent(in) :: ecut,ecutsm,dilatmx,stmbias,pawecutdg,nelect,charge
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(ebands_t),intent(in) :: ebands
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type),intent(in) :: wvl
@@ -2085,7 +2085,7 @@ subroutine hdr_echo(hdr, fform, rdwr, unit, header)
  if (rdwr==4) write(ount, '(a)' ) ' ECHO of the ABINIT file header '
  write(ount, '(a)' ) ' '
  write(ount, '(a)' ) ' First record :'
- write(ount, '(a,a6,2i5)' )  '.codvsn,headform,fform = ',hdr%codvsn, hdr%headform, fform
+ write(ount, '(a,a8,2i5)' )  '.codvsn,headform,fform = ',hdr%codvsn, hdr%headform, fform
  write(ount, '(a)' ) ' '
  write(ount, '(a)' ) ' Second record :'
  write(ount, '(a,4i6)') ' bantot,intxc,ixc,natom  =',hdr%bantot, hdr%intxc, hdr%ixc, hdr%natom
@@ -2289,7 +2289,7 @@ subroutine hdr_skip_wfftype(wff,ierr)
 !Local variables-------------------------------
  integer :: headform,mu,npsp,unit,usepaw !,fform
  integer :: integers(17)
- character(len=6) :: codvsn
+ character(len=8) :: codvsn
  character(len=500) :: msg,errmsg
 #if defined HAVE_MPI_IO
  integer(kind=MPI_OFFSET_KIND) :: delim_record,posit,positloc
@@ -2724,7 +2724,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
  list_size=npsp+1 + npsp
  ABI_MALLOC(list_char,(list_size))
  if (master==me)then
-   list_char(1)       =hdr%codvsn  ! Only 6 characters are stored in list_char(1)
+   list_char(1)       =hdr%codvsn  ! Only 8 characters are stored in list_char(1)
    list_char(2:npsp+1)=hdr%title
    list_char(npsp+2:) =hdr%md5_pseudos
  end if
@@ -2733,7 +2733,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
 
  if(master/=me)then
    list_tmp=list_char(1)
-   hdr%codvsn=list_tmp(1:6)
+   hdr%codvsn=list_tmp(1:8)
    do ipsp=2,npsp+1
      list_tmp =list_char(ipsp)
      hdr%title(ipsp-1) =list_tmp(1:fnlen)
@@ -3418,7 +3418,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
 
    ! Define dimensions.
    ncerr = nctk_def_dims(ncid, [&
-     nctkdim_t("npsp", hdr%npsp), nctkdim_t("codvsnlen", 6), nctkdim_t("psptitlen", 132)&
+     nctkdim_t("npsp", hdr%npsp), nctkdim_t("codvsnlen", 8), nctkdim_t("psptitlen", 132)&
    ])
    NCF_CHECK(ncerr)
 

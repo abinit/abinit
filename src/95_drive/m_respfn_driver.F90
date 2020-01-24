@@ -217,7 +217,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,intent(inout) :: iexit
  real(dp),intent(in) :: cpui
  real(dp),intent(inout) :: etotal !vz_i
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset

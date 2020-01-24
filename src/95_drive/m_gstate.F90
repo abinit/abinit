@@ -238,7 +238,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !scalars
  integer,intent(inout) :: iexit,initialized
  real(dp),intent(in) :: cpui
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
  type(args_gs_type),intent(in) :: args_gs
  type(datafiles_type),intent(inout) :: dtfil

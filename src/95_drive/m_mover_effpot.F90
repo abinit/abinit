@@ -141,7 +141,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  !type 
  type(scup_dtset_type) :: scup_inp
  !real(dp) :: cpui
-!character(len=6) :: codvsn
+!character(len=8) :: codvsn
 
 !TEST_AM
 ! integer :: ia,mu,rand_seed = 5
