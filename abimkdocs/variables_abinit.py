@@ -3689,7 +3689,7 @@ Variable(
     vartype="integer",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval=2,
+    defaultval="2 except when [[eph_task]] = +4 where 1 is used as default."
     mnemonics="Electron-Phonon: INTegration METHod",
     text=r"""
 This variable defines the technique for the integration over the Brillouin zone.
@@ -8109,13 +8109,13 @@ methods:
 In theory, all methods give identical results. However, due to different
 implementation approaches, the round-off errors can lead to slight differences
 intermediate and final results obtained using methods 1,2 and 3. The choice of
-the method can also affect the convergence. For more details, see [[cite:Ricci2019]] or [[cite:Gonze2020]]. 
+the method can also affect the convergence. For more details, see [[cite:Ricci2019]] or [[cite:Gonze2020]].
 WARNING: in [[cite:Ricci2019]], the meaning of [[ixcrot]]=2 or 3 is inverted with respect to the implementation. On the contrary,
 the implemention and [[cite:Gonze2020]] agree. More explicitly, the method refered to as method 1' in [[cite:Ricci2019]]
 is [[ixcrot]]=2, and method refereed to as method 2 in [[cite:Ricci2019]] is [[ixcrot]]=3.
 
 !!! note
-    For non-zero perturbation wavevector ([[qpt]]/=0), only the [[ixcrot]]=3 implementation is currently available. 
+    For non-zero perturbation wavevector ([[qpt]]/=0), only the [[ixcrot]]=3 implementation is currently available.
     The code will stop with the default [[ixcrot]] value for non-zero perturbation wavevector. The user should then set [[ixcrot]]=3 and restart.
 """,
 ),
@@ -19455,25 +19455,30 @@ Variable(
     defaultval=0.0036749326,
     mnemonics="Z-CUT",
     characteristics=['[[ENERGY]]'],
-    commentdefault="0.0036749326 Ha = 0.1 eV",
-    requires="[[optdriver]] in [3,4,99]",
+    commentdefault="0.1 eV (0.0036749326 Ha)",
+    requires="[[optdriver]] in [3, 4, 7, 99]",
     text=r"""
 It is meant to avoid some divergences that might occur during the evaluation
 of the Adler-Wiser expression of the irreducible polarizability
 ([[optdriver]] = 3) or during the numerical treatment of the integrals defining
 the contribution to the self-energy matrix elements ([[optdriver]] = 4). If the
-denominator becomes smaller than [[zcut]], a small imaginary part (depending
-on [[zcut]]) is added, in order to avoid the divergence.
+denominator becomes smaller than **zcut**, a small imaginary part (depending
+on **zcut**) is added, in order to avoid the divergence.
 
-When [[optdriver]] = 99, [[zcut]] defines the small complex shift used to avoid
+When [[optdriver]] = 99, **zcut** defines the small complex shift used to avoid
 divergences in the expression for the macroscopic dielectric function. It
 simulates the experimental uncertainty and the finite lifetime of the
 quasi-particles (although the true lifetime should be k- and band-dependent).
-The value of [[zcut]] affects the number of iteration needed to achieve
-convergence in the Haydock iterative method. In this case, [[zcut]] should be
+The value of **zcut** affects the number of iteration needed to achieve
+convergence in the Haydock iterative method. In this case, **zcut** should be
 larger than the typical distance between the eigenvalues of the exciton Hamiltonian.
-Ideally, one should make a convergence study decreasing the value of [[zcut]]
+Ideally, one should make a convergence study decreasing the value of **zcut**
 for increasing number of k points.
+
+When [[optdriver]] = 7, **zcut** defines the small complex shift used to avoid
+divergences in the expression for the Fan-Migdal e-ph self-energy.
+Note that the default value is to large for e-ph calculations, smaller values of the order
+of 0.001 or 0.001 eV should be used (and carefully tested).
 """,
 ),
 
@@ -19503,7 +19508,7 @@ Variable(
     mnemonics="Z (charge) of the IONs for the different TYPes of AToms",
     characteristics=['[[INTERNAL_ONLY]]'],
     text=r"""
-Charge of the pseudo-ion (=number of valence electrons that are needed to
+Charge of the pseudo-ion (defined as the number of valence electrons that are needed to
 screen exactly the pseudopotential).
 """,
 ),
