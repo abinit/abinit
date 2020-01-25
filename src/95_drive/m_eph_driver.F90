@@ -6,7 +6,7 @@
 !!   Driver for EPH calculations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2019 ABINIT group (MG, MVer, GA)
+!!  Copyright (C) 2009-2020 ABINIT group (MG, MVer, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -137,7 +137,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
 !Arguments ------------------------------------
 !scalars
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(pawang_type),intent(inout) :: pawang
@@ -168,12 +168,12 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(ebands_t) :: ebands, ebands_kq
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
- type(ifc_type) :: ifc, ifc_coarse
+ type(ifc_type) :: ifc
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
 !arrays
- integer :: ngfftc(18), ngfftf(18), ngqpt_coarse(3), count_wminmax(2)
+ integer :: ngfftc(18), ngfftf(18), count_wminmax(2)
  integer,allocatable :: dummy_atifc(:)
  real(dp),parameter :: k0(3)=zero
  real(dp) :: wminmax(2), dielt(3,3), zeff(3,3,dtset%natom), zeff_raw(3,3,dtset%natom)
@@ -455,26 +455,9 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
  end if
 
- if (any(dtset%ddb_qrefine > 1)) then
-   ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
-   ! Build the IFCs using the coarse q-mesh.
-   ngqpt_coarse = dtset%ddb_ngqpt / dtset%ddb_qrefine
-   call ifc_init(ifc_coarse, cryst, ddb, &
-     brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, ngqpt_coarse, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-     nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
-
-   ! Now use the coarse q-mesh to fill the entries in dynmat(q)
-   ! on the dense q-mesh that cannot be obtained from the DDB file.
-   call ifc_init(ifc, cryst, ddb, &
-     brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-     nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm, ifc_coarse=ifc_coarse)
-   call ifc_coarse%free()
-
- else
-   call ifc_init(ifc, cryst, ddb, &
+ call ifc_init(ifc, cryst, ddb, &
      brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
      nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
- end if
 
  ABI_FREE(ddb_qshifts)
  call ifc%print(unit=std_out)

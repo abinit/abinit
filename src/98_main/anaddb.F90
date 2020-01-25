@@ -6,7 +6,7 @@
 !! Main routine for analysis of the interatomic force constants and associated properties.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (XG,DCA,JCC,CL,XW,GA)
+!! Copyright (C) 1999-2020 ABINIT group (XG,DCA,JCC,CL,XW,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

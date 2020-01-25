@@ -7,7 +7,7 @@
 !! the interatomic force constants and write the result in a DDB file.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (GA)
+!!  Copyright (C) 2008-2020 ABINIT group (GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -1,7 +1,7 @@
 /* dev_spec.cu*/
 
 /*
- * Copyright (C) 2008-2019 ABINIT Group (MMancini,FDahm)
+ * Copyright (C) 2008-2020 ABINIT Group (MMancini,FDahm)
  * this file is distributed under the terms of the
  * gnu general public license, see ~abinit/COPYING
  * or http://www.gnu.org/copyleft/gpl.txt.

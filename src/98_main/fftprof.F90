@@ -6,7 +6,7 @@
 !!  Utility for profiling the FFT libraries supported by ABINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2019 ABINIT group (MG)
+!! Copyright (C) 2004-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -213,7 +213,7 @@ program fftprof
  do_mpi_utests = INDEX(tasks," mpi-utests")>0
  !do_mpi_bench  = INDEX(tasks," mpi-bench")>0
 
-#ifdef HAVE_FFT_FFTW3_THREADS
+#ifdef HAVE_FFTW3_THREADS
  call fftw3_init_threads()
 #endif
 

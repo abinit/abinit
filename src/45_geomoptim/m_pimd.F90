@@ -7,7 +7,7 @@
 !!  Path-Integral Molecular Dynamics (PIMD) implementation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (GG,MT)
+!! Copyright (C) 2010-2020 ABINIT group (GG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

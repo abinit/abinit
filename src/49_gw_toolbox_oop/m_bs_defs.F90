@@ -6,7 +6,7 @@
 !!  This module defines basic structures used for Bethe-Salpeter calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2018 EXC and ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, MG)
+!! Copyright (C) 1992-2020 EXC and ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

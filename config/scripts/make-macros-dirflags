@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -153,8 +153,6 @@ ext_libs = sorted(list(set(ext_libs)))
 ext_libs.remove("fft")
 ext_libs.remove("gpu")
 ext_libs.remove("mpi")
-ext_libs.remove("timer")
-ext_libs = ["atompaw"] + ext_libs
 
 # Init
 mac = ""

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Copyright (C) 1998-2019 ABINIT group (XG).
+# Copyright (C) 1998-2020 ABINIT group (XG).
 # 
 # Change the reference files to allow the ngfft to be present in the diff
 

@@ -109,7 +109,7 @@ def robodoc_dheader(dirname):
 !!  FIXME: Description is missing
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT Group
+!! Copyright (C) 2020-2020 ABINIT Group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

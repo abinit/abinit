@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -84,6 +84,7 @@ def macro_footer():
 # Initial setup
 my_name    = "make-macros-output"
 my_configs = {
+  "bsys":"config/specs/buildsys.conf",
   "conf":"config/specs/autotools.conf",
   "libs":"config/specs/corelibs.conf"}
 my_output  = "config/m4/auto-output.m4"
@@ -119,6 +120,13 @@ try:
   ac_abinit_dirs = cnf.get("ac_output","subdirs").split()
 except:
   ac_abinit_dirs = list()
+
+# Add subsystems
+cnf_subs = MyConfigParser()
+cnf_subs.read(my_configs["bsys"])
+ac_abinit_dirs += sorted([item for item in cnf_subs.sections() \
+  if (cnf_subs.get(item, "mode") == "detached") and (cnf_subs.get(item, "type") == "data")])
+
 
 # Start writing macro
 m4 = open(my_output, "wt")

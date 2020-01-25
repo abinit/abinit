@@ -6,7 +6,7 @@
 !! Contains the predictor for LOTF (ionmov==23)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JCC, SE)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JCC, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +52,7 @@ CONTAINS !===========================================================
  !! Lotf ensemble molecular dynamics.
  !!
  !! COPYRIGHT
- !! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JCC, SE)
+ !! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JCC, SE)
  !! This file is distributed under the terms of the
  !! GNU General Public License, see ~abinit/COPYING
  !! or http://www.gnu.org/copyleft/gpl.txt .

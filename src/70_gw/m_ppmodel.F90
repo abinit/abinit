@@ -7,7 +7,7 @@
 !!  the plasmonpole technique. Methods to operate on the object are also provided.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG, GMR, VO, LR, RWG, RS)
+!!  Copyright (C) 2008-2020 ABINIT group (MG, GMR, VO, LR, RWG, RS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

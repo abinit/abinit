@@ -10,7 +10,7 @@
 !!  Also contains basic container datatype for LibXC interfacing.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MOliveira,LHH,FL,GMR,MT)
+!! Copyright (C) 2008-2020 ABINIT group (MOliveira,LHH,FL,GMR,MT)
 !! This file is distributed under the terms of the
 !! GNU Gener_al Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

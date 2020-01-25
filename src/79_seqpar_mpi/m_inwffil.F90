@@ -6,7 +6,7 @@
 !!  Do initialization of wavefunction files.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

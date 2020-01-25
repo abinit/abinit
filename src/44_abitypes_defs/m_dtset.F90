@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1992-2019 ABINIT group (XG, MG, FJ, DCA, MT)
+!! Copyright (C) 1992-2020 ABINIT group (XG, MG, FJ, DCA, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -852,7 +852,7 @@ type, public :: dataset_type
 
 ! e-ph variables
  real(dp) :: eph_mustar
- integer :: eph_intmeth ! = 1
+ integer :: eph_intmeth ! = 2
  real(dp) :: eph_extrael != zero
  real(dp) :: eph_fermie != huge(one)
  integer :: eph_frohlichm != 0
@@ -868,6 +868,7 @@ type, public :: dataset_type
 
  integer :: eph_stern = 0
  integer :: eph_transport = 0
+ !integer :: eph_mrta = 1
  integer :: eph_use_ftinterp = 0
 
  integer :: ph_intmeth
@@ -876,7 +877,6 @@ type, public :: dataset_type
  real(dp) :: ph_smear
  integer :: dvdb_ngqpt(3)
  integer :: ddb_ngqpt(3)
- integer :: ddb_qrefine(3) = [1, 1, 1]
  real(dp) :: ddb_shiftq(3)
 
  integer :: mixprec = 0
@@ -1401,7 +1401,6 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  if (allocated(dtin%ph_qshift)) call alloc_copy(dtin%ph_qshift, dtout%ph_qshift)
  dtout%ph_smear          = dtin%ph_smear
  dtout%ddb_ngqpt         = dtin%ddb_ngqpt
- dtout%ddb_qrefine       = dtin%ddb_qrefine
  dtout%dvdb_ngqpt        = dtin%dvdb_ngqpt
  dtout%ddb_shiftq        = dtin%ddb_shiftq
  dtout%dvdb_qcache_mb    = dtin%dvdb_qcache_mb
@@ -3053,7 +3052,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' chrgat charge chempot chkdilatmx chkexit chkprim'
  list_vars=trim(list_vars)//' chksymbreak chneut cineb_start coefficients constraint_kind cpus cpum cpuh'
 !D
- list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_qrefine ddb_shiftq dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb'
+ list_vars=trim(list_vars)//' ddamp ddb_ngqpt ddb_shiftq dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb'
  list_vars=trim(list_vars)//' delayperm densfor_pred densty dfield'
  list_vars=trim(list_vars)//' dfpt_sciss diecut diegap dielam dielng diemac'
  list_vars=trim(list_vars)//' diemix diemixmag diismemory dilatmx dipdip dipdip_prt dipdip_range'
@@ -3199,13 +3198,13 @@ subroutine chkvars(string)
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
  list_vars=trim(list_vars)//' sigma_bsum_range sigma_erange sigma_ngkpt sigma_nshiftk sigma_shiftk'
-!MS Variables for SCALE-UP 
+!MS Variables for SCALE-UP
  list_vars=trim(list_vars)//' scup_elec_model scup_ksamp scup_tcharge scup_initorbocc scup_ismagnetic'
- list_vars=trim(list_vars)//' scup_istddft scup_printbands scup_printgeom scup_printeigv scup_printeltic ' 
+ list_vars=trim(list_vars)//' scup_istddft scup_printbands scup_printgeom scup_printeigv scup_printeltic '
  list_vars=trim(list_vars)//' scup_printorbocc scup_printniter scup_nspeck scup_speck scup_ndivsm'
  list_vars=trim(list_vars)//' scup_scfmixing scup_scfthresh scup_startpulay scup_maxscfstep'
  list_vars=trim(list_vars)//' scup_smearing scup_freezden'
-!End SCALE-UP variables 
+!End SCALE-UP variables
  list_vars=trim(list_vars)//' slabwsrad slabzbeg slabzend slk_rankpp smdelta so_psp'
  list_vars=trim(list_vars)//' slc_coupling'
  list_vars=trim(list_vars)//' spbroad spgaxor spgorig spgroup spgroupma'

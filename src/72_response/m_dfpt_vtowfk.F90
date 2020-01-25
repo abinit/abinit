@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
+!!  Copyright (C) 1999-2020 ABINIT group (XG, AR, DRH, MB, MVer,XW, MT, GKA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
