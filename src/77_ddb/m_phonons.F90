@@ -3100,8 +3100,7 @@ subroutine dfpt_symph(iout,acell,eigvec,indsym,natom,nsym,phfrq,rprim,symrel)
      if(integer_characters(imode)==0)then
        do jmode=imode-1,1,-1
          if(integer_characters(jmode)==0)then
-           if(abs(phfrq(imode)-phfrq(jmode))<itol*tol6 .and. &
-&              sum(abs(symph(:,imode)-symph(:,jmode))) < tol6 )then
+           if(abs(phfrq(imode)-phfrq(jmode))<itol*tol6)then
              degeneracy(jmode)=degeneracy(jmode)+degeneracy(imode)
              degeneracy(imode)=0
              symph(:,jmode)=symph(:,jmode)+symph(:,imode)
