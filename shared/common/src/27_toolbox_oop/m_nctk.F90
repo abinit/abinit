@@ -2660,6 +2660,11 @@ subroutine nctk_defwrite_nonana_raman_terms(ncid, iphl2, nph2l, natom, rsus, mod
 
 ! *************************************************************************
 
+!This should be removed when nph2l will be used.
+ if(.false.)then
+  MSG_ERROR(sjoin("nph2l is unused", nph2l)) 
+ endif
+
  select case (mode)
  case ("define")
    NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
