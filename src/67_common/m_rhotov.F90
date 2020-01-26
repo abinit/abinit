@@ -515,7 +515,7 @@ subroutine rhotov(constrained_dft,dtset,energies,gprimd,gsqcut,intgres,istep,kxc
      ABI_DEALLOCATE(xcart)
 
      vresidnew = vnew - vtrial
-     vtrial = vnew
+     !vtrial = vnew
 
      call mean_fftr(vxc, vmean(1:1),  nfft, nfftot, dtset%nspden,&
 &     mpi_comm_sphgrid=mpi_comm_sphgrid)

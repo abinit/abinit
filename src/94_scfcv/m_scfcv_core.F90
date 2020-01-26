@@ -1942,7 +1942,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &     ngfftf,ngfftmix,nkxc,npawmix,npwdiel,&
 &     nstep,psps%ntypat,n1xccc,&
 &     pawrhoij,ph1df,psps,rhor,rprimd,susmat,psps%usepaw,&
-&     vhartr,vnew_mean,vpsp,nvresid,vtrial,vxc,xred,&
+&     vhartr,vnew_mean,vpsp,nvresid,vres_mean,vtrial,vxc,xred,&
 &     nfftf,pawtab,rhog,wvl,&
 &     mix_mgga=mix_mgga,vtau=vxctau,vtauresid=nvtauresid)
 

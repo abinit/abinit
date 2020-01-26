@@ -468,8 +468,10 @@ subroutine xcpot (cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,n
 !If the grid is shifted, or if gradient corrections are present, there must be FFTs.
  if(ishift==1 .or. ngrad==2)then
 
-   if (with_vxc) then
+   if(with_vxc.or.with_vxctau) then
      ABI_ALLOCATE(work,(cplex*nfft))
+   end if
+   if (with_vxc) then
      ABI_ALLOCATE(wkcmpx,(2,nfft))
    end if
 
@@ -685,6 +687,8 @@ subroutine xcpot (cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,n
    end if
    if(with_vxc) then
      ABI_DEALLOCATE(wkcmpx)
+   end if
+   if(with_vxc.or.with_vxctau) then
      ABI_DEALLOCATE(work)
    end if
 
