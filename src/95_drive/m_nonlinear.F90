@@ -207,8 +207,7 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
 !arrays
  integer :: dum_kptrlatt(3,3),dum_vacuum(3),ngfft(18),ngfftf(18),perm(6),ii,theunit
  integer,allocatable :: atindx(:),atindx1(:),blkflg(:,:,:,:,:,:),carflg(:,:,:,:,:,:),cgindex(:,:)
- integer,allocatable :: blkflg_tmp(:,:,:,:,:,:),blkflg_sav(:,:,:,:,:,:)
- integer,allocatable :: carflg_tmp(:,:,:,:,:,:),carflg_sav(:,:,:,:,:,:)
+ integer,allocatable :: flg_tmp(:,:,:,:,:,:)
  integer,allocatable :: d3e_pert1(:),d3e_pert2(:),d3e_pert3(:)
  integer,allocatable :: indsym(:,:,:),indsy1(:,:,:),irrzon(:,:,:),irrzon1(:,:,:)
  integer,allocatable :: kg(:,:),kneigh(:,:),kg_neigh(:,:,:)
@@ -308,37 +307,38 @@ subroutine nonlinear(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,pawang,pawra
  ABI_ALLOCATE(d3e_pert3,(mpert))
  ABI_ALLOCATE(d3etot,(2,3,mpert,3,mpert,3,mpert))
  ABI_ALLOCATE(d3cart,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(blkflg_tmp,(3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(blkflg_sav,(3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(carflg_tmp,(3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(carflg_sav,(3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3e_1,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3e_2,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3e_3,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3e_4,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3e_5,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3e_6,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3e_7,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3e_8,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3e_9,(2,3,mpert,3,mpert,3,mpert))
- d3e_1(:,:,:,:,:,:,:) = 0_dp
- d3e_2(:,:,:,:,:,:,:) = 0_dp
- d3e_3(:,:,:,:,:,:,:) = 0_dp
- d3e_4(:,:,:,:,:,:,:) = 0_dp
- d3e_5(:,:,:,:,:,:,:) = 0_dp
- d3e_6(:,:,:,:,:,:,:) = 0_dp
- d3e_7(:,:,:,:,:,:,:) = 0_dp
- d3e_8(:,:,:,:,:,:,:) = 0_dp
- d3e_9(:,:,:,:,:,:,:) = 0_dp
- ABI_ALLOCATE(d3cart_1,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3cart_2,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3cart_3,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3cart_4,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3cart_5,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3cart_6,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3cart_7,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3cart_8,(2,3,mpert,3,mpert,3,mpert))
- ABI_ALLOCATE(d3cart_9,(2,3,mpert,3,mpert,3,mpert))
+ if (pead==0) then
+   ABI_ALLOCATE(d3e_1,(2,3,mpert,3,mpert,3,mpert))
+   ABI_ALLOCATE(d3e_2,(2,3,mpert,3,mpert,3,mpert))
+   ABI_ALLOCATE(d3e_3,(2,3,mpert,3,mpert,3,mpert))
+   ABI_ALLOCATE(d3e_4,(2,3,mpert,3,mpert,3,mpert))
+   ABI_ALLOCATE(d3e_5,(2,3,mpert,3,mpert,3,mpert))
+   ABI_ALLOCATE(d3e_6,(2,3,mpert,3,mpert,3,mpert))
+   ABI_ALLOCATE(d3e_7,(2,3,mpert,3,mpert,3,mpert))
+   ABI_ALLOCATE(d3e_8,(2,3,mpert,3,mpert,3,mpert))
+   ABI_ALLOCATE(d3e_9,(2,3,mpert,3,mpert,3,mpert))
+   d3e_1(:,:,:,:,:,:,:) = 0_dp
+   d3e_2(:,:,:,:,:,:,:) = 0_dp
+   d3e_3(:,:,:,:,:,:,:) = 0_dp
+   d3e_4(:,:,:,:,:,:,:) = 0_dp
+   d3e_5(:,:,:,:,:,:,:) = 0_dp
+   d3e_6(:,:,:,:,:,:,:) = 0_dp
+   d3e_7(:,:,:,:,:,:,:) = 0_dp
+   d3e_8(:,:,:,:,:,:,:) = 0_dp
+   d3e_9(:,:,:,:,:,:,:) = 0_dp
+   if (dtset%nonlinear_info>0) then
+     ABI_ALLOCATE(flg_tmp,(3,mpert,3,mpert,3,mpert))
+     ABI_ALLOCATE(d3cart_1,(2,3,mpert,3,mpert,3,mpert))
+     ABI_ALLOCATE(d3cart_2,(2,3,mpert,3,mpert,3,mpert))
+     ABI_ALLOCATE(d3cart_3,(2,3,mpert,3,mpert,3,mpert))
+     ABI_ALLOCATE(d3cart_4,(2,3,mpert,3,mpert,3,mpert))
+     ABI_ALLOCATE(d3cart_5,(2,3,mpert,3,mpert,3,mpert))
+     ABI_ALLOCATE(d3cart_6,(2,3,mpert,3,mpert,3,mpert))
+     ABI_ALLOCATE(d3cart_7,(2,3,mpert,3,mpert,3,mpert))
+     ABI_ALLOCATE(d3cart_8,(2,3,mpert,3,mpert,3,mpert))
+     ABI_ALLOCATE(d3cart_9,(2,3,mpert,3,mpert,3,mpert))
+   end if
+ end if
  blkflg(:,:,:,:,:,:) = 0
  d3etot(:,:,:,:,:,:,:) = 0_dp
  rfpert(:,:,:,:,:,:) = 0
@@ -1014,11 +1014,11 @@ end if
 &   kpt3,dtset%mband,dtset%mkmem,mpi_enreg,dtset%mpw,dtset%nband,dtset%nkpt,&
 &   nkpt3,nneigh,npwarr,dtset%nsppol,occ,pwind)
 
-  call pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,gmet,gprimd,gsqcut,&
-&  hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,dtset%mband,dtset%mgfft,&
-&  dtset%mkmem,mkmem_max,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,mvwtk,natom,nfftf,&
-&  dtset%nkpt,nkpt3,nkxc,nk3xc,nneigh,dtset%nspinor,dtset%nsppol,npwarr,occ,psps,pwind,&
-&  rfpert,rprimd,ucvol,xred)
+   call pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3etot,gmet,gprimd,gsqcut,&
+&   hdr,kg,kneigh,kg_neigh,kptindex,kpt3,kxc,k3xc,dtset%mband,dtset%mgfft,&
+&   dtset%mkmem,mkmem_max,dtset%mk1mem,mpert,mpi_enreg,dtset%mpw,mvwtk,natom,nfftf,&
+&   dtset%nkpt,nkpt3,nkxc,nk3xc,nneigh,dtset%nspinor,dtset%nsppol,npwarr,occ,psps,pwind,&
+&   rfpert,rprimd,ucvol,xred)
 
  else ! pead=0 in this case
 
@@ -1031,34 +1031,38 @@ end if
 &   nsym1,indsy1,symaf1,symrc1,&
 &   d3e_1,d3e_2,d3e_3,d3e_4,d3e_5,d3e_6,d3e_7,d3e_8,d3e_9)
 
+   !Complete missing elements using symmetry operations
+
+   if (dtset%nonlinear_info>0) then
+     flg_tmp = blkflg
+     call d3sym(flg_tmp,d3e_1,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+     flg_tmp = blkflg
+     call d3sym(flg_tmp,d3e_2,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+     flg_tmp = blkflg
+     call d3sym(flg_tmp,d3e_3,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+     flg_tmp = blkflg
+     call d3sym(flg_tmp,d3e_4,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+     flg_tmp = blkflg
+     call d3sym(flg_tmp,d3e_5,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+     flg_tmp = blkflg
+     call d3sym(flg_tmp,d3e_6,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+     flg_tmp = blkflg
+     call d3sym(flg_tmp,d3e_7,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+     flg_tmp = blkflg
+     call d3sym(flg_tmp,d3e_8,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+     flg_tmp = blkflg
+     call d3sym(flg_tmp,d3e_9,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+   end if
+
  end if ! end pead/=0
 
  write(message,'(a,a,a)')ch10,&
 & ' --- Third order energy calculation completed --- ',ch10
  call wrtout(ab_out,message,'COLL')
 
-!Complete missing elements using symmetry operations
- blkflg_sav = blkflg
- call d3sym(blkflg,d3etot,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
 
- blkflg_tmp = blkflg_sav
- call d3sym(blkflg_tmp,d3e_1,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
- blkflg_tmp = blkflg_sav
- call d3sym(blkflg_tmp,d3e_2,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
- blkflg_tmp = blkflg_sav
- call d3sym(blkflg_tmp,d3e_3,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
- blkflg_tmp = blkflg_sav
- call d3sym(blkflg_tmp,d3e_4,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
- blkflg_tmp = blkflg_sav
- call d3sym(blkflg_tmp,d3e_5,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
- blkflg_tmp = blkflg_sav
- call d3sym(blkflg_tmp,d3e_6,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
- blkflg_tmp = blkflg_sav
- call d3sym(blkflg_tmp,d3e_7,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
- blkflg_tmp = blkflg_sav
- call d3sym(blkflg_tmp,d3e_8,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
- blkflg_tmp = blkflg_sav
- call d3sym(blkflg_tmp,d3e_9,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
+ !Complete missing elements using symmetry operations
+ call d3sym(blkflg,d3etot,indsym,mpert,natom,dtset%nsym,symrec,dtset%symrel)
 
 !Open the formatted derivative database file, and write the
 !preliminary information
@@ -1080,15 +1084,17 @@ end if
 !  Compute tensors related to third-order derivatives
    call nlopt(blkflg,carflg,d3etot,d3cart,gprimd,mpert,natom,rprimd,ucvol)
 !  Note that the imaginary part is not transformed into cartesian coordinates
-   call nlopt(blkflg,carflg_tmp,d3e_1,d3cart_1,gprimd,mpert,natom,rprimd,ucvol)
-   call nlopt(blkflg,carflg_tmp,d3e_2,d3cart_2,gprimd,mpert,natom,rprimd,ucvol)
-   call nlopt(blkflg,carflg_tmp,d3e_3,d3cart_3,gprimd,mpert,natom,rprimd,ucvol)
-   call nlopt(blkflg,carflg_tmp,d3e_4,d3cart_4,gprimd,mpert,natom,rprimd,ucvol)
-   call nlopt(blkflg,carflg_tmp,d3e_5,d3cart_5,gprimd,mpert,natom,rprimd,ucvol)
-   call nlopt(blkflg,carflg_tmp,d3e_6,d3cart_6,gprimd,mpert,natom,rprimd,ucvol)
-   call nlopt(blkflg,carflg_tmp,d3e_7,d3cart_7,gprimd,mpert,natom,rprimd,ucvol)
-   call nlopt(blkflg,carflg_tmp,d3e_8,d3cart_8,gprimd,mpert,natom,rprimd,ucvol)
-   call nlopt(blkflg,carflg_tmp,d3e_9,d3cart_9,gprimd,mpert,natom,rprimd,ucvol)
+   if (pead==0.and.(dtset%nonlinear_info>0)) then
+     call nlopt(blkflg,flg_tmp,d3e_1,d3cart_1,gprimd,mpert,natom,rprimd,ucvol)
+     call nlopt(blkflg,flg_tmp,d3e_2,d3cart_2,gprimd,mpert,natom,rprimd,ucvol)
+     call nlopt(blkflg,flg_tmp,d3e_3,d3cart_3,gprimd,mpert,natom,rprimd,ucvol)
+     call nlopt(blkflg,flg_tmp,d3e_4,d3cart_4,gprimd,mpert,natom,rprimd,ucvol)
+     call nlopt(blkflg,flg_tmp,d3e_5,d3cart_5,gprimd,mpert,natom,rprimd,ucvol)
+     call nlopt(blkflg,flg_tmp,d3e_6,d3cart_6,gprimd,mpert,natom,rprimd,ucvol)
+     call nlopt(blkflg,flg_tmp,d3e_7,d3cart_7,gprimd,mpert,natom,rprimd,ucvol)
+     call nlopt(blkflg,flg_tmp,d3e_8,d3cart_8,gprimd,mpert,natom,rprimd,ucvol)
+     call nlopt(blkflg,flg_tmp,d3e_9,d3cart_9,gprimd,mpert,natom,rprimd,ucvol)
+   end if
 
    if ((d3e_pert1(natom+2)==1).and.(d3e_pert2(natom+2)==1).and. &
 &   (d3e_pert3(natom+2)==1)) then
@@ -1256,36 +1262,36 @@ end if
    ABI_DEALLOCATE(mpi_enreg%mkmem)
    ABI_DEALLOCATE(mvwtk)
    ABI_DEALLOCATE(pwind)
+ else
+   if (dtset%nonlinear_info>0) then
+     ABI_DEALLOCATE(d3cart_1)
+     ABI_DEALLOCATE(d3cart_2)
+     ABI_DEALLOCATE(d3cart_3)
+     ABI_DEALLOCATE(d3cart_4)
+     ABI_DEALLOCATE(d3cart_5)
+     ABI_DEALLOCATE(d3cart_6)
+     ABI_DEALLOCATE(d3cart_7)
+     ABI_DEALLOCATE(d3cart_8)
+     ABI_DEALLOCATE(d3cart_9)
+     ABI_DEALLOCATE(flg_tmp)
+   end if
+   ABI_DEALLOCATE(d3e_1)
+   ABI_DEALLOCATE(d3e_2)
+   ABI_DEALLOCATE(d3e_3)
+   ABI_DEALLOCATE(d3e_4)
+   ABI_DEALLOCATE(d3e_5)
+   ABI_DEALLOCATE(d3e_6)
+   ABI_DEALLOCATE(d3e_7)
+   ABI_DEALLOCATE(d3e_8)
+   ABI_DEALLOCATE(d3e_9)
  end if
  ABI_DEALLOCATE(atindx)
  ABI_DEALLOCATE(atindx1)
  ABI_DEALLOCATE(blkflg)
- ABI_DEALLOCATE(blkflg_tmp)
- ABI_DEALLOCATE(blkflg_sav)
  ABI_DEALLOCATE(carflg)
- ABI_DEALLOCATE(carflg_tmp)
- ABI_DEALLOCATE(carflg_sav)
  ABI_DEALLOCATE(cg)
  ABI_DEALLOCATE(d3cart)
  ABI_DEALLOCATE(d3etot)
- ABI_DEALLOCATE(d3cart_1)
- ABI_DEALLOCATE(d3cart_2)
- ABI_DEALLOCATE(d3cart_3)
- ABI_DEALLOCATE(d3cart_4)
- ABI_DEALLOCATE(d3cart_5)
- ABI_DEALLOCATE(d3cart_6)
- ABI_DEALLOCATE(d3cart_7)
- ABI_DEALLOCATE(d3cart_8)
- ABI_DEALLOCATE(d3cart_9)
- ABI_DEALLOCATE(d3e_1)
- ABI_DEALLOCATE(d3e_2)
- ABI_DEALLOCATE(d3e_3)
- ABI_DEALLOCATE(d3e_4)
- ABI_DEALLOCATE(d3e_5)
- ABI_DEALLOCATE(d3e_6)
- ABI_DEALLOCATE(d3e_7)
- ABI_DEALLOCATE(d3e_8)
- ABI_DEALLOCATE(d3e_9)
  ABI_DEALLOCATE(d3e_pert1)
  ABI_DEALLOCATE(d3e_pert2)
  ABI_DEALLOCATE(d3e_pert3)
