@@ -2862,8 +2862,9 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
  type(hdr_type),intent(out) :: hdr
 
 !Local variables-------------------------------
- integer :: ipsp
+ integer :: ipsp, ierr
  character(len=500) :: msg,errmsg
+ character(len=6) :: codvsn6
  real(dp),allocatable :: occ3d(:,:,:)
 
 !*************************************************************************
@@ -2877,7 +2878,12 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
 
  ! Reading the first record of the file ------------------------------------
  ! fform is not a record of hdr_type
- read(unit, err=10, iomsg=errmsg) hdr%codvsn,hdr%headform,fform
+ read(unit, iostat=ierr) hdr%codvsn,hdr%headform,fform
+ if (ierr /= 0) then
+   ! Support for pre-v9 (length of codvsn was changed from 6 to 8) is implemented.
+   read(unit, err=10, iomsg=errmsg) codvsn6, hdr%headform, fform
+   hdr%codvsn(1:6) = codvsn6
+ end if
 
  if (hdr%headform < 80) then
    write(msg,'(3a,i0,4a)') &
