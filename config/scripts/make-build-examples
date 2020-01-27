@@ -92,7 +92,10 @@ now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
 if ( not os.path.exists(my_outdir) ):
   os.makedirs(my_outdir)
 for old_ex in os.listdir(my_outdir):
-  os.remove(os.path.join(my_outdir, old_ex))
+    try:
+        os.remove(os.path.join(my_outdir, old_ex))
+    except OSError as error:
+        print("file ",os.path.join(my_outdir,old_ex)," cannot be removed")
 
 # Process config files and write examples
 for my_config in my_configs:
