@@ -2975,13 +2975,12 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
 !Local variables-------------------------------
 !scalars
  integer,parameter :: formeig0=0
- integer :: spin,ikf,ik_ibz,nband_k,mpw_disk,mband,nspinor
- integer :: iomode,nsppol,nkibz,isym,itimrev
+ integer :: spin,ikf,ik_disk,nband_k,mpw_disk,mband,nspinor
+ integer :: iomode,nsppol,nkirred_disk,isym,itimrev
  integer :: npw_disk,npw_kf,istwf_disk,istwf_kf
  integer :: ikpt,ii,jj,kk,ll,iqst,nqst
  integer :: wfk_unt, iband, nband_me
  integer :: nband_me_saved, iband_saved, chksymbreak, iout
- integer :: ik_disk
  integer :: spin_saved, spin_sym
  integer :: itimrev_disk
  real(dp) :: ecut_eff,cpu,wall,gflops, res
@@ -2992,16 +2991,14 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  logical,parameter :: force_istwfk1=.False.
  type(wfk_t),target :: wfk_disk
  type(crystal_t) :: cryst
- type(ebands_t) :: ebands_ibz
+ type(ebands_t) :: ebands_disk
  type(ebands_t),target :: ebands_full
 !arrays
  integer :: g0(3),work_ngfft(18),gmax_disk(3),gmax_kf(3),gmax(3)
  integer,allocatable :: kg_kf(:,:), icg(:,:), ikg(:), ibdeig(:,:), ibdocc(:,:)
- integer,allocatable :: ibz2rbz(:)
- integer,allocatable :: ibz2disk(:)
  integer,allocatable :: symrelT(:,:,:)
- integer,allocatable :: rbz2ibz(:,:),kg_disk(:,:),iperm(:),rbz2ibz_sort(:)
- real(dp) :: kf(3),kibz(3), ksym(3)
+ integer,allocatable :: rbz2disk(:,:),kg_disk(:,:),iperm(:),rbz2disk_sort(:)
+ real(dp) :: kf(3),k_disk(3), ksym(3)
  real(dp) :: kdiff(3)
  real(dp),allocatable :: cg_disk(:,:),eig_disk(:),occ_disk(:),work(:,:,:,:)
 
@@ -3020,7 +3017,8 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  call wfk_open_read(wfk_disk,inpath,formeig,iomode,wfk_unt,xmpi_comm_self)
 
 
- ABI_CHECK(wfk_disk%mband == dtset%mband, "mband does not agree with file")
+print *, 'wfk_disk%mband, dtset%mband ', wfk_disk%mband, dtset%mband
+ ABI_CHECK(wfk_disk%mband >= dtset%mband, "mband does not agree with file")
  mband = wfk_disk%mband;
  ABI_CHECK(wfk_disk%nspinor == dtset%nspinor, "nspinor does not agree with file")
  nspinor = wfk_disk%nspinor
@@ -3043,81 +3041,38 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
 
  cryst = wfk_disk%hdr%get_crystal(2)
 
-! first determine IBZ bands etc...
- ebands_ibz = wfk_read_ebands(inpath, xmpi_comm_self)
+! first determine disk bands etc...
+ ebands_disk = wfk_read_ebands(inpath, xmpi_comm_self)
 
  ! Build new header for full BZ. This is the most delicate part since all the arrays in hdr_full
  ! that depend on k-points must be consistent with kptns_in and nkpt_in.
-! call ebands_expandk(ebands_ibz, cryst, ecut_eff, force_istwfk1, dksqmax, rbz2ibz, ebands_full)
+! call ebands_expandk(ebands_disk, cryst, ecut_eff, force_istwfk1, dksqmax, rbz2disk, ebands_full)
 
-!TODO: need to construct rbz2ibz properly with kranks to get from requested input k to the ibz k 
-!   we have on file
-!   make routine map_kpts (cryst, kptns_in, ebands_ibz%kptns, nkpt_in, nkibz, rbz2ibz)
-!TODO: generalize present routine to accept non reduced kpt set, and just go find the ones it needs
-!      should we still use symrels and spin our the irred subset of the input wfk?
  chksymbreak = 0
  iout = 0
- ! abuse symkpt, sending it a "less than full bz set"
- !   should still reduce to the ibz, though not necessairly the same one!!
- !   2019/12/28: Seems it still does generate the same one every time for different perts of FCC Al...
- ABI_ALLOCATE (rbz2ibz, (6,nkpt_in))
- ABI_ALLOCATE (ibz2rbz, (nkpt_in))
+ ABI_ALLOCATE (rbz2disk, (6,nkpt_in))
  ABI_ALLOCATE (symrelT, (3,3,cryst%nsym))
  do isym=1,cryst%nsym
    symrelT(:,:,isym) = transpose(cryst%symrel(:,:,isym))
  end do
- ! NB: convention for timrev in crystal is 1,2 instead of 0,1. Why break the abinit convention????
- call symkpt_new(chksymbreak, cryst%gmet, ibz2rbz, iout, kptns_in, nkpt_in, nkibz, &
-&     cryst%nsym, symrelT, cryst%timrev-1, rbz2ibz, xmpi_comm_self)
-
- ! we now have 3 lists: input k, disk k, and irred k
- ! check that all of the irred k (needed to complete the input k requested) are in the list of those on disk
- ABI_ALLOCATE (ibz2disk, (nkibz))
- ibz2disk = -1
- do ik_ibz=1,nkibz
-print *, 'ik_ibz, nkibz ', ik_ibz, nkibz
-   foundk = .false.
-   do ik_disk=1,wfk_disk%nkpt
-print *, ' kpt disk vs irred ', ebands_ibz%kptns(:,ik_disk), '   ', kptns_in(:,ibz2rbz(ik_ibz))
-     call wrap2_pmhalf(ebands_ibz%kptns(1,ik_disk) - kptns_in(1,ibz2rbz(ik_ibz)), kdiff(1), res)
-     call wrap2_pmhalf(ebands_ibz%kptns(2,ik_disk) - kptns_in(2,ibz2rbz(ik_ibz)), kdiff(2), res)
-     call wrap2_pmhalf(ebands_ibz%kptns(3,ik_disk) - kptns_in(3,ibz2rbz(ik_ibz)), kdiff(3), res)
-     if (sum(abs(kdiff)) < tol6) then
-       ibz2disk(ik_ibz) = ik_disk
-       foundk = .true.
-       exit
-     end if
-!TODO: make sure the algorithm prefers +kibz to the time reversed copy. May be ok as is.
-     call wrap2_pmhalf(ebands_ibz%kptns(1,ik_disk) + kptns_in(1,ibz2rbz(ik_ibz)), kdiff(1), res)
-     call wrap2_pmhalf(ebands_ibz%kptns(2,ik_disk) + kptns_in(2,ibz2rbz(ik_ibz)), kdiff(2), res)
-     call wrap2_pmhalf(ebands_ibz%kptns(3,ik_disk) + kptns_in(3,ibz2rbz(ik_ibz)), kdiff(3), res)
-     if (sum(abs(kdiff)) < tol6) then
-       ibz2disk(ik_ibz) = -ik_disk
-       foundk = .true.
-       exit
-     end if
-   end do
-   if (.not. foundk) then
-print *, 'ik_ibz, kptns_in(:,ibz2rbz(ik_ibz))  ', ik_ibz, kptns_in(:,ibz2rbz(ik_ibz))
-     MSG_ERROR ("wfk_read_my_kptbands : not all of the required irred kpts are on disk.")
-   end if
- end do
+ call mapkptsets(chksymbreak, cryst%gmet, iout, ebands_disk%kptns, ebands_disk%nkpt, kptns_in, nkpt_in, &
+&     nkirred_disk, cryst%nsym, symrelT, cryst%timrev-1, rbz2disk, xmpi_comm_self)
 
  ! More efficienct algorithm based on random access IO:
- !   For each point in the IBZ:
+ !   For each point in the irred disk set:
  !     - Read wavefunctions from wfk_disk
- !     - For each k-point in the star of kpt_ibz:
+ !     - For each k-point in the star of kpt_disk:
  !        - Rotate wavefunctions in G-space to get the k-point in the requested BZ.
  !        - save kbz data.
 
- ! Construct sorted mapping RBZ --> IBZ to speedup qbz search below.
+ ! Construct sorted mapping RBZ --> irred kdisk set, to speedup qbz search below.
  ABI_MALLOC(iperm, (nkpt_in))
- ABI_MALLOC(rbz2ibz_sort, (nkpt_in))
+ ABI_MALLOC(rbz2disk_sort, (nkpt_in))
  iperm = [(ii, ii=1,nkpt_in)]
- rbz2ibz_sort = rbz2ibz(1,:)
- call sort_int(nkpt_in, rbz2ibz_sort, iperm)
+ rbz2disk_sort = rbz2disk(1,:)
+ call sort_int(nkpt_in, rbz2disk_sort, iperm)
 print *, 'iperm ', iperm
-print *, 'rbz2ibz_sort ', rbz2ibz_sort
+print *, 'rbz2disk_sort ', rbz2disk_sort
 
 ! prepare offsets for k-points, which could arrive in a random order from the irred k
 !TODO: if nband_me is not constant over the k-points, this becomes a huge pain to predict...
@@ -3135,13 +3090,13 @@ print *, 'rbz2ibz_sort ', rbz2ibz_sort
  do spin=1,nsppol
    jj = 0
    do ikpt=1,nkpt_in
-     ik_ibz = rbz2ibz(1,ikpt)
-     ik_disk = abs(ibz2disk(ik_ibz))
+     ik_disk = rbz2disk(1,ikpt)
 
      ! conversion of single spin AFM wfk file to full 2 component one in memory
      spin_sym=spin
      if (convnsppol1to2) spin_sym=1
-     nband_k = wfk_disk%nband(ik_disk,spin_sym)
+! this allows for reading fewer bands from disk than the maximum
+     nband_k = min(wfk_disk%nband(ik_disk,spin_sym), dtset%mband)
      ikg(ikpt) = jj
      ibdeig(ikpt,spin) = kk
      ibdocc(ikpt,spin) = ll
@@ -3158,49 +3113,50 @@ print *, 'icg counts ikpt, spin ', icg(ikpt,spin),ikpt,spin
  end do
 
 print *, ' distrb_flags(:,:,:) ', distrb_flags
+
+! main loop reading in wfk and spinning them out to all kptns_in which need them
  do spin=1,nsppol
    ! for nsppol=1 input and nsppol=2 run, no need to continue the spin loop
    if (convnsppol1to2 .and. spin > 1) exit
 
-   do ik_ibz=1,nkibz
-     ik_disk = abs(ibz2disk(ik_ibz))
-     itimrev_disk = 0
-     if (ibz2disk(ik_ibz) < 0) itimrev_disk = 1
+   do ik_disk=1,ebands_disk%nkpt
+     k_disk = ebands_disk%kptns(:, ik_disk)
 
-     nband_k = wfk_disk%nband(ik_disk,spin)
-     kibz = kptns_in(:, ibz2rbz(ik_ibz))
+! this allows for reading fewer bands from disk than the maximum
+     nband_k = min(wfk_disk%nband(ik_disk,spin), dtset%mband)
      istwf_disk = wfk_disk%hdr%istwfk(ik_disk)
      npw_disk = wfk_disk%hdr%npwarr(ik_disk)
 
-     ! Find number of symmetric k-points associated to ik_ibz
+     ! Find number of symmetric k-points associated to ik_disk
      nqst = 0
      needthisk=.false.
      iqst = 0
-     ! scan to the first point which uses this kibz
+     ! scan to the first point which uses this kdisk
      do iqst = 1, nkpt_in
-       if (rbz2ibz_sort(iqst) == ik_ibz) exit
+       if (rbz2disk_sort(iqst) == ik_disk) exit
      end do
      ! how many equivalent k? Could be 0, and we will not necessarily use them all if their bands are on other cpus
-     do ii=iqst,nkpt_in
-       if (rbz2ibz_sort(ii) /= ik_ibz) exit
+     do ii=iqst, nkpt_in
+       if (rbz2disk_sort(ii) /= ik_disk) exit
        nqst = nqst + 1
-print *, 'iqst, ii, iperm(ii), nqst, ik_ibz, distrb_flags(iperm(ii),:,spin)  ', iqst, ii, iperm(ii), nqst, ik_ibz, distrb_flags(iperm(ii),:,spin)
+print *, 'iqst, ii, iperm(ii), nqst, ik_disk, distrb_flags(iperm(ii),:,spin)  ', iqst, ii, iperm(ii), nqst, ik_disk, distrb_flags(iperm(ii),:,spin)
        if (any(distrb_flags(iperm(ii),:,spin))) needthisk=.true.
        if (convnsppol1to2 .and. any(distrb_flags(iperm(ii),:,nsppol+1-spin))) needthisk=.true.
      end do ! loop over equivalent k
 
-print *, ' spin, ik_ibz, nqst, needthisk ', spin, ik_ibz, nqst, needthisk
-! do we need the present kibz, or one of its images?
+print *, ' spin, ik_disk, nqst, needthisk ', spin, ik_disk, nqst, needthisk
+! do we need the present kdisk, or one of its images?
 ! TODO: check if the eigenvalues are correct all the same
      if (.not. needthisk) cycle
 
-     ABI_CHECK(nqst > 0 .and. rbz2ibz_sort(iqst) == ik_ibz, "Wrong iqst")
+     ABI_CHECK(nqst > 0 .and. rbz2disk_sort(iqst) == ik_disk, "Wrong iqst")
 
+! loop over equivalent images found in rbz set for current k_disk point
      iband_saved = -1
      nband_me_saved = -1
      do jj=0,nqst-1
        ikf = iperm(iqst+jj)
-       ABI_CHECK(ik_ibz == rbz2ibz(1,ikf), "ik_ibz !/ ind qq(1)")
+       ABI_CHECK(ik_disk == rbz2disk(1,ikf), "ik_disk !/ ind qq(1)")
 
        kf = kptns_in(:,ikf)
 print *, ' kf ',kf
@@ -3245,24 +3201,18 @@ print *, 'reading from file for iband, ik_disk, spin', iband, ik_disk, spin
          end if
        
          ! reset isym for each spin_sym
-         isym = rbz2ibz(2,ikf)
+         isym = rbz2disk(2,ikf)
          ! there is a first time reversal possible from the irred set found above to the kptns in input.
          ! a second possible time reversal if the irred k is not explicitly in the disk file, but only it's time reversed image
-         itimrev = mod(itimrev_disk+rbz2ibz(3,ikf),2)
-         g0 = rbz2ibz(4:6,ikf) ! IS(k_ibz) + g0 = k_bz
-
-         ! see if we can not get away without time reversal anyway, if k is equal to it's time reversal image
-         if (itimrev > 0) then
-print *, 'itimrev, abs(mod(two*kibz, one)) ', itimrev, abs(mod(two*kibz, one))
-           if (sum(abs(mod(two*kibz, one))) < tol12) itimrev = 0
-         end if
+         itimrev = rbz2disk(3,ikf)
+         g0 = rbz2disk(4:6,ikf) ! IS(k_disk) + g0 = k_bz
 
          ! complete the spin down wfk with an AFM symop
          if (spin_sym /= spin) then
            !  try next symop to find afm operation to get the spin component we want
            do isym = 1, cryst%nsym
              if (cryst%symafm(isym) == 1) cycle
-             ksym = matmul(symrelT(:,:,isym), kibz)
+             ksym = matmul(symrelT(:,:,isym), k_disk)
              if (sum(abs(ksym-kf)) < tol8) exit
            end do
            ABI_CHECK(isym <= cryst%nsym, "did not find the AFM symop I need to get isppol=2 wave functions from disk")
@@ -3272,8 +3222,8 @@ print *, 'using afm symop ', isym, cryst%symafm(isym), cryst%symrel(:,:,isym), c
          isirred_kf = (isym == 1 .and. itimrev == 0 .and. all(g0 == 0) .and. cryst%symafm(isym) == 1)
 print *, 'isirred_kf ', isirred_kf
 
-print *, 'ikf, kf, isym, itimrev, g0, ik_ibz, jj, iqst, ik_ibz, kibz ', &
-&         ikf, kf, isym, itimrev, g0, ik_ibz, jj, iqst, ik_ibz, kibz
+print *, 'ikf, kf, isym, itimrev, g0,  jj, iqst, ik_disk, k_disk ', &
+&         ikf, kf, isym, itimrev, g0,  jj, iqst, ik_disk, k_disk
          if (present(eigen)) then
            eigen(ibdeig(ikf,spin_sym)+1:ibdeig(ikf,spin_sym)+nband_k*(2*nband_k)**formeig) = eig_disk(1:nband_k*(2*nband_k)**formeig)
          end if
@@ -3310,7 +3260,7 @@ print *, 'npwarr change or need to convert the wf by symmetry, or complete it'
            ABI_CALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
   
            ! Rotate nband_k wavefunctions (output in cg)
-           call cgtk_rotate(cryst,kibz,isym,itimrev,g0,nspinor,nband_me,&
+           call cgtk_rotate(cryst,k_disk,isym,itimrev,g0,nspinor,nband_me,&
 &            npw_disk,kg_disk,npw_kf,kg_kf,istwf_disk,istwf_kf,cg_disk,&
 &            cg(:,icg(ikf,spin_sym)+1:icg(ikf,spin_sym)+npw_kf*nband_me*dtset%nspinor),&
 &            work_ngfft,work)
@@ -3320,7 +3270,7 @@ print *, 'npwarr change or need to convert the wf by symmetry, or complete it'
          end if
        end do ! spin_sym
      end do ! equiv kpt jj
-   end do ! kpt
+   end do ! kpt disk
  end do ! sppol
 
  ABI_FREE(icg)
@@ -3329,10 +3279,8 @@ print *, 'npwarr change or need to convert the wf by symmetry, or complete it'
  ABI_FREE(ibdocc)
 
  ABI_FREE(iperm)
- ABI_FREE(rbz2ibz_sort)
- ABI_FREE(rbz2ibz)
- ABI_FREE(ibz2rbz)
- ABI_FREE(ibz2disk)
+ ABI_FREE(rbz2disk_sort)
+ ABI_FREE(rbz2disk)
 
  ABI_FREE(kg_disk)
  ABI_FREE(cg_disk)
@@ -3340,7 +3288,7 @@ print *, 'npwarr change or need to convert the wf by symmetry, or complete it'
  ABI_FREE(occ_disk)
 
  call cryst%free()
- call ebands_free(ebands_ibz)
+ call ebands_free(ebands_disk)
  call ebands_free(ebands_full)
  call wfk_disk%close()
 
@@ -3419,7 +3367,7 @@ subroutine wfk_write_my_kptbands(outpath, dtset, distrb_flags, comm, &
  call cwtime(cpu, wall, gflops, "start")
 
 print *, 'formeig ', formeig
- iomode = 0 !iomode_from_fname(outpath)
+ iomode = iomode_from_fname(outpath)
  wfk_unt = get_unit()
  call wfk_disk%open_write(hdr,outpath,formeig,iomode,wfk_unt,comm) !xmpi_comm_self)
 
@@ -3455,7 +3403,7 @@ print *, ' nband_k npw_k ', nband_k, npw_k
          stop "wfk_write_my_kptbands: bands not contiguous in distrb_flags"
        end if
      end if
-print *, 'nband_me, distrb_flags(ik_rbz,iband+nband_me-1,spin)) ', nband_me, distrb_flags(ik_rbz,iband+nband_me-1,spin)
+print *, 'nband_me, distrb_flags(ik_rbz,iband,spin)) ', nband_me, distrb_flags(ik_rbz,iband,spin)
 
      if (present(occ)) then
 print *, 'shapeocc ', shape(occ)

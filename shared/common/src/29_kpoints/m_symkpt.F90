@@ -41,6 +41,7 @@ module m_symkpt
 
  public :: symkpt
  public :: symkpt_new
+ public :: mapkptsets
 !!***
 
 contains
@@ -655,6 +656,199 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  end if
 
 end subroutine symkpt_new
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* ABINIT/mapkptsets
+!! NAME
+!! mapkptsets
+!!
+!! FUNCTION
+!! given 2 input sets of kpts (1 and 2) find the symmetry operations that yield points in list 2 from a minimal set from list 1
+!! typical usage is to find k in a list from disk, to initialize the wfk in memory
+!! kin can be overcomplete etc... we just need to find _a_ solution
+!!
+!! INPUTS
+!!
+!! OUTPUT
+!! nkirred = number of irreducible k needed from list 1 (in)
+!! bz2ibz_smap = mapping of indices in list 2 with their irreducible origin in list 1, symop and timrev needed to transform them
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine mapkptsets(chksymbreak,gmet,iout,k_in,nk_in,&
+&   kbz,nkbz,nkirred,nsym,symrec,timrev,bz2kin_smap, comm)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: chksymbreak,iout,nkbz,nsym,timrev,comm
+ integer,intent(in) :: nk_in
+ integer,intent(out) :: nkirred
+!arrays
+ integer,intent(in) :: symrec(3,3,nsym)
+ real(dp),intent(in) :: gmet(3,3),kbz(3,nkbz)
+ real(dp),intent(in) :: k_in(3,nkbz)
+ integer,intent(out) :: bz2kin_smap(6,nkbz)
+
+!Local variables -------------------------
+!scalars
+ type(krank_t) :: krank
+ integer :: identi,ii,ikpt,ik_in,ikpt_found
+ integer :: isym,itim,jj,nkpout,tident
+ !real(dp) :: cpu, gflops, wall
+ character(len=500) :: message
+!arrays
+ real(dp) :: ksym(3),kpt1(3)
+
+! *********************************************************************
+
+ ABI_UNUSED(comm)
+ ABI_UNUSED(gmet)
+
+ if (timrev/=1 .and. timrev/=0) then
+   write(message,'(a,i0)')' timrev should be 0 or 1, while it is equal to ',timrev
+   MSG_BUG(message)
+ end if
+
+ ! Find the identity symmetry operation
+ identi = 1
+ tident = -1
+ if (nsym/=1) then
+   do isym=1,nsym
+     tident=1
+     do jj=1,3
+       if(symrec(jj,jj,isym)/=1)tident=0
+       do ii=1,3
+         if( ii/=jj .and. symrec(ii,jj,isym)/=0)tident=0
+       end do
+     end do
+     if(tident==1)then
+       identi=isym
+       !write(message, '(a,i0)' )' symkpt : found identity, with number',identi
+       !call wrtout(std_out,message,'COLL')
+       exit
+     end if
+   end do
+   ABI_CHECK(tident == 1, 'Did not find the identity operation')
+ end if
+
+ ! Initialize
+ bz2kin_smap = 0
+ do ikpt=1,nkbz
+   bz2kin_smap(1, ikpt) = ikpt
+   bz2kin_smap(2, ikpt) = 1
+   bz2kin_smap(4, ikpt) = 1 ! We will use this as wtk_folded
+ end do
+
+ ! Start krank
+ krank = krank_new(nkbz, kbz)
+
+ ! Here begins the serious business
+ !call cwtime(cpu, wall, gflops, "start")
+
+ ! If there is some possibility for a change
+ if(nkbz/=1 .and. (nsym/=1 .or. timrev==1) )then
+
+   ! Examine whether the k point grid is symmetric or not
+   ! This check scales badly with nkbz hence it's disabled for dense meshes.
+   if (chksymbreak == 1 .and. nkbz < 40**3) then
+     do ikpt=1,nkbz
+       kpt1 = kbz(:,ikpt)
+
+       do isym=1,nsym
+         do itim=0,timrev
+           ! Skip identity symmetry
+           if (isym==identi .and. itim==0) cycle
+
+           ! Get the symmetric of the vector
+           do ii=1,3
+             ksym(ii)=(1-2*itim)*( kpt1(1)*symrec(ii,1,isym)+&
+                                   kpt1(2)*symrec(ii,2,isym)+&
+                                   kpt1(3)*symrec(ii,3,isym) )
+           end do
+
+           !find this point
+           ikpt_found = krank%get_index(ksym)
+           !if (sum(abs(mod(ksym-kbz(:,ikpt_found),one)))>tol8) then
+           !  MSG_ERROR('Wrong k-point mapping found by krank')
+           !end if
+           !if k-point not found
+           if (ikpt_found < 0) then
+             write(message,'(3a,i4,2a,9i3,2a,i6,1a,3es16.6,6a)' )&
+             'Chksymbreak=1. It has been observed that the k point grid is not symmetric:',ch10,&
+             'for the symmetry number: ',isym,ch10,&
+             'with symrec= ',symrec(1:3,1:3,isym),ch10,&
+             'the symmetric of the k point number: ',ikpt,' with components: ',kpt1(:),ch10,&
+             'does not belong to the k point grid.',ch10,&
+             'Read the description of the input variable chksymbreak,',ch10,&
+             'You might switch it to zero, or change your k point grid to one that is symmetric.'
+             MSG_ERROR(message)
+           end if
+         end do ! itim
+       end do ! isym
+     end do ! ikpt
+   end if
+ end if ! End check on possibility of change
+ !call cwtime_report(" ibz", cpu, wall, gflops)
+
+ !do ikpt=1,nkbz
+ !  write(*,*) ikpt, ibz2bz(ikpt), bz2kin_smap(1,ikpt)
+ !end do
+
+ ! Initialize 
+ bz2kin_smap = 0
+
+ nkirred = 0
+ ! Now I loop over the points in the in list to find the mapping to the BZ
+ do ik_in=1,nk_in
+   kpt1 = k_in(:,ik_in)
+
+   ! HM: Here I invert the itim and isym loop to generate the same mapping as listkk
+   do itim=0,timrev
+     do isym=1,nsym
+       ! Get the symmetric of the vector
+       do ii=1,3
+         ksym(ii)=(1-2*itim)*( kpt1(1)*symrec(ii,1,isym)+&
+                               kpt1(2)*symrec(ii,2,isym)+&
+                               kpt1(3)*symrec(ii,3,isym) )
+       end do
+
+       !find this point in the main set 2
+       ikpt_found = krank%get_index(ksym)
+
+       if (ikpt_found < 0) cycle
+       ! if we already filled it, ignore new symmetric pre-image
+       if (bz2kin_smap(1, ikpt_found) /= 0) cycle
+
+       bz2kin_smap(1:3, ikpt_found) = [ik_in,isym,itim]
+       bz2kin_smap(4:6, ikpt_found) = nint(kbz(:,ikpt_found)-ksym)
+     end do
+   end do
+   ! did I end up using this ik_in?
+   if (any(bz2kin_smap(1,:) == ik_in)) then
+     nkirred = nkirred + 1
+   end if
+ end do
+ !call cwtime_report(" map", cpu, wall, gflops)
+
+ call krank%free()
+
+ !Here I make a check if the mapping was sucessfull
+ !might exit less brutally and allow for error catching by the caller...
+ if (any(bz2kin_smap(1, :) == 0)) then
+   MSG_ERROR('Could not find mapping BZ to IBZ')
+ end if
+
+ !do ikpt=1,nkbz
+ !  write(*,*) ikpt, ibz2bz(ikpt), bz2kin_smap(1,ikpt)
+ !end do
+
+end subroutine mapkptsets
 !!***
 
 end module m_symkpt
