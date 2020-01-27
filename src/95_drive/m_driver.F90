@@ -162,7 +162,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  !scalars
  integer,intent(in) :: ndtset,ndtset_alloc,npsp
  real(dp),intent(in) :: cpui
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  character(len=fnlen),intent(in) :: filstat
  type(MPI_type),intent(inout) :: mpi_enregs(0:ndtset_alloc)
  !arrays
