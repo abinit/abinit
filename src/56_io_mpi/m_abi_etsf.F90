@@ -460,7 +460,7 @@ subroutine ini_wf_etsf(ncid,usewvl,lmn_size,npsp,ntypat)
 
 #ifdef HAVE_ETSF_IO
 !Define dimensions.
- ncerr = nctk_def_dims(ncid, [nctkdim_t("npsp", npsp), nctkdim_t("codvsnlen", 6),nctkdim_t("psptitlen", 132)])
+ ncerr = nctk_def_dims(ncid, [nctkdim_t("npsp", npsp), nctkdim_t("codvsnlen", 8),nctkdim_t("psptitlen", 132)])
  NCF_CHECK(ncerr)
 
  if (usewvl==1) then ! Add the BigDFT private dimensions.
