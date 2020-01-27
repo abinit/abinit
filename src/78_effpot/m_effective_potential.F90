@@ -982,7 +982,7 @@ subroutine effective_potential_generateDipDip(eff_pot,ncell,option,asr,comm)
        irpt2 = irpt2 + 1
      end if
    end do
-   write(std_out,*) "irpt2: how many dipdip cells: ", irpt2
+   !write(std_out,*) "irpt2: how many dipdip cells: ", irpt2
 
 !  Copy ifc into effective potential
 !  !!!Warning eff_pot%harmonics_terms%ifcs only contains atmfrc,short_atmfrc,ewald_atmfrc,nrpt

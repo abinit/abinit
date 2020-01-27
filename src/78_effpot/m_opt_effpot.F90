@@ -170,9 +170,9 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh)
  !  Print the standard devition of initial model 
       write(message,'(6a,ES24.16,6a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
  &                    ' Mean Standard Deviation values of the effective-potential',ch10,&
- &                    ' with respect to the training-set before optimization (meV/atm):',&
+ &                    ' with respect to the training-set before optimization (meV^2/atm):',&
  &               ch10,'   Energy          : ',&
- &               mse*Ha_EV*1000*factor ,ch10,&
+ &               mse* (Ha_EV*1000)**2 *factor ,ch10,&
  &                    ' Goal function values of the effective.potential',ch10,& 
  &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
  &                    '   Forces+Stresses : ',&
@@ -217,9 +217,9 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh)
  !  Print the standard deviation after deleting
       write(message,'(6a,ES24.16,6a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
  &                    ' Mean Standard Deviation values of the effective-potential',ch10,&
- &                    ' with respect to the training-set after deleting selected terms (meV/atm):',&
+ &                    ' with respect to the training-set after deleting selected terms (meV^2/atm):',&
  &               ch10,'   Energy          : ',&
- &               mse*Ha_EV*1000*factor ,ch10,&
+ &               mse* (Ha_EV*1000)**2 *factor ,ch10,&
  &                    ' Goal function values of the effective.potential',ch10,& 
  &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
  &                    '   Forces+Stresses : ',&
@@ -296,9 +296,9 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh)
      !  Print the standard deviation after optimization
           write(message,'(6a,ES24.16,6a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
      &                    ' Mean Standard Deviation values of the effective-potential',ch10,&
-     &                    ' with respect to the training-set after optimizing selected terms (meV/atm):',&
+     &                    ' with respect to the training-set after optimizing selected terms (meV^2/atm):',&
      &               ch10,'   Energy          : ',&
-     &               mse*Ha_EV*1000*factor ,ch10,&
+     &               mse* (Ha_EV*1000)**2 *factor ,ch10,&
      &                    ' Goal function values of the effective.potential',ch10,& 
      &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
      &                    '   Forces+Stresses : ',&
@@ -469,9 +469,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  !  Print the standard devition of initial model 
       write(message,'(6a,ES24.16,6a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
  &                    ' Mean Standard Deviation values of the effective-potential',ch10,&
- &                    ' with respect to the training-set before attempted bounding (meV/atm):',&
+ &                    ' with respect to the training-set before attempted bounding (meV^2/atm):',&
  &               ch10,'   Energy          : ',&
- &               mse_ini*Ha_EV*1000*factor ,ch10,&
+ &               mse_ini* (Ha_EV*1000)**2 *factor ,ch10,&
  &                    ' Goal function values of the effective.potential',ch10,& 
  &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
  &                    '   Forces+Stresses : ',&
@@ -667,13 +667,21 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
                   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
 &                                              natom_sc,ntime,fit_data%training_set%sqomega,comm,&
 &                                              compute_anharmonic=.TRUE.,print_file=.FALSE.)
- 
-                  write(message,'(a,I2,a,ES24.16)') "cycle ",i," (mse+msef+mses)/(mse_ini+msef_ini+mses_ini): ",(mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
+! ENERGY + FORCES + STRESSES output 
+!                  write(message,'(a,I2,a,ES24.16)') "cycle ",i," (mse+msef+mses)/(mse_ini+msef_ini+mses_ini): ",(mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
+!                  call wrtout(std_out,message,'COLL')
+!                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (mse+msef+mses): ", (mse+msef+mses)
+!                  call wrtout(std_out,message,'COLL')
+! FORCES + STRESSES output 
+                  write(message,'(a,I2,a,ES24.16)') "cycle ",i," (msef+mses)/(msef_ini+mses_ini): ",(msef+mses)/(msef_ini+mses_ini)
                   call wrtout(std_out,message,'COLL')
-                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (mse+msef+mses): ", (mse+msef+mses)
+                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
                   call wrtout(std_out,message,'COLL')
                   coeff_opt(i) =  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient
-                  msefs_arr(i) =  (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
+!Store ENERGY + FORCES + STRESSES
+!                 msefs_arr(i) =  (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
+!STORE FORCES + STRESSES
+                  msefs_arr(i) =  (msef+mses)/(msef_ini+mses_ini)
                   if(i==2 .and. abs(msefs_arr(1)-msefs_arr(2)) < tol8)then 
                      eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient =& 
                      eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient*10d5 
@@ -695,7 +703,11 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
                 call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                               natom_sc,ntime,fit_data%training_set%sqomega,comm,&
  &                                               compute_anharmonic=.TRUE.,print_file=.FALSE.)
-                write(message,'(a,ES24.16)') "(mse+msef+mses)/(mse_ini+msef_ini+mses_ini) after_opt: ", (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
+! ENERGY + FORCES + STRESESS OUTPUT
+!                write(message,'(a,ES24.16)') "(mse+msef+mses)/(mse_ini+msef_ini+mses_ini) after_opt: ", (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
+!                call wrtout(std_out,message,'COLL')
+! FORCES + STRESESS OUTPUT
+                write(message,'(a,ES24.16)') "(msef+mses)/(msef_ini+mses_ini) after_opt: ", (msef+mses)/(msef_ini+mses_ini)
                 call wrtout(std_out,message,'COLL')
                 mse_ini  = mse
                 msef_ini = msef
@@ -727,9 +739,9 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 !  Print the standard devition of final model 
       write(message,'(6a,ES24.16,6a,ES24.16,2a,ES24.16,2a,ES24.16,a)' )ch10,&
  &                    ' Mean Standard Deviation values of the effective-potential',ch10,&
- &                    ' with respect to the training-set after attempted bounding (meV/atm):',&
+ &                    ' with respect to the training-set after attempted bounding (meV^2/atm):',&
  &               ch10,'   Energy          : ',&
- &               mse*Ha_EV*1000*factor ,ch10,&
+ &               mse* (Ha_EV*1000)**2 *factor ,ch10,&
  &                    ' Goal function values of the effective.potential',ch10,& 
  &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
  &                    '   Forces+Stresses : ',&
@@ -1940,7 +1952,7 @@ function opt_boundcoeff(yvalues,cvalues) result (coeff)
  
  !write(*,*) "a", a
  !write(*,*) "b", b
- penalty = 0.001 
+ penalty = 0.001
  coeff_tmp = -b/(2*a)
  !write(*,*) "coeff_tmp", coeff_tmp 
  if(coeff_tmp > 0)then
