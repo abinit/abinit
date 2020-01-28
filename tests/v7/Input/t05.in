@@ -55,7 +55,7 @@ nspden6 2
 nsppol6 2 
 getwfk6 0
 nband6 6
-nstep6 25
+nstep6 24
 
 # DS 7 constrained direction and amplitude, collinear spin
 magconon7 2
