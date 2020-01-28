@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 8.11.13 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h37 )
+.Starting date : Sat 21 Dec 2019.
+- ( at 15h11 )
   
 - input  file    -> t39.in
 - output file    -> t39.out
@@ -31,12 +31,12 @@
      natom =       2  nloc_mem =       2    nspden =       1   nspinor =       1
     nsppol =       1      nsym =       1    n1xccc =       1    ntypat =       2
     occopt =       1   xclevel =       2
--    mband =           4        mffmem =           1         mkmem =         256
+-    mband =           4        mffmem =           1         mkmem =          64
        mpw =         165          nfft =        4096          nkpt =         256
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        18    nfftf =      5832
 ================================================================================
-P This job should need less than                       7.864 Mbytes of memory.
+P This job should need less than                       4.601 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.580 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -50,12 +50,12 @@ _ WF disk file :      2.580 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
      natom =       2  nloc_mem =       2    nspden =       1   nspinor =       1
     nsppol =       1      nsym =       1    n1xccc =       1    ntypat =       2
     occopt =       1   xclevel =       2
--    mband =           4        mffmem =           1         mkmem =         256
+-    mband =           4        mffmem =           1         mkmem =          64
        mpw =         165          nfft =        4096          nkpt =         256
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        18    nfftf =      5832
 ================================================================================
-P This job should need less than                       7.864 Mbytes of memory.
+P This job should need less than                       4.601 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.580 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -69,12 +69,12 @@ _ WF disk file :      2.580 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
      natom =       2  nloc_mem =       2    nspden =       1   nspinor =       1
     nsppol =       1      nsym =       1    n1xccc =       1    ntypat =       2
     occopt =       1   xclevel =       2
--    mband =           4        mffmem =           1         mkmem =         256
+-    mband =           4        mffmem =           1         mkmem =          64
        mpw =         165          nfft =        4096          nkpt =         256
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        18    nfftf =      5832
 ================================================================================
-P This job should need less than                       7.864 Mbytes of memory.
+P This job should need less than                       4.601 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.580 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
 ================================================================================
@@ -153,7 +153,7 @@ _ WF disk file :      2.580 Mbytes ; DEN or POT disk file :      0.046 Mbytes.
            kptopt           3
          kptrlatt        4   -4    4     -4    4    4     -4   -4    4
           kptrlen      4.24810427E+01
-P           mkmem         256
+P           mkmem          64
             natom           2
             nband           4
            ndtset           3
@@ -175,6 +175,7 @@ P           mkmem         256
         optforces           0
         optstress           0
            orbmag           3
+-      paral_atom           0
         pawcpxocc           2
         pawecutdg      6.00000000E+00 Hartree
            prtden           0
@@ -220,7 +221,7 @@ P           mkmem         256
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   nproc =    4
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -245,8 +246,8 @@ P           mkmem         256
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.18046
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/As.GGA-PBE-rpaw-2.10.abinit
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/As.GGA-PBE-rpaw-2.10.abinit
+- pspini: atom type   1  psp file is /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/As.GGA-PBE-rpaw-2.10.abinit
+- pspatm: opening atomic psp file    /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/As.GGA-PBE-rpaw-2.10.abinit
 - Paw atomic data for element As - Generated with atompaw v3.1.0.3
 - 33.00000   5.00000  20150317                znucl, zion, pspdat
     7   11    1    0      1074   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -269,8 +270,8 @@ P           mkmem         256
  Compensation charge density is not taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.GGA-PBE-rpaw-2.00.abinit
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.GGA-PBE-rpaw-2.00.abinit
+- pspini: atom type   2  psp file is /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/Al.GGA-PBE-rpaw-2.00.abinit
+- pspatm: opening atomic psp file    /home/jzwanzig/abinit/abinit/tests/Psps_for_tests/Al.GGA-PBE-rpaw-2.00.abinit
 - Paw atomic data for element Al - Generated with atompaw v4.0.0.10
 - 13.00000   3.00000  20141221                znucl, zion, pspdat
     7   11    1    0       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -307,7 +308,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  ETOT  4  -8.5657350682879    -1.009E-04 1.640E-08 1.377E-04
  ETOT  5  -8.5657655188101    -3.045E-05 4.661E-09 3.510E-06
  ETOT  6  -8.5657659720028    -4.532E-07 1.330E-09 2.228E-07
- ETOT  7  -8.5657659983256    -2.632E-08 3.066E-11 1.195E-08
+ ETOT  7  -8.5657659983255    -2.632E-08 3.066E-11 1.195E-08
  ETOT  8  -8.5657660003284    -2.003E-09 1.423E-12 8.955E-10
  ETOT  9  -8.5657660004817    -1.533E-10 2.253E-13 3.809E-11
 
@@ -319,9 +320,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
 
- C(   1) : real, imag   1.30612826E-12  8.58015133E-17
- C(   2) : real, imag   2.51556494E-13 -7.40770829E-17
- C(   3) : real, imag  -9.62320638E-12 -8.88301078E-17
+ C(   1) : real, imag  -8.35622618E-12 -9.02157786E-13
+ C(   2) : real, imag   5.70563574E-12  4.83945319E-12
+ C(   3) : real, imag   7.21354468E-13 -5.10985164E-12
 
 ====================================================
 
@@ -331,9 +332,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Orbital magnetization
 ----Orbital magnetization is a real vector, given along Cartesian directions----
 
- Orb Mag(   1) : real, imag   5.52630950E-12  1.09209413E-13
- Orb Mag(   2) : real, imag   5.30538514E-12 -1.05541407E-13
- Orb Mag(   3) : real, imag   3.20275512E-12 -1.83767563E-14
+ Orb Mag(   1) : real, imag  -2.57450974E-11  1.96886185E-12
+ Orb Mag(   2) : real, imag  -1.20969834E-10  8.33353276E-13
+ Orb Mag(   3) : real, imag   1.81573226E-11 -6.15115119E-13
 
 ====================================================
 
@@ -346,7 +347,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     -0.432402994114412
+ Compensation charge over spherical meshes =     -0.432402994114411
  Compensation charge over fine fft grid    =     -0.432393583963439
 
  ==== Results concerning PAW augmentation regions ====
@@ -384,14 +385,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000  -0.00000  -0.00000  -0.03707  -0.00000   0.00000   0.00143   0.00000
    0.00000  -0.00000  -0.00000  -0.00000  -0.03707   0.00000   0.00000   0.00143
    === IMAGINARY PART:
-   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000
-  -0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000
-  -0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000
-  -0.00000  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000
-   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000
+  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000
+  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000   0.00000
+  -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000
+  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000
    0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
-   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000
-  -0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000
+  -0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000
  Atom #  2
    === REAL PART:
    1.25155  -0.01200  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000
@@ -403,14 +404,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
   -0.00000   0.00000   0.00000   0.00883   0.00000   0.00000   0.00011   0.00000
   -0.00000   0.00000   0.00000   0.00000   0.00883   0.00000   0.00000   0.00011
    === IMAGINARY PART:
-   0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
+  -0.00000   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
   -0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000
   -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000
    0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000
-  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000
+  -0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
    0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
-  -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
+  -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000
 
 
 ================================================================================
@@ -446,26 +447,26 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Loc. psp. energy= -2.02283807398282E+00
-    Spherical terms =  4.27798168723945E+00
-    >>>>>>>>> Etotal= -8.56577752129879E+00
+    Spherical terms =  4.27798168723946E+00
+    >>>>>>>>> Etotal= -8.56577752129878E+00
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -9.09011750277717E-01
+    Band energy     = -9.09011750277716E-01
     Ewald energy    =-8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Dble-C XC-energy= -4.31595521895037E+00
-    Spherical terms =  4.09695925231891E+00
-    >>>> Etotal (DC)= -8.56576600048167E+00
+    Spherical terms =  4.09695925231892E+00
+    >>>> Etotal (DC)= -8.56576600048166E+00
 
   >Total energy in eV           = -2.33086660191421E+02
-  >Total DC energy in eV        = -2.33086346694044E+02
+  >Total DC energy in eV        = -2.33086346694043E+02
 --------------------------------------------------------------------------------
 
 
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   nproc =    4
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -505,9 +506,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
 
- C(   1) : real, imag   1.31262430E-09  2.00823115E-17
- C(   2) : real, imag   1.74298390E-09  3.70450406E-18
- C(   3) : real, imag  -2.39362864E-05  1.01256444E-16
+ C(   1) : real, imag   1.89687948E-09 -1.35622053E-12
+ C(   2) : real, imag  -5.89362030E-10  7.50414794E-13
+ C(   3) : real, imag   2.00728558E-05  2.20054071E-12
 
 ====================================================
 
@@ -517,9 +518,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Orbital magnetization
 ----Orbital magnetization is a real vector, given along Cartesian directions----
 
- Orb Mag(   1) : real, imag  -2.85254690E-09 -2.78074555E-13
- Orb Mag(   2) : real, imag  -5.54566210E-10  9.93123986E-14
- Orb Mag(   3) : real, imag  -9.51193064E-05  1.75970239E-13
+ Orb Mag(   1) : real, imag  -3.22045514E-10  4.46542933E-13
+ Orb Mag(   2) : real, imag   2.83742672E-10 -1.12509366E-12
+ Orb Mag(   3) : real, imag  -1.37999440E-04 -4.90091326E-13
 
 ====================================================
 
@@ -595,14 +596,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    0.00000   0.00000   0.00000  -0.03707   0.00000   0.00000   0.00143   0.00000
    0.00000   0.00000   0.00000   0.00000  -0.03707  -0.00000   0.00000   0.00143
    === IMAGINARY PART:
-  -0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000
-  -0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
-   0.00000  -0.00000  -0.00000   0.00000  -0.00001  -0.00000   0.00000   0.00000
+   0.00000   0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000
+  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
+   0.00000  -0.00000   0.00000   0.00000  -0.00001  -0.00000   0.00000   0.00000
   -0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000
-   0.00000   0.00000   0.00001  -0.00000  -0.00000  -0.00000  -0.00000   0.00000
+   0.00000   0.00000   0.00001  -0.00000   0.00000  -0.00000  -0.00000   0.00000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000
-   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
-  -0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000   0.00000
+   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
+  -0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000
  Atom #  2
    === REAL PART:
    1.25154  -0.01200   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000
@@ -615,13 +616,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
   -0.00000   0.00000  -0.00000  -0.00000   0.00883  -0.00000   0.00000   0.00011
    === IMAGINARY PART:
   -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000
-  -0.00000   0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000
+  -0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000  -0.00000
    0.00000   0.00000  -0.00000  -0.00000  -0.00727   0.00000  -0.00000   0.00020
-   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000
+   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000   0.00000
   -0.00000  -0.00000   0.00727   0.00000   0.00000  -0.00020  -0.00000  -0.00000
    0.00000   0.00000  -0.00000   0.00000   0.00020  -0.00000  -0.00000   0.00000
-   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000
-  -0.00000   0.00000  -0.00020  -0.00000   0.00000  -0.00000   0.00000   0.00000
+   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
+  -0.00000   0.00000  -0.00020  -0.00000   0.00000  -0.00000   0.00000  -0.00000
 
 
 ================================================================================
@@ -657,8 +658,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Loc. psp. energy= -2.02283372960337E+00
-    Spherical terms =  4.27798752587227E+00
-    >>>>>>>>> Etotal= -8.56575966887821E+00
+    Spherical terms =  4.27798752587228E+00
+    >>>>>>>>> Etotal= -8.56575966887820E+00
 
  "Double-counting" decomposition of free energy:
     Band energy     = -9.09018242662716E-01
@@ -676,7 +677,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   nproc =    4
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -716,9 +717,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Chern number C from orbital magnetization
 ----C is a real vector, given along Cartesian directions----
 
- C(   1) : real, imag  -1.31283175E-09 -1.05324900E-16
- C(   2) : real, imag  -1.74283010E-09  8.46056734E-17
- C(   3) : real, imag   2.39362860E-05  4.86394884E-17
+ C(   1) : real, imag  -1.89021055E-09 -1.24175625E-12
+ C(   2) : real, imag   5.79162428E-10  7.62024894E-13
+ C(   3) : real, imag  -2.00728527E-05  2.17743059E-12
 
 ====================================================
 
@@ -728,9 +729,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
  Orbital magnetization
 ----Orbital magnetization is a real vector, given along Cartesian directions----
 
- Orb Mag(   1) : real, imag   2.85215571E-09 -2.78691132E-13
- Orb Mag(   2) : real, imag   5.54810559E-10  9.95587417E-14
- Orb Mag(   3) : real, imag   9.51193066E-05  1.75040349E-13
+ Orb Mag(   1) : real, imag   3.36417083E-10  3.98871529E-13
+ Orb Mag(   2) : real, imag  -2.45400315E-10 -1.06451414E-12
+ Orb Mag(   3) : real, imag   1.37999424E-04 -5.48850023E-13
 
 ====================================================
 
@@ -808,9 +809,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    === IMAGINARY PART:
    0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000   0.00000  -0.00000
   -0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000   0.00000  -0.00000
-  -0.00000   0.00000   0.00000  -0.00000   0.00001   0.00000  -0.00000  -0.00000
+  -0.00000   0.00000  -0.00000  -0.00000   0.00001   0.00000  -0.00000  -0.00000
    0.00000   0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000
-  -0.00000  -0.00000  -0.00001   0.00000   0.00000   0.00000   0.00000  -0.00000
+  -0.00000  -0.00000  -0.00001   0.00000  -0.00000   0.00000   0.00000  -0.00000
   -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000
   -0.00000  -0.00000   0.00000  -0.00000  -0.00000   0.00000   0.00000  -0.00000
    0.00000   0.00000   0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
@@ -827,10 +828,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
    === IMAGINARY PART:
   -0.00000   0.00000   0.00000   0.00000  -0.00000   0.00000   0.00000  -0.00000
   -0.00000   0.00000   0.00000   0.00000  -0.00000  -0.00000  -0.00000  -0.00000
-  -0.00000  -0.00000   0.00000   0.00000   0.00727  -0.00000   0.00000  -0.00020
+  -0.00000  -0.00000  -0.00000   0.00000   0.00727  -0.00000   0.00000  -0.00020
   -0.00000  -0.00000  -0.00000   0.00000   0.00000   0.00000   0.00000  -0.00000
-   0.00000   0.00000  -0.00727  -0.00000   0.00000   0.00020   0.00000   0.00000
-  -0.00000   0.00000   0.00000  -0.00000  -0.00020  -0.00000  -0.00000  -0.00000
+   0.00000   0.00000  -0.00727  -0.00000  -0.00000   0.00020   0.00000   0.00000
+  -0.00000   0.00000   0.00000  -0.00000  -0.00020   0.00000  -0.00000  -0.00000
   -0.00000   0.00000  -0.00000  -0.00000  -0.00000   0.00000  -0.00000  -0.00000
    0.00000   0.00000   0.00020   0.00000  -0.00000   0.00000   0.00000  -0.00000
 
@@ -868,11 +869,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
     Ewald energy    = -8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Loc. psp. energy= -2.02283372960337E+00
-    Spherical terms =  4.27798752587227E+00
+    Spherical terms =  4.27798752587228E+00
     >>>>>>>>> Etotal= -8.56575966887821E+00
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -9.09018242662717E-01
+    Band energy     = -9.09018242662716E-01
     Ewald energy    =-8.47170304989273E+00
     PspCore energy  =  1.03394476632023E+00
     Dble-C XC-energy= -4.31595268799010E+00
@@ -961,7 +962,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     160.500     160.486
            kptopt           3
          kptrlatt        4   -4    4     -4    4    4     -4   -4    4
           kptrlen      4.24810427E+01
-P           mkmem         256
+P           mkmem          64
             natom           2
             nband           4
            ndtset           3
@@ -983,6 +984,7 @@ P           mkmem         256
         optforces           0
         optstress           0
            orbmag           3
+-      paral_atom           0
         pawcpxocc           2
         pawecutdg      6.00000000E+00 Hartree
            prtden           0
@@ -1104,10 +1106,10 @@ P           mkmem         256
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         64.1  wall=         64.4
+- Proc.   0 individual time (sec): cpu=          8.9  wall=          8.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   7 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         64.1  wall=         64.4
+.Delivered   2 WARNINGs and   0 COMMENTs to log file.
++Overall time at end (sec) : cpu=         35.7  wall=         35.5

@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG, DC, GMR)
+!!  Copyright (C) 2008-2020 ABINIT group (XG, DC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -118,6 +118,7 @@ subroutine init_(mix)
  mix%n_pulayit = 7
  mix%n_pawmix  = 0
  mix%n_atom    = 0
+ mix%space     = 0
  mix%useprec   = .true.
 
  call nullify_(mix)
@@ -220,7 +221,8 @@ subroutine ab7_mixing_new(mix, iscf, kind, space, nfft, nspden, &
       & iscf /= AB7_MIXING_ANDERSON_2 .and. &
       & iscf /= AB7_MIXING_CG_ENERGY .and. &
       & iscf /= AB7_MIXING_PULAY .and. &
-      & iscf /= AB7_MIXING_CG_ENERGY_2) then
+      & iscf /= AB7_MIXING_CG_ENERGY_2 .and. &
+      & iscf /= AB7_MIXING_NONE) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, "(A,I0,A)") "Unknown mixing scheme (", iscf, ")."
     return
@@ -458,20 +460,41 @@ subroutine ab7_mixing_copy_current_step(mix, arr_resid, errid, errmess, &
  real(dp), intent(in), optional :: arr_atm(3, mix%n_atom)
 ! *************************************************************************
 
- if (.not. associated(mix%f_fftgr)) then
+
+ if (mix%n_fftgr>0 .and. (.not. associated(mix%f_fftgr))) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, '(a,a,a,a)' )ch10,&
-         & ' ab7_mixing_set_arr_current_step: ERROR -',ch10,&
+         & ' ab7_mixing_set_arr_current_step: ERROR (1) -',ch10,&
+         & '  Working arrays not yet allocated.'
+    return
+ end if
+ if (mix%n_pawmix>0 .and. (.not. associated(mix%f_paw))) then
+    errid = AB7_ERROR_MIXING_ARG
+    write(errmess, '(a,a,a,a)' )ch10,&
+         & ' ab7_mixing_set_arr_current_step: ERROR (2) -',ch10,&
+         & '  Working arrays not yet allocated.'
+    return
+ end if
+ if (mix%n_atom>0 .and. (.not. associated(mix%f_atm))) then
+    errid = AB7_ERROR_MIXING_ARG
+    write(errmess, '(a,a,a,a)' )ch10,&
+         & ' ab7_mixing_set_arr_current_step: ERROR (3) -',ch10,&
          & '  Working arrays not yet allocated.'
     return
  end if
  errid = AB7_NO_ERROR
 
- mix%f_fftgr(:,:,mix%i_vresid(1)) = arr_resid(:,:)
- if (present(arr_respc)) mix%f_fftgr(:,:,mix%i_vrespc(1)) = arr_respc(:,:)
- if (present(arr_paw_resid)) mix%f_paw(:, mix%i_vresid(1)) = arr_paw_resid(:)
- if (present(arr_paw_respc)) mix%f_paw(:, mix%i_vrespc(1)) = arr_paw_respc(:)
- if (present(arr_atm)) mix%f_atm(:,:, mix%i_vresid(1)) = arr_atm(:,:)
+ if (mix%n_fftgr>0) then
+   mix%f_fftgr(:,:,mix%i_vresid(1)) = arr_resid(:,:)
+   if (present(arr_respc)) mix%f_fftgr(:,:,mix%i_vrespc(1)) = arr_respc(:,:)
+ end if
+ if (mix%n_pawmix>0) then
+   if (present(arr_paw_resid)) mix%f_paw(:, mix%i_vresid(1)) = arr_paw_resid(:)
+   if (present(arr_paw_respc)) mix%f_paw(:, mix%i_vrespc(1)) = arr_paw_respc(:)
+ end if
+ if (mix%n_atom>0) then
+   if (present(arr_atm)) mix%f_atm(:,:, mix%i_vresid(1)) = arr_atm(:,:)
+ end if
 
 end subroutine ab7_mixing_copy_current_step
 !!***
@@ -611,8 +634,10 @@ subroutine ab7_mixing_eval_allocate(mix, istep)
     end if
     close(unit=temp_unit)
     call timab(83,2,tsec)
-    ABI_DEALLOCATE(mix%f_fftgr)
-    nullify(mix%f_fftgr)
+    if (associated(mix%f_fftgr)) then
+      ABI_DEALLOCATE(mix%f_fftgr)
+      nullify(mix%f_fftgr)
+    end if
     if (associated(mix%f_paw)) then
        ABI_DEALLOCATE(mix%f_paw)
        nullify(mix%f_paw)
@@ -661,7 +686,7 @@ end subroutine ab7_mixing_eval_deallocate
  character(len = 500), intent(out) :: errmess
  logical, intent(in), optional :: reset
  integer, intent(in), optional :: isecur, comm_atom, pawopt, response
- real(dp), intent(inout), optional :: pawarr(mix%n_pawmix)
+ real(dp), intent(inout), optional, target :: pawarr(mix%n_pawmix)
  real(dp), intent(in), optional :: etotal
  real(dp), intent(in), optional :: potden(mix%space * mix%nfft,mix%nspden)
  real(dp), intent(out), optional :: resnrm
@@ -671,16 +696,20 @@ end subroutine ab7_mixing_eval_deallocate
  integer :: moveAtm, dbl_nnsclo, initialized, isecur_
  integer :: usepaw, pawoptmix_, response_
  real(dp) :: resnrm_
+!arrays
+ real(dp),target :: dum(1)
+ real(dp),pointer :: pawarr_(:)
+
 ! *************************************************************************
 
  ! Argument checkings.
- if (mix%iscf == AB7_MIXING_NONE) then
-    errid = AB7_ERROR_MIXING_ARG
-    write(errmess, '(a,a,a,a)' )ch10,&
-         & ' ab7_mixing_eval: ERROR -',ch10,&
-         & '  No method has been chosen.'
-    return
- end if
+ !if (mix%iscf == AB7_MIXING_NONE) then
+ !   errid = AB7_ERROR_MIXING_ARG
+ !   write(errmess, '(a,a,a,a)' )ch10,&
+ !        & ' ab7_mixing_eval: ERROR -',ch10,&
+ !        & '  No method has been chosen.'
+ !   return
+ !end if
  if (mix%n_pawmix > 0 .and. .not. present(pawarr)) then
     errid = AB7_ERROR_MIXING_ARG
     write(errmess, '(a,a,a,a)' )ch10,&
@@ -697,13 +726,21 @@ end subroutine ab7_mixing_eval_deallocate
  end if
  errid = AB7_NO_ERROR
 
- ! Miscellaneous
- moveAtm = 0
- if (mix%n_atom > 0) moveAtm = 1
+ ! Reset if requested
  initialized = 1
  if (present(reset)) then
     if (reset) initialized = 0
  end if
+
+ ! If no mixing, exit here
+ if (mix%iscf == AB7_MIXING_NONE) then
+   if (present(resnrm)) resnrm=0.d0
+   return
+ end if
+
+ ! Miscellaneous
+ moveAtm = 0
+ if (mix%n_atom > 0) moveAtm = 1
  isecur_ = 0
  if (present(isecur)) isecur_ = isecur
  usepaw = 0
@@ -712,6 +749,7 @@ end subroutine ab7_mixing_eval_deallocate
  if (present(pawopt)) pawoptmix_ = pawopt
  response_ = 0
  if (present(response)) response_ = response
+ pawarr_ => dum ; if (present(pawarr)) pawarr_ => pawarr
 
  ! Do the mixing.
  resnrm_ = 0.d0
@@ -728,13 +766,13 @@ end subroutine ab7_mixing_eval_deallocate
       call scfopt(mix%space, mix%f_fftgr,mix%f_paw,mix%iscf,istep,&
          & mix%i_vrespc,mix%i_vtrial, &
          & mpi_comm,mpi_summarize,mix%nfft,mix%n_pawmix,mix%nspden, &
-         & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr, &
+         & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr_, &
          & resnrm_, arr, errid, errmess, comm_atom=comm_atom)
     else
       call scfopt(mix%space, mix%f_fftgr,mix%f_paw,mix%iscf,istep,&
          & mix%i_vrespc,mix%i_vtrial, &
          & mpi_comm,mpi_summarize,mix%nfft,mix%n_pawmix,mix%nspden, &
-         & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr, &
+         & mix%n_fftgr,mix%n_index,mix%kind,pawoptmix_,usepaw,pawarr_, &
          & resnrm_, arr, errid, errmess)
     end if
     !  Change atomic positions

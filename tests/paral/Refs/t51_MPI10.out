@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 09h02 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h52 )
   
-- input  file    -> t51.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/paral_t51_MPI10-t52_MPI10-t53_MPI10/t51.in
 - output file    -> t51_MPI10.out
 - root for input  files -> t51_MPI10i
 - root for output files -> t51_MPI10o
@@ -166,8 +166,8 @@ P           mkmem           1
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10256
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1139,8 +1139,8 @@ P           mkmem           1
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          3.7        0.06      0.001
-- Total wall clock time (s,m,h):          3.9        0.06      0.001
+- Total cpu        time (s,m,h):          3.5        0.06      0.001
+- Total wall clock time (s,m,h):          3.6        0.06      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
@@ -1149,39 +1149,41 @@ P           mkmem           1
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- invars2                        0.035   0.9      0.035   0.9              1      -1.00        0.99       0.99
-- fourwf%(pot)                   0.028   0.8      0.028   0.7            287      -1.00        1.00       1.00
-- abinit(2)                      0.019   0.5      0.020   0.5              1      -1.00        0.99       0.99
-- others (131)                   0.076   2.1      0.197   5.1             -1      -1.00        0.39       0.39
+- invars2                        0.041   1.2      0.042   1.2              1      -1.00        0.99       0.99
+- fourwf%(pot)                   0.028   0.8      0.028   0.8            287      -1.00        1.00       1.00
+- abinit(2)                      0.021   0.6      0.021   0.6              1      -1.00        0.98       0.98
+- others (131)                   0.079   2.3      0.123   3.4             -1      -1.00        0.64       0.64
 -<END_TIMER>
 -
-- subtotal                       0.159   4.3      0.280   7.2                                  0.57       0.57
+- subtotal                       0.169   4.9      0.214   6.0                                  0.79       0.79
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 10, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           3.7, wall_time =           3.9
+- cpu_time =           3.5, wall_time =           3.6
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- scfcv-scprqt                   1.219  32.9      1.341  34.6            100      -1.00        0.91       0.91
-- invars2                        0.344   9.3      0.351   9.0             10      -1.00        0.98       0.98
-- fourwf%(pot)                   0.271   7.3      0.275   7.1           2870      -1.00        0.99       0.99
-- abinit(2)                      0.178   4.8      0.183   4.7             10      -1.00        0.97       0.97
-- ewald                          0.128   3.4      0.130   3.3             10      -1.00        0.99       0.99
-- stress                         0.107   2.9      0.107   2.8             10      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.102   2.8      0.102   2.6             10      -1.00        1.00       1.00
-- fourdp                         0.046   1.2      0.046   1.2            510      -1.00        0.99       0.99
-- nonlop(apply)                  0.042   1.1      0.042   1.1           2870      -1.00        0.98       0.98
-- mkrho/=                        0.033   0.9      0.033   0.9            200      -1.00        0.99       0.99
-- vtorho(MPI)                    0.031   0.8      0.031   0.8            100      -1.00        1.00       1.00
-- projbd                         0.030   0.8      0.030   0.8           4300      -1.00        0.98       0.98
-- xc:pot/=fourdp                 0.029   0.8      0.029   0.8            110      -1.00        1.00       1.00
-- others (121)                   0.107   2.9      0.106   2.7             -1      -1.00        1.01       1.01
+- scfcv-scprqt                   0.538  15.5      0.587  16.3            100      -1.00        0.92       0.92
+- invars2                        0.390  11.2      0.408  11.3             10      -1.00        0.96       0.96
+- fourwf%(pot)                   0.278   8.0      0.282   7.8           2870      -1.00        0.99       0.99
+- abinit(2)                      0.188   5.4      0.201   5.6             10      -1.00        0.93       0.93
+- ewald                          0.124   3.6      0.124   3.5             10      -1.00        1.00       1.00
+- stress                         0.109   3.1      0.109   3.0             10      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.104   3.0      0.104   2.9             10      -1.00        1.00       1.00
+- mkrho/=                        0.062   1.8      0.063   1.8            200      -1.00        0.99       0.99
+- fourdp                         0.048   1.4      0.049   1.4            510      -1.00        0.98       0.98
+- nonlop(apply)                  0.041   1.2      0.042   1.2           2870      -1.00        0.98       0.98
+- projbd                         0.033   0.9      0.035   1.0           4300      -1.00        0.94       0.94
+- xc:pot/=fourdp                 0.032   0.9      0.032   0.9            110      -1.00        0.99       0.99
+- vtorho(MPI)                    0.031   0.9      0.031   0.9            100      -1.00        1.00       1.00
+- symrhg(no FFT)                 0.022   0.6      0.022   0.6            100      -1.00        0.99       0.99
+- vtowfk(ssdiag)                 0.020   0.6      0.020   0.6            -10      -1.00        1.00       1.00
+- others (119)                   0.072   2.1      0.071   2.0             -1      -1.00        1.01       1.01
 -<END_TIMER>
 
-- subtotal                       2.666  71.9      2.807  72.3                                  0.95       0.95
+- subtotal                       2.091  60.4      2.180  60.7                                  0.96       0.96
 
 ================================================================================
 
@@ -1257,4 +1259,4 @@ P           mkmem           1
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.9  wall=          4.1
++Overall time at end (sec) : cpu=          3.6  wall=          3.8

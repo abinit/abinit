@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_nonlop
 !! NAME
 !!  m_nonlop
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (MT)
+!!  Copyright (C) 1998-2020 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -793,7 +792,7 @@ end subroutine nonlop
 !!  This routine is an interface to Cuda Kernel gpu_nonlop.cu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2019 ABINIT group (FDahm, MT)
+!! Copyright (C) 2011-2020 ABINIT group (FDahm, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

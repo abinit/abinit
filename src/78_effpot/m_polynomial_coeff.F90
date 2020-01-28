@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_polynomial_coeff
 !!
 !! NAME
@@ -8,7 +7,7 @@
 !! Module with the datatype polynomial coefficients
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (AM)
+!! Copyright (C) 2010-2020 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -822,7 +821,7 @@ end subroutine polynomial_coeff_MPIrecv
 !! This routine print the coefficents into XML format
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2019 ABINIT group (AM)
+!! Copyright (C) 2000-2020 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

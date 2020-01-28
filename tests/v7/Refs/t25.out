@@ -2,7 +2,7 @@
 .Version 8.11.12 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -350,7 +350,7 @@ P           mkmem           8
   Size of radial mesh for [pseudo] core density... 1505
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl/tvalespl/ttaucorespl  100
+  No of Q-points for tcorespl/tvalespl/tcoretauspl  100
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -401,7 +401,7 @@ P           mkmem           8
   Size of radial mesh for [pseudo] core density... 1068
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl/tvalespl/ttaucorespl  100
+  No of Q-points for tcorespl/tvalespl/tcoretauspl  100
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -447,7 +447,7 @@ P           mkmem           8
   Size of radial mesh for [pseudo] core density...  350
   Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl/tvalespl/ttaucorespl  100
+  No of Q-points for tcorespl/tvalespl/tcoretauspl  100
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1

@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h27 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h18 )
   
-- input  file    -> t72.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v3_t72/t72.in
 - output file    -> t72.out
 - root for input  files -> t72i
 - root for output files -> t72o
@@ -581,8 +581,8 @@ P          mk1mem4         64
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.pspgth
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/01h.pspgth
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -634,7 +634,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   27.639E-23; max=  30.870E-22
+ Mean square residual over all n,k,spin=   18.753E-24; max=  48.862E-24
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -750,12 +750,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  5.20762783119899E-03 -4.583E+00 3.419E-02 2.432E+01
- ETOT  2  5.71436396779035E-05 -5.150E-03 6.669E-05 1.534E-01
- ETOT  3  4.37651705720299E-06 -5.277E-05 8.961E-07 1.984E-04
- ETOT  4  4.30223592839951E-06 -7.428E-08 1.601E-09 2.142E-07
+-ETOT  1  5.20762783119899E-03 -4.583E+00 5.634E-02 2.432E+01
+ ETOT  2  5.71436396779035E-05 -5.150E-03 1.137E-04 1.534E-01
+ ETOT  3  4.37651705720299E-06 -5.277E-05 1.169E-06 1.984E-04
+ ETOT  4  4.30223592839951E-06 -7.428E-08 2.427E-09 2.142E-07
  ETOT  5  4.30219451974523E-06 -4.141E-11 4.863E-13 3.376E-10
- ETOT  6  4.30219443092739E-06 -8.882E-14 1.512E-15 1.322E-12
+ ETOT  6  4.30219443092739E-06 -8.882E-14 2.394E-15 1.322E-12
 
  At SCF step    6, etot is converged : 
   for the second time, diff in etot=  8.882E-14 < toldfe=  1.000E-10
@@ -763,7 +763,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -33.333E-03; max=  15.121E-16
+ Mean square residual over all n,k,spin=   61.923E-17; max=  23.941E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -918,7 +918,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -33.333E-03; max=  15.276E-19
+ Mean square residual over all n,k,spin=   64.157E-20; max=  15.276E-19
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1052,7 +1052,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -33.333E-03; max=  12.357E-18
+ Mean square residual over all n,k,spin=   41.987E-19; max=  12.357E-18
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -1658,10 +1658,10 @@ P          mk1mem4         64
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.6
+- Proc.   0 individual time (sec): cpu=          0.9  wall=          1.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and  47 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.0  wall=          1.6
++Overall time at end (sec) : cpu=          0.9  wall=          1.0

@@ -130,7 +130,7 @@ after the host it is stored on, you will be able to build ABINIT on several
 machines sharing the same home directory.
 
 You will find a self-documented tunable configuration for ABINIT in
-~abinit/doc/build/config-template.ac .
+~abinit/doc/build/config-template.ac9.
 
 
 

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_orbmag
 !! NAME
 !!  m_orbmag
@@ -8,7 +7,7 @@
 !!  used to handle orbital magnetization
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2017 ABINIT group (JWZ)
+!! Copyright (C) 2011-2020 ABINIT group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -277,7 +276,6 @@ CONTAINS  !=====================================================================
   end subroutine destroy_orbmag
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/initorbmag
 !! NAME
 !! initorbmag
@@ -286,7 +284,7 @@ CONTAINS  !=====================================================================
 !! Initialization of orbital magnetization calculation; similar to initberry
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2017 ABINIT group.
+!! Copyright (C) 2004-2020 ABINIT group.
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -889,7 +887,6 @@ subroutine initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 end subroutine initorbmag
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/rho_norm_check
 !! NAME
 !! rho_norm_check
@@ -899,7 +896,7 @@ end subroutine initorbmag
 !! It is assumed that only completely filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1008,7 +1005,6 @@ subroutine rho_norm_check(atindx1,cg,cprj,dtorbmag,dtset,mpi_enreg,mcg,mcprj,&
 end subroutine rho_norm_check
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/covar_cprj
 !! NAME
 !! covar_cprj
@@ -1017,7 +1013,7 @@ end subroutine rho_norm_check
 !! Generate cprj multiplied by S^{-1}, similarly to the wavefunctions in smatrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1084,7 +1080,6 @@ subroutine covar_cprj(cprj_kb,cprj_kb_covar,dtset,nband_k,pawtab,smat_inv)
 end subroutine covar_cprj
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/covar_test
 !! NAME
 !! covar_test
@@ -1093,7 +1088,7 @@ end subroutine covar_cprj
 !! Routine to play with and check covariant derivative Q|\partial_k u_{nk}\rangle$
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1117,7 +1112,7 @@ end subroutine covar_cprj
 !! SOURCE
 
 
-subroutine covar_test(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
+subroutine covar_test(atindx1,cg,cprj,dtorbmag,dtset,gprimd,mcg,mcprj,mpi_enreg,&
       & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,xred)
 
   !Arguments ------------------------------------
@@ -1133,18 +1128,17 @@ subroutine covar_test(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_e
   !arrays
   integer,intent(in) :: atindx1(dtset%natom)
   integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3)
-  real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),xred(3,dtset%natom)
+  real(dp), intent(in) :: cg(2,mcg),gprimd(3,3),xred(3,dtset%natom)
   type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
-  integer :: bdir,bfor,bsigma,iatom,iband,icg,icgb,icprj,icprjb
-  integer :: ikg,ikpt,ikptb,ilmn,ipw,isppol,itrs,itypat
+  integer :: bdir,bfor,bsigma,iband,icg,icgb,icprj,icprjb
+  integer :: ikg,ikpt,ikptb,isppol,itrs
   integer :: jband,mcg1_k,my_nspinor,ncpgr,npw_k,npw_kb
   integer :: shiftbd,smatrix_ddkflag,smatrix_job
   real(dp) :: doti,dotr
-  complex(dpc) :: cpb,smi
 
   !arrays
   integer :: nattyp_dum(dtset%ntypat)
@@ -1271,7 +1265,6 @@ subroutine covar_test(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_e
 end subroutine covar_test
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/duqdu
 !! NAME
 !! duqdu
@@ -1281,7 +1274,7 @@ end subroutine covar_test
 !! Q projects onto the conduction space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1309,7 +1302,7 @@ end subroutine covar_test
 
 
 subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
-     & gmet,gprimd,mcg,mcprj,mpi_enreg,nband_k,npwarr,pawang,pawrad,pawtab,&
+     & gprimd,mcg,mcprj,mpi_enreg,nband_k,npwarr,pawang,pawrad,pawtab,&
      & psps,pwind,pwind_alloc,xred)
 
   !Arguments ------------------------------------
@@ -1324,7 +1317,7 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
   !arrays
   integer,intent(in) :: atindx1(dtset%natom)
   integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3)
-  real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),xred(3,dtset%natom)
+  real(dp), intent(in) :: cg(2,mcg),gprimd(3,3),xred(3,dtset%natom)
   real(dp),intent(in) :: energies(nband_k,dtset%nkpt)
   real(dp), intent(out) :: duqduchern(2,3),duqdumag(2,3)
   type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
@@ -1333,14 +1326,12 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,bfor,bsigma,countb,countg,countjb,countjg,countk,dest
-  integer :: epsabg,gdir,gfor,gsigma,iatom,iband
-  integer :: icg,icgb,icgg,icprji,icprjbi,icprjgi,ierr
-  integer :: ikg,ikpt,ikpt_loc,ikpti,ikptb,ikptbi,ikptg,ikptgi,ish1,ish2,isppol,itrs,itypat
-  integer :: jcgb,jcgg,jcprjbi,jcprjgi,jkpt,jkptb,jkptbi,jkptg,jkptgi,jsppol
+  integer :: adir,bdir,bfor,bsigma,countb,countg,countk
+  integer :: epsabg,gdir,gfor,gsigma,iband
+  integer :: icg,icprji,ierr
+  integer :: ikg,ikpt,ikpt_loc,ikpti,ikptb,ikptbi,ikptg,ikptgi,ish1,ish2,isppol,itrs
   integer :: me,mcg1_k,my_nspinor,n2dim,ncpgr,npw_k,npw_kb,npw_kg,nproc,ntotcp
-  integer :: shiftbd,smatrix_ddkflag,smatrix_job,sourceb,sourceg,spaceComm
-  integer :: tagb,tagg
+  integer :: shiftbd,smatrix_ddkflag,smatrix_job,spaceComm
   real(dp) :: deltab,deltag,doti,dotr,ENK
   complex(dpc) :: cprefac,duqduchern_term,duqdumag_term
 
@@ -1348,7 +1339,6 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
   integer :: nattyp_dum(dtset%ntypat)
   integer,allocatable :: dimlmn(:),pwind_kb(:),pwind_kg(:),sflag_k(:)
   real(dp) :: dkb(3),dkbg(3),dkg(3),dtm_k(2)
-  real(dp),allocatable :: buffer(:,:)
   real(dp),allocatable :: cg_k(:,:),cg1_kb(:,:),cg1_kg(:,:),cgqb(:,:),cgqg(:,:)
   real(dp),allocatable :: kk_paw(:,:,:),pwnsfac_k(:,:)
   real(dp),allocatable :: smat_inv(:,:,:),smat_kk(:,:,:)
@@ -1591,9 +1581,8 @@ subroutine duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,energies,&
   ABI_DEALLOCATE(pwnsfac_k)
 
 end subroutine duqdu
-!!***n
+!!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/mpicomm_helper
 !! NAME
 !! mpicomm_helper
@@ -1602,7 +1591,7 @@ end subroutine duqdu
 !! get wavefunction and cprj in mpi communication loop
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1729,8 +1718,8 @@ subroutine mpicomm_helper(atindx1,bdir,bfor,cg,cgqb,cprj,cprj_kb,dimlmn,dtorbmag
   end if
 
 end subroutine mpicomm_helper
+!!***
             
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/duqhqdu
 !! NAME
 !! duqhqdu
@@ -1740,7 +1729,7 @@ end subroutine mpicomm_helper
 !! Q projects onto the conduction space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1764,7 +1753,7 @@ end subroutine mpicomm_helper
 !! SOURCE
 
 
-subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi_enreg,&
+subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
      & nattyp,nband_k,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,&
      & rmet,rprimd,ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
 
@@ -1780,7 +1769,7 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
   type(pseudopotential_type),intent(in) :: psps
 
   !arrays
-  integer, intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
+  integer, intent(in) :: atindx1(dtset%natom)
   integer, intent(in) :: nattyp(dtset%ntypat),npwarr(dtset%nkpt),pwind(pwind_alloc,2,3)
   real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3)
   real(dp), intent(in) :: vhartr(nfftf),vpsp(nfftf),vxc(nfftf,dtset%nspden),xred(3,dtset%natom)
@@ -1795,17 +1784,16 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,bfor,bsigma,countb,countg,countjb,countjg,countk,cpopt,dest,dimffnl
+  integer :: adir,bdir,bfor,bsigma,countb,countg,countk,cpopt,dimffnl
   integer :: getcprj_choice,getcprj_cpopt,getcprj_idir
-  integer :: epsabg,exchn2n3d,gdir,gfor,gsigma,ia,iatom,iband,ibs1,ibs2
-  integer :: icg,icgb,icgg,icprji,icprjbi,icprjgi,ider,idir,ierr
-  integer :: ikg,ikg1,ikpt,ikpt_ctr,ikpt_loc,ikpti,ikptb,ikptbi,ikptg,ikptgi
-  integer :: ilm,isppol,istwf_k,itrs,itypat
-  integer :: jcgb,jcgg,jcprjbi,jcprjgi,jkpt,jkptb,jkptbi,jkptg,jkptgi,jsppol
-  integer :: me,mcg1_k,my_nspinor,n2dim,ncpgr,ndat
-  integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,npw_k,npw_k_,npw_kb,npw_kg,nproc,ntotcp
-  integer :: optder,prtvol,shiftbd,sij_opt,smatrix_ddkflag,smatrix_job,sourceb,sourceg,spaceComm
-  integer :: tagb,tagg,tim_getghc,type_calc
+  integer :: epsabg,exchn2n3d,gdir,gfor,gsigma,ia,iband,ibs1,ibs2
+  integer :: icg,icprji,ider,idir,ierr
+  integer :: ikg,ikg1,ikpt,ikpt_loc,ikpti,ikptb,ikptbi,ikptg,ikptgi
+  integer :: ilm,isppol,istwf_k,itrs
+  integer :: me,my_nspinor,ncpgr,ndat
+  integer :: ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6,nkpg,npw_k,npw_k_,npw_kb,npw_kg,nproc
+  integer :: prtvol,shiftbd,sij_opt,smatrix_ddkflag,smatrix_job,spaceComm
+  integer :: tim_getghc,type_calc
   real(dp) :: arg,deltab,deltag,doti,dotr,ecut_eff,lambda
   complex(dpc) :: cgdijcb,cprefac,duqhqdu_term
   logical :: has_vectornd
@@ -1813,9 +1801,8 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
 
   !arrays
   integer :: nattyp_dum(dtset%ntypat)
-  integer,allocatable :: dimlmn(:),kg_k(:,:),nband_dum(:),pwind_kb(:),pwind_kg(:),sflag_k(:)
-  real(dp) :: dkb(3),dkbg(3),dkg(3),dtm_k(2),kpoint(3),kpointb(3),kpointg(3),lambdarr(1),rhodum(1)
-  real(dp),allocatable :: buffer(:,:)
+  integer,allocatable :: dimlmn(:),kg_k(:,:),pwind_kb(:),pwind_kg(:),sflag_k(:)
+  real(dp) :: dkb(3),dkg(3),dtm_k(2),kpoint(3),lambdarr(1),rhodum(1)
   real(dp),allocatable :: cg_k(:,:),cg1_kb(:,:),cg1_kg(:,:),cgrvtrial(:,:)
   real(dp),allocatable :: cgqb(:,:),cgqg(:,:),cwavef(:,:),ffnl(:,:,:,:)
   real(dp),allocatable :: ghc(:,:),ghcall(:,:),gsc(:,:),gvnlc(:,:)
@@ -1824,7 +1811,7 @@ subroutine duqhqdu(atindx1,cg,cnum_duqhqdu,cprj,dtorbmag,dtset,gmet,gprimd,kg,mc
   real(dp),allocatable :: smat_inv(:,:,:),smat_kk(:,:,:)
   real(dp),allocatable :: vectornd_pac(:,:,:,:,:),vlocal(:,:,:,:),vtrial(:,:)
   real(dp),allocatable :: ylm_k(:,:),ylmgr_k(:,:,:)
-  type(pawcprj_type),allocatable :: cprj_buf(:,:),cprj_k(:,:),cprj_kb(:,:),cprj1_kb(:,:)
+  type(pawcprj_type),allocatable :: cprj_k(:,:),cprj_kb(:,:),cprj1_kb(:,:)
   type(pawcprj_type),allocatable :: cprj_kg(:,:),cprj1_kg(:,:),cwaveprj(:,:)
 
   !----------------------------------------------------
@@ -2592,7 +2579,6 @@ end subroutine duqhqdu
 ! end subroutine duqhqdu_gamma
 ! !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/udsqdu
 !! NAME
 !! udsqdu
@@ -2603,7 +2589,7 @@ end subroutine duqhqdu
 !! the Chern number (integral over Berry curvature).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2627,7 +2613,7 @@ end subroutine duqhqdu
 !! SOURCE
 
 
-subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,kg,&
+subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,&
      & mcg,mcprj,mpi_enreg,nband_k,npwarr,paw_ij,pawang,pawrad,pawtab,psps,&
      pwind,pwind_alloc,rmet,rprimd,udsqduchern,udsqdumag,xred,ylm,ylmgr)
 
@@ -2642,7 +2628,7 @@ subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,kg,&
   type(pseudopotential_type),intent(in) :: psps
 
   !arrays
-  integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
+  integer,intent(in) :: atindx1(dtset%natom)
   integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3)
   real(dp), intent(in) :: cg(2,mcg),gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),xred(3,dtset%natom)
   real(dp), intent(out) :: udsqduchern(2,3),udsqdumag(2,3)
@@ -2655,17 +2641,16 @@ subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,kg,&
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,countg,countjg,countk,dest,dimph1d,dimffnl,dir_tmp,exchn2n3d,epsabg
-  integer :: gdir,gfor,gsigma,ia,iatom,iband,ibs1,ibs2
-  integer :: icg,icgg,icprji,icprjg,icprjgi,ider,idir,ierr
-  integer :: ikg,ikg1,ikpt,ikpt_loc,ikpti,ikptg,ikptgi,ilm,isppol,istwf_k,itrs,itypat
-  integer :: jcgg,jcprjgi,jkpt,jkptg,jkptgi,jsppol
+  integer :: adir,bdir,countg,countk,dimph1d,dimffnl,exchn2n3d,epsabg
+  integer :: gdir,gfor,gsigma,ia,iband,ibs1,ibs2
+  integer :: icg,icprji,ider,idir,ierr
+  integer :: ikg,ikg1,ikpt,ikpt_loc,ikpti,ikptg,ikptgi,ilm,isppol,istwf_k,itrs
   integer :: mcg1_k,me,my_nspinor,n2dim,ncpgr,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6
   integer :: nkpg,nproc,npw_k,npw_k_,npw_kg
   integer :: nonlop_choice,nonlop_cpopt,nonlop_nnlout,nonlop_ndat
   integer :: nonlop_paw_opt,nonlop_signs,ntotcp
-  integer :: shiftbd,smatrix_ddkflag,smatrix_job,sourceg,spaceComm,tagg,tim_nonlop
-  real(dp) :: arg,deltab,deltag,doti,dotr,ecut_eff,ENK
+  integer :: shiftbd,smatrix_ddkflag,smatrix_job,spaceComm,tim_nonlop
+  real(dp) :: arg,deltag,doti,dotr,ecut_eff,ENK
   complex(dpc) :: cprefac,udsqduchern_term,udsqdumag_term
   type(gs_hamiltonian_type) :: gs_hamk
 
@@ -2673,7 +2658,7 @@ subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,kg,&
   integer :: nattyp_dum(dtset%ntypat)
   integer,allocatable :: dimlmn(:),kg_k(:,:),pwind_kg(:),sflag_k(:)
   real(dp) :: dkg(3),dtm_k(2),kpoint(3),nonlop_lambda(1)
-  real(dp),allocatable :: buffer(:,:),cg_k(:,:),cg1_kg(:,:),cgqg(:,:),cwavef(:,:),ffnl_k(:,:,:,:)
+  real(dp),allocatable :: cg_k(:,:),cg1_kg(:,:),cgqg(:,:),cwavef(:,:),ffnl_k(:,:,:,:)
   real(dp),allocatable :: kk_paw(:,:,:),kpg_k(:,:),nonlop_enlout(:)
   real(dp),allocatable :: phkxred(:,:),ph1d(:,:),ph3d(:,:,:),pwnsfac_k(:,:)
   real(dp),allocatable :: smat_inv(:,:,:),smat_kk(:,:,:),svect(:,:,:),svectout(:,:),vectout(:,:)
@@ -2969,7 +2954,6 @@ subroutine udsqdu(atindx1,cg,cprj,dtorbmag,dtset,energies,gmet,gprimd,kg,&
 end subroutine udsqdu
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/udsdsu
 !! NAME
 !! udsdsu
@@ -2978,7 +2962,7 @@ end subroutine udsqdu
 !! Return i*epsabg\sum_{n,n}<u_kn|\partial_b S|u_kn'><u_kn|\partial_g S|u_kn>E_nk
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3001,8 +2985,8 @@ end subroutine udsqdu
 !! SOURCE
 
 
-subroutine udsdsu(atindx1,cg,cnum_udsdsu,cprj,dtorbmag,dtset,energies,gmet,gprimd,kg,mcg,mcprj,mpi_enreg,&
-     & nband_k,npwarr,paw_ij,pawang,pawrad,pawtab,psps,rmet,rprimd,xred,ylm,ylmgr)
+subroutine udsdsu(atindx1,cg,cnum_udsdsu,cprj,dtorbmag,dtset,energies,gmet,gprimd,mcg,mcprj,mpi_enreg,&
+     & nband_k,npwarr,paw_ij,pawtab,psps,rmet,rprimd,xred,ylm,ylmgr)
 
   !Arguments ------------------------------------
   !scalars
@@ -3010,33 +2994,30 @@ subroutine udsdsu(atindx1,cg,cnum_udsdsu,cprj,dtorbmag,dtset,energies,gmet,gprim
   type(dataset_type),intent(in) :: dtset
   type(MPI_type), intent(inout) :: mpi_enreg
   type(orbmag_type), intent(inout) :: dtorbmag
-  type(pawang_type),intent(in) :: pawang
   type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj)
   type(pseudopotential_type),intent(in) :: psps
 
   !arrays
-  integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem)
-  integer,intent(in) :: npwarr(dtset%nkpt)
+  integer,intent(in) :: atindx1(dtset%natom),npwarr(dtset%nkpt)
   real(dp), intent(in) :: cg(2,mcg),energies(nband_k,dtset%nkpt),gmet(3,3),gprimd(3,3)
   real(dp), intent(in) :: rmet(3,3),rprimd(3,3),xred(3,dtset%natom)
   real(dp), intent(out) :: cnum_udsdsu(2,3)
   real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
   real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
   type(paw_ij_type),intent(inout) :: paw_ij(dtset%natom*psps%usepaw)
-  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat)
   type(pawtab_type),intent(in) :: pawtab(dtset%ntypat)
 
   !Local variables -------------------------
   !scalars
-  integer :: adir,bdir,dimph1d,dimffnl,dir_tmp,exchn2n3d,epsabg
-  integer :: gdir,ia,iatom,iband,ibs1,ibs2
+  integer :: adir,bdir,dimph1d,dimffnl,exchn2n3d,epsabg
+  integer :: gdir,ia,iband,ibs1,ibs2
   integer :: icg,icprj,ider,idir,ierr
-  integer :: ikg,ikg1,ikpt,ikpt_loc,ilm,isppol,istwf_k,itypat,jband
+  integer :: ikg,ikg1,ikpt,ilm,isppol,istwf_k,jband
   integer :: me,my_nspinor,ncpgr,ngfft1,ngfft2,ngfft3,ngfft4,ngfft5,ngfft6
   integer :: nkpg,npw_k,npw_k_
   integer :: nonlop_choice,nonlop_cpopt,nonlop_nnlout,nonlop_ndat,nonlop_paw_opt,nonlop_signs
-  integer :: nproc,shiftbd,smatrix_ddkflag,smatrix_job,spaceComm,tim_nonlop
-  real(dp) :: arg,deltab,deltag,doti,dotr,ecut_eff,ENK
+  integer :: nproc,spaceComm,tim_nonlop
+  real(dp) :: arg,doti,dotr,ecut_eff,ENK
   complex(dpc) :: udsdsu_term,ujdsbu,ujdsgu
   type(gs_hamiltonian_type) :: gs_hamk
 
@@ -3262,7 +3243,6 @@ subroutine udsdsu(atindx1,cg,cnum_udsdsu,cprj,dtorbmag,dtset,energies,gmet,gprim
 end subroutine udsdsu
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_onsite_l_k
 !! NAME
 !! make_onsite_l_k
@@ -3271,7 +3251,7 @@ end subroutine udsdsu
 !! Compute 1/2 <L_R> onsite contribution to orbital magnetization at given k point and idir
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3351,7 +3331,6 @@ subroutine make_onsite_l_k(cprj_k,dtset,idir,nband_k,onsite_l_k,pawrad,pawtab)
 end subroutine make_onsite_l_k
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_onsite_l
 !! NAME
 !! make_onsite_l
@@ -3360,7 +3339,7 @@ end subroutine make_onsite_l_k
 !! Compute 1/2 <L_R> onsite contribution to orbital magnetization in direction idir
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3457,7 +3436,6 @@ subroutine make_onsite_l(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite_
 end subroutine make_onsite_l
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_onsite_bm
 !! NAME
 !! make_onsite_bm
@@ -3466,7 +3444,7 @@ end subroutine make_onsite_l
 !! Compute A_0.A_N onsite term for magnetic field + nuclear magnetic dipole moment
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3658,7 +3636,6 @@ subroutine make_onsite_bm(atindx1,cprj,dtset,idir,mcprj,mpi_enreg,nband_k,onsite
 end subroutine make_onsite_bm
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_eeig
 !! NAME
 !! make_eeig
@@ -3667,7 +3644,7 @@ end subroutine make_onsite_bm
 !! Compute the energy eigenvalues at each k point
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3948,7 +3925,6 @@ end subroutine make_eeig
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_S1trace
 !! NAME
 !! make_S1trace
@@ -3957,7 +3933,7 @@ end subroutine make_eeig
 !! Compute Trace[\rho_0 S^{(1)} \rho_0] in orbital magnetism context
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4073,7 +4049,6 @@ subroutine make_S1trace(adir,atindx1,cprj,dtset,eeig,&
 end subroutine make_S1trace
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_rhorij1
 !! NAME
 !! make_rhorij1
@@ -4082,7 +4057,7 @@ end subroutine make_S1trace
 !! Compute Trace[\rho_0 \rho_Rij(1) ] in orbital magnetism context
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4202,7 +4177,6 @@ subroutine make_rhorij1(adir,atindx1,cprj,dtset,mcprj,mpi_enreg,&
 end subroutine make_rhorij1
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/cpg_dij_cpb
 !! NAME
 !! cpg_dij_cpb
@@ -4211,7 +4185,7 @@ end subroutine make_rhorij1
 !! Compute <u_kg|p_i>dij<p_j|u_kb> energy contribution
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4281,7 +4255,6 @@ subroutine cpg_dij_cpb(cgdijcb,cprj_kb,cprj_kg,dtset,nb,ng,nspinor,paw_ij,pawtab
 end subroutine cpg_dij_cpb
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/orbmag
 !! NAME
 !! orbmag
@@ -4290,7 +4263,7 @@ end subroutine cpg_dij_cpb
 !! This routine is a driver for orbital magnetization computations
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4382,9 +4355,9 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  if (dtset%orbmag > 0) then
     ! discretized derivatives of wavefunctions version
 
-    call orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,kg,&
+    call orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
      & mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
-     & pwind,pwind_alloc,rprimd,symrec,usecprj,vectornd,&
+     & pwind,pwind_alloc,rprimd,usecprj,vectornd,&
      & vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
 
  end if
@@ -4403,7 +4376,6 @@ subroutine orbmag(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 end subroutine orbmag
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/orbmag_wf
 !! NAME
 !! orbmag_wf
@@ -4413,7 +4385,7 @@ end subroutine orbmag
 !! It is assumed that only completely filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4469,9 +4441,9 @@ end subroutine orbmag
 !!
 !! SOURCE
 
-subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,kg,&
+subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,&
      & mcg,mcprj,mpi_enreg,nattyp,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,&
-     & pwind,pwind_alloc,rprimd,symrec,usecprj,vectornd,&
+     & pwind,pwind_alloc,rprimd,usecprj,vectornd,&
      & vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
 
  !Arguments ------------------------------------
@@ -4485,8 +4457,8 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  type(pseudopotential_type),intent(in) :: psps
 
  !arrays
- integer,intent(in) :: atindx1(dtset%natom),kg(3,dtset%mpw*dtset%mkmem),nattyp(dtset%ntypat)
- integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
+ integer,intent(in) :: atindx1(dtset%natom),nattyp(dtset%ntypat)
+ integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3)
  real(dp),intent(in) :: cg(2,mcg),rprimd(3,3)
  real(dp),intent(in) :: vhartr(nfftf),vpsp(nfftf),vxc(nfftf,dtset%nspden),xred(3,dtset%natom)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
@@ -4499,21 +4471,16 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
  !Local variables -------------------------
  !scalars
- integer :: adir,bdx,gdxstor
- integer :: isppol,istwf_k,my_nspinor
- integer :: nband_k,ncpgr,ncpgrb
- real(dp) :: chernnorm,magnorm,ucvol,finish_time,start_time
- complex(dpc) :: CCI_dir,VVI_dir,VVII_dir,VVIII_dir
- complex(dpc) :: CCIV_dir,dpds_dir,onsite_bm_dir,onsite_l_dir,rhorij1_dir,s1trace_dir
- character(len=500) :: message
+ integer :: adir,isppol,istwf_k,my_nspinor,nband_k,ncpgr
+ real(dp) :: chernnorm,magnorm,ucvol
+ complex(dpc) :: onsite_bm_dir,onsite_l_dir,rhorij1_dir,s1trace_dir
 
  !arrays
- integer,allocatable :: dimlmn(:)
- real(dp) :: CCI(2,3),CCIV(2,3),cnum_dpdp(2,3),cnum_dpds(2,3),gmet(3,3),gprimd(3,3)
+ real(dp) :: CCI(2,3),gmet(3,3),gprimd(3,3)
  real(dp) :: duqduchern(2,3),duqdumag(2,3),udsqduchern(2,3),udsqdumag(2,3)
  real(dp) :: onsite_bm(2,3),onsite_l(2,3),orbmagvec(2,3),rhorij1(2,3)
- real(dp) :: rmet(3,3),s1trace(2,3),VVI(2,3),VVI_dsdu(2,3)
- real(dp) :: VVII(2,3),VVII_dusdu(2,3),VVII_udsdsu(2,3),VVIII(2,3),VVIII_dsdu(2,3)
+ real(dp) :: rmet(3,3),s1trace(2,3),VVI(2,3)
+ real(dp) :: VVII(2,3),VVII_udsdsu(2,3),VVIII(2,3)
  real(dp),allocatable :: eeig(:,:)
 
  ! ***********************************************************************
@@ -4539,12 +4506,12 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 
  ! compute i*\epsilon_{abg}\sum_n <du|Q|du> with and without E_nk weights (needed respectively
  ! by Chern number and by magnetization)
- call duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,&
+ call duqdu(atindx1,cg,cprj,dtorbmag,dtset,duqduchern,duqdumag,eeig,gprimd,mcg,mcprj,mpi_enreg,&
       & nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,xred)
 
  ! compute i*\epsilon_{abg}\sum_n <u|dS Q|du> with and without E_nk weights (needed respectively
  ! by Chern number and by magnetization)
- call udsqdu(atindx1,cg,cprj,dtorbmag,dtset,eeig,gmet,gprimd,kg,&
+ call udsqdu(atindx1,cg,cprj,dtorbmag,dtset,eeig,gmet,gprimd,&
      & mcg,mcprj,mpi_enreg,nband_k,npwarr,paw_ij,pawang,pawrad,pawtab,psps,&
      pwind,pwind_alloc,rmet,rprimd,udsqduchern,udsqdumag,xred,ylm,ylmgr)
 
@@ -4601,28 +4568,18 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,kg,&
     end do ! end loop over adir
 
     CCI=zero
-    call duqhqdu(atindx1,cg,CCI,cprj,dtorbmag,dtset,gmet,gprimd,kg,mcg,mcprj,mpi_enreg,&
+    call duqhqdu(atindx1,cg,CCI,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_enreg,&
          & nattyp,nband_k,nfftf,npwarr,paw_ij,pawang,pawfgr,pawrad,pawtab,psps,pwind,pwind_alloc,&
          & rmet,rprimd,ucvol,vectornd,vhartr,vpsp,vxc,with_vectornd,xred,ylm,ylmgr)
     CCI=-half*CCI
 
-    ! call udsqdu(atindx1,cg,VVI_dsdu,cprj,dtorbmag,dtset,gmet,gprimd,&
-    !      & kg,mcg,mcprj,mpi_enreg,&
-    !      & nband_k,npwarr,paw_ij,pawang,pawrad,pawtab,&
-    !      & psps,pwind,pwind_alloc,&
-    !      & rmet,rprimd,xred,ylm,ylmgr,energies=eeig,swap_option=.TRUE.)
     VVI=half*udsqdumag
 
-    call udsdsu(atindx1,cg,VVII_udsdsu,cprj,dtorbmag,dtset,eeig,gmet,gprimd,kg,mcg,mcprj,mpi_enreg,&
-         & nband_k,npwarr,paw_ij,pawang,pawrad,pawtab,psps,rmet,rprimd,xred,ylm,ylmgr)
+    call udsdsu(atindx1,cg,VVII_udsdsu,cprj,dtorbmag,dtset,eeig,gmet,gprimd,mcg,mcprj,mpi_enreg,&
+         & nband_k,npwarr,paw_ij,pawtab,psps,rmet,rprimd,xred,ylm,ylmgr)
 
     VVII=half*(duqdumag - VVII_udsdsu) ! check this
 
-    ! call udsqdu(atindx1,cg,VVIII_dsdu,cprj,dtorbmag,dtset,gmet,gprimd,&
-    !      & kg,mcg,mcprj,mpi_enreg,&
-    !      & nband_k,npwarr,paw_ij,pawang,pawrad,pawtab,&
-    !      & psps,pwind,pwind_alloc,&
-    !      & rmet,rprimd,xred,ylm,ylmgr,energies=eeig)
     VVIII=half*udsqdumag
     
     ! convert terms to cartesian coordinates as needed
@@ -4695,7 +4652,6 @@ subroutine orbmag_wf(atindx1,cg,cprj,dtset,dtorbmag,kg,&
 end subroutine orbmag_wf
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/output_orbmag
 !! NAME
 !! output_orbmag
@@ -4704,7 +4660,7 @@ end subroutine orbmag_wf
 !! This routine outputs orbmag and chern number
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4778,7 +4734,6 @@ subroutine output_orbmag(output_option,output_vector)
 end subroutine output_orbmag
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_dpdp
 !! NAME
 !! make_dpdp
@@ -4788,7 +4743,7 @@ end subroutine output_orbmag
 !! appears in the Chern number
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -4835,29 +4790,20 @@ end subroutine output_orbmag
 !!
 !! SOURCE
 
-subroutine make_dpdp(atindx1,cg,cnum_dpdp,cprj,dtset,dtorbmag,&
-     & mcg,mcprj,mpi_enreg,nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
-     & rprimd,smat_all_indx,symrec,usecprj,usepaw,xred)
+subroutine make_dpdp(cnum_dpdp,dtset,dtorbmag,mpi_enreg,nband_k,&
+     & rprimd,smat_all_indx)
 
   !Arguments ------------------------------------
   !scalars
-  integer,intent(in) :: mcg,mcprj,nband_k,pwind_alloc,usecprj,usepaw
+  integer,intent(in) :: nband_k
   type(dataset_type),intent(in) :: dtset
   type(MPI_type), intent(inout) :: mpi_enreg
   type(orbmag_type), intent(inout) :: dtorbmag
-  type(pawang_type),intent(in) :: pawang
-  type(pseudopotential_type),intent(in) :: psps
 
   !arrays
-  integer,intent(in) :: atindx1(dtset%natom)
-  integer,intent(in) :: npwarr(dtset%nkpt),pwind(pwind_alloc,2,3),symrec(3,3,dtset%nsym)
-  real(dp), intent(in) :: cg(2,mcg),rprimd(3,3)
+  real(dp), intent(in) :: rprimd(3,3)
   real(dp), intent(in) :: smat_all_indx(2,dtorbmag%mband_occ,dtorbmag%mband_occ,dtorbmag%fnkpt,1:6,0:4)
-  real(dp), intent(in) :: xred(3,dtset%natom)
   real(dp), intent(out) :: cnum_dpdp(2,3)
-  type(pawrad_type),intent(in) :: pawrad(dtset%ntypat*usepaw)
-  type(pawcprj_type),intent(in) ::  cprj(dtset%natom,mcprj*usecprj)
-  type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*usepaw)
 
   !Local variables -------------------------
   !scalars
@@ -4866,7 +4812,6 @@ subroutine make_dpdp(atindx1,cg,cnum_dpdp,cprj,dtset,dtorbmag,&
   integer :: my_nspinor,nn,n1,n2
   real(dp) :: deltab,deltag,ucvol
   complex(dpc) :: IA,t1A,t2A,t3A
-  character(len=500) :: message
   !arrays
   real(dp) :: dkb(3),dkg(3),gmet(3,3),gprimd(3,3),rmet(3,3)
 
@@ -4968,7 +4913,6 @@ subroutine make_dpdp(atindx1,cg,cnum_dpdp,cprj,dtset,dtorbmag,&
 end subroutine make_dpdp
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_smat
 !! NAME
 !! make_smat
@@ -4979,7 +4923,7 @@ end subroutine make_dpdp
 !! filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group (JWZ)
+!! Copyright (C) 2003-2020 ABINIT  group (JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -5429,7 +5373,6 @@ subroutine make_smat(atindx1,cg,cprj,dtorbmag,dtset,gmet,gprimd,mcg,mcprj,mpi_en
 end subroutine make_smat
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/ctocprjb
 !! NAME
 !! ctocprjb
@@ -5439,7 +5382,7 @@ end subroutine make_smat
 !! at k points on current processor and all bands
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -5661,7 +5604,6 @@ subroutine ctocprjb(atindx1,cg,cprj_kb_k,dtorbmag,dtset,gmet,gprimd,&
 end subroutine ctocprjb
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/kgk_ke
 !! NAME
 !! kgk_ke
@@ -5670,7 +5612,7 @@ end subroutine ctocprjb
 !! Compute k-shifted kinetic energy: |u_{nkg}> -> T_k |u_{nkg}>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -5752,7 +5694,6 @@ subroutine kgk_ke(dtset,dkg,gmet,kgket,kg_kg,kkgket,kpointg,npw_kg)
 end subroutine kgk_ke
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/applyap
 !! NAME
 !! applyap
@@ -5761,7 +5702,7 @@ end subroutine kgk_ke
 !! apply nuclear dipole term A.p
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -5862,7 +5803,6 @@ subroutine applyap(bra,dkg,dtset,ghc_vectornd,istwf_k,kg_kg,kpointg,mpi_enreg,&
 end subroutine applyap
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_eeig123
 !! NAME
 !! make_eeig123
@@ -5871,7 +5811,7 @@ end subroutine applyap
 !! Compute matrix elements <u_k+g|H_k|u_k+b>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -6341,7 +6281,6 @@ subroutine make_eeig123(atindx1,cg,cprj,dtorbmag,dtset,eeig,&
 end subroutine make_eeig123
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/orbmag_rho
 !! NAME
 !! orbmag_rho
@@ -6351,7 +6290,7 @@ end subroutine make_eeig123
 !! It is assumed that only completely filled bands are present.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -6447,15 +6386,14 @@ subroutine orbmag_rho(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  integer :: isppol,istwf_k,my_nspinor
  integer :: nband_k,ncpgr,ncpgrb
  real(dp) :: ucvol,finish_time,start_time
- complex(dpc) :: CCI_dir,VVI_dir,VVII_dir,VVIII_dir
+ complex(dpc) :: CCI_dir,VVI_dir,VVII_dir
  complex(dpc) :: CCIV_dir,dpds_dir,onsite_bm_dir,onsite_l_dir,rhorij1_dir,s1trace_dir
- character(len=500) :: message
 
  !arrays
  integer,allocatable :: dimlmn(:)
  real(dp) :: CCI(2,3),CCIV(2,3),cnum_dpdp(2,3),cnum_dpds(2,3),gmet(3,3),gprimd(3,3)
  real(dp) :: onsite_bm(2,3),onsite_l(2,3),orbmagvec(2,3),rhorij1(2,3)
- real(dp) :: rmet(3,3),s1trace(2,3),VVI(2,3),VVII(2,3),VVIII(2,3)
+ real(dp) :: rmet(3,3),s1trace(2,3),VVI(2,3),VVII(2,3)
  real(dp),allocatable :: dsdk(:,:,:,:,:,:)
  real(dp),allocatable :: eeig(:,:),eeig123(:,:,:,:,:,:),smat_all_indx(:,:,:,:,:,:)
  type(pawcprj_type),allocatable :: cprj_kb_k(:,:,:,:)
@@ -6515,9 +6453,8 @@ subroutine orbmag_rho(atindx1,cg,cprj,dtset,dtorbmag,kg,&
  ! call chern number routines if necessary
  if ( (dtset%orbmag .EQ. -1) .OR. (dtset%orbmag .EQ. -3) ) then
 
-    call make_dpdp(atindx1,cg,cnum_dpdp,cprj,dtset,dtorbmag,&
-     & mcg,mcprj,mpi_enreg,nband_k,npwarr,pawang,pawrad,pawtab,psps,pwind,pwind_alloc,&
-     & rprimd,smat_all_indx,symrec,usecprj,psps%usepaw,xred)
+    call make_dpdp(cnum_dpdp,dtset,dtorbmag,mpi_enreg,nband_k,&
+     & rprimd,smat_all_indx)
 
     cnum_dpdp(1,1:3) = ucvol*MATMUL(gprimd,cnum_dpdp(1,1:3))
     cnum_dpdp(2,1:3) = ucvol*MATMUL(gprimd,cnum_dpdp(2,1:3))
@@ -6716,7 +6653,6 @@ end subroutine orbmag_rho
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_dpHdp
 !! NAME
 !! make_dpHdp
@@ -6725,7 +6661,7 @@ end subroutine orbmag_rho
 !! This routine computes term CCI for orbital magnetization
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -6828,7 +6764,6 @@ subroutine make_dpHdp(adir,CCI_dir,dtorbmag,eeig123,nband_k,smat_all_indx)
 end subroutine make_dpHdp
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_qdpdpH
 !! NAME
 !! make_CCIV_dpdk
@@ -6837,7 +6772,7 @@ end subroutine make_dpHdp
 !! This routine computes term Tr[(1-\rho)d\rho d\rho H (1-\rho)]
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -6944,7 +6879,6 @@ subroutine make_qdpdpH(adir,dtorbmag,eeig,nband_k,smat_all_indx,CCIV_dir)
 end subroutine make_qdpdpH
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_pdpdpH
 !! NAME
 !! make_dpdpH
@@ -6953,7 +6887,7 @@ end subroutine make_qdpdpH
 !! This routine computes term Tr[\rho d\rho d\rho H]
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -7058,7 +6992,6 @@ end subroutine make_pdpdpH
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_dpdsH
 !! NAME
 !! make_dpdsH
@@ -7068,7 +7001,7 @@ end subroutine make_pdpdpH
 !! If H is not present, then H -> 1 and get analogous term appearing in Chern number.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2017 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

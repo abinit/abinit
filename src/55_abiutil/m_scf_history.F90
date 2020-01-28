@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_scf_history
 !! NAME
 !!  m_scf_history
@@ -9,7 +8,7 @@
 !!  as needed by the specific SCF algorithm.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2019 ABINIT group (MT)
+!! Copyright (C) 2011-2020 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

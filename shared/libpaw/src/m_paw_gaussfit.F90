@@ -7,7 +7,7 @@
 !!  Module to fit PAW related data to sums of gaussians
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2019 ABINIT group (T. Rangel)
+!!  Copyright (C) 2012-2020 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1506,7 +1506,7 @@ end subroutine gaussfit_calc_deriv_c4
 !!  Uses the Levenberg-Marquardt algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2019 ABINIT group (T. Rangel)
+!!  Copyright (C) 2011-2020 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1688,7 +1688,7 @@ end subroutine gaussfit_rlsf
 !!  Finds chisq, alpha and beta parameters for LSF using the Levenberg-Marquardt algorithm.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2019 ABINIT group (T. Rangel)
+!!  Copyright (C) 2011-2020 ABINIT group (T. Rangel)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

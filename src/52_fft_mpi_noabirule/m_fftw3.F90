@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fftw3
 !! NAME
 !! m_fftw3
@@ -7,7 +6,7 @@
 !!  This module provides wrappers for the FFTW3 routines: in-place and out-of-place version.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG, FD)
+!! Copyright (C) 2009-2020 ABINIT group (MG, FD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -59,7 +58,7 @@ MODULE m_fftw3
 
  implicit none
 
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
  include 'fftw3-mpi.f03'
 #endif
 
@@ -106,7 +105,7 @@ MODULE m_fftw3
  public :: fftw3_applypot_many
  public :: fftw3_accrho
 
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
 ! flags copied from fftw3.f
  integer,public,parameter :: ABI_FFTW_FORWARD = FFTW_FORWARD
  integer,public,parameter :: ABI_FFTW_BACKWARD = FFTW_BACKWARD
@@ -138,7 +137,7 @@ MODULE m_fftw3
  ! It should be at least integer*@SIZEOF_INT_P@
  ! MKL wrappers requires it to be integer*8, so do _not_ use C_INTPTR_T.
 
-#ifdef HAVE_FFT_FFTW3_THREADS
+#ifdef HAVE_FFTW3_THREADS
  integer,private,save :: THREADS_INITED = 0
  ! 1 if treads have been initialized. 0 otherwise.
 #endif
@@ -207,7 +206,7 @@ MODULE m_fftw3
    module procedure fftw3_fftpad_dpc
  end interface fftw3_fftpad
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
   ! Overloaded planner.
  interface fftw3_plan_many_dft
    module procedure dplan_many_dft_1D
@@ -247,7 +246,7 @@ MODULE m_fftw3
 !!     builders with MKL should use m_dfti.F90
 !!     builders with FFTW3 should provide a recent version of the library
 !!
-#ifndef HAVE_FFT_FFTW3_MPI
+#ifndef HAVE_FFTW3_MPI
  ! Fortran binding for fftw_malloc
  interface fftw_malloc
    type(C_PTR) function fftw_malloc(alloc_size) bind(C, name='fftw_malloc')
@@ -803,7 +802,7 @@ subroutine fftw3_fftrisc_sp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 #undef  FFT_PRECISION
 #undef  MYKIND
@@ -924,7 +923,7 @@ subroutine fftw3_fftrisc_dp(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboundout,
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 #undef  FFT_PRECISION
 #undef  MYKIND
@@ -982,7 +981,7 @@ subroutine fftw3_fftrisc_mixprec(cplex,denpot,fofgin,fofgout,fofr,gboundin,gboun
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 #undef  FFT_PRECISION
 #undef  MYKIND
@@ -1054,7 +1053,7 @@ subroutine fftw3_fftug_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  real(dp),target,intent(in) :: ug(2*npw_k*ndat)
  real(dp),target,intent(inout) :: ur(2*ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=2
@@ -1123,7 +1122,7 @@ subroutine fftw3_fftug_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf
  complex(spc),target,intent(in) :: ug(npw_k*ndat)
  complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
@@ -1193,7 +1192,7 @@ subroutine fftw3_fftug_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf
  complex(dpc),target,intent(in) :: ug(npw_k*ndat)
  complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
@@ -1265,7 +1264,7 @@ subroutine fftw3_fftur_dp(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf_
  real(dp),target,intent(inout) :: ur(2*ldx*ldy*ldz*ndat)
  real(dp),target,intent(inout) :: ug(2*npw_k*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=2
@@ -1338,7 +1337,7 @@ subroutine fftw3_fftur_spc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf
  complex(spc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
  complex(spc),target,intent(inout) :: ug(npw_k*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
@@ -1411,7 +1410,7 @@ subroutine fftw3_fftur_dpc(fftalg,fftcache,npw_k,nx,ny,nz,ldx,ldy,ldz,ndat,istwf
  complex(dpc),target,intent(inout) :: ur(ldx*ldy*ldz*ndat)
  complex(dpc),target,intent(inout) :: ug(npw_k*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dist=1
@@ -1476,7 +1475,7 @@ subroutine fftw3_c2c_ip_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
 !arrays
  complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -1559,7 +1558,7 @@ subroutine fftw3_fftpad_spc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
  integer,intent(in) :: gbound(2*mgfft+8,2)
  complex(spc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
  integer,parameter :: dst=1
  real(sp) :: fact
@@ -1616,7 +1615,7 @@ subroutine fftw3_c2c_ip_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,fftw_flags)
 !arrays
  complex(dpc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -1696,7 +1695,7 @@ subroutine fftw3_c2c_op_spc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
  complex(spc),intent(in) :: ff(ldx*ldy*ldz*ndat)
  complex(spc),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -1777,7 +1776,7 @@ subroutine fftw3_c2c_op_dpc(nx,ny,nz,ldx,ldy,ldz,ndat,isign,ff,gg,fftw_flags)
  complex(dpc),intent(in) :: ff(ldx*ldy*ldz*ndat)
  complex(dpc),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -1861,7 +1860,7 @@ subroutine fftw3_r2c_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  real(dp),intent(in) :: ff(ldx*ldy*ldz*ndat)
  real(dp),intent(out) :: gg(2,ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -2018,7 +2017,7 @@ subroutine fftw3_c2r_op(nx,ny,nz,ldx,ldy,ldz,ndat,ff,gg,fftw_flags)
  real(dp),intent(in) :: ff(2,ldx*ldy*ldz*ndat)
  real(dp),intent(out) :: gg(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -2135,7 +2134,7 @@ subroutine fftw3_many_dft_op(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,fftw_flags
  real(dp),intent(in) :: fin(2*ldx*ldy*ldz*ndat)
  real(dp),intent(out) :: fout(2*ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -2219,7 +2218,7 @@ subroutine fftw3_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,finout,fftw_flags)
 !arrays
  real(dp),intent(inout) :: finout(2*ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3,nt_all=-1
@@ -2293,15 +2292,15 @@ subroutine fftw3_cleanup()
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
  call fftw_mpi_cleanup()
 #endif
-#ifdef HAVE_FFT_FFTW3_THREADS
+#ifdef HAVE_FFTW3_THREADS
  if (THREADS_INITED==1) then
    call dfftw_cleanup_threads()
    THREADS_INITED = 0
  end if
-#elif defined HAVE_FFT_FFTW3
+#elif defined HAVE_FFTW3
  call dfftw_cleanup()
 #else
  MSG_ERROR("FFTW3 support not activated")
@@ -2337,7 +2336,7 @@ subroutine fftw3_destroy_plan(plan)
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !$OMP CRITICAL (OMPC_fftw3_destroy_plan)
  call dfftw_destroy_plan(plan)
 !$OMP END CRITICAL (OMPC_fftw3_destroy_plan)
@@ -2377,13 +2376,13 @@ subroutine fftw3_init_threads()
 
 !Local variables ------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3_THREADS
+#ifdef HAVE_FFTW3_THREADS
  integer :: iret
 #endif
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3_THREADS
+#ifdef HAVE_FFTW3_THREADS
  if (THREADS_INITED==0) then
    !call wrtout(std_out,"Calling dfftw_init_threads()","COLL")
    call dfftw_init_threads(iret)
@@ -2401,7 +2400,7 @@ subroutine fftw3_init_threads()
 #endif
 #endif
 
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
   !call wrtout(std_out,"Calling fftw_mpi_init()","COLL")
   call fftw_mpi_init()
 #endif
@@ -2441,7 +2440,7 @@ subroutine fftw3_set_nthreads(nthreads)
 
 !Local variables ------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3_THREADS
+#ifdef HAVE_FFTW3_THREADS
  integer :: istat,nt
  integer,parameter :: enough=1
  integer,save :: nwarns=0
@@ -2449,7 +2448,7 @@ subroutine fftw3_set_nthreads(nthreads)
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3_THREADS
+#ifdef HAVE_FFTW3_THREADS
  if (THREADS_INITED==0) then
    MSG_WARNING("Threads are not initialized")
  end if
@@ -2527,7 +2526,7 @@ subroutine fftw3_fftpad_dp(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer,parameter :: dst=2
  real(dp) :: fact
 
@@ -2587,7 +2586,7 @@ subroutine fftw3_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
  integer,intent(in) :: gbound(2*mgfft+8,2)
  complex(dpc),intent(inout) :: ff(ldx*ldy*ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: dst=1
@@ -2607,7 +2606,7 @@ subroutine fftw3_fftpad_dpc(ff,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
 end subroutine fftw3_fftpad_dpc
 !!***
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 !----------------------------------------------------------------------
 
@@ -2945,7 +2944,7 @@ end function dplan_many_dft_c2r
 !!
 !! SOURCE
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 subroutine fftw3_execute_dft_dp(plan, in, out)
 
@@ -2977,7 +2976,7 @@ end subroutine fftw3_execute_dft_dp
 !!
 !! SOURCE
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 subroutine fftw3_execute_dft_spc(plan, in, out)
 
@@ -3009,7 +3008,7 @@ end subroutine fftw3_execute_dft_spc
 !!
 !! SOURCE
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 subroutine fftw3_execute_dft_dpc(plan, in, out)
 
@@ -3043,7 +3042,7 @@ end subroutine fftw3_execute_dft_dpc
 !!
 !! SOURCE
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 subroutine fftw3_alloc_real1d_dp(size,cptr,fptr)
 
@@ -3080,7 +3079,7 @@ end subroutine fftw3_alloc_real1d_dp
 !!
 !! SOURCE
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 subroutine fftw3_alloc_real2d_dp(shape,cptr,fptr)
 
@@ -3117,7 +3116,7 @@ end subroutine fftw3_alloc_real2d_dp
 !!
 !! SOURCE
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 subroutine fftw3_alloc_complex1d_spc(size,cptr,fptr)
 
@@ -3154,7 +3153,7 @@ end subroutine fftw3_alloc_complex1d_spc
 !!
 !! SOURCE
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 
 subroutine fftw3_alloc_complex1d_dpc(size,cptr,fptr)
 
@@ -3281,7 +3280,7 @@ subroutine fftwmpi_get_work_array(cdata_f,cdata_r,rank,nx,ny,nz,ndat,comm_fft,n0
  type(C_PTR), intent(out) :: cdata_f,cdata_r
 
 !Local variables-------------------------------
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
 !scalars
  integer(C_INTPTR_T) :: alloc_local
 !arrays
@@ -3342,7 +3341,7 @@ subroutine fftwmpi_free_work_array(cdata_f,cdata_r)
 
 ! *************************************************************************
 
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
  call fftw_free(cdata_r)
  call fftw_free(cdata_f)
 #else
@@ -3399,7 +3398,7 @@ subroutine fftw3mpi_many_dft_ip(nx,ny,nz,ldx,ldy,ldz,ndat,isign,fin,fout,comm_ff
  real(dp),intent(in) :: fin(2,ldx,ldy,ldz*ndat)
  real(dp),intent(out) :: fout(2,ldx,ldy,ldz*ndat)
 
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3
@@ -3516,7 +3515,7 @@ subroutine fftw3mpi_many_dft_tr(nx,ny,nz,ndat,isign,fin,fout,comm_fft,fftw_flags
  complex(C_DOUBLE_COMPLEX),ABI_CONTIGUOUS pointer :: fout(:,:,:)
 
 !Local variables-------------------------------
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
 !scalars
  integer :: my_flags
  !FFTWMPI stuff
@@ -3602,7 +3601,7 @@ subroutine fftw3_mpifourdp_c2r(nfft,ngfft,ndat,&
  real(dp),intent(out) :: fofr(nfft*ndat)
 
 !Local variables-------------------------------
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
 !scalars
  integer,parameter :: rank3=3
  integer :: nx,ny,nz,nproc_fft
@@ -3751,7 +3750,7 @@ subroutine fftw3_mpifourdp_r2c(nfft,ngfft,ndat,&
  real(dp),intent(out) :: fofg(2,nfft*ndat)
 
 !Local variables-------------------------------
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
  !scalars
  integer,parameter :: rank3=3
  integer :: my_flags,nproc_fft,nx,ny,nz
@@ -3898,7 +3897,7 @@ subroutine old_fftw3_mpifourdp(cplex,nfft,ngfft,ndat,isign,&
  integer,intent(in) :: fftn3_distrib(ngfft(3)),ffti3_local(ngfft(3))
  real(dp),intent(inout) :: fofg(2,nfft*ndat),fofr(cplex*nfft*ndat)
 
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
 !Local variables-------------------------------
 !scalars
  integer :: nx,ny,nz,my_flags
@@ -4014,7 +4013,7 @@ subroutine fftw3_mpifourdp_c2c(cplex,nfft,ngfft,ndat,isign,&
  integer,intent(in) :: fftn3_distrib(ngfft(3)),ffti3_local(ngfft(3))
  real(dp),intent(inout) :: fofg(2,nfft*ndat),fofr(cplex*nfft*ndat)
 
-#ifdef HAVE_FFT_FFTW3_MPI
+#ifdef HAVE_FFTW3_MPI
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank3=3
@@ -4191,7 +4190,7 @@ subroutine fftw3_mpiback_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  real(dp),intent(in) :: zf(2,md1,md3,md2proc,ndat)
  real(dp),intent(out) :: zr(2,nd1,nd2,nd3proc,ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
  integer,parameter :: nt1=1
  integer :: j,i1,i2,idat,ierr,includelast
@@ -4550,7 +4549,7 @@ subroutine fftw3_mpiforw_wf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer :: j,i1,i2,i3,idat,ierr,nproc_fft,me_fft,nthreads
  integer :: ioption,j2,j3,j2st,jp2st,lot1,lot2,lot3,lzt,m1zt,ma,mb,n1dfft,nnd3
  integer :: m2eff,ncache,n1eff,n1half,i1inv,i2inv,i3inv
@@ -4898,7 +4897,7 @@ subroutine fftw3_mpiback(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
 
 !Local variables-------------------------------
 !scalaras
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer :: j,i1,idat,ierr,includelast,j2,j2st,j3,jeff,jp2st,lzt,nthreads
  integer :: ma,mb,n1dfft,n1eff,n2eff,n1zt,ncache,nnd3,nproc_fft,me_fft,lot1,lot2,lot3
  integer(KIND_FFTW_PLAN) :: bw_plan1_lot,bw_plan1_rest
@@ -5199,7 +5198,7 @@ subroutine fftw3_mpiforw(cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd1eff,nd2proc,nd3proc,
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer :: j,i1,idat,ierr,j2,j2st,j3,jp2st,lzt,nthreads
  integer :: ma,mb,n1dfft,n1eff,n2eff,n1zt,ncache,nnd3,nproc_fft,me_fft,lot1,lot2,lot3
  integer(KIND_FFTW_PLAN) :: fw_plan1_lot,fw_plan1_rest
@@ -5583,7 +5582,7 @@ subroutine fftw3_applypot(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer,parameter :: unused0=0
  integer :: j,i1,i2,i3,idat,ierr,j3glob,nthreads
  integer :: ioption,j2,j3,lzt,m1zt,ma,mb,n1dfft,nnd3,lot1,lot2,lot3
@@ -6053,7 +6052,7 @@ subroutine fftw3_accrho(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer,parameter :: unused0=0
  integer :: j,i1,idat,ierr,j3glob
  integer :: ioption,j2,j3,j2st,jp2st,lzt,m1zt,ma,mb,n1dfft,nnd3
@@ -6379,7 +6378,7 @@ subroutine fftw3_mpiback_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
  real(dp),intent(in) :: zf(2,md1,md3,md2proc,ndat)
  real(dp),intent(out) :: zr(2,nd1,nd2,nd3proc,ndat)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
  integer,parameter :: nt1=1
  integer :: j,i1,i2,idat,ierr,includelast,nthreads
@@ -6735,7 +6734,7 @@ subroutine fftw3_mpiforw_manywf(cplexwf,ndat,n1,n2,n3,nd1,nd2,nd3proc,&
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer :: j,i1,i2,i3,idat,ierr,nproc_fft,me_fft
  integer :: ioption,j2,j3,j2st,jp2st,lot1,lot2,lot3,lzt,m1zt,ma,mb,n1dfft,nnd3
  integer :: m2eff,ncache,n1eff,n1half,i1inv,i2inv,i3inv,nthreads
@@ -7077,7 +7076,7 @@ subroutine fftw3_applypot_many(cplexwf,cplex,ndat,n1,n2,n3,nd1,nd2,nd3,nd3proc,&
 
 !Local variables-------------------------------
 !scalars
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
  integer,parameter :: unused0=0
  integer :: j,i1,i2,i3,idat,ierr,j3glob,nthreads
  integer :: ioption,j2,j3,lzt,m1zt,ma,mb,n1dfft,nnd3,lot1,lot2,lot3
@@ -7531,7 +7530,7 @@ subroutine fftw3_poisson(cplex,nx,ny,nz,ldx,ldy,ldz,ndat,vg,nr)
  real(dp),intent(inout) :: nr(cplex*ldx*ldy*ldz*ndat)
  real(dp),intent(in) :: vg(nx*ny*nz)
 
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank1=1,rank2=2

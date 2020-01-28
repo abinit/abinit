@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_chkinp
 !! NAME
 !!  m_chkinp
@@ -7,7 +6,7 @@
 !! Check consistency of Abinit input data against itself.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -104,8 +103,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
  integer :: bantot,ia,iatom,ib,iband,idtset,ierr,iexit,ii,iimage,ikpt,ilang,intimage,ierrgrp
  integer :: ipsp,isppol,isym,itypat,iz,jdtset,jj,kk,maxiatsph,maxidyn,minplowan_iatom,maxplowan_iatom
  integer :: mband,mgga,miniatsph,minidyn,mod10,mpierr,all_nprocs
- integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu,nproc,nspden,nspinor,nsppol,optdriver,response,usepaw,usewvl
- integer :: fftalg !,fftalga,fftalgc,
+ integer :: mu,natom,nfft,nfftdg,nkpt,nloc_mem,nlpawu,nproc,nspden,nspinor,nsppol,optdriver,response
+ integer :: fftalg,need_kden,usepaw,usewvl
  real(dp) :: delta,dz,sumalch,summix,sumocc,ucvol,wvl_hgrid,zatom
  character(len=1000) :: msg
  type(dataset_type) :: dt
@@ -170,6 +169,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    nproc=mpi_enregs(idtset)%nproc
    mgga=0;if(dt%ixc>=31.and.dt%ixc<=34)mgga=1
    if (dt%ixc<0.and.libxc_functionals_ismgga()) mgga=1
+   need_kden=mgga;if (dt%ixc==31.or.dt%ixc==34) need_kden=0
 
 !  =====================================================================================================
 !  Check the values of variables, using alphabetical order
@@ -727,12 +727,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        !  MSG_ERROR_NOSTOP("Self-energy with symsigma 1 and nspinor 2 not implemented", ierr)
        !end if
        if (optdriver == RUNL_SIGMA .and. &
-       any(mod(dt%gwcalctyp, 10) == [SIG_GW_AC, SIG_QPGW_PPM, SIG_QPGW_CD])) then
+           any(mod(dt%gwcalctyp, 10) == [SIG_GW_AC, SIG_QPGW_PPM, SIG_QPGW_CD])) then
          MSG_ERROR_NOSTOP("analytic-continuation, model GW with nspinor 2 are not implemented", ierr)
        end if
        !if (optdriver == RUNL_SIGMA .and. mod(dt%gwcalctyp, 100) >= 10) then
        !  MSG_ERROR_NOSTOP("Self-consistent GW with nspinor == 2 not implemented", ierr)
        !end if
+       if (optdriver == RUNL_SIGMA .and. dt%symsigma > 0 .and. dt%gwcalctyp >= 20) then
+         MSG_ERROR_NOSTOP("gwcalctyp >= 0 requires symsigma == 0 in input. New default in Abinit9 is symsigma 1!", ierr)
+       end if
+       if (optdriver == RUNL_SIGMA .and. dt%symsigma > 0 .and. dt%ucrpa > 0) then
+         MSG_ERROR_NOSTOP("ucrpa requires symsigma == 0 in input. New default in Abinit9 is symsigma 1!", ierr)
+       end if
        if (dt%gwcomp /= 0) then
          MSG_ERROR_NOSTOP("gwcomp /= 0 with nspinor 2 not implemented", ierr)
        end if
@@ -1315,6 +1321,20 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  ixcrot
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,3,(/1,2,3/),iout)
+   if(dt%rfmagn/=0)then
+     if(abs(dt%qptn(1))>tol8)then
+       cond_string(1)='qptn(1)' ; cond_values(1)=dt%qptn(1)
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,1,(/3/),iout)
+     end if
+     if(abs(dt%qptn(2))>tol8)then
+       cond_string(1)='qptn(2)' ; cond_values(1)=dt%qptn(2)
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,1,(/3/),iout)
+     end if
+     if(abs(dt%qptn(3))>tol8)then
+       cond_string(1)='qptn(3)' ; cond_values(1)=dt%qptn(3)
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,1,(/3/),iout)
+     end if
+   endif
 
 !  tim1rev
    call chkint_eq(0,0,cond_string,cond_values,ierr,'tim1rev',dt%tim1rev,2,(/0,1/),iout)
@@ -2212,6 +2232,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end if
      end if
    end if
+   !PAW+mGGA function restricted to pawxcdev=0
+   if (dt%usepaw==1.and.mgga==1.and.dt%pawxcdev/=0) then
+     write(msg,'(5a)' ) &
+&     'You are performing a PAW calculation using a meta-GGA XC functional:',ch10,&
+&     '  This is restricted to pawxcdev=0!',ch10,&
+&     '  Action: change pawxcdev value in your input file!'
+     MSG_ERROR_NOSTOP(msg, ierr)
+   end if
    !Non linear Response function only for LDA (restricted to ixc=3/7/8)
    allow=(dt%ixc>0).and.(dt%ixc/=3.and.dt%ixc/=7.and.dt%ixc/=8)
    if(.not.allow) allow=(dt%ixc<0).and.(libxc_functionals_isgga().or.libxc_functionals_ismgga())
@@ -2252,7 +2280,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'symmorphi',dt%symmorphi,1,(/0/),iout)
   end if
-  ! only kptopt 3 is allowed 
+  ! only kptopt 3 is allowed
   if(dt%orbmag.NE.0) then
      cond_string(1)='orbmag';cond_values(1)=dt%orbmag
      call chkint_eq(1,1,cond_string,cond_values,ierr,'kptopt',dt%kptopt,1,(/3/),iout)
@@ -2684,12 +2712,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      MSG_ERROR(' pawprtdos/=2  and prtdosm=2 are not compatible')
    end if
 
-!  prtefmas
+   !  prtefmas
    call chkint_eq(0,0,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,2,(/0,1/),iout)
-   if(optdriver/=RUNL_RESPFN)then
-     cond_string(1)='optdriver' ; cond_values(1)=optdriver
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,1,(/0/),iout)
-   end if
+   !if(optdriver/=RUNL_RESPFN)then
+   !  cond_string(1)='optdriver' ; cond_values(1)=optdriver
+   !  call chkint_eq(0,1,cond_string,cond_values,ierr,'prtefmas',dt%prtefmas,1,(/0/),iout)
+   !end if
 
 !  prtelf
    call chkint_ge(0,0,cond_string,cond_values,ierr,'prtelf',dt%prtkden,0,iout)
@@ -2744,7 +2772,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  prtgden
    call chkint(0,0,cond_string,cond_values,ierr,'prtgden',dt%prtgden,1,(/0/),1,0,iout)
-
    if(optdriver/=RUNL_GSTATE)then
      cond_string(1)='optdriver' ; cond_values(1)=optdriver
      call chkint(0,1,cond_string,cond_values,ierr,'prtgden',dt%prtgden,1,(/0/),0,0,iout)
@@ -2760,22 +2787,21 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='optdriver' ; cond_values(1)=optdriver
      call chkint_eq(0,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
    end if
-   if(usepaw/=0)then
-     cond_string(1)='usepaw' ; cond_values(1)=usepaw
-     call chkint_eq(0,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
-   end if
+   !if(usepaw/=0)then
+   !  cond_string(1)='usepaw' ; cond_values(1)=usepaw
+   !  call chkint_eq(0,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
+   !end if
 
 !  prtlden
    call chkint(0,0,cond_string,cond_values,ierr,'prtlden',dt%prtlden,1,(/0/),1,0,iout)
-
    if(optdriver/=RUNL_GSTATE)then
      cond_string(1)='optdriver' ; cond_values(1)=optdriver
      call chkint(0,1,cond_string,cond_values,ierr,'prtlden',dt%prtlden,1,(/0/),0,0,iout)
    end if
-   if(usepaw/=0)then
-     cond_string(1)='usepaw' ; cond_values(1)=usepaw
-     call chkint(0,1,cond_string,cond_values,ierr,'prtlden',dt%prtlden,1,(/0/),0,0,iout)
-   end if
+   !if(usepaw/=0)then
+   !  cond_string(1)='usepaw' ; cond_values(1)=usepaw
+   !  call chkint(0,1,cond_string,cond_values,ierr,'prtlden',dt%prtlden,1,(/0/),0,0,iout)
+   !end if
 
 !  prtstm
    call chkint_ge(0,0,cond_string,cond_values,ierr,'prtstm',dt%prtstm,0,iout)
@@ -3187,7 +3213,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%usekden==0)then
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
-     if(mgga==1)then
+     if(mgga/=need_kden)then
        write(msg, '(3a)' )&
 &       'The functional is a MGGA, but the kinetic energy density',ch10, &
 &       'is not present. Please set "usekden 1" in the input file.'

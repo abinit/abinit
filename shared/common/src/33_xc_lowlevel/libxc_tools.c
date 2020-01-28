@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2019 ABINIT group (MT)
+ * Copyright (C) 2015-2020 ABINIT group (MT)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

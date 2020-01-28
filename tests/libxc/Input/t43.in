@@ -8,6 +8,7 @@ ndtset   3
 gwpara   2
 enunit   1
 gw_qprange -14  # Compute correction for all the bands 
+symsigma 0
 
 # Dataset1: usual self-consistent ground-state calculation
 # Definition of the k-point grid

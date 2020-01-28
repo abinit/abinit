@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_timana
 !! NAME
 !!  m_timana
@@ -7,7 +6,7 @@
 !! Analyse the timing, and print in unit ab_out. Some discussion of the
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (XG, GMR)
+!!  Copyright (C) 1998-2020 ABINIT group (XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

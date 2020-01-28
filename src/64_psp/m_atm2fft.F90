@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_atm2fft
 !! NAME
 !!  m_atm2fft
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -373,7 +372,7 @@ subroutine atm2fft(atindx1,atmrho,atmvloc,dyfrn,dyfrv,eltfrn,gauss,gmet,gprimd,&
    if (usepaw == 1) then
      tcorespl => pawtab(itypat)%tcorespl
      tvalespl => pawtab(itypat)%tvalespl
-     ttaucorespl => pawtab(itypat)%ttaucorespl
+     ttaucorespl => pawtab(itypat)%tcoretauspl
    else
      tcorespl => psps%nctab(itypat)%tcorespl
      tvalespl => psps%nctab(itypat)%tvalespl

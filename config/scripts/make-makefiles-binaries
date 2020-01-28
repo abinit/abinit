@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -44,7 +44,7 @@ def makefile_header(name,stamp):
 #
 
 AM_CFLAGS  = @ABI_CPPFLAGS@
-AM_FCFLAGS = @FPPFLAGS@ @FCFLAGS_FREEFORM@ @FCFLAGS_MODDIR@ @abi_extra_incs@ @fc_mod_incs@ @fcflags_opt_98_main@
+AM_FCFLAGS = @FPPFLAGS@ @FCFLAGS_FREEFORM@ @FCFLAGS_MODDIR@ @fc_mod_fcflags@ @fcflags_opt_98_main@
 AM_LDFLAGS = @FC_LDFLAGS@
 
 """ % (name,stamp,name)
@@ -61,7 +61,8 @@ AM_LDFLAGS = @FC_LDFLAGS@
 my_name    = "make-makefiles-binaries"
 my_configs = {
   "libs":"config/specs/corelibs.conf",
-  "bins":"config/specs/binaries.conf"}
+  "bins":"config/specs/binaries.conf",
+  "deps":"config/specs/dependencies.conf"}
 my_output  = "src/98_main/Makefile.am"
 
 # Check if we are in the top of the ABINIT source tree
@@ -96,6 +97,10 @@ bin_cnf.read(my_configs["bins"])
 main_bins = bin_cnf.sections()
 main_bins.sort()
 
+# Init deps
+dep_cnf = MyConfigParser()
+dep_cnf.read(my_configs["deps"])
+
 # Generate library and include lists
 lib_list = ""
 inc_list = ""
@@ -108,13 +113,10 @@ else:
   include_dirs = []
 
 # Common and core include lists
-include_dirs = ["common", "core"]
+include_dirs = ["common", "core", "libpaw"]
 
 for tmp in include_dirs:
-  inc_list += " \\\n\t@src_%s_incs@" % (tmp)
-
-# FIXME: hard-coded include for fallbacks
-inc_list += " \\\n\t@fallbacks_incs@"
+  inc_list += " \\\n\t@src_%s_fcflags@" % (tmp)
 
 # Core libraries
 for lib in abinit_corelibs:
@@ -184,7 +186,7 @@ for bin in main_bins:
     bin_deps = list()
   bin_opt = bin_cnf.get(bin,"optional")
   bin_cppflags = ""
-  bin_fcflags = ""
+  bin_fcflags = "@src_common_fcflags@ @src_core_fcflags@ @src_libpaw_fcflags@"
   bin_ldflags = ""
   bin_libs = ""
 
@@ -195,18 +197,23 @@ for bin in main_bins:
 
   # Check whether the binary may use external libraries
   for dep in bin_deps:
-    bin_cppflags += " @lib_%s_incs@" % (dep)
-    bin_fcflags += " @lib_%s_fcflags@" % (dep)
-    bin_ldflags += " @lib_%s_ldflags@" % (dep)
-    bin_libs += " @lib_%s_libs@" % (dep)
+    if ( dep in dep_cnf.sections() ):
+      if ( dep_cnf.get(dep, "detector") == "steredeg" ):
+        dep_pfx = "sd"
+      else:
+        dep_pfx = "abi"
+      dep_lngs = dep_cnf.get(dep, "languages").split()
+      if ( ("c" in dep_lngs) or ("c++" in dep_lngs) ):
+        bin_cppflags += " @%s_%s_cppflags@" % (dep_pfx, dep)
+      if ( "fortran" in dep_lngs ):
+        bin_fcflags += " @%s_%s_fcflags@" % (dep_pfx, dep)
+      bin_ldflags += " @%s_%s_ldflags@" % (dep_pfx, dep)
+      bin_libs += " @%s_%s_libs@" % (dep_pfx, dep)
+    else:
+      raise ValueError("invalid external dependency: '%s'" % dep)
+  bin_fcflags += "@sd_sys_fcflags@"
 
   # Finish setting build-time parameters
-  if ( bin_cppflags != "" ):
-    bin_cppflags = "$(AM_CPPFLAGS) $(CPPFLAGS) %s" % (bin_cppflags)
-  if ( bin_fcflags != "" ):
-    bin_fcflags = "$(AM_FCFLAGS) $(FCFLAGS) %s" % (bin_fcflags)
-  if ( bin_ldflags != "" ):
-    bin_ldflags = "$(FC_LDFLAGS) %s" % (bin_ldflags)
   bin_libs += " $(FC_LIBS)"
 
   # Write results

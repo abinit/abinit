@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outscfcv
 !! NAME
 !!  m_outscfcv
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2019 ABINIT group (XG)
+!!  Copyright (C) 2005-2020 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1255,6 +1254,18 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  ! Band structure interpolation from eigenvalues computed on the k-mesh.
  if (nint(dtset%einterp(1)) /= 0) then
    call ebands_interpolate_kpath(ebands, dtset, crystal, [0, 0], dtfil%filnam_ds(4), spacecomm)
+ end if
+
+ if(associated(elfr))then
+   ABI_DEALLOCATE(elfr)
+ end if
+
+ if(associated(grhor))then
+   ABI_DEALLOCATE(grhor)
+ end if
+
+ if(associated(lrhor))then
+   ABI_DEALLOCATE(lrhor)
  end if
 
  call crystal%free()

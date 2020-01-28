@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dtfil
 !! NAME
 !!  m_dtfil
@@ -7,7 +6,7 @@
 !!   object and procedures dealing with input/output filenames
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG, MT)
+!!  Copyright (C) 2008-2020 ABINIT group (XG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -234,6 +233,7 @@ module m_dtfil
   character(len=fnlen) :: fnametmp_eig
   character(len=fnlen) :: fnametmp_1wf1_eig
   character(len=fnlen) :: fnametmp_fft
+  character(len=fnlen) :: fnametmp_fft_mgga
   character(len=fnlen) :: fnametmp_kgs
   character(len=fnlen) :: fnametmp_sustr
   character(len=fnlen) :: fnametmp_tdexcit
@@ -916,6 +916,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    filfft=trim(filfft)//'_P-'//trim(tag)
  end if
  dtfil%fnametmp_fft=filfft
+ dtfil%fnametmp_fft_mgga=trim(filfft)//'_MGGA'
 
  ! These keywords are only used in algorithms using images of the cell
  if (iimage==0) then

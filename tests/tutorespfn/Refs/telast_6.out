@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 8.11.14 of ABINIT 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h20 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 23h20 )
   
-- input  file    -> telast_6.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mverstra_develop/tests/Test_suite/tutorespfn_telast_6/telast_6.in
 - output file    -> telast_6.out
 - root for input  files -> telast_6i
 - root for output files -> telast_6o
@@ -1858,8 +1858,8 @@ P          mk1mem34      2000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mverstra_develop/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mverstra_develop/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2466,20 +2466,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     137.333     137.297
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  0.41936634324333     -1.368E+00 4.430E-03 5.933E+00
- ETOT  2  0.41474952369298     -4.617E-03 6.904E-06 2.264E-01
+-ETOT  1  0.41936634324333     -1.368E+00 8.443E-03 5.933E+00
+ ETOT  2  0.41474952369298     -4.617E-03 7.894E-06 2.264E-01
  ETOT  3  0.41454338988700     -2.061E-04 4.037E-07 1.194E-03
- ETOT  4  0.41454212272138     -1.267E-06 3.420E-09 7.970E-06
- ETOT  5  0.41454211471904     -8.002E-09 9.795E-12 4.329E-08
- ETOT  6  0.41454211467109     -4.795E-11 1.159E-13 7.451E-11
- ETOT  7  0.41454211467101     -8.837E-14 2.214E-16 1.764E-13
+ ETOT  4  0.41454212272138     -1.267E-06 6.312E-09 7.970E-06
+ ETOT  5  0.41454211471904     -8.002E-09 2.174E-11 4.329E-08
+ ETOT  6  0.41454211467109     -4.795E-11 1.459E-13 7.451E-11
+ ETOT  7  0.41454211467101     -8.837E-14 2.310E-16 1.764E-13
 
  At SCF step    7       vres2   =  1.76E-13 < tolvrs=  1.00E-12 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -50.000E-03; max=  22.139E-17
+ Mean square residual over all n,k,spin=   96.463E-18; max=  23.105E-17
 
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -2520,19 +2520,19 @@ _setup2: Arith. and geom. avg. npw (full set) are     137.333     137.297
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  0.16704412093141     -9.860E-01 3.112E-03 1.019E+01
- ETOT  2  0.14793907863309     -1.911E-02 1.505E-05 1.554E-01
+-ETOT  1  0.16704412093141     -9.860E-01 4.949E-03 1.019E+01
+ ETOT  2  0.14793907863309     -1.911E-02 6.612E-05 1.554E-01
  ETOT  3  0.14764628962725     -2.928E-04 7.604E-07 1.072E-04
  ETOT  4  0.14764619777904     -9.185E-08 3.876E-10 1.366E-07
- ETOT  5  0.14764619768808     -9.096E-11 3.046E-13 3.794E-10
- ETOT  6  0.14764619768784     -2.387E-13 8.900E-16 2.478E-13
+ ETOT  5  0.14764619768808     -9.096E-11 3.159E-13 3.794E-10
+ ETOT  6  0.14764619768784     -2.387E-13 9.880E-16 2.478E-13
 
  At SCF step    6       vres2   =  2.48E-13 < tolvrs=  1.00E-12 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -50.000E-03; max=  88.996E-17
+ Mean square residual over all n,k,spin=   41.765E-17; max=  98.797E-17
 
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3214,20 +3214,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     137.223     137.190
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  0.46571298451403     -1.314E+00 5.419E-03 5.867E+00
- ETOT  2  0.46117851888804     -4.534E-03 8.328E-06 2.249E-01
+-ETOT  1  0.46571298451403     -1.314E+00 5.994E-03 5.867E+00
+ ETOT  2  0.46117851888804     -4.534E-03 2.864E-05 2.249E-01
  ETOT  3  0.46097469144288     -2.038E-04 7.894E-07 1.185E-03
- ETOT  4  0.46097343767829     -1.254E-06 4.024E-09 7.883E-06
+ ETOT  4  0.46097343767829     -1.254E-06 5.967E-09 7.883E-06
  ETOT  5  0.46097342979153     -7.887E-09 2.659E-11 4.291E-08
- ETOT  6  0.46097342974424     -4.728E-11 1.833E-13 7.274E-11
- ETOT  7  0.46097342974416     -8.527E-14 6.730E-16 1.690E-13
+ ETOT  6  0.46097342974424     -4.728E-11 1.881E-13 7.274E-11
+ ETOT  7  0.46097342974416     -8.527E-14 7.294E-16 1.690E-13
 
  At SCF step    7       vres2   =  1.69E-13 < tolvrs=  1.00E-12 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -50.000E-03; max=  67.299E-17
+ Mean square residual over all n,k,spin=   10.074E-17; max=  72.936E-17
 
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3268,11 +3268,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     137.223     137.190
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  0.16278246295477     -9.874E-01 4.041E-03 1.016E+01
- ETOT  2  0.14380400826309     -1.898E-02 4.774E-05 1.568E-01
+-ETOT  1  0.16278246295477     -9.874E-01 1.296E-02 1.016E+01
+ ETOT  2  0.14380400826309     -1.898E-02 5.473E-05 1.568E-01
  ETOT  3  0.14350972224206     -2.943E-04 9.951E-07 1.079E-04
  ETOT  4  0.14350963022032     -9.202E-08 1.718E-09 1.337E-07
- ETOT  5  0.14350963013234     -8.798E-11 5.667E-13 3.748E-10
+ ETOT  5  0.14350963013234     -8.798E-11 1.945E-12 3.748E-10
  ETOT  6  0.14350963013212     -2.229E-13 2.689E-15 2.446E-13
 
  At SCF step    6       vres2   =  2.45E-13 < tolvrs=  1.00E-12 =>converged.
@@ -3280,7 +3280,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     137.223     137.190
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -50.000E-03; max=  26.895E-16
+ Mean square residual over all n,k,spin=   41.116E-17; max=  26.895E-16
 
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -3974,12 +3974,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     137.284     137.251
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  0.46600265586256     -1.314E+00 6.034E-03 5.836E+00
- ETOT  2  0.46150609202727     -4.497E-03 1.272E-05 2.241E-01
- ETOT  3  0.46130353652009     -2.026E-04 6.995E-07 1.183E-03
- ETOT  4  0.46130228814505     -1.248E-06 5.876E-09 7.865E-06
+-ETOT  1  0.46600265586256     -1.314E+00 9.301E-03 5.836E+00
+ ETOT  2  0.46150609202727     -4.497E-03 1.324E-05 2.241E-01
+ ETOT  3  0.46130353652009     -2.026E-04 7.290E-07 1.183E-03
+ ETOT  4  0.46130228814505     -1.248E-06 1.045E-08 7.865E-06
  ETOT  5  0.46130228028710     -7.858E-09 3.194E-11 4.291E-08
- ETOT  6  0.46130228023980     -4.730E-11 2.015E-13 7.255E-11
+ ETOT  6  0.46130228023980     -4.730E-11 2.237E-13 7.255E-11
  ETOT  7  0.46130228023972     -8.615E-14 5.777E-15 1.688E-13
 
  At SCF step    7       vres2   =  1.69E-13 < tolvrs=  1.00E-12 =>converged.
@@ -3987,7 +3987,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     137.284     137.251
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -50.000E-03; max=  57.768E-16
+ Mean square residual over all n,k,spin=   10.713E-17; max=  57.768E-16
 
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -4028,19 +4028,19 @@ _setup2: Arith. and geom. avg. npw (full set) are     137.284     137.251
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  0.16138696129106     -9.884E-01 4.653E-03 1.013E+01
- ETOT  2  0.14248760578051     -1.890E-02 3.968E-05 1.573E-01
- ETOT  3  0.14219284096740     -2.948E-04 7.673E-07 1.083E-04
- ETOT  4  0.14219274864375     -9.232E-08 1.050E-09 1.332E-07
- ETOT  5  0.14219274855630     -8.746E-11 2.954E-12 3.745E-10
- ETOT  6  0.14219274855608     -2.176E-13 3.998E-14 2.440E-13
+-ETOT  1  0.16138696129106     -9.884E-01 2.980E-02 1.013E+01
+ ETOT  2  0.14248760578051     -1.890E-02 1.291E-04 1.573E-01
+ ETOT  3  0.14219284096740     -2.948E-04 1.515E-06 1.083E-04
+ ETOT  4  0.14219274864375     -9.232E-08 2.412E-09 1.332E-07
+ ETOT  5  0.14219274855630     -8.746E-11 4.928E-11 3.745E-10
+ ETOT  6  0.14219274855608     -2.176E-13 9.551E-14 2.440E-13
 
  At SCF step    6       vres2   =  2.44E-13 < tolvrs=  1.00E-12 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -50.000E-03; max=  39.983E-15
+ Mean square residual over all n,k,spin=   78.535E-17; max=  95.509E-15
 
  Seventeen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -5709,10 +5709,61 @@ P          mk1mem34      2000
 
 ================================================================================
 
+- Total cpu        time (s,m,h):         55.8        0.93      0.015
+- Total wall clock time (s,m,h):         57.0        0.95      0.016
+-
+- For major independent code sections, cpu and wall times (sec),
+-  as well as % of the time and number of calls for node 0-
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
+- cpu_time =           55.8, wall_time =           57.0
+-
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- fourwf%(pot)                  18.866  33.8     18.985  33.3         227043      -1.00        0.99       0.99
+- fourwf%(G->r)                  5.051   9.1      5.081   8.9         113211      -1.00        0.99       0.99
+- nonlop(apply)                  2.212   4.0      2.248   3.9         190411      -1.00        0.98       0.98
+- invars2                        2.060   3.7      2.060   3.6             12      -1.00        1.00       1.00
+- projbd                         1.986   3.6      1.951   3.4         347814      -1.00        1.02       1.02
+- getghc-other                   1.807   3.2      1.717   3.0             -1      -1.00        1.05       1.05
+- fourwf%(den)                   1.776   3.2      1.784   3.1          39715      -1.00        1.00       1.00
+- dfpt_vtowfk(contrib)           1.745   3.1      1.723   3.0             -1      -1.00        1.01       1.01
+- abinit(2)                      1.745   3.1      1.745   3.1              1      -1.00        1.00       1.00
+- nonlop(forces)                 1.481   2.7      1.454   2.6          80640      -1.00        1.02       1.02
+- dfpt_vtorho-kpt loop           1.385   2.5      1.420   2.5             45      -1.00        0.98       0.98
+- vtowfk(ssdiag)                 0.903   1.6      0.881   1.5             -1      -1.00        1.03       1.03
+- getgh1c_setup                  0.439   0.8      0.452   0.8           9158      -1.00        0.97       0.97
+- pspini                         0.345   0.6      0.345   0.6             12      -1.00        1.00       1.00
+- others (120)                  -1.463  -2.6     -1.450  -2.5             -1      -1.00        1.01       1.01
+-<END_TIMER>
+-
+- subtotal                      40.338  72.3     40.396  70.9                                  1.00       1.00
 
-- Timing analysis has been suppressed with timopt=0
+- For major independent code sections, cpu and wall times (sec),
+- as well as % of the total time and number of calls 
 
+-<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
+- cpu_time =          55.8, wall_time =          57.0
+-
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
+-                                                                  (-1=no count)
+- fourwf%(pot)                  18.866  33.8     18.985  33.3         227043      -1.00        0.99       0.99
+- fourwf%(G->r)                  5.051   9.1      5.081   8.9         113211      -1.00        0.99       0.99
+- nonlop(apply)                  2.212   4.0      2.248   3.9         190411      -1.00        0.98       0.98
+- invars2                        2.060   3.7      2.060   3.6             12      -1.00        1.00       1.00
+- projbd                         1.986   3.6      1.951   3.4         347814      -1.00        1.02       1.02
+- getghc-other                   1.807   3.2      1.717   3.0             -1      -1.00        1.05       1.05
+- fourwf%(den)                   1.776   3.2      1.784   3.1          39715      -1.00        1.00       1.00
+- dfpt_vtowfk(contrib)           1.745   3.1      1.723   3.0             -1      -1.00        1.01       1.01
+- abinit(2)                      1.745   3.1      1.745   3.1              1      -1.00        1.00       1.00
+- nonlop(forces)                 1.481   2.7      1.454   2.6          80640      -1.00        1.02       1.02
+- dfpt_vtorho-kpt loop           1.385   2.5      1.420   2.5             45      -1.00        0.98       0.98
+- vtowfk(ssdiag)                 0.903   1.6      0.881   1.5             -1      -1.00        1.03       1.03
+- getgh1c_setup                  0.439   0.8      0.452   0.8           9158      -1.00        0.97       0.97
+- pspini                         0.345   0.6      0.345   0.6             12      -1.00        1.00       1.00
+- others (120)                  -1.463  -2.6     -1.450  -2.5             -1      -1.00        1.01       1.01
+-<END_TIMER>
 
+- subtotal                      40.338  72.3     40.396  70.9                                  1.00       1.00
 
 ================================================================================
 
@@ -5787,10 +5838,10 @@ P          mk1mem34      2000
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         53.9  wall=         57.8
+- Proc.   0 individual time (sec): cpu=         55.8  wall=         57.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  56 WARNINGs and  90 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         53.9  wall=         57.8
+.Delivered  58 WARNINGs and  90 COMMENTs to log file.
++Overall time at end (sec) : cpu=         55.8  wall=         57.0

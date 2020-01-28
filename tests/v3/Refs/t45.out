@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h26 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h18 )
   
-- input  file    -> t45.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v3_t45/t45.in
 - output file    -> t45.out
 - root for input  files -> t45i
 - root for output files -> t45o
@@ -305,8 +305,8 @@ P           mkmem4          1
          ecut(hartree)=      2.990   => boxcut(ratio)=   2.00281
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -323,8 +323,8 @@ P           mkmem4          1
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/12mg.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/12mg.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/12mg.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/12mg.pspnc
 -  Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
 - 12.00000   2.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -557,7 +557,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   25.252E-10; max=  14.750E-08
+ Mean square residual over all n,k,spin=   43.349E-13; max=  92.959E-13
  reduced coordinates (array xred) for    9 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.243302629360      0.243302629360      0.243302629360
@@ -672,7 +672,7 @@ P newkpt: treating      4 bands with npw=     140 for ikpt=   5 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   72.753E-08; max=  43.497E-07
+ Mean square residual over all n,k,spin=   11.016E-07; max=  43.497E-07
    0.0000  0.0000  0.0000    1  2.70970E-06 kpt; spin; max resid(k); each band:
   1.18E-07 2.71E-06 2.23E-06 1.92E-06 8.61E-07 5.72E-08
    0.0000  0.0000  0.0000    1  4.34970E-06 kpt; spin; max resid(k); each band:
@@ -777,7 +777,7 @@ P newkpt: treating      3 bands with npw=     126 for ikpt=   1 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   62.468E-07; max=  87.160E-12
+ Mean square residual over all n,k,spin=   87.160E-12; max=  87.160E-12
    0.0000  0.0000  0.0000    1  1.84594E-05 kpt; spin; max resid(k); each band:
   8.72E-11 2.81E-07 1.85E-05
  reduced coordinates (array xred) for    9 atoms
@@ -1045,10 +1045,10 @@ P           mkmem4          1
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          9.2  wall=          9.7
+- Proc.   0 individual time (sec): cpu=          7.6  wall=          7.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.2  wall=          9.7
++Overall time at end (sec) : cpu=          7.6  wall=          7.9

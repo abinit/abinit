@@ -8,7 +8,7 @@
 !!  i.e. quantities expressed with <Phi_i|...|Phi_j> and/or <tild_Phi_i|...|tild_Phi_j>.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2019 ABINIT group (MT,FJ)
+!! Copyright (C) 2013-2020 ABINIT group (MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
