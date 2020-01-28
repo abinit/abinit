@@ -2371,7 +2371,7 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
 &                   anharmstr=need_anharmstr,spcoupling=need_spcoupling,&
 &                   only_odd_power=need_only_odd_power,only_even_power=need_only_even_power)
    ABI_DEALLOCATE(list_coeff)
-!   write(std_out,*) "DEBUG: list_combination after call to CCL:", list_combination_tmp
+   !write(std_out,*) "DEBUG: list_combination after call to CCL:", list_combination_tmp
 
    nirred_comb = size(index_irredcomb)
 ! else
@@ -2384,7 +2384,6 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
 !   ABI_ALLOCATE(index_irredcomb,(nirred_comb))
 !endif
 !call xmpi_bcast(index_irredcomb, master, comm, ierr)
-
 
 if(need_compute_symmetric)then
   if(need_verbose)then
@@ -2431,9 +2430,9 @@ if(need_compute_symmetric)then
      else
         my_ncombi = 0
      endif
-   !if(my_rank == i-1)then
-   !   write(std_out,*) "my_rank,my_ncombi_start,my_ncombi_end, my_ncombi:", my_rank,my_ncombi_start,my_ncombi_end,my_ncombi
-   !endif
+   if(my_rank == i-1)then
+      write(std_out,*) "my_rank,my_ncombi_start,my_ncombi_end, my_ncombi:", my_rank,my_ncombi_start,my_ncombi_end,my_ncombi
+   endif
   enddo
 
   !write(std_out,*) "my_ncombi: ", my_ncombi
@@ -3328,9 +3327,13 @@ recursive subroutine computeCombinationFromList(cell,compatibleCoeffs,list_coeff
 !         index_coeff_tmp = index_coeff
          !Count anharmonic strain terms
          if(ndisp_out == 0 .and. nstrain > 0)then
-            nmodel_tot = nmodel_tot + 1
             nirred_comb = nirred_comb +1
-            if(need_compute)list_combination(1:power_disp,nmodel_tot) = index_coeff
+            iirred_comb = iirred_comb +1
+            if(need_compute)then 
+               list_combination(1:power_disp,iirred_comb) = index_coeff
+               index_irredcomb(iirred_comb) = nmodel_tot
+            endif 
+            nmodel_tot = nmodel_tot + 1
             !write(std_out,*) "DEBUG index_coeff: ", index_coeff
          else !Else counst symmetric terms of atomic displacement (pure disp or disp/strain)
               !Store index for each combination of irreducible terms to later parallely compute symmetric combinations
@@ -3986,7 +3989,8 @@ sc_size = (/1,1,1/)
 
 call polynomial_coeff_getNorder(strain_terms_tmp,crystal,cutoff,ncoeff,ncoeff_out,power_strain,&
 &                               power_strph,option,sc_size,comm,anharmstr=.true.,spcoupling=.false.,&
-&                               only_odd_power=.false.,only_even_power=.true.,verbose=.false.)
+&                               only_odd_power=.false.,only_even_power=.true.,compute_symmetric=.false.,&
+                                verbose=.false.)
 
 
 !TODO Probably put in one routine
@@ -4022,7 +4026,7 @@ enddo
 
 
 !Deallocateion
-ABI_DATATYPE_DEALLOCATE(strain_terms_tmp)
+call polynomial_coeff_list_free(strain_terms_tmp)
 ABI_DEALLOCATE(same)
 
 end subroutine polynomial_coeff_getEvenAnhaStrain

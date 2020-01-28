@@ -490,7 +490,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  !do iorder=order(1),order(2),2, Order will be done per term 
  !Loop over all original terms + 1 
  ! + 1 to bound pure strain
-  do iterm =1,nterm  !+1 
+  do iterm =1,nterm +1 
      if(iterm <=nterm)then
        ncombi1=0 
        ncombi2=0
@@ -741,15 +741,15 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  &                    ' Mean Standard Deviation values of the effective-potential',ch10,&
  &                    ' with respect to the training-set after attempted bounding (meV^2/atm):',&
  &               ch10,'   Energy          : ',&
- &               mse* (Ha_EV*1000)**2 *factor ,ch10,&
+ &               mse_ini* (Ha_EV*1000)**2 *factor ,ch10,&
  &                    ' Goal function values of the effective.potential',ch10,& 
  &                    ' with respect to the test-set (eV^2/A^2):',ch10,&
  &                    '   Forces+Stresses : ',&
- &               (msef+mses)*(HaBohr_meVAng)**2,ch10,&
+ &               (msef_ini+mses_ini)*(HaBohr_meVAng)**2,ch10,&
  &                    '   Forces          : ',&
- &               msef*(HaBohr_meVAng)**2,ch10,&
+ &               msef_ini*(HaBohr_meVAng)**2,ch10,&
  &                    '   Stresses        : ',&
- &               mses*(HaBohr_meVAng)**2,ch10
+ &               mses_ini*(HaBohr_meVAng)**2,ch10
       call wrtout(ab_out,message,'COLL')
       call wrtout(std_out,message,'COLL')
 
@@ -1471,7 +1471,21 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
       
        ! get start and stop order for this term 
        call opt_getHOforterm(term,power_disp,order_start,order_stop)
+       if(had_strain) call opt_getHOforterm(term_in,power_disp,order_start_str,order_stop_str)
        if(order_start == 0)then 
+                ! Message to Output 
+                write(message,'(5a,I2,a,I2,3a)' )ch10,&
+&               " ==> High order cross product terms for term ", trim(term%name),ch10,&
+&               " ==> do not fit into specified order range from ", power_disp(1),' to ',power_disp(2),ch10,&        
+&               " ==> Can not construct high order cross product bounding term",ch10
+                call wrtout(ab_out,message,'COLL')
+                call wrtout(std_out,message,'COLL')
+                ABI_DEALLOCATE(ncombi_order)
+                ABI_DEALLOCATE(ncombi_order_str)
+                return  
+       end if
+       
+       if(order_start_str == 0 .and. had_strain)then 
                 ! Message to Output 
                 write(message,'(5a,I2,a,I2,3a)' )ch10,&
 &               " ==> High order cross product terms for term ", trim(term_in%name),ch10,&
@@ -1479,15 +1493,13 @@ subroutine opt_getHOcrossdisp(terms_out,ncombi,term_in,power_disp)
 &               " ==> Can not construct high order cross product bounding term",ch10
                 call wrtout(ab_out,message,'COLL')
                 call wrtout(std_out,message,'COLL')
-               return  
+                had_strain = .FALSE.
        end if
-       
        ! get total amount of combinations and combinations per order for the term
        call opt_getCombisforterm(order_start,order_stop,ndisp,ncombi,ncombi_order)             
        !write(std_out,*) "I was here ncombi is: ", ncombi
        ! Allocate terms with ncombi free space to work with 
        if(had_strain)then 
-          call opt_getHOforterm(term_in,power_disp,order_start_str,order_stop_str)
           call opt_getCombisforterm(order_start_str,order_stop_str,nbody_tot,ncombi_str,ncombi_order_str)
           !write(std_out,*) "I was here ncombi_str is: ", ncombi_str
           ABI_DATATYPE_ALLOCATE(terms_out,(ncombi+ncombi_str))
