@@ -24,19 +24,11 @@
 #include "abi_common.h"
 
 module m_chi0
-
+#ifdef HAVE_CRPA_NO_OPTIM
 #ifdef FC_INTEL
-#if  __INTEL_COMPILER==1310
+#if  __INTEL_COMPILER<=1700
 !DEC$ NOOPTIMIZE
 #endif
-#if  __INTEL_COMPILER==1500
-!DEC$ NOOPTIMIZE
-#endif
-#if  __INTEL_COMPILER==1600
-!DEC$ NOOPTIMIZE
-#endif
-#if  __INTEL_COMPILER==1700
-!DEC$ NOOPTIMIZE
 #endif
 #endif
 

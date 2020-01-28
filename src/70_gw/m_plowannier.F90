@@ -23,22 +23,18 @@
 #include "abi_common.h"
 
 MODULE m_plowannier
+#ifdef HAVE_CRPA_NO_OPTIM
+#warning "CRPA NO OPTIM activated"
+#endif
 
+
+#ifdef HAVE_CRPA_NO_OPTIM
 #ifdef FC_INTEL
-#if  __INTEL_COMPILER==1310
-!DEC$ NOOPTIMIZE
-#endif
-#if  __INTEL_COMPILER==1500
-!DEC$ NOOPTIMIZE
-#endif
-#if  __INTEL_COMPILER==1600
-!DEC$ NOOPTIMIZE
-#endif
-#if  __INTEL_COMPILER==1700
+#if  __INTEL_COMPILER<=1700
 !DEC$ NOOPTIMIZE
 #endif
 #endif
-
+#endif
 
  use defs_basis
  use m_errors
@@ -732,9 +728,6 @@ end subroutine destroy_orbital
 subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,& 
 & mpi_enreg,occ,wan,pawtab,psps,usecprj,unpaw,pawrad,dtfil)
 
-#ifdef FC_INTEL
-!DEC$ NOOPTIMIZE
-#endif
 
  use m_hide_lapack
 
@@ -2881,10 +2874,6 @@ end subroutine fullbz_plowannier
 
  subroutine compute_oper_ks2wan(wan,operks,operwan,option)
 
-#ifdef FC_INTEL
-!DEC$ NOOPTIMIZE
-#endif
-
    !Arguments--------------------------
    type(plowannier_type), intent(in) :: wan
    type(operwan_type), intent(inout) :: operwan(:,:,:)
@@ -3485,9 +3474,6 @@ end subroutine init_operwan_realspace
 
 subroutine reduce_operwan_realspace(wan,rhot1,npwx,nibz,comm,nbz,nsppol)
 
-! #ifdef FC_INTEL
-! !DEC$ NOOPTIMIZE
-! #endif
 
   use m_xmpi, only : xmpi_barrier,xmpi_sum  
 !Arguments---------------------------------------
@@ -3729,10 +3715,6 @@ end subroutine zero_operwan_realspace
 !!
 !! SOURCE
 subroutine compute_oper_wank2realspace(wan,operwan,operwan_realspace)
-
-#ifdef FC_INTEL
-!DEC$ NOOPTIMIZE
-#endif
 
 !Arguments----------------------------------
   type(operwan_realspace_type),intent(inout) :: operwan_realspace
