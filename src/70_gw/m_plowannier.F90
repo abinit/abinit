@@ -23,9 +23,6 @@
 #include "abi_common.h"
 
 MODULE m_plowannier
-#ifdef HAVE_CRPA_NO_OPTIM
-#warning "CRPA NO OPTIM activated"
-#endif
 
 
 #ifdef HAVE_CRPA_NO_OPTIM
