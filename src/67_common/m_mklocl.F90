@@ -1027,6 +1027,7 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: im=2,re=1
+ integer :: g0term_
  integer :: i1,i2,i3,ia,ia1,ia2,id1,id2,id3,ig1,ig2,ig3,ii,itypat,jj
  integer :: ka,kb,n1,n2,n3
  real(dp),parameter :: tolfix=1.0000001_dp
@@ -1193,7 +1194,8 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
 
 #ifdef MR_DEV
 !Alternative treatment of Vloc(G=0) for the flexoelectric tensor calculation
- if (present(g0term).and.g0term==1) then
+ g0term_=0; if (present(g0term)) g0term_=g0term
+ if (g0term_==1) then
    vlocg0=zero
    if (istr<=3) then
      ia1=1
