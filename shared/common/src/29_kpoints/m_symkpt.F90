@@ -692,7 +692,7 @@ subroutine mapkptsets(chksymbreak,gmet,iout,k_in,nk_in,&
 !arrays
  integer,intent(in) :: symrec(3,3,nsym)
  real(dp),intent(in) :: gmet(3,3),kbz(3,nkbz)
- real(dp),intent(in) :: k_in(3,nkbz)
+ real(dp),intent(in) :: k_in(3,nk_in)
  integer,intent(out) :: bz2kin_smap(6,nkbz)
 
 !Local variables -------------------------
