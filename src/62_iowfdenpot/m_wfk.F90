@@ -519,6 +519,8 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
  Wfk%nproc     = xmpi_comm_size(comm)
  Wfk%fform     = 2
 
+Wfk%debug = .true.
+
  ! Copy the header
  call hdr_copy(Hdr,Wfk%Hdr)
 
@@ -612,6 +614,7 @@ print *, ' Wfk%hdr_offset  fform funt ierr ', Wfk%hdr_offset, fform, funt, ierr
      !ABI_CHECK_MPI(mpierr,"FILE_SYNC")
 
      if (Wfk%debug) then
+print *, 'xmpio_check_frmarkers 617'
        call xmpio_check_frmarkers(Wfk%fh,offset,sc_mode,nfrec,bsize_frecords,ierr)
        ABI_CHECK(ierr == 0, "xmpio_check_frmarkers returned ierr!=0")
      end if
@@ -718,6 +721,7 @@ print *, ' wfkclose: Wfk%iomode, IO_MODE_FORTRAN, IO_MODE_MPI ', Wfk%iomode, IO_
        call MPI_FILE_OPEN(xmpi_comm_self, Wfk%fname, MPI_MODE_RDONLY, xmpio_info, Wfk%fh, mpierr)
        ABI_CHECK_MPI(mpierr,"MPI_FILE_OPEN")
        call hdr_bsize_frecords(Wfk%Hdr,Wfk%formeig,nfrec,bsize_frecords)
+print *, 'xmpio_check_frmarkers 724'
        call xmpio_check_frmarkers(Wfk%fh,Wfk%hdr_offset,xmpio_single,nfrec,bsize_frecords,ierr)
        ABI_CHECK(ierr==0,"xmpio_check_frmarkers returned ierr!=0")
        ABI_FREE(bsize_frecords)
@@ -1923,8 +1927,7 @@ print *, 'sc_mode, xmpio_collective, xmpio_single ', sc_mode, xmpio_collective, 
      my_bcount = 0
      do band=band_block(1),band_block(2)
        base = 2*(band-1)*nband_disk
-!TODO: I think this is wrong - it interleaves the arrays eig_k and cg_k, instead of printing
-! all of the eig_k matrix, and then cg_k (as is done in MPIO below)
+!NB: interleaves the arrays eig_k and cg_k in the RF case with formeig 1
        write(Wfk%fh, err=10, iomsg=errmsg) eig_k(base+1:base+2*nband_disk)
        ipw = my_bcount * npwso
        my_bcount = my_bcount + 1
@@ -1940,11 +1943,12 @@ print *, 'sc_mode, xmpio_collective, xmpio_single ', sc_mode, xmpio_collective, 
 
 #ifdef HAVE_MPI_IO
  case (IO_MODE_MPI)
+! record 1 npw, nspinor, nband of length 3
    my_offset = Wfk%offset_ks(ik_ibz,spin,REC_NPW)
 
-   bsize_rec(1) = 3 * xmpi_bsize_int
-   call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,ierr)
-   ABI_CHECK(ierr==0,"ierr!=0")
+!   bsize_rec(1) = 3 * xmpi_bsize_int
+!   call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,ierr)
+!   ABI_CHECK(ierr==0,"ierr!=0")
 
    my_offset = Wfk%offset_ks(ik_ibz,spin,REC_NPW) + xmpio_bsize_frm
 
@@ -1971,11 +1975,12 @@ print *, 'sc_mode, xmpio_collective, xmpio_single ', sc_mode, xmpio_collective, 
    end if
    ABI_CHECK_MPI(mpierr,"writing REC_NPW")
 
+! record 2 kg
    if (present(kg_k)) then
      my_offset = Wfk%offset_ks(ik_ibz,spin,REC_KG)
 
-     bsize_rec(1) = 3 * npw_disk * xmpi_bsize_int
-     call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,ierr)
+!     bsize_rec(1) = 3 * npw_disk * xmpi_bsize_int
+!     call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,ierr)
 
      my_offset = Wfk%offset_ks(ik_ibz,spin,REC_KG) + xmpio_bsize_frm
 
@@ -1983,15 +1988,17 @@ print *, 'sc_mode, xmpio_collective, xmpio_single ', sc_mode, xmpio_collective, 
      ABI_CHECK_MPI(mpierr,"mpio_write_kg_k")
    end if
 
+! record 3 eigk occk
    if (Wfk%formeig==0) then
 
      if (present(eig_k) .and. present(occ_k)) then
 
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_EIG)
 
-       bsize_rec(1) = 2 * nband_disk * xmpi_bsize_dp
-       call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,ierr)
+!       bsize_rec(1) = 2 * nband_disk * xmpi_bsize_dp
+!       call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,ierr)
 
+!TODO: check if we need 2*bsize_frm here
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_EIG) + xmpio_bsize_frm
        !
        ! Write both eig and occ in tmp_eigk
@@ -2007,9 +2014,14 @@ print *, 'sc_mode, xmpio_collective, xmpio_single ', sc_mode, xmpio_collective, 
        ABI_FREE(tmp_eigk)
      end if
 
+! record 4 cg
      if (present(cg_k)) then
+!TODO: in principle these markers are written when the file is opened, no need here.
        ABI_MALLOC(bsize_frecords, (nb_block))
        bsize_frecords = 2 * npw_disk * nspinor_disk * xmpi_bsize_dp
+! TODO: why 2*frm size here? Each band cg is a single record!
+print *, 'GS writing mpio ik, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_CG), my_offset, xmpio_bsize_frm ', &
+&                     ik_ibz, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_CG), my_offset, xmpio_bsize_frm
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG) + (band_block(1)-1) * (bsize_frecords(1) + 2*xmpio_bsize_frm)
        call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,nb_block,bsize_frecords,ierr)
        ABI_CHECK(ierr==0,"ierr!=0")
@@ -2027,16 +2039,18 @@ print *, 'sc_mode, xmpio_collective, xmpio_single ', sc_mode, xmpio_collective, 
 
    else if (Wfk%formeig==1) then
 
+! record 3 eigk occk
      if (present(eig_k)) then
 print *, 'in writing of records for mpio formeig 1'
        types = [MPI_DOUBLE_COMPLEX,MPI_DOUBLE_COMPLEX]
        sizes = [nband_disk,npw_disk*nspinor_disk]
 
-! TODO: are we missing frmarkers here?
        call xmpio_create_fstripes(nband_disk,sizes,types,gkk_type,my_offpad,mpierr)
        ABI_CHECK_MPI(mpierr,"xmpio_create_fstripes")
 
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_EIG) + my_offpad
+print *, 'RF writing mpio ik, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_EIG), my_offset, my_offpad, xmpio_bsize_frm ', &
+&                     ik_ibz, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_EIG), my_offset, my_offpad, xmpio_bsize_frm
 
        call MPI_FILE_SET_VIEW(Wfk%fh,my_offset,MPI_BYTE,gkk_type,'native',xmpio_info,mpierr)
        ABI_CHECK_MPI(mpierr,"SET_VIEW")
@@ -2044,6 +2058,7 @@ print *, 'in writing of records for mpio formeig 1'
        call MPI_TYPE_FREE(gkk_type,mpierr)
        ABI_CHECK_MPI(mpierr,"FREE")
 
+! NB: bufsz is not 2*nband**2 because we use COMPLEX below
        bufsz = (nband_disk**2)
 
        if (sc_mode==xmpio_collective) then
@@ -2057,31 +2072,40 @@ print *, 'in writing of records for mpio formeig 1'
        ABI_CHECK_MPI(mpierr,"FILE_WRITE")
      end if
 
+! record 4 cg
      if (present(cg_k)) then
 !       ABI_CHECK(band_block(1)==1,"band_block(1) !=1 not coded")
 
        types = [MPI_DOUBLE_COMPLEX, MPI_DOUBLE_COMPLEX]
-       sizes = [npw_disk*nspinor_disk, band_block(2)-band_block(1)]
+       !sizes = [npw_disk*nspinor_disk, band_block(2)-band_block(1)]
+       sizes = [npw_disk*nspinor_disk, nb_block]
 
        call xmpio_create_fstripes(nb_block,sizes,types,cgblock_type,my_offpad,mpierr)
        ABI_CHECK_MPI(mpierr,"xmpio_create_fstripes")
 
+! TODO: check that the following offset is correct
+!       check that the 4 * xmpio_bsize_frm is correct: 1 record marker for eigen and 1 for cg in principle!
+!         even if the cg is followed by 2 frm, and eig 1, then it should be 3, not 4
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG) + my_offpad &
 &         + (band_block(1)-1) * (2 * nband_disk * xmpi_bsize_dp &
 &                              + 2 * npw_disk * nspinor_disk * xmpi_bsize_dp &
 &                              + 4 * xmpio_bsize_frm)
 
+print *, 'RF writing mpio ik, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_CG), my_offset, my_offpad, xmpio_bsize_frm ', &
+&                     ik_ibz, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_CG), my_offset, my_offpad, xmpio_bsize_frm
        call MPI_FILE_SET_VIEW(Wfk%fh,my_offset,MPI_BYTE,cgblock_type,'native',xmpio_info,mpierr)
        ABI_CHECK_MPI(mpierr,"SET_VIEW")
 
+print *, ' cgblock_type ', cgblock_type
        call MPI_TYPE_FREE(cgblock_type,mpierr)
        ABI_CHECK_MPI(mpierr,"")
 
        bufsz = npw_disk * nspinor_disk * nb_block
+print *, ' bufsz sc_mode, xmpio_collective, xmpio_single ', bufsz, sc_mode, xmpio_collective, xmpio_single
        if (sc_mode==xmpio_collective) then
          call MPI_FILE_WRITE_ALL(Wfk%fh,cg_k,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
        else if (sc_mode==xmpio_single) then
-         call MPI_FILE_WRITE(Wfk%fh,cg_k,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
+         call MPI_FILE_WRITE    (Wfk%fh,cg_k,bufsz,MPI_DOUBLE_COMPLEX,MPI_STATUS_IGNORE,mpierr)
        else
          MSG_ERROR("Wrong sc_mode")
        end if
@@ -3075,6 +3099,7 @@ print *, 'iperm ', iperm
 print *, 'rbz2disk_sort ', rbz2disk_sort
 
 ! prepare offsets for k-points, which could arrive in a random order from the irred k
+! these are valid in the output arrays, not in the disk file
 !TODO: if nband_me is not constant over the k-points, this becomes a huge pain to predict...
  ABI_ALLOCATE(icg, (nkpt_in,nsppol))
  ABI_ALLOCATE(ikg, (nkpt_in))
@@ -3106,7 +3131,7 @@ print *, 'rbz2disk_sort ', rbz2disk_sort
 
      if (.not. any(distrb_flags(ikpt,:,spin))) cycle
      icg(ikpt,spin) = ii
-print *, 'icg counts ikpt, spin ', icg(ikpt,spin),ikpt,spin
+!print *, 'icg counts ikpt, spin ', icg(ikpt,spin),ikpt,spin
 ! TODO: this does not take into account variable nband(ik)
      ii = ii+dtset%mband_mem*npwarr(ikpt)*dtset%nspinor
    end do
@@ -3369,6 +3394,7 @@ subroutine wfk_write_my_kptbands(outpath, dtset, distrb_flags, comm, &
 print *, 'formeig ', formeig
  iomode = iomode_from_fname(outpath)
  wfk_unt = get_unit()
+ wfk_disk%debug = .true.
  call wfk_disk%open_write(hdr,outpath,formeig,iomode,wfk_unt,comm) !xmpi_comm_self)
 
 print *, 'after wfk_disk%open_write  wfk_disk%hdr_offset ', wfk_disk%hdr_offset

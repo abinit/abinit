@@ -3801,7 +3801,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
      wtk_k=wtk_rbz(ikpt)
 
 print *, ' cycle, nband ', proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me),&
-&        proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+&       proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
        eigen1(1+bd2tot_index : 2*nband_k**2+bd2tot_index) = zero
        bdtot_index=bdtot_index+nband_k

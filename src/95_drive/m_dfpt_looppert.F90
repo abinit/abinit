@@ -361,7 +361,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  type(pawrhoij_type),pointer :: pawrhoij_pert(:)
  type(ddb_type) :: ddb
 
- integer :: mcg_tmp, iband_me, icg_tmp, npw 
+ integer :: mcg_tmp, iband_me, icg_tmp, npw, ibdoffst
  real(dp), allocatable :: cg_tmp(:,:)
  real(dp), allocatable :: eigen_tmp(:)
  real(dp), allocatable :: occ_tmp(:)
@@ -1134,6 +1134,7 @@ print *, " occ_tmp 1128 ", occ_tmp
    !transfer to local array
    icg=0
    icg_tmp=0
+   ibdoffst = 0
 print *, 'mkmem_rbz ', mkmem_rbz
 print *, 'nband_rbz ', nband_rbz
 print *, ' mcg, mcg_tmp ', mcg, mcg_tmp
@@ -1144,22 +1145,31 @@ print *, 'shapes ', shape(cg), "  ", shape(cg_tmp)
        npw = npwarr(ikpt)
        iband_me = 0
        do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
-print *, 'mpi_enreg%proc_distrb(ikpt,iband,isppol) ', mpi_enreg%proc_distrb(ikpt,iband,isppol), &
-&       ' meband ', mpi_enreg%me_band, ' mekpt ', mpi_enreg%me_kpt
+!print *, 'mpi_enreg%proc_distrb(ikpt,iband,isppol) ', mpi_enreg%proc_distrb(ikpt,iband,isppol), &
+!&       ' meband ', mpi_enreg%me_band, ' mekpt ', mpi_enreg%me_kpt
          if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) then
            icg_tmp = icg_tmp + npw
            cycle
          end if
          iband_me = iband_me + 1
-print *, 'is ik ib kpt icg ', isppol, ikpt, iband, kpt_rbz(:,ikpt), icg
+!print *, 'is ik ib kpt icg ', isppol, ikpt, iband, kpt_rbz(:,ikpt), icg
 if (sum(abs(cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol6) then
 print *, ' diff in cg '
 print *, cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
 end if 
+
          !cg(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
          icg = icg + npw
          icg_tmp = icg_tmp + npw
        end do
+if (sum(abs(eigen0(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
+&        eigen_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))))) > tol6) then
+print *, ' diff in eigen0 ', eigen0(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
+&        eigen_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1)))
+else
+write (301, *) 'is ik ib ', isppol, ikpt, iband, kpt_rbz(:,ikpt)
+end if
+       ibdoffst = ibdoffst + nband_rbz(ikpt+nkpt_rbz*(isppol-1))
      end do
    end do
    ABI_DEALLOCATE(cg_tmp)
@@ -1335,12 +1345,13 @@ print *, ' mpw, mpw1 ', mpw, mpw1
 ! mcgq=      mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
    mcg_tmp = mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
    ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
+   ABI_ALLOCATE(eigen_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
 
      call timab(144,1,tsec)
 !     call inwffil(ask_accurate,cgq,dtset,dtset%ecut,ecut_eff,eigenq,dtset%exchn2n3d,&
 !&     formeig,hdr,&
 !&     ireadwf0,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,dtset%mband,mcgq,&
-     call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigenq,dtset%exchn2n3d,&
+     call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen_tmp,dtset%exchn2n3d,&
 &     formeig,hdr,&
 &     ireadwf0,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,dtset%mband,mcg_tmp,&
 &     mkqmem_rbz,mpi_enreg,mpw1,nband_rbz,dtset%ngfft,nkpt_rbz,npwar1,&
@@ -1351,6 +1362,7 @@ print *, ' mkqmem_rbz, ', mkqmem_rbz
    !transfer to local array
    icg=0
    icg_tmp=0
+   ibdoffst=0
    do isppol=1, nsppol
      do ikpt=1, mkqmem_rbz
        npw = npwar1(ikpt)
@@ -1371,9 +1383,18 @@ end if
          icg = icg + npw
          icg_tmp = icg_tmp + npw
        end do
+if (sum(abs(eigenq(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
+&        eigen_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))))) > tol6) then
+print *, ' diff in eigenq ', eigenq(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
+&        eigen_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1)))
+else
+write (300, *) 'is ik ib ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
+end if
+       ibdoffst = ibdoffst + nband_rbz(ikpt+nkpt_rbz*(isppol-1))
      end do
    end do
    ABI_DEALLOCATE(cg_tmp)
+   ABI_DEALLOCATE(eigen_tmp)
  
 !    Close dtfil%unwffkq, if it was ever opened (in inwffil)
      if (ireadwf0==1) then
