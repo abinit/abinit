@@ -1493,6 +1493,8 @@ end if
      option=1
      dosdeltae=zero ! the DOS is not computed with option=1
      maxocc=two/(dtset%nspinor*dtset%nsppol)
+
+print *, ' eigenq ', eigenq
      call getnel(docckqde,dosdeltae,eigenq,entropy,fermie,maxocc,dtset%mband,&
 &     nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occkq,dtset%occopt,option,&
 &     dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz)

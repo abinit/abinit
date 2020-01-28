@@ -3006,7 +3006,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  integer :: wfk_unt, iband, nband_me
  integer :: nband_me_saved, iband_saved, chksymbreak, iout
  integer :: spin_saved, spin_sym
- integer :: itimrev_disk
+ integer :: itimrev_disk, ierr
  real(dp) :: ecut_eff,cpu,wall,gflops, res
  character(len=500) :: msg
  logical :: isirred_kf, foundk
@@ -3040,11 +3040,20 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  ABI_UNUSED(comm)
  call wfk_open_read(wfk_disk,inpath,formeig,iomode,wfk_unt,xmpi_comm_self)
 
+ if(present(eigen)) then
+   eigen = zero
+ end if
+ if(present(occ)) then
+   occ = zero
+ end if
+ if(present(kg)) then
+   kg = 0
+ end if
 
 print *, 'wfk_disk%mband, dtset%mband ', wfk_disk%mband, dtset%mband
- ABI_CHECK(wfk_disk%mband >= dtset%mband, "mband does not agree with file")
+ ABI_CHECK(wfk_disk%mband >= dtset%mband, "input mband too large for this file")
  mband = wfk_disk%mband;
- ABI_CHECK(wfk_disk%nspinor == dtset%nspinor, "nspinor does not agree with file")
+ ABI_CHECK(wfk_disk%nspinor == dtset%nspinor, "input nspinor does not agree with file")
  nspinor = wfk_disk%nspinor
 ! checks: impose each individual nband conserved wrt disk?
 
@@ -3251,6 +3260,7 @@ print *, 'ikf, kf, isym, itimrev, g0,  jj, iqst, ik_disk, k_disk ', &
 &         ikf, kf, isym, itimrev, g0,  jj, iqst, ik_disk, k_disk
          if (present(eigen)) then
            eigen(ibdeig(ikf,spin_sym)+1:ibdeig(ikf,spin_sym)+nband_k*(2*nband_k)**formeig) = eig_disk(1:nband_k*(2*nband_k)**formeig)
+print *, 'nbandk, eigen ', nband_k, eigen(ibdeig(ikf,spin_sym)+1:ibdeig(ikf,spin_sym)+nband_k*(2*nband_k)**formeig)
          end if
          if (present(occ)) then
            occ(ibdocc(ikf,spin_sym)+1:ibdocc(ikf,spin_sym)+nband_k) = occ_disk(1:nband_k)
@@ -3297,6 +3307,19 @@ print *, 'npwarr change or need to convert the wf by symmetry, or complete it'
      end do ! equiv kpt jj
    end do ! kpt disk
  end do ! sppol
+
+ if(present(eigen)) then
+   call xmpi_sum(eigen,comm,ierr)
+   !call xmpi_sum(eigen,dtset%mband*(2*dtset%mband)**formeig*nkpt_in*dtset%nsppol,comm,ierr)
+ end if
+ if(present(occ)) then
+   call xmpi_sum(occ,comm,ierr)
+   !call xmpi_sum(occ,dtset%mband*nkpt_in*dtset%nsppol,comm,ierr)
+ end if
+!TODO: optimize the xmpi_sum below with a single buffer (no interface for a 2D array xmpi_sum???)
+ if(present(kg)) then
+   call xmpi_sum(kg,comm,ierr)
+ end if
 
  ABI_FREE(icg)
  ABI_FREE(ikg)
