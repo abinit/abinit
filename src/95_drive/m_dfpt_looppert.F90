@@ -1356,12 +1356,13 @@ print *, ' mpw, mpw1 ', mpw, mpw1
      call timab(144,1,tsec)
      call wfk_read_my_kptbands(dtfil%fnamewffq, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1, &
-&            cgq, eigen=eigenq, occ=occ_tmp)
+&            cgq, eigen=eigenq, occ=occ_disk)
      call timab(144,2,tsec)
 !DEBUG
 ! mcgq=      mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
    mcg_tmp = mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
    ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
+   ABI_ALLOCATE(occ_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
    ABI_ALLOCATE(eigen_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
 
      call timab(144,1,tsec)
@@ -1412,6 +1413,7 @@ end if
    end do
    ABI_DEALLOCATE(cg_tmp)
    ABI_DEALLOCATE(eigen_tmp)
+   ABI_DEALLOCATE(occ_tmp)
  
 !    Close dtfil%unwffkq, if it was ever opened (in inwffil)
      if (ireadwf0==1) then
@@ -1434,6 +1436,8 @@ end if
    if (.not.kramers_deg) then
      call put_eneocc_vect(ebands_kmq, "eig", eigen_mq)
    end if
+
+   ABI_DEALLOCATE(occ_disk)
 
 !  PAW: compute on-site projections of GS wavefunctions (cprjq) (and derivatives) at k+q
    ABI_DATATYPE_ALLOCATE(cprjq,(0,0))
@@ -1646,8 +1650,6 @@ print *, ' occkq ', occkq
      end if
      call timab(144,2,tsec)
    end if
-
-   ABI_DEALLOCATE(occ_disk)
 
 !  Eventually reytrieve 1st-order PAW occupancies from file header
    if (psps%usepaw==1.and.dtfil%ireadwf/=0) then
