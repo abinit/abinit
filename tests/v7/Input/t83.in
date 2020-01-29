@@ -1,4 +1,4 @@
-#   C in diamond structure; Very rough  2x2x2  special point grid; low ecut.
+#   O2 molecule in a box; low ecut.
 #   Only 3 q-points
 
  elph2_imagden 0.1 eV
@@ -44,7 +44,7 @@
  qpt4 0.0 0.0 0.0
  nband4 10 10
  nbdbuf4 2
- ieig2rf4 5 # Produce GKK files
+ ieig2rf4 5 # Produce GKK files and EIG2 data for Debye Waller diagrams as well.
  bdeigrf4 10 # 8+2 buff
  smdelta4 1
  kptopt4 3 # Need full k-point set for finite q response
