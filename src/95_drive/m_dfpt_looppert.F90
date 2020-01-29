@@ -1177,13 +1177,13 @@ print *, ' diff in eigen0 ', eigen0(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*
 else
 write (301, *) 'is ik ib ', isppol, ikpt, iband, kpt_rbz(:,ikpt)
 end if
-if (sum(abs(occ_rbz(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
-&           occ_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))))) > tol6) then
-print *, ' diff in occ ', occ_rbz(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
-&                         occ_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1)))
-else
-write (302, *) 'is ik ib ', isppol, ikpt, iband, kpt_rbz(:,ikpt)
-end if
+!if (sum(abs(occ_rbz(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
+!&           occ_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))))) > tol6) then
+!print *, ' diff in occ ', occ_rbz(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
+!&                         occ_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1)))
+!else
+!write (302, *) 'is ik ib ', isppol, ikpt, iband, kpt_rbz(:,ikpt)
+!end if
        ibdoffst = ibdoffst + nband_rbz(ikpt+nkpt_rbz*(isppol-1))
      end do
    end do
