@@ -124,7 +124,7 @@ subroutine longwave(codvsn,dtfil,dtset,etotal,mpi_enreg,npwtot,occ,&
 !Arguments ------------------------------------
  !scalars
  real(dp),intent(inout) :: etotal
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset

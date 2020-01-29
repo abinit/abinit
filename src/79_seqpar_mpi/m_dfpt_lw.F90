@@ -177,7 +177,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  integer,intent(inout) :: blkflg(3,mpert,3,mpert,3,mpert)
  real(dp),intent(inout) :: d3etot(2,3,mpert,3,mpert,3,mpert)
  real(dp),intent(in) :: ucvol
- character(len=6), intent(in) :: codvsn
+ character(len=8), intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -1626,7 +1626,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
 !scalars
  integer,intent(in) :: mpert,nfft,nkpt,nkxc,nspden,nsppol,timrev
  real(dp),intent(in) :: ucvol
- character(len=6), intent(in) :: codvsn
+ character(len=8), intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
