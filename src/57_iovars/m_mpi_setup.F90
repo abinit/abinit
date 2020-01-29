@@ -635,6 +635,7 @@ print *,  'bandpp ', dtsets(idtset)%bandpp
        end if ! response case
      end if
    end if
+   if (mband_mem == 0) mband_mem = mband_upper
    dtsets(idtset)%mband_mem = mband_mem
 
 print *, ' iikpt,iband,isppol   proc_distrb '

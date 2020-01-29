@@ -341,6 +341,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp),allocatable :: gh1c_pert(:,:,:,:),eigen0(:),eigen0_copy(:),eigen1(:),eigen1_mean(:)
  real(dp),allocatable :: eigenq(:),gh1c_set(:,:),gh0c1_set(:,:),kpq(:,:)
  real(dp),allocatable :: kpq_rbz(:,:),kpt_rbz(:,:),occ_pert(:),occ_rbz(:),occkq(:),kpt_rbz_pert(:,:)
+ real(dp),allocatable :: occ_disk(:)
  real(dp),allocatable :: ph1d(:,:),ph1df(:,:),phnons1(:,:,:),resid(:),rhog1(:,:)
  real(dp),allocatable :: rhor1_save(:,:,:)
  real(dp),allocatable :: rhor1(:,:),rho1wfg(:,:),rho1wfr(:,:),tnons1(:,:),tnons1_tmp(:,:)
@@ -364,7 +365,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: mcg_tmp, iband_me, icg_tmp, npw, ibdoffst
  real(dp), allocatable :: cg_tmp(:,:)
  real(dp), allocatable :: eigen_tmp(:)
- real(dp), allocatable :: occ_tmp(:)
+ real(dp),allocatable :: occ_tmp(:)
+ real(dp),allocatable :: doccde_tmp(:)
 
 ! ***********************************************************************
 
@@ -943,6 +945,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_ALLOCATE(kpt_rbz,(3,nkpt_rbz))
    ABI_ALLOCATE(nband_rbz,(nkpt_rbz*dtset%nsppol))
    ABI_ALLOCATE(occ_rbz,(dtset%mband*nkpt_rbz*dtset%nsppol))
+   ABI_ALLOCATE(occ_disk,(dtset%mband*nkpt_rbz*dtset%nsppol))
    ABI_ALLOCATE(wtk_rbz,(nkpt_rbz))
    indkpt1(:)=indkpt1_tmp(1:nkpt_rbz)
    do ikpt=1,nkpt_rbz
@@ -1066,6 +1069,8 @@ print *, 'after kpgio'
    call wrtout(ab_out,message,'COLL')
 
 !  Initialize band structure datatype at k
+! TODO: occ_rbz and doccde_rbz are overwritten here, though they could be set from the input file, above
+!   need to check if this is correct (or indifferent) in all cases
    bantot_rbz=sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
    ABI_ALLOCATE(eigen0,(bantot_rbz))
    eigen0(:)=zero
@@ -1073,7 +1078,6 @@ print *, 'after kpgio'
 &   nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
 &   dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 &   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
-print *, " eigen0 1075 ", eigen0
    ABI_DEALLOCATE(eigen0)
 
 !  Initialize header, update it with evolving variables
@@ -1108,7 +1112,11 @@ print *, " occ_rbz 1087 ", occ_rbz
 ! Initialize the wave function type and read GS WFK
    call wfk_read_my_kptbands(dtfil%fnamewffk, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpt_rbz, nkpt_rbz, npwarr, &
-&            cg, eigen=eigen0, occ=occ_rbz)
+&            cg, eigen=eigen0, occ=occ_disk)
+! if the occ are not fixed by the input file, read in from GS file
+   if (dtset%occopt /= 2) then
+     occ_rbz = occ_disk
+   end if 
 print *, 'eigen0 1111 ', eigen0
 print *, " occ_rbz 1111 ", occ_rbz
   
@@ -1168,6 +1176,13 @@ print *, ' diff in eigen0 ', eigen0(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*
 &        eigen_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1)))
 else
 write (301, *) 'is ik ib ', isppol, ikpt, iband, kpt_rbz(:,ikpt)
+end if
+if (sum(abs(occ_rbz(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
+&           occ_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))))) > tol6) then
+print *, ' diff in occ ', occ_rbz(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
+&                         occ_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1)))
+else
+write (302, *) 'is ik ib ', isppol, ikpt, iband, kpt_rbz(:,ikpt)
 end if
        ibdoffst = ibdoffst + nband_rbz(ikpt+nkpt_rbz*(isppol-1))
      end do
@@ -1278,19 +1293,21 @@ end if
 
 !  Initialize band structure datatype at k+q
    ABI_ALLOCATE(eigenq,(bantot_rbz))
+   ABI_ALLOCATE(doccde_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
    eigenq(:)=zero
-   call ebands_init(bantot_rbz,ebands_kq,dtset%nelect,doccde_rbz,eigenq,istwfk_rbz,kpq_rbz,&
-&   nband_rbz,nkpt_rbz,npwar1,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
+   call ebands_init(bantot_rbz,ebands_kq,dtset%nelect,doccde_tmp,eigenq,istwfk_rbz,kpq_rbz,&
+&   nband_rbz,nkpt_rbz,npwar1,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_disk,wtk_rbz,&
 &   dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 &   dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
    if (.not.kramers_deg) then
      eigenq(:)=zero
-     call ebands_init(bantot_rbz,ebands_kmq,dtset%nelect,doccde_rbz,eigenq,istwfk_rbz,kmq_rbz,&
-&     nband_rbz,nkpt_rbz,npwar1_mq,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
+     call ebands_init(bantot_rbz,ebands_kmq,dtset%nelect,doccde_tmp,eigenq,istwfk_rbz,kmq_rbz,&
+&     nband_rbz,nkpt_rbz,npwar1_mq,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_disk,wtk_rbz,&
 &     dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
 &     dtset%kptrlatt, dtset%nshiftk, dtset%shiftk)
    end if
    ABI_DEALLOCATE(eigenq)
+   ABI_DEALLOCATE(doccde_tmp)
 
 !  Initialize header
    call hdr_init(ebands_kq,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl%descr, &
@@ -1339,7 +1356,7 @@ print *, ' mpw, mpw1 ', mpw, mpw1
      call timab(144,1,tsec)
      call wfk_read_my_kptbands(dtfil%fnamewffq, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1, &
-&            cgq, eigen=eigenq, occ=occ_rbz)
+&            cgq, eigen=eigenq, occ=occ_tmp)
      call timab(144,2,tsec)
 !DEBUG
 ! mcgq=      mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
@@ -1355,7 +1372,7 @@ print *, ' mpw, mpw1 ', mpw, mpw1
 &     formeig,hdr,&
 &     ireadwf0,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,dtset%mband,mcg_tmp,&
 &     mkqmem_rbz,mpi_enreg,mpw1,nband_rbz,dtset%ngfft,nkpt_rbz,npwar1,&
-&     dtset%nsppol,nsym,occ_rbz,optorth,&
+&     dtset%nsppol,nsym,occ_tmp,optorth,&
 &     dtset%symafm,dtset%symrel,dtset%tnons,&
 &     dtfil%unkg1,wffkq,wfftkq,dtfil%unwffkq,dtfil%fnamewffq,wvl)
 print *, ' mkqmem_rbz, ', mkqmem_rbz
@@ -1407,7 +1424,7 @@ end if
        call timab(144,1,tsec)
        call wfk_read_my_kptbands(dtfil%fnamewffq, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1_mq, &
-&            cg_mq, eigen=eigen_mq, occ=occ_rbz)
+&            cg_mq, eigen=eigen_mq, occ=occ_tmp)
        call timab(144,2,tsec)
 
      end if
@@ -1629,6 +1646,8 @@ print *, ' occkq ', occkq
      end if
      call timab(144,2,tsec)
    end if
+
+   ABI_DEALLOCATE(occ_disk)
 
 !  Eventually reytrieve 1st-order PAW occupancies from file header
    if (psps%usepaw==1.and.dtfil%ireadwf/=0) then

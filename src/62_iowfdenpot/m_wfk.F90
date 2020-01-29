@@ -1335,9 +1335,11 @@ print *, ' wfk_read_band_block : Wfk%iomode IO_MODE_FORTRAN, IO_MODE_MPI ', Wfk%
 
        call mpio_read_eigocc_k(Wfk%fh,my_offset,nband_disk,Wfk%formeig,sc_mode,tmp_eigk,mpierr)
        ABI_CHECK_MPI(mpierr,"reading eigocc")
+print *, ' tmp_eigk(1:nband_disk) ', shape(tmp_eigk), '  ', tmp_eigk(1:nband_disk)
+print *, ' tmp_eigk(nband_disk+1:) ', tmp_eigk(nband_disk+1:)
 
        if (present(eig_k)) eig_k(1:nband_disk) = tmp_eigk(1:nband_disk)
-       if (present(occ_k)) occ_k(1:nband_disk) = tmp_eigk(nband_disk+1:)
+       if (present(occ_k)) occ_k(1:nband_disk) = tmp_eigk(nband_disk+1:2*nband_disk)
 
        ABI_FREE(tmp_eigk)
      end if
@@ -3049,9 +3051,11 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  if(present(kg)) then
    kg = 0
  end if
+!! this initialization is needed in case we read a file with fewer bands and only fill part of cg
+! cg = zero
 
 print *, 'wfk_disk%mband, dtset%mband ', wfk_disk%mband, dtset%mband
- ABI_CHECK(wfk_disk%mband >= dtset%mband, "input mband too large for this file")
+! ABI_CHECK(wfk_disk%mband >= dtset%mband, "input mband too large for this file")
  mband = wfk_disk%mband;
  ABI_CHECK(wfk_disk%nspinor == dtset%nspinor, "input nspinor does not agree with file")
  nspinor = wfk_disk%nspinor
@@ -3217,7 +3221,7 @@ print *, 'spin_sym, spin,  nsppol, wfk_disk%nsppol ', spin_sym, spin, nsppol, wf
 
 ! may need to re-read if for a different equivalent k if I need other bands
          if (iband /= iband_saved .or. nband_me /= nband_me_saved .or. spin /= spin_saved) then
-print *, 'reading from file for iband, ik_disk, spin', iband, ik_disk, spin
+print *, 'reading from file for iband, ik_disk, spin, formeig ', iband, ik_disk, spin, formeig
            if (formeig > 0) then
              call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_disk,spin,xmpio_single,&
                kg_k=kg_disk,cg_k=cg_disk,eig_k=eig_disk)
@@ -3264,6 +3268,7 @@ print *, 'nbandk, eigen ', nband_k, eigen(ibdeig(ikf,spin_sym)+1:ibdeig(ikf,spin
          end if
          if (present(occ)) then
            occ(ibdocc(ikf,spin_sym)+1:ibdocc(ikf,spin_sym)+nband_k) = occ_disk(1:nband_k)
+print *, 'nbandk, occ ', nband_k, occ(ibdocc(ikf,spin_sym)+1:ibdocc(ikf,spin_sym)+nband_k)
          end if
 print *, 'npwarr disk and kf : ', wfk_disk%hdr%npwarr(ik_disk), npwarr(ikf)
   

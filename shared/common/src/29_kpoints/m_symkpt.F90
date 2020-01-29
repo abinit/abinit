@@ -796,10 +796,6 @@ subroutine mapkptsets(chksymbreak,gmet,iout,k_in,nk_in,&
  end if ! End check on possibility of change
  !call cwtime_report(" ibz", cpu, wall, gflops)
 
- !do ikpt=1,nkbz
- !  write(*,*) ikpt, ibz2bz(ikpt), bz2kin_smap(1,ikpt)
- !end do
-
  ! Initialize 
  bz2kin_smap = 0
 
@@ -841,7 +837,15 @@ subroutine mapkptsets(chksymbreak,gmet,iout,k_in,nk_in,&
  !Here I make a check if the mapping was sucessfull
  !might exit less brutally and allow for error catching by the caller...
  if (any(bz2kin_smap(1, :) == 0)) then
-   MSG_ERROR('Could not find mapping BZ to IBZ')
+!print *, 'nkirred ', nkirred
+!do ikpt_found=1, nkbz
+!print *, bz2kin_smap(:,ikpt_found), kbz(:,ikpt_found)
+!end do
+!print *, 'k_in = '
+!do ik_in=1, nk_in
+!print *, k_in(:,ik_in)
+!end do
+   MSG_ERROR('Could not find mapping k-point sets')
  end if
 
  !do ikpt=1,nkbz
