@@ -1162,8 +1162,8 @@ contains
     ! Loop over spins
     do isppol=1,nsppol
       ! write(msg, '(a,i6,a)') ' Eigenvalues (hartree) for nkpt=',nkpt,'k points:'
-      write(msg, '(a,i12,a,i12,a,i15)') ' Number of kpts     = ',nkpt,'            Number of bands    = ',&
-      & mband,'            Iteration          = ',iter
+      write(msg, '(a,i12,a,i12)') ' Number of kpts     = ',nkpt,'            Number of bands    = ',&
+      & mband
       call wrtout(temp_unit,msg,'COLL')
 
       ! Loop over k-points

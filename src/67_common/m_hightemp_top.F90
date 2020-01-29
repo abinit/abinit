@@ -55,7 +55,7 @@ contains
   !! CHILDREN
   !!
   !! SOURCE
-  subroutine hightemp_prt_cg(cg,ckpt,ecut,eig_k,exchn2n3d,istwfk,kpt,&
+  subroutine hightemp_prt_cg(cg,ckpt,ecut,eig_k,exchn2n3d,fnameabo,istwfk,kpt,&
   & mcg,mpi_enreg,mpw,nband,nkpt,npwarr,nsppol,rprimd)
     ! Arguments -------------------------------
     ! Scalars
@@ -67,6 +67,7 @@ contains
     real(dp),intent(in) :: kpt(3,nkpt),rprimd(3,3)
     real(dp),intent(in) :: cg(2,mcg)
     real(dp),intent(in) :: eig_k(nband(ckpt))
+    character(len=*),intent(in) :: fnameabo
 
     ! Local variables -------------------------
     ! Scalars
@@ -74,8 +75,9 @@ contains
     integer :: cgshift,iband,ioffkg,iout,ipw
     integer :: incrdegcg,ikpt,ipwbis,krow,mkmem,npw_k
     real(dp) :: tempcgk,energmin,cgsum,tot_cgsum,ucvol
-    character(len=20) :: filenameoutpw
+    character(len=50) :: filenameoutpw
     character(len=4) :: mode_paral
+    character(len=500) :: msg
     ! Arrays
     real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3)
     integer,allocatable :: kg(:,:),kg_k(:,:),npwarr1(:),npwtot1(:)
@@ -96,8 +98,7 @@ contains
     ABI_ALLOCATE(npwtot1,(nkpt))
     mkmem=nkpt
 
-    ! S'OCCUPER DE CA !!!
-    !    Create positions index for pw
+    ! Create positions index for pw
     call kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kpt,mkmem,nband,nkpt,&
     & mode_paral,mpi_enreg,mpw,npwarr1,npwtot1,nsppol)
 
@@ -108,62 +109,64 @@ contains
     kg_k(:,1:npw_k)=kg(:,1+ioffkg:npw_k+ioffkg)
     call getkpgnorm(gprimd,kpt(:,ckpt),kg_k,kpgnorm,npw_k)
 
-    write(filenameoutpw, '(A,I4.4,A,I4.4)') 'eigocc_k',ckpt
-    open(file="pwcoef/"//filenameoutpw, unit=23)
-    write(23,'(ES12.5)') eig_k
-    close(23)
-
-    ABI_ALLOCATE(tempwfk,(mpw, 3))
-    ABI_ALLOCATE(buf,(2))
-    do iband=1, nband(ckpt)
-
-      tempwfk(:,:) = 0_DP
-      cgshift=(iband-1)*npw_k
-      do ipw=1, npw_k
-        tempwfk(ipw,2) = ABS(dcmplx(cg(1,cgshift+ipw), cg(2,cgshift+ipw)))
-        ! Hartree to eV * Kinetic energy of the pw
-        tempwfk(ipw,1) = 27.2114*(2*pi*kpgnorm(ipw))**2/2.
-        tempwfk(ipw,3) = ipw
-      end do
-
-      ! Sorting in energies
-      do ipw=1, npw_k
-        krow = minloc(tempwfk(ipw:npw_k, 1), dim=1) + ipw - 1
-        buf(:) = tempwfk(ipw, :)
-        tempwfk(ipw, :) = tempwfk(krow, :)
-        tempwfk(krow, :) = buf(:)
-      end do
-
-      ! Normalization constant
-      tot_cgsum = sum(tempwfk(:,2))
-
-      write(filenameoutpw, '(A,I4.4,A,I4.4)') 'outpw_k',ckpt,'_b',iband
-      open(file="pwcoef/"//filenameoutpw, unit=23)
-
-      ! do ipw = 1, npw_k
-      !    write(23,*) tempwfk(ipw-1, 1), tempwfk(ipw,2), 1, tempwfk(ipw-1, 3)
-      ! end do
-
-      ! Degenerescence in energies
-      incrdegcg = 1
-      energmin = tempwfk(1,1)
-      cgsum = tempwfk(1,2)
-      do ipw=2, npw_k
-        if (abs(tempwfk(ipw,1)-energmin) .LE. 1E-10) then
-           cgsum = cgsum + tempwfk(ipw,2)
-           incrdegcg = incrdegcg + 1
-        else
-           write(23,'(ES12.5,ES12.5,i12,ES12.5)') tempwfk(ipw-1, 1), cgsum/tot_cgsum, incrdegcg,&
-           & tempwfk(ipw-1, 3)
-           energmin = tempwfk(ipw, 1)
-           cgsum = tempwfk(ipw,2)
-           incrdegcg = 1
-        end if
-      end do
+    if(mpi_enreg%me==mpi_enreg%me_kpt) then
+      write(filenameoutpw,'(A,I4.4)') '_PW_EIG_k',ckpt
+      open(file=trim(fnameabo)//trim(filenameoutpw), unit=23)
+      write(23,'(ES12.5)') eig_k
       close(23)
-    end do
-    ABI_DEALLOCATE(buf)
-    ABI_DEALLOCATE(tempwfk)
+
+      ABI_ALLOCATE(tempwfk,(mpw, 3))
+      ABI_ALLOCATE(buf,(2))
+      do iband=1, nband(ckpt)
+
+        tempwfk(:,:) = 0_DP
+        cgshift=(iband-1)*npw_k
+        do ipw=1, npw_k
+          tempwfk(ipw,2) = ABS(dcmplx(cg(1,cgshift+ipw), cg(2,cgshift+ipw)))
+          ! Hartree to eV * Kinetic energy of the pw
+          tempwfk(ipw,1) = 27.2114*(2*pi*kpgnorm(ipw))**2/2.
+          tempwfk(ipw,3) = ipw
+        end do
+
+        ! Sorting in energies
+        do ipw=1, npw_k
+          krow = minloc(tempwfk(ipw:npw_k, 1), dim=1) + ipw - 1
+          buf(:) = tempwfk(ipw, :)
+          tempwfk(ipw, :) = tempwfk(krow, :)
+          tempwfk(krow, :) = buf(:)
+        end do
+
+        ! Normalization constant
+        tot_cgsum = sum(tempwfk(:,2))
+
+        write(filenameoutpw, '(A,I4.4,A,I4.4)') '_PW_k',ckpt,'_b',iband
+        open(file=trim(fnameabo)//trim(filenameoutpw), unit=23)
+
+        ! do ipw = 1, npw_k
+        !    write(23,*) tempwfk(ipw-1, 1), tempwfk(ipw,2), 1, tempwfk(ipw-1, 3)
+        ! end do
+
+        ! Degenerescence in energies
+        incrdegcg = 1
+        energmin = tempwfk(1,1)
+        cgsum = tempwfk(1,2)
+        do ipw=2, npw_k
+          if (abs(tempwfk(ipw,1)-energmin) .LE. 1E-10) then
+             cgsum = cgsum + tempwfk(ipw,2)
+             incrdegcg = incrdegcg + 1
+          else
+             write(23,'(ES12.5,ES12.5,i12,ES12.5)') tempwfk(ipw-1, 1), cgsum/tot_cgsum, incrdegcg,&
+             & tempwfk(ipw-1, 3)
+             energmin = tempwfk(ipw, 1)
+             cgsum = tempwfk(ipw,2)
+             incrdegcg = 1
+          end if
+        end do
+        close(23)
+      end do
+      ABI_DEALLOCATE(buf)
+      ABI_DEALLOCATE(tempwfk)
+    end if
     ABI_DEALLOCATE(npwtot1)
     ABI_DEALLOCATE(npwarr1)
     ABI_DEALLOCATE(kpgnorm)
