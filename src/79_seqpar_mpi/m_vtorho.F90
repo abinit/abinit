@@ -968,10 +968,11 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
 
        !blanchet PRINT WAVE FUNCTIONS COEFFICIENTS
-       call hightemp_prt_cg(cg,ikpt,dtset%ecut,eig_k,0,dtfil%filnam_ds(4),&
-&       dtset%istwfk,dtset%kptns,mcg,mpi_enreg,dtset%mpw,dtset%nband,&
-&       dtset%nkpt,npwarr,dtset%nsppol,rprimd)
-
+       if(dtset%userid==6661) then
+         call hightemp_prt_cg(cg,ikpt,dtset%ecut,eig_k,0,dtfil%filnam_ds(4),&
+&         dtset%istwfk,dtset%kptns,mcg,mpi_enreg,dtset%mpw,dtset%nband,&
+&         dtset%nkpt,npwarr,dtset%nsppol,rprimd)
+        end if
        call timab(985,1,tsec)
 
 #if defined HAVE_GPU_CUDA
