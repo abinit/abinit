@@ -30,7 +30,7 @@ blue 0 0
 ##%% no_check = yes
 #%% [files]
 #%% files_to_test = 
-#%%   tlw_7.out.eps, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+#%%   tlw_7.out.eps, tolnlines=  5, tolabs=  0.000e+00, tolrel=  0.000e+00
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
