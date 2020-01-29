@@ -6,7 +6,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
+!!  Copyright (C) 2008-2020 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -182,7 +182,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
 !Arguments ------------------------------------
 !scalars
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(Datafiles_type),intent(in) :: Dtfil
  type(Dataset_type),intent(inout) :: Dtset
  type(Pawang_type),intent(inout) :: Pawang
@@ -1591,7 +1591,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  character(len=fnlen),intent(in) :: wfk_fname
  type(Dataset_type),intent(inout) :: Dtset !INOUT is due to setshells
  type(datafiles_type),intent(in) :: dtfil

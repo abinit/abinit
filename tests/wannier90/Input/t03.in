@@ -13,6 +13,7 @@
      typat      1      1
      znucl     14.00
  symmorphi      0
+ symsigma       0
 
 # Parameters common to all runs
       ecut      6.00

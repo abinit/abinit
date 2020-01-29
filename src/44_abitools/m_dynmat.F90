@@ -6,7 +6,7 @@
 !!  This module provides low-level tools to operate on the dynamical matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
+!!  Copyright (C) 2014-2020 ABINIT group (XG, JCC, MJV, NH, RC, MVeithen, MM, MG, MT, DCA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1269,10 +1269,10 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
 !and imposition of the charge neutrality condition
  if (chneut/=0)then
    write(message, '(a,a,a,a,a,a,a)' )&
-&   ' The violation of the charge neutrality conditions',ch10,&
-&   ' by the effective charges is as follows :',ch10,&
-&   '    atom        electric field',ch10,&
-&   ' displacement     direction   '
+    ' The violation of the charge neutrality conditions',ch10,&
+    ' by the effective charges is as follows :',ch10,&
+    '    atom        electric field',ch10,&
+    ' displacement     direction   '
    call wrtout(ab_out,message,'COLL')
    do idir1=1,3
      do idir2=1,3
@@ -1283,7 +1283,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
          end do
          do ipert1=1,natom
            d2cart(ii,idir1,ipert1,idir2,natom+2)=&
-&           d2cart(ii,idir1,ipert1,idir2,natom+2)-sumwght(ii)*wghtat(ipert1)
+           d2cart(ii,idir1,ipert1,idir2,natom+2)-sumwght(ii)*wghtat(ipert1)
          end do
        end do
        write(message, '(i8,i16,2f16.6)' ) idir1,idir2,sumwght(1),sumwght(2)
@@ -1303,7 +1303,7 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
          end do
          do ipert2=1,natom
            d2cart(ii,idir1,natom+2,idir2,ipert2)=&
-&           d2cart(ii,idir1,natom+2,idir2,ipert2)-sumwght(ii)*wghtat(ipert2)
+           d2cart(ii,idir1,natom+2,idir2,ipert2)-sumwght(ii)*wghtat(ipert2)
          end do
        end do
      end do
@@ -1378,16 +1378,15 @@ subroutine chneu9(chneut,d2cart,mpert,natom,ntypat,selectz,typat,zion)
 
 !Write the effective charge tensor
  write(message, '(a,a,a,a,a,a,a)' )&
-& ' Effective charge tensors after ',ch10,&
-& ' imposition of the charge neutrality,',ch10,&
-& ' and eventual restriction to some part :',ch10,&
-& '   atom    displacement  '
+   ' Effective charge tensors after ',ch10,&
+   ' imposition of the charge neutrality,',ch10,&
+   ' and eventual restriction to some part :',ch10,&
+  '   atom    displacement  '
  call wrtout(ab_out,message,'COLL')
 
  do ipert1=1,natom
    do idir1=1,3
-     write(message, '(2i10,3es16.6)' )ipert1,idir1,&
-&     (d2cart(1,idir1,ipert1,idir2,natom+2),idir2=1,3)
+     write(message, '(2i10,3es16.6)' )ipert1,idir1,(d2cart(1,idir1,ipert1,idir2,natom+2),idir2=1,3)
      call wrtout(ab_out,message,'COLL')
    end do
  end do

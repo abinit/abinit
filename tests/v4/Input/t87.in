@@ -40,6 +40,7 @@
 
      nband2     5
       awtr2     0       # Note : the default awtr 1 is better
+      symsigma  0
 
 # Calculation of the HF corrections - iteration 1
  optdriver3     4

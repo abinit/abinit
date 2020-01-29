@@ -8,7 +8,7 @@
 !!  and a set of generic interfaces wrapping the most commonly used MPI primitives.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG, MB, XG, YP, MT)
+!! Copyright (C) 2009-2020 ABINIT group (MG, MB, XG, YP, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

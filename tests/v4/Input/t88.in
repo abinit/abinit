@@ -31,6 +31,7 @@
     nband1      35
     nbdbuf1      5
     gwpara       1 # Note: gwpara 2 is better
+    symsigma     0 # Note: symsigma 1 is better
 
 # Calculation of the dielectric matrix - iteration 1
  optdriver2     3

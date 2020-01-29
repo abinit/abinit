@@ -8,7 +8,7 @@
 !!
 !! COPYRIGHT
 !! Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!! Copyright (C) 2009-2019 ABINIT group (MG, YG)
+!! Copyright (C) 2009-2020 ABINIT group (MG, YG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -192,7 +192,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
 !Arguments ------------------------------------
 !scalars
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(datafiles_type),intent(inout) :: Dtfil
  type(dataset_type),intent(inout) :: Dtset
  type(pawang_type),intent(inout) :: Pawang
@@ -1101,7 +1101,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  character(len=fnlen),intent(out) :: w_fname
  type(dataset_type),intent(inout) :: Dtset
  type(datafiles_type),intent(in) :: Dtfil

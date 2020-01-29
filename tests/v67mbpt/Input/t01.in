@@ -12,6 +12,7 @@
  ndtset 6
  ecut 6
  ecutwfn 6
+ symsigma 0
 
 # wavefunction calculation
  nband1      15

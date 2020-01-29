@@ -1,8 +1,8 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 30 Dec 2019.
-- ( at 18h08 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h50 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/paral_t51_MPI4-t52_MPI4-t53_MPI4/t52.in
 - output file    -> t52_MPI4.out
@@ -527,16 +527,16 @@ P           mkmem          64
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   1.838  14.0      1.845  13.8          21278      -1.00        1.00       1.00
-- nonlop(apply)                  0.279   2.1      0.282   2.1          21278      -1.00        0.99       0.99
-- projbd                         0.175   1.3      0.178   1.3          30806      -1.00        0.99       0.99
-- vtorho(MPI)                    0.129   1.0      0.129   1.0              2      -1.00        1.00       1.00
-- getghc-other                   0.111   0.9      0.103   0.8             -1      -1.00        1.09       1.09
+- fourwf%(pot)                   1.844  14.0      1.851  13.8          21278      -1.00        1.00       1.00
+- nonlop(apply)                  0.275   2.1      0.278   2.1          21278      -1.00        0.99       0.99
+- projbd                         0.177   1.4      0.179   1.3          30806      -1.00        0.99       0.99
+- vtorho(MPI)                    0.126   1.0      0.126   0.9              2      -1.00        1.00       1.00
+- getghc-other                   0.111   0.8      0.104   0.8             -1      -1.00        1.07       1.07
 - vtowfk(ssdiag)                 0.104   0.8      0.107   0.8             -1      -1.00        0.97       0.97
-- others (128)                   0.101   0.8      0.102   0.8             -1      -1.00        0.99       0.99
+- others (128)                   0.098   0.7      0.100   0.7             -1      -1.00        0.98       0.98
 -<END_TIMER>
 -
-- subtotal                       2.738  20.9      2.744  20.5                                  1.00       1.00
+- subtotal                       2.736  20.8      2.745  20.4                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
@@ -546,18 +546,18 @@ P           mkmem          64
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   7.467  57.0      7.491  56.1          87909      -1.00        1.00       1.00
-- nonlop(apply)                  1.141   8.7      1.153   8.6          87909      -1.00        0.99       0.99
-- projbd                         0.710   5.4      0.718   5.4         126648      -1.00        0.99       0.99
-- getghc-other                   0.453   3.5      0.418   3.1             -4      -1.00        1.08       1.08
-- vtowfk(ssdiag)                 0.409   3.1      0.411   3.1             -4      -1.00        0.99       0.99
-- vtorho(MPI)                    0.365   2.8      0.365   2.7              8      -1.00        1.00       1.00
-- invars2                        0.185   1.4      0.187   1.4              8      -1.00        0.99       0.99
-- ewald                          0.095   0.7      0.095   0.7              8      -1.00        1.00       1.00
-- others (126)                   0.115   0.9      0.117   0.9             -1      -1.00        0.99       0.99
+- fourwf%(pot)                   7.476  56.9      7.502  55.8          87909      -1.00        1.00       1.00
+- nonlop(apply)                  1.132   8.6      1.144   8.5          87909      -1.00        0.99       0.99
+- projbd                         0.719   5.5      0.724   5.4         126648      -1.00        0.99       0.99
+- getghc-other                   0.452   3.4      0.419   3.1             -4      -1.00        1.08       1.08
+- vtowfk(ssdiag)                 0.411   3.1      0.414   3.1             -4      -1.00        0.99       0.99
+- vtorho(MPI)                    0.369   2.8      0.369   2.7              8      -1.00        1.00       1.00
+- invars2                        0.188   1.4      0.190   1.4              8      -1.00        0.99       0.99
+- ewald                          0.089   0.7      0.090   0.7              8      -1.00        0.99       0.99
+- others (126)                   0.118   0.9      0.122   0.9             -1      -1.00        0.97       0.97
 -<END_TIMER>
 
-- subtotal                      10.939  83.5     10.954  82.0                                  1.00       1.00
+- subtotal                      10.953  83.4     10.974  81.6                                  1.00       1.00
 
 ================================================================================
 
@@ -633,4 +633,4 @@ P           mkmem          64
 
  Calculation completed.
 .Delivered   2 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.2  wall=         13.4
++Overall time at end (sec) : cpu=         13.3  wall=         13.6

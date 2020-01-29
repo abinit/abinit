@@ -6,7 +6,7 @@
 !!  This module contains routines related to PAW on-site densities and on-site potentials.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (FJ, MT)
+!! Copyright (C) 2018-2020 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -285,7 +285,7 @@ contains
   else
     MSG_ERROR('Please use recent format for the input file')
   end if  
-  write(InVar%stdout,'(a)') '.Copyright (C) 1998-2019 ABINIT group (FB,JB).'
+  write(InVar%stdout,'(a)') '.Copyright (C) 1998-2020 ABINIT group (FB,JB).'
   write(InVar%stdout,'(a)') ' ABINIT comes with ABSOLUTELY NO WARRANTY.'
   write(InVar%stdout,'(a)') ' It is free software, and you are welcome to redistribute it'
   write(InVar%stdout,'(a)') ' under certain conditions (GNU General Public License,'

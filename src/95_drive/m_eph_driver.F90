@@ -6,7 +6,7 @@
 !!   Driver for EPH calculations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2019 ABINIT group (MG, MVer, GA)
+!!  Copyright (C) 2009-2020 ABINIT group (MG, MVer, GA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -137,7 +137,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
 !Arguments ------------------------------------
 !scalars
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(inout) :: dtset
  type(pawang_type),intent(inout) :: pawang
@@ -168,12 +168,12 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  type(ebands_t) :: ebands, ebands_kq
  type(ddb_type) :: ddb
  type(dvdb_t) :: dvdb
- type(ifc_type) :: ifc, ifc_coarse
+ type(ifc_type) :: ifc
  type(pawfgr_type) :: pawfgr
  type(mpi_type) :: mpi_enreg
  type(phonon_dos_type) :: phdos
 !arrays
- integer :: ngfftc(18), ngfftf(18), ngqpt_coarse(3), count_wminmax(2)
+ integer :: ngfftc(18), ngfftf(18), count_wminmax(2)
  integer,allocatable :: dummy_atifc(:)
  real(dp),parameter :: k0(3)=zero
  real(dp) :: wminmax(2), dielt(3,3), zeff(3,3,dtset%natom), zeff_raw(3,3,dtset%natom)
