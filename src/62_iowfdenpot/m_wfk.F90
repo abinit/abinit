@@ -3032,6 +3032,11 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
 
  call cwtime(cpu, wall, gflops, "start")
 
+! first determine disk bands etc... 
+! need to do this first as it opens the file, and in normal fortran io 
+! you have to close it first before proceeding below
+ ebands_disk = wfk_read_ebands(inpath, xmpi_comm_self)
+
 ! now attack the cg reading
  iomode = iomode_from_fname(inpath)
  wfk_unt = get_unit()
@@ -3077,9 +3082,6 @@ print *, 'wfk_disk%mband, dtset%mband ', wfk_disk%mband, dtset%mband
  ABI_MALLOC(occ_disk, (mband))
 
  cryst = wfk_disk%hdr%get_crystal(2)
-
-! first determine disk bands etc...
- ebands_disk = wfk_read_ebands(inpath, xmpi_comm_self)
 
  ! Build new header for full BZ. This is the most delicate part since all the arrays in hdr_full
  ! that depend on k-points must be consistent with kptns_in and nkpt_in.
