@@ -19,16 +19,16 @@
 # Check whether the Cuda library is working.
 #
 AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
-  dnl Init
+  # Init
   abi_gpu_cuda_serial="no"
   abi_gpu_cuda_mpi="no"
   abi_gpu_cuda_old="unknown"
 
-  dnl Display variables
+  # Display variables
   AC_MSG_NOTICE([Cuda incs: ${abi_gpu_cuda_incs}])
   AC_MSG_NOTICE([Cuda libs: ${abi_gpu_cuda_libs}])
 
-  dnl Prepare environment
+  # Prepare environment
   ABI_ENV_BACKUP
   CPPFLAGS="${CPPFLAGS} ${abi_gpu_cuda_incs}"
   LDFLAGS="${CC_LDFLAGS} ${CC_LDFLAGS_GPU}"
@@ -36,10 +36,10 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
   LIBS="${abi_gpu_cuda_libs} ${LIBS}"
   AC_LANG_PUSH([C])
 
-  dnl Check usability of headers
+  # Check usability of headers
   AC_CHECK_HEADERS([cuda_runtime_api.h cufft.h cublas.h])
 
-  dnl Look for libraries and routines
+  # Look for libraries and routines
   AC_MSG_CHECKING([whether Cuda programs can be compiled])
   AC_LINK_IFELSE([AC_LANG_PROGRAM(
     [[
@@ -54,7 +54,7 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
     ]])], [abi_gpu_cuda_serial="yes"], [])
   AC_MSG_RESULT([${abi_gpu_cuda_serial}])
 
-  dnl Do we have an old version of Cuda?
+  # Do we have an old version of Cuda?
   AC_MSG_CHECKING([whether we have Cuda < 4])
   AC_LINK_IFELSE([AC_LANG_PROGRAM(
     [[
@@ -67,12 +67,12 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
     ]])], [abi_gpu_cuda_old="no"], [abi_gpu_cuda_old="yes"])
   AC_MSG_RESULT([${abi_gpu_cuda_old}])
 
-  dnl Check ISO C Binding (Fortran)
+  # Check ISO C Binding (Fortran)
   if test "${fc_has_iso_c_binding}" != "yes"; then
     AC_MSG_WARN([your Fortran compiler does not provide any ISO C binding module])
   fi
 
-  dnl Restore build environment
+  # Restore build environment
   AC_LANG_POP([C])
   LIBS="${abi_saved_LIBS}"
   ABI_ENV_RESTORE
@@ -90,7 +90,7 @@ AC_DEFUN([_ABI_GPU_CHECK_CUDA],[
 # Looks for an implementation of Cuda, using the provided prefix.
 #
 AC_DEFUN([_ABI_GPU_INIT_CUDA],[
-  dnl Init
+  # Init
   abi_gpu_cuda_has_cc="no"
   abi_gpu_cuda_has_common="no"
   abi_gpu_cuda_has_fft="no"
@@ -99,19 +99,19 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
   abi_gpu_cuda_has_linalg="no"
   abi_gpu_cuda_has_runtime="no"
   abi_gpu_cuda_libdir=""
-  abi_gpu_cuda_incs="${with_gpu_incs}"
-  abi_gpu_cuda_libs="${with_gpu_libs}"
-  abi_gpu_cuda_root="${with_gpu_prefix}"
+  abi_gpu_cuda_incs="${GPU_CPPFLAGS}"
+  abi_gpu_cuda_libs="${GPU_LIBS}"
+  abi_gpu_cuda_root="${abi_gpu_prefix}"
 
-  dnl Make use of the CUDA_ROOT environment variable
+  # Make use of the CUDA_ROOT environment variable
   if test "${abi_gpu_cuda_root}" = ""; then
     abi_gpu_cuda_root="${CUDA_ROOT}"
   fi
 
-  dnl Check whether to look for generic files
+  # Check whether to look for generic files
   if test "${abi_gpu_cuda_root}" = ""; then
 
-    dnl nVidia C compiler
+    # nVidia C compiler
     if test "${NVCC}" = ""; then
       AC_CHECK_PROGS(NVCC,[nvcc])
     fi
@@ -125,7 +125,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
 
   else
 
-    dnl nVidia C compiler
+    # nVidia C compiler
     AC_MSG_CHECKING([for the nVidia C compiler])
     if test -x "${abi_gpu_cuda_root}/bin/nvcc"; then
       abi_gpu_cuda_has_cc="yes"
@@ -137,11 +137,11 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
       AC_MSG_RESULT([${NVCC}])
     fi
 
-    dnl Headers
+    # Headers
     AC_MSG_CHECKING([for Cuda headers])
     abi_result=""
     if test -s "${abi_gpu_cuda_root}/include/cuda_runtime_api.h"; then
-      if test "${with_gpu_incs}" = ""; then
+      if test "${GPU_CPPFLAGS}" = ""; then
         abi_gpu_cuda_incs="-I${abi_gpu_cuda_root}/include"
       fi
       abi_gpu_cuda_has_incs="yes"
@@ -154,7 +154,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
       abi_result="${abi_result} blas"
     fi
     if test -s "${abi_gpu_cuda_root}/SDK/C/common/inc/cutil.h"; then
-      if test "${with_gpu_incs}" = ""; then
+      if test "${GPU_CPPFLAGS}" = ""; then
         abi_gpu_cuda_incs="-I${abi_gpu_cuda_root}/SDK/C/common/inc ${abi_gpu_cuda_incs}"
       fi
       abi_result="${abi_result} sdk"
@@ -164,7 +164,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     fi
     AC_MSG_RESULT([${abi_result}])
 
-    dnl Libraries
+    # Libraries
     AC_MSG_CHECKING([for Cuda libraries])
     abi_result=""
     if test "${abi_cpu_64bits}" = "yes"; then
@@ -188,7 +188,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
       fi
     done
     if test -e "${abi_gpu_cuda_libdir}/libcudart.${abi_so_ext}"; then
-      if test "${with_gpu_libs}" = ""; then
+      if test "${GPU_LIBS}" = ""; then
         abi_gpu_cuda_libs="-lcudart"
       fi
       abi_gpu_cuda_has_libs="yes"
@@ -197,25 +197,25 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     fi
     if test "${abi_gpu_cuda_has_libs}" = "yes"; then
       if test -e "${abi_gpu_cuda_libdir}/libcufft.${abi_so_ext}"; then
-        if test "${with_gpu_libs}" = ""; then
+        if test "${GPU_LIBS}" = ""; then
           abi_gpu_cuda_libs="-lcufft ${abi_gpu_cuda_libs}"
         fi
         abi_gpu_cuda_has_fft="yes"
         abi_result="${abi_result} fft"
       fi
       if test -e "${abi_gpu_cuda_libdir}/libcublas.${abi_so_ext}"; then
-        if test "${with_gpu_libs}" = ""; then
+        if test "${GPU_LIBS}" = ""; then
           abi_gpu_cuda_libs="-lcublas ${abi_gpu_cuda_libs}"
         fi
         abi_gpu_cuda_has_linalg="yes"
         abi_result="${abi_result} blas"
       fi
-      if test "${with_gpu_libs}" = ""; then
+      if test "${GPU_LIBS}" = ""; then
         abi_gpu_cuda_libs="-L${abi_gpu_cuda_libdir} ${abi_gpu_cuda_libs}"
       fi
     fi
     if test -s "${abi_gpu_cuda_root}/SDK/C/lib/libcutil.a"; then
-      if test "${with_gpu_libs}" = ""; then
+      if test "${GPU_LIBS}" = ""; then
         abi_gpu_cuda_libs="-L${abi_gpu_cuda_root}/SDK/C/lib -lcutil ${abi_gpu_cuda_libs}"
       fi
       abi_result="${abi_result} sdk"
@@ -224,14 +224,14 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
       abi_result="none"
     fi
     AC_MSG_RESULT([${abi_result}])
-    if test "${with_gpu_libs}" = ""; then
+    if test "${GPU_LIBS}" = ""; then
       abi_gpu_cuda_libs="${abi_gpu_cuda_libs} -lcuda"
     fi
     if test "${abi_gpu_cuda_has_common}" = "no"; then
       AC_MSG_WARN([could not find libcuda.${abi_so_ext}])
     fi
 
-    dnl C and C++ link flags
+    # C and C++ link flags
     AC_MSG_CHECKING([for Cuda link flags])
     if test "${CC_LDFLAGS_GPU}" = ""; then
       if test "${abi_cpu_64bits}" = "yes"; then
@@ -249,7 +249,7 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
     fi
     AC_MSG_RESULT([${CC_LDFLAGS_GPU}])
 
-  fi dnl abi_gpu_cuda_root
+  fi # abi_gpu_cuda_root
 
   AC_MSG_NOTICE([Cuda incs: ${abi_gpu_cuda_incs}])
   AC_MSG_NOTICE([Cuda libs: ${abi_gpu_cuda_libs}])
@@ -269,40 +269,33 @@ AC_DEFUN([_ABI_GPU_INIT_CUDA],[
 # Note 2: it should be run as early as possible.
 #
 AC_DEFUN([ABI_GPU_INIT],[
-  dnl Init
+  # Delegate most of the initialization to Steredeg
+  SD_GPU_INIT([optional warn])
+
+  # Init
   abi_gpu_complete="unknown"
+  abi_gpu_enable="${sd_gpu_enable}"
   abi_gpu_has_cc="no"
   abi_gpu_has_fft="no"
   abi_gpu_has_incs="no"
   abi_gpu_has_libs="no"
   abi_gpu_has_linalg="no"
   abi_gpu_usable="no"
-  lib_gpu_fcflags=""
-  lib_gpu_ldflags=""
-  lib_gpu_flavor="none"
-  lib_gpu_incs=""
-  lib_gpu_libs=""
+  abi_gpu_fcflags=""
+  abi_gpu_ldflags=""
+  abi_gpu_flavor="${sd_gpu_flavor}"
+  abi_gpu_incs="${GPU_CPPFLAGS}"
+  abi_gpu_libs="${GPU_LIBS}"
 
-  if test "${enable_gpu}" = "yes"; then
+  if test "${abi_gpu_enable}" = "yes" -o "${abi_gpu_enable}" = "auto"; then
 
-    dnl Banner
+    # Banner
     AC_MSG_NOTICE([Initializing GPU support])
     AC_MSG_CHECKING([which kind of GPU we want])
-    AC_MSG_RESULT([${with_gpu_flavor}])
+    AC_MSG_RESULT([${abi_gpu_flavor}])
 
-    dnl Check option consistency
-    if test "${with_gpu_prefix}" != ""; then
-      if test "${with_gpu_incs}" != ""; then
-        AC_MSG_ERROR([use --with-gpu-prefix or --with-gpu-includes, not both])
-      fi
-      if test "${with_gpu_libs}" != ""; then
-        AC_MSG_ERROR([use --with-gpu-prefix or --with-gpu-libs, not both])
-      fi
-      AC_MSG_NOTICE([looking for GPU support in ${with_gpu_prefix}])
-    fi
-
-    dnl Look for prerequisites
-    case "${with_gpu_flavor}" in
+    # Look for prerequisites
+    case "${abi_gpu_flavor}" in
 
       cuda*)
         _ABI_GPU_INIT_CUDA
@@ -325,15 +318,16 @@ AC_DEFUN([ABI_GPU_INIT],[
   else
 
     AC_MSG_NOTICE([GPU support disabled from command-line])
+    abi_gpu_flavor="none"
 
-  fi dnl enable_gpu
+  fi # abi_gpu_enable
 
-  dnl Enable substitution
-  AC_SUBST(lib_gpu_fcflags)
-  AC_SUBST(lib_gpu_ldflags)
-  AC_SUBST(lib_gpu_flavor)
-  AC_SUBST(lib_gpu_incs)
-  AC_SUBST(lib_gpu_libs)
+  # Enable substitution
+  AC_SUBST(abi_gpu_fcflags)
+  AC_SUBST(abi_gpu_ldflags)
+  AC_SUBST(abi_gpu_flavor)
+  AC_SUBST(abi_gpu_incs)
+  AC_SUBST(abi_gpu_libs)
 ]) # ABI_GPU_INIT
 
 
@@ -348,26 +342,24 @@ AC_DEFUN([ABI_GPU_INIT],[
 # Sets all variables needed to handle the GPU libraries.
 #
 AC_DEFUN([ABI_GPU_DETECT],[
-  AC_REQUIRE([ABI_GPU_INIT])
-
-  dnl Initial setup
+  # Initial setup
   abi_gpu_serial="no"
   abi_gpu_mpi="no"
-  abi_gpu_precision=`echo "${with_gpu_flavor}" | cut -d- -f2`
+  abi_gpu_precision=`echo "${abi_gpu_flavor}" | cut -d- -f2`
   test "${abi_gpu_precision}" = "" && abi_gpu_precision="single"
 
-  dnl Display user requests
+  # Display user requests
   AC_MSG_CHECKING([whether to activate GPU support])
-  AC_MSG_RESULT([${enable_gpu}])
+  AC_MSG_RESULT([${abi_gpu_enable}])
 
-  dnl Look for GPU libraries
-  if test "${enable_gpu}" = "yes"; then
+  # Look for GPU libraries
+  if test "${abi_gpu_enable}" = "yes"; then
 
-    dnl Check whether we have a working gpu environment
+    # Check whether we have a working gpu environment
     AC_MSG_CHECKING([for the requested GPU support])
-    AC_MSG_RESULT([${with_gpu_flavor}])
+    AC_MSG_RESULT([${abi_gpu_flavor}])
 
-    case "${with_gpu_flavor}" in
+    case "${abi_gpu_flavor}" in
 
       cuda*)
         _ABI_GPU_CHECK_CUDA
@@ -386,10 +378,10 @@ AC_DEFUN([ABI_GPU_DETECT],[
               AC_DEFINE(HAVE_GPU_CUDA_DP,1,[Define to 1 if you want to perform double-precision Cuda calculations.])
               ;;
           esac
-          lib_gpu_fcflags="${abi_gpu_cuda_fcflags}"
-          lib_gpu_ldflags="${abi_gpu_cuda_ldflags}"
-          lib_gpu_incs="${abi_gpu_cuda_incs}"
-          lib_gpu_libs="${abi_gpu_cuda_libs}"
+          abi_gpu_fcflags="${abi_gpu_cuda_fcflags}"
+          abi_gpu_ldflags="${abi_gpu_cuda_ldflags}"
+          abi_gpu_incs="${abi_gpu_cuda_incs}"
+          abi_gpu_libs="${abi_gpu_cuda_libs}"
         fi
         ;;
 
@@ -401,25 +393,28 @@ AC_DEFUN([ABI_GPU_DETECT],[
 
   fi
 
-  dnl Transmit serial status to the source code
+  # Transmit serial status to the source code
   if test "${abi_gpu_serial}" = "yes"; then
     AC_DEFINE([HAVE_GPU],1,[Define to 1 if you have a GPU library.])
     AC_DEFINE([HAVE_GPU_SERIAL],1,[Define to 1 if you have a serial GPU library.])
-    lib_gpu_flavor="${with_gpu_flavor}"
+    abi_gpu_flavor="${abi_gpu_flavor}"
   fi
 
-  dnl Transmit MPI status to the source code
+  # Transmit MPI status to the source code
   if test "${abi_gpu_mpi}" = "yes"; then
     AC_DEFINE([HAVE_GPU_MPI],1,[Define to 1 if you have a MPI-aware GPU library.])
   fi
 
-  dnl Output final flavor
-  if test "${enable_gpu}" = "yes"; then
+  # Output final flavor
+  if test "${abi_gpu_enable}" = "yes"; then
     AC_MSG_CHECKING([for the actual GPU support])
-    AC_MSG_RESULT([${lib_gpu_flavor}])
+    AC_MSG_RESULT([${abi_gpu_flavor}])
   fi
 
-  dnl Inform Automake
-  AM_CONDITIONAL(DO_BUILD_17_GPU_TOOLBOX,[test "${lib_gpu_flavor}" != "none"])
-  AM_CONDITIONAL(DO_BUILD_52_MANAGE_CUDA,[test "${lib_gpu_flavor}" = "cuda-double" -o "${lib_gpu_flavor}" = "cuda-single"])
+  # FIXME: Update GPU libraries
+  sd_gpu_libs="${sd_gpu_libs} ${abi_gpu_libs}"
+
+  # Inform Automake
+  AM_CONDITIONAL(DO_BUILD_17_GPU_TOOLBOX,[test "${abi_gpu_flavor}" != "none"])
+  AM_CONDITIONAL(DO_BUILD_52_MANAGE_CUDA,[test "${abi_gpu_flavor}" = "cuda-double" -o "${abi_gpu_flavor}" = "cuda-single"])
 ]) # ABI_GPU_DETECT

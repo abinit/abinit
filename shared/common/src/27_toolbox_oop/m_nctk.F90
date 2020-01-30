@@ -229,6 +229,9 @@ MODULE m_nctk
  public :: nctk_read_datar
  public :: nctk_defwrite_nonana_terms  ! Write phonon frequencies and displacements for q-->0
                                        ! in the presence of non-analytical behaviour.
+ public :: nctk_defwrite_nonana_raman_terms   ! Write raman susceptiblities for q-->0
+ public :: nctk_defwrite_raman_terms   ! Write raman susceptiblities and frequencies for q=0
+
 #endif
  public :: create_nc_file              ! FIXME: Deprecated
  public :: write_var_netcdf            ! FIXME: Deprecated
@@ -2616,6 +2619,126 @@ subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, c
  end select
 
 end subroutine nctk_defwrite_nonana_terms
+!!***
+
+!!****f* m_nctk/nctk_defwrite_nonana_raman_terms
+!! NAME
+!! nctk_defwrite_nonana_raman_terms
+!!
+!! FUNCTION
+!! Write the Raman susceptiblities for q-->0 along different directions in the netcdf file.
+!!
+!! INPUTS
+!!  ncid=netcdf file id.
+!!  iphl2=Index of the q-point to be written to file.
+!!  nph2l=Number of qpoints.
+!!  rsus(3*natom,3,3)=List of Raman susceptibilities along the direction corresponding to iphl2.
+!!  natom=Number of atoms
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! PARENTS
+!!      anaddb
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nctk_defwrite_nonana_raman_terms(ncid, iphl2, nph2l, natom, rsus, mode)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid,natom,iphl2,nph2l
+ character(len=*),intent(in) :: mode
+!arrays
+ real(dp),intent(in) :: rsus(3*natom,3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncerr, raman_sus_varid
+
+! *************************************************************************
+
+!Fake use of nph2l, to keep it as argument. This should be removed when nph2l will be used.
+ if(.false.)then
+  ncerr=nph2l
+ endif
+
+ select case (mode)
+ case ("define")
+   NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
+   ncerr = nctk_def_arrays(ncid, [ nctkarr_t("non_analytical_raman_sus", "dp", &
+"number_of_non_analytical_directions,number_of_phonon_modes,number_of_cartesian_directions,number_of_cartesian_directions")])
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nctk_set_datamode(ncid))
+
+ case ("write")
+
+   NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_raman_sus", raman_sus_varid))
+   ncerr = nf90_put_var(ncid,raman_sus_varid,rsus,&
+     start=[iphl2,1,1,1], count=[1,3*natom,3,3])
+   NCF_CHECK(ncerr)
+
+ case default
+   MSG_ERROR(sjoin("Wrong value for mode", mode))
+ end select
+
+end subroutine nctk_defwrite_nonana_raman_terms
+!!***
+
+!!****f* m_nctk/nctk_defwrite_raman_terms
+!! NAME
+!! nctk_defwrite_raman_terms
+!!
+!! FUNCTION
+!! Write the Raman susceptiblities for q=0 and also the phonon frequncies at gamma.
+!!
+!! INPUTS
+!!  ncid=netcdf file id.
+!!  rsus(3*natom,3,3)=List of Raman susceptibilities.
+!!  natom=Number of atoms
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! PARENTS
+!!      anaddb
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nctk_defwrite_raman_terms(ncid, natom, rsus, phfrq)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid,natom
+!arrays
+ real(dp),intent(in) :: rsus(3*natom,3,3)
+ real(dp),intent(in) :: phfrq(3*natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncerr, raman_sus_varid, phmodes_varid
+
+! *************************************************************************
+
+ NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
+ ncerr = nctk_def_arrays(ncid, [ nctkarr_t("raman_sus", "dp", &
+  "number_of_phonon_modes,number_of_cartesian_directions,number_of_cartesian_directions"), &
+  nctkarr_t("gamma_phonon_modes", "dp", "number_of_phonon_modes")])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nctk_set_datamode(ncid))
+
+ NCF_CHECK(nf90_inq_varid(ncid, "raman_sus", raman_sus_varid))
+ NCF_CHECK(nf90_put_var(ncid,raman_sus_varid,rsus))
+ NCF_CHECK(nf90_inq_varid(ncid, "gamma_phonon_modes", phmodes_varid))
+ NCF_CHECK(nf90_put_var(ncid,phmodes_varid,phfrq*Ha_eV))
+
+end subroutine nctk_defwrite_raman_terms
 !!***
 
 #endif

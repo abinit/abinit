@@ -1,0 +1,57 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2015 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+from ConfigParser import ConfigParser,NoOptionError
+from time import gmtime,strftime
+
+import commands
+import os
+import re
+import sys
+
+class MyConfigParser(ConfigParser):
+
+  def optionxform(self,option):
+    return str(option)
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Main program
+#
+
+# Initial setup
+my_name    = "make-macros-detect"
+my_configs = ["config/specs/dependencies.conf"]
+
+# Check if we are in the top of the ABINIT source tree
+if ( not os.path.exists("configure.ac") or
+     not os.path.exists("src/98_main/abinit.F90") ):
+  print("%s: You must be in the top of an ABINIT source tree." % my_name)
+  print("%s: Aborting now." % my_name)
+  sys.exit(1)
+
+# Read config file(s)
+for cnf_file in my_configs:
+  if ( os.path.exists(cnf_file) ):
+    if ( re.search("\.cf$",cnf_file) ):
+      execfile(cnf_file)
+  else:
+    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+    print("%s: Aborting now." % my_name)
+    sys.exit(2)
+
+# What time is it?
+now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
+
+# Init
+cnf = MyConfigParser()
+cnf.read(my_configs[0])
+
+#

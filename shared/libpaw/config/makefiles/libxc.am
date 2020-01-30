@@ -1,0 +1,29 @@
+## Copyright (C) 2018-2019 Yann Pouillon <devops@materialsevolution.es>
+
+#
+# Makefile for the LibXC bindings of LibPAW
+#
+
+                    # ------------------------------------ #
+
+#
+# Source files
+#
+
+# C source - keep this in alphabetical order
+pawxc_core_srcs = \
+  libpaw_libxc.c
+
+                    # ------------------------------------ #
+
+#
+# Build targets
+#
+
+# Essential build parameters
+AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir)
+
+# Libraries
+noinst_LIBRARIES = libpaw_libxc.a
+
+libpaw_libxc_a_SOURCES = $(pawxc_core_srcs)

@@ -204,7 +204,8 @@ now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
 # Init
 cnf = MyConfigParser()
 cnf.read(my_configs[0])
-abinit_env_vars = cnf.sections()
+abinit_env_vars = [item for item in cnf.sections() \
+  if not cnf.get(item, "status") in ["dropped", "removed"]]
 abinit_env_vars.sort()
 
 # Start writing macro

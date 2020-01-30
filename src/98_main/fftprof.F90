@@ -213,7 +213,7 @@ program fftprof
  do_mpi_utests = INDEX(tasks," mpi-utests")>0
  !do_mpi_bench  = INDEX(tasks," mpi-bench")>0
 
-#ifdef HAVE_FFT_FFTW3_THREADS
+#ifdef HAVE_FFTW3_THREADS
  call fftw3_init_threads()
 #endif
 

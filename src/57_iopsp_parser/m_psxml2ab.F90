@@ -40,7 +40,7 @@ module m_psxml2ab
  use defs_datatypes
  use m_abicore
  use m_errors
-#ifdef HAVE_PSML
+#ifdef HAVE_LIBPSML
  use m_psml
  use m_psml_api
 #endif
@@ -52,7 +52,7 @@ implicit none
 
 private
 
-#ifdef HAVE_PSML
+#ifdef HAVE_LIBPSML
 public :: psxml2abheader
 !public :: psxml2abfull
 

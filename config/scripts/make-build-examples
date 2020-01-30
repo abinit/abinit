@@ -46,7 +46,7 @@ def key_is_ok(key):
 # Initial setup
 my_name     = "make-build-examples"
 my_configs  = ["config/specs/testfarm.conf"]
-my_template = "doc/build/config-template.ac"
+my_template = "doc/build/config-template.ac9"
 my_outdir   = "doc/build/config-examples"
 my_fbck     = "config/specs/fbversion.conf"
 
@@ -88,9 +88,18 @@ else:
 # What time is it?
 now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
 
-# Process config files and write examples
+# Prepare the storage space
 if ( not os.path.exists(my_outdir) ):
   os.makedirs(my_outdir)
+for old_ex in os.listdir(my_outdir):
+  item = os.path.join(my_outdir, old_ex)
+  #print("Removing item:", item)
+  if os.path.isdir(item):
+    os.rmdir(item)
+  else:
+    os.remove(item)
+
+# Process config files and write examples
 for my_config in my_configs:
   cnf = MyConfigParser()
   cnf.read(my_config)
@@ -113,13 +122,15 @@ for my_config in my_configs:
       if ( do_print ):
         out_data += line
 
-    # Select file location
-    my_subdir = ""
-    if ( cnf_vars["status"] == "uncertified" ):
-      my_subdir = "uncertified/"
-
     # Inject fbversion in out_data
     out_data=out_data.replace("_FB_",fbversion)
 
     # Write data
-    open("%s/%s%s.ac" % (my_outdir,my_subdir,sec), "wt").write(out_data)
+    out_path = os.path.join(my_outdir, sec+".ac9")
+    open(out_path, "wt").write(out_data)
+
+    # FIXME: Create symbolic link until the test farm gets updated
+    old_path = os.path.join(my_outdir, sec+".ac")
+    if ( os.path.exists(old_path) or os.path.islink(old_path) ):
+      os.remove(old_path)
+    os.symlink(sec+".ac9", old_path)
