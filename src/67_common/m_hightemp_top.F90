@@ -155,7 +155,7 @@ contains
              cgsum = cgsum + tempwfk(ipw,2)
              incrdegcg = incrdegcg + 1
           else
-             write(23,'(ES12.5,ES12.5,i12,ES12.5)') tempwfk(ipw-1, 1), cgsum/tot_cgsum, incrdegcg,&
+             write(23,'(ES14.6,ES14.6,i14,ES14.6)') tempwfk(ipw-1, 1), cgsum/tot_cgsum, incrdegcg,&
              & tempwfk(ipw-1, 3)
              energmin = tempwfk(ipw, 1)
              cgsum = tempwfk(ipw,2)
