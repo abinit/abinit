@@ -1,8 +1,8 @@
 
-.Version 8.10.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2018 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 18 Apr 2019.
-- ( at 16h09 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h30 )
   
 - input  file    -> t24.in
 - output file    -> t24.out
@@ -192,8 +192,8 @@ P           mkmem          20
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_quickfixes/tests/Psps_for_tests/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_quickfixes/tests/Psps_for_tests/1h.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -205,8 +205,8 @@ P           mkmem          20
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_quickfixes/tests/Psps_for_tests/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/torrent_quickfixes/tests/Psps_for_tests/1h.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/1h.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -295,6 +295,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.87802113833365E+01 ; Band energy (Ha)=  -1.3718814361E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.52252090E-03  sigma(3 2)=  3.37475723E-04
@@ -404,6 +406,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.86261643862204E+01 ; Band energy (Ha)=  -1.1212568657E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.58269192E-03  sigma(3 2)=  3.50237965E-04
   sigma(2 2)= -5.41809824E-03  sigma(3 1)=  2.29985972E-04
@@ -512,6 +516,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.86261643862204E+01 ; Band energy (Ha)=  -1.1212568659E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.58269192E-03  sigma(3 2)=  3.50237965E-04
   sigma(2 2)= -5.41809824E-03  sigma(3 1)= -2.29985972E-04
@@ -619,6 +625,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.87802113833364E+01 ; Band energy (Ha)=  -1.3718814363E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.52252090E-03  sigma(3 2)=  3.37475723E-04
@@ -737,6 +745,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.88631070791058E+01 ; Band energy (Ha)=  -1.6661111389E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.06587342E-03  sigma(3 2)=  9.47611406E-05
   sigma(2 2)= -5.61601938E-03  sigma(3 1)=  1.49504477E-04
@@ -844,6 +854,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.87117137017145E+01 ; Band energy (Ha)=  -1.3035553107E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.70668940E-03  sigma(3 2)=  2.65887508E-04
@@ -953,6 +965,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.87117137017306E+01 ; Band energy (Ha)=  -1.3035553110E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.70668940E-03  sigma(3 2)=  2.65887508E-04
   sigma(2 2)= -5.60496767E-03  sigma(3 1)= -2.23800000E-04
@@ -1060,6 +1074,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.88631070791138E+01 ; Band energy (Ha)=  -1.6661111389E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.06587342E-03  sigma(3 2)=  9.47611405E-05
@@ -1179,6 +1195,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.88760318871207E+01 ; Band energy (Ha)=  -1.8331944983E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.55684512E-03  sigma(3 2)= -7.70013170E-05
   sigma(2 2)= -5.75876476E-03  sigma(3 1)= -8.47649567E-05
@@ -1286,6 +1304,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.87696390108409E+01 ; Band energy (Ha)=  -1.4657130928E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.91969060E-03  sigma(3 2)=  1.78681779E-04
@@ -1395,6 +1415,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.87696390108464E+01 ; Band energy (Ha)=  -1.4657130931E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -3.91969060E-03  sigma(3 2)=  1.78681779E-04
   sigma(2 2)= -5.72137290E-03  sigma(3 1)= -1.97039508E-04
@@ -1502,6 +1524,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.88760318871206E+01 ; Band energy (Ha)=  -1.8331944979E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.55684512E-03  sigma(3 2)= -7.70013171E-05
@@ -1621,6 +1645,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.88753574415059E+01 ; Band energy (Ha)=  -1.8257612662E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.51951948E-03  sigma(3 2)= -6.58422641E-05
   sigma(2 2)= -5.75391855E-03  sigma(3 1)= -6.79378115E-05
@@ -1728,6 +1754,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.88058070516764E+01 ; Band energy (Ha)=  -1.6073270731E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.19036460E-03  sigma(3 2)=  1.02474381E-04
@@ -1837,6 +1865,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.88058070516758E+01 ; Band energy (Ha)=  -1.6073270732E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.19036460E-03  sigma(3 2)=  1.02474381E-04
   sigma(2 2)= -5.78844558E-03  sigma(3 1)= -1.52688688E-04
@@ -1944,6 +1974,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.88753574415052E+01 ; Band energy (Ha)=  -1.8257612658E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.51951948E-03  sigma(3 2)= -6.58422642E-05
@@ -2063,6 +2095,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.88746486397800E+01 ; Band energy (Ha)=  -1.8388198474E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.55173567E-03  sigma(3 2)= -7.65510798E-05
   sigma(2 2)= -5.76536568E-03  sigma(3 1)= -8.35211645E-05
@@ -2170,6 +2204,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.88254917296308E+01 ; Band energy (Ha)=  -1.7191850069E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.47868145E-03  sigma(3 2)=  4.78949889E-05
@@ -2279,6 +2315,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.88254917296307E+01 ; Band energy (Ha)=  -1.7191850068E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.47868145E-03  sigma(3 2)=  4.78949889E-05
   sigma(2 2)= -5.81605018E-03  sigma(3 1)= -1.07812433E-04
@@ -2386,6 +2424,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.88746486397799E+01 ; Band energy (Ha)=  -1.8388198461E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.55173567E-03  sigma(3 2)= -7.65510789E-05
@@ -2505,6 +2545,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.88739248269430E+01 ; Band energy (Ha)=  -1.8420998823E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.55068985E-03  sigma(3 2)= -7.66863286E-05
   sigma(2 2)= -5.76877083E-03  sigma(3 1)= -8.34257751E-05
@@ -2612,6 +2654,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.88345769474938E+01 ; Band energy (Ha)=  -1.8004042670E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.73279661E-03  sigma(3 2)=  1.28442988E-05
@@ -2721,6 +2765,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.88345769474917E+01 ; Band energy (Ha)=  -1.8004042668E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.73279661E-03  sigma(3 2)=  1.28442988E-05
   sigma(2 2)= -5.82288386E-03  sigma(3 1)= -6.86547020E-05
@@ -2828,6 +2874,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.88739248269430E+01 ; Band energy (Ha)=  -1.8420998820E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.55068985E-03  sigma(3 2)= -7.66863287E-05
@@ -2947,6 +2995,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.88733309495460E+01 ; Band energy (Ha)=  -1.8467221973E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.55734523E-03  sigma(3 2)= -7.88378486E-05
   sigma(2 2)= -5.77275900E-03  sigma(3 1)= -8.65227123E-05
@@ -3054,6 +3104,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.88380792835206E+01 ; Band energy (Ha)=  -1.8551088779E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.92647021E-03  sigma(3 2)= -8.04049113E-06
@@ -3163,6 +3215,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.88380792835195E+01 ; Band energy (Ha)=  -1.8551088766E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -4.92647021E-03  sigma(3 2)= -8.04049102E-06
   sigma(2 2)= -5.82134866E-03  sigma(3 1)= -3.92457655E-05
@@ -3270,6 +3324,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.88733309495460E+01 ; Band energy (Ha)=  -1.8467221968E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.55734523E-03  sigma(3 2)= -7.88378486E-05
@@ -3389,6 +3445,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.88729058412357E+01 ; Band energy (Ha)=  -1.8483905905E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.55608685E-03  sigma(3 2)= -7.86174063E-05
   sigma(2 2)= -5.77435783E-03  sigma(3 1)= -8.60351344E-05
@@ -3496,6 +3554,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.88391575435093E+01 ; Band energy (Ha)=  -1.8901364934E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.06019403E-03  sigma(3 2)= -2.00695854E-05
@@ -3605,6 +3665,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.88391575434852E+01 ; Band energy (Ha)=  -1.8901364927E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.06019403E-03  sigma(3 2)= -2.00695853E-05
   sigma(2 2)= -5.81777142E-03  sigma(3 1)= -1.93139821E-05
@@ -3712,6 +3774,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.88729058412357E+01 ; Band energy (Ha)=  -1.8483905901E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.55608685E-03  sigma(3 2)= -7.86174063E-05
@@ -3831,6 +3895,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.88726192248681E+01 ; Band energy (Ha)=  -1.8497896048E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.55633551E-03  sigma(3 2)= -7.87571291E-05
   sigma(2 2)= -5.77558796E-03  sigma(3 1)= -8.61590668E-05
@@ -3938,6 +4004,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.88393488252542E+01 ; Band energy (Ha)=  -1.9118154641E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.14666318E-03  sigma(3 2)= -2.69217422E-05
@@ -4047,6 +4115,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
     Total energy(eV)= -2.88393488252432E+01 ; Band energy (Ha)=  -1.9118154635E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.14666318E-03  sigma(3 2)= -2.69217421E-05
   sigma(2 2)= -5.81453367E-03  sigma(3 1)= -6.64788931E-06
@@ -4154,6 +4224,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.625      74.598
  Other information on the energy :
     Total energy(eV)= -2.88726192248682E+01 ; Band energy (Ha)=  -1.8497896043E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -5.55633551E-03  sigma(3 2)= -7.87571292E-05
@@ -4330,51 +4402,51 @@ P           mkmem          20
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [3] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          8.3  wall=          8.3
+- Proc.   0 individual time (sec): cpu=          8.9  wall=          9.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  85 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.3  wall=          8.3
++Overall time at end (sec) : cpu=          8.9  wall=          9.6

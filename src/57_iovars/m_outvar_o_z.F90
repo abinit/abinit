@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outvar_o_z
 !! NAME
 !!  m_outvar_o_z
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -562,6 +561,9 @@ contains
 
  intarr(1,:)=dtsets(:)%prtposcar
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtposcar','INT',0)
+
+ intarr(1,:)=dtsets(:)%prtprocar
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtprocar','INT',0)
 
  intarr(1,:)=dtsets(:)%prtpot
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtpot','INT',0)

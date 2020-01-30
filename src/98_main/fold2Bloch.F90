@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/fold2Bloch
 !! NAME
 !! fold2Bloch
@@ -7,7 +6,7 @@
 !! Main routine for the unfolding of the wavefuntion.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2019 ABINIT group (AB)
+!! Copyright (C) 2014-2020 ABINIT group (AB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

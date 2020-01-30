@@ -1,8 +1,8 @@
 
-.Version 8.9.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.14 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  2 May 2018.
-- ( at 13h18 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h37 )
   
-- input  file    -> t55.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v8_t55/t55.in
 - output file    -> t55.out
 - root for input  files -> t55i
 - root for output files -> t55o
@@ -237,8 +237,8 @@ P          mk1mem3          1
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.14352
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas2/tests/Psps_for_tests/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas2/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -251,8 +251,8 @@ P          mk1mem3          1
              1   -6.605901   -2.664074
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas2/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas2/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -276,20 +276,20 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -75.928933199857    -7.593E+01 3.899E-02 2.826E+02
  ETOT  2  -75.914196039765     1.474E-02 1.028E-04 3.234E+02
- ETOT  3  -76.031407737703    -1.172E-01 4.180E-03 3.423E+00
+ ETOT  3  -76.031407737702    -1.172E-01 4.180E-03 3.423E+00
  ETOT  4  -76.032590354534    -1.183E-03 3.270E-05 7.569E-03
  ETOT  5  -76.032591300618    -9.461E-07 4.407E-08 4.851E-04
  ETOT  6  -76.032591496835    -1.962E-07 5.762E-09 1.395E-05
  ETOT  7  -76.032591499879    -3.044E-09 1.948E-10 3.440E-07
- ETOT  8  -76.032591499928    -4.906E-11 1.440E-12 2.817E-08
- ETOT  9  -76.032591499937    -9.564E-12 3.916E-13 2.012E-11
- ETOT 10  -76.032591499938    -1.009E-12 1.917E-16 1.198E-13
- ETOT 11  -76.032591499938     3.837E-13 8.370E-19 1.103E-16
+ ETOT  8  -76.032591499928    -4.910E-11 1.440E-12 2.817E-08
+ ETOT  9  -76.032591499937    -9.578E-12 3.916E-13 2.012E-11
+ ETOT 10  -76.032591499938    -9.805E-13 1.917E-16 1.198E-13
+ ETOT 11  -76.032591499938     3.979E-13 8.370E-19 1.103E-16
  ETOT 12  -76.032591499938    -4.547E-13 9.194E-22 1.646E-18
- ETOT 13  -76.032591499940    -1.947E-12 1.652E-23 3.689E-21
- ETOT 14  -76.032591499940    -8.527E-14 2.358E-26 6.775E-23
+ ETOT 13  -76.032591499940    -1.933E-12 1.652E-23 3.669E-21
+ ETOT 14  -76.032591499940    -8.527E-14 2.316E-26 6.704E-23
 
- At SCF step   14       vres2   =  6.77E-23 < tolvrs=  1.00E-22 =>converged.
+ At SCF step   14       vres2   =  6.70E-23 < tolvrs=  1.00E-22 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.61554058E-03  sigma(3 2)=  0.00000000E+00
@@ -305,7 +305,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.3534E-14; max=  1.2267E-12
+ Mean square residual over all n,k,spin=   84.833E-28; max=  23.158E-27
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -346,12 +346,14 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
     Ewald energy    = -4.69303700643459E+01
     PspCore energy  =  1.90126569223953E+00
     Loc. psp. energy= -6.42389313151317E+01
-    NL   psp  energy= -2.06156934029011E+01
+    NL   psp  energy= -2.06156934029010E+01
     >>>>>>>>> Etotal= -7.60325914999403E+01
 
  Other information on the energy :
     Total energy(eV)= -2.06895203317545E+03 ; Band energy (Ha)=  -1.2973455314E+01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.61554058E-03  sigma(3 2)=  0.00000000E+00
@@ -403,7 +405,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.3027E-23; max=  9.0031E-23
+ Mean square residual over all n,k,spin=   37.890E-24; max=  90.022E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -443,8 +445,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.14352
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas2/tests/Psps_for_tests/Mg-sp-gw.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas2/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Mg-sp-gw.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Mg-sp-gw.psp8
 - Mg    ONCVPSP  r_core=  1.16  1.56
 - 12.00000  10.00000    150902                znucl, zion, pspdat
     8   11    1    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -457,8 +459,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
              1   -6.605901   -2.664074
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas2/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_efmas2/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -503,28 +505,28 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -45.305494185937     -4.531E+01 1.664E-02 0.000E+00
- ETOT  2  -45.308683947576     -3.190E-03 5.278E-06 0.000E+00
+-ETOT  1  -45.305494184231     -4.531E+01 1.664E-02 0.000E+00
+ ETOT  2  -45.308683947575     -3.190E-03 5.278E-06 0.000E+00
  ETOT  3  -45.308684640874     -6.933E-07 1.185E-09 0.000E+00
- ETOT  4  -45.308684641099     -2.254E-10 6.384E-13 0.000E+00
- ETOT  5  -45.308684641100     -1.066E-13 3.486E-16 0.000E+00
- ETOT  6  -45.308684641100     -4.263E-14 1.574E-19 0.000E+00
- ETOT  7  -45.308684641100     -1.421E-14 1.485E-22 0.000E+00
- ETOT  8  -45.308684641100      7.105E-15 5.751E-23 0.000E+00
+ ETOT  4  -45.308684641099     -2.254E-10 6.385E-13 0.000E+00
+ ETOT  5  -45.308684641100     -1.350E-13 3.486E-16 0.000E+00
+ ETOT  6  -45.308684641100      5.684E-14 1.574E-19 0.000E+00
+ ETOT  7  -45.308684641100     -2.842E-14 1.485E-22 0.000E+00
+ ETOT  8  -45.308684641100      1.421E-14 5.753E-23 0.000E+00
 
  At SCF step    8   max residual=  5.75E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -1.6667E-02; max=  5.7512E-23
+ Mean square residual over all n,k,spin=   20.186E-24; max=  57.531E-24
  dfpt_looppert : ek2=    5.8681353568E+01
           f-sum rule ratio=    1.5279875991E+00
- prteigrs : about to open file t55_1WF1_EIG
+ prteigrs : about to open file t55t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   1  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
+  -0.00000   -0.00000   -0.00000   -0.00000    0.00000   -0.00000    0.00000    0.00000
   -0.00000    0.00000    0.00000    0.00000
 
  Eight components of 2nd-order total energy (hartree) are
@@ -555,29 +557,29 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -45.305019022580     -4.531E+01 1.729E-02 0.000E+00
+-ETOT  1  -45.305019022587     -4.531E+01 1.729E-02 0.000E+00
  ETOT  2  -45.308683734677     -3.665E-03 3.618E-06 0.000E+00
  ETOT  3  -45.308684639521     -9.048E-07 1.597E-09 0.000E+00
- ETOT  4  -45.308684639856     -3.358E-10 4.725E-13 0.000E+00
- ETOT  5  -45.308684639857     -1.421E-13 3.486E-16 0.000E+00
- ETOT  6  -45.308684639857     -9.237E-14 1.574E-19 0.000E+00
- ETOT  7  -45.308684639857      4.974E-14 1.485E-22 0.000E+00
- ETOT  8  -45.308684639857     -2.842E-14 7.283E-23 0.000E+00
+ ETOT  4  -45.308684639857     -3.359E-10 4.725E-13 0.000E+00
+ ETOT  5  -45.308684639857     -1.208E-13 3.486E-16 0.000E+00
+ ETOT  6  -45.308684639857      1.421E-14 1.574E-19 0.000E+00
+ ETOT  7  -45.308684639857     -7.105E-15 1.485E-22 0.000E+00
+ ETOT  8  -45.308684639857     -7.105E-15 7.283E-23 0.000E+00
 
  At SCF step    8   max residual=  7.28E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -1.6667E-02; max=  7.2827E-23
+ Mean square residual over all n,k,spin=   32.828E-24; max=  72.832E-24
  dfpt_looppert : ek2=    5.8681353568E+01
           f-sum rule ratio=    1.5279875990E+00
- prteigrs : about to open file t55_1WF1_EIG
+ prteigrs : about to open file t55t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   1  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-   0.00000    0.00000    0.00000    0.00000    0.00000   -0.00000   -0.00000   -0.00000
-  -0.00000    0.00000    0.00000    0.00000
+   0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000
+  -0.00000   -0.00000    0.00000    0.00000
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -607,29 +609,29 @@ _setup2: Arith. and geom. avg. npw (full set) are    1013.672    1013.596
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -45.305482631212     -4.531E+01 1.664E-02 0.000E+00
- ETOT  2  -45.308683944815     -3.201E-03 5.279E-06 0.000E+00
+-ETOT  1  -45.305482632914     -4.531E+01 1.664E-02 0.000E+00
+ ETOT  2  -45.308683944816     -3.201E-03 5.279E-06 0.000E+00
  ETOT  3  -45.308684638397     -6.936E-07 1.185E-09 0.000E+00
  ETOT  4  -45.308684638622     -2.254E-10 6.391E-13 0.000E+00
- ETOT  5  -45.308684638622     -9.948E-14 3.486E-16 0.000E+00
- ETOT  6  -45.308684638622      4.263E-14 1.574E-19 0.000E+00
- ETOT  7  -45.308684638622     -2.132E-14 1.484E-22 0.000E+00
- ETOT  8  -45.308684638622     -7.105E-15 9.860E-23 0.000E+00
+ ETOT  5  -45.308684638622     -1.421E-14 3.486E-16 0.000E+00
+ ETOT  6  -45.308684638622     -4.263E-14 1.574E-19 0.000E+00
+ ETOT  7  -45.308684638622      2.132E-14 1.484E-22 0.000E+00
+ ETOT  8  -45.308684638622      0.000E+00 9.860E-23 0.000E+00
 
  At SCF step    8   max residual=  9.86E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -1.6667E-02; max=  9.8601E-23
+ Mean square residual over all n,k,spin=   29.156E-24; max=  98.601E-24
  dfpt_looppert : ek2=    5.8681353568E+01
           f-sum rule ratio=    1.5279875990E+00
- prteigrs : about to open file t55_1WF1_EIG
+ prteigrs : about to open file t55t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   1  k points:
   (in case of degenerate eigenvalues, averaged derivative)
  kpt#   1, nband= 12, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000   -0.00000
-  -0.00000    0.00000   -0.00000   -0.00000
+   0.00000   -0.00000   -0.00000   -0.00000   -0.00000    0.00000    0.00000    0.00000
+   0.00000    0.00000   -0.00000   -0.00000
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
@@ -934,8 +936,9 @@ P          mk1mem3          1
 -
 - [1] Precise effective masses from density functional perturbation theory
 - J. Laflamme Janssen, Y. Gillet, S. Ponce, A. Martin, M. Torrent, and X. Gonze. Phys. Rev. B 93, 205147 (2016)
-- Comment : in case the DFPT prediction of effective masses is used.
+- Comment: in case the DFPT prediction of effective masses is used.
 - Strong suggestion to cite this paper in your publications.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#laflamme2016
 -
 - [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
@@ -949,52 +952,58 @@ P          mk1mem3          1
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
 - [3] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
 - implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
 -
 - [4] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
 - interatomic force constants from density-functional perturbation theory,
 - X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
 - [5] Optimized norm-conserving Vanderbilt pseudopotentials.
 - D.R. Hamann, Phys. Rev. B 88, 085117 (2013).
 - Comment: Some pseudopotential generated using the ONCVPSP code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
 -
-- [6] ABINIT : First-principles approach of materials and nanosystem properties.
+- [6] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [7] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         10.8  wall=         11.3
+- Proc.   0 individual time (sec): cpu=          9.5  wall=         10.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  15 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.8  wall=         11.3
+.Delivered   1 WARNINGs and  16 COMMENTs to log file.
++Overall time at end (sec) : cpu=          9.5  wall=         10.0

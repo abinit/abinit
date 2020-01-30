@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of AIM 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of AIM 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  AIM comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h00 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h30 )
   
  ECHO of the INPUT
  ************************
@@ -37,7 +37,7 @@
  ECHO of the ABINIT file header 
  
  First record :
-.codvsn,headform,fform = 8.0.3    80   52
+.codvsn,headform,fform = 8.11.1   80   52
  
  Second record :
  bantot,intxc,ixc,natom  =    40     0     1    16
@@ -417,8 +417,8 @@ Volume of the Bader atom:      1     15.92950636
 
  Time needed (seconds) - total, CP analyse, SURF determination:
 
--               8.80201451      4.05961312      4.72130823
+-               8.83853850      4.01391278      4.80382204
 
-+Total cpu time      8.802  and wall time      8.802 sec
++Total cpu time      8.839  and wall time      8.878 sec
 
  aim : the run completed succesfully.

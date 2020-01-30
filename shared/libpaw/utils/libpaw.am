@@ -1,0 +1,103 @@
+# ===========================================
+# Makefile
+# Use it to create a tar.gz containing
+# a standalone LIBPAW library
+#                    M.T. jan 15 - Rev oct 18
+# ===========================================
+
+#Define main directories
+LIBPAW_DIR = $(top_builddir)/libpaw/libpaw
+LIBPAW_UTIL_DIR = $(top_srcdir)/libpaw/libpaw-utils
+LIBPAW_SRC_DIR = $(LIBPAW_DIR)/src
+LIBPAW_CFG_DIR = $(LIBPAW_DIR)/config
+
+#Define ABINIT directories
+ABINIT_SRC_DIR = $(abinit_srcdir)
+LIBPAW_ABINIT_DIR = $(ABINIT_SRC_DIR)/shared/libpaw/src
+
+#Useful names
+LIBPAW_VERSION = @libpaw_version@
+LIBPAW_TAR_NAME = libpaw-$(LIBPAW_VERSION)
+
+#Abilint interfaces
+DO_COPY_INTERFACES=''`$(GREP) -s -m1 ^\ *interface\ * $(LIBPAW_ABINIT_DIR)/interfaces_*.F90 2>/dev/null`
+
+bindings-ready: dist
+
+default: dist
+
+dist: libpaw-tarball
+
+libpaw-tarball: libpaw | clean-tarball
+	@$(TAR) -czvf $(LIBPAW_TAR_NAME).tar.gz libpaw >>/dev/null
+	@rm -rf $(LIBPAW_DIR)
+	@echo "Making libPAW tarball... done!"
+
+clean: clean-tarball clean-src
+	@rm -rf $(LIBPAW_DIR) $(LIBPAW_TAR_NAME).tar.gz
+
+clean-src:
+	@rm -rf $(LIBPAW_DIR)
+	@echo "Cleaning libPAW source files... done!"
+
+clean-tarball:
+	@rm -rf $(LIBPAW_TAR_NAME).tar.gz
+
+libpaw: libpaw_src_processing libpaw_copy_makefile libpaw_build_src_list
+
+libpaw_create_dirs: clean-src check_interfaces
+	@if ! test -d $(LIBPAW_DIR); then $(INSTALL) -d -m 755 $(LIBPAW_DIR);fi
+	@if ! test -d $(LIBPAW_SRC_DIR); then $(INSTALL) -d -m 755 $(LIBPAW_SRC_DIR);fi
+	@if ! test -d $(LIBPAW_CFG_DIR); then $(INSTALL) -d -m 755 $(LIBPAW_CFG_DIR);fi
+	@echo "Creating libpaw dir... done!"
+
+libpaw_copy_src: | libpaw_create_dirs
+	@cp -rf $(LIBPAW_ABINIT_DIR)/*.F90 $(LIBPAW_SRC_DIR)
+	@cp -rf $(LIBPAW_ABINIT_DIR)/*.c $(LIBPAW_SRC_DIR)
+	@cp -rf $(LIBPAW_ABINIT_DIR)/*.h $(LIBPAW_SRC_DIR)
+	@cp -rf $(LIBPAW_ABINIT_DIR)/*.txt $(LIBPAW_SRC_DIR)
+	@if test -z $(DO_COPY_INTERFACES); then rm -rf $(LIBPAW_SRC_DIR)/interfaces_*.F90; fi
+	@echo "Copying libpaw source files... done!"
+
+libpaw_copy_makefile: | libpaw_create_dirs
+	@cp -rf $(LIBPAW_UTIL_DIR)/VERSION $(LIBPAW_DIR)
+	@cp -rf $(LIBPAW_UTIL_DIR)/Makefile.main $(LIBPAW_DIR)/Makefile
+	@cp -rf $(LIBPAW_UTIL_DIR)/makefile.in $(LIBPAW_DIR)
+	@cp -rf $(LIBPAW_UTIL_DIR)/Makefile.src $(LIBPAW_CFG_DIR)
+	@echo "Copying libpaw makefiles... done!"
+
+libpaw_build_src_list: | libpaw_create_dirs
+#       Build abinit.src file from abinit.amf and abinit.src file
+	@echo 'LIBPAW_SRC_FILES= \' > $(LIBPAW_CFG_DIR)/libpaw.src
+	@if ! test -z $(DO_COPY_INTERFACES) ; then \
+	 ls -1 $(LIBPAW_SRC_DIR)/interfaces_*.F90 | $(SED) -e 's/.*\///' -e 's/$$/\ \\/' \
+	 >> $(LIBPAW_CFG_DIR)/libpaw.src ; \
+	 fi
+	@$(GREP) -e '\.F90' -e '\.h' $(LIBPAW_ABINIT_DIR)/abinit.amf | \
+	 $(SED) -e 's/\ \\//g' -e 's/$$/\ \\/g'  \
+	 >> $(LIBPAW_CFG_DIR)/libpaw.src
+	@$(GREP) -e '\.F90' -e '\.c' $(LIBPAW_ABINIT_DIR)/abinit.src | \
+	 $(SED) -e 's/,/\ \\/g' | $(SED) -e 's/\"//g' \
+	 >> $(LIBPAW_CFG_DIR)/libpaw.src
+	@echo "Creating libpaw source files list... done!"
+
+libpaw_src_processing: libpaw_copy_src
+#       Rename MPI objects beginning with xmpi
+	@$(FIND) $(LIBPAW_SRC_DIR) -name '*.F90' -exec \
+	 $(SED) -i'.orig' -e 's/xmpi_/xpaw_mpi_/g' {} \;
+	@rm -rf $(LIBPAW_SRC_DIR)/*.orig
+	@echo "Renaming libpaw MPI statements... done!"
+#       Eliminate unwanted "use interfaces_*" statements
+	@$(FIND) $(LIBPAW_SRC_DIR) -name '*.F90' -exec \
+	 $(SED) -i'.orig' -e '/use[ ]*interfaces_.*\(libpaw\)/!s/use[ ]*interfaces_/\!&/g' {} \;
+	@rm -rf $(LIBPAW_SRC_DIR)/*.orig
+	@echo "Eliminating ABINIT interfaces in libpaw... done!"
+
+check_interfaces:
+	@if ! test -z $(DO_COPY_INTERFACES) ; then \
+	  if ! test -f $(LIBPAW_ABINIT_DIR)/interfaces_*.F90; then \
+	   echo 'Before building the libPAW library, you must execute'; \
+	   echo 'the "*/*/makemake" script in ABINIT root dir!'; \
+	   echo ; exit 2; \
+	  fi; \
+	 fi

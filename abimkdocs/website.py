@@ -880,6 +880,7 @@ The bibtex file is available [here](../abiref.bib).
     export ABI_TESTS=$ABI_HOME/tests/
     export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/  # Pseudopotentials used in examples.
     ```
+
     Examples in this tutorial use these shell variables: copy and paste
     the code snippets into the terminal (**remember to set ABI_HOME first!**).
     The 'export PATH' line adds the directory containing the executables to your [PATH](http://www.linfo.org/path_env_var.html)
@@ -1221,14 +1222,17 @@ The bibtex file is available [here](../abiref.bib).
                 html_classes.append("abifile-wikilink")
 
             elif namespace == "ac":
-                # Handle [[ac:abiref_gnu_5.3_debug.ac]]
+                # Handle [[ac:abiref_gnu_9.2_debug.ac]]
                 # The following is incorrect: files in /build/config-examples are generated when makemake is issued.
                 # url = "/build/config-examples/%s" % name
                 # By contrast, the following is a permanent reference
-                url = "/abichecks/buildsys/Refs/%s" % name
-                if a.text is None: a.text = name
-                target = "_blank"
-                html_classes.append("abifile-wikilink")
+                # FIXME: buildsys refs are not generated anymore (YP)
+                #url = "/abichecks/buildsys/Refs/%s" % name
+                #if a.text is None: a.text = name
+                #target = "_blank"
+                #html_classes.append("abifile-wikilink")
+                url = "/build/config-template.ac9"
+                pass
 
             elif namespace == "pdf":
                 # Handle [[pdf:howto_chebfi.pdf]] or [[pdf:howto_chebfi]]

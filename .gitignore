@@ -20,6 +20,7 @@ abinit.dir
 build_g95
 build_gfortran
 build_ifort
+debian.ac
 config.optim
 logfile
 make.log
@@ -78,7 +79,6 @@ tests/TestBot_MPI*/*
 /config.pc
 /config.sh
 /config.status
-/config/split
 /directories.dot
 /dump_fb_version.py
 /stamp-h1
@@ -90,7 +90,6 @@ tests/TestBot_MPI*/*
 /bindings/autom4te.cache
 /bindings/configure
 /bindings/config.log
-/bindings/config.mk
 /bindings/config.sh
 /bindings/config.status
 /bindings/config/gnu/compile
@@ -116,6 +115,7 @@ tests/TestBot_MPI*/*
 /config/gnu/missing
 /config/gnu/mkinstalldirs
 /config/local/*
+/config/split
 /config/wrappers/wrap-fc
 /config/wrappers/wrap-mpicc
 /config/wrappers/wrap-mpicxx

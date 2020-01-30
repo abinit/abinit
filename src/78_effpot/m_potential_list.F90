@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_potential_list
 !! NAME
 !! m_potential_list
@@ -18,7 +17,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +41,7 @@ module m_potential_list
   use m_multibinit_dataset, only: multibinit_dtset_type
   use m_abstract_potential, only: abstract_potential_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
-
+  use m_hashtable_strval, only: hash_table_t
 
   implicit none
   !!***
@@ -191,13 +190,15 @@ contains
   !> @param[in] (optional) displacement, strain, spin, lwf
   !> @param[out](optional) force, stress, bfield, lwf_force, energy
   !----------------------------------------------------------------------
-  subroutine calculate(self, displacement, strain, spin, lwf,  force, stress, bfield, lwf_force, energy)
+  subroutine calculate(self, displacement, strain, spin, lwf,  force, stress, bfield, &
+       & lwf_force, energy, energy_table)
     ! calculate energy and its first derivatives.
     class(potential_list_t), intent(inout) :: self  ! the effpot may save the states.
     ! inputs
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     ! outputs
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
+    type(hash_table_t),optional, intent(inout) :: energy_table
     integer :: i
     ! Note
     ! calculate force and strain if asked to
@@ -209,7 +210,7 @@ contains
     do i=1, self%size
        call self%list(i)%ptr%calculate(displacement=displacement, strain=strain, &
             & spin=spin, lwf=lwf, force=force, stress=stress, bfield=bfield, &
-            lwf_force=lwf_force, energy=energy)
+            lwf_force=lwf_force, energy=energy, energy_table=energy_table)
     end do
   end subroutine calculate
 

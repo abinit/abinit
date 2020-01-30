@@ -1,8 +1,8 @@
 
 .Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 21 Nov 2019.
-- ( at 00h34 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h30 )
   
 - input  file    -> t33.in
 - output file    -> t33.out
@@ -30,7 +30,7 @@
      lnmax =       1     mgfft =      40  mpssoang =       1    mqgrid =    3001
      natom =       1  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        3668          nfft =       64000          nkpt =           1
 ================================================================================
@@ -47,7 +47,7 @@ _ WF disk file :      0.058 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
      lnmax =       1     mgfft =      40  mpssoang =       1    mqgrid =    3001
      natom =       1  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        3668          nfft =       64000          nkpt =           1
 ================================================================================
@@ -64,7 +64,7 @@ _ WF disk file :      0.058 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
      lnmax =       1     mgfft =      40  mpssoang =       1    mqgrid =    3001
      natom =       1  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        3668          nfft =       64000          nkpt =           1
 ================================================================================
@@ -81,7 +81,7 @@ _ WF disk file :      0.114 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
      lnmax =       1     mgfft =      40  mpssoang =       1    mqgrid =    3001
      natom =       1  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        3668          nfft =       64000          nkpt =           1
 ================================================================================
@@ -203,8 +203,8 @@ P           mkmem           1
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/01h.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/01h.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -237,12 +237,10 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
  ETOT  4 -0.44967545559118    -5.901E-06 9.336E-09 3.344E-03
  ETOT  5 -0.44967547125981    -1.567E-08 4.679E-11 3.709E-06
  ETOT  6 -0.44967547131937    -5.956E-11 1.165E-12 5.472E-08
- ETOT  7 -0.44967547131956    -1.823E-13 2.387E-15 1.318E-10
+ ETOT  7 -0.44967547131956    -1.822E-13 2.387E-15 1.318E-10
 
  At SCF step    7, etot is converged : 
-  for the second time, diff in etot=  1.823E-13 < toldfe=  1.000E-10
-
- Compute kinetic energy density
+  for the second time, diff in etot=  1.822E-13 < toldfe=  1.000E-10
 
 Result for kinetic energy density :
 
@@ -293,8 +291,8 @@ Result for kinetic energy density :
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  4.08598150264221E-01
-    Hartree energy  =  7.70545031149984E-02
+    Kinetic energy  =  4.08598150264220E-01
+    Hartree energy  =  7.70545031149983E-02
     XC energy       = -2.33181055046844E-01
     Ewald energy    = -2.36441456623389E-01
     PspCore energy  =  7.27220521664304E-07
@@ -336,8 +334,8 @@ Result for kinetic energy density :
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/01h.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/01h.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -373,8 +371,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
 
  At SCF step    7, etot is converged : 
   for the second time, diff in etot=  2.607E-13 < toldfe=  1.000E-10
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 
@@ -468,8 +464,8 @@ Result for kinetic energy density :
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/01h.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/01h.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -501,13 +497,11 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
  ETOT  4 -0.48230276211279    -7.009E-06 1.720E-07 3.842E-02
  ETOT  5 -0.48230278232310    -2.021E-08 8.566E-09 1.594E-04
  ETOT  6 -0.48230278264980    -3.267E-10 2.124E-10 5.597E-06
- ETOT  7 -0.48230278269440    -4.459E-11 1.860E-12 3.863E-07
- ETOT  8 -0.48230278270281    -8.419E-12 1.469E-14 2.691E-09
+ ETOT  7 -0.48230278269439    -4.459E-11 1.860E-12 3.863E-07
+ ETOT  8 -0.48230278270281    -8.420E-12 1.469E-14 2.691E-09
 
  At SCF step    8, etot is converged : 
-  for the second time, diff in etot=  8.419E-12 < toldfe=  1.000E-10
-
- Compute kinetic energy density
+  for the second time, diff in etot=  8.420E-12 < toldfe=  1.000E-10
 
 Result for kinetic energy density :
 
@@ -624,8 +618,8 @@ Result for kinetic energy density :
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/01h.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/01h.bare
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -658,12 +652,10 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
  ETOT  5 -0.48231638153385    -2.617E-08 7.374E-09 1.461E-04
  ETOT  6 -0.48231638182071    -2.869E-10 1.323E-10 5.334E-06
  ETOT  7 -0.48231638186579    -4.508E-11 1.042E-12 3.574E-07
- ETOT  8 -0.48231638187354    -7.755E-12 1.947E-14 2.728E-09
+ ETOT  8 -0.48231638187354    -7.754E-12 1.947E-14 2.728E-09
 
  At SCF step    8, etot is converged : 
-  for the second time, diff in etot=  7.755E-12 < toldfe=  1.000E-10
-
- Compute kinetic energy density
+  for the second time, diff in etot=  7.754E-12 < toldfe=  1.000E-10
 
 Result for kinetic energy density :
 
@@ -742,9 +734,9 @@ Result for kinetic energy density :
     XC energy       = -2.77553201611615E-01
     Ewald energy    = -2.36441456623389E-01
     PspCore energy  =  7.27220521664304E-07
-    Loc. psp. energy= -5.07508755776698E-01
+    Loc. psp. energy= -5.07508755776699E-01
     NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -4.82316381873540E-01
+    >>>>>>>>> Etotal= -4.82316381873539E-01
 
  Other information on the energy :
     Total energy(eV)= -1.31244962091272E+01 ; Band energy (Ha)=  -2.4627241305E-01
@@ -931,10 +923,10 @@ P           mkmem           1
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          6.1  wall=          6.3
+- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.1  wall=          6.3
++Overall time at end (sec) : cpu=          6.0  wall=          6.1

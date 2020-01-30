@@ -1,8 +1,8 @@
 
-.Version 8.1.5 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  7 Dec 2016.
-- ( at 20h15 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h24 )
   
 - input  file    -> t45.in
 - output file    -> t45.out
@@ -43,8 +43,8 @@ P              Additional     real(dp)  numbers, for      0.319 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 3.206 Mbytes.
-P Main chain + nonlop.f + opernl.f      2.890 Mbytes.
+P Main chain + fourwf.f                 3.165 Mbytes.
+P Main chain + nonlop.f + opernl.f      2.849 Mbytes.
 P XC chain                              3.358 Mbytes.
 P mkrho chain                           2.555 Mbytes.
 P fourdp chain                          2.351 Mbytes.
@@ -132,8 +132,8 @@ P           mkmem           1
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/torrent_pimd/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -144,7 +144,7 @@ P           mkmem           1
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm : epsatm=    1.43386982
+  pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -1086,7 +1086,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.2656E-13; max=  1.9667E-12
+ Mean square residual over all n,k,spin=   82.656E-14; max=  19.667E-13
    0.0000  0.0000  0.0000    1  1.31954E-12 kpt; spin; max resid(k); each band:
   1.14E-12 7.97E-14 1.32E-12 1.20E-13 1.20E-13
    0.0000  0.0000  0.0000    2  1.96668E-12 kpt; spin; max resid(k); each band:
@@ -1173,6 +1173,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  Other information on the energy :
     Total energy(eV)= -2.36009106630633E+02 ; Band energy (Ha)=  -1.3534518258E+00
 --------------------------------------------------------------------------------
+
+
 
           ===> extra information on forces <===
  ewald contribution to reduced grads
@@ -1289,48 +1291,52 @@ P           mkmem           1
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [3] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          2.0
+- Proc.   0 individual time (sec): cpu=          5.0  wall=          5.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  10 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.8  wall=          2.0
+.Delivered  10 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.0  wall=          5.4

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_spin_hist
 !! NAME
 !! m_spin_hist
@@ -24,7 +23,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,7 +33,7 @@
 
 ! TODO hexu:
 ! sync ihist_latt when with lattice dynamics
-! add average , variance, etc (should they be here?)
+! add average, variance, etc (should they be here?)
 ! structural information and some parameters are no longer 
 ! used here. They should be removed form this file.
 
@@ -212,8 +211,6 @@ contains
     ABI_ALLOCATE(self%itime, (mxhist))
 
     ABI_ALLOCATE(self%ihist_latt, (mxhist))
-
-
 
     ! TODO: add observable allocation here.
 
@@ -427,7 +424,6 @@ contains
   !!
   !! SOURCE
   function get_S(self, step) result(S)
-
     class(spin_hist_t), intent(inout) :: self
     integer, intent(in), optional:: step
     real(dp) :: S(3, self%nspin)

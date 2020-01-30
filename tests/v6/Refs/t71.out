@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h01 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h31 )
   
 
 ================================================================================
@@ -67,6 +67,7 @@
 
  Calculation of the interatomic forces 
 
+-begin at tcpu      0.020  and twall      0.020 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :      108
  greater than 80, so only write 20 of them
@@ -97,7 +98,7 @@
 
  Treat the first list of vectors 
 
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00  2.208018E-03  2.208018E-03
@@ -117,7 +118,7 @@
   3.0  0.0 -1.0 -1.0 -1.0  0.0 -0.0 -0.0  1.0 -1.0 -1.0  0.0  1.0  1.0  1.0 -0.0
   0.0  1.0 -1.0 -0.0 -1.0  1.0 -1.0 -1.0 -3.0 -0.0  1.0  1.0  1.0 -0.0  0.0  0.0
  -1.0  1.0  1.0 -0.0 -1.0 -1.0 -1.0  0.0 -0.0 -1.0  1.0  0.0  1.0 -1.0  1.0  1.0
- 
+
   Phonon wavevector (reduced coordinates) :  0.37500  0.37500  0.75000
  Phonon energies in Hartree :
   -8.173872E-04 -7.050620E-04 -2.274598E-04  2.474796E-03  2.493010E-03
@@ -125,7 +126,7 @@
  Phonon frequencies in cm-1    :
 - -1.793958E+02 -1.547432E+02 -4.992165E+01  5.431549E+02  5.471525E+02
 -  5.717606E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  1.00000
  Phonon energies in Hartree :
   -8.245779E-04 -5.814703E-04 -5.814703E-04  2.480723E-03  2.480723E-03
@@ -133,7 +134,7 @@
  Phonon frequencies in cm-1    :
 - -1.809739E+02 -1.276180E+02 -1.276180E+02  5.444558E+02  5.444558E+02
 -  5.946942E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
    8.590688E-04  8.590688E-04  9.821447E-04  2.327622E-03  2.327622E-03
@@ -141,7 +142,7 @@
  Phonon frequencies in cm-1    :
 -  1.885438E+02  1.885438E+02  2.155559E+02  5.108541E+02  5.108541E+02
 -  5.772289E+02
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.25000  0.75000
  Phonon energies in Hartree :
   -9.363381E-04 -9.363381E-04  2.970748E-04  2.401750E-03  2.558998E-03
@@ -154,7 +155,7 @@
 
  Treat the second list of vectors 
 
- 
+
   Phonon at Gamma, with non-analyticity in the
   direction (cartesian coordinates)  1.00000  0.00000  0.00000
  Phonon energies in Hartree :
@@ -164,10 +165,10 @@
 -  0.000000E+00  0.000000E+00  0.000000E+00  4.846040E+02  4.846040E+02
 -  4.846040E+02
 -
-- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.6
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      3.645  and wall time      3.645 sec
++Total cpu time      0.075  and wall time      0.076 sec
 
  anaddb : the run completed succesfully.

@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 11h56 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h25 )
   
 - input  file    -> t38.in
 - output file    -> t38.out
@@ -34,7 +34,7 @@
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =          58          nfft =        1728          nkpt =           2
 ================================================================================
-P This job should need less than                       1.309 Mbytes of memory.
+P This job should need less than                       1.301 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.009 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
        mpw =          58          nfft =        1728          nkpt =          32
 ================================================================================
-P This job should need less than                       1.242 Mbytes of memory.
+P This job should need less than                       1.234 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.115 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.115 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           4        mffmem =           1         mkmem =          32
        mpw =          58          nfft =        1728          nkpt =          32
 ================================================================================
-P This job should need less than                       1.242 Mbytes of memory.
+P This job should need less than                       1.234 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.115 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -136,7 +136,7 @@ _ WF disk file :      0.115 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -519,8 +519,8 @@ P          mk1mem5         32
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/12mg.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/12mg.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/12mg.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/12mg.pspnc
 -  Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
 - 12.00000   2.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -531,14 +531,14 @@ P          mk1mem5         32
     2   0.000   0.000    0   2.5922174        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.54196289048337    0.05499530377757    0.78827945413088   rchrg,fchrg,qchrg
- pspatm : epsatm=   -1.54393848
+  pspatm : epsatm=   -1.54393848
          --- l  ekb(1:nproj) -->
              0    1.755924
              1    0.853613
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/8o.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/8o.pspnc
 -  Troullier-Martins psp for element  O         Thu Oct 27 17:29:57 EDT 1994
 -  8.00000   6.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -547,7 +547,7 @@ P          mk1mem5         32
     1  20.911  28.075    0   1.4482335        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.56990156784787    3.95561236318184    0.63894027514378   rchrg,fchrg,qchrg
- pspatm : epsatm=    1.57752239
+  pspatm : epsatm=    1.57752239
          --- l  ekb(1:nproj) -->
              0    5.670783
  pspatm: atomic psp has been read  and splines computed
@@ -566,11 +566,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      54.250      54.208
  ETOT  4  -15.700585632890    -9.830E-06 2.590E-08 2.052E-05
  ETOT  5  -15.700585645214    -1.232E-08 2.495E-11 4.111E-07
  ETOT  6  -15.700585645589    -3.755E-10 3.253E-12 3.074E-09
- ETOT  7  -15.700585645595    -6.047E-12 3.324E-14 1.149E-11
- ETOT  8  -15.700585645595     8.882E-14 2.743E-16 5.063E-14
- ETOT  9  -15.700585645595    -8.527E-14 1.963E-18 5.493E-18
- ETOT 10  -15.700585645595     5.684E-14 3.237E-22 1.550E-20
- ETOT 11  -15.700585645595     0.000E+00 9.816E-23 9.246E-22
+ ETOT  7  -15.700585645595    -6.038E-12 3.324E-14 1.149E-11
+ ETOT  8  -15.700585645595     8.527E-14 2.743E-16 5.063E-14
+ ETOT  9  -15.700585645595    -8.171E-14 1.963E-18 5.493E-18
+ ETOT 10  -15.700585645595     5.329E-14 3.237E-22 1.550E-20
+ ETOT 11  -15.700585645595     3.553E-15 9.817E-23 9.240E-22
 
  At SCF step   11   max residual=  9.82E-23 < tolwfr=  1.00E-22 =>converged.
 
@@ -588,7 +588,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      54.250      54.208
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.9516E-23; max=  9.8161E-23
+ Mean square residual over all n,k,spin=   29.519E-24; max=  98.172E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -634,6 +634,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      54.250      54.208
  Other information on the energy :
     Total energy(eV)= -4.27234662829102E+02 ; Band energy (Ha)=  -8.4179508563E-02
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.25854845E-03  sigma(3 2)=  0.00000000E+00
@@ -692,7 +694,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      54.250      54.208
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.7724E-23; max=  9.8747E-23
+ Mean square residual over all n,k,spin=   37.724E-24; max=  98.748E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -759,7 +761,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      54.250      54.208
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.7724E-23; max=  9.8747E-23
+ Mean square residual over all n,k,spin=   37.724E-24; max=  98.748E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -941,65 +943,65 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
--ETOT  1   12.141054474051     -3.806E+00 2.042E-02 2.489E+03
+-ETOT  1   12.141054482385     -3.806E+00 2.042E-02 2.489E+03
 
- ETOT  2   8.6889602480983     -3.452E+00 1.678E-02 2.987E+02
+ ETOT  2   8.6889602545728     -3.452E+00 1.678E-02 2.987E+02
 
- ETOT  3   7.7885194459256     -9.004E-01 9.875E-04 7.049E+00
+ ETOT  3   7.7885194459117     -9.004E-01 9.875E-04 7.049E+00
 
- ETOT  4   7.7726730233689     -1.585E-02 1.034E-05 1.002E-03
+ ETOT  4   7.7726730233631     -1.585E-02 1.034E-05 1.002E-03
 
- ETOT  5   7.7726659386677     -7.085E-06 1.629E-08 6.278E-05
+ ETOT  5   7.7726659386678     -7.085E-06 1.629E-08 6.278E-05
 
  ETOT  6   7.7726658462514     -9.242E-08 1.260E-10 1.827E-07
 
- ETOT  7   7.7726658462046     -4.679E-11 9.922E-11 3.233E-08
+ ETOT  7   7.7726658462046     -4.680E-11 9.922E-11 3.233E-08
 
  At SCF step    7   max residual=  9.92E-11 < tolwfr=  1.00E-10 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.4318E-11; max=  9.9217E-11
-  -0.2500  0.5000  0.0000    1  6.82645E-11 kpt; spin; max resid(k); each band:
+ Mean square residual over all n,k,spin=   44.319E-12; max=  99.220E-12
+  -0.2500  0.5000  0.0000    1  6.82641E-11 kpt; spin; max resid(k); each band:
   2.70E-11 6.18E-11 3.63E-11 6.83E-11
-   0.5000 -0.2500  0.0000    1  7.41823E-11 kpt; spin; max resid(k); each band:
+   0.5000 -0.2500  0.0000    1  7.41819E-11 kpt; spin; max resid(k); each band:
   2.73E-11 6.07E-11 3.59E-11 7.42E-11
-  -0.2500 -0.2500  0.2500    1  5.47357E-11 kpt; spin; max resid(k); each band:
+  -0.2500 -0.2500  0.2500    1  5.47359E-11 kpt; spin; max resid(k); each band:
   3.00E-11 5.47E-11 5.09E-11 5.74E-12
-  -0.2500  0.0000  0.0000    1  5.35288E-11 kpt; spin; max resid(k); each band:
+  -0.2500  0.0000  0.0000    1  5.35293E-11 kpt; spin; max resid(k); each band:
   1.90E-11 3.02E-11 5.35E-11 4.23E-11
-   0.5000  0.2500  0.0000    1  7.41804E-11 kpt; spin; max resid(k); each band:
+   0.5000  0.2500  0.0000    1  7.41809E-11 kpt; spin; max resid(k); each band:
   2.73E-11 6.07E-11 3.59E-11 7.42E-11
-  -0.2500  0.2500  0.2500    1  7.52571E-11 kpt; spin; max resid(k); each band:
+  -0.2500  0.2500  0.2500    1  7.52581E-11 kpt; spin; max resid(k); each band:
   3.19E-11 6.06E-11 5.23E-11 7.53E-11
-   0.2500  0.5000  0.0000    1  6.82626E-11 kpt; spin; max resid(k); each band:
+   0.2500  0.5000  0.0000    1  6.82632E-11 kpt; spin; max resid(k); each band:
   2.70E-11 6.18E-11 3.63E-11 6.83E-11
-   0.5000  0.5000  0.2500    1  6.91117E-11 kpt; spin; max resid(k); each band:
+   0.5000  0.5000  0.2500    1  6.91120E-11 kpt; spin; max resid(k); each band:
   3.57E-11 1.24E-11 6.91E-11 1.97E-11
   -0.2500  0.5000  0.5000    1  7.53571E-11 kpt; spin; max resid(k); each band:
   3.92E-11 2.49E-11 7.54E-11 1.12E-11
-   0.0000 -0.2500  0.0000    1  4.75996E-11 kpt; spin; max resid(k); each band:
+   0.0000 -0.2500  0.0000    1  4.75993E-11 kpt; spin; max resid(k); each band:
   1.90E-11 2.32E-11 4.65E-11 4.76E-11
-   0.2500 -0.2500  0.2500    1  5.47364E-11 kpt; spin; max resid(k); each band:
+   0.2500 -0.2500  0.2500    1  5.47362E-11 kpt; spin; max resid(k); each band:
   3.00E-11 5.47E-11 5.09E-11 5.74E-12
-   0.5000 -0.2500  0.5000    1  6.91125E-11 kpt; spin; max resid(k); each band:
+   0.5000 -0.2500  0.5000    1  6.91124E-11 kpt; spin; max resid(k); each band:
   3.57E-11 1.24E-11 6.91E-11 1.97E-11
-  -0.2500 -0.2500 -0.2500    1  9.92164E-11 kpt; spin; max resid(k); each band:
+  -0.2500 -0.2500 -0.2500    1  9.92166E-11 kpt; spin; max resid(k); each band:
   7.01E-11 6.91E-11 9.92E-11 1.01E-11
-   0.2500  0.0000  0.0000    1  5.35281E-11 kpt; spin; max resid(k); each band:
+   0.2500  0.0000  0.0000    1  5.35288E-11 kpt; spin; max resid(k); each band:
   1.90E-11 3.02E-11 5.35E-11 4.23E-11
-   0.0000  0.2500  0.0000    1  4.75981E-11 kpt; spin; max resid(k); each band:
+   0.0000  0.2500  0.0000    1  4.75988E-11 kpt; spin; max resid(k); each band:
   1.90E-11 2.32E-11 4.65E-11 4.76E-11
-   0.2500  0.2500  0.2500    1  9.92172E-11 kpt; spin; max resid(k); each band:
+   0.2500  0.2500  0.2500    1  9.92196E-11 kpt; spin; max resid(k); each band:
   7.01E-11 6.91E-11 9.92E-11 1.01E-11
-   0.0000  0.5000  0.2500    1  7.52123E-11 kpt; spin; max resid(k); each band:
+   0.0000  0.5000  0.2500    1  7.52130E-11 kpt; spin; max resid(k); each band:
   2.75E-11 6.60E-11 3.38E-11 7.52E-11
-   0.2500  0.5000  0.5000    1  7.53565E-11 kpt; spin; max resid(k); each band:
+   0.2500  0.5000  0.5000    1  7.53568E-11 kpt; spin; max resid(k); each band:
   3.92E-11 2.49E-11 7.54E-11 1.12E-11
-   0.0000 -0.2500  0.5000    1  7.52141E-11 kpt; spin; max resid(k); each band:
+   0.0000 -0.2500  0.5000    1  7.52137E-11 kpt; spin; max resid(k); each band:
   2.75E-11 6.60E-11 3.38E-11 7.52E-11
-   0.2500 -0.2500 -0.2500    1  7.52605E-11 kpt; spin; max resid(k); each band:
+   0.2500 -0.2500 -0.2500    1  7.52596E-11 kpt; spin; max resid(k); each band:
   3.19E-11 6.06E-11 5.23E-11 7.53E-11
 
  Thirteen components of 2nd-order total energy (hartree) are
@@ -1019,7 +1021,7 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
  Resulting in :
  2DEtotal=    0.7772665846E+01 Ha. Also 2DEtotal=    0.211504993957E+03 eV
     (2DErelax=   -8.1747523348E+00 Ha. 2DEnonrelax=    1.5947418181E+01 Ha)
-    (  non-var. 2DEtotal :    7.7726965902E+00 Ha)
+    (  non-var. 2DEtotal :    7.7726965903E+00 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -1100,65 +1102,65 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
--ETOT  1   877.91610506280      4.773E+02 8.660E-01 3.713E+05
+-ETOT  1   877.91610498052      4.773E+02 8.660E-01 3.713E+05
 
- ETOT  2   756.64485928443     -1.213E+02 1.654E+00 3.263E+05
+ ETOT  2   756.64485802232     -1.213E+02 1.654E+00 3.263E+05
 
- ETOT  3   63.032576344426     -6.936E+02 3.577E-01 3.761E+01
+ ETOT  3   63.032576353567     -6.936E+02 3.577E-01 3.761E+01
 
- ETOT  4   62.783064820686     -2.495E-01 2.642E-04 9.965E-02
+ ETOT  4   62.783064820614     -2.495E-01 2.642E-04 9.965E-02
 
- ETOT  5   62.782813286911     -2.515E-04 2.137E-07 1.276E-03
+ ETOT  5   62.782813286910     -2.515E-04 2.137E-07 1.276E-03
 
  ETOT  6   62.782810415379     -2.872E-06 6.462E-09 2.099E-05
 
- ETOT  7   62.782810373005     -4.237E-08 9.740E-11 9.793E-09
+ ETOT  7   62.782810373002     -4.238E-08 9.740E-11 9.793E-09
 
  At SCF step    7   max residual=  9.74E-11 < tolwfr=  1.00E-10 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.2954E-11; max=  9.7405E-11
-  -0.2500  0.5000  0.0000    1  8.62139E-11 kpt; spin; max resid(k); each band:
+ Mean square residual over all n,k,spin=   42.954E-12; max=  97.405E-12
+  -0.2500  0.5000  0.0000    1  8.62179E-11 kpt; spin; max resid(k); each band:
   1.74E-11 2.55E-11 8.62E-11 8.33E-11
-   0.5000 -0.2500  0.0000    1  7.91110E-11 kpt; spin; max resid(k); each band:
+   0.5000 -0.2500  0.0000    1  7.91148E-11 kpt; spin; max resid(k); each band:
   2.52E-11 1.94E-11 7.91E-11 6.91E-11
-  -0.2500 -0.2500  0.2500    1  3.94321E-11 kpt; spin; max resid(k); each band:
+  -0.2500 -0.2500  0.2500    1  3.94333E-11 kpt; spin; max resid(k); each band:
   1.77E-11 1.50E-11 1.35E-11 3.94E-11
-  -0.2500  0.0000  0.0000    1  3.76859E-11 kpt; spin; max resid(k); each band:
+  -0.2500  0.0000  0.0000    1  3.76848E-11 kpt; spin; max resid(k); each band:
   2.14E-11 1.43E-11 3.54E-11 3.77E-11
-   0.5000  0.2500  0.0000    1  7.91146E-11 kpt; spin; max resid(k); each band:
+   0.5000  0.2500  0.0000    1  7.91107E-11 kpt; spin; max resid(k); each band:
   2.52E-11 1.94E-11 7.91E-11 6.91E-11
-  -0.2500  0.2500  0.2500    1  9.08277E-11 kpt; spin; max resid(k); each band:
+  -0.2500  0.2500  0.2500    1  9.08245E-11 kpt; spin; max resid(k); each band:
   1.85E-11 1.31E-11 9.08E-11 3.58E-11
-   0.2500  0.5000  0.0000    1  8.62178E-11 kpt; spin; max resid(k); each band:
+   0.2500  0.5000  0.0000    1  8.62133E-11 kpt; spin; max resid(k); each band:
   1.74E-11 2.55E-11 8.62E-11 8.33E-11
-   0.5000  0.5000  0.2500    1  9.74046E-11 kpt; spin; max resid(k); each band:
+   0.5000  0.5000  0.2500    1  9.74044E-11 kpt; spin; max resid(k); each band:
   1.45E-11 5.63E-11 1.45E-11 9.74E-11
-  -0.2500  0.5000  0.5000    1  6.83824E-11 kpt; spin; max resid(k); each band:
+  -0.2500  0.5000  0.5000    1  6.83865E-11 kpt; spin; max resid(k); each band:
   9.08E-12 6.25E-11 6.84E-11 4.39E-11
-   0.0000 -0.2500  0.0000    1  5.98415E-11 kpt; spin; max resid(k); each band:
+   0.0000 -0.2500  0.0000    1  5.98407E-11 kpt; spin; max resid(k); each band:
   2.71E-11 1.95E-11 4.36E-11 5.98E-11
-   0.2500 -0.2500  0.2500    1  3.94332E-11 kpt; spin; max resid(k); each band:
+   0.2500 -0.2500  0.2500    1  3.94320E-11 kpt; spin; max resid(k); each band:
   1.77E-11 1.50E-11 1.35E-11 3.94E-11
    0.5000 -0.2500  0.5000    1  9.74045E-11 kpt; spin; max resid(k); each band:
   1.45E-11 5.63E-11 1.45E-11 9.74E-11
-  -0.2500 -0.2500 -0.2500    1  9.37443E-11 kpt; spin; max resid(k); each band:
+  -0.2500 -0.2500 -0.2500    1  9.37465E-11 kpt; spin; max resid(k); each band:
   4.47E-11 5.05E-11 9.37E-11 8.53E-11
-   0.2500  0.0000  0.0000    1  3.76852E-11 kpt; spin; max resid(k); each band:
+   0.2500  0.0000  0.0000    1  3.76857E-11 kpt; spin; max resid(k); each band:
   2.14E-11 1.43E-11 3.54E-11 3.77E-11
-   0.0000  0.2500  0.0000    1  5.98407E-11 kpt; spin; max resid(k); each band:
+   0.0000  0.2500  0.0000    1  5.98415E-11 kpt; spin; max resid(k); each band:
   2.71E-11 1.95E-11 4.36E-11 5.98E-11
-   0.2500  0.2500  0.2500    1  9.37464E-11 kpt; spin; max resid(k); each band:
+   0.2500  0.2500  0.2500    1  9.37442E-11 kpt; spin; max resid(k); each band:
   4.47E-11 5.05E-11 9.37E-11 8.53E-11
-   0.0000  0.5000  0.2500    1  9.19535E-11 kpt; spin; max resid(k); each band:
-  2.05E-11 2.48E-11 9.20E-11 3.21E-11
-   0.2500  0.5000  0.5000    1  6.83864E-11 kpt; spin; max resid(k); each band:
-  9.08E-12 6.25E-11 6.84E-11 4.39E-11
-   0.0000 -0.2500  0.5000    1  9.19499E-11 kpt; spin; max resid(k); each band:
+   0.0000  0.5000  0.2500    1  9.19497E-11 kpt; spin; max resid(k); each band:
   2.05E-11 2.48E-11 9.19E-11 3.21E-11
-   0.2500 -0.2500 -0.2500    1  9.08247E-11 kpt; spin; max resid(k); each band:
+   0.2500  0.5000  0.5000    1  6.83820E-11 kpt; spin; max resid(k); each band:
+  9.08E-12 6.25E-11 6.84E-11 4.39E-11
+   0.0000 -0.2500  0.5000    1  9.19536E-11 kpt; spin; max resid(k); each band:
+  2.05E-11 2.48E-11 9.20E-11 3.21E-11
+   0.2500 -0.2500 -0.2500    1  9.08278E-11 kpt; spin; max resid(k); each band:
   1.85E-11 1.31E-11 9.08E-11 3.58E-11
 
  Thirteen components of 2nd-order total energy (hartree) are
@@ -1191,7 +1193,7 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
   
-   1    1   1    1        20.8530373824         0.0000000000
+   1    1   1    1        20.8530373824        -0.0000000000
    1    1   2    1        14.1273366072         0.0000000000
    1    1   3    1        14.1273366072        -0.0000000000
    1    1   1    2        -0.0000000000        -0.0000000000
@@ -1199,7 +1201,7 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
    1    1   3    2        -0.0000000000        -0.0000000000
   
    2    1   1    1        14.1273366072         0.0000000000
-   2    1   2    1        20.8530373824         0.0000000000
+   2    1   2    1        20.8530373824        -0.0000000000
    2    1   3    1        14.1273366072         0.0000000000
    2    1   1    2        -0.0000000000        -0.0000000000
    2    1   2    2        -0.0000000000        -0.0000000000
@@ -1207,7 +1209,7 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
   
    3    1   1    1        14.1273366072        -0.0000000000
    3    1   2    1        14.1273366072         0.0000000000
-   3    1   3    1        20.8530373824        -0.0000000000
+   3    1   3    1        20.8530373824         0.0000000000
    3    1   1    2        -0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
    3    1   3    2        -0.0000000000        -0.0000000000
@@ -1215,23 +1217,23 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
    1    2   1    1        -0.0000000000         0.0000000000
    1    2   2    1        -0.0000000000         0.0000000000
    1    2   3    1        -0.0000000000         0.0000000000
-   1    2   1    2        84.7640196433        -0.0000000000
-   1    2   2    2        75.6893710659        -0.0000000000
-   1    2   3    2        75.6893710659        -0.0000000000
+   1    2   1    2        84.7640196433         0.0000000000
+   1    2   2    2        75.6893710659         0.0000000000
+   1    2   3    2        75.6893710659         0.0000000000
   
    2    2   1    1        -0.0000000000         0.0000000000
    2    2   2    1        -0.0000000000         0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
-   2    2   1    2        75.6893710659        -0.0000000000
-   2    2   2    2        84.7640196433         0.0000000000
-   2    2   3    2        75.6893710659         0.0000000000
+   2    2   1    2        75.6893710659         0.0000000000
+   2    2   2    2        84.7640196433        -0.0000000000
+   2    2   3    2        75.6893710659        -0.0000000000
   
    3    2   1    1        -0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.0000000000         0.0000000000
-   3    2   1    2        75.6893710659        -0.0000000000
-   3    2   2    2        75.6893710659         0.0000000000
-   3    2   3    2        84.7640196433         0.0000000000
+   3    2   1    2        75.6893710659         0.0000000000
+   3    2   2    2        75.6893710659        -0.0000000000
+   3    2   3    2        84.7640196433        -0.0000000000
   
   Frozen wf local part of the dynamical matrix
      j1       j2             matrix element
@@ -1336,9 +1338,9 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
    1    1   2    2        -0.0000000000        -0.0000000000
    1    1   3    2        -0.0000000000        -0.0000000000
   
-   2    1   1    1        -0.4162542408         0.0000000000
+   2    1   1    1        -0.4162542408        -0.0000000000
    2    1   2    1        -0.8254426163         0.0000000000
-   2    1   3    1        -0.4162542408         0.0000000000
+   2    1   3    1        -0.4162542408        -0.0000000000
    2    1   1    2        -0.0000000000        -0.0000000000
    2    1   2    2        -0.0000000000        -0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
@@ -1354,7 +1356,7 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
    1    2   2    1        -0.0000000000         0.0000000000
    1    2   3    1        -0.0000000000         0.0000000000
    1    2   1    2       -65.1760132285         0.0000000000
-   1    2   2    2       -32.5880066142         0.0000000000
+   1    2   2    2       -32.5880066142        -0.0000000000
    1    2   3    2       -32.5880066142         0.0000000000
   
    2    2   1    1        -0.0000000000         0.0000000000
@@ -1368,7 +1370,7 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.0000000000         0.0000000000
    3    2   1    2       -32.5880066142         0.0000000000
-   3    2   2    2       -32.5880066142         0.0000000000
+   3    2   2    2       -32.5880066142        -0.0000000000
    3    2   3    2       -65.1760132285         0.0000000000
   
   Frozen wf xc core (2) part of the dynamical matrix
@@ -1424,42 +1426,42 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
    1    1   1    1        -1.0125354948        -0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-   1    1   1    2        -0.0000000019         0.0000000004
+   1    1   1    2        -0.0000000018        -0.0000000005
    1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
   
-   2    1   1    1        -2.4014022054         0.0000000000
+   2    1   1    1        -2.4014022053         0.0000000000
    2    1   2    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-   2    1   1    2        -0.0000000019         0.0000000005
+   2    1   1    2        -0.0000000019        -0.0000000005
    2    1   2    2         0.0000000000         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
   
-   3    1   1    1        -2.4014022054         0.0000000000
+   3    1   1    1        -2.4014022053         0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000000000         0.0000000000
-   3    1   1    2        -0.0000000019         0.0000000005
+   3    1   1    2        -0.0000000019        -0.0000000005
    3    1   2    2         0.0000000000         0.0000000000
    3    1   3    2         0.0000000000         0.0000000000
   
-   1    2   1    1         0.0000000049        -0.0000000111
+   1    2   1    1         0.0000000048        -0.0000000048
    1    2   2    1         0.0000000000         0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2      -373.5143792184        -0.0000000009
+   1    2   1    2      -373.5143792183        -0.0000000019
    1    2   2    2         0.0000000000         0.0000000000
    1    2   3    2         0.0000000000         0.0000000000
   
-   2    2   1    1         0.0000000052        -0.0000000110
+   2    2   1    1         0.0000000051        -0.0000000050
    2    2   2    1         0.0000000000         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
-   2    2   1    2      -223.8132372536        -0.0000000009
+   2    2   1    2      -223.8132372538        -0.0000000018
    2    2   2    2         0.0000000000         0.0000000000
    2    2   3    2         0.0000000000         0.0000000000
   
-   3    2   1    1         0.0000000052        -0.0000000110
+   3    2   1    1         0.0000000051        -0.0000000050
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1         0.0000000000         0.0000000000
-   3    2   1    2      -223.8132372536        -0.0000000009
+   3    2   1    2      -223.8132372538        -0.0000000018
    3    2   2    2         0.0000000000         0.0000000000
    3    2   3    2         0.0000000000         0.0000000000
   
@@ -1470,42 +1472,42 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
    1    1   1    1        -7.1621860960         0.0000000000
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
-   1    1   1    2        -0.0000000031         0.0000000005
+   1    1   1    2        -0.0000000030        -0.0000000005
    1    1   2    2         0.0000000000         0.0000000000
    1    1   3    2         0.0000000000         0.0000000000
   
    2    1   1    1        -3.6181910601        -0.0000000000
    2    1   2    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
-   2    1   1    2        -0.0000000030         0.0000000005
+   2    1   1    2        -0.0000000029        -0.0000000005
    2    1   2    2         0.0000000000         0.0000000000
    2    1   3    2         0.0000000000         0.0000000000
   
    3    1   1    1        -3.6181910601        -0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000000000         0.0000000000
-   3    1   1    2        -0.0000000030         0.0000000005
+   3    1   1    2        -0.0000000029        -0.0000000005
    3    1   2    2         0.0000000000         0.0000000000
    3    1   3    2         0.0000000000         0.0000000000
   
-   1    2   1    1         0.0000000005        -0.0000000014
+   1    2   1    1         0.0000000005        -0.0000000004
    1    2   2    1         0.0000000000         0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
-   1    2   1    2        35.7133021214        -0.0000000001
+   1    2   1    2        35.7133021212        -0.0000000002
    1    2   2    2         0.0000000000         0.0000000000
    1    2   3    2         0.0000000000         0.0000000000
   
-   2    2   1    1         0.0000000006        -0.0000000016
+   2    2   1    1         0.0000000006        -0.0000000008
    2    2   2    1         0.0000000000         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
-   2    2   1    2        22.1309344291        -0.0000000000
+   2    2   1    2        22.1309344290        -0.0000000001
    2    2   2    2         0.0000000000         0.0000000000
    2    2   3    2         0.0000000000         0.0000000000
   
-   3    2   1    1         0.0000000006        -0.0000000016
+   3    2   1    1         0.0000000006        -0.0000000008
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1         0.0000000000         0.0000000000
-   3    2   1    2        22.1309344291        -0.0000000000
+   3    2   1    2        22.1309344290        -0.0000000001
    3    2   2    2         0.0000000000         0.0000000000
    3    2   3    2         0.0000000000         0.0000000000
   
@@ -1514,23 +1516,23 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1         7.7726965902         0.0000000000
-   1    1   2    1         5.6514008084         0.0000000000
-   1    1   3    1         5.6514008084         0.0000000000
+   1    1   1    1         7.7726965903         0.0000000000
+   1    1   2    1         5.6514008085         0.0000000000
+   1    1   3    1         5.6514008085         0.0000000000
    1    1   1    2        -0.0000000000        -0.0000000000
    1    1   2    2        -0.0000000000        -0.0000000000
    1    1   3    2        -0.0000000000        -0.0000000000
   
-   2    1   1    1         5.6514008084         0.0000000000
-   2    1   2    1         7.7726965902         0.0000000000
-   2    1   3    1         5.6514008084         0.0000000000
+   2    1   1    1         5.6514008085         0.0000000000
+   2    1   2    1         7.7726965903         0.0000000000
+   2    1   3    1         5.6514008085         0.0000000000
    2    1   1    2        -0.0000000000        -0.0000000000
    2    1   2    2        -0.0000000000        -0.0000000000
    2    1   3    2        -0.0000000000        -0.0000000000
   
-   3    1   1    1         5.6514008084         0.0000000000
-   3    1   2    1         5.6514008084         0.0000000000
-   3    1   3    1         7.7726965902         0.0000000000
+   3    1   1    1         5.6514008085         0.0000000000
+   3    1   2    1         5.6514008085         0.0000000000
+   3    1   3    1         7.7726965903         0.0000000000
    3    1   1    2        -0.0000000000        -0.0000000000
    3    1   2    2        -0.0000000000        -0.0000000000
    3    1   3    2        -0.0000000000        -0.0000000000
@@ -1538,23 +1540,23 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
    1    2   1    1        -0.0000000000         0.0000000000
    1    2   2    1        -0.0000000000         0.0000000000
    1    2   3    1        -0.0000000000         0.0000000000
-   1    2   1    2        62.7827689550         0.0000000000
-   1    2   2    2        31.9169814457         0.0000000000
-   1    2   3    2        31.9169814457         0.0000000000
+   1    2   1    2        62.7827689549         0.0000000000
+   1    2   2    2        31.9169814455         0.0000000000
+   1    2   3    2        31.9169814455         0.0000000000
   
    2    2   1    1        -0.0000000000         0.0000000000
    2    2   2    1        -0.0000000000         0.0000000000
    2    2   3    1        -0.0000000000         0.0000000000
-   2    2   1    2        31.9169814457         0.0000000000
-   2    2   2    2        62.7827689550         0.0000000000
-   2    2   3    2        31.9169814457         0.0000000000
+   2    2   1    2        31.9169814455         0.0000000000
+   2    2   2    2        62.7827689549         0.0000000000
+   2    2   3    2        31.9169814455         0.0000000000
   
    3    2   1    1        -0.0000000000         0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1        -0.0000000000         0.0000000000
-   3    2   1    2        31.9169814457         0.0000000000
-   3    2   2    2        31.9169814457         0.0000000000
-   3    2   3    2        62.7827689550         0.0000000000
+   3    2   1    2        31.9169814455         0.0000000000
+   3    2   2    2        31.9169814455         0.0000000000
+   3    2   3    2        62.7827689549         0.0000000000
   
   
   Dynamical matrix, in cartesian coordinates,
@@ -1603,7 +1605,7 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
    3    2   1    2         0.0172125939         0.0000000000
    3    2   2    2         0.0172125939         0.0000000000
    3    2   3    2         2.0388386572         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
    1.771043E-03  1.771043E-03  2.655440E-03  8.325501E-03  8.325501E-03
@@ -1766,65 +1768,65 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
--ETOT  1   877.91610506280      4.773E+02 8.660E-01 3.713E+05
+-ETOT  1   877.91610498052      4.773E+02 8.660E-01 3.713E+05
 
- ETOT  2   756.64485928443     -1.213E+02 1.654E+00 3.263E+05
+ ETOT  2   756.64485802232     -1.213E+02 1.654E+00 3.263E+05
 
- ETOT  3   63.032576344426     -6.936E+02 3.577E-01 3.761E+01
+ ETOT  3   63.032576353567     -6.936E+02 3.577E-01 3.761E+01
 
- ETOT  4   62.783064820686     -2.495E-01 2.642E-04 9.965E-02
+ ETOT  4   62.783064820614     -2.495E-01 2.642E-04 9.965E-02
 
- ETOT  5   62.782813286911     -2.515E-04 2.137E-07 1.276E-03
+ ETOT  5   62.782813286910     -2.515E-04 2.137E-07 1.276E-03
 
- ETOT  6   62.782810415378     -2.872E-06 6.462E-09 2.099E-05
+ ETOT  6   62.782810415379     -2.872E-06 6.462E-09 2.099E-05
 
- ETOT  7   62.782810373005     -4.237E-08 9.740E-11 9.793E-09
+ ETOT  7   62.782810373002     -4.238E-08 9.740E-11 9.793E-09
 
  At SCF step    7   max residual=  9.74E-11 < tolwfr=  1.00E-10 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.2954E-11; max=  9.7405E-11
-  -0.2500  0.5000  0.0000    1  8.62139E-11 kpt; spin; max resid(k); each band:
+ Mean square residual over all n,k,spin=   42.954E-12; max=  97.405E-12
+  -0.2500  0.5000  0.0000    1  8.62179E-11 kpt; spin; max resid(k); each band:
   1.74E-11 2.55E-11 8.62E-11 8.33E-11
-   0.5000 -0.2500  0.0000    1  7.91110E-11 kpt; spin; max resid(k); each band:
+   0.5000 -0.2500  0.0000    1  7.91148E-11 kpt; spin; max resid(k); each band:
   2.52E-11 1.94E-11 7.91E-11 6.91E-11
-  -0.2500 -0.2500  0.2500    1  3.94321E-11 kpt; spin; max resid(k); each band:
+  -0.2500 -0.2500  0.2500    1  3.94333E-11 kpt; spin; max resid(k); each band:
   1.77E-11 1.50E-11 1.35E-11 3.94E-11
-  -0.2500  0.0000  0.0000    1  3.76859E-11 kpt; spin; max resid(k); each band:
+  -0.2500  0.0000  0.0000    1  3.76848E-11 kpt; spin; max resid(k); each band:
   2.14E-11 1.43E-11 3.54E-11 3.77E-11
-   0.5000  0.2500  0.0000    1  7.91146E-11 kpt; spin; max resid(k); each band:
+   0.5000  0.2500  0.0000    1  7.91107E-11 kpt; spin; max resid(k); each band:
   2.52E-11 1.94E-11 7.91E-11 6.91E-11
-  -0.2500  0.2500  0.2500    1  9.08277E-11 kpt; spin; max resid(k); each band:
+  -0.2500  0.2500  0.2500    1  9.08245E-11 kpt; spin; max resid(k); each band:
   1.85E-11 1.31E-11 9.08E-11 3.58E-11
-   0.2500  0.5000  0.0000    1  8.62178E-11 kpt; spin; max resid(k); each band:
+   0.2500  0.5000  0.0000    1  8.62133E-11 kpt; spin; max resid(k); each band:
   1.74E-11 2.55E-11 8.62E-11 8.33E-11
-   0.5000  0.5000  0.2500    1  9.74046E-11 kpt; spin; max resid(k); each band:
+   0.5000  0.5000  0.2500    1  9.74044E-11 kpt; spin; max resid(k); each band:
   1.45E-11 5.63E-11 1.45E-11 9.74E-11
-  -0.2500  0.5000  0.5000    1  6.83824E-11 kpt; spin; max resid(k); each band:
+  -0.2500  0.5000  0.5000    1  6.83865E-11 kpt; spin; max resid(k); each band:
   9.08E-12 6.25E-11 6.84E-11 4.39E-11
-   0.0000 -0.2500  0.0000    1  5.98415E-11 kpt; spin; max resid(k); each band:
+   0.0000 -0.2500  0.0000    1  5.98407E-11 kpt; spin; max resid(k); each band:
   2.71E-11 1.95E-11 4.36E-11 5.98E-11
-   0.2500 -0.2500  0.2500    1  3.94332E-11 kpt; spin; max resid(k); each band:
+   0.2500 -0.2500  0.2500    1  3.94320E-11 kpt; spin; max resid(k); each band:
   1.77E-11 1.50E-11 1.35E-11 3.94E-11
    0.5000 -0.2500  0.5000    1  9.74045E-11 kpt; spin; max resid(k); each band:
   1.45E-11 5.63E-11 1.45E-11 9.74E-11
-  -0.2500 -0.2500 -0.2500    1  9.37443E-11 kpt; spin; max resid(k); each band:
+  -0.2500 -0.2500 -0.2500    1  9.37465E-11 kpt; spin; max resid(k); each band:
   4.47E-11 5.05E-11 9.37E-11 8.53E-11
-   0.2500  0.0000  0.0000    1  3.76852E-11 kpt; spin; max resid(k); each band:
+   0.2500  0.0000  0.0000    1  3.76857E-11 kpt; spin; max resid(k); each band:
   2.14E-11 1.43E-11 3.54E-11 3.77E-11
-   0.0000  0.2500  0.0000    1  5.98407E-11 kpt; spin; max resid(k); each band:
+   0.0000  0.2500  0.0000    1  5.98415E-11 kpt; spin; max resid(k); each band:
   2.71E-11 1.95E-11 4.36E-11 5.98E-11
-   0.2500  0.2500  0.2500    1  9.37464E-11 kpt; spin; max resid(k); each band:
+   0.2500  0.2500  0.2500    1  9.37442E-11 kpt; spin; max resid(k); each band:
   4.47E-11 5.05E-11 9.37E-11 8.53E-11
-   0.0000  0.5000  0.2500    1  9.19535E-11 kpt; spin; max resid(k); each band:
-  2.05E-11 2.48E-11 9.20E-11 3.21E-11
-   0.2500  0.5000  0.5000    1  6.83864E-11 kpt; spin; max resid(k); each band:
-  9.08E-12 6.25E-11 6.84E-11 4.39E-11
-   0.0000 -0.2500  0.5000    1  9.19499E-11 kpt; spin; max resid(k); each band:
+   0.0000  0.5000  0.2500    1  9.19497E-11 kpt; spin; max resid(k); each band:
   2.05E-11 2.48E-11 9.19E-11 3.21E-11
-   0.2500 -0.2500 -0.2500    1  9.08247E-11 kpt; spin; max resid(k); each band:
+   0.2500  0.5000  0.5000    1  6.83820E-11 kpt; spin; max resid(k); each band:
+  9.08E-12 6.25E-11 6.84E-11 4.39E-11
+   0.0000 -0.2500  0.5000    1  9.19536E-11 kpt; spin; max resid(k); each band:
+  2.05E-11 2.48E-11 9.20E-11 3.21E-11
+   0.2500 -0.2500 -0.2500    1  9.08278E-11 kpt; spin; max resid(k); each band:
   1.85E-11 1.31E-11 9.08E-11 3.58E-11
 
  Thirteen components of 2nd-order total energy (hartree) are
@@ -1857,17 +1859,17 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
   
-   1    1   1    1        84.7640196433        -0.0000000000
-   1    1   2    1        75.6893710659        -0.0000000000
-   1    1   3    1        75.6893710659        -0.0000000000
+   1    1   1    1        84.7640196433         0.0000000000
+   1    1   2    1        75.6893710659         0.0000000000
+   1    1   3    1        75.6893710659         0.0000000000
   
-   2    1   1    1        75.6893710659        -0.0000000000
-   2    1   2    1        84.7640196433         0.0000000000
-   2    1   3    1        75.6893710659         0.0000000000
+   2    1   1    1        75.6893710659         0.0000000000
+   2    1   2    1        84.7640196433        -0.0000000000
+   2    1   3    1        75.6893710659        -0.0000000000
   
-   3    1   1    1        75.6893710659        -0.0000000000
-   3    1   2    1        75.6893710659         0.0000000000
-   3    1   3    1        84.7640196433         0.0000000000
+   3    1   1    1        75.6893710659         0.0000000000
+   3    1   2    1        75.6893710659        -0.0000000000
+   3    1   3    1        84.7640196433        -0.0000000000
   
    1    2   1    1        -0.0000000000        -0.0000000000
    1    2   2    1        -0.0000000000        -0.0000000000
@@ -1942,15 +1944,15 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
   dir pert dir pert     real part   imaginary part
   
    1    1   1    1       -65.1760132285         0.0000000000
-   1    1   2    1       -32.5880066142         0.0000000000
+   1    1   2    1       -32.5880066142        -0.0000000000
    1    1   3    1       -32.5880066142         0.0000000000
   
    2    1   1    1       -32.5880066142         0.0000000000
    2    1   2    1       -65.1760132285         0.0000000000
-   2    1   3    1       -32.5880066142        -0.0000000000
+   2    1   3    1       -32.5880066142         0.0000000000
   
    3    1   1    1       -32.5880066142         0.0000000000
-   3    1   2    1       -32.5880066142         0.0000000000
+   3    1   2    1       -32.5880066142        -0.0000000000
    3    1   3    1       -65.1760132285         0.0000000000
   
    1    2   1    1        -0.0000000000        -0.0000000000
@@ -1997,27 +1999,27 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
   
-   1    1   1    1      -373.5143792184        -0.0000000009
+   1    1   1    1      -373.5143792183        -0.0000000019
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
   
-   2    1   1    1      -223.8132372536        -0.0000000009
+   2    1   1    1      -223.8132372538        -0.0000000018
    2    1   2    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
   
-   3    1   1    1      -223.8132372536        -0.0000000009
+   3    1   1    1      -223.8132372538        -0.0000000018
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000000000         0.0000000000
   
-   1    2   1    1        -0.0000000019         0.0000000004
+   1    2   1    1        -0.0000000018        -0.0000000005
    1    2   2    1         0.0000000000         0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
   
-   2    2   1    1        -0.0000000019         0.0000000005
+   2    2   1    1        -0.0000000019        -0.0000000005
    2    2   2    1         0.0000000000         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
   
-   3    2   1    1        -0.0000000019         0.0000000005
+   3    2   1    1        -0.0000000019        -0.0000000005
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1         0.0000000000         0.0000000000
   
@@ -2025,27 +2027,27 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
      j1       j2             matrix element
   dir pert dir pert     real part   imaginary part
   
-   1    1   1    1        35.7133021214        -0.0000000001
+   1    1   1    1        35.7133021212        -0.0000000002
    1    1   2    1         0.0000000000         0.0000000000
    1    1   3    1         0.0000000000         0.0000000000
   
-   2    1   1    1        22.1309344291        -0.0000000000
+   2    1   1    1        22.1309344290        -0.0000000001
    2    1   2    1         0.0000000000         0.0000000000
    2    1   3    1         0.0000000000         0.0000000000
   
-   3    1   1    1        22.1309344291        -0.0000000000
+   3    1   1    1        22.1309344290        -0.0000000001
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000000000         0.0000000000
   
-   1    2   1    1        -0.0000000031         0.0000000005
+   1    2   1    1        -0.0000000030        -0.0000000005
    1    2   2    1         0.0000000000         0.0000000000
    1    2   3    1         0.0000000000         0.0000000000
   
-   2    2   1    1        -0.0000000030         0.0000000005
+   2    2   1    1        -0.0000000029        -0.0000000005
    2    2   2    1         0.0000000000         0.0000000000
    2    2   3    1         0.0000000000         0.0000000000
   
-   3    2   1    1        -0.0000000030         0.0000000005
+   3    2   1    1        -0.0000000029        -0.0000000005
    3    2   2    1         0.0000000000         0.0000000000
    3    2   3    1         0.0000000000         0.0000000000
   
@@ -2054,23 +2056,23 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
      j1       j2             matrix element
   dir pert dir pert     real part     imaginary part
   
-   1    1   1    1        62.7827689550         0.0000000000
-   1    1   2    1        31.9169814457         0.0000000000
-   1    1   3    1        31.9169814457         0.0000000000
+   1    1   1    1        62.7827689549         0.0000000000
+   1    1   2    1        31.9169814455         0.0000000000
+   1    1   3    1        31.9169814455         0.0000000000
    1    1   1    2        -0.0000000000         0.0000000000
    1    1   2    2        -0.0000000000         0.0000000000
    1    1   3    2        -0.0000000000         0.0000000000
   
-   2    1   1    1        31.9169814457         0.0000000000
-   2    1   2    1        62.7827689550         0.0000000000
-   2    1   3    1        31.9169814457         0.0000000000
+   2    1   1    1        31.9169814455         0.0000000000
+   2    1   2    1        62.7827689549         0.0000000000
+   2    1   3    1        31.9169814455         0.0000000000
    2    1   1    2        -0.0000000000         0.0000000000
    2    1   2    2        -0.0000000000         0.0000000000
    2    1   3    2        -0.0000000000         0.0000000000
   
-   3    1   1    1        31.9169814457         0.0000000000
-   3    1   2    1        31.9169814457         0.0000000000
-   3    1   3    1        62.7827689550         0.0000000000
+   3    1   1    1        31.9169814455         0.0000000000
+   3    1   2    1        31.9169814455         0.0000000000
+   3    1   3    1        62.7827689549         0.0000000000
    3    1   1    2        -0.0000000000         0.0000000000
    3    1   2    2        -0.0000000000         0.0000000000
    3    1   3    2        -0.0000000000         0.0000000000
@@ -2125,7 +2127,7 @@ P newkpt: treating      4 bands with npw=      53 for ikpt=  20 by node    0
    3    2   1    1        -0.0000000000        -0.0000000000
    3    2   2    1        -0.0000000000         0.0000000000
    3    2   3    1         0.0000000000        -0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.50000  0.50000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00  8.325501E-03  8.325501E-03
@@ -2515,51 +2517,65 @@ P          mk1mem5         32
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
-- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
+-
+- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
 - interatomic force constants from density-functional perturbation theory,
 - X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [4] A brief introduction to the ABINIT software package.
+- [5] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [5] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
--
-- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.6
+- Proc.   0 individual time (sec): cpu=          3.3  wall=          4.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  30 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.3  wall=          3.6
+.Delivered  17 WARNINGs and  31 COMMENTs to log file.
++Overall time at end (sec) : cpu=          3.3  wall=          4.2

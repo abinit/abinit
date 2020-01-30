@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_transport
 !! NAME
 !!  m_transport
@@ -8,7 +7,7 @@
 !!  Initially for electron mobility limited by electron-phonon scattering.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (HM)
+!!  Copyright (C) 2008-2020 ABINIT group (HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -80,10 +79,10 @@ type,public :: transport_rta_t
    ! number of temperatures
 
    integer :: ndop
-   ! number of carrier concentrarions at which to evaluate chemical potential energy
+   ! number of carrier concentrations at which to evaluate chemical potential energy
 
    integer :: nw
-   ! number of frequencies at which trasport quantities are computed
+   ! number of frequencies at which transport quantities are computed
 
    real(dp) :: eph_extrael
    ! extra electrons per unit cell from sigeph (lifetimes)
@@ -102,11 +101,11 @@ type,public :: transport_rta_t
 
    real(dp),allocatable :: eph_mu_e(:)
    ! (ntemp, ndop)
-   ! Chemical potential at this carrier concentrarion and temperature from sigeph (lifetime)
+   ! Chemical potential at this carrier concentration and temperature from sigeph (lifetime)
 
    real(dp),allocatable :: transport_mu_e(:)
    ! (ntemp, ndop)
-   ! Chemical potential at this carrier concentrarion and temperature
+   ! Chemical potential at this carrier concentration and temperature
 
    real(dp),allocatable :: eminmax_spin(:,:)
    ! min max energy of the of the original ebands object
@@ -591,8 +590,10 @@ subroutine transport_rta_compute(self, cryst, dtset, comm)
 
  ! Compute transport quantities
  fact0 = (Time_Sec * siemens_SI / Bohr_meter / cryst%ucvol)
+
  self%sigma = fact0 * self%l0
  call safe_div(volt_SI * self%l1, self%l0, zero, self%pi)
+
  do itemp=1,self%ntemp
    kT = self%kTmesh(itemp) / kb_HaK
    call safe_div(volt_SI * self%l1(:,:,:,:,itemp), &
@@ -716,6 +717,7 @@ contains
      end do
    end do
  end do
+ lorder(:,:,:,:,self%ntemp+1)=zero
 
  end subroutine onsager
 
@@ -771,7 +773,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  ! Compute index of valence band
  max_occ = two/(self%nspinor*self%nsppol)
  ! TODO: should add nelect0 to ebands to keep track of intrinsic
- nvalence = nint(self%ebands%nelect - self%eph_extrael)/max_occ
+ nvalence = nint((self%ebands%nelect - self%eph_extrael)/max_occ)
 
  ABI_CALLOC(self%ne,(self%ntemp))
  ABI_CALLOC(self%nh,(self%ntemp))

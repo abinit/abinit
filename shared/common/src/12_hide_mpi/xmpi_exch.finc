@@ -15,7 +15,7 @@
 !!  a tag is specified.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2019 ABINIT group (MB)
+!!  Copyright (C) 2001-2020 ABINIT group (MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -330,7 +330,8 @@ subroutine xmpi_exch_dp4d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
 !Local variables--------------
 #if defined HAVE_MPI
  integer :: statux(MPI_STATUS_SIZE)
- integer :: me,n1,n2,n3,n4,tag
+ integer :: me,my_dt,my_op,n1,n2,n3,n4,tag
+ integer(kind=int64) :: ntot
 #endif
 
 ! *************************************************************************
@@ -344,11 +345,29 @@ subroutine xmpi_exch_dp4d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
  n3 =size(vsend,dim=3)
  n4 =size(vsend,dim=4)
  tag = MOD(mtag, xmpi_tag_ub)
+
+ !This product of dimensions can be greater than a 32bit integer
+ !We use a INT64 to store it. If it is too large, we switch to an
+ !alternate routine because MPI<4 doesnt handle 64 bit counts.
+ ntot=int(n1*n2*n3*n4,kind=int64)
+
  if (recever==me) then
-   call MPI_RECV(vrecv,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,statux,ier)
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_RECV(vrecv,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,statux,ier)
+   else
+     call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
+     call MPI_RECV(vrecv,1,my_dt,sender,tag,spaceComm,statux,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
  if (sender==me) then
-   call MPI_SEND(vsend,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,recever,tag,spaceComm,ier)
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_SEND(vsend,n1*n2*n3*n4,MPI_DOUBLE_PRECISION,recever,tag,spaceComm,ier)
+   else
+     call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
+     call MPI_SEND(vsend,1,my_dt,recever,tag,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 
@@ -391,8 +410,9 @@ subroutine xmpi_exch_dp5d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
 
 !Local variables--------------
 #if defined HAVE_MPI
- integer :: me,n1,n2,n3,n4,n5,tag
+ integer :: me,my_dt,my_op,n1,n2,n3,n4,n5,tag
  integer :: statux(MPI_STATUS_SIZE)
+ integer(kind=int64) :: ntot
 #endif
 
 ! *************************************************************************
@@ -407,11 +427,29 @@ subroutine xmpi_exch_dp5d_tag(vsend,mtag,sender,vrecv,recever,spaceComm,ier)
  n4 =size(vsend,dim=4)
  n5 =size(vsend,dim=5)
  tag = MOD(mtag,xmpi_tag_ub)
+
+ !This product of dimensions can be greater than a 32bit integer
+ !We use a INT64 to store it. If it is too large, we switch to an
+ !alternate routine because MPI<4 doesnt handle 64 bit counts.
+ ntot=int(n1*n2*n3*n4*n5,kind=int64)
+
  if (recever==me) then
-   call MPI_RECV(vrecv,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,statux,ier)
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_RECV(vrecv,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,sender,tag,spaceComm,statux,ier)
+   else
+     call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
+     call MPI_RECV(vrecv,1,my_dt,sender,tag,spaceComm,statux,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
  if (sender==me) then
-   call MPI_SEND(vsend,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,recever,tag,spaceComm,ier)
+   if (ntot<=xmpi_maxint32_64) then
+     call MPI_SEND(vsend,n1*n2*n3*n4*n5,MPI_DOUBLE_PRECISION,recever,tag,spaceComm,ier)
+   else
+     call xmpi_largetype_create(ntot,MPI_DOUBLE_PRECISION,my_dt,my_op,MPI_OP_NULL)
+     call MPI_SEND(vsend,1,my_dt,recever,tag,spaceComm,ier)
+     call xmpi_largetype_free(my_dt,my_op)
+   end if
  end if
 #endif
 

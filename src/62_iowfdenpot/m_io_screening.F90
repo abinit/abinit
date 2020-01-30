@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_io_screening
 !! NAME
 !!  m_io_screening
@@ -8,7 +7,7 @@
 !!  _SCR and _SUSC file as well as methods used to read/write/echo.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -231,7 +230,8 @@ MODULE m_io_screening
  integer,private,parameter :: HSCR_KNOWN_HEADFORMS(1) = [80]
  ! The list of headforms used for SCR/SUSC so far.
 
- integer,public,parameter :: HSCR_LATEST_HEADFORM = HSCR_KNOWN_HEADFORMS(size(HSCR_KNOWN_HEADFORMS))
+ integer,private,parameter :: size_hscr_known_headforms = size(HSCR_KNOWN_HEADFORMS) ! Need this for Flang
+ integer,public,parameter :: HSCR_LATEST_HEADFORM = HSCR_KNOWN_HEADFORMS(size_hscr_known_headforms)
  ! The latest headform used when writing.
 
  public :: hscr_from_file       ! Read the header from file.

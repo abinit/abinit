@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_spin_potential
 !! NAME
 !! m_spin_potential
@@ -24,7 +23,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (TO, hexu)
+!! Copyright (C) 2001-2020 ABINIT group (TO, hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,6 +48,7 @@ module  m_spin_potential
   use m_spmat_csr, only : CSR_mat_t
   use m_spmat_convert, only : spmat_convert
   use m_abstract_potential, only : abstract_potential_t
+  use m_hashtable_strval, only: hash_table_t
   implicit none
   !!***
   private
@@ -287,19 +287,28 @@ contains
   end subroutine calc_bilinear_term_Heff
 
   subroutine spin_potential_t_calculate(self, displacement, strain, spin, lwf, &
-       force, stress, bfield, lwf_force, energy)
+       force, stress, bfield, lwf_force, energy, energy_table)
     class(spin_potential_t), intent(inout) :: self
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
     real(dp), optional, intent(inout) :: force(:,:), stress(:,:), bfield(:,:), lwf_force(:), energy
+    type(hash_table_t),optional, intent(inout) :: energy_table
+    real(dp) :: etmp
     ! if present in input
     ! calculate if required
 
+    if (present(bfield) ) then
+       call self%get_Heff(spin, bfield, etmp)
 
-    if (present(bfield) .and. present(energy)) then
-       call self%get_Heff(spin, bfield, energy)
-    !else
-    !   call self%get_energy(spin, energy)
+       ! only update energy when bfield is asked for.
+       if ( present(energy)) then
+          energy=energy+etmp
+       end if
+       if (present(energy_table)) then
+          call energy_table%put(self%label, etmp)
+       end if
     end if
+
+
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(displacement)
     ABI_UNUSED_A(strain)
@@ -355,7 +364,8 @@ contains
     endif
 
     call xmpi_sum_master(etmp, 0, xmpi_world, ierr )
-    energy=energy+etmp
+    ! NOTE: here energy is not added to input energy.
+    energy=etmp
 
   end subroutine spin_potential_t_total_Heff
 

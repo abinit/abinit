@@ -7,7 +7,7 @@
 !!  Low-level tools related to symmetries
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (RC, XG, GMR, MG, JWZ)
+!!  Copyright (C) 1998-2020 ABINIT group (RC, XG, GMR, MG, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1714,7 +1714,7 @@ end subroutine symchk
 !! Equivalent to $S*t(b)+tnons-x(a)=another$ $integer$ for $x(b)=x(inv(S))$.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

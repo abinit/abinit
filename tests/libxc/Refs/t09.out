@@ -1,8 +1,8 @@
 
 .Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 21 Nov 2019.
-- ( at 00h07 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h17 )
   
 - input  file    -> t09.in
 - output file    -> t09.out
@@ -161,8 +161,8 @@ P           mkmem          10
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.08431
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -193,26 +193,24 @@ _setup2: Arith. and geom. avg. npw (full set) are     327.688     327.681
  ETOT 10  -8.3923336756116     2.814E-11 1.136E-05 6.107E-16
  ETOT 11  -8.3923336755832     2.836E-11 5.039E-06 4.788E-18
  ETOT 12  -8.3923336755625     2.073E-11 3.360E-06 3.243E-18
- ETOT 13  -8.3923336755466     1.590E-11 1.522E-06 2.372E-17
- ETOT 14  -8.3923336755280     1.855E-11 1.044E-06 4.928E-18
- ETOT 15  -8.3923336755159     1.212E-11 4.743E-07 7.490E-18
- ETOT 16  -8.3923336755040     1.197E-11 3.310E-07 8.599E-18
- ETOT 17  -8.3923336754960     7.985E-12 1.498E-07 1.044E-17
- ETOT 18  -8.3923336754876     8.399E-12 1.056E-07 1.611E-17
- ETOT 19  -8.3923336754823     5.272E-12 4.758E-08 1.677E-17
- ETOT 20  -8.3923336754775     4.817E-12 3.372E-08 1.819E-17
- ETOT 21  -8.3923336754744     3.071E-12 2.134E-08 1.808E-17
- ETOT 22  -8.3923336754714     3.066E-12 1.321E-08 1.105E-17
- ETOT 23  -8.3923336754695     1.885E-12 1.098E-08 9.305E-18
- ETOT 24  -8.3923336754680     1.473E-12 6.821E-09 5.359E-18
- ETOT 25  -8.3923336754667     1.256E-12 5.659E-09 4.311E-18
- ETOT 26  -8.3923336754657     1.036E-12 3.524E-09 2.882E-18
- ETOT 27  -8.3923336754650     7.283E-13 2.919E-09 1.970E-18
- ETOT 28  -8.3923336754645     4.512E-13 1.821E-09 1.216E-20
- ETOT 29  -8.3923336754641     4.619E-13 1.507E-09 3.811E-22
- ETOT 30  -8.3923336754638     2.309E-13 9.417E-10 1.785E-23
-
- Compute kinetic energy density
+ ETOT 13  -8.3923336755466     1.589E-11 1.522E-06 2.372E-17
+ ETOT 14  -8.3923336755280     1.856E-11 1.044E-06 4.929E-18
+ ETOT 15  -8.3923336755159     1.212E-11 4.743E-07 7.492E-18
+ ETOT 16  -8.3923336755040     1.196E-11 3.310E-07 8.597E-18
+ ETOT 17  -8.3923336754960     7.987E-12 1.498E-07 1.043E-17
+ ETOT 18  -8.3923336754876     8.402E-12 1.056E-07 1.612E-17
+ ETOT 19  -8.3923336754823     5.270E-12 4.758E-08 1.675E-17
+ ETOT 20  -8.3923336754775     4.814E-12 3.372E-08 1.833E-17
+ ETOT 21  -8.3923336754744     3.089E-12 2.134E-08 1.840E-17
+ ETOT 22  -8.3923336754713     3.075E-12 1.321E-08 1.175E-17
+ ETOT 23  -8.3923336754695     1.865E-12 1.098E-08 9.517E-18
+ ETOT 24  -8.3923336754679     1.513E-12 6.821E-09 6.443E-18
+ ETOT 25  -8.3923336754667     1.229E-12 5.659E-09 6.218E-18
+ ETOT 26  -8.3923336754656     1.126E-12 3.524E-09 5.967E-18
+ ETOT 27  -8.3923336754650     6.199E-13 2.919E-09 5.745E-18
+ ETOT 28  -8.3923336754645     4.832E-13 1.821E-09 9.608E-20
+ ETOT 29  -8.3923336754641     3.926E-13 1.507E-09 2.504E-20
+ ETOT 30  -8.3923336754638     2.665E-13 9.417E-10 4.035E-21
 
 Result for kinetic energy density :
 
@@ -277,12 +275,12 @@ Result for kinetic energy density :
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  8.12897072337883E+00
-    Hartree energy  =  9.68314195953156E-01
+    Hartree energy  =  9.68314195953162E-01
     XC energy       = -4.44560411498561E-01
     Ewald energy    = -1.27864070809300E+01
     PspCore energy  =  2.80630280215998E-02
-    Loc. psp. energy= -5.41537445456586E+00
-    NL   psp  energy=  1.12866032417705E+00
+    Loc. psp. energy= -5.41537445456588E+00
+    NL   psp  energy=  1.12866032417706E+00
     >>>>>>>>> Etotal= -8.39233367546383E+00
 
  Other information on the energy :
@@ -480,10 +478,10 @@ P           mkmem          10
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          3.7  wall=          4.6
+- Proc.   0 individual time (sec): cpu=          3.8  wall=          4.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.7  wall=          4.6
++Overall time at end (sec) : cpu=          3.8  wall=          4.2

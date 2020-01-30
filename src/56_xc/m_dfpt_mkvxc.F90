@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_mkvxc
 !! NAME
 !!  m_dfpt_mkvxc
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2019 ABINIT group (XG, DRH, FR, EB, SPr)
+!!  Copyright (C) 2001-2020 ABINIT group (XG, DRH, FR, EB, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -719,8 +718,8 @@ subroutine dfpt_mkvxcgga(cplex,gprimd,kxc,mpi_enreg,nfft,ngfft,&
  end if
 
  vxc1(:,:)=zero
- call xcpot(cplex,dnexcdn,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden,&
-& nspgrad,qphon,rho1now,vxc1)
+ call xcpot(cplex,gprimd,ishift,use_laplacian,mpi_enreg,nfft,ngfft,ngrad,nspden,&
+& nspgrad,qphon,depsxc=dnexcdn,rhonow=rho1now,vxc=vxc1)
 
 !call filterpot(paral_kgb,cplex,gmet,gsqcut,nfft,ngfft,nspden,qphon,vxc1)
 

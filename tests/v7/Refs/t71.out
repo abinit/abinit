@@ -1,8 +1,8 @@
 
-.Version 8.11.1 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 31 Oct 2018.
-- ( at 02h20 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h35 )
   
 - input  file    -> t71.in
 - output file    -> t71.out
 - root for input  files -> t71i
 - root for output files -> t71o
 
-- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- inpspheads : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
@@ -216,9 +216,9 @@ P           mkmem           4
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.51316612
@@ -245,14 +245,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -11.445809698483    -1.145E+01 4.017E-02 1.081E+01
- ETOT  2  -11.454864374351    -9.055E-03 7.230E-07 5.908E-01
+ ETOT  2  -11.454864374350    -9.055E-03 7.230E-07 5.908E-01
  ETOT  3  -11.455322361367    -4.580E-04 2.887E-06 1.567E-03
  ETOT  4  -11.455325164149    -2.803E-06 8.694E-09 1.759E-05
  ETOT  5  -11.455325176606    -1.246E-08 2.242E-11 2.972E-08
  ETOT  6  -11.455325176650    -4.328E-11 4.077E-13 4.209E-11
- ETOT  7  -11.455325176650    -4.796E-14 1.393E-15 4.427E-13
- ETOT  8  -11.455325176650     3.375E-14 1.668E-17 2.595E-14
- ETOT  9  -11.455325176650     5.507E-14 6.459E-19 2.593E-17
+ ETOT  7  -11.455325176650    -4.974E-14 1.393E-15 4.427E-13
+ ETOT  8  -11.455325176650     2.842E-14 1.668E-17 2.595E-14
+ ETOT  9  -11.455325176650     5.862E-14 6.459E-19 2.593E-17
 
  At SCF step    9   max residual=  6.46E-19 < tolwfr=  1.00E-18 =>converged.
 
@@ -325,7 +325,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  4.8308E-31; max dE/dt=  1.1833E-30; dE/dt below (all hartree)
+ rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
 
@@ -334,14 +334,14 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
     2      0.89174993186803     0.89174993186803     0.89174993186803
 
  cartesian forces (hartree/bohr) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 8.7772759E-32 8.7772759E-32   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1      0.00000000000000    -0.00000000000000     0.00000000000000
-    2     -0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 4.5134564E-30 4.5134564E-30   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000    -0.00000000000000    -0.00000000000000
+    2     -0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 0.0000000E+00 0.0000000E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740652601000  6.740652601000  6.740652601000 bohr
               =  3.566999727472  3.566999727472  3.566999727472 angstroms
  prteigrs : about to open file t71o_DS1_EIG
@@ -366,15 +366,17 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
 
  "Double-counting" decomposition of free energy:
     Band energy     =  3.91647522718658E-01
-    Ewald energy    = -1.27864130979666E+01
+    Ewald energy    =-1.27864130979666E+01
     PspCore energy  =  9.33164515583050E-01
-    Dble-C XC-energy= -8.81762654531651E-01
+    Dble-C XC-energy= -8.81762654531647E-01
     Spherical terms =  8.88038539403541E-01
     >>>> Etotal (DC)= -1.14553251747930E+01
 
   >Total energy in eV           = -3.11715250622937E+02
   >Total DC energy in eV        = -3.11715250572415E+02
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -9.64723218E-05  sigma(3 2)=  0.00000000E+00
@@ -413,9 +415,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
-- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_wfmix/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
+- pspatm : Reading pseudopotential header in XML form from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.GGA_X_PBE+GGA_C_PBE-paw.xml
  Pseudopotential format is: paw10
  basis_size (lnmax)=  4 (lmn_size=  8), orbitals=   0   0   1   1
  Spheres core radius: rc_sph= 1.51316612
@@ -453,7 +455,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
  ETOT  8  -10.796414547213    -8.574E-04 8.272E-11 1.423E-08
  Outer loop step  3 - inner step  4 - frozen Fock etot NOT converged : 
   diff in etot=  8.574E-04 > toldfe=  1.000E-12
- ETOT  9  -10.792571221218     3.843E-03 3.504E-06 4.809E-03
+ ETOT  9  -10.792571221217     3.843E-03 3.504E-06 4.809E-03
  ETOT 10  -10.793268313100    -6.971E-04 3.422E-08 4.957E-04
  ETOT 11  -10.794052887602    -7.846E-04 1.519E-09 9.472E-08
  ETOT 12  -10.793909866502     1.430E-04 2.072E-12 3.142E-10
@@ -492,46 +494,46 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
  ETOT 33  -10.793134788749     5.771E-07 1.405E-14 1.209E-11
  ETOT 34  -10.793134877386    -8.864E-08 5.872E-17 1.333E-12
  ETOT 35  -10.793134915719    -3.833E-08 3.821E-18 3.543E-16
- ETOT 36  -10.793134908595     7.124E-09 7.000E-21 6.011E-19
+ ETOT 36  -10.793134908595     7.124E-09 7.000E-21 6.010E-19
  Outer loop step 10 - inner step  4 - frozen Fock etot NOT converged : 
   diff in etot=  7.124E-09 > toldfe=  1.000E-12
  ETOT 37  -10.793134960363    -5.177E-08 1.364E-15 7.968E-13
  ETOT 38  -10.793134904103     5.626E-08 3.803E-18 7.780E-14
  ETOT 39  -10.793134912669    -8.566E-09 2.365E-19 5.188E-17
- ETOT 40  -10.793134910918     1.751E-09 4.364E-22 5.345E-20
+ ETOT 40  -10.793134910918     1.751E-09 4.364E-22 5.344E-20
  Outer loop step 11 - inner step  4 - frozen Fock etot NOT converged : 
   diff in etot=  1.751E-09 > toldfe=  1.000E-12
  ETOT 41  -10.793134881184     2.973E-08 8.463E-17 1.438E-14
  ETOT 42  -10.793134889097    -7.913E-09 9.394E-20 1.602E-15
  ETOT 43  -10.793134890379    -1.282E-09 4.177E-21 7.656E-19
- ETOT 44  -10.793134890133     2.453E-10 9.537E-24 1.185E-21
+ ETOT 44  -10.793134890133     2.453E-10 9.536E-24 1.184E-21
  Outer loop step 12 - inner step  4 - frozen Fock etot NOT converged : 
   diff in etot=  2.453E-10 > toldfe=  1.000E-12
  ETOT 45  -10.793134893915    -3.782E-09 7.451E-18 1.683E-15
  ETOT 46  -10.793134890354     3.561E-09 7.981E-21 1.697E-16
  ETOT 47  -10.793134890772    -4.185E-10 5.201E-22 5.820E-20
- ETOT 48  -10.793134890691     8.149E-11 7.201E-25 3.015E-22
+ ETOT 48  -10.793134890691     8.149E-11 7.202E-25 3.014E-22
  Outer loop step 13 - inner step  4 - frozen Fock etot NOT converged : 
   diff in etot=  8.149E-11 > toldfe=  1.000E-12
  ETOT 49  -10.793134889062     1.629E-09 5.250E-19 1.319E-17
  ETOT 50  -10.793134889762    -6.994E-10 1.892E-22 1.253E-18
- ETOT 51  -10.793134889793    -3.123E-11 3.394E-24 2.908E-21
- ETOT 52  -10.793134889786     6.960E-12 1.982E-26 9.192E-24
+ ETOT 51  -10.793134889793    -3.123E-11 3.395E-24 2.908E-21
+ ETOT 52  -10.793134889786     6.956E-12 1.970E-26 9.236E-24
  Outer loop step 14 - inner step  4 - frozen Fock etot NOT converged : 
-  diff in etot=  6.960E-12 > toldfe=  1.000E-12
+  diff in etot=  6.956E-12 > toldfe=  1.000E-12
  ETOT 53  -10.793134890052    -2.662E-10 4.978E-20 3.979E-18
  ETOT 54  -10.793134889797     2.552E-10 1.274E-22 4.549E-19
  ETOT 55  -10.793134889820    -2.274E-11 1.536E-24 1.065E-22
- ETOT 56  -10.793134889815     4.139E-12 1.650E-27 3.701E-24
+ ETOT 56  -10.793134889815     4.139E-12 1.654E-27 3.694E-24
  Outer loop step 15 - inner step  4 - frozen Fock etot NOT converged : 
   diff in etot=  4.139E-12 > toldfe=  1.000E-12
  ETOT 57  -10.793134889719     9.610E-11 5.011E-21 1.211E-20
- ETOT 58  -10.793134889780    -6.054E-11 1.141E-23 3.264E-22
- ETOT 59  -10.793134889780     3.002E-13 2.567E-27 2.549E-24
- ETOT 60  -10.793134889780     1.776E-15 2.735E-29 1.673E-25
+ ETOT 58  -10.793134889780    -6.054E-11 1.141E-23 3.266E-22
+ ETOT 59  -10.793134889780     3.055E-13 2.568E-27 2.582E-24
+ ETOT 60  -10.793134889780     5.329E-15 2.595E-29 1.677E-25
  Outer loop step 16 - inner step  4 - frozen Fock etot converged : 
-  for the second time, diff in etot=  1.776E-15 < toldfe=  1.000E-12
- ETOT 61  -10.793134889798    -1.876E-11 1.585E-21 1.025E-20
+  for the second time, diff in etot=  5.329E-15 < toldfe=  1.000E-12
+ ETOT 61  -10.793134889798    -1.877E-11 1.585E-21 1.025E-20
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.58776790E-03  sigma(3 2)=  0.00000000E+00
@@ -541,7 +543,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
 
  scprqt:  WARNING -
   nstep=   61 was not enough SCF cycles to converge;
-  maximum energy difference=  1.876E-11 exceeds toldfe=  1.000E-12
+  maximum energy difference=  1.877E-11 exceeds toldfe=  1.000E-12
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -603,27 +605,27 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   49.837E-23; max=  15.848E-22
+ Mean square residual over all n,k,spin=   49.838E-23; max=  15.849E-22
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
- rms dE/dt=  1.0531E-18; max dE/dt=  7.2054E-19; dE/dt below (all hartree)
-    1      -0.000000000000     -0.000000000000      0.000000000000
-    2       0.000000000000      0.000000000000     -0.000000000000
+ rms dE/dt=  5.5567E-19; max dE/dt=  3.8686E-19; dE/dt below (all hartree)
+    1      -0.000000000000      0.000000000000      0.000000000000
+    2       0.000000000000     -0.000000000000     -0.000000000000
 
  cartesian coordinates (angstrom) at end:
     1      0.00000000000000     0.00000000000000     0.00000000000000
     2      0.89174993186803     0.89174993186803     0.89174993186803
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 2.5333725E-19 4.0713926E-19   0.000E+00  0.000E+00  0.000E+00 h/b
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 1.2585917E-19 1.9301434E-19   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000    -0.00000000000000     0.00000000000000
-    2      0.00000000000000     0.00000000000000    -0.00000000000000
- frms,max,avg= 1.3027124E-17 2.0935941E-17   0.000E+00  0.000E+00  0.000E+00 e/A
+    1     -0.00000000000000     0.00000000000000     0.00000000000000
+    2      0.00000000000000    -0.00000000000000    -0.00000000000000
+ frms,max,avg= 6.4719383E-18 9.9251955E-18   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  6.740652601000  6.740652601000  6.740652601000 bohr
               =  3.566999727472  3.566999727472  3.566999727472 angstroms
  prteigrs : about to open file t71o_DS2_EIG
@@ -637,7 +639,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  6.81466278249171E+00
+    Kinetic energy  =  6.81466278249170E+00
     Hartree energy  =  1.17150562025742E+00
     XC energy       = -3.12608556991963E+00
     Ewald energy    = -1.27864130979666E+01
@@ -647,16 +649,18 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
     >>>>>>>>> Etotal= -1.07931348897983E+01
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -9.18372648731472E-01
-    Ewald energy    = -1.27864130979666E+01
+    Band energy     = -9.18372648731467E-01
+    Ewald energy    =-1.27864130979666E+01
     PspCore energy  =  9.33164515583050E-01
     Dble-C XC-energy=  1.95457994966221E+00
-    Spherical terms =  2.39063916993749E-02
+    Spherical terms =  2.39063916993750E-02
     >>>> Etotal (DC)= -1.07931348897535E+01
 
   >Total energy in eV           = -2.93696136539060E+02
   >Total DC energy in eV        = -2.93696136537840E+02
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.58776790E-03  sigma(3 2)=  0.00000000E+00
@@ -679,10 +683,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     115.519     115.508
              ecut      1.00000000E+01 Hartree
            etotal1    -1.1455325177E+01
            etotal2    -1.0793134890E+01
-            fcart1     8.7772759395E-32 -8.7772759395E-32  8.7772759395E-32
-                      -8.7772759395E-32  8.7772759395E-32 -8.7772759395E-32
-            fcart2    -6.4338113038E-20 -1.5045772376E-19  4.0713925590E-19
-                       6.4338113038E-20  1.5045772376E-19 -4.0713925590E-19
+            fcart1    -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+                      -0.0000000000E+00 -0.0000000000E+00 -0.0000000000E+00
+            fcart2    -1.9301433911E-19  1.0028370216E-19  1.4499551445E-20
+                       1.9301433911E-19 -1.0028370216E-19 -1.4499551445E-20
 -          fftalg         312
        fockoptmix         201
  fockdownsampling1          1       1       1
@@ -817,8 +821,8 @@ P           mkmem           4
 -
 - [1] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
-- Comment : PAW calculations. Strong suggestion to cite this paper.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#torrent2008
+- Comment: PAW calculations. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
 - [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
@@ -832,51 +836,51 @@ P           mkmem           4
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [5] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          5.5  wall=          5.6
+- Proc.   0 individual time (sec): cpu=          5.8  wall=          6.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered 564 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.5  wall=          5.6
+.Delivered 562 WARNINGs and   4 COMMENTs to log file.
++Overall time at end (sec) : cpu=          5.8  wall=          6.3

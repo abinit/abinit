@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_mkrho
 !! NAME
 !!  m_dfpt_mkrho
@@ -7,7 +6,7 @@
 !! Compute RF charge density rho1(r) and rho1(G) in electrons/bohr**3
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, AR, MB, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -121,7 +120,7 @@ contains
 subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
 & kg,kg1,mband,mgfft,mkmem,mk1mem,mpi_enreg,mpw,mpw1,nband_rbz,&
 & nfft,ngfft,nkpt_rbz,npwarr,npwar1,nspden,nspinor,nsppol,nsym,&
-& occ_rbz,phnons,rhog1,rhor1,rprimd,symafm,symrel,ucvol,wtk_rbz)
+& occ_rbz,phnons,rhog1,rhor1,rprimd,symafm,symrel,tnons,ucvol,wtk_rbz)
 
 !Arguments ------------------------------------
 !scalars
@@ -138,7 +137,8 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  real(dp),intent(in) :: cg1(2,mpw1*nspinor*mband*mk1mem*nsppol),gprimd(3,3)
  real(dp),intent(in) :: occ_rbz(mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: phnons(2,nfft**(1-1/nsym),(nspden/nsppol)-3*(nspden/4))
- real(dp),intent(in) :: rprimd(3,3),wtk_rbz(nkpt_rbz)
+ real(dp),intent(in) :: rprimd(3,3),tnons(3,nsym)
+ real(dp),intent(in) :: wtk_rbz(nkpt_rbz)
  real(dp),intent(out) :: rhog1(2,nfft),rhor1(cplex*nfft,nspden)
 
 !Local variables-------------------------------
@@ -523,7 +523,7 @@ subroutine dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon,istwfk_rbz,&
  call timab(48,2,tsec)
 
  call symrhg(cplex,gprimd,irrzon,mpi_enreg,nfft,nfft,ngfft,nspden,nsppol,nsym,phnons,&
-             rhog1,rhor1,rprimd,symafm,symrel)
+             rhog1,rhor1,rprimd,symafm,symrel,tnons)
 
 !We now have both rho(r) and rho(G), symmetrized, and if nsppol=2
 !we also have the spin-up density, symmetrized, in rhor1(:,2).

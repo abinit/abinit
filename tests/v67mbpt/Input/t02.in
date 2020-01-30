@@ -9,6 +9,7 @@ gwpara      2
 fftgw       11  # Use the coarsest FFT mesh for oscillator (compatible with symmetries)
 
 use_yaml    1   # enable YAML document output for tests
+symsigma    0
 
 # Parameters for the calculation of the WFK file
 nband1      30         # Number of (occ and empty) bands to be computed in the GS part.

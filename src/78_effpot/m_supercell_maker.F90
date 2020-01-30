@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_supercell_maker
 !! NAME
 !! m_supercell_maker
@@ -19,7 +18,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,6 +84,10 @@ module m_supercell_maker
      procedure :: trans_j_and_Rj_noalloc
      procedure :: trans_jlist_and_Rj
      procedure :: rvec_for_each
+
+     ! Wave like quantities:
+     procedure :: generate_wave_scalar   ! s=s0*e^{ikR}
+     procedure :: generate_spin_wave_vectorlist  !vector with rotation angle= 2pi k * R
   end type supercell_maker_t
 
   public :: scmaker_unittest
@@ -319,7 +322,7 @@ contains
   !> @brief generate a wave like quantity. A_sc(R) = A(0)* exp(ikR)
   !>  The A_sc will be allocated. size : (ndim, nA*ncells)
   !>   NOTE: This generate a density wave. For a spin wave,
-  !>         use generate_rotate_wave_vectorlist.
+  !>         use generate_spin_wave_vectorlist.
   !> @param [in] A: a vector quantity. dimension (xyz, iA)
   !> @param [in] kpoint: the wave vector
   !> @param [out] A_sc: indices in supercell.
@@ -347,7 +350,8 @@ contains
 
 
   !-----------------------------------------------------------------------
-  !> @brief generate a spin wave  quantity. rotate by theta(R) = 2pi * k.dot.R, around axis.
+  !> @brief generate a spin wave  quantity. 
+  !>  rotate by theta(R) = 2pi * k.dot.R, around axis.
   !>  The A_sc will be allocated. size : (ndim, nA*ncells)
   !> @param [in] A: a vector quantity. dimension (xyz, iA)
   !> @param [in] kpoint: the wave vector
@@ -356,11 +360,12 @@ contains
   !-----------------------------------------------------------------------
   subroutine generate_spin_wave_vectorlist(self, A, kpoint, axis, A_sc)
     class(supercell_maker_t), intent(inout) :: self
-    real(dp), intent(in) :: A(:, :)
+    real(dp), intent(in) :: A(:, :) !(3, dimension of primitive cell)
     real(dp), intent(in) ::  kpoint(3)
     real(dp), intent(in) ::  axis(3)
-    real(dp), allocatable, intent(inout) :: A_sc(:, :)
+    real(dp), allocatable, intent(inout) :: A_sc(:, :) !(3, dimension of supercell)
     integer :: icell, iA, nA, counter, ndim
+    real(dp):: angle
     ndim=size(A, 1)
     nA=size(A,2)
     if(.not. allocated(A_sc)) then
@@ -368,11 +373,10 @@ contains
     end if
     counter=0
     do icell = 1, self%ncells
-       do iA=1 , nA
+       do iA=1, nA
           counter=counter+1
-          A_sc(:,counter) = rotate_by_angle_around_axis( &
-               &angle=two_pi* DOT_PRODUCT(kpoint,  self%rvecs(:, icell)), &
-               & axis=axis, vec=A(:, iA))
+          angle=two_pi* DOT_PRODUCT(kpoint,  self%rvecs(:, icell))
+          A_sc(:,counter) = rotate_by_angle_around_axis(angle=angle, axis=axis, vec=A(:, iA))
        end do
     end do
   end subroutine generate_spin_wave_vectorlist

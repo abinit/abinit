@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/anaddb
 !! NAME
 !! anaddb
@@ -7,7 +6,7 @@
 !! Main routine for analysis of the interatomic force constants and associated properties.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (XG,DCA,JCC,CL,XW,GA)
+!! Copyright (C) 1999-2020 ABINIT group (XG,DCA,JCC,CL,XW,GA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -93,7 +92,7 @@ program anaddb
  integer,parameter :: rftyp4=4
  integer :: comm,iatom,iblok,iblok_stress,iblok_tmp,idir,ii,index
  integer :: ierr,iphl2,lenstr,mtyp,mpert,msize,natom
- integer :: nsym,ntypat,option,usepaw,nproc,my_rank,ana_ncid,prt_internalstr
+ integer :: nsym,ntypat,usepaw,nproc,my_rank,ana_ncid,prt_internalstr
  logical :: iam_master
  integer :: rfelfd(4),rfphon(4),rfstrs(4),ngqpt_coarse(3)
  integer :: count_wminmax(2)
@@ -112,8 +111,7 @@ program anaddb
  real(dp),allocatable :: rsus(:,:,:)
  real(dp),allocatable :: zeff(:,:,:)
  character(len=10) :: procstr
- character(len=24) :: codename
- character(len=24) :: start_datetime
+ character(len=24) :: codename, start_datetime
  character(len=strlen) :: string
  character(len=fnlen) :: filnam(7),elph_base_name,tmpfilename, phibz_prefix
  character(len=500) :: msg
@@ -166,8 +164,8 @@ program anaddb
  call timab(1, 0, tsec)
 
  ! Initialise the code: write heading, and read names of files.
- if (iam_master) call anaddb_init(filnam)
- call xmpi_bcast (filnam, master, comm, ierr)
+ if (iam_master) call anaddb_init(args%input_path, filnam)
+ call xmpi_bcast(filnam, master, comm, ierr)
 
  ! make log file for non-master procs
  if (.not. iam_master) then
@@ -197,10 +195,8 @@ program anaddb
 
  ! Read the input file, and store the information in a long string of characters
  ! strlen from defs_basis module
- option=1
  if (iam_master) then
-   call instrng (filnam(1),lenstr,option,strlen,string)
-
+   call instrng(filnam(1), lenstr, 1, strlen, string)
    ! To make case-insensitive, map characters to upper case.
    call inupper(string(1:lenstr))
  end if
@@ -638,6 +634,9 @@ program anaddb
 #ifdef HAVE_NETCDF
        iphl2 = 0
        call nctk_defwrite_nonana_terms(ana_ncid, iphl2, inp%nph2l, inp%qph2l, natom, phfrq, displ, "define")
+       if (inp%nlflag == 1) then
+         call nctk_defwrite_nonana_raman_terms(ana_ncid, iphl2, inp%nph2l, natom, rsus, "define")
+       end if
 #endif
      end if
 
@@ -671,6 +670,11 @@ program anaddb
        ! Write Raman susceptibilities
        if (inp%nlflag == 1) then
          call ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm(1),rsus,Crystal%ucvol)
+#ifdef HAVE_NETCDF
+         if (my_rank == master) then
+           call nctk_defwrite_nonana_raman_terms(ana_ncid, iphl2, inp%nph2l, natom, rsus, "write")
+         end if
+#endif
        end if
 
        ! Prepare the evaluation of the Lyddane-Sachs-Teller relation
@@ -759,6 +763,11 @@ program anaddb
 
    rsus = zero
    call ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq(1),qphon,qphnrm(1),rsus,Crystal%ucvol)
+#ifdef HAVE_NETCDF
+   if (my_rank == master) then
+     call nctk_defwrite_raman_terms(ana_ncid, natom, rsus, phfrq(1))
+   end if
+#endif
 
    call electrooptic(dchide,inp%dieflag,epsinf,fact_oscstr,natom,phfrq,inp%prtmbm,rsus,Crystal%ucvol)
  end if ! condition on nlflag

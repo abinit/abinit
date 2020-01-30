@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_cgwf
 !! NAME
 !!  m_cgwf
@@ -7,7 +6,7 @@
 !!  Conjugate-gradient eigensolver.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
+!!  Copyright (C) 2008-2020 ABINIT group (DCA, XG, GMR, MT, MVeithen, ISouza, JIniguez)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1218,7 +1217,7 @@ subroutine cgwf(berryopt,cg,cgq,chkexit,cpus,dphase_k,dtefield,&
    ! switch from ikptf to ikpt
    ikptf = ikpt
    call xmpi_allgather(ikptf,ikptf_recv,spaceComm_distrb,ierr)
-   call pawcprj_mpi_allgather(cprj_k,cprj_gat,natom,nspinor*mband,dimlmn,ncpgr,nproc_distrb,&
+   call pawcprj_mpi_allgather(cprj_k,cprj_gat,natom,nspinor*mband,1,dimlmn,ncpgr,nproc_distrb,&
 &   spaceComm_distrb,ierr,rank_ordered=.true.)
    do iproc = 1, nproc_distrb
      icp2=nspinor*mband*(iproc-1)
@@ -2000,7 +1999,6 @@ subroutine mksubham(cg,ghc,gsc,gvnlxc,iblock,icg,igsc,istwf_k,&
 end subroutine mksubham
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/make_grad_berry
 !! NAME
 !! make_grad_berry
@@ -2010,7 +2008,7 @@ end subroutine mksubham
 !! electric field case
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group
+!! Copyright (C) 1998-2020 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lattice_langevin_mover
 !! NAME
 !! m_lattice_langevin_mover
@@ -22,7 +21,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -49,6 +48,7 @@ module m_lattice_langevin_mover
   use m_lattice_mover, only: lattice_mover_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_random_xoroshiro128plus, only:  rng_t
+  use m_hashtable_strval, only: hash_table_t
 !!***
 
   implicit none
@@ -147,11 +147,13 @@ contains
   !    The other variables are only required if there is coupling with
   !    the mover variable.
   !-------------------------------------------------------------------!
-  subroutine run_one_step(self, effpot,displacement, strain, spin, lwf )
+  subroutine run_one_step(self, effpot,displacement, strain, spin, lwf , energy_table)
     class(lattice_langevin_mover_t), intent(inout) :: self
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    type(hash_table_t), optional, intent(inout) :: energy_table
     integer :: i
+    character(len=40) :: key
 
     ! do not use displacement and strain because they are stored in the mover.
     ABI_UNUSED_A(displacement)
@@ -160,9 +162,12 @@ contains
     self%energy = 0.0
     self%forces(:,:) =0.0
     call effpot%calculate( displacement=self%displacement, strain=self%strain, &
-         & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
+         & spin=spin, lwf=lwf, force=self%forces, stress=self%stress, &
+         & energy=self%energy, energy_table=energy_table)
     call self%rng%rand_normal_array(self%xi, 3*self%natom)
     call self%rng%rand_normal_array(self%eta, 3*self%natom)
+
+
 
     ! First half of velocity update
     do i =1, self%natom
@@ -179,13 +184,20 @@ contains
     self%energy=0.0
     self%forces=0.0
     call effpot%calculate( displacement=self%displacement, strain=self%strain, &
-         & spin=spin, lwf=lwf, force=self%forces, stress=self%stress,  energy=self%energy)
+         & spin=spin, lwf=lwf, force=self%forces, stress=self%stress, &
+         & energy=self%energy, energy_table=energy_table)
     do i =1, self%natom
        self%current_vcart(:,i) = self%current_vcart(:,i) + &
             &self%c1 * self%forces(:,i) / self%masses(i) - &
             & self%c2 * self%current_vcart(:,i) + &
             & self%c3(i) * self%xi(:, i) - self%c4(i) * self%eta(:,i)
     end do
+
+    call self%get_T_and_Ek()
+    if (present(energy_table)) then
+      key = 'Lattice kinetic energy'
+       call energy_table%put(key, self%Ek)
+    end if
 
   end subroutine run_one_step
 

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_nstwf
 !! NAME
 !!  m_dfpt_nstwf
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group ()
+!!  Copyright (C) 2008-2020 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -101,7 +100,7 @@ contains
 !!  - on-site contributions.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (MT, AM)
+!! Copyright (C) 2010-2020 ABINIT group (MT, AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -238,7 +237,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 &                  mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,ncpgr,nfftf,ngfftf,nhat,nhat1,&
 &                  nkpt_rbz,nkxc,npwarr,npwar1,nspden,nspinor,nsppol,nsym1,n3xccc,occkq,occ_rbz,&
 &                  paw_an,paw_an1,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoij,&
-&                  pawrhoij1,pawtab,phnons1,ph1d,ph1df,psps,rhog,rhor,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,&
+&                  pawrhoij1,pawtab,phnons1,ph1d,ph1df,psps,rhog,rhor,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &                  ucvol,usecprj,usepaw,usexcnhat,useylmgr1,vhartr1,vpsp1,vtrial,vtrial1,vxc,&
 &                  wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr1)
 
@@ -278,7 +277,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: ph1df(2,3*(2*mgfftf+1)*dtset%natom),rhog(2,nfftf)
  real(dp),intent(in) :: rhor(cplex*nfftf,nspden),rhor1(cplex*nfftf,nspden),rmet(3,3),rprimd(3,3)
- real(dp),intent(in) :: vhartr1(cplex*nfftf),vtrial1(cplex*nfftf,nspden),vxc(nfftf,nspden)
+ real(dp),intent(in) :: tnons1(3,nsym1),vhartr1(cplex*nfftf),vtrial1(cplex*nfftf,nspden),vxc(nfftf,nspden)
  real(dp),intent(in) :: wtk_rbz(nkpt_rbz),xred(3,dtset%natom)
  real(dp),intent(in) :: ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylm1(mpw1*mk1mem,psps%mpsang*psps%mpsang*psps%useylm)
@@ -1498,7 +1497,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        ABI_ALLOCATE(drho1wfg,(2,dtset%nfft))
        call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
 &       nspden,nsppol,nsym1,phnons1,drho1wfg,drho1wfr(:,:,idir1),&
-&       rprimd,symaf1,symrl1)
+&       rprimd,symaf1,symrl1,tnons1)
        if (dtset%pawstgylm/=0) then
          option=0
          call pawnhatfr(option,idir1,ipert1,my_natom,dtset%natom,nspden,dtset%ntypat,&
@@ -1740,7 +1739,7 @@ end subroutine dfpt_nstpaw
 !! Only for norm-conserving pseudopotentials (no PAW)
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
+!! Copyright (C) 1999-2020 ABINIT group (XG,AR,MB,MVer,MT, MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

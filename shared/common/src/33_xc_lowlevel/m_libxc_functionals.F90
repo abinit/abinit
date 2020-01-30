@@ -10,7 +10,7 @@
 !!  Also contains basic container datatype for LibXC interfacing.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MOliveira,LHH,FL,GMR,MT)
+!! Copyright (C) 2008-2020 ABINIT group (MOliveira,LHH,FL,GMR,MT)
 !! This file is distributed under the terms of the
 !! GNU Gener_al Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1300,13 +1300,13 @@ end function libxc_functionals_nspin
        MSG_BUG(msg)
      end if
    end if
- endif    
+ endif
 
 !Inititalize all output arrays to zero
  exc=zero ; vxc=zero
  if (present(dvxc)) dvxc=zero
  if (present(d2vxc)) d2vxc=zero
- if (is_gga.or.is_mgga.and.present(vxcgr)) vxcgr=zero
+ if ((is_gga.or.is_mgga).and.present(vxcgr)) vxcgr=zero
  if (is_mgga.and.present(vxclrho)) vxclrho=zero
  if (is_mgga.and.present(vxctau)) vxctau=zero
 
@@ -1691,7 +1691,7 @@ subroutine libxc_functionals_set_hybridparams(hyb_mixing,hyb_mixing_sr,hyb_range
      xc_func%hyb_mixing=hyb_mixing
      alpha_c=real(xc_func%hyb_mixing,kind=C_DOUBLE)
      if (is_pbe0) then
-       npar_c=int(1,kind=C_INT) ; param_c(1)=alpha_c 
+       npar_c=int(1,kind=C_INT) ; param_c(1)=alpha_c
        call xc_func_set_params(xc_func%conf,param_c,npar_c)
      endif
    endif

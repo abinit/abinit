@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_lattice_mover
 !! NAME
 !! m_lattice_mover
@@ -16,7 +15,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +41,7 @@ module m_lattice_mover
   use m_abstract_mover, only: abstract_mover_t
   use m_multibinit_cell, only: mbcell_t, mbsupercell_t
   use m_random_xoroshiro128plus, only:  rng_t
-
+  use m_hashtable_strval, only: hash_table_t
 !!***
 
   implicit none
@@ -110,10 +109,11 @@ contains
     ABI_ALLOCATE(self%current_vcart, (3, self%natom))
     ABI_ALLOCATE(self%forces, (3,self%natom))
     self%is_null=.False.
-    self%strain(:,:) =0.0
-    self%stress(:,:) =0.0
-    self%forces(:,:) =0.0
-    self%displacement(:,:) =0.0
+    self%strain(:,:) = 0.0
+    self%stress(:,:) = 0.0
+    self%forces(:,:) = 0.0
+    self%displacement(:,:) = 0.0
+    self%current_vcart(:,:) = 0.0
     call self%set_params(params)
     call self%set_rng(rng)
   end subroutine initialize
@@ -158,22 +158,27 @@ contains
   !    if mode=1, use a Boltzman distribution to init the velocities.
   !    if mode=2, ...
   !-------------------------------------------------------------------!
-  subroutine set_initial_state(self, mode)
+  subroutine set_initial_state(self, mode, restart_hist_fname)
     ! set initial positions, spin, etc
     class(lattice_mover_t), intent(inout) :: self
     integer, optional, intent(in) :: mode
+    character(len=*), optional, intent(in) :: restart_hist_fname
+
+
     real(dp) :: xi(3, self%natom)
     integer :: i
+
+    ABI_UNUSED(restart_hist_fname)
 
     if(mode==1) then ! using a boltzmann distribution. 
        ! Should only be used for a constant Temperature mover
        ! which includes:
-       !102:    Langevin
-       !103:    Brendesen
+       !   102:    Langevin
+       !   103:    Brendesen
        if (.not.( &
           self%latt_dynamics==101 .or.  &  ! TODO remove
           self%latt_dynamics==102 .or. self%latt_dynamics==103 ) ) then
-          MSG_BUG("Only set lattice initial state with a Boltzmann distribution in a constant T mover.")
+          MSG_ERROR("Only set lattice initial state with a Boltzmann distribution in a constant T mover.")
        end if
        call self%rng%rand_normal_array(xi, 3*self%natom)
        do i=1, self%natom
@@ -181,9 +186,20 @@ contains
        end do
        call self%force_stationary()
        self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)
-    !else
+       call self%get_T_and_Ek()
+    else if(mode==2) then ! Use reference structure and 0 velocity.
        ! other modes.
+       if(self%latt_dynamics==102 .or. self%latt_dynamics==103 ) then
+           MSG_ERROR("Displacement and velocity set to zero in a NVT mover.")
+       end if
+       do i=1, self%natom
+          self%current_vcart(:,i) = 0.0
+       end do
+       self%current_xcart(:, :) = self%supercell%lattice%xcart(:,:)
     end if
+
+    ABI_UNUSED(restart_hist_fname)
+
   end subroutine set_initial_state
 
 
@@ -225,23 +241,36 @@ contains
   !> strain: Also should NOT be provided.
   !> spin: should be provided only if there is spin-lattice coupling
   !> lwf : should be provided only if there is lattice-lwf coupling (unlikely)
+  !> energy_table: energy_table.
   !-------------------------------------------------------------------!
-  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf)
+  subroutine run_one_step(self, effpot, displacement, strain, spin, lwf, energy_table)
     ! run one step. (For MC also?)
-    class(lattice_mover_t), intent(inout) :: self
-    ! array of effective potentials so that there can be multiple of them.
+    class(lattice_mover_t),      intent(inout) :: self    ! array of effective potentials so that there can be multiple of them.
     class(abstract_potential_t), intent(inout) :: effpot
-    real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    real(dp), optional,          intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    type(hash_table_t), optional, intent(inout) :: energy_table
+
+    character(len=40) :: key
+
     if(present(displacement) .or. present(strain)) then
        MSG_ERROR("displacement and strain should not be input for lattice mover")
     end if
+
+    MSG_BUG("The abstract lattice mover is used, which should be a bug.")
+
     ABI_UNUSED_A(self)
     ABI_UNUSED_A(effpot)
     ABI_UNUSED_A(displacement)
     ABI_UNUSED_A(strain)
     ABI_UNUSED_A(spin)
     ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(energy_table)
 
+    call self%get_T_and_Ek()
+    if (present(energy_table)) then
+      key = 'Lattice kinetic energy'
+      call energy_table%put(key, self%Ek)
+    end if
   end subroutine run_one_step
 
 
@@ -266,12 +295,13 @@ contains
   !-------------------------------------------------------------------!
   ! run from begining to end.
   !-------------------------------------------------------------------!
-  subroutine run_time(self, effpot, displacement, strain, spin, lwf)
+  subroutine run_time(self, effpot, displacement, strain, spin, lwf, energy_table)
     ! run one step. (For MC also?)
     class(lattice_mover_t), intent(inout) :: self
     ! array of effective potentials so that there can be multiple of them.
     class(abstract_potential_t), intent(inout) :: effpot
     real(dp), optional, intent(inout) :: displacement(:,:), strain(:,:), spin(:,:), lwf(:)
+    type(hash_table_t), optional, intent(inout) :: energy_table
     integer :: i, nstep
     character(len=90) :: msg
     if(present(displacement) .or. present(strain)) then
@@ -281,11 +311,9 @@ contains
     ABI_UNUSED_A(effpot)
     ABI_UNUSED_A(spin)
     ABI_UNUSED_A(lwf)
+    ABI_UNUSED_A(energy_table)
 
-    !TODO: add set_initial mode to input file
-    call self%set_initial_state(mode=1)
 
-    
     msg=repeat("=", 90)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
@@ -304,14 +332,13 @@ contains
 
     nstep=floor(self%thermal_time/self%dt)
     do i =1, nstep
-       call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf)
+       call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
     end do
 
     nstep=floor(self%total_time/self%dt)
     do i =1, nstep
-       call self%get_T_and_Ek()
        !print *, "Step: ", i,  "    T: ", self%T_ob*Ha_K, "    Ek:", self%Ek, "Ev", self%energy, "Etot", self%energy+self%Ek
-       call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf)
+       call self%run_one_step(effpot=effpot, spin=spin, lwf=lwf, energy_table=energy_table)
        
        write(msg, "(I13, 4X, F15.5, 4X, ES15.5, 4X, ES15.5, 4X, ES15.5)")  i, self%T_ob*Ha_K, &
             & self%Ek/self%supercell%ncell, self%energy/self%supercell%ncell, &
@@ -325,8 +352,6 @@ contains
     msg=repeat("=", 90)
     call wrtout(std_out,msg,'COLL')
     call wrtout(ab_out, msg, 'COLL')
-
-
 
   end subroutine run_time
 

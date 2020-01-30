@@ -33,7 +33,8 @@ cpp_explicit = [
 cpp_ignored = [
   "HAVE_CONFIG_H",
   "HAVE_IBM6",
-  "LIBPAW_HAVE_FOX"
+  "HAVE_LIBPAW_ABINIT",
+  "LIBPAW_HAVE_FOX",
 ]
 
 cpp_keywords = ("#","endif","ifdef","ifndef","elif","if","else","defined","[<>=]=?[ ]*[0-9]*","\\|\\|","&&","\\(","\\)","!")
@@ -69,7 +70,7 @@ def main():
                   cpp_libpaw.append(tmp_def)
 
   # Extract CPP options from the libTetra header files
-  libtetra_dir = os.path.join(top, "src", "17_libtetra_ext")
+  libtetra_dir = os.path.join(top, "shared", "common", "src", "17_libtetra_ext")
   assert os.path.isdir(libtetra_dir)
   cpp_libtetra = list()
   for root,dirs,files in os.walk(libtetra_dir):
@@ -88,14 +89,13 @@ def main():
   assert os.path.isdir(m4_path)
   for root,dirs,files in os.walk(m4_path):
     for src in files:
-      if not re_m4file.search(src): continue
-      with open(os.path.join(root, src), "rt") as fh:
-          for line in fh:
-            if re_acdef.search(line):
-              tmp_def = re.sub(".*AC_DEFINE\\([\\[]?([^\\],]*).*","\\1",line).strip()
-              if not tmp_def in cpp_buildsys:
-                cpp_buildsys.append(tmp_def)
-
+      if ( src.endswith(".m4") ):
+        with open(os.path.join(root, src), "rt") as fh:
+            for line in fh:
+              if re_acdef.search(line):
+                tmp_def = re.sub(".*AC_DEFINE\\([\\[]?([^\\],]*).*","\\1",line).strip()
+                if not tmp_def in cpp_buildsys:
+                  cpp_buildsys.append(tmp_def)
   with open(os.path.join(top, "configure.ac"), "rt") as fh:
       for line in fh:
         if ( re_acdef.search(line) ):

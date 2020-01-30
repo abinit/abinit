@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_spmat_ndcoo
 !! NAME
 !! m_spmat_ndcoo
@@ -13,7 +12,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -57,8 +56,8 @@ module m_spmat_NDCOO
   type, public :: ndcoo_mat_t
      integer :: ndim=0                  ! number of dimensions
      integer :: nnz=0                   ! Number of (None-zero) entries. 
-     integer, allocatable :: mshape(:)  ! the shape of the matrix. len(mshpae)=ndim.
-     ! Note that it is not checked if the index by the shaped. If a the shape for some
+     integer, allocatable :: mshape(:)  ! the shape of the matrix. len(mshape)=ndim.
+     ! Note that it is not checked if the index by the shaped. If the shape for some
      ! dimension is unkown, it can be set to -1.
      type(int2d_array_type) :: ind      ! The index array
      type(real_array_type) :: val       ! The value array
@@ -75,7 +74,11 @@ module m_spmat_NDCOO
      procedure :: get_ind_inz           ! get the z'th indices.
      procedure :: get_ind               ! get the indices for all in a dimension
      procedure :: group_by_1dim         ! group the matrix by first dimension
-     procedure :: mv1vec                ! multiply vector
+     procedure :: mv1vec                ! multiply vector, return NDCOO entity with one dimension less
+     procedure :: mv2vec                ! multiply 2 vectors, return NDCOO entity with two dimensions less
+     procedure :: vec_product2d         ! multiply 2d matrix with one vector, return vector
+     procedure :: vec_product           ! multiply 3d matrix with two vectors, return vector
+     procedure :: vec_product4d         ! multiply 4d matrix with three vectors
      !procedure :: print
   end type ndcoo_mat_t
 
@@ -247,43 +250,45 @@ contains
   !-------------------------------------------------------------------!
   subroutine group_by_1dim(self, ngroup, i1_list, istartend)
     class(ndcoo_mat_t), intent(inout) :: self
-    integer, intent(inout) :: ngroup
+    integer,            intent(inout) :: ngroup
     integer, allocatable, intent(inout) :: i1_list(:), istartend(:)
+
     integer :: i, ii
     type(int_array_type) :: j1, jstartend
+
     if (.not. (self%is_unique))  then
-       call self%sum_duplicates()
+      call self%sum_duplicates()
     end if
     if (self%nnz<1) then
-       ngroup=0
+      ngroup=0
     else if (self%nnz==1) then
-       i=1
-       ii=self%ind%data(1,i)
-       call j1%push(ii)
-       call jstartend%push(1)
-       call jstartend%push(2)
+      i=1
+      ii=self%ind%data(1,i)
+      call j1%push(ii)
+      call jstartend%push(1)
+      call jstartend%push(2)
     else
-       i=1
-       ii=self%ind%data(1,i)
-       call j1%push(ii)
-       call jstartend%push(i)
-       do i=2, self%nnz
-          ii=self%ind%data(1,i)
-          if(ii == self%ind%data(1, i-1)) then
-             cycle
-          else
-             call j1%push(ii)
-             call jstartend%push(i)
-          end if
-       end do
-       call jstartend%push(self%nnz+1)
+      i=1
+      ii=self%ind%data(1,i)
+      call j1%push(ii)
+      call jstartend%push(i)
+      do i=2, self%nnz
+        ii=self%ind%data(1,i)
+        if(ii == self%ind%data(1, i-1)) then
+          cycle
+        else
+          call j1%push(ii)
+          call jstartend%push(i)
+        end if
+      end do
+      call jstartend%push(self%nnz+1)
     end if
     ngroup=j1%size
     if(ngroup>0) then
-       ABI_ALLOCATE(i1_list, (ngroup))
-       ABI_ALLOCATE(istartend, (ngroup+1))
-       i1_list(:)=j1%data(1: j1%size)
-       istartend(:)=jstartend%data(1: jstartend%size)
+      ABI_ALLOCATE(i1_list, (ngroup))
+      ABI_ALLOCATE(istartend, (ngroup+1))
+      i1_list(:)=j1%data(1: j1%size)
+      istartend(:)=jstartend%data(1: jstartend%size)
     end if
     call j1%finalize()
     call jstartend%finalize()
@@ -304,19 +309,84 @@ contains
   end function get_ind
 
 
-  ! matrix vector product. 
-  subroutine mv1vec(self, vec, i, res)
+  ! matrix vector product
+  subroutine mv1vec(self, vec, iv, res)
     class(ndcoo_mat_t), intent(inout) :: self
-    real(dp), intent(in) :: vec(:)
-    integer ,intent(in) :: i               !
+    real(dp),           intent(in)    :: vec(:)
+    integer,            intent(in)    :: iv  ! which index is used for multiplication
     class(ndcoo_mat_t), intent(inout) :: res ! result
-    !integer :: iind
-    !TODO: to be implemented
-    ABI_UNUSED_A(self)
-    ABI_UNUSED_A(vec)
-    ABI_UNUSED_A(i)
-    ABI_UNUSED_A(res)
+
+    integer :: iind, iiv, j, jv 
+    integer :: ind(1:res%ndim)
+    real(dp) :: val
+
+    if(self%ndim .ne. res%ndim+1) then
+      MSG_ERROR('Dimension of resulting matrix is not equal to (dimension of initial matrix -1)')
+    endif
+
+    do iind =1 , self%nnz
+      iiv=self%ind%data(iv, iind)
+      jv=0
+      do j=1, self%ndim
+        if(j.ne.iv) then
+          jv=jv+1
+          ind(jv) = self%ind%data(j, iind)
+        endif
+      enddo
+      val = self%val%data(iind)*vec(iiv)
+      call res%add_entry(ind, val)
+    end do
+
+    call sum_duplicates(res)
+
   end subroutine mv1vec
+
+
+  subroutine mv2vec(self, veci, vecj, iv, jv, res)
+    class(ndcoo_mat_t), intent(inout) :: self
+    real(dp),           intent(in)    :: veci(:), vecj(:) ! vectors to be multiplied with
+    integer,            intent(in)    :: iv, jv  ! which indices are used for multiplication
+    class(ndcoo_mat_t), intent(inout) :: res ! result
+
+    integer :: iind, iiv, ijv, jnew, j 
+    integer :: ind(1:res%ndim)
+    real(dp) :: val
+
+    if(self%ndim .ne. res%ndim+2) then
+      MSG_ERROR('Dimension of resulting matrix is not equal to (dimension of initial matrix -2)')
+    endif
+    do iind =1 , self%nnz
+      iiv=self%ind%data(iv, iind)
+      ijv=self%ind%data(jv, iind)
+      jnew=0
+      do j=1, self%ndim
+        if(j.ne.iv .and. j.ne.jv) then
+          jnew=jnew+1
+          ind(jnew) = self%ind%data(j, iind)
+        endif
+      enddo
+      val = self%val%data(iind)*veci(iiv)*vecj(ijv) 
+      call res%add_entry(ind, val) 
+    end do
+    call sum_duplicates(res)
+
+  end subroutine mv2vec
+
+
+  subroutine vec_product2d(self, iv, veci, rv, res)
+    class(ndcoo_mat_t), intent(inout) :: self
+    real(dp), intent(in) :: veci(:)
+    integer ,intent(in) :: iv, rv               !
+    real(dp), intent(inout) :: res(:)
+    integer :: iind, iiv, irv
+    do iind =1 , self%nnz
+      iiv=self%ind%data(iv, iind)
+      irv=self%ind%data(rv, iind)
+      res(irv) = res(irv) + self%val%data(iind) * veci(iiv)
+    end do
+  end subroutine vec_product2d
+
+
 
   ! matrix vector vector  product. matrix should be dim3.
   ! n(vector)=ndim-1
@@ -336,6 +406,28 @@ contains
       res(irv) = res(irv) + self%val%data(iind) * veci(iiv)*vecj(ijv)
     end do
   end subroutine vec_product
+
+
+  ! matrix vector vector vector product. matrix should be dim4.
+  ! n(vector)=ndim-1
+  ! which returns a vecor
+  ! res_r = \sum_ijk M_{ijkr} V_i V_j V_k
+  ! i, j, k, r can be in any order.
+  subroutine vec_product4d(self, iv, veci, jv, vecj, kv, veck, rv, res)
+    class(ndcoo_mat_t), intent(inout) :: self
+    real(dp), intent(in) :: veci(:), vecj(:), veck(:)
+    integer ,intent(in) :: iv, jv, kv, rv               !
+    real(dp), intent(inout) :: res(:)
+    integer :: iind, iiv, ijv, ikv, irv
+    do iind =1 , self%nnz
+      iiv=self%ind%data(iv, iind)
+      ijv=self%ind%data(jv, iind)
+      ikv=self%ind%data(kv, iind)
+      irv=self%ind%data(rv, iind)
+      res(irv) = res(irv) + self%val%data(iind) * veci(iiv)*vecj(ijv)*veck(ikv)
+    end do
+  end subroutine vec_product4d
+
 
 
   subroutine test_ndcoo()

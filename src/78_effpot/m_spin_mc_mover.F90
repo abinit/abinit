@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_spin_mc_mover
 !! NAME
 !! m_spin_mc_mover
@@ -19,7 +18,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (hexu)
+!! Copyright (C) 2001-2020 ABINIT group (hexu)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -37,6 +36,7 @@
     use m_errors
     use m_abstract_potential, only: abstract_potential_t
     use m_random_xoroshiro128plus, only: rng_t
+    use m_hashtable_strval, only: hash_table_t
     implicit none
 !!***
     private

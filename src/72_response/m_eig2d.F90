@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_eig2d
 !! NAME
 !!  m_eig2d
@@ -9,7 +8,7 @@
 !!  displacements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2019 ABINIT group (SP, PB, XG)
+!! Copyright (C) 2014-2020 ABINIT group (SP, PB, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -2,22 +2,22 @@
 authors: YP
 ---
 
-# Developing for ABINIT  
+# Developing for ABINIT
 
-## Introducing ABINIT to new developers 
+## Introducing ABINIT to new developers
 
 WARNING : some parts are severely outdated ...
 
 This tutorial introduces ABINIT to new developers. We want here to give a
 first insight into the internals of ABINIT. In other words, you will look at
 what's under the hood. Being an ABINIT user is not required, though it will help
-a lot, in particular when writing a test case for your contribution. 
+a lot, in particular when writing a test case for your contribution.
 Some experience in programming _is_ necessary if you want to take maximum
 benefit from this tutorial. In particular, some ease with Fortran 90, 95 or 2003
 will be truly welcome. Familiarity with the unix command line will be important as well.
 
 ## 1 Context
-  
+
 The ABINIT package is aimed at being used by different groups of people,
 without mandatory control by the main contributors of the ABINIT group. In the
 same way, the ABINIT development project is fundamentally open to the
@@ -48,14 +48,14 @@ scripts, known as abirules, checking for the presence of documentation, absence
 of unused variables, etc...
 
 A lot of information for the ABINIT developers can be found in the
-developer's corner of the [ABINIT wiki](https://wiki.abinit.org/doku.php), especially, 
+developer's corner of the [ABINIT wiki](https://wiki.abinit.org/doku.php), especially,
 [an overview of ABINIT development](https://wiki.abinit.org/doku.php?id=developers:overview),
 [git(lab) specificities](https://wiki.abinit.org/doku.php?id=developers:git:specificities_git_abinit),
 [buildbot and the test farm](https://wiki.abinit.org/doku.php?id=bb:overview),
 as well as in [[https://docs.abinit.org/developers/abimkdocs|the ABINIT doc]].
 
 ## 2 Objectives
-  
+
 The main goals of this tutorial are to provide you with a useful understanding of
 the source tree structure and the build process, as well as to sensibilize you
 to the rules and procedures followed for the development of ABINIT. In the
@@ -75,7 +75,7 @@ For this tutorial, your input variable will be a real number called " _tutorial_
 ". The task devoted to your routine is just to print this variable.
 
 ## 3 Tasks
-  
+
 #### Get the source and compile the code
 
 There are two ways of getting the source code of ABINIT:
@@ -83,7 +83,7 @@ There are two ways of getting the source code of ABINIT:
   * directly from the ABINIT web site ([abinit.org/](https://www.abinit.org/)) by downloading the latest production tarball;
   * from the ABINIT gitlab git repository. This is favored, as it allows easier integration and merging, testing, etc...
 
-While the first method is commonplace, the second one requires you to know how to use git(lab). 
+While the first method is commonplace, the second one requires you to know how to use git(lab).
 Please see the [ABINIT gitlab Wiki section](http://wiki.abinit.org/doku.php?id=developers:specificities_git_abinit/).
 
 Once you have got the tarball, uncompress it by typing:
@@ -91,7 +91,7 @@ Once you have got the tarball, uncompress it by typing:
     tar xvzf abinit-<version> .tar.gz
 
 where _<version>_ is the version number you downloaded, e.g. "8.6.3". Then go
-into the newly-created _abinit- <version>_ directory and have a look at it. 
+into the newly-created _abinit- <version>_ directory and have a look at it.
 Then answer the following questions:
 
 Q1. If you need off-line documentation, in which directories will you look?
@@ -113,7 +113,7 @@ Before actually starting the compilation, type:
     ./configure --help
 
 and read carefully the output. You might then find useful to have a look at
-the template for config files stored in _~abinit/doc/build/config-template.ac_
+the template for config files stored in _~abinit/doc/build/config-template.ac9_
 which will provide you with more details on the configuration. Other example
 config files in that subdirectory can be used to set up your build more
 quickly.  If you have a configuration file called _~/.abinit/build/hostname.ac_

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_common
 !! NAME
 !!  m_common
@@ -8,7 +7,7 @@
 !!  Mainly printing routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1772,6 +1771,9 @@ end subroutine prtene
 !!  pseudopotential headers, maxval of dimensions needed in outvars
 !!
 !! INPUTS
+!!  input_path: Input filename specifed on the command line. zero lenght if files file syntax is used.
+!!    Mainly used to check whether pseudos are defined in the input to avoid entering the files file
+!!    branch that prompts for pseudos.
 !!  path: Input Filename
 !!  comm: MPI communicator
 !!
@@ -1792,14 +1794,14 @@ end subroutine prtene
 !!
 !! SOURCE
 
-subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
+subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(out) :: lenstr, ndtset
  type(ab_dimensions),intent(out) :: mx
  character(len=strlen), intent(out) :: string
- character(len=*),intent(in) :: path
+ character(len=*),intent(in) :: input_path, path
  integer,intent(in) :: comm
  integer,intent(out) :: timopt, dmatpuflag
 !arrays
@@ -1816,24 +1818,23 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  integer,allocatable :: mband_upper_(:)
  real(dp) :: ecut_tmp(3,2,10),tsec(2)
  real(dp),allocatable :: zionpsp(:)
- character(len=fnlen), allocatable :: pspfilnam_(:)
+ character(len=fnlen), allocatable :: pspfilnam_(:), pseudo_paths(:)
 
 !************************************************************************
 
- ! Call the parser from the parser module.
  me = xmpi_comm_rank(comm); nprocs = xmpi_comm_size(comm)
 
  ! Read the file, stringify it and return the number of datasets.
  call parsefile(path, lenstr, ndtset, string, comm)
 
  ndtset_alloc = ndtset; if (ndtset == 0) ndtset_alloc=1
- ABI_DATATYPE_ALLOCATE(dtsets, (0:ndtset_alloc))
+ ABI_MALLOC(dtsets, (0:ndtset_alloc))
 
  timopt = 1; if (xmpi_paral==1) timopt = 0
 
  ! Continue to analyze the input string, get upper dimensions, and allocate the remaining arrays.
  call invars0(dtsets, istatr, istatshft, lenstr, msym, mx%natom, mx%nimage, mx%ntypat, &
-              ndtset, ndtset_alloc, npsp, papiopt, timopt, string, comm)
+              ndtset, ndtset_alloc, npsp, pseudo_paths, papiopt, timopt, string, comm)
 
  ! Enable PAPI timers
  call time_set_papiopt(papiopt)
@@ -1845,48 +1846,64 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
  call timab(41,2,tsec)
  call timab(timopt,5,tsec)
 
- ! Finish to read the "file" file completely, as npsp is known,
- ! and also initialize pspheads, that contains the important information
+ ! Initialize pspheads, that contains the important information
  ! from the pseudopotential headers, as well as the psp filename
-
  call timab(42,1,tsec)
 
  usepaw = 0
- ABI_DATATYPE_ALLOCATE(pspheads,(npsp))
+ ABI_MALLOC(pspheads, (npsp))
  if (npsp > 10) then
    MSG_BUG('ecut_tmp is not well defined.')
  end if
  ecut_tmp = -one
 
  pspheads(:)%usewvl = dtsets(1)%usewvl
- if (me == 0) then
-    !if (.not. present(pspfilnam)) then
-    ! Read the name of the psp file
-    ABI_MALLOC(pspfilnam_,(npsp))
-    do ipsp=1,npsp
-      write(std_out,'(/,a)' )' Please give name of formatted atomic psp file'
-      read (std_in, '(a)' , iostat=ios ) filpsp
-      ! It might be that a file name is missing
-      if (ios/=0) then
-        write(msg, '(7a)' )&
-        'There are not enough names of pseudopotentials',ch10,&
-        'provided in the files file.',ch10,&
-        'Action: check first the variable ntypat (and/or npsp) in the input file;',ch10,&
-        'if they are correct, complete your files file.'
-        MSG_ERROR(msg)
-      end if
-      pspfilnam_(ipsp) = trim(filpsp)
-      write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(filpsp)
-    end do ! ipsp=1,npsp
 
+ if (me == 0) then
+    ABI_MALLOC(pspfilnam_, (npsp))
+
+    if (len_trim(pseudo_paths(1)) == 0) then
+      ! Enter Legacy `files file` mode --> Read the name of the psp file from files file.
+
+      ! Catch possible mistake done by user (input without pseudos and `abinit t01.in` syntax)
+      ! else the code starts to prompt for pseudos and execution gets stuck
+      if (len_trim(input_path) /= 0) then
+        MSG_ERROR("`pseudos` variable must be specified in input when the code is invoked with the `abinit t01.in` syntax")
+      end if
+
+      ! Finish to read the "file" file completely, as npsp is known,
+      do ipsp=1,npsp
+        write(std_out,'(/,a)' )' Please give name of formatted atomic psp file (and finish with a newline character)'
+        read (std_in, '(a)' , iostat=ios ) filpsp
+        ! It might be that a file name is missing
+        if (ios /= 0) then
+          write(msg, '(5a)' )&
+          'There are not enough names of pseudopotentials provided in the files file.',ch10,&
+          'Action: check first the variable ntypat (and/or npsp) in the input file;',ch10,&
+          'if they are correct, complete your files file.'
+          MSG_ERROR(msg)
+        end if
+        pspfilnam_(ipsp) = trim(filpsp)
+        write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(filpsp)
+      end do ! ipsp
+
+    else
+      ! Get pseudopotential paths from input file.
+      pspfilnam_ = pseudo_paths
+      do ipsp=1,npsp
+        write(std_out,'(a,i0,2a)' )' For atom type ',ipsp,', psp file is ',trim(pspfilnam_(ipsp))
+      end do
+    end if
+
+    ! Now read the psp headers
     call inpspheads(pspfilnam_, npsp, pspheads, ecut_tmp)
     ABI_FREE(pspfilnam_)
-    !else
-    !   call inpspheads(pspfilnam, npsp, pspheads, ecut_tmp)
-    !end if
+
     if (minval(abs(pspheads(1:npsp)%pspcod - 7)) == 0) usepaw=1
     if (minval(abs(pspheads(1:npsp)%pspcod - 17)) == 0) usepaw=1
  end if
+
+ ABI_FREE(pseudo_paths)
 
  ! Communicate pspheads to all processors
  call pspheads_comm(npsp, pspheads, usepaw)
@@ -1905,16 +1922,10 @@ subroutine get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, psp
     endif
  end do
 
- !Take care of other dimensions, and part of the content of dtsets that is or might be needed early.
- !zion_max=maxval(pspheads(1:npsp)%zionpsp) ! This might not work properly with HP compiler
-
-! zion_max=token%pspheads(1)%zionpsp
-! do ii=1,npsp
-!    zion_max=max(token%pspheads(ii)%zionpsp,zion_max)
-! end do
- ABI_MALLOC(zionpsp,(npsp))
+ ! Take care of other dimensions, and part of the content of dtsets that is or might be needed early.
+ ABI_MALLOC(zionpsp, (npsp))
  do ii=1,npsp
-  zionpsp(ii) = pspheads(ii)%zionpsp
+   zionpsp(ii) = pspheads(ii)%zionpsp
  end do
 
  ABI_MALLOC(mband_upper_, (0:ndtset_alloc))

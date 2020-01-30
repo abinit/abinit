@@ -1,8 +1,8 @@
 
 .Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 21 Nov 2019.
-- ( at 00h34 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h30 )
   
 - input  file    -> t32.in
 - output file    -> t32.out
@@ -30,7 +30,7 @@
      lnmax =       2     mgfft =      36  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =        1618          nfft =       46656          nkpt =           2
 ================================================================================
@@ -47,7 +47,7 @@ _ WF disk file :      0.200 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
      lnmax =       2     mgfft =      36  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =        1618          nfft =       46656          nkpt =           2
 ================================================================================
@@ -64,7 +64,7 @@ _ WF disk file :      0.200 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
      lnmax =       2     mgfft =      36  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =        1618          nfft =       46656          nkpt =           2
 ================================================================================
@@ -81,7 +81,7 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
      lnmax =       2     mgfft =      36  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =        1618          nfft =       46656          nkpt =           2
 ================================================================================
@@ -259,8 +259,8 @@ P           mkmem           2
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -292,10 +292,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
  ETOT  4  -7.9357467002980    -1.028E-06 6.095E-09 1.638E-03
  ETOT  5  -7.9357468368992    -1.366E-07 8.986E-10 2.219E-06
  ETOT  6  -7.9357468372041    -3.049E-10 3.401E-12 5.132E-09
- ETOT  7  -7.9357468372047    -6.146E-13 1.941E-14 2.621E-11
- ETOT  8  -7.9357468372051    -3.952E-13 2.785E-16 1.657E-13
-
- Compute kinetic energy density
+ ETOT  7  -7.9357468372047    -5.951E-13 1.941E-14 2.621E-11
+ ETOT  8  -7.9357468372051    -4.050E-13 2.785E-16 1.657E-13
 
 Result for kinetic energy density :
 
@@ -325,7 +323,7 @@ Result for kinetic energy density :
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   44.418E-18; max=  27.847E-17
+ Mean square residual over all n,k,spin=   44.419E-18; max=  27.847E-17
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -359,17 +357,17 @@ Result for kinetic energy density :
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.07462468668383E+00
-    Hartree energy  =  5.59785891608643E-01
+    Kinetic energy  =  3.07462468668384E+00
+    Hartree energy  =  5.59785891608650E-01
     XC energy       = -2.40257177187822E+00
     Ewald energy    = -8.40046478618609E+00
     PspCore energy  =  1.66947472379070E+00
-    Loc. psp. energy= -2.22682703652066E+00
-    NL   psp  energy= -2.09768544703274E-01
-    >>>>>>>>> Etotal= -7.93574683720508E+00
+    Loc. psp. energy= -2.22682703652069E+00
+    NL   psp  energy= -2.09768544703279E-01
+    >>>>>>>>> Etotal= -7.93574683720509E+00
 
  Other information on the energy :
-    Total energy(eV)= -2.15942653402968E+02 ; Band energy (Ha)=  -1.3781791220E+00
+    Total energy(eV)= -2.15942653402969E+02 ; Band energy (Ha)=  -1.3781791220E+00
 --------------------------------------------------------------------------------
 
 
@@ -409,8 +407,8 @@ Result for kinetic energy density :
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -435,16 +433,14 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
 ================================================================================
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -7.9030472114292    -7.903E+00 1.444E-02 3.751E+01
+ ETOT  1  -7.9030472114291    -7.903E+00 1.444E-02 3.751E+01
  ETOT  2  -7.9353960703721    -3.235E-02 2.184E-05 3.411E+00
  ETOT  3  -7.9357456723159    -3.496E-04 2.113E-06 1.350E-02
  ETOT  4  -7.9357467002982    -1.028E-06 6.095E-09 1.638E-03
  ETOT  5  -7.9357468368993    -1.366E-07 8.986E-10 2.219E-06
  ETOT  6  -7.9357468372040    -3.048E-10 3.401E-12 5.132E-09
- ETOT  7  -7.9357468372046    -5.729E-13 1.941E-14 2.621E-11
- ETOT  8  -7.9357468372049    -2.620E-13 2.785E-16 1.657E-13
-
- Compute kinetic energy density
+ ETOT  7  -7.9357468372046    -5.889E-13 1.941E-14 2.621E-11
+ ETOT  8  -7.9357468372049    -2.451E-13 2.785E-16 1.657E-13
 
 Result for kinetic energy density :
 
@@ -508,13 +504,13 @@ Result for kinetic energy density :
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.07462468668382E+00
-    Hartree energy  =  5.59785891608636E-01
+    Kinetic energy  =  3.07462468668383E+00
+    Hartree energy  =  5.59785891608645E-01
     XC energy       = -2.40257177187801E+00
     Ewald energy    = -8.40046478618609E+00
     PspCore energy  =  1.66947472379070E+00
-    Loc. psp. energy= -2.22682703652065E+00
-    NL   psp  energy= -2.09768544703272E-01
+    Loc. psp. energy= -2.22682703652066E+00
+    NL   psp  energy= -2.09768544703275E-01
     >>>>>>>>> Etotal= -7.93574683720487E+00
 
  Other information on the energy :
@@ -558,8 +554,8 @@ Result for kinetic energy density :
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -590,10 +586,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
  ETOT  4  -7.9357467002980    -1.028E-06 6.095E-09 3.275E-03
  ETOT  5  -7.9357468368992    -1.366E-07 8.986E-10 4.438E-06
  ETOT  6  -7.9357468372041    -3.049E-10 3.401E-12 1.026E-08
- ETOT  7  -7.9357468372047    -6.413E-13 1.941E-14 5.241E-11
- ETOT  8  -7.9357468372051    -3.677E-13 2.785E-16 3.314E-13
-
- Compute kinetic energy density
+ ETOT  7  -7.9357468372047    -6.395E-13 1.941E-14 5.241E-11
+ ETOT  8  -7.9357468372051    -3.606E-13 2.785E-16 3.314E-13
 
 Result for kinetic energy density :
 
@@ -682,17 +676,17 @@ Result for kinetic energy density :
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.07462468668388E+00
-    Hartree energy  =  5.59785891608673E-01
-    XC energy       = -2.40257177187823E+00
+    Kinetic energy  =  3.07462468668383E+00
+    Hartree energy  =  5.59785891608644E-01
+    XC energy       = -2.40257177187822E+00
     Ewald energy    = -8.40046478618609E+00
     PspCore energy  =  1.66947472379070E+00
-    Loc. psp. energy= -2.22682703652074E+00
-    NL   psp  energy= -2.09768544703280E-01
-    >>>>>>>>> Etotal= -7.93574683720510E+00
+    Loc. psp. energy= -2.22682703652066E+00
+    NL   psp  energy= -2.09768544703276E-01
+    >>>>>>>>> Etotal= -7.93574683720508E+00
 
  Other information on the energy :
-    Total energy(eV)= -2.15942653402969E+02 ; Band energy (Ha)=  -1.3781791220E+00
+    Total energy(eV)= -2.15942653402968E+02 ; Band energy (Ha)=  -1.3781791220E+00
 --------------------------------------------------------------------------------
 
 
@@ -732,8 +726,8 @@ Result for kinetic energy density :
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -764,10 +758,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
  ETOT  4  -7.9357467002982    -1.028E-06 6.095E-09 3.275E-03
  ETOT  5  -7.9357468368993    -1.366E-07 8.986E-10 4.438E-06
  ETOT  6  -7.9357468372040    -3.048E-10 3.401E-12 1.026E-08
- ETOT  7  -7.9357468372046    -5.631E-13 1.941E-14 5.241E-11
- ETOT  8  -7.9357468372049    -3.073E-13 2.785E-16 3.314E-13
-
- Compute kinetic energy density
+ ETOT  7  -7.9357468372046    -6.004E-13 1.941E-14 5.241E-11
+ ETOT  8  -7.9357468372049    -2.434E-13 2.785E-16 3.314E-13
 
 Result for kinetic energy density :
 
@@ -856,17 +848,17 @@ Result for kinetic energy density :
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.07462468668379E+00
-    Hartree energy  =  5.59785891608619E-01
+    Kinetic energy  =  3.07462468668384E+00
+    Hartree energy  =  5.59785891608646E-01
     XC energy       = -2.40257177187802E+00
     Ewald energy    = -8.40046478618609E+00
     PspCore energy  =  1.66947472379070E+00
-    Loc. psp. energy= -2.22682703652063E+00
-    NL   psp  energy= -2.09768544703270E-01
-    >>>>>>>>> Etotal= -7.93574683720490E+00
+    Loc. psp. energy= -2.22682703652067E+00
+    NL   psp  energy= -2.09768544703276E-01
+    >>>>>>>>> Etotal= -7.93574683720487E+00
 
  Other information on the energy :
-    Total energy(eV)= -2.15942653402964E+02 ; Band energy (Ha)=  -1.3781791220E+00
+    Total energy(eV)= -2.15942653402963E+02 ; Band energy (Ha)=  -1.3781791220E+00
 --------------------------------------------------------------------------------
 
 
@@ -956,7 +948,7 @@ P           mkmem           2
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten3     6.0884488851E-05  6.0884488851E-05  6.0884488851E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten4     7.5828102846E-05  7.5828102846E-05  7.5828102846E-05
+           strten4     7.5828102845E-05  7.5828102845E-05  7.5828102845E-05
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -1093,10 +1085,10 @@ P           mkmem           2
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         19.1  wall=         19.3
+- Proc.   0 individual time (sec): cpu=         19.0  wall=         21.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.1  wall=         19.3
++Overall time at end (sec) : cpu=         19.0  wall=         21.1

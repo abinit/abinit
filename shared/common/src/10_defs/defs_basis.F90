@@ -8,7 +8,7 @@
 !! physical constants, as well as associated datatypes and methods.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2019 ABINIT group (HM, XG,XW, EB)
+!! Copyright (C) 2000-2020 ABINIT group (HM, XG,XW, EB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,7 +76,13 @@ module defs_basis
 ! but do not modify the other declarations in this module
 
 !The default lengths
- integer, parameter :: fnlen=264      ! maximum length of file name variables
+! TODO: We should increase fnlen to be able to handle multiple pseudos paths in the input file
+! but it seems that increasing this value triggers bugs in the rest of code because people
+! do not trim input strings and use character(len=500) :: msg
+
+ integer, parameter :: fnlen=264     ! maximum length of file name variables
+ !integer, parameter :: fnlen=400     ! maximum length of file name variables
+ !integer, parameter :: fnlen=1024     ! maximum length of file name variables
  integer, parameter :: strlen=2000000 ! maximum length of input string
 
  integer, parameter :: md5_slen = 32 ! lenght of strings storing the pseudos' md5 checksum.

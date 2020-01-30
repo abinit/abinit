@@ -1,8 +1,8 @@
 
 .Version 8.11.12 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 21 Nov 2019.
-- ( at 00h34 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h30 )
   
 - input  file    -> t31.in
 - output file    -> t31.out
@@ -47,7 +47,7 @@ _ WF disk file :      0.200 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
      lnmax =       2     mgfft =      36  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =        1618          nfft =       46656          nkpt =           2
 ================================================================================
@@ -81,7 +81,7 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
      lnmax =       2     mgfft =      36  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =        1618          nfft =       46656          nkpt =           2
 ================================================================================
@@ -265,8 +265,8 @@ P           mkmem           2
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -298,19 +298,17 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
  ETOT  4  -7.9333339286292    -1.124E-06 6.595E-09 1.705E-03
  ETOT  5  -7.9333340828128    -1.542E-07 9.642E-10 2.249E-06
  ETOT  6  -7.9333340831204    -3.075E-10 3.787E-12 6.069E-09
- ETOT  7  -7.9333340831216    -1.211E-12 1.686E-14 2.108E-11
- ETOT  8  -7.9333340831216     2.043E-14 2.310E-16 1.637E-13
- ETOT  9  -7.9333340831216    -7.461E-14 2.637E-18 3.801E-16
- ETOT 10  -7.9333340831214     2.096E-13 3.367E-20 1.892E-18
- ETOT 11  -7.9333340831217    -2.363E-13 4.648E-22 9.840E-21
- ETOT 12  -7.9333340831217    -6.217E-15 6.168E-24 2.278E-22
- ETOT 13  -7.9333340831217    -5.418E-14 8.875E-26 4.816E-24
- ETOT 14  -7.9333340831217     1.155E-14 1.144E-27 2.448E-25
- ETOT 15  -7.9333340831217    -1.776E-15 9.329E-29 3.527E-26
+ ETOT  7  -7.9333340831215    -1.171E-12 1.686E-14 2.108E-11
+ ETOT  8  -7.9333340831216    -5.151E-14 2.310E-16 1.637E-13
+ ETOT  9  -7.9333340831216    -4.796E-14 2.637E-18 3.801E-16
+ ETOT 10  -7.9333340831214     2.132E-13 3.367E-20 1.892E-18
+ ETOT 11  -7.9333340831217    -2.363E-13 4.648E-22 9.842E-21
+ ETOT 12  -7.9333340831217    -8.882E-15 6.168E-24 2.277E-22
+ ETOT 13  -7.9333340831217    -5.329E-14 8.878E-26 4.749E-24
+ ETOT 14  -7.9333340831217     8.882E-15 1.142E-27 2.570E-25
+ ETOT 15  -7.9333340831217     0.000E+00 9.446E-29 3.485E-26
 
- At SCF step   15   max residual=  9.33E-29 < tolwfr=  1.00E-28 =>converged.
-
- Compute kinetic energy density
+ At SCF step   15   max residual=  9.45E-29 < tolwfr=  1.00E-28 =>converged.
 
 Result for kinetic energy density :
 
@@ -335,7 +333,7 @@ Result for kinetic energy density :
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   72.190E-30; max=  93.287E-30
+ Mean square residual over all n,k,spin=   71.848E-30; max=  94.463E-30
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -419,8 +417,8 @@ Result for kinetic energy density :
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -451,19 +449,17 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
  ETOT  4  -7.9333339286292    -1.124E-06 6.595E-09 1.705E-03
  ETOT  5  -7.9333340828129    -1.542E-07 9.642E-10 2.249E-06
  ETOT  6  -7.9333340831203    -3.074E-10 3.787E-12 6.069E-09
- ETOT  7  -7.9333340831216    -1.280E-12 1.680E-14 2.108E-11
- ETOT  8  -7.9333340831215     1.315E-13 2.309E-16 1.637E-13
- ETOT  9  -7.9333340831217    -2.141E-13 2.634E-18 3.804E-16
- ETOT 10  -7.9333340831215     1.696E-13 3.367E-20 1.890E-18
- ETOT 11  -7.9333340831216    -9.415E-14 4.645E-22 9.840E-21
- ETOT 12  -7.9333340831216     6.217E-15 6.166E-24 2.280E-22
- ETOT 13  -7.9333340831216    -4.974E-14 8.869E-26 4.805E-24
- ETOT 14  -7.9333340831216     2.220E-14 1.141E-27 2.424E-25
- ETOT 15  -7.9333340831216    -8.882E-16 8.612E-29 3.703E-26
+ ETOT  7  -7.9333340831216    -1.283E-12 1.680E-14 2.108E-11
+ ETOT  8  -7.9333340831215     1.430E-13 2.309E-16 1.637E-13
+ ETOT  9  -7.9333340831217    -2.078E-13 2.634E-18 3.804E-16
+ ETOT 10  -7.9333340831215     1.634E-13 3.367E-20 1.890E-18
+ ETOT 11  -7.9333340831216    -9.237E-14 4.645E-22 9.840E-21
+ ETOT 12  -7.9333340831216     5.329E-15 6.165E-24 2.278E-22
+ ETOT 13  -7.9333340831216    -4.885E-14 8.871E-26 4.771E-24
+ ETOT 14  -7.9333340831216     2.132E-14 1.142E-27 2.540E-25
+ ETOT 15  -7.9333340831216    -2.665E-15 8.932E-29 4.375E-26
 
- At SCF step   15   max residual=  8.61E-29 < tolwfr=  1.00E-28 =>converged.
-
- Compute kinetic energy density
+ At SCF step   15   max residual=  8.93E-29 < tolwfr=  1.00E-28 =>converged.
 
 Result for kinetic energy density :
 
@@ -488,7 +484,7 @@ Result for kinetic energy density :
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   69.542E-30; max=  86.120E-30
+ Mean square residual over all n,k,spin=   71.334E-30; max=  89.323E-30
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -523,13 +519,13 @@ Result for kinetic energy density :
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  3.04075175536096E+00
-    Hartree energy  =  5.57533363475108E-01
+    Hartree energy  =  5.57533363475109E-01
     XC energy       = -2.36883555266804E+00
     Ewald energy    = -8.40046478618609E+00
     PspCore energy  =  1.66947472379070E+00
     Loc. psp. energy= -2.22210873553023E+00
     NL   psp  energy= -2.09684851364027E-01
-    >>>>>>>>> Etotal= -7.93333408312162E+00
+    >>>>>>>>> Etotal= -7.93333408312163E+00
 
  Other information on the energy :
     Total energy(eV)= -2.15876999025444E+02 ; Band energy (Ha)=  -1.3753112494E+00
@@ -574,8 +570,8 @@ Result for kinetic energy density :
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -603,22 +599,20 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
  ETOT  1  -7.9004679881452    -7.900E+00 1.427E-02 7.427E+01
  ETOT  2  -7.9329969104179    -3.253E-02 2.209E-05 6.516E+00
  ETOT  3  -7.9333328050591    -3.359E-04 1.963E-06 2.680E-02
- ETOT  4  -7.9333339286292    -1.124E-06 6.595E-09 3.411E-03
+ ETOT  4  -7.9333339286293    -1.124E-06 6.595E-09 3.411E-03
  ETOT  5  -7.9333340828128    -1.542E-07 9.642E-10 4.499E-06
  ETOT  6  -7.9333340831204    -3.075E-10 3.787E-12 1.214E-08
- ETOT  7  -7.9333340831216    -1.187E-12 1.686E-14 4.215E-11
- ETOT  8  -7.9333340831216    -9.770E-15 2.310E-16 3.274E-13
- ETOT  9  -7.9333340831216    -7.550E-14 2.637E-18 7.602E-16
- ETOT 10  -7.9333340831214     2.185E-13 3.367E-20 3.784E-18
- ETOT 11  -7.9333340831217    -2.380E-13 4.648E-22 1.968E-20
- ETOT 12  -7.9333340831217    -7.105E-15 6.168E-24 4.564E-22
- ETOT 13  -7.9333340831217    -5.507E-14 8.876E-26 9.517E-24
- ETOT 14  -7.9333340831217     1.421E-14 1.142E-27 5.506E-25
- ETOT 15  -7.9333340831217     0.000E+00 8.919E-29 7.279E-26
+ ETOT  7  -7.9333340831215    -1.156E-12 1.686E-14 4.215E-11
+ ETOT  8  -7.9333340831216    -4.441E-14 2.310E-16 3.274E-13
+ ETOT  9  -7.9333340831216    -4.707E-14 2.637E-18 7.602E-16
+ ETOT 10  -7.9333340831214     2.034E-13 3.367E-20 3.784E-18
+ ETOT 11  -7.9333340831217    -2.363E-13 4.648E-22 1.968E-20
+ ETOT 12  -7.9333340831217    -7.105E-15 6.168E-24 4.559E-22
+ ETOT 13  -7.9333340831217    -5.418E-14 8.878E-26 9.645E-24
+ ETOT 14  -7.9333340831217     1.332E-14 1.142E-27 5.037E-25
+ ETOT 15  -7.9333340831217    -5.329E-15 9.846E-29 8.074E-26
 
- At SCF step   15   max residual=  8.92E-29 < tolwfr=  1.00E-28 =>converged.
-
- Compute kinetic energy density
+ At SCF step   15   max residual=  9.85E-29 < tolwfr=  1.00E-28 =>converged.
 
 Result for kinetic energy density :
 
@@ -663,7 +657,7 @@ Result for kinetic energy density :
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   71.089E-30; max=  89.190E-30
+ Mean square residual over all n,k,spin=   72.786E-30; max=  98.462E-30
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -708,8 +702,8 @@ Result for kinetic energy density :
     Ewald energy    = -8.40046478618609E+00
     PspCore energy  =  1.66947472379070E+00
     Loc. psp. energy= -2.22210873553022E+00
-    NL   psp  energy= -2.09684851364025E-01
-    >>>>>>>>> Etotal= -7.93333408312171E+00
+    NL   psp  energy= -2.09684851364026E-01
+    >>>>>>>>> Etotal= -7.93333408312172E+00
 
  Other information on the energy :
     Total energy(eV)= -2.15876999025446E+02 ; Band energy (Ha)=  -1.3753112494E+00
@@ -752,8 +746,8 @@ Result for kinetic energy density :
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -784,19 +778,17 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
  ETOT  4  -7.9333339286292    -1.124E-06 6.595E-09 3.411E-03
  ETOT  5  -7.9333340828129    -1.542E-07 9.642E-10 4.499E-06
  ETOT  6  -7.9333340831203    -3.074E-10 3.787E-12 1.214E-08
- ETOT  7  -7.9333340831216    -1.274E-12 1.680E-14 4.215E-11
- ETOT  8  -7.9333340831214     1.439E-13 2.309E-16 3.274E-13
- ETOT  9  -7.9333340831217    -2.212E-13 2.634E-18 7.608E-16
- ETOT 10  -7.9333340831215     1.590E-13 3.367E-20 3.780E-18
- ETOT 11  -7.9333340831216    -9.237E-14 4.645E-22 1.968E-20
- ETOT 12  -7.9333340831216     9.770E-15 6.166E-24 4.569E-22
- ETOT 13  -7.9333340831216    -5.240E-14 8.869E-26 9.588E-24
- ETOT 14  -7.9333340831216     1.954E-14 1.142E-27 4.532E-25
- ETOT 15  -7.9333340831216     1.776E-15 8.640E-29 8.004E-26
+ ETOT  7  -7.9333340831216    -1.281E-12 1.680E-14 4.215E-11
+ ETOT  8  -7.9333340831215     1.359E-13 2.309E-16 3.274E-13
+ ETOT  9  -7.9333340831217    -2.114E-13 2.634E-18 7.608E-16
+ ETOT 10  -7.9333340831215     1.608E-13 3.367E-20 3.780E-18
+ ETOT 11  -7.9333340831216    -9.326E-14 4.645E-22 1.968E-20
+ ETOT 12  -7.9333340831216     7.105E-15 6.165E-24 4.548E-22
+ ETOT 13  -7.9333340831216    -4.441E-14 8.870E-26 9.459E-24
+ ETOT 14  -7.9333340831216     1.776E-14 1.142E-27 5.515E-25
+ ETOT 15  -7.9333340831216    -1.776E-15 8.646E-29 8.141E-26
 
- At SCF step   15   max residual=  8.64E-29 < tolwfr=  1.00E-28 =>converged.
-
- Compute kinetic energy density
+ At SCF step   15   max residual=  8.65E-29 < tolwfr=  1.00E-28 =>converged.
 
 Result for kinetic energy density :
 
@@ -841,7 +833,7 @@ Result for kinetic energy density :
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   70.110E-30; max=  86.402E-30
+ Mean square residual over all n,k,spin=   71.243E-30; max=  86.463E-30
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -881,7 +873,7 @@ Result for kinetic energy density :
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  3.04075175536096E+00
-    Hartree energy  =  5.57533363475108E-01
+    Hartree energy  =  5.57533363475109E-01
     XC energy       = -2.36883555266804E+00
     Ewald energy    = -8.40046478618609E+00
     PspCore energy  =  1.66947472379070E+00
@@ -1121,10 +1113,10 @@ P           mkmem           2
 - Comment: the original paper describing the ABINIT project.
 - DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         28.0  wall=         28.4
+- Proc.   0 individual time (sec): cpu=         28.1  wall=         31.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         28.0  wall=         28.4
++Overall time at end (sec) : cpu=         28.1  wall=         31.3

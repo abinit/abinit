@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gstate
 !! NAME
 !!  m_gstate
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, JYR, MKV, MT, FJ, MB, DJA)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -239,7 +238,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 !scalars
  integer,intent(inout) :: iexit,initialized
  real(dp),intent(in) :: cpui
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
  type(args_gs_type),intent(in) :: args_gs
  type(datafiles_type),intent(inout) :: dtfil
@@ -443,7 +442,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      ylm_option=0
      if (dtset%prtstm==0.and.dtset%iscf>0.and.dtset%positron/=1) ylm_option=1 ! compute gradients of YLM
      if (dtset%berryopt==4 .and. dtset%optstress /= 0 .and. psps%usepaw==1) ylm_option = 1 ! compute gradients of YLM
-     if ((dtset%orbmag.GT.0) .AND. (psps%usepaw==1)) ylm_option = 1 ! compute gradients of YLM
+     if ((dtset%orbmag.NE.0) .AND. (psps%usepaw==1)) ylm_option = 1 ! compute gradients of YLM
      call initylmg(gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,&
 &     psps%mpsang,dtset%mpw,dtset%nband,dtset%nkpt,&
 &     npwarr,dtset%nsppol,ylm_option,rprimd,ylm,ylmgr)
@@ -954,7 +953,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      call timab(553,1,tsec)
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
      hyb_range_fock=zero;if (dtset%ixc<0) call libxc_functionals_get_hybridparams(hyb_range=hyb_range_fock)
-     call pawinit(gnt_option,gsqcut_shp,hyb_range_fock,dtset%pawlcutd,dtset%pawlmix,&
+     call pawinit(dtset%effmass_free,gnt_option,gsqcut_shp,hyb_range_fock,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
 &     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usekden,dtset%usepotzero)
 
@@ -1079,14 +1078,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
        end if
 
 !      Compute up+down rho(G) by fft
-       ABI_ALLOCATE(work,(nfftf))
-       work(:)=rhor(:,1)
-       call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+       call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
        if(dtset%usekden==1)then
-         work(:)=taur(:,1)
-         call fourdp(1,taug,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+         call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
        end if
-       ABI_DEALLOCATE(work)
 
      else if(dtfil%ireadwf/=0)then
        izero=0
@@ -1102,6 +1097,11 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
          call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &         mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
          call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
+         if(dtset%usekden==1)then
+           call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
+&           mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs,option=1)
+           call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,taug,rhowfr,taur)
+         end if
          ABI_DEALLOCATE(rhowfg)
          ABI_DEALLOCATE(rhowfr)
        else
@@ -1181,14 +1181,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      end if
 
 !    Compute up+down rho(G) by fft
-     ABI_ALLOCATE(work,(nfftf))
-     work(:)=rhor(:,1)
-     call fourdp(1,rhog,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+     call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
      if(dtset%usekden==1)then
-       work(:)=taur(:,1)
-       call fourdp(1,taug,work,-1,mpi_enreg,nfftf,1,ngfftf,0)
+       call fourdp(1,taug,taur(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
      end if
-     ABI_DEALLOCATE(work)
 
    end if
  end if ! has_to_init
@@ -1230,7 +1226,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  !! orbital magnetization initialization
  dtorbmag%orbmag = dtset%orbmag
- if (dtorbmag%orbmag > 0) then
+ if (dtorbmag%orbmag .NE. 0) then
     call initorbmag(dtorbmag,dtset,gmet,gprimd,kg,mpi_enreg,npwarr,occ,&
 &                   pawtab,psps,pwind,pwind_alloc,pwnsfac,&
 &                   rprimd,symrec,xred)
@@ -2600,7 +2596,7 @@ end subroutine pawuj_drive
 !!  read/write xfhist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2019 ABINIT group (MB)
+!! Copyright (C) 2003-2020 ABINIT group (MB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

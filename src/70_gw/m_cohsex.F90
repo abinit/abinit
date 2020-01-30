@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_cohsex
 !! NAME
 !!  m_cohsex
@@ -7,7 +6,7 @@
 !! Calculate diagonal and off-diagonal matrix elements of the SEX or COHSEX self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!!  Copyright (C) 1999-2020 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -74,7 +73,7 @@ contains
 !! Calculate diagonal and off-diagonal matrix elements of the SEX or COHSEX self-energy operator.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
+!! Copyright (C) 1999-2020 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
