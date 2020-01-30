@@ -603,7 +603,9 @@ that the equilibrium volume is very weakly modified by the strong correlations i
 
 ## 7 Electronic Structure of SrVO3: k-resolved Spectral function
 
-We are going to use OmegaMaxEnt to do the analytical continuation of the self-energy in Matsubara frequencies to real frequencies.
+We are going to use OmegaMaxEnt to do the direct analytical continuation of the self-energy in Matsubara frequencies to real frequencies.
+(A more precise way to do the analytical continuation uses an auxiliary Green's function as mentionned in e.g. endnote 55
+of Ref. [[cite:Sakuma2013a]]).
 First of all, we are going to relaunch a more converged calculation using tdmft_5.in
 
 {% dialog tests/tutoparal/Input/tdmft_5.in%}
@@ -625,7 +627,7 @@ In this directory, we launch OmegaMaxEnt just to generate the input template:
     cd Spectral
     OmegaMaxEnt
 
-Then, you have to edit the input file OmegaMaxEnt_input_params.dat of OmegaMaxent and specify that the data is contained in self.dat and
+Then, you have to edit the input file *OmegaMaxEnt_input_params.dat* of OmegaMaxent and specify that the data is contained in self.dat and
 that it contains a finite value a infinite frequency. So the first lines should look like this:
 
     data file: self.dat
@@ -643,7 +645,7 @@ Then relaunch OmegaMaxent
 
     OmegaMaxEnt
 
-You can now plot the imaginary part of the self energy in real frequencies with:
+You can now plot the imaginary part of the self energy in real frequencies with (be careful, this file contains in fact -2 Im$\Sigma$. If another analytical continuation tool is used, one needs to give to ABINIT -2 Im$\Sigma$ and not $\Sigma$ ):
 
     xmgrace OmegaMaxEnt_final_result/optimal_spectral_function.dat
 
