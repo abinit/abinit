@@ -683,7 +683,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  character(len=500) :: message
 !arrays
  real(dp) :: c1i(2*mr+1),c1r(2*mr+1),c2i(2*mr+1),c2r(2*mr+1),c3i(2*mr+1)
- real(dp) :: c3r(2*mr+1),cosqxred(natom),gpq(3),gpqgpq(3,3)
+ real(dp) :: c3r(2*mr+1),cosqxred(natom),gpq(3),gpqfac(3,3),gpqgpq(3,3)
  real(dp) :: invdlt(3,3),ircar(3),ircax(3),rr(3),sinqxred(natom)
  real(dp) :: xredcar(3,natom),xredcax(3,natom),xredicar(3),xredicax(3),xx(3)
  real(dp) :: gprimbyacell(3,3),tsec(2)
@@ -823,6 +823,11 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !              Here calculate the term
                term1=exp(-arg1)/gsq
+               do jj=1,3
+                 do ii=1,3
+                   gpqfac(ii,jj)=gpqgpq(ii,jj)*term1
+                 end do
+               end do
 
 ! MJV: replaced old calls to cos and sin. Checked for 10 tests in v2 that max error is about 6.e-15, usually < 2.e-15
                do ia=1,natom
@@ -834,7 +839,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                do nu=1,3
                  do ia=1,natom
                    do mu=nu,3
-                     dyddt(1,mu,ia,nu,ia)=dyddt(1,mu,ia,nu,ia)+gpqgpq(mu,nu)*term1
+                     dyddt(1,mu,ia,nu,ia)=dyddt(1,mu,ia,nu,ia)+gpqfac(mu,nu)
                    end do
                  end do
                end do
@@ -849,8 +854,8 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                    ! Dipole-dipole contribution
                    do nu=1,3
                      do mu=nu,3
-                       dyddt(1,mu,ia,nu,ib)=dyddt(1,mu,ia,nu,ib)+gpqgpq(mu,nu)*term1*cddr
-                       dyddt(2,mu,ia,nu,ib)=dyddt(2,mu,ia,nu,ib)+gpqgpq(mu,nu)*term1*cddi
+                       dyddt(1,mu,ia,nu,ib)=dyddt(1,mu,ia,nu,ib)+gpqfac(mu,nu)*cddr
+                       dyddt(2,mu,ia,nu,ib)=dyddt(2,mu,ia,nu,ib)+gpqfac(mu,nu)*cddi
                      end do
                    end do
                  end do
@@ -908,7 +913,16 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
 
 !Multiplies by common factor
  fact1=4.0_dp*pi/ucvol
- dyddt=dyddt*fact1
+ do ib=1,natom
+   do ia=1,ib
+     do nu=1,3
+       do mu=nu,3
+         dyddt(1,mu,ia,nu,ib)=dyddt(1,mu,ia,nu,ib)*fact1
+         dyddt(2,mu,ia,nu,ib)=dyddt(2,mu,ia,nu,ib)*fact1
+       end do
+     end do
+   end do
+ end do
  if (do_quadrupole) then
    dydqt=dydqt*fact1/two  * two_pi
    dyqqt=dyqqt*fact1/four * two_pi ** 2
