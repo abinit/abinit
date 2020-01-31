@@ -365,6 +365,7 @@ subroutine wfk_open_read(Wfk,fname,formeig,iomode,funt,comm,Hdr_out)
 
  Wfk%fname     = fname
  Wfk%formeig   = formeig
+print *, ' in open read Wfk%formeig ', Wfk%formeig
  Wfk%iomode    = iomode; if (endswith(fname, ".nc")) wfk%iomode = IO_MODE_ETSF
  ! This is to test the different versions.
  !wfk%iomode    = IO_MODE_MPI
@@ -1216,6 +1217,7 @@ subroutine wfk_read_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_
  end if
 
 print *, ' wfk_read_band_block : Wfk%iomode IO_MODE_FORTRAN, IO_MODE_MPI ', Wfk%iomode, IO_MODE_FORTRAN, IO_MODE_MPI
+print *, ' ik_ibz,spin ', ik_ibz,spin
  select case (Wfk%iomode)
  case (IO_MODE_FORTRAN)
 
@@ -1866,6 +1868,7 @@ print *, 'sc_mode, xmpio_collective, xmpio_single ', sc_mode, xmpio_collective, 
 
    ! Rewind the file to have the correct (k,s) block (if needed)
    call wfk_seek(Wfk,ik_ibz,spin)
+print *, ' Wfkfptr ', wfk%f90_fptr, ' recnpw ', REC_NPW
 
    ! Write the first record: npw, nspinor, nband_disk
    write(Wfk%fh, err=10, iomsg=errmsg) npw_disk, nspinor_disk, nband_disk
@@ -1914,8 +1917,8 @@ print *, 'sc_mode, xmpio_collective, xmpio_single ', sc_mode, xmpio_collective, 
      end if
 
    case (1)
-     ! Write matrix of size (2*nband_k**2)
-     ! The wave-functions.
+     ! Write column of matrix of total size (2*nband_k**2)
+     ! And the wave-functions.
      npwso = npw_disk*nspinor_disk
 
 ! fast forward the bands which are not mine
@@ -1942,6 +1945,7 @@ print *, 'sc_mode, xmpio_collective, xmpio_single ', sc_mode, xmpio_collective, 
 
    ! Reached the end of the (k,s) block. Update f90_fptr
    call wfk_update_f90ptr(wfk, ik_ibz, spin)
+print *, ' Wfkfptr after update ', wfk%f90_fptr, ' recnpw ', REC_NPW
 
 #ifdef HAVE_MPI_IO
  case (IO_MODE_MPI)
@@ -3017,8 +3021,6 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  logical,parameter :: force_istwfk1=.False.
  type(wfk_t),target :: wfk_disk
  type(crystal_t) :: cryst
- type(ebands_t) :: ebands_disk
- type(ebands_t),target :: ebands_full
 !arrays
  integer :: g0(3),work_ngfft(18),gmax_disk(3),gmax_kf(3),gmax(3)
  integer,allocatable :: kg_kf(:,:), icg(:,:), ikg(:), ibdeig(:,:), ibdocc(:,:)
@@ -3032,11 +3034,6 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
 
  call cwtime(cpu, wall, gflops, "start")
 
-! first determine disk bands etc... 
-! need to do this first as it opens the file, and in normal fortran io 
-! you have to close it first before proceeding below
- ebands_disk = wfk_read_ebands(inpath, xmpi_comm_self)
-
 ! now attack the cg reading
  iomode = iomode_from_fname(inpath)
  wfk_unt = get_unit()
@@ -3045,6 +3042,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
 ! if I use comm and MPIO_stuff then it hangs on this call
 ! if I impose FORTRAN_IO and xmpio_single it complains the file is already opened by another proc
  ABI_UNUSED(comm)
+print *, 'calling wfk_open_read with formeig = ', formeig
  call wfk_open_read(wfk_disk,inpath,formeig,iomode,wfk_unt,xmpi_comm_self)
 
  if(present(eigen)) then
@@ -3083,10 +3081,6 @@ print *, 'wfk_disk%mband, dtset%mband ', wfk_disk%mband, dtset%mband
 
  cryst = wfk_disk%hdr%get_crystal(2)
 
- ! Build new header for full BZ. This is the most delicate part since all the arrays in hdr_full
- ! that depend on k-points must be consistent with kptns_in and nkpt_in.
-! call ebands_expandk(ebands_disk, cryst, ecut_eff, force_istwfk1, dksqmax, rbz2disk, ebands_full)
-
  chksymbreak = 0
  iout = 0
  ABI_ALLOCATE (rbz2disk, (6,nkpt_in))
@@ -3094,7 +3088,7 @@ print *, 'wfk_disk%mband, dtset%mband ', wfk_disk%mband, dtset%mband
  do isym=1,cryst%nsym
    symrelT(:,:,isym) = transpose(cryst%symrel(:,:,isym))
  end do
- call mapkptsets(chksymbreak, cryst%gmet, iout, ebands_disk%kptns, ebands_disk%nkpt, kptns_in, nkpt_in, &
+ call mapkptsets(chksymbreak, cryst%gmet, iout, wfk_disk%hdr%kptns, wfk_disk%hdr%nkpt, kptns_in, nkpt_in, &
 &     nkirred_disk, cryst%nsym, symrelT, cryst%timrev-1, rbz2disk, xmpi_comm_self)
 
  ! More efficienct algorithm based on random access IO:
@@ -3159,8 +3153,8 @@ print *, ' distrb_flags(:,:,:) ', distrb_flags
    ! for nsppol=1 input and nsppol=2 run, no need to continue the spin loop
    if (convnsppol1to2 .and. spin > 1) exit
 
-   do ik_disk=1,ebands_disk%nkpt
-     k_disk = ebands_disk%kptns(:, ik_disk)
+   do ik_disk=1,wfk_disk%hdr%nkpt
+     k_disk = wfk_disk%hdr%kptns(:, ik_disk)
 
 ! this allows for reading fewer bands from disk than the maximum
      nband_k = min(wfk_disk%nband(ik_disk,spin), dtset%mband)
@@ -3343,8 +3337,6 @@ print *, 'npwarr change or need to convert the wf by symmetry, or complete it'
  ABI_FREE(occ_disk)
 
  call cryst%free()
- call ebands_free(ebands_disk)
- call ebands_free(ebands_full)
  call wfk_disk%close()
 
 end subroutine wfk_read_my_kptbands
@@ -3707,7 +3699,8 @@ subroutine wfk_seek(Wfk,ik_ibz,spin)
      rec_type = Wfk%f90_fptr(3)
      recn_fpt = Wfk%recn_ks(ik_fpt,spin_fpt, rec_type)
    end if
-
+print *, ' Wfk%f90_fptr ik_ibz,spin ', Wfk%f90_fptr, ik_ibz,spin
+print *, ' Wfk%recn_ks(:,:, REC_NPW) ', Wfk%recn_ks(:,:, REC_NPW) 
    recn_wanted = Wfk%recn_ks(ik_ibz,spin, REC_NPW)
 
    if (Wfk%debug) then
@@ -3816,8 +3809,10 @@ subroutine wfk_compute_offsets(Wfk)
        Wfk%recn_ks(ik_ibz,spin, REC_CG)  = base + 4
        base = Wfk%recn_ks(ik_ibz,spin,REC_CG)
        if (Wfk%formeig==0) then
-         base = base + (nband_k-1)
+! add records for each cg (iband), and account for offset of 1 added for REC_NPW
+         base = base + nband_k - 1
        else if (Wfk%formeig==1) then
+! add records for each eig1(:,iband) and cg (iband), and account for offset of 1 added for REC_NPW
          base = base + 2*(nband_k-1)
        else
          MSG_ERROR("formeig != [0,1]")
