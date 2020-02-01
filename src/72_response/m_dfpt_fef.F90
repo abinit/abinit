@@ -2148,7 +2148,7 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mband_mem,mkmem,&
  integer :: jband,kband,mpw_tmp,npw_k1,npw_k2,pwmax,pwmin
  real(dp) :: doti,dotr,e0,fac
 !arrays
- integer,allocatable :: band_procs(:)
+ integer :: band_procs(mband)
  integer,allocatable :: pwind_tmp(:)
  real(dp) :: z1(2)
  real(dp),allocatable :: Amat(:,:,:),umat(:,:,:,:),vect1(:,:),vect2(:,:)
@@ -2477,7 +2477,7 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mband_mem,mkmem,
  integer :: npw_k2,pwmax,pwmin
  real(dp) :: doti,dotr,e0,fac
 !arrays
- integer,allocatable :: band_procs(:)
+ integer :: band_procs(mband)
  integer,allocatable :: pwind_tmp(:)
  real(dp) :: edir(3)
  real(dp),allocatable :: s1mat(:,:,:),vect1(:,:),vect2(:,:)
@@ -2682,7 +2682,7 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mband_mem,
  real(dp) :: doti,dotr,e0,fac
 !arrays
  integer,allocatable :: pwind_tmp(:)
- integer,allocatable :: band_procs(:)
+ integer :: band_procs(mband)
  real(dp) :: edir(3)
  real(dp),allocatable :: s1mat(:,:,:),vect1(:,:),vect2(:,:)
 
@@ -2881,7 +2881,7 @@ subroutine qmatrix(cg,dtefield,qmat,mpi_enreg,mpw,mpw1,mkmem,mband,mband_mem,npw
 !arrays
  integer,allocatable :: ipvt(:),pwind_k(:)
  real(dp) :: det(2,2)
- integer,allocatable :: band_procs(:)
+ integer :: band_procs(mband)
  real(dp),allocatable :: sinv(:,:,:),smat_k(:,:,:),vect1(:,:),vect2(:,:)
  real(dp),allocatable :: zgwork(:,:)
 
