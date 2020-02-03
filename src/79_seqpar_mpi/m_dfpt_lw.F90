@@ -1443,9 +1443,9 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
 
 
 !Write the Quadrupole tensor in cartesian coordinates
- write(ab_out,*)' '
- write(ab_out,*)' Quadrupole tensor, in cartesian coordinates,'
- write(ab_out,*)' efidir   atom   atddir   qgrdir          real part        imaginary part'
+ write(ab_out,'(a)')' '
+ write(ab_out,'(a)')' Quadrupole tensor, in cartesian coordinates,'
+ write(ab_out,'(a)')' efidir   atom   atddir   qgrdir          real part        imaginary part'
  do iq1dir=1,3
    do iq2dir=1,3
      do iatdir=1,3
@@ -1461,7 +1461,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
        end do
      end do
    end do
-   write(ab_out,*)' '
+   write(ab_out,'(a)')' '
  end do
 
 !Write the q-gradient of the Polarization response
@@ -1489,10 +1489,10 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
 
 !Write the electronic (frozen-ion) contribution to the piezoelectric tensor
 !(R.M. Martin, PRB 5, 1607 (1972))
- write(ab_out,*)' '
- write(ab_out,*)' Electronic (frozen-ion) contribution to the piezoelectric tensor,'
- write(ab_out,*)' in cartesian coordinates, (from quadrupole calculation)'
- write(ab_out,*)' atddir   qgrdir   efidir        real part           imaginary part'
+ write(ab_out,'(a)')' '
+ write(ab_out,'(a)')' Electronic (frozen-ion) contribution to the piezoelectric tensor,'
+ write(ab_out,'(a)')' in cartesian coordinates, (from quadrupole calculation)'
+ write(ab_out,'(a)')' atddir   qgrdir   efidir        real part           imaginary part'
  do iq1dir=1,3
    gamma=iq1dir
    do iq2dir=1,3
@@ -1522,7 +1522,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
 
      end do
    end do
-   write(ab_out,*)' '
+   write(ab_out,'(a)')' '
  end do
  write(ab_out,'(80a)')('=',ii=1,80)
 
@@ -3347,9 +3347,9 @@ end subroutine dfpt_flexo
    open(unit=76,file='elec_flexo_elecstic.out',status='unknown',form='formatted',action='write')
  end if
 
- write(ab_out,*)' '
- write(ab_out,*)' Frozen-ion flexoelectric tensor, in cartesian coordinates,'
- write(ab_out,*)' efidir  qgrdir  strdir1  strdir2         real part          imaginary part'
+ write(ab_out,'(a)')' '
+ write(ab_out,'(a)')' Frozen-ion flexoelectric tensor, in cartesian coordinates,'
+ write(ab_out,'(a)')' efidir  qgrdir  strdir1  strdir2         real part          imaginary part'
  do istr2dir=1,3
    delta=istr2dir
    do istr1dir=1,3
@@ -3411,7 +3411,7 @@ end subroutine dfpt_flexo
           
        end do
      end do
-     write(ab_out,*)' '
+     write(ab_out,'(a)')' '
      if (prtvol==1) then
        write(71,*)' ' 
        write(72,*)' ' 
@@ -3832,9 +3832,9 @@ end subroutine dfpt_ciflexoout
  end do
 
 !Write the tensor in cartesian coordinates
- write(ab_out,*)' '
- write(ab_out,*)' First moment of real space IFC, in cartesian coordinates,'
- write(ab_out,*)' iatom   iatdir   jatom   jatddir   qgrdir           real part          imaginary part'
+ write(ab_out,'(a)')' '
+ write(ab_out,'(a)')' First moment of real space IFC, in cartesian coordinates,'
+ write(ab_out,'(a)')' iatom   iatdir   jatom   jatddir   qgrdir           real part          imaginary part'
  do iq1dir=1,3
    do jatdir=1,3
      do jatom=1,matom
@@ -3851,15 +3851,15 @@ end subroutine dfpt_ciflexoout
        end do
      end do
    end do
-   write(ab_out,*)' '
+   write(ab_out,'(a)')' '
  end do
  write(ab_out,'(80a)')('=',ii=1,80)
 
 !Write the piezoelectric force-response tensor
- write(ab_out,*)' '
- write(ab_out,*)' Piezoelectric force-response tensor, in cartesian coordinates '
- write(ab_out,*)' (from q-gradient of dnamical matrix),'
- write(ab_out,*)' iatom   iatddir  jatddir   qgrdir           real part          imaginary part'
+ write(ab_out,'(a)')' '
+ write(ab_out,'(a)')' Piezoelectric force-response tensor, in cartesian coordinates '
+ write(ab_out,'(a)')' (from q-gradient of dnamical matrix),'
+ write(ab_out,'(a)')' iatom   iatddir  jatddir   qgrdir           real part          imaginary part'
  do iq1dir=1,3
    do iatdir=1,3
      do iatom=1,matom
@@ -3881,7 +3881,7 @@ end subroutine dfpt_ciflexoout
        end do
      end do
    end do
-   write(ab_out,*)' '
+   write(ab_out,'(a)')' '
  end do
  write(ab_out,'(80a)')('=',ii=1,80)
 
@@ -4427,9 +4427,9 @@ end subroutine dfpt_ciflexoout
    open(unit=78,file='isdq_ewdqdq.out',status='unknown',form='formatted',action='write')
  end if
 
- write(ab_out,*)' '
- write(ab_out,*)' q-gradient of piezoelectric force response tensor, in cartesian coordinates,'
- write(ab_out,'(a85)')'atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part'
+ write(ab_out,'(a)')' '
+ write(ab_out,'(a)')' q-gradient of piezoelectric force response tensor, in cartesian coordinates,'
+ write(ab_out,'(a)')'atom   atdir  qgrdir  strdir1  strdir2         real part          imaginary part'
  do istr2dir=1,3
    delta=istr2dir
    do istr1dir=1,3
@@ -4517,16 +4517,16 @@ end subroutine dfpt_ciflexoout
 
          end do
        end do
-       write(ab_out,*)' '
+       write(ab_out,'(a)')' '
        if (prtvol==1) then
-         write(71,*)' ' 
-         write(72,*)' ' 
-         write(73,*)' ' 
-         write(74,*)' ' 
-         write(75,*)' ' 
-         write(76,*)' ' 
-         write(77,*)' ' 
-         write(78,*)' ' 
+         write(71,'(a)')' ' 
+         write(72,'(a)')' ' 
+         write(73,'(a)')' ' 
+         write(74,'(a)')' ' 
+         write(75,'(a)')' ' 
+         write(76,'(a)')' ' 
+         write(77,'(a)')' ' 
+         write(78,'(a)')' ' 
        end if
      end do
    end do
@@ -4544,11 +4544,11 @@ end subroutine dfpt_ciflexoout
  end if
 
 !Write the elastic tensor
- write(ab_out,*)' '
- write(ab_out,*)' Elastic tensor, in cartesian coordinates '
- write(ab_out,*)' (from q-gradient of internal strain),'
- write(ab_out,*)' (for stressed cells it lacks an improper contribution),'
- write(ab_out,*)'atdir  qgrdir  strdir1  strdir2         real part          imaginary part'
+ write(ab_out,'(a)')' '
+ write(ab_out,'(a)')' Elastic tensor, in cartesian coordinates '
+ write(ab_out,'(a)')' (from q-gradient of internal strain),'
+ write(ab_out,'(a)')' (for stressed cells it lacks an improper contribution),'
+ write(ab_out,'(a)')' atdir  qgrdir  strdir1  strdir2         real part          imaginary part'
  do istr2dir=1,3
    delta=istr2dir
    do istr1dir=1,3
@@ -4573,7 +4573,7 @@ end subroutine dfpt_ciflexoout
 
        end do
      end do
-   write(ab_out,*)' '
+   write(ab_out,'(a)')' '
    end do
  end do
  write(ab_out,'(80a)')('=',ii=1,80)
