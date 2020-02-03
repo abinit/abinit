@@ -95,6 +95,8 @@ for old_ex in os.listdir(my_outdir):
   item = os.path.join(my_outdir, old_ex)
   #print("Removing item:", item)
   if os.path.isdir(item):
+    if os.lisdir(item) != 0:
+        raise RuntimeError("Cannot remove non-empty directory:", item)
     os.rmdir(item)
   else:
     os.remove(item)
