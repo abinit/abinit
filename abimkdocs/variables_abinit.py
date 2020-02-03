@@ -3693,7 +3693,7 @@ Variable(
     vartype="integer",
     topics=['ElPhonInt_expert'],
     dimensions="scalar",
-    defaultval="2 except when [[eph_task]] = +4 where 1 is used as default.",
+    defaultval="2 (tetra) except when [[eph_task]] = +4 where 1 is used as default.",
     mnemonics="Electron-Phonon: INTegration METHod",
     text=r"""
 This variable defines the technique for the integration over the Brillouin zone in the EPH code.

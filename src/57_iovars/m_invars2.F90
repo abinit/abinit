@@ -959,14 +959,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%rcut=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'zcut',tread,'ENE')
- if(tread==1) then
-   dtset%zcut = dprarr(1)
- else
-   ! Change default value in EPH calculations
-   !if (dtset%optdriver == RUNL_EPH) then
-   !  dtset%zcut = 0.001_dp * eV_Ha
-   !end if
- end if
+ if(tread==1) dtset%zcut = dprarr(1)
+ !else
+ !  ! Change default value in EPH calculations
+ !  !if (dtset%optdriver == RUNL_EPH) then
+ !  !  dtset%zcut = 0.001_dp * eV_Ha
+ !  !end if
+ !end if
 
  ! q-points for long wave-length limit.
  if (dtset%gw_nqlwl>0) then
@@ -1255,6 +1254,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    ! eph_intmeth depends on eph_task.
    !if (abs(dtset%eph_task) == 4) dtset%eph_intmeth = 1
    if (dtset%eph_task == +4) dtset%eph_intmeth = 1
+   if (dtset%eph_task == -4 .and. dtset%symsigma == 0) dtset%eph_intmeth = 1
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_extrael',tread,'DPR')
