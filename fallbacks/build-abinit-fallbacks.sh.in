@@ -13,24 +13,6 @@ cd $source
 # Configure
 ./configure \
   --prefix="${fallbacks_prefix}" \
-  --with-tardir="${HOME}/.abinit/tarballs" \
-  --with-fc-vendor="@abi_fc_vendor@" \
-  --with-fc-version="@abi_fc_version@" \
-  --with-linalg-libs="@sd_linalg_libs@" \
-  --with-linalg-incs="@sd_linalg_fcflags@" \
-  --disable-bigdft \
-  CC="@CC@" \
-  CXX="@CXX@" \
-  FC="@FC@"
-
-make -j 8
-make install
-
-exit
-
-# Old Configure
-./configure \
-  --prefix="${fallbacks_prefix}" \
   --srcdir="@abinit_srcdir@/fallbacks" \
   --enable-atompaw="" \
   --enable-bigdft="yes" \
@@ -47,6 +29,15 @@ exit
   --with-netcdf4-libs="@sd_netcdf_libs@" \
   --with-netcdf4-fortran-incs="@sd_netcdf_fortran_cppflags@" \
   --with-netcdf4-fortran-libs="@sd_netcdf_fortran_libs@" \
+  --with-fc-vendor="@abi_fc_vendor@" \
+  --with-fc-version="@abi_fc_version@" \
   CC="@CC@" \
   CXX="@CXX@" \
   FC="@FC@"
+
+
+make -j 8
+make install
+
+exit
+

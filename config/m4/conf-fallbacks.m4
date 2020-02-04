@@ -29,24 +29,32 @@ AC_DEFUN([ABI_FALLBACKS_INIT],[
 
   dnl Check fallbacks install prefix and look for the configurator
   if test "${with_fallbacks}" = "yes"; then
-    AC_CHECK_PROGS([abi_fbk_config],[abinit-fallbacks-config])
+    #AC_CHECK_PROGS([abi_fbk_config],
+    #               [${ac_abs_confdir}/fallbacks/build-abinit-fallbacks.sh.in \
+    #                ./build-abinit-fallbacks.sh.in])
+    abi_fbk_config="${ac_abs_confdir}/fallbacks/build-abinit-fallbacks.sh.in"
     if test "${abi_fbk_config}" != ""; then
       abi_fbk_enable="yes"
       abi_fbk_init="yon"
     fi
+    echo "abi_fbk_config = ${abi_fbk_config}"
   elif test -d "${with_fallbacks}"; then
     abi_fbk_prefix="${with_fallbacks}"
-    abi_fbk_config="${abi_fbk_prefix}/bin/abinit-fallbacks-config"
-    if test -x "${abi_fbk_config}"; then
+    abi_fbk_config="${abi_fbk_prefix}/build-abinit-fallbacks.sh"
+    dnl if test -x "${abi_fbk_config}"; then
+    if test -f "${abi_fbk_config}.in"; then
       abi_fbk_enable="yes"
       abi_fbk_init="dir"
     fi
+    echo "abi_fbk_prefix=${ac_abs_confdir}/fallbacks"
+    echo "with_fallbacks=${with_fallbacks}"
+    echo "abi_fbk_config = ${abi_fbk_config}"
   elif test "${with_fallbacks}" != ""; then
     AC_MSG_ERROR([invalid fallbacks install prefix: '${with_fallbacks}'
                   please use --with-fallbacks without argument or make it
                   point to a readable directory actually containing
                   fallbacks (hint: it should contain an executable
-                  program called 'bin/abinit-fallbacks-config')])
+                  program called 'build-abinit-fallbacks.sh')])
   fi
 
   dnl Decide whether to allow fallbacks
@@ -54,7 +62,7 @@ AC_DEFUN([ABI_FALLBACKS_INIT],[
     if test "${with_fallbacks}" != "" -a "${with_fallbacks}" != "no"; then
       AC_MSG_ERROR([fallbacks not found
                   please check that --with-fallbacks points to a readable
-                  directory or that the abinit-fallbacks-config program
+                  directory or that the 'build-abinit-fallbacks.sh' program
                   is available through your PATH environment variable])
     fi
   fi

@@ -662,16 +662,20 @@ SD_FFTW3_INIT([optional skip])
 SD_LEVMAR_INIT([optional fail])
 
 # Init LibPSML
-SD_LIBPSML_INIT([optional fail])
+#SD_LIBPSML_INIT([optional fail])
+SD_LIBPSML_INIT([optional warn])
 
 # Init LibXC
-SD_LIBXC_INIT([no-fortran optional fail])
+#SD_LIBXC_INIT([no-fortran optional fail])
+SD_LIBXC_INIT([no-fortran optional warn])
 
 # Init NetCDF
-SD_NETCDF_INIT([optional fail])
+#SD_NETCDF_INIT([optional fail])
+SD_NETCDF_INIT([optional warn])
 
 # Init NetCDF-Fortran
-SD_NETCDF_FORTRAN_INIT([optional fail])
+#SD_NETCDF_FORTRAN_INIT([optional fail])
+SD_NETCDF_FORTRAN_INIT([optional warn])
 
 # Init PAPI
 SD_PAPI_INIT([optional fail])
@@ -683,10 +687,12 @@ SD_PFFT_INIT([optional skip])
 SD_TRIQS_INIT([optional fail])
 
 # Init Wannier90
-SD_WANNIER90_INIT([optional fail], [-lwannier90])
+#SD_WANNIER90_INIT([optional fail], [-lwannier90])
+SD_WANNIER90_INIT([optional warn], [-lwannier90])
 
 # Init XMLF90
-SD_XMLF90_INIT([optional fail])
+#SD_XMLF90_INIT([optional fail])
+SD_XMLF90_INIT([optional warn])
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -816,6 +822,9 @@ AM_CONDITIONAL([DO_BUILD_67_TRIQS_EXT],
 # Wannier90 library support
 SD_WANNIER90_DETECT
 
+# AtomPAW integration support
+ABI_CHECK_ATOMPAW_BINS
+
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
 
@@ -895,6 +904,35 @@ ABI_MSG_SECTION([Feature triggers summary])
 # Display summary table
 ABI_TRIGGERS_SUMMARY
 
+#------------------------ START JMB --------------------------------------#
+# Check status of fallbacks
+
+status=""
+
+# Check NetCDF
+if test "${sd_netcdf_enable}" = "no"; then
+      ABI_MSG_NOTICE_S([CAUTION : NetCDF is MANDATORY !],
+		       [   suggestion : use 'with_netcdf' in the ac file])
+      status="#"
+else
+  if test "${sd_netcdf_ok}" != "yes";then
+      ABI_MSG_NOTICE_L([netcdf_nw],[WARNING : NetCDF does not WORKING])
+      status="#"
+  fi
+fi
+
+# Check LibXC
+if test "${sd_libxc_enable}" = "no"; then
+      ABI_MSG_NOTICE_S([CAUTION : LibXC is MANDATORY !],
+		       [   suggestion : use 'with_libxc' in the ac file])
+      status="#"
+else
+  if test "${sd_libxc_ok}" != "yes";then
+      ABI_MSG_NOTICE_L([libxc_nw],[WARNING : LibXC does not WORKING])
+      status="#"
+  fi
+fi
+
 # Always generate a build script for required fallbacks
 AC_OUTPUT([fallbacks/build-abinit-fallbacks.sh])
 
@@ -907,6 +945,14 @@ if test "${abi_fbk_required}" = ""; then
 else
   AC_MSG_NOTICE([fallbacks required - you should not run production calculations])
 fi
+
+# Check exit
+if test ! -z "${status}"; then
+      ABI_MSG_NOTICE([fallbacks-required])
+      AC_MSG_FAILURE([***  Problems must be solved before continuing  ***])
+fi
+
+#-------------------- END JMB --------------------------------------------#
 
 # FIXME: copying linear algebra tarball for now,
 #        ensuring ~/.abinit/tarballs/ exists

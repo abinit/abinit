@@ -117,7 +117,6 @@ AC_DEFUN([ABI_MSG_FC_BUGGY],[
 ]) # ABI_MSG_FC_BUGGY
 
 
-
 dnl ABI_MSG_NOTICE(FILE, TITLE)
 dnl ---------------------------
 dnl
@@ -168,6 +167,106 @@ AC_DEFUN([ABI_MSG_NOTICE],[
     AC_MSG_WARN([message file ${abi_msg_file} not found])
   fi
 ]) dnl ABI_MSG_NOTICE
+
+
+
+dnl ABI_MSG_NOTICE_L(FILE, TITLE)
+dnl ---------------------------
+dnl
+dnl Print a framed message to attract users' attention to something.
+dnl
+AC_DEFUN([ABI_MSG_NOTICE_L],[
+  dnl Do some sanity checking of the arguments
+  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl Init
+  abi_msg_file="${abinit_srcdir}/config/messages/$1.msg"
+  abi_msg_title="$2"
+  test "${abi_msg_title}" = "" && abi_msg_title="IMPORTANT NOTE"
+
+  dnl Format title
+  abi_msg_spacer="                                                                "
+  abi_msg_tmp1=`echo "${abi_msg_title}" | sed -e 's/./ /g'`
+  abi_msg_tmp2=`echo "${abi_msg_tmp1}" | grep "${abi_msg_spacer}"`
+  abi_msg_spacer=`echo "${abi_msg_spacer}" | sed -e "s/${abi_msg_tmp1}//"`
+  test "${abi_msg_tmp2}" = "" || abi_msg_spacer=""
+  abi_msg_title="${abi_msg_title}${abi_msg_spacer}"
+
+  if test -s "${abi_msg_file}"; then
+
+  dnl Print header
+  echo ""
+  echo "  +------------------------------------------------------------------+"
+  echo "  | ${abi_msg_title} |"
+  echo "  +------------------------------------------------------------------+"
+
+  dnl Format and write message
+  while read abi_msg_line; do
+    abi_msg_line=`eval echo ${abi_msg_line}`
+    abi_msg_spacer="                                                                "
+    abi_msg_tmp1=`echo "${abi_msg_line}" | sed -e 's/./ /g'`
+    abi_msg_tmp2=`echo "${abi_msg_tmp1}" | grep "${abi_msg_spacer}"`
+    test "${abi_msg_tmp1}" = "" || \
+      abi_msg_spacer=`echo "${abi_msg_spacer}" | sed -e "s/${abi_msg_tmp1}//"`
+    test "${abi_msg_tmp2}" = "" || abi_msg_spacer=""
+    echo "  | ${abi_msg_line}${abi_msg_spacer} |"
+  done <"${abi_msg_file}"
+
+  dnl Print footer
+  echo "  +------------------------------------------------------------------+"
+  echo ""
+
+  else
+    AC_MSG_WARN([message file ${abi_msg_file} not found])
+  fi
+]) dnl ABI_MSG_NOTICE_L
+
+
+
+dnl ABI_MSG_NOTICE_S(TITLE, SOLUTION)
+dnl ---------------------------------
+dnl
+dnl Print a framed message to attract users' attention to something.
+dnl
+AC_DEFUN([ABI_MSG_NOTICE_S],[
+  dnl Do some sanity checking of the arguments
+  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl Init
+  abi_msg_title="$1"
+  test "${abi_msg_title}" = "" && abi_msg_title="IMPORTANT NOTE"
+
+  dnl Format title
+  abi_msg_spacer="                                                                "
+  abi_msg_tmp1=`echo "${abi_msg_title}" | sed -e 's/./ /g'`
+  abi_msg_tmp2=`echo "${abi_msg_tmp1}" | grep "${abi_msg_spacer}"`
+  abi_msg_spacer=`echo "${abi_msg_spacer}" | sed -e "s/${abi_msg_tmp1}//"`
+  test "${abi_msg_tmp2}" = "" || abi_msg_spacer=""
+  abi_msg_title="${abi_msg_title}${abi_msg_spacer}"
+
+  dnl Print header
+  echo ""
+  echo "  +------------------------------------------------------------------+"
+  echo "  | ${abi_msg_title} |"
+  echo "  +------------------------------------------------------------------+"
+
+  dnl Format solution if provided
+  abi_msg_title="$2"
+  if test "${abi_msg_title}" != ""; then
+      abi_msg_spacer="                                                                "
+      abi_msg_tmp1=`echo "${abi_msg_title}" | sed -e 's/./ /g'`
+      abi_msg_tmp2=`echo "${abi_msg_tmp1}" | grep "${abi_msg_spacer}"`
+      abi_msg_spacer=`echo "${abi_msg_spacer}" | sed -e "s/${abi_msg_tmp1}//"`
+      test "${abi_msg_tmp2}" = "" || abi_msg_spacer=""
+      abi_msg_title="${abi_msg_title}${abi_msg_spacer}"
+      echo "  | ${abi_msg_title} |"
+  fi
+  echo "  +------------------------------------------------------------------+"
+
+  echo ""
+
+]) dnl ABI_MSG_NOTICE_S
+
 
 
 # ABI_MSG_SECTION(TITLE)
