@@ -88,7 +88,7 @@ module m_wfk
  use m_distribfft,   only : init_distribfft_seq
  use m_mpinfo,       only : destroy_mpi_enreg, initmpi_seq
  use m_rwwf,         only : rwwf
- use m_kpts,         only : listkk
+ use m_kpts,         only : listkk,kpts_timrev_from_kptopt
 
  implicit none
 
@@ -3079,15 +3079,19 @@ print *, 'wfk_disk%mband, dtset%mband ', wfk_disk%mband, dtset%mband
  ABI_MALLOC(eig_disk, ((2*mband)**wfk_disk%formeig*mband) )
  ABI_MALLOC(occ_disk, (mband))
 
- cryst = wfk_disk%hdr%get_crystal(2)
+ itimrev = kpts_timrev_from_kptopt(dtset%kptopt)
+ cryst = wfk_disk%hdr%get_crystal(itimrev + 1)
+
 
  chksymbreak = 0
  iout = 0
  ABI_ALLOCATE (rbz2disk, (6,nkpt_in))
  ABI_ALLOCATE (symrelT, (3,3,cryst%nsym))
+! TODO: from Matteo, this should be symrel straight, not transposed. Perhaps the logic in mapkptsets is transposed?
  do isym=1,cryst%nsym
    symrelT(:,:,isym) = transpose(cryst%symrel(:,:,isym))
  end do
+print *, 'wfk_disk%hdr%nkpt cryst%timrev ', wfk_disk%hdr%nkpt, cryst%timrev
  call mapkptsets(chksymbreak, cryst%gmet, iout, wfk_disk%hdr%kptns, wfk_disk%hdr%nkpt, kptns_in, nkpt_in, &
 &     nkirred_disk, cryst%nsym, symrelT, cryst%timrev-1, rbz2disk, xmpi_comm_self)
 

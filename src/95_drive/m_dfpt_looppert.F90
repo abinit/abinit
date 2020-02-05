@@ -1162,7 +1162,8 @@ print *, 'shapes ', shape(cg), "  ", shape(cg_tmp)
          iband_me = iband_me + 1
 !print *, 'is ik ib kpt icg ', isppol, ikpt, iband, kpt_rbz(:,ikpt), icg
 if (sum(abs(cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol6) then
-print *, ' diff in cg '
+print *, 'is ik ib cg ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
+print *, ' diff in cg ', isppol, ikpt, ' / ', nkpt_rbz
 print *, cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
 end if 
 

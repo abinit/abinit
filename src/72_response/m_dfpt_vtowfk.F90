@@ -918,6 +918,8 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,e
  edocc(iband)=zero
 
 ! loop jband over all bands being treated for the moment
+! all procs in pool of bands should be working on the same jband at a given time
+! I will save in _my_ array cwave1, if iband==jband
  do jband = 1, nband
    if (bands_treated_now(jband) == 0) cycle
 

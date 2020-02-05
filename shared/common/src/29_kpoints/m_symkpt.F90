@@ -699,7 +699,7 @@ subroutine mapkptsets(chksymbreak,gmet,iout,k_in,nk_in,&
 !scalars
  type(krank_t) :: krank
  integer :: identi,ii,ikpt,ik_in,ikpt_found
- integer :: isym,itim,jj,nkpout,tident
+ integer :: isym,itim,jj,tident
  !real(dp) :: cpu, gflops, wall
  character(len=500) :: message
 !arrays
@@ -799,14 +799,16 @@ subroutine mapkptsets(chksymbreak,gmet,iout,k_in,nk_in,&
  ! Initialize 
  bz2kin_smap = 0
 
- nkirred = 0
- ! Now I loop over the points in the in list to find the mapping to the BZ
- do ik_in=1,nk_in
-   kpt1 = k_in(:,ik_in)
-
    ! HM: Here I invert the itim and isym loop to generate the same mapping as listkk
-   do itim=0,timrev
-     do isym=1,nsym
+ do itim=0,timrev
+   do isym=1,nsym
+
+!TODO: verify this inefficient use: sweep over isym=identity first to check which
+!  k_in are actually directly present in kbz. Will not minimize the number of k_in we use, on the contrary
+! Now I loop over the points in the in list to find the mapping to the BZ
+   do ik_in=1,nk_in
+     kpt1 = k_in(:,ik_in)
+
        ! Get the symmetric of the vector
        do ii=1,3
          ksym(ii)=(1-2*itim)*( kpt1(1)*symrec(ii,1,isym)+&
@@ -823,14 +825,20 @@ subroutine mapkptsets(chksymbreak,gmet,iout,k_in,nk_in,&
 
        bz2kin_smap(1:3, ikpt_found) = [ik_in,isym,itim]
        bz2kin_smap(4:6, ikpt_found) = nint(kbz(:,ikpt_found)-ksym)
+print *, ' g0 calculation ', kbz(:,ikpt_found)-ksym, '   ', bz2kin_smap(4:6, ikpt_found)
      end do
+
    end do
+ end do
+ !call cwtime_report(" map", cpu, wall, gflops)
+
+ nkirred = 0
+ do ik_in=1,nk_in
    ! did I end up using this ik_in?
    if (any(bz2kin_smap(1,:) == ik_in)) then
      nkirred = nkirred + 1
    end if
  end do
- !call cwtime_report(" map", cpu, wall, gflops)
 
  call krank%free()
 
