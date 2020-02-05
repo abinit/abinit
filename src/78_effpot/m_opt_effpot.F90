@@ -627,23 +627,24 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  &                                           natom_sc,ntime,fit_data%training_set%sqomega,comm,&
  &                                           compute_anharmonic=.TRUE.,print_file=.FALSE.)
                i = 0
-               write(message,'(a,I2,a,F12.7)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
+               write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
                call wrtout(std_out,message,'COLL')
                write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
                call wrtout(std_out,message,'COLL')
                do  while((msef+mses)/(msef_ini+mses_ini) >= 1.001)
                   i = i + 1 
-                  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = coeff_ini / 2**i
+                  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient = &!coeff_ini / 2**i
+&                  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient / 2**1
                   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,&
  &                                              natom_sc,ntime,fit_data%training_set%sqomega,comm,&
  &                                              compute_anharmonic=.TRUE.,print_file=.FALSE.)
  
-                  write(message,'(a,I2,a,F12.7)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
+                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
                   call wrtout(std_out,message,'COLL')
                   write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
                   call wrtout(std_out,message,'COLL')
                enddo ! while mse/mse_ini>1.0001 
-               write(message,'(a,F12.7)') "coeff after opt:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient 
+               write(message,'(a,ES24.16)') "coeff after opt:",   eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient 
                call wrtout(std_out,message,'COLL')
                msef_ini = msef
                mses_ini = mses
@@ -668,20 +669,20 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 &                                              natom_sc,ntime,fit_data%training_set%sqomega,comm,&
 &                                              compute_anharmonic=.TRUE.,print_file=.FALSE.)
 ! ENERGY + FORCES + STRESSES output 
-!                  write(message,'(a,I2,a,ES24.16)') "cycle ",i," (mse+msef+mses)/(mse_ini+msef_ini+mses_ini): ",(mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
-!                  call wrtout(std_out,message,'COLL')
-!                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (mse+msef+mses): ", (mse+msef+mses)
-!                  call wrtout(std_out,message,'COLL')
+                  write(message,'(a,I2,a,ES24.16)') "cycle ",i," (mse+msef+mses)/(mse_ini+msef_ini+mses_ini): ",(mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
+                  call wrtout(std_out,message,'COLL')
+                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (mse+msef+mses): ", (mse+msef+mses)
+                  call wrtout(std_out,message,'COLL')
 ! FORCES + STRESSES output 
-                  write(message,'(a,I2,a,ES24.16)') "cycle ",i," (msef+mses)/(msef_ini+mses_ini): ",(msef+mses)/(msef_ini+mses_ini)
-                  call wrtout(std_out,message,'COLL')
-                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
-                  call wrtout(std_out,message,'COLL')
+!                 write(message,'(a,I2,a,ES24.16)') "cycle ",i," (msef+mses)/(msef_ini+mses_ini): ",(msef+mses)/(msef_ini+mses_ini)
+!                 call wrtout(std_out,message,'COLL')
+!                 write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
+!                 call wrtout(std_out,message,'COLL')
                   coeff_opt(i) =  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient
 !Store ENERGY + FORCES + STRESSES
-!                 msefs_arr(i) =  (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
+                 msefs_arr(i) =  (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
 !STORE FORCES + STRESSES
-                  msefs_arr(i) =  (msef+mses)/(msef_ini+mses_ini)
+!                 msefs_arr(i) =  (msef+mses)/(msef_ini+mses_ini)
                   if(i==2 .and. abs(msefs_arr(1)-msefs_arr(2)) < tol8)then 
                      eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient =& 
                      eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient*10d5 
@@ -704,11 +705,11 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  &                                               natom_sc,ntime,fit_data%training_set%sqomega,comm,&
  &                                               compute_anharmonic=.TRUE.,print_file=.FALSE.)
 ! ENERGY + FORCES + STRESESS OUTPUT
-!                write(message,'(a,ES24.16)') "(mse+msef+mses)/(mse_ini+msef_ini+mses_ini) after_opt: ", (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
-!                call wrtout(std_out,message,'COLL')
-! FORCES + STRESESS OUTPUT
-                write(message,'(a,ES24.16)') "(msef+mses)/(msef_ini+mses_ini) after_opt: ", (msef+mses)/(msef_ini+mses_ini)
+                write(message,'(a,ES24.16)') "(mse+msef+mses)/(mse_ini+msef_ini+mses_ini) after_opt: ", (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
                 call wrtout(std_out,message,'COLL')
+! FORCES + STRESESS OUTPUT
+!               write(message,'(a,ES24.16)') "(msef+mses)/(msef_ini+mses_ini) after_opt: ", (msef+mses)/(msef_ini+mses_ini)
+!               call wrtout(std_out,message,'COLL')
                 mse_ini  = mse
                 msef_ini = msef
                 mses_ini = mses
@@ -1360,7 +1361,7 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm)
     ABI_DATATYPE_ALLOCATE(terms,(nterm_tot_tmp)) 
     do icombi=1,ncombi
        terms(nterm_start+icombi) = strain_terms_tmp(icombi)
-       terms(nterm_start+icombi)%coefficient = 10000000      ! eff_pot%harmonics_terms%elastic_constants(1,1)
+       terms(nterm_start+icombi)%coefficient = 1000000      ! eff_pot%harmonics_terms%elastic_constants(1,1)
     enddo
 
 end subroutine opt_getHOstrain

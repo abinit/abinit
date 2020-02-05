@@ -2430,9 +2430,9 @@ if(need_compute_symmetric)then
      else
         my_ncombi = 0
      endif
-   if(my_rank == i-1)then
-      write(std_out,*) "my_rank,my_ncombi_start,my_ncombi_end, my_ncombi:", my_rank,my_ncombi_start,my_ncombi_end,my_ncombi
-   endif
+   !if(my_rank == i-1)then
+   !   write(std_out,*) "my_rank,my_ncombi_start,my_ncombi_end, my_ncombi:", my_rank,my_ncombi_start,my_ncombi_end,my_ncombi
+   !endif
   enddo
 
   !write(std_out,*) "my_ncombi: ", my_ncombi
@@ -3448,7 +3448,7 @@ integer,intent(inout),allocatable :: index_irred(:)
 !Local variables-------------------------------
 !scalar
 integer :: isym,idisp,ncombi_to_test,idisp2,ii,jj
-logical :: need_compute,irreducible, need_only_even
+logical :: need_compute,irreducible, need_only_even,possible
 !arrays
 integer :: index_coeff_tmp(ndisp),powers(ndisp),symcoeff_found(nsym)
 integer,allocatable :: index_isym(:)
@@ -3478,44 +3478,50 @@ if(isym_in <= nsym .and. idisp_in <= ndisp)then
      !write(std_out,*) "DEBUG: idisp_in", idisp_in, "ndisp", ndisp
      if(idisp_in == ndisp)then
        if(ndisp == 1 .and. isym ==1 .or. ndisp > 1)then !If term is just one body just store one time
-         ncombi = ncombi + 1
-         if(need_compute)then
-           !loop over displacements in term
-           do idisp=1,ndisp
-              index_coeff_tmp(idisp) = list_symcoeff(6,index_coeff_in(idisp),index_isym(idisp))
-           end do !idisp=1,ndisp
-           ! Store index of symmetric coefficient to evade double generation. 
-           symcoeff_found(isym) = index_coeff_tmp(idisp_in)
-           if(isym > 1 .and. any(symcoeff_found(:isym-1) == symcoeff_found(isym)))then 
-                index_coeff_tmp = 0 
-           endif
-!          Check if we want only even terms
-!          count the number of body
-           powers(:) = 1
-           do ii=1,ndisp
-             do jj=ii+1,ndisp
-               if (powers(jj) == 0) cycle
-               if(index_coeff_tmp(ii)==index_coeff_tmp(jj))then
-                 powers(ii) = powers(ii) + 1
-                 powers(jj) = 0
-               end if
-             end do
+         
+         do idisp=1,ndisp
+            index_coeff_tmp(idisp) = list_symcoeff(6,index_coeff_in(idisp),index_isym(idisp))
+         end do !idisp=1,ndisp
+         ! Store index of symmetric coefficient to evade double generation. 
+         symcoeff_found(isym) = index_coeff_tmp(idisp_in)
+         if(isym > 1 .and. any(symcoeff_found(:isym-1) == symcoeff_found(isym)))then 
+              index_coeff_tmp = 0 
+         endif
+!        Check if we want only even terms
+!        count the number of body
+         powers(:) = 1
+         do ii=1,ndisp
+           do jj=ii+1,ndisp
+             if (powers(jj) == 0) cycle
+             if(index_coeff_tmp(ii)==index_coeff_tmp(jj))then
+               powers(ii) = powers(ii) + 1
+               powers(jj) = 0
+             end if
            end do
-           if(any(mod(powers(1:ndisp),2) /=0) .and. need_only_even) then
-              index_coeff_tmp(:) = 0
-           end if
-           !Check if symmetric combination is allowed
-           if(.not. any(index_coeff_tmp == 0))then ! Check if term is allowed by distance
-              do idisp=1,ndisp-1
-                 do idisp2=idisp+1,ndisp
-                    if(compatibleCoeffs(index_coeff_tmp(idisp),index_coeff_tmp(idisp2)) == 0) then
-                       index_coeff_tmp = 0
-                       exit
-                    end if
-                 enddo
-                 if(all(index_coeff_tmp == 0))exit
-              enddo
-           endif
+         end do
+         if(any(mod(powers(1:ndisp),2) /=0) .and. need_only_even) then
+            index_coeff_tmp(:) = 0
+         end if
+         !Check if symmetric combination is allowed
+         if(.not. any(index_coeff_tmp == 0))then ! Check if term is allowed by distance
+            do idisp=1,ndisp-1
+               do idisp2=idisp+1,ndisp
+                  if(compatibleCoeffs(index_coeff_tmp(idisp),index_coeff_tmp(idisp2)) == 0) then
+                     index_coeff_tmp = 0
+                     exit
+                  end if
+               enddo
+               if(all(index_coeff_tmp == 0))exit
+            enddo
+         endif
+         if(any(index_coeff_tmp == 0))then ! If symmetry doesn't point to another term or isn't allowed due to distance write zeros to filter after
+	    possible = .FALSE.
+         else   
+	    ncombi = ncombi + 1
+            possible = .TRUE. 
+         endif
+         if(need_compute .and. possible)then
+           !loop over displacements in term
            if(any(index_coeff_tmp == 0))then ! If symmetry doesn't point to another term or isn't allowed due to distance write zeros to filter after
               list_combination(:,ncombi) = 0
            else
