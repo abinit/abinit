@@ -104,7 +104,7 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
  integer :: ig1min,ig2min,ig3min
  integer :: ii,ii1,ing,me_fft,n1,n2,n3,nd_atom,nd_atom_tot,nproc_fft
  real(dp),parameter :: tolfix=1.000000001e0_dp
- real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs,phase,ucvol
+ real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs,phase,ucvol, rcut
  complex(dpc) :: prefac,cgr
  !arrays
  integer :: id(3)
@@ -336,6 +336,9 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
 !scalars
  integer,intent(in) :: cplex,izero,nfft
  real(dp),intent(in) :: gsqcut
+! REMEMBER to define the V_Coulomb type first before you uncomment this
+! For the moment we will leave optional the choice of cut-off technique 
+! type(vcoul_type), intent(in), optional :: icutcoul 
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -426,6 +429,37 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
 
  ABI_ALLOCATE(work1,(2,nfft))
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
+
+ ! If there is a special treatment for the Coulomb singularity: 
+ ! Calculate it here only once before entering the loop over the grid points
+  if (PRESENT(divgq0)) then
+   rcut = (three*nfft*ucvol/four_pi)**(one/three)
+
+! SELECT CASE (singularity_mode)
+
+!   CASE('SPHERE') ! 0D 
+   ! Treatment of the divergence at the Gamma point
+   ! Spencer-Alavi scheme !!! ATT: Other methods will be gradually included
+   ! I am not completely convinced that this should be purely attributed to Spencer-Alavi  2008
+   ! since in Rozzi et al. 2006 they propose the same treatment for 0D case
+   divgq0 = two_pi*rcut**two
+
+!   CASE('CYLINDER') ! According to Rozzi et al 2006
+!     divgq0 = -pi*rcut**two*(2*log(rcut)-1)
+
+!   CASE('SURFACE') ! According to Rozzi et al 2006
+!     divgq0 = -pi*rcut**two
+
+!   CASE DEFAULT
+!     
+!     DEBUG
+!       call wrtout(std_out,"!!!No divergence treatment chosen!!!")
+!     ENDDEBUG
+
+! END SELECT
+ 
+ end if 
+
 
  ! Triple loop on each dimension
  do i3=1,n3
