@@ -657,7 +657,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
  if (dtset%usekden==1) call ab7_mixing_eval_deallocate(mix_mgga)
 
  call timab(904,2,tsec)
-print *,"AAAA"
+
 !Restore potential
  if (ispmix==1.and.nfft==nfftmix) then
    vtrial=vtrial0
