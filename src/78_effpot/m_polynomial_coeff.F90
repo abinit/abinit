@@ -2020,7 +2020,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  logical :: iam_master,need_anharmstr,need_spcoupling,need_distributed,need_verbose
  logical :: need_only_odd_power,need_only_even_power,compute_sym,irreducible,need_compute_symmetric
 !arrays
- integer :: ncell(3)
+ integer :: ncell(3),shape_listsymcoeff(3),shape_listsymstr(3)
  integer,allocatable :: buffsize(:),buffdispl(:),index_irredcomb(:),dummylist(:),index_irred(:)
  integer,allocatable :: offsets(:)
  integer,allocatable :: cell(:,:),compatibleCoeffs(:,:)
@@ -2170,6 +2170,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  end do
 
 
+if(iam_master)then
  if(need_verbose)then
    write(message,'(1a)')' Generation of the list of all the possible pairs of atoms within cutoff'
    call wrtout(std_out,message,'COLL')
@@ -2177,9 +2178,24 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  call polynomial_coeff_getList(cell,crystal,dist,list_symcoeff,list_symstr,&
 &                              natom,nstr_sym,ncoeff_sym,nrpt,range_ifc,cutoff,sc_size=sc_size,&
 &                              fit_iatom=fit_iatom_in)
+ shape_listsymcoeff = shape(list_symcoeff)
+ shape_listsymstr   = shape(list_symstr)
+endif!if iam master 
+
+!Broadcast Results of getList
+call xmpi_bcast(shape_listsymcoeff, master, comm, ierr)
+call xmpi_bcast(shape_listsymstr, master, comm, ierr)
+call xmpi_bcast(nstr_sym, master, comm, ierr)
+call xmpi_bcast(ncoeff_sym, master, comm, ierr)
+if(.not. iam_master )then
+  ABI_ALLOCATE(list_symcoeff,(shape_listsymcoeff(1),shape_listsymcoeff(2),shape_listsymcoeff(3)))
+  ABI_ALLOCATE(list_symstr,(shape_listsymstr(1),shape_listsymstr(2),shape_listsymstr(3)))
+endif 
+call xmpi_bcast(list_symcoeff, master, comm, ierr)
+call xmpi_bcast(list_symstr, master, comm, ierr)
+call xmpi_barrier(comm)
 
 ncoeff_symsym = size(list_symcoeff(1,:,1))
-
 !if(iam_master)then
 !i0 = 0
 !write(std_out,*) "DEBUG shape list_symcoeff(:,:,:):", shape(list_symcoeff)
