@@ -448,7 +448,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
 !     divgq0 = -pi*rcut**two*(2*log(rcut)-1)
 
 !   CASE('SURFACE') ! According to Rozzi et al 2006
-!     divgq0 = -pi*rcut**two
+!     divgq0 = -two_pi*rcut**two
 
 !   CASE DEFAULT
 !     
