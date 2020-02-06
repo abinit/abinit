@@ -1,5 +1,5 @@
 
-.Version 8.11.7 of MULTIBINIT 
+.Version 8.11.14 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  4 Jun 2019.
-- ( at 10h52 )
+.Starting date : Thu  6 Feb 2020.
+- ( at 14h42 )
   
--  nproc =    4
+-  nproc =    2
 
 ================================================================================
 
  Read the information in the reference structure in 
--test_model.xml
+-/home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t98_model.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -54,8 +54,8 @@ dipdip_range         2         2         2
 
 ================================================================================
 
--Opening the file test_model.xml
--Reading the file test_model.xml with LibXML library
+-Opening the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t98_model.xml
+-Reading the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t98_model.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -78,8 +78,8 @@ dipdip_range         2         2         2
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file test_model.xml
--Reading the file test_model.xml with LibXML library
+-Opening the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t98_model.xml
+-Reading the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t98_model.xml with LibXML library
 
 ================================================================================
 
@@ -89,26 +89,26 @@ dipdip_range         2         2         2
 
 TEST - SET Option
 -Reading the test-set file :
--test.nc
+-/home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t98.nc
 
 
  Mean Standard Deviation values of the effective-potential
- with respect to the test-set (meV/atm):
-   Energy          :   3.2894121340050653E-01
+ with respect to the test-set (meV^2/atm):
+   Energy          :   1.1581196256185514E+01
  Goal function values of the effective.potential
  with respect to the test-set (eV^2/A^2):
    Forces+Stresses :   1.5633997907362205E-03
-   Forces          :   5.7262029535544770E-04
+   Forces          :   5.7262029535544749E-04
    Stresses        :   9.9077949538077287E-04
 
 
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          3.4  wall=          5.4
+- Proc.   0 individual time (sec): cpu=          1.4  wall=          1.4
 
 ================================================================================
 
-+Total cpu time     13.607  and wall time     21.464 sec
++Total cpu time      2.770  and wall time      2.819 sec
 
  multibinit : the run completed succesfully.

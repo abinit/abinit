@@ -669,20 +669,20 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
 &                                              natom_sc,ntime,fit_data%training_set%sqomega,comm,&
 &                                              compute_anharmonic=.TRUE.,print_file=.FALSE.)
 ! ENERGY + FORCES + STRESSES output 
-                  write(message,'(a,I2,a,ES24.16)') "cycle ",i," (mse+msef+mses)/(mse_ini+msef_ini+mses_ini): ",(mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
-                  call wrtout(std_out,message,'COLL')
-                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (mse+msef+mses): ", (mse+msef+mses)
-                  call wrtout(std_out,message,'COLL')
+!                  write(message,'(a,I2,a,ES24.16)') "cycle ",i," (mse+msef+mses)/(mse_ini+msef_ini+mses_ini): ",(mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
+!                  call wrtout(std_out,message,'COLL')
+!                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (mse+msef+mses): ", (mse+msef+mses)
+!                  call wrtout(std_out,message,'COLL')
 ! FORCES + STRESSES output 
-!                 write(message,'(a,I2,a,ES24.16)') "cycle ",i," (msef+mses)/(msef_ini+mses_ini): ",(msef+mses)/(msef_ini+mses_ini)
-!                 call wrtout(std_out,message,'COLL')
-!                 write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
-!                 call wrtout(std_out,message,'COLL')
+                 write(message,'(a,I2,a,ES24.16)') "cycle ",i," (msef+mses)/(msef_ini+mses_ini): ",(msef+mses)/(msef_ini+mses_ini)
+                 call wrtout(std_out,message,'COLL')
+                 write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
+                 call wrtout(std_out,message,'COLL')
                   coeff_opt(i) =  eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient
 !Store ENERGY + FORCES + STRESSES
-                 msefs_arr(i) =  (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
+!                 msefs_arr(i) =  (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
 !STORE FORCES + STRESSES
-!                 msefs_arr(i) =  (msef+mses)/(msef_ini+mses_ini)
+                 msefs_arr(i) =  (msef+mses)/(msef_ini+mses_ini)
                   if(i==2 .and. abs(msefs_arr(1)-msefs_arr(2)) < tol8)then 
                      eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient =& 
                      eff_pot%anharmonics_terms%coefficients(nterm2)%coefficient*10d5 
@@ -705,11 +705,11 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  &                                               natom_sc,ntime,fit_data%training_set%sqomega,comm,&
  &                                               compute_anharmonic=.TRUE.,print_file=.FALSE.)
 ! ENERGY + FORCES + STRESESS OUTPUT
-                write(message,'(a,ES24.16)') "(mse+msef+mses)/(mse_ini+msef_ini+mses_ini) after_opt: ", (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
-                call wrtout(std_out,message,'COLL')
+!                write(message,'(a,ES24.16)') "(mse+msef+mses)/(mse_ini+msef_ini+mses_ini) after_opt: ", (mse+msef+mses)/(mse_ini+msef_ini+mses_ini)
+!                call wrtout(std_out,message,'COLL')
 ! FORCES + STRESESS OUTPUT
-!               write(message,'(a,ES24.16)') "(msef+mses)/(msef_ini+mses_ini) after_opt: ", (msef+mses)/(msef_ini+mses_ini)
-!               call wrtout(std_out,message,'COLL')
+               write(message,'(a,ES24.16)') "(msef+mses)/(msef_ini+mses_ini) after_opt: ", (msef+mses)/(msef_ini+mses_ini)
+               call wrtout(std_out,message,'COLL')
                 mse_ini  = mse
                 msef_ini = msef
                 mses_ini = mses

@@ -1,5 +1,5 @@
 
-.Version 8.11.7 of MULTIBINIT 
+.Version 8.11.14 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
 
 .Copyright (C) 1998-2019 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue  4 Jun 2019.
-- ( at 11h48 )
+.Starting date : Thu  6 Feb 2020.
+- ( at 14h41 )
   
--  nproc =    4
+-  nproc =    2
 
 ================================================================================
 
  Read the information in the reference structure in 
--test_model.xml
+-/home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t98_model.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -57,8 +57,8 @@ dipdip_range         2         2         2
 
 ================================================================================
 
--Opening the file test_model.xml
--Reading the file test_model.xml with LibXML library
+-Opening the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t98_model.xml
+-Reading the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t98_model.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -81,8 +81,8 @@ dipdip_range         2         2         2
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file test_model.xml
--Reading the file test_model.xml with LibXML library
+-Opening the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t98_model.xml
+-Reading the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t98_model.xml with LibXML library
 
 ================================================================================
 
@@ -91,7 +91,7 @@ dipdip_range         2         2         2
 ================================================================================
 
 -Reading the training-set file :
--test.nc
+-/home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t98.nc
 
 
 ================================================================================
@@ -100,42 +100,42 @@ Optimizing Effective Potential
 
 
  Mean Standard Deviation values of the effective-potential
- with respect to the training-set before optimization (meV/atm):
-   Energy          :   3.2894121340050653E-01
+ with respect to the training-set before optimization (meV^2/atm):
+   Energy          :   1.1581196256185514E+01
  Goal function values of the effective.potential
  with respect to the test-set (eV^2/A^2):
    Forces+Stresses :   1.5633997907362205E-03
-   Forces          :   5.7262029535544770E-04
+   Forces          :   5.7262029535544749E-04
    Stresses        :   9.9077949538077287E-04
 
 
  Mean Standard Deviation values of the effective-potential
- with respect to the training-set after deleting selected terms (meV/atm):
-   Energy          :   3.4674930608244842E-01
+ with respect to the training-set after deleting selected terms (meV^2/atm):
+   Energy          :   1.2738740394185962E+01
  Goal function values of the effective.potential
  with respect to the test-set (eV^2/A^2):
-   Forces+Stresses :   1.7524994686471966E-03
-   Forces          :   7.6089189702714969E-04
+   Forces+Stresses :   1.7524994686471964E-03
+   Forces          :   7.6089189702714958E-04
    Stresses        :   9.9160757162004690E-04
 
 
  Mean Standard Deviation values of the effective-potential
- with respect to the training-set after optimizing selected terms (meV/atm):
-   Energy          :   3.0913620599140901E-01
+ with respect to the training-set after optimizing selected terms (meV^2/atm):
+   Energy          :   1.0519571773190103E+01
  Goal function values of the effective.potential
  with respect to the test-set (eV^2/A^2):
-   Forces+Stresses :   1.5256288198381154E-03
-   Forces          :   5.3584404219031391E-04
-   Stresses        :   9.8978477764780168E-04
+   Forces+Stresses :   1.5256288198381158E-03
+   Forces          :   5.3584404219031412E-04
+   Stresses        :   9.8978477764780147E-04
 
 
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          9.4  wall=         10.4
+- Proc.   0 individual time (sec): cpu=          3.4  wall=          3.5
 
 ================================================================================
 
-+Total cpu time     36.271  and wall time     41.643 sec
++Total cpu time      6.907  and wall time      6.932 sec
 
  multibinit : the run completed succesfully.
