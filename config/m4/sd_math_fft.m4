@@ -157,7 +157,7 @@ AC_DEFUN([SD_FFT_DETECT], [
   # FIXME: hard-coded FFTW3 options
   case "${sd_fft_flavor}" in
     fftw3-mpi)
-      if test "${sd_mpi_enable}" = "yes"; then
+      if test "${sd_mpi_ok}" = "yes" -a "${sd_fftw3_mpi_ok}" = "yes"; then
         AC_DEFINE([HAVE_FFTW3_MPI], 1,
           [Define to 1 if you have a MPI-enabled FFTW3 library.])
       fi
