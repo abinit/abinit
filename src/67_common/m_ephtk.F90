@@ -100,8 +100,8 @@ subroutine ephtk_set_phmodes_skip(dtset, phmodes_skip)
    end if
    call wrtout(std_out, sjoin(" Including phonon modes between [", &
                itoa(dtset%eph_phrange(1)), ',', itoa(dtset%eph_phrange(2)), "]"))
-   phmodes_skip = 0
-   phmodes_skip(dtset%eph_phrange(1):dtset%eph_phrange(2)) = 1
+   phmodes_skip = 1
+   phmodes_skip(dtset%eph_phrange(1):dtset%eph_phrange(2)) = 0
  end if
 
 end subroutine ephtk_set_phmodes_skip

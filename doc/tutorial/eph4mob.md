@@ -131,7 +131,7 @@ The file *$\$ABI_TUTORESPFN/Input/teph4mob_5.in* is an example of such computati
 {% dialog tests/tutorespfn/Input/teph4mob_5.in %}
 
 You will need the wavefunction, DDB and DVDB files obtained previously.
-You can give the paths to these file using:
+You can give the paths to these files using:
 
     getwfk_path "teph4mob_4o_DS2_WFK"
     getddb_path "teph4mob_2_DDB"
@@ -234,7 +234,7 @@ teph4mob_5.out file:
 
 	K-point: [ 4.5833E-01,  4.5833E-01,  0.0000E+00], T=    5.0 [K]
 	   B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-	   5   3.573    0.000  34495.8    0.000
+	   5   3.573    0.000  31553.2    0.000
 
 Only the first temperature is printed in the output file, but all the information can be found in the SIGEPH.nc file.
 
@@ -249,14 +249,13 @@ Only the first temperature is printed in the output file, but all the informatio
 
 At the end of the .out and .log files, the mobility is printed:
 
-	Transport calculation results
 	 Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
-	            5.00        0.23E+17        0.00E+00            0.00            0.00
-	           64.00        0.23E+17        0.00E+00           42.80            0.00
-	          123.00        0.23E+17        0.00E+00          363.44            0.00
-	          182.00        0.23E+17        0.00E+00          433.51            0.00
-	          241.00        0.23E+17        0.00E+00          425.82            0.00
-	          300.00        0.23E+17        0.00E+00          368.46            0.00
+        	    5.00        0.23E+17        0.00E+00            0.00            0.00
+	           64.00        0.23E+17        0.00E+00           38.37            0.00
+        	  123.00        0.23E+17        0.00E+00          345.31            0.00
+	          182.00        0.23E+17        0.00E+00          423.32            0.00
+        	  241.00        0.23E+17        0.00E+00          418.67            0.00
+	          300.00        0.23E+17        0.00E+00          363.11            0.00
 
 The temperature is first given then the electron and hole densities, and electron and hole mobilities. 
 In this computation, we consider only the electrons, so the values for the holes are 0. 
@@ -310,7 +309,8 @@ in the computation of the mobility. This second option has the advantage that it
 (useful for convergence studies), but it
 requires more computational time.
 
-You can run again the previous input files, by densifying the different meshes. 
+You can run again the previous input files, by densifying the different meshes.
+Note that for the densest grids, you might have to use a supercomputer. 
 You should obtain something like this, for T = 300 K:
 
 ![](eph4mob_assets/teph4mob_conv.png)
@@ -346,11 +346,13 @@ In the log file, you will now find information about the double-grid method:
 	 coarse:                24          24          24
 	 dense:                 48          48          48
 
-The mobility obtained, at 300 K, is 160.34 cm$^2$/V/s. Using a 48x48x48 q-mesh for the matrix elements as well would give
-97.10. The result is indeed improved, since using a 24x24x24 mesh for everything gives 368.46. 
+The mobility obtained, at 300 K, is 158.01 cm$^2$/V/s. Using a 48x48x48 q-mesh for the matrix elements as well would give
+96.09. The result is indeed improved, since using a 24x24x24 mesh for everything gives 363.11. 
 You can also use a denser fine mesh, but always a multiple of the initial coarse mesh (in this case,
 72x72x72, 96x96x96, etc). However, we found that there is very little use to go beyond a mesh three times
 as dense as the coarse mesh.
+Using a 72x72x72 fine mesh for the energies gives a mobility of 149.87 cm$^2$/V/s,
+and a 96x96x96 mesh leads to 146.24 cm$^2$/V/s: the improvement is indeed rather limited.
 
 ### Note on the different levels of MPI parallelism
 
