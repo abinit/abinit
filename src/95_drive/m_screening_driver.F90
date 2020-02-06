@@ -751,7 +751,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,rhor_p,prev_Pawrhoij)
 
    ABI_FREE(rhor_p)
-   ABI_DT_FREE(prev_Pawrhoij)
+   ABI_FREE(prev_Pawrhoij)
 
    ! FIXME this is to preserve the old implementation for the head and the wings in ccchi0q0
    ! But has to be rationalized
@@ -1523,13 +1523,13 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end if
  end if
 
- ABI_DT_FREE(Pawfgrtab)
- ABI_DT_FREE(Paw_pwff)
- ABI_DT_FREE(Pawrhoij)
- ABI_DT_FREE(Paw_ij)
- ABI_DT_FREE(Paw_an)
+ ABI_FREE(Pawfgrtab)
+ ABI_FREE(Paw_pwff)
+ ABI_FREE(Pawrhoij)
+ ABI_FREE(Paw_ij)
+ ABI_FREE(Paw_an)
  ABI_FREE(ktabrf)
- ABI_DT_FREE(Paw_onsite)
+ ABI_FREE(Paw_onsite)
 
  call wfd%free()
  call kmesh_free(Kmesh)
@@ -1545,7 +1545,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call ebands_free(QP_BSt)
  call littlegroup_free(Ltg_q)
  call destroy_mpi_enreg(MPI_enreg_seq)
- ABI_DT_FREE(Ltg_q)
+ ABI_FREE(Ltg_q)
 
  call timab(301,2,tsec)
 
@@ -2160,7 +2160,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 
  ABI_FREE(occfact)
  call pawrhoij_free(Pawrhoij)
- ABI_DT_FREE(Pawrhoij)
+ ABI_FREE(Pawrhoij)
 
  ! ==== Setup of extrapolar technique ====
  Ep%gwcomp = Dtset%gwcomp; Ep%gwencomp = Dtset%gwencomp
