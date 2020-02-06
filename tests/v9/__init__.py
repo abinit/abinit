@@ -10,6 +10,8 @@ keywords = [
 
 #: List of input files
 inp_files = [
+#Constrained DFT
+"t01.in",
 #Electron-phonon
 "t50.in",
 "t51.in",
