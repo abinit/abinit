@@ -277,7 +277,7 @@ AC_DEFUN([_SD_FFTW3_CHECK_USE], [
         fftw_mpi_init();
       ]])], [sd_fftw3_mpi_ok="yes"], [sd_fftw3_mpi_ok="no"])
     AC_LANG_POP([C])
-    AC_MSG_RESULT([${sd_fftw3_ok}])
+    AC_MSG_RESULT([${sd_fftw3_mpi_ok}])
   else
     sd_fftw3_mpi_ok="no"
   fi
