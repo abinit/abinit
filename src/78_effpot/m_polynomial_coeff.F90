@@ -2280,7 +2280,7 @@ ncoeff_symsym = size(list_symcoeff(1,:,1))
    if(need_verbose)then
      write(message,"(1a,I10)") "  -Number of irreducible pairs within cutoff:   ", ncoeff_sym
      call wrtout(std_out,message,'COLL')
-     write(message,"(1a,I10,I10)") "  -Number of combinations of irreducible pairs: ", nirred_comb, icoeff2
+     write(message,"(1a,I10)") "  -Number of combinations of irreducible pairs: ", nirred_comb
      call wrtout(std_out,message,'COLL')
      !write(message,"(1a,I10)") "  -Number of possible symmetric combinations:   ", ncombination
      !call wrtout(std_out,message,'COLL')
@@ -2310,7 +2310,7 @@ if(need_compute_symmetric)then
     call wrtout(std_out,message,'COLL')
     write(message,'(1a)')' Compute symmetric combinations of combinations of irreducible pairs'
     call wrtout(std_out,message,'COLL')
-    write(message,'(3a)')' ---> Try to match number of CPU to number of irreducible combinations',ch10,&
+    write(message,'(3a)')' ---> Try to match number of CPU to number combinations of irreucible pairs',ch10,&
     &                    '      for max. speedup'
     call wrtout(std_out,message,'COLL')
   endif
@@ -2339,10 +2339,19 @@ if(need_compute_symmetric)then
     endif
   end if
 
+  if(my_ncombi_end <= nirred_comb)then
+     my_nirred = my_ncombi_end+1-my_ncombi_start
+  else
+     my_nirred = 0
+  endif
+
+
+  !write(std_out,*) "my_rank", my_rank, "my_ncmobi_start", my_ncombi_start, "my_ncombi_end", my_ncombi_end,'my_nirred',my_nirred
+
   !COPY IRREDUCIBLE COMBINTATIONS TO BE DONE TO EACH PROCESSOR
-  my_nirred = my_ncombi_end - my_ncombi_start + 1
+  !my_nirred = my_ncombi_end - my_ncombi_start + 1
   ABI_ALLOCATE(my_list_combination_tmp,(power_disps(2),my_nirred))
-  my_list_combination_tmp(:,:) = list_combination_tmp(:,my_ncombi_start:my_ncombi_end)
+  if(my_nirred /= 0)my_list_combination_tmp(:,:) = list_combination_tmp(:,my_ncombi_start:my_ncombi_end)
   ABI_ALLOCATE(my_index_irredcomb,(my_nirred))
   !DEALLOCATE list_combination_tmp
   ABI_DEALLOCATE(list_combination_tmp)
@@ -2416,7 +2425,7 @@ if(need_compute_symmetric)then
   endif
 
   ! Delete double combinations on each processor
-  if(need_verbose)then
+  if(need_verbose .and. my_nirred /= 0)then
      write(message,'(1a,I4)')' Reduce reducible symmetric combinations on processor: ', my_rank+1
      call wrtout(std_out,message,'PERS')
   endif
