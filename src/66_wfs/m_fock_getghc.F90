@@ -4,7 +4,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (CMartins, FJ, MT, XG)
+!!  Copyright (C) 2013-2020 ABINIT group (CMartins, FJ, MT, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,7 +82,7 @@ contains
 !!                   contains the fock exchange term for cwavef at the end.
 !!
 !! NOTES
-!!  The current version assumes that :
+!!  The current version assumes that:
 !!   * nspinor = 1
 !!   * no "my_nspinor"
 !!   * no restriction to the value of istwfk_bz (but must be tested in all case)
@@ -682,7 +682,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! === Calculate the contribution to energy ===
 ! ============================================
 !* Only the contribution when cwavef=cgocc_bz are calculated, in order to cancel exactly the self-interaction
-!* at each convergence step. (consistent definition with the defintion of hartree energy)
+!* at each convergence step. (consistent definition with the definition of hartree energy)
  if (fockcommon%ieigen/=0) then
    eigen=zero
 !* Dot product of cwavef and ghc
@@ -1210,7 +1210,6 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
  type(fock_common_type),pointer :: fockcommon
 ! Arrays
  real(dp), allocatable :: ghc1(:,:),xi(:,:)
-
 
 ! *************************************************************************
 

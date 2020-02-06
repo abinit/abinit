@@ -2,6 +2,7 @@
 # The H atom is EXACT within H-F.
 ndtset  3
 gwpara  2
+symsigma 0
 
 # Dataset 1: WFK generation
 tolwfr1       1.0d-6

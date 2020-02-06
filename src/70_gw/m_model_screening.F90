@@ -6,7 +6,7 @@
 !!  Module containing functions for calculating and fitting model dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MS)
+!!  Copyright (C) 2008-2020 ABINIT group (MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

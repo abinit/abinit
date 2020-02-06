@@ -6,7 +6,7 @@
 !!
 !! COPYRIGHT
 !!  Copyright (C) 2002-2007 Stefan Goedecker, CEA Grenoble
-!!  Copyright (C) 2014-2019 ABINIT group (XG)
+!!  Copyright (C) 2014-2020 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

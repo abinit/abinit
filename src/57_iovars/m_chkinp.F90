@@ -6,7 +6,7 @@
 !! Check consistency of Abinit input data against itself.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MKV, DRH, MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -727,12 +727,18 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        !  MSG_ERROR_NOSTOP("Self-energy with symsigma 1 and nspinor 2 not implemented", ierr)
        !end if
        if (optdriver == RUNL_SIGMA .and. &
-       any(mod(dt%gwcalctyp, 10) == [SIG_GW_AC, SIG_QPGW_PPM, SIG_QPGW_CD])) then
+           any(mod(dt%gwcalctyp, 10) == [SIG_GW_AC, SIG_QPGW_PPM, SIG_QPGW_CD])) then
          MSG_ERROR_NOSTOP("analytic-continuation, model GW with nspinor 2 are not implemented", ierr)
        end if
        !if (optdriver == RUNL_SIGMA .and. mod(dt%gwcalctyp, 100) >= 10) then
        !  MSG_ERROR_NOSTOP("Self-consistent GW with nspinor == 2 not implemented", ierr)
        !end if
+       if (optdriver == RUNL_SIGMA .and. dt%symsigma > 0 .and. dt%gwcalctyp >= 20) then
+         MSG_ERROR_NOSTOP("gwcalctyp >= 0 requires symsigma == 0 in input. New default in Abinit9 is symsigma 1!", ierr)
+       end if
+       if (optdriver == RUNL_SIGMA .and. dt%symsigma > 0 .and. dt%ucrpa > 0) then
+         MSG_ERROR_NOSTOP("ucrpa requires symsigma == 0 in input. New default in Abinit9 is symsigma 1!", ierr)
+       end if
        if (dt%gwcomp /= 0) then
          MSG_ERROR_NOSTOP("gwcomp /= 0 with nspinor 2 not implemented", ierr)
        end if
@@ -1315,6 +1321,20 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  ixcrot
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,3,(/1,2,3/),iout)
+   if(dt%rfmagn/=0)then
+     if(abs(dt%qptn(1))>tol8)then
+       cond_string(1)='qptn(1)' ; cond_values(1)=dt%qptn(1)
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,1,(/3/),iout)
+     end if
+     if(abs(dt%qptn(2))>tol8)then
+       cond_string(1)='qptn(2)' ; cond_values(1)=dt%qptn(2)
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,1,(/3/),iout)
+     end if
+     if(abs(dt%qptn(3))>tol8)then
+       cond_string(1)='qptn(3)' ; cond_values(1)=dt%qptn(3)
+       call chkint_eq(1,1,cond_string,cond_values,ierr,'ixcrot',dt%ixcrot,1,(/3/),iout)
+     end if
+   endif
 
 !  tim1rev
    call chkint_eq(0,0,cond_string,cond_values,ierr,'tim1rev',dt%tim1rev,2,(/0,1/),iout)

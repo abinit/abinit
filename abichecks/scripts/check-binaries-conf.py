@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 "Check binaries configuration"
 #
-# Copyright (C) 2012-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2012-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -32,23 +32,22 @@ class MyConfigParser(ConfigParser):
 #
 
 dep_levels = {
-  "algo":1,
-  "atompaw":3,
-  "bigdft":3,
-  "etsf_io":2,
-  "fft":1,
-  "psml":1,
-  "yaml":1,
-  "libxc":1,
-  "linalg":1,
-  "math":1,
-  "mpi":0,
-  "gpu":1,
-  "netcdf":1,
-  "timer":1,
-  "triqs":0, 
-  "wannier90":3,
-  "xml":0  # Comment hexu: Please check. 
+  "bigdft":10,
+  "fft":8,
+  "levmar":9,
+  "libpsml":9,
+  "libxc":9,
+  "libxml2":0,
+  "linalg":7,
+  "mpi":1,
+  "gpu":2,
+  "hdf5":4,
+  "netcdf":5,
+  "netcdf_fortran":6,
+  "papi":3,
+  "triqs":3, 
+  "wannier90":9,
+  "xmlf90":3,
 }
 
 def main():

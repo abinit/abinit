@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of MULTIBINIT 
+.Version 8.11.14 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h49 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h49 )
   
 -  nproc =    2
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t97_sys.xml
+-/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/paral/Input/t97_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -66,8 +66,8 @@ dipdip_range         2         2         2
 
 ================================================================================
 
--Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t97_sys.xml
--Reading the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/paral/Input/t97_sys.xml with LibXML library
+-Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/paral/Input/t97_sys.xml
+-Reading the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/paral/Input/t97_sys.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -1570,6 +1570,6 @@ dipdip_range         2         2         2
 
 ================================================================================
 
-+Total cpu time      0.346  and wall time      0.356 sec
++Total cpu time      0.317  and wall time      0.325 sec
 
  multibinit : the run completed succesfully.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 "check build configuration"
 #
-# Copyright (C) 2010-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2010-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -28,13 +28,12 @@ class MyConfigParser(ConfigParser):
     return str(option)
 
 
-env_ignore = ["DEFS"]
+env_ignore = ["DEFS", "LIBS"]
 opt_ignore = [
-  "enable_config_file",
   "fcflags_opt_.*",
-  "group_.*",
   "prefix",
-  "with_config_file"]
+  "with_config_file",
+]
 val_ignore = [".*-fallback"]
 
 def is_ignored(keyword):
@@ -69,8 +68,27 @@ def main():
   cnf_env.read(envconf_path)
   env_config = list()
   for env in cnf_env.sections():
-    if cnf_env.get(env,"reset") == "no":
-      if not is_ignored(env): env_config.append(env)
+    if ( (cnf_env.get(env,"reset") == "no") and \
+       (not cnf_env.get(env,"status") in ["dropped", "removed"]) ):
+      if not is_ignored(env):
+          env_config.append(env)
+
+  # Extract environment variables from dependencies
+  cnf_dep = MyConfigParser()
+  depconf_path = os.path.join(home_dir, "config", "specs", "dependencies.conf")
+  assert os.path.exists(depconf_path)
+  cnf_dep.read(depconf_path)
+  for dep in cnf_dep.sections():
+    env_config += ["%s_%s" % (dep.upper(), item) for item in ["FCFLAGS", "LDFLAGS", "LIBS"]]
+    langs = cnf_dep.get(dep, "languages").split()
+    if ( "c" in langs ):
+      env_config += ["%s_%s" % (dep.upper(), item) for item in ["CPPFLAGS", "CFLAGS"]]
+    if ( "c++" in langs ):
+      env_config += ["%s_%s" % (dep.upper(), item) for item in ["CXXFLAGS"]]
+    if ( "fortran" in langs ):
+      env_config += ["%s_%s" % (dep.upper(), item) for item in ["FCFLAGS"]]
+    if ( cnf_dep.has_option(dep, "extra_vars") ):
+      env_config += cnf_dep.get(dep, "extra_vars").split()
   env_config.sort()
 
   # Extract options from config file
@@ -91,6 +109,10 @@ def main():
     else:
       if not is_ignored(opt):
         opt_config.append(opt)
+  opt_config += ["with_%s" % item for item in cnf_dep.sections() \
+    if cnf_dep.get(item, "detector") in ["arch", "steredeg"]]
+  opt_config += ["with_%s_flavor" % item for item in cnf_dep.sections() \
+    if cnf_dep.has_option(item, "flavors")]
   opt_config.sort()
   opt_removed.sort()
 
@@ -98,7 +120,7 @@ def main():
   env_template = list()
   opt_template = list()
 
-  ac_fname = os.path.join(home_dir, "doc/build/config-template.ac")
+  ac_fname = os.path.join(home_dir, "doc/build/config-template.ac9")
   with open(ac_fname, "rt") as fh:
       for line in fh:
         if re_env.match(line):
@@ -116,7 +138,7 @@ def main():
   opt_template.sort()
 
   # Check whether non-trivial option values are found in template
-  ac_fname = os.path.join(home_dir,"doc/build/config-template.ac")
+  ac_fname = os.path.join(home_dir,"doc/build/config-template.ac9")
 
   with open(ac_fname, "rt") as fh:
     tpl_data = fh.read()
@@ -129,7 +151,7 @@ def main():
         tmp_values.remove("no")
       if "yes" in tmp_values:
         tmp_values.remove("yes")
-    except NoOptionError:
+    except:
       tmp_values = list()
 
     for val in tmp_values:
@@ -160,18 +182,18 @@ def main():
     sys.stderr.write("%s  %s  %s\n" % ("-","-" * 48,"-" * 24))
 
     for env in denv_config:
-      sys.stderr.write("%s  %-48s  %-24s\n" % ("I",env,"config-template.ac"))
+      sys.stderr.write("%s  %-48s  %-24s\n" % ("I",env,"config-template.ac9"))
     for env in denv_template:
       sys.stderr.write("%s  %-48s  %-24s\n" % ("U",env,"environment.conf"))
     for opt in dopt_config:
-      sys.stderr.write("%s  %-48s  %-24s\n" % ("I",opt,"config-template.ac"))
+      sys.stderr.write("%s  %-48s  %-24s\n" % ("I",opt,"config-template.ac9"))
     for opt in dopt_values:
       for val in opt_values[opt]:
-        sys.stderr.write("%s  %-48s  %-24s\n" % ("D","%s='%s'" % (opt,val),"config-template.ac"))
+        sys.stderr.write("%s  %-48s  %-24s\n" % ("D","%s='%s'" % (opt,val),"config-template.ac9"))
     for opt in dopt_template:
       sys.stderr.write("%s  %-48s  %-24s\n" % ("U",opt,"options.conf"))
     for opt in dopt_removed:
-      sys.stderr.write("%s  %-48s  %-24s\n" % ("R",opt,"config-template.ac"))
+      sys.stderr.write("%s  %-48s  %-24s\n" % ("R",opt,"config-template.ac9"))
 
     sys.stderr.write("\n")
 

@@ -1,6 +1,6 @@
 /* xmalloc.h -- memory allocation that aborts on errors. */
 /*
- * Copyright (C) 2009-2019 ABINIT group (MG)
+ * Copyright (C) 2009-2020 ABINIT group (MG)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

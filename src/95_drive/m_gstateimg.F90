@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (XG, AR, GG, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (XG, AR, GG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -200,7 +200,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  integer,optional,intent(in) :: idtset,ndtset
  integer,intent(inout) :: iexit
  real(dp),intent(in) :: cpui
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  character(len=fnlen),optional,intent(in) :: filstat
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),target,intent(inout) :: dtfil

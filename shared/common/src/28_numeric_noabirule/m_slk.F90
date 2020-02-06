@@ -7,7 +7,7 @@
 !! This module contains the description of the variables used in the ScaLAPACK routines.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2019 ABINIT group (CS,GZ,FB,MG)
+!! Copyright (C) 2004-2020 ABINIT group (CS,GZ,FB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

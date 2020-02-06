@@ -1,0 +1,42 @@
+## Copyright (C) 2018-2019 Yann Pouillon <devops@materialsevolution.es>
+
+#
+# Top Makefile for LibPAW
+#
+
+# Information for aclocal, to rebuild makefiles on the fly when needed
+ACLOCAL_AMFLAGS = -I config/m4
+
+# Make sure that 'make distcheck' performs a minimal build
+AM_DISTCHECK_CONFIGURE_FLAGS = \
+  --disable-debug \
+  --without-libxc \
+  --without-mpi
+
+# Delegate all build tasks to subdirectories
+SUBDIRS = libxc src doc
+
+# Files to install for pkg-config
+# See http://www.freedesktop.org/wiki/Software/pkg-config/ for details
+pkgconfigdir = $(libdir)/pkgconfig
+nodist_pkgconfig_DATA = config/data/libpaw.pc
+
+# Some files are not removed by default and cause "make distcleancheck" to fail
+DISTCLEANFILES = \
+  config/data/libpaw.pc \
+  libpaw-*.tar.bz2 \
+  libpaw-*.tar.gz \
+  libpaw-*.tar.xz
+
+# We use our own version of Markdown to build Markdown documentation
+EXTRA_DIST = config/scripts/markdown
+
+FIND = find
+
+# Rename MPI objects beginning with xmpi
+export: distdir
+	$(FIND) $(distdir)/src -name '*.F90' -exec \
+	  $(SED) -i'.orig' -e 's/xmpi_/xpaw_mpi_/g' {} \;
+	rm -rf $(distdir)/src/*.orig
+	tardir=$(distdir) && $(am__tar) | eval GZIP= gzip $(GZIP_ENV) -c >$(distdir).tar.gz
+	$(am__post_remove_distdir)

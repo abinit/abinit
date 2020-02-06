@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -22,22 +22,13 @@ AC_DEFUN([ABI_MSG_END],
 [[
 # Set OpenMP status reports
 #
-if test "${enable_openmp}" = "yes"; then
+if test "${abi_openmp_enable}" = "yes"; then
   tmp_omp_collapse="${abi_omp_has_collapse}"
 else
   tmp_omp_collapse="ignored"
 fi
 
 # Set library-related status reports
-#
-# Timer
-if test "${with_timer_libs}" = ""; then
-  tmp_rep_timer_libs="auto-detected"
-else
-  tmp_rep_timer_libs="user-defined"
-fi
-test "${lib_timer_flavor}" = "none" -o "${lib_timer_flavor}" = "abinit" && \
-  tmp_rep_timer_libs="ignored"
 
 # Linalg
 if test "${with_linalg_libs}" = ""; then
@@ -45,58 +36,53 @@ if test "${with_linalg_libs}" = ""; then
 else
   tmp_rep_linalg_libs="user-defined"
 fi
-test "${lib_linalg_flavor}" = "netlib-fallback" && \
+test "${sd_linalg_flavor}" = "netlib-fallback" && \
   tmp_rep_linalg_libs="internal"
-test "${lib_linalg_flavor}" = "none" -o \
-     "${lib_linalg_flavor}" = "netlib-fallback" && \
+test "${sd_linalg_flavor}" = "none" -o \
+     "${sd_linalg_flavor}" = "netlib-fallback" && \
   tmp_rep_linalg_libs="ignored"
 
-# Algo
-if test "${with_algo_libs}" = ""; then
-  tmp_rep_algo_libs="auto-detected"
-else
-  tmp_rep_algo_libs="user-defined"
-fi
-test "${lib_algo_flavor}" = "none" && \
-  tmp_rep_algo_libs="ignored"
-
 # FFT
-if test "${with_fft_libs}" = ""; then
+if test "${sd_fft_init}" = "def"; then
   tmp_rep_fft_libs="auto-detected"
 else
   tmp_rep_fft_libs="user-defined"
 fi
-test "${lib_fft_flavor}" = "none" -o "${lib_fft_flavor}" = "abinit" && \
+test "${sd_fft_flavor}" = "none" && \
   tmp_rep_fft_libs="ignored"
 
 # Display values of important configure options and ending message
 cat <<EOF
 
-Summary of important options:
+Core build parameters
+---------------------
 
-  * C compiler      : ${abi_cc_vendor} version ${abi_cc_version}
-  * Fortran compiler: ${abi_fc_vendor} version ${abi_fc_version}
-  * architecture    : ${abi_cpu_vendor} ${abi_cpu_model} (${abi_cpu_bits} bits)
+  * C compiler       : ${abi_cc_vendor} version ${abi_cc_version}
+  * Fortran compiler : ${abi_fc_vendor} version ${abi_fc_version}
+  * architecture     : ${abi_cpu_vendor} ${abi_cpu_model} (${abi_cpu_bits} bits)
+  * debugging        : ${abi_debug_flavor}
+  * optimizations    : ${abi_optim_flavor}
 
-  * debugging       : ${enable_debug}
-  * optimizations   : ${enable_optim}
+  * OpenMP enabled   : ${abi_openmp_enable} (collapse: ${tmp_omp_collapse})
+  * MPI    enabled   : ${abi_mpi_enable} (flavor: ${abi_mpi_flavor})
+  * MPI    in-place  : ${abi_mpi_inplace_enable}
+  * MPI-IO enabled   : ${abi_mpi_io_enable}
+  * GPU    enabled   : ${abi_gpu_enable} (flavor: ${abi_gpu_flavor})
 
-  * OpenMP enabled  : ${enable_openmp} (collapse: ${tmp_omp_collapse})
-  * MPI    enabled  : ${enable_mpi}
-  * MPI-IO enabled  : ${enable_mpi_io}
-  * GPU    enabled  : ${enable_gpu} (flavor: ${lib_gpu_flavor})
-  * XML    enabled  : ${enable_xml}
+  * LibXML2 enabled  : ${abi_libxml2_enable}
+  * HDF5 enabled     : ${sd_hdf5_enable} (MPI support: ${sd_hdf5_mpi_ok})
+  * NetCDF enabled   : ${sd_netcdf_enable} (MPI support: C=${sd_netcdf_mpi_ok}, Fortran=${sd_netcdf_fortran_mpi_ok})
 
-  * TRIO   flavor = ${lib_trio_flavor}
-  * TIMER  flavor = ${lib_timer_flavor} (libs: ${tmp_rep_timer_libs})
-  * LINALG flavor = ${lib_linalg_flavor} (libs: ${tmp_rep_linalg_libs})
-  * ALGO   flavor = ${lib_algo_flavor} (libs: ${tmp_rep_algo_libs})
-  * FFT    flavor = ${lib_fft_flavor} (libs: ${tmp_rep_fft_libs})
-  * DFT    flavor = ${lib_dft_flavor}
+  * FFT flavor       : ${sd_fft_flavor} (libs: ${tmp_rep_fft_libs})
+  * LINALG flavor    : ${sd_linalg_flavor} (libs: ${tmp_rep_linalg_libs})
+
+  * Build workflow   : ${abi_build_steps}
+
+${abi_opt_deprecated_count} deprecated options have been used:${abi_opt_deprecated_used}.
 
 Configuration complete.
-You may now type "make" to build ABINIT.
-(or, on a SMP machine, "make mj4", or "make multi multi_nprocs=<n>")
+You may now type "make" to build Abinit.
+(or "make -j<n>", where <n> is the number of available processors)
 
 EOF
 ]]) # ABI_MSG_END

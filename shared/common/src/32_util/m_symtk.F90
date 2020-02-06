@@ -7,7 +7,7 @@
 !!  Low-level tools related to symmetries
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (RC, XG, GMR, MG, JWZ)
+!!  Copyright (C) 1998-2020 ABINIT group (RC, XG, GMR, MG, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1689,12 +1689,16 @@ end subroutine symchk
 !! which each atom is sent in the unit cell by the INVERSE of the
 !! symmetry operation inv(symrel); i.e. this is the atom which, when acted
 !! upon by the given symmetry element isym, gets transformed into atom iatom.
+!!
 !! This routine uses the fact that inv(symrel)=trans(symrec),
 !! the inverse of the symmetry operation expressed in the basis of real
 !! space primitive translations equals the transpose of the same symmetry
-!! operation expressed in the basis of reciprocal space primitive transl.
-!! $xred(nu,indsym(4,isym,ia))=symrec(mu,nu,isym)*(xred(mu,ia)-tnons(mu,isym))
-!! - transl(mu)$ where $transl$ is also a set of integers and
+!! operation expressed in the basis of reciprocal space primitive transl:
+!!
+!!      $xred(nu,indsym(4,isym,ia))=symrec(mu,nu,isym)*(xred(mu,ia)-tnons(mu,isym))
+!!          - transl(mu)$
+!!
+!! where $transl$ is also a set of integers and
 !! where translation transl places coordinates within unit cell (note sign).
 !! Note that symrec is the set of arrays which are actually input here.
 !! These arrays have integer elements.
@@ -1706,7 +1710,10 @@ end subroutine symchk
 !! implementing suggestion of Andrew Horsfield: replace search for
 !! equivalent atoms using direct primitive cell translations by
 !! use of dot product relation which must produce an integer.
-!! Relation: $[inv(S(i))*(x(a)-tnons(i)) - x(inv(S)(i,a))] = integer$
+!! Relation:
+!!
+!!      $[inv(S(i))*(x(a)-tnons(i)) - x(inv(S)(i,a))] = integer$
+!!
 !! where $S(i) =$ symmetry matrix in real space, tnons=nonsymmorphic translation
 !! (may be 0 0 0), and $x(inv(S)(i,a))$ is sought atom into which $x(a)$ gets
 !! rotated by $inv(S)$.  Integer gives primitive translation coordinates to get
@@ -1714,7 +1721,7 @@ end subroutine symchk
 !! Equivalent to $S*t(b)+tnons-x(a)=another$ $integer$ for $x(b)=x(inv(S))$.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

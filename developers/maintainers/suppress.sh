@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (C) 1998-2019 ABINIT group (XG)
+# Copyright (C) 1998-2020 ABINIT group (XG)
 # 
 # The purpose of this script is to suppress lines that contain some
 # expression in a whole set of files
