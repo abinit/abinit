@@ -57,6 +57,7 @@ getwfk3     1    # Read GS wavefunctions from o_DS1_WFK
 getddb3   20     # Read DDB files from DS20_DDB
 getdvdb3   -1
 eph_intmeth3 2
+eph_phrange3 1 6  # This just for testing purposes.
 eph_ngqpt_fine3 8 8 8 
 sigma_erange3 0.2 0.2 eV   # Select kpts in fine mesh within this energy window.
 ngkpt3    8 8 8

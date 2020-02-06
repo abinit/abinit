@@ -88,6 +88,9 @@ _ WF disk file :      5.095 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
               amu      6.94100000E+00  1.89984032E+01
         boxcutmin      1.70000000E+00
              ecut      3.50000000E+01 Hartree
+      eph_phrange1       0    0
+      eph_phrange2       0    0
+      eph_phrange3       1    6
          eph_task1          1
          eph_task2          5
          eph_task3         -4
@@ -731,6 +734,9 @@ Transport calculation results
               amu      6.94100000E+00  1.89984032E+01
         boxcutmin      1.70000000E+00
              ecut      3.50000000E+01 Hartree
+      eph_phrange1       0    0
+      eph_phrange2       0    0
+      eph_phrange3       1    6
          eph_task1          1
          eph_task2          5
          eph_task3         -4
