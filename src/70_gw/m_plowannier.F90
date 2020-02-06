@@ -3191,7 +3191,7 @@ subroutine normalization_plowannier(wan,opt)
       end do
     end do
   end do
-  if (opt==0 .and. nb_zeros_tot/=1) then
+  if (opt==0 .and. nb_zeros_tot/=0) then
     write(message,'(a,i2,a)')"The matrix inversion detects ",nb_zeros_tot," zero(s) on the diagonals. Take results with caution or modify nkpt and/or bands for plowan"
     MSG_COMMENT(message)
   end if
