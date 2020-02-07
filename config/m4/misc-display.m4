@@ -260,8 +260,8 @@ AC_DEFUN([ABI_MSG_NOTICE_S],[
       test "${abi_msg_tmp2}" = "" || abi_msg_spacer=""
       abi_msg_title="${abi_msg_title}${abi_msg_spacer}"
       echo "  | ${abi_msg_title} |"
+      echo "  +------------------------------------------------------------------+"
   fi
-  echo "  +------------------------------------------------------------------+"
 
   echo ""
 
