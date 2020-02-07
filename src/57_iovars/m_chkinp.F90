@@ -2145,6 +2145,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        MSG_ERROR_NOSTOP(msg, ierr)
      end if
    end if
+   if (response==1 .and. (dt%kptopt/=2 .or. dt%kptopt/=3)) then
+       write(msg,'(a,i3,4a)' )&
+&        'The input variable optdriver=',dt%optdriver,ch10,&
+&        'which implies response functions, and requires kptopt=2 or 3.',&
+&        'Value 2 should be used only for q=(0,0,0) only',&
+&        'Other q should use value of 3'
+       MSG_ERROR_NOSTOP(msg, ierr)
+   end if
    if(usepaw==1)then
      ! Is optdriver compatible with PAW?
      cond_string(1)='usepaw' ; cond_values(1)=usepaw
