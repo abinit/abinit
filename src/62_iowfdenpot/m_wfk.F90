@@ -3079,7 +3079,8 @@ print *, 'wfk_disk%mband, dtset%mband ', wfk_disk%mband, dtset%mband
  ABI_MALLOC(eig_disk, ((2*mband)**wfk_disk%formeig*mband) )
  ABI_MALLOC(occ_disk, (mband))
 
- itimrev = kpts_timrev_from_kptopt(dtset%kptopt)
+ itimrev = kpts_timrev_from_kptopt(wfk_disk%hdr%kptopt)
+print *, 'itimrev,dtset%kptopt ', itimrev, dtset%kptopt
  cryst = wfk_disk%hdr%get_crystal(itimrev + 1)
 
 
