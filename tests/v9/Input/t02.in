@@ -74,7 +74,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t02.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00
+#%%   t02.out, tolnlines = 2, tolabs = 1.1e-06, tolrel = 1.1e-04
 #%% psp_files = 26fe.paw
 #%% [paral_info]
 #%% max_nprocs = 28
