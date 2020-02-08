@@ -3554,8 +3554,7 @@ class AbinitTestSuite(object):
                     timeout_1test = 240.
 
                 # Wait for all tests to be done gathering results
-                results = self.wait_loop(py_nprocs, len(self.tests),
-                                         timeout_1test, res_q)
+                results = self.wait_loop(py_nprocs, len(self.tests), timeout_1test, res_q)
 
                 # remove this to let python garbage collect processes and avoid
                 # Pickle to complain (it does not accept processes for security reasons)
@@ -3563,16 +3562,21 @@ class AbinitTestSuite(object):
                 task_q.close()
                 res_q.close()
 
-                # update local tests instances with the results of their running in
-                # a remote process
-                for test in self.tests:
-                    if test._rid not in results:
-                        # This error will only happen if there is a bug
-                        raise RuntimeError((
-                            "I did not get the results of the test {}. It"
-                            " means that something fishy happen in the worker."
-                        ).format(test.full_id))
-                    test.results_load(results[test._rid])
+                if results is None:
+                    # In principle this should not happen!
+                    print("WARNING: wait_loop returned None instead of results. Will try to continue execution!")
+
+                else:
+                    # update local tests instances with the results of their running in
+                    # a remote process
+                    for test in self.tests:
+                        if test._rid not in results:
+                            # This error will only happen if there is a bug
+                            raise RuntimeError((
+                                "I did not get the results of the test {}. It"
+                                " means that something fishy happen in the worker."
+                            ).format(test.full_id))
+                        test.results_load(results[test._rid])
 
             # Run completed.
             self._executed = True
