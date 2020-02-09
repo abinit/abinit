@@ -2195,7 +2195,7 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mband_mem,mkmem,&
          vect2(:,1:npw_k2) = cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
          if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
        end if
-       call mpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
+       call xmpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
 
 
        iband_me = 0
@@ -2235,7 +2235,7 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mband_mem,mkmem,&
 &         cg1(:,icg1 + 1 + (jband-1)*npw_k2*nspinor:icg1 + jband*npw_k2*nspinor)
          if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
        end if
-       call mpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
+       call xmpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
 
        iband_me = 0
        do iband = 1, dtefield%mband_occ
@@ -2275,7 +2275,7 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mband_mem,mkmem,&
 &         cg(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
          if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
        end if
-       call mpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
+       call xmpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
 
        iband_me = 0
        do iband = 1, dtefield%mband_occ
@@ -2316,7 +2316,7 @@ subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mband_mem,mkmem,&
 &         cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
          if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
        end if
-       call mpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
+       call xmpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
 
        iband_me = 0
        do iband = 1, dtefield%mband_occ
@@ -2520,7 +2520,7 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mband_mem,mkmem,
 &         cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
          if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
        end if
-       call mpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
+       call xmpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
 
        iband_me = 0
        do iband = 1, dtefield%mband_occ
@@ -2556,7 +2556,7 @@ subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mband_mem,mkmem,
 &         cg(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
          if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
        end if
-       call mpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
+       call xmpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
 
        iband_me = 0
        do iband = 1, dtefield%mband_occ
@@ -2725,7 +2725,7 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mband_mem,
 &          cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
          jband_me = jband_me + 1
        end if
-       call mpi_bcast(vect2,band_procs(jband), mpi_enreg%comm_band,ierr)
+       call xmpi_bcast(vect2,band_procs(jband), mpi_enreg%comm_band,ierr)
        
 ! now everyone has vect2 for present jband
        if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
@@ -2766,7 +2766,7 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mband_mem,
 &          cg(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
          jband_me = jband_me + 1
        end if
-       call mpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
+       call xmpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
 
        if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
        iband_me = 0
@@ -2922,7 +2922,7 @@ subroutine qmatrix(cg,dtefield,qmat,mpi_enreg,mpw,mpw1,mkmem,mband,mband_mem,npw
              vect2(:,1:npw_k2) = cg(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
              jband_me = jband_me + 1
            end if
-           call mpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
+           call xmpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
 
            if (npw_k2 < mpw) vect2(:,npw_k2+1:mpw) = zero
 
