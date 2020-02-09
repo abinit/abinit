@@ -1,6 +1,6 @@
 
-.Version 8.0.3 of CUT3D 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of CUT3D 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  CUT3D comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 07h33 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 16h45 )
   
 
   What is the name of the 3D function (density, potential or wavef) file ?
@@ -27,7 +27,7 @@
  ECHO of the ABINIT file header 
  
  First record :
-.codvsn,headform,fform = 8.0.3    80   52
+.codvsn,headform,fform = 9.0.0      80   52
  
  Second record :
  bantot,intxc,ixc,natom  =    10     0     1     2
@@ -200,7 +200,7 @@
    Spin-component number     1
       Dot product of values, mean, mean times cell volume=    1.598621E+02    3.426400E-03    9.831462E-01
 -
-- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
 
   Thank you for using me
 

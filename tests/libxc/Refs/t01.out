@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h17 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 17h48 )
   
-- input  file    -> t01.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t01/t01.in
 - output file    -> t01.out
 - root for input  files -> t01i
 - root for output files -> t01o
@@ -951,8 +951,8 @@ P           mkmem           1
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1006,6 +1006,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.334E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.265949455264082E-002, "res2":  5.797569803146754E+001, 
+    "residm":  1.333578403781525E-005, "diffor": undef, 
+}
+etotal    : -2.827105239041179E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.443655468053256E-001
+stress_tensor: !CartTensor
+- [-3.647636222318887E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -3.671481322771562E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000, -3.865305970852875E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1100,8 +1126,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1154,6 +1180,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.334E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.265949455264259E-002, "res2":  5.797569803146847E+001, 
+    "residm":  1.333578403781542E-005, "diffor": undef, 
+}
+etotal    : -2.827105239041179E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.443655468053251E-001
+stress_tensor: !CartTensor
+- [-3.647636222319928E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -3.671481322772430E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000, -3.865305970852355E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1253,8 +1305,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1307,6 +1359,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.336E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.266784606099458E-002, "res2":  5.781160115080439E+001, 
+    "residm":  1.335718715941693E-005, "diffor": undef, 
+}
+etotal    : -2.827429417101381E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.444359552956630E-001
+stress_tensor: !CartTensor
+- [-3.625287789007994E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -3.649458254021137E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000, -3.844399793754878E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1401,8 +1479,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1455,6 +1533,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.336E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.266784606099947E-002, "res2":  5.781160115080682E+001, 
+    "residm":  1.335718715941730E-005, "diffor": undef, 
+}
+etotal    : -2.827429417101384E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.444359552956627E-001
+stress_tensor: !CartTensor
+- [-3.625287789006433E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -3.649458254019403E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000, -3.844399793752623E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1554,8 +1658,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1608,6 +1712,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.479E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.336821971703372E-002, "res2":  5.921097186107284E+001, 
+    "residm":  1.478750183760981E-005, "diffor": undef, 
+}
+etotal    : -2.812230677017473E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.358152202648333E-001
+stress_tensor: !CartTensor
+- [-2.596909793838315E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -2.632767494478306E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000, -2.810640545448529E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1702,8 +1832,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1756,6 +1886,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.479E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.336821971703195E-002, "res2":  5.921097186107298E+001, 
+    "residm":  1.478750183761092E-005, "diffor": undef, 
+}
+etotal    : -2.812230677017472E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.358152202648330E-001
+stress_tensor: !CartTensor
+- [-2.596909793838315E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -2.632767494478306E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000, -2.810640545448702E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1855,8 +2011,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1909,6 +2065,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.342E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.270114000570732E-002, "res2":  6.104131134125423E+001, 
+    "residm":  1.342147168497679E-005, "diffor": undef, 
+}
+etotal    : -2.833092912554718E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.476121992639554E-001
+stress_tensor: !CartTensor
+- [-3.696300886589446E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -3.721704105638940E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000, -3.916090895693154E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2003,8 +2185,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2057,6 +2239,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.342E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.270114000570777E-002, "res2":  6.104131134125453E+001, 
+    "residm":  1.342147168497600E-005, "diffor": undef, 
+}
+etotal    : -2.833092912554716E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.476121992639552E-001
+stress_tensor: !CartTensor
+- [-3.696300886591528E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -3.721704105641022E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000, -3.916090895695236E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2156,8 +2364,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2210,6 +2418,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.333E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.265119139621529E-002, "res2":  5.778887609555916E+001, 
+    "residm":  1.333306560288579E-005, "diffor": undef, 
+}
+etotal    : -2.827584300824331E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.445617926985811E-001
+stress_tensor: !CartTensor
+- [-3.683301345857737E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -3.706997194891897E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000, -3.901560448457275E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2304,8 +2538,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2358,6 +2592,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.333E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.265119139621484E-002, "res2":  5.778887609556071E+001, 
+    "residm":  1.333306560288500E-005, "diffor": undef, 
+}
+etotal    : -2.827584300824332E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.445617926985808E-001
+stress_tensor: !CartTensor
+- [-3.683301345856696E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -3.706997194891897E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000, -3.901560448457622E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2457,8 +2717,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2511,6 +2771,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.597E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.172062229795667E-002, "res2":  1.309476137177461E+002, 
+    "residm":  1.596687115651748E-005, "diffor": undef, 
+}
+etotal    : -2.885090968678996E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.588779217447911E-001
+stress_tensor: !CartTensor
+- [ 1.175607369521715E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.167456863718109E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.068311761864554E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2605,8 +2891,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2659,6 +2945,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.597E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.172062687776165E-002, "res2":  1.309466930225936E+002, 
+    "residm":  1.596682548220065E-005, "diffor": undef, 
+}
+etotal    : -2.885090895715400E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.588778615995995E-001
+stress_tensor: !CartTensor
+- [ 1.175597944885990E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.167447366198151E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.068302184913169E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2758,8 +3070,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2812,6 +3124,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.924E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.205469545886517E-002, "res2":  4.790652198151152E+002, 
+    "residm":  1.924039885681798E-005, "diffor": undef, 
+}
+etotal    : -2.903004219297855E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.665775449766863E-001
+stress_tensor: !CartTensor
+- [ 3.067201597033749E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  3.030575020809897E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.095850999756325E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2906,8 +3244,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2960,6 +3298,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.924E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.205469935527503E-002, "res2":  4.790636350813814E+002, 
+    "residm":  1.924033653258941E-005, "diffor": undef, 
+}
+etotal    : -2.903004145747405E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.665774841648871E-001
+stress_tensor: !CartTensor
+- [ 3.067191630738945E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  3.030564991411058E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.095840951584655E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3059,8 +3423,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3113,6 +3477,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  2.078E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.044717033738518E-002, "res2":  3.200888676325819E+002, 
+    "residm":  2.077767248827425E-005, "diffor": undef, 
+}
+etotal    : -2.909323194752698E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.564652200410627E-001
+stress_tensor: !CartTensor
+- [ 8.427193461702242E-006,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  9.155523941011278E-006,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  6.706762770103344E-006, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3207,8 +3597,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3261,6 +3651,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  2.078E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.044717033738962E-002, "res2":  3.200888676402708E+002, 
+    "residm":  2.077767248827414E-005, "diffor": undef, 
+}
+etotal    : -2.909323194752699E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.564652200410618E-001
+stress_tensor: !CartTensor
+- [ 8.427193461705712E-006,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  9.155523941025156E-006,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  6.706762770120691E-006, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3360,8 +3776,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3414,6 +3830,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.815E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.167682366336109E-002, "res2":  3.810047570497324E+002, 
+    "residm":  1.814743523028213E-005, "diffor": undef, 
+}
+etotal    : -2.910366392562012E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.758196900962632E-001
+stress_tensor: !CartTensor
+- [ 9.539042232616726E-006,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  9.372575253203893E-006,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  9.112733906757539E-006, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3508,8 +3950,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3562,6 +4004,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.815E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.167682366336242E-002, "res2":  3.810047570486637E+002, 
+    "residm":  1.814743523028193E-005, "diffor": undef, 
+}
+etotal    : -2.910366392562013E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.758196900962645E-001
+stress_tensor: !CartTensor
+- [ 9.539042232653155E-006,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  9.372575253214302E-006,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  9.112733906764478E-006, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3661,8 +4129,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3715,6 +4183,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.976E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.126651555781466E-002, "res2":  2.716274078349526E+002, 
+    "residm":  1.975988756500404E-005, "diffor": undef, 
+}
+etotal    : -2.912926551635684E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.723760531912803E-001
+stress_tensor: !CartTensor
+- [ 9.070024147275005E-006,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  9.150454785516609E-006,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  8.294435170220643E-006, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3809,8 +4303,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3863,6 +4357,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.976E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.126651555781466E-002, "res2":  2.716274078382059E+002, 
+    "residm":  1.975988756500487E-005, "diffor": undef, 
+}
+etotal    : -2.912926551635686E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.723760531912843E-001
+stress_tensor: !CartTensor
+- [ 9.070024147323577E-006,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  9.150454785551304E-006,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  8.294435170269215E-006, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3962,8 +4482,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4016,6 +4536,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  3.682E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.260724502508648E-002, "res2":  1.339860968220722E+003, 
+    "residm":  3.682267434311420E-005, "diffor": undef, 
+}
+etotal    : -2.915648818385967E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.856656513264745E-001
+stress_tensor: !CartTensor
+- [ 4.141476171223909E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  4.090351759682900E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.152401146596535E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4110,8 +4656,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4164,6 +4710,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  3.682E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.260724502509003E-002, "res2":  1.339860968247883E+003, 
+    "residm":  3.682267434311726E-005, "diffor": undef, 
+}
+etotal    : -2.915648818385964E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.856656513264777E-001
+stress_tensor: !CartTensor
+- [ 4.141476171224256E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  4.090351759681859E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.152401146595841E-005, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4263,8 +4835,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4317,6 +4889,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.376E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.149916305952470E-002, "res2":  2.313670148631721E+002, 
+    "residm":  1.375800381495904E-005, "diffor": undef, 
+}
+etotal    : -2.863486346610372E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.497858210818688E-001
+stress_tensor: !CartTensor
+- [-4.570997658020412E-006,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -4.727016335858622E-006,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000, -5.546176286212793E-006, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4411,8 +5009,8 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
          ecut(hartree)=    200.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4465,6 +5063,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   16869.000   16869.000
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.376E-05 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        1
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+002, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.149916818200492E-002, "res2":  2.313655867069158E+002, 
+    "residm":  1.375797577295812E-005, "diffor": undef, 
+}
+etotal    : -2.863486273629265E+000
+entropy   :  0.000000000000000E+000
+fermie    : -5.497857611747436E-001
+stress_tensor: !CartTensor
+- [-4.571087919251194E-006,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -4.727107398878594E-006,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000, -5.546268198541235E-006, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4728,7 +5352,24 @@ P           mkmem           1
 - Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -4742,11 +5383,11 @@ P           mkmem           1
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -4755,11 +5396,13 @@ P           mkmem           1
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [4] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [5] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -4767,24 +5410,15 @@ P           mkmem           1
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [5] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=         21.2  wall=         23.8
+- Proc.   0 individual time (sec): cpu=         21.3  wall=         28.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  56 WARNINGs and 144 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         21.2  wall=         23.8
++Overall time at end (sec) : cpu=         21.3  wall=         28.3

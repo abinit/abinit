@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h27 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 16h45 )
   
-- input  file    -> t74.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v3_t74/t74.in
 - output file    -> t74.out
 - root for input  files -> t74i
 - root for output files -> t74o
@@ -363,8 +363,8 @@ P          mk1mem           1
          ecut(hartree)=     13.000   => boxcut(ratio)=   2.05372
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/8o.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/8o.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.pspnc
 -  Troullier-Martins psp for element  O         Thu Oct 27 17:29:57 EDT 1994
 -  8.00000   6.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -407,6 +407,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     855.000     855.000
   sigma(1 1)=  4.59519623E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  4.59519623E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.67164353E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.300000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -5.435651928564766E-013, "res2":  8.705298460150055E-017, 
+    "residm":  1.745410707736912E-019, "diffor": undef, 
+}
+etotal    : -3.182081217398003E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.478784501897114E-002
+stress_tensor: !CartTensor
+- [ 4.595196230694638E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  4.595196230694638E-003,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.671643525510164E-003, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000,  6.339372369506638E-001, ]
+- [-0.000000000000000E+000, -0.000000000000000E+000, -6.339372369506638E-001, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -520,6 +547,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     855.000     855.000
   sigma(2 2)=  4.59489565E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.67466395E-03  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.300000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  5.506706202140776E-013, "res2":  4.012590454800795E-017, 
+    "residm":  5.217193434599140E-020, "diffor": undef, 
+}
+etotal    : -3.182109728153974E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.470295117410935E-002
+stress_tensor: !CartTensor
+- [ 4.594895648156850E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  4.594895648156850E-003,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.674663950455610E-003, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000,  6.332170051537407E-001, ]
+- [-0.000000000000000E+000, -0.000000000000000E+000, -6.332170051537407E-001, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -631,6 +685,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     855.000     855.000
   sigma(1 1)=  4.59459520E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  4.59459520E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.67768078E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.300000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  1.968203378055478E-012, "res2":  4.009533755336923E-017, 
+    "residm":  5.168474705135845E-020, "diffor": undef, 
+}
+etotal    : -3.182138206932059E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.461811286923948E-002
+stress_tensor: !CartTensor
+- [ 4.594595196298851E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  4.594595196298850E-003,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.677680782462982E-003, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000,  6.324969850545380E-001, ]
+- [-0.000000000000000E+000, -0.000000000000000E+000, -6.324969850545380E-001, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -953,6 +1034,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     855.000     855.000
   sigma(2 2)=  4.59519623E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.67164352E-03  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.300000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  1.492139745096210E-013, "res2":  2.672506916317278E-017, 
+    "residm":  1.046300296444548E-018, "diffor": undef, 
+}
+etotal    : -3.182081217398046E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.478784489193732E-002
+stress_tensor: !CartTensor
+- [ 4.595196231543244E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  4.595196231267520E-003,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.671643522629917E-003, ]
+cartesian_forces: !CartForces
+- [ 1.070504067712602E-013, -1.063015074338483E-013,  6.339372373956423E-001, ]
+- [-1.070504067712602E-013,  1.063015074338483E-013, -6.339372373956423E-001, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1058,6 +1166,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     855.000     855.000
   sigma(1 1)=  4.59459520E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  4.59459520E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.67768078E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.300000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  3.055333763768431E-013, "res2":  2.530585130101081E-017, 
+    "residm":  1.047902240157406E-018, "diffor": undef, 
+}
+etotal    : -3.182138206932256E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.461811287209436E-002
+stress_tensor: !CartTensor
+- [ 4.594595196377069E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  4.594595196101565E-003,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.677680783089948E-003, ]
+cartesian_forces: !CartForces
+- [-7.427056510189107E-017,  1.191944931360073E-015,  6.324969848685991E-001, ]
+- [ 7.427056510189107E-017, -1.191944931360073E-015, -6.324969848685991E-001, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1374,7 +1509,35 @@ P          mk1mem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
+-
+- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- interatomic force constants from density-functional perturbation theory,
+- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
+-
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1388,22 +1551,11 @@ P          mk1mem           1
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
-- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
--
-- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
-- interatomic force constants from density-functional perturbation theory,
-- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
--
-- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1412,27 +1564,14 @@ P          mk1mem           1
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [5] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=          3.5  wall=          3.7
+- Proc.   0 individual time (sec): cpu=          3.6  wall=          3.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.5  wall=          3.7
++Overall time at end (sec) : cpu=          3.6  wall=          3.8

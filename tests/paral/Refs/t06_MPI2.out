@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h45 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 18h09 )
   
-- input  file    -> t06.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t06_MPI2/t06.in
 - output file    -> t06_MPI2.out
 - root for input  files -> t06_MPI2i
 - root for output files -> t06_MPI2o
@@ -222,8 +222,8 @@ P           mkmem2         10
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.00793
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb_001023.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/41nb_001023.pspfhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/41nb_001023.pspfhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/41nb_001023.pspfhi
 - Nb, fhi98PP: TM-type, LDA Perdew/Wang, l = 2 local
 - 41.00000  13.00000      1023                znucl, zion, pspdat
     6    7    2    2       539   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -235,8 +235,8 @@ P           mkmem2         10
              1    9.959063
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/03li.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/03li.pspfhi
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/03li.pspfhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/03li.pspfhi
 - Li, fhi98PP: TM-type, LDA PedewWang, l = 2 local
 -  3.00000   3.00000      1023                znucl, zion, pspdat
     6    7    2    2       433   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -248,8 +248,8 @@ P           mkmem2         10
              1   -1.038282
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o_001023.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/08o_001023.pspfhi
+- pspini: atom type   3  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/08o_001023.pspfhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/08o_001023.pspfhi
 - O, fhi98PP: TM-type, LDA PerdewWang, l=2 local
 -  8.00000   6.00000      1023                znucl, zion, pspdat
     6    7    2    2       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -350,6 +350,41 @@ _setup2: Arith. and geom. avg. npw (full set) are     170.000     169.973
   sigma(1 1)=  2.57352350E-02  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.57352350E-02  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.64170223E-02  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :       10
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  6.800000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.563241086000000E+001,  5.563241086000000E+001,  5.563241086000000E+001, ]
+alpha_beta_gamma_angles: [ 5.563241086000000E+001,  5.563241086000000E+001,  5.563241086000000E+001, ]
+cutoff_energies: {"ecut":  3.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  5.684341886080801E-014, "res2":  2.339493022716789E-013, 
+    "residm":  3.447304652132178E-015, "diffor": undef, 
+}
+etotal    : -1.929588993537974E+002
+entropy   :  0.000000000000000E+000
+fermie    :  4.882593201737347E-001
+stress_tensor: !CartTensor
+- [ 2.573523498962824E-002,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.573523498962825E-002,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  2.641702226055611E-002, ]
+cartesian_forces: !CartForces
+- [ 8.562498143670470E-018,  2.379864736431530E-017, -9.010211263452206E-002, ]
+- [ 1.623604239763241E-018, -3.956928251313619E-018, -9.010211263452209E-002, ]
+- [-1.437672566419405E-018, -3.217405307372789E-018, -2.612754864014779E-002, ]
+- [-1.498892623750651E-018,  3.150634592315148E-018, -2.612754864014778E-002, ]
+- [-4.232255331126770E-002,  5.906298653595131E-002,  3.874322042488996E-002, ]
+- [-2.998877010787825E-002, -6.618389958855470E-002,  3.874322042488997E-002, ]
+- [ 7.231132341914595E-002,  7.120913052603381E-003,  3.874322042488996E-002, ]
+- [ 7.231132341914595E-002, -7.120913052603386E-003,  3.874322042488996E-002, ]
+- [-2.998877010787825E-002,  6.618389958855470E-002,  3.874322042488996E-002, ]
+- [-4.232255331126770E-002, -5.906298653595132E-002,  3.874322042488996E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -591,6 +626,41 @@ _setup2: Arith. and geom. avg. npw (full set) are     170.000     169.973
  scprqt:  WARNING -
   nstep=    5 was not enough SCF cycles to converge;
   maximum energy difference=  7.749E-08 exceeds toldfe=  1.000E-10
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :       10
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  6.800000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.563241086000000E+001,  5.563241086000000E+001,  5.563241086000000E+001, ]
+alpha_beta_gamma_angles: [ 5.563241086000000E+001,  5.563241086000000E+001,  5.563241086000000E+001, ]
+cutoff_energies: {"ecut":  3.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -7.749210340080026E-008, "res2":  5.703512940090002E-007, 
+    "residm":  1.275332616176208E-007, "diffor": undef, 
+}
+etotal    : -1.929589027979227E+002
+entropy   :  0.000000000000000E+000
+fermie    :  4.882611982749076E-001
+stress_tensor: !CartTensor
+- [ 2.573464870520633E-002,  0.000000000000000E+000, -1.028525677831612E-007, ]
+- [ 0.000000000000000E+000,  2.573591540793995E-002,  0.000000000000000E+000, ]
+- [-1.028525677831612E-007,  0.000000000000000E+000,  2.641697267191096E-002, ]
+cartesian_forces: !CartForces
+- [ 8.827953986641892E-004, -2.439631788189184E-004, -9.009503175737468E-002, ]
+- [ 8.827953986641839E-004,  2.439631788189170E-004, -9.009503175737468E-002, ]
+- [ 1.213313588830063E-004,  2.090521684741402E-005, -2.612862289931016E-002, ]
+- [ 1.213313588830057E-004, -2.090521684741258E-005, -2.612862289931016E-002, ]
+- [-4.282575473862746E-002,  5.912124949462274E-002,  3.903516375791453E-002, ]
+- [-3.022906341046656E-002, -6.599756449543155E-002,  3.863297869259344E-002, ]
+- [ 7.205069139154684E-002,  6.963323189273386E-003,  3.855551220617686E-002, ]
+- [ 7.205069139154682E-002, -6.963323189273386E-003,  3.855551220617686E-002, ]
+- [-3.022906341046656E-002,  6.599756449543155E-002,  3.863297869259344E-002, ]
+- [-4.282575473862747E-002, -5.912124949462274E-002,  3.903516375791453E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -918,7 +988,30 @@ P           mkmem2         10
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- using density-functional theory.
+- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
+- Comment: Some pseudopotential generated using the FHI code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -932,17 +1025,11 @@ P           mkmem2         10
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
-- using density-functional theory.
-- M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
-- Comment: Some pseudopotential generated using the FHI code were used.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
--
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -951,11 +1038,13 @@ P           mkmem2         10
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [4] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [5] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -963,24 +1052,15 @@ P           mkmem2         10
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [5] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=         75.1  wall=        185.1
+- Proc.   0 individual time (sec): cpu=         70.7  wall=        141.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        148.6  wall=        370.2
++Overall time at end (sec) : cpu=        141.6  wall=        281.9

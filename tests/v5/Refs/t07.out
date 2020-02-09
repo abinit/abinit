@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h28 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 16h49 )
   
-- input  file    -> t07.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t07/t07.in
 - output file    -> t07.out
 - root for input  files -> t07i
 - root for output files -> t07o
@@ -1538,8 +1538,8 @@ P           mkmem6          6
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.gga.uspp.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.gga.uspp.paw
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.gga.uspp.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.gga.uspp.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Aluminium
 - 13.00000   3.00000  20050712                znucl, zion, pspdat
     7   11    1    0       604   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1578,6 +1578,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     484.000     483.982
  ETOT  8  -8.3913514138219     1.681E-08 3.454E-06 2.864E-13
 
  At SCF step    8       nres2   =  2.86E-13 < tolvrs=  2.00E-10 =>converged.
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg":  1.500000000000000E+001, }
+convergence: {
+    "deltae":  1.681140560094718E-008, "res2":  2.864380314286014E-013, 
+    "residm":  3.453548336865017E-006, "diffor":  0.000000000000000E+000, 
+}
+etotal    : -8.391351413821937E+000
+entropy   :  0.000000000000000E+000
+fermie    :  2.596582813761356E-001
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1738,8 +1767,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     484.000     483.982
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.gga.uspp.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.gga.uspp.paw
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.gga.uspp.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.gga.uspp.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Aluminium
 - 13.00000   3.00000  20050712                znucl, zion, pspdat
     7   11    1    0       604   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1776,6 +1805,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     461.000     461.000
  ETOT  7  -8.5664831901927    -2.053E-07 4.313E-04 1.555E-10
 
  At SCF step    7       nres2   =  1.55E-10 < tolvrs=  2.00E-10 =>converged.
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg":  1.500000000000000E+001, }
+convergence: {
+    "deltae": -2.052551373310507E-007, "res2":  1.554884899564618E-010, 
+    "residm":  4.313492412553307E-004, "diffor":  0.000000000000000E+000, 
+}
+etotal    : -8.566483190192651E+000
+entropy   :  0.000000000000000E+000
+fermie    : -1.458653529371948E-001
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1964,8 +2022,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     461.000     461.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.gga.uspp.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.gga.uspp.paw
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.gga.uspp.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.gga.uspp.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Aluminium
 - 13.00000   3.00000  20050712                znucl, zion, pspdat
     7   11    1    0       604   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2002,6 +2060,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     484.000     483.982
  ETOT  7  -8.5675412403752    -8.017E-08 1.182E-05 9.100E-11
 
  At SCF step    7       nres2   =  9.10E-11 < tolvrs=  2.00E-10 =>converged.
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg":  1.500000000000000E+001, }
+convergence: {
+    "deltae": -8.016744779126839E-008, "res2":  9.100066361105826E-011, 
+    "residm":  1.182177234100164E-005, "diffor":  0.000000000000000E+000, 
+}
+etotal    : -8.567541240375217E+000
+entropy   :  0.000000000000000E+000
+fermie    :  2.546020018211411E-001
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2197,8 +2284,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     484.000     483.982
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.gga.uspp.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.gga.uspp.paw
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.gga.uspp.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.gga.uspp.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Aluminium
 - 13.00000   3.00000  20050712                znucl, zion, pspdat
     7   11    1    0       604   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2278,6 +2365,35 @@ TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
   posnstep=    4 was not enough SCF cycles to converge difference between
   etotal from electronic calculation and etotal from positronic calculation;
   diff=  1.322E-05 exceeds postoldfe=  1.000E-06
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg":  1.500000000000000E+001, }
+convergence: {
+    "deltae":  5.080380560684716E-012, "res2":  1.138125834889607E-010, 
+    "residm":  2.887769891676256E-004, "diffor":  0.000000000000000E+000, 
+}
+etotal    : -8.613332456490655E+000
+entropy   :  0.000000000000000E+000
+fermie    : -1.598648929969241E-001
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2473,8 +2589,8 @@ TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.gga.uspp.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Al.gga.uspp.paw
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.gga.uspp.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Al.gga.uspp.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): Aluminium
 - 13.00000   3.00000  20050712                znucl, zion, pspdat
     7   11    1    0       604   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2548,6 +2664,35 @@ TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
   posnstep=    4 was not enough SCF cycles to converge difference between
   etotal from electronic calculation and etotal from positronic calculation;
   diff=  1.306E-05 exceeds postoldfe=  1.000E-06
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg":  1.500000000000000E+001, }
+convergence: {
+    "deltae":  1.554312234475219E-012, "res2":  2.383191858116860E-011, 
+    "residm":  1.404741331817490E-004, "diffor":  0.000000000000000E+000, 
+}
+etotal    : -8.613332284380867E+000
+entropy   :  0.000000000000000E+000
+fermie    : -1.598648630015830E-001
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2798,6 +2943,35 @@ TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
   posnstep=    4 was not enough SCF cycles to converge difference between
   max. force from electronic calculation and max. force from positronic calculation;
   diff=  3.382E-05 exceeds postoldff=  1.500E-03
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg":  1.500000000000000E+001, }
+convergence: {
+    "deltae":  1.815969596918876E-011, "res2":  9.468437576506942E-011, 
+    "residm":  4.805901882966777E-004, "diffor":  2.541581461349557E-008, 
+}
+etotal    : -8.613519373805357E+000
+entropy   :  0.000000000000000E+000
+fermie    : -1.604495201173866E-001
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [-5.414013717883470E-003, -0.000000000000000E+000, -0.000000000000000E+000, ]
+- [ 5.756034788101972E-003, -0.000000000000000E+000, -0.000000000000000E+000, ]
+- [ 5.071992647664969E-003, -0.000000000000000E+000, -0.000000000000000E+000, ]
+- [-5.414013717883471E-003, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -4396,7 +4570,24 @@ P           mkmem6          6
 - Comment: PAW calculations. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
-- [3] Recent developments in the ABINIT software package.
+- [3] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -4410,11 +4601,11 @@ P           mkmem6          6
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -4423,27 +4614,14 @@ P           mkmem6          6
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [5] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=         26.8  wall=         27.0
+- Proc.   0 individual time (sec): cpu=         27.2  wall=         28.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered   6 WARNINGs and  43 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         26.8  wall=         27.0
+.Delivered   5 WARNINGs and  43 COMMENTs to log file.
++Overall time at end (sec) : cpu=         27.2  wall=         28.0

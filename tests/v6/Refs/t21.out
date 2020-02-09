@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h30 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 16h58 )
   
-- input  file    -> t21.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t21/t21.in
 - output file    -> t21.out
 - root for input  files -> t21i
 - root for output files -> t21o
@@ -174,8 +174,8 @@ P           mkmem           2
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -226,6 +226,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     126.750     126.749
   sigma(1 1)= -9.90448261E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -9.90448261E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  9.86184335E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.019806626980426E-014, "res2":  5.991985730038619E-015, 
+    "residm":  5.763650616278024E-015, "diffor":  5.557835268399369E-009, 
+}
+etotal    : -1.064883315083894E+001
+entropy   :  0.000000000000000E+000
+fermie    :  2.627775451154013E-002
+stress_tensor: !CartTensor
+- [-9.904482614917550E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -9.904482614917420E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  9.861843350231639E-004, ]
+cartesian_forces: !CartForces
+- [-7.869390612830795E-019,  1.608120048811843E-018,  4.520802509506791E-002, ]
+- [ 7.869390612830795E-019, -1.608120048811843E-018, -4.520802509506791E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -339,6 +366,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)= -8.84534755E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.50481653E-03  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -4.219202764943475E-011, "res2":  2.300779255762063E-013, 
+    "residm":  2.385973224419103E-008, "diffor":  4.713059292837940E-008, 
+}
+etotal    : -9.742419905197709E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.586917402830109E-001
+stress_tensor: !CartTensor
+- [-8.845347549720146E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -8.845347549720137E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.504816525146990E-003, ]
+cartesian_forces: !CartForces
+- [-4.666361852815681E-018, -2.300088477289295E-019,  7.204874155609350E-002, ]
+- [ 4.666361852815681E-018,  2.300088477289295E-019, -7.204874155609350E-002, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -451,6 +505,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)= -5.67136279E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  7.63665251E-04  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -7.709388682997087E-013, "res2":  6.133686259802466E-014, 
+    "residm":  2.239625579020149E-011, "diffor":  1.199331196855002E-008, 
+}
+etotal    : -9.284979961896820E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.346454933458761E-001
+stress_tensor: !CartTensor
+- [-5.671362788662599E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -5.671362788662604E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  7.636652508713378E-004, ]
+cartesian_forces: !CartForces
+- [-6.955652367695121E-018,  3.553214741360436E-017,  9.928248621907010E-002, ]
+- [ 6.955652367695121E-018, -3.553214741360436E-017, -9.928248621907010E-002, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -539,8 +620,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -590,6 +671,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)= -3.84660231E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -3.84660231E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  7.13425607E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -5.329070518200751E-013, "res2":  3.514892784048061E-013, 
+    "residm":  2.176631229087016E-011, "diffor":  1.526860177181177E-008, 
+}
+etotal    : -9.283925701544415E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.092894338993578E-001
+stress_tensor: !CartTensor
+- [-3.846602305982834E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -3.846602305982836E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  7.134256069307354E-004, ]
+cartesian_forces: !CartForces
+- [ 4.593101516057996E-018,  4.453816429692044E-018,  8.530618328481462E-002, ]
+- [-4.593101516057996E-018, -4.453816429692044E-018, -8.530618328481462E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -679,8 +787,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -729,6 +837,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)= -2.46311387E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -2.46311387E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  7.33047292E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.295141937087465E-012, "res2":  3.099049981890784E-011, 
+    "residm":  1.189931837876631E-012, "diffor":  3.462518949337579E-008, 
+}
+etotal    : -9.279388730790306E+000
+entropy   :  0.000000000000000E+000
+fermie    :  8.642060623872487E-002
+stress_tensor: !CartTensor
+- [-2.463113867235670E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -2.463113867235664E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  7.330472918234930E-004, ]
+cartesian_forces: !CartForces
+- [ 2.157490119875792E-018,  1.320521552961596E-018,  7.184699430790326E-002, ]
+- [-2.157490119875792E-018, -1.320521552961596E-018, -7.184699430790326E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -818,8 +953,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -868,6 +1003,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)= -1.28433388E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -1.28433388E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  7.37910092E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -9.920952948050399E-012, "res2":  1.267293425989723E-010, 
+    "residm":  2.375909016572266E-011, "diffor":  6.831342082291858E-009, 
+}
+etotal    : -9.289744053966464E+000
+entropy   :  0.000000000000000E+000
+fermie    :  6.531875710976487E-002
+stress_tensor: !CartTensor
+- [-1.284333878720489E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -1.284333878720496E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  7.379100921188150E-004, ]
+cartesian_forces: !CartForces
+- [-5.506998793259456E-019,  6.173873559141630E-019,  6.167157914350452E-002, ]
+- [ 5.506998793259456E-019, -6.173873559141630E-019, -6.167157914350452E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -972,8 +1134,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1022,6 +1184,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     126.750     126.749
   sigma(1 1)=  3.57002678E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.57002678E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  9.67814181E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.166000629382324E-010, "res2":  9.950325052205761E-014, 
+    "residm":  3.447634910009263E-008, "diffor":  1.498066785204921E-008, 
+}
+etotal    : -1.068129961230695E+001
+entropy   :  0.000000000000000E+000
+fermie    :  5.661392788443227E-002
+stress_tensor: !CartTensor
+- [ 3.570026783413526E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  3.570026783413535E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  9.678141809687226E-004, ]
+cartesian_forces: !CartForces
+- [-2.154926894037561E-019,  2.635877001551486E-018,  2.166361975329865E-002, ]
+- [ 2.154926894037561E-019, -2.635877001551486E-018, -2.166361975329865E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1133,6 +1322,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)= -2.23997133E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -2.23997133E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.28759049E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.261213355974178E-013, "res2":  2.168065110937120E-012, 
+    "residm":  1.922477593473837E-015, "diffor":  1.226323800840312E-008, 
+}
+etotal    : -9.835559498026370E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.186579004250259E-001
+stress_tensor: !CartTensor
+- [-2.239971333941183E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -2.239971333941183E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.287590487918950E-003, ]
+cartesian_forces: !CartForces
+- [ 2.051618423904738E-018,  1.104085938813064E-018,  3.397793708142960E-002, ]
+- [-2.051618423904738E-018, -1.104085938813064E-018, -3.397793708142960E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1246,6 +1462,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)=  1.38176245E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.66506487E-04  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  1.776356839400250E-014, "res2":  1.936866567887317E-014, 
+    "residm":  9.460589494909550E-018, "diffor":  3.322082900436563E-009, 
+}
+etotal    : -9.452976749579362E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.054752575937867E-001
+stress_tensor: !CartTensor
+- [ 1.381762449597659E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.381762449597643E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.665064867580260E-004, ]
+cartesian_forces: !CartForces
+- [-4.250422326088102E-018, -6.387777104931715E-019,  4.142481837746309E-002, ]
+- [ 4.250422326088102E-018,  6.387777104931715E-019, -4.142481837746309E-002, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1334,8 +1577,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1385,6 +1628,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  1.48373471E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.48373471E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.15983672E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.375077994860476E-014, "res2":  3.615108772827057E-013, 
+    "residm":  7.730043158845741E-016, "diffor":  2.048604071797078E-008, 
+}
+etotal    : -9.416306651053622E+000
+entropy   :  0.000000000000000E+000
+fermie    :  8.276934395383087E-002
+stress_tensor: !CartTensor
+- [ 1.483734711891546E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.483734711891557E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.159836721186973E-004, ]
+cartesian_forces: !CartForces
+- [-9.941842291026410E-019,  4.361906531304736E-018,  5.343021624648839E-002, ]
+- [ 9.941842291026410E-019, -4.361906531304736E-018, -5.343021624648839E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1474,8 +1744,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1526,6 +1796,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  1.41456547E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.41456547E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.91581006E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  0.000000000000000E+000, "res2":  5.074221029748672E-015, 
+    "residm":  3.930470124310318E-015, "diffor":  3.931514620802989E-009, 
+}
+etotal    : -9.377381820672008E+000
+entropy   :  0.000000000000000E+000
+fermie    :  6.408832837713420E-002
+stress_tensor: !CartTensor
+- [ 1.414565471269181E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.414565471269185E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.915810057549463E-004, ]
+cartesian_forces: !CartForces
+- [-1.334087762509421E-017,  1.235231505385822E-017,  5.560966243300748E-002, ]
+- [ 1.334087762509421E-017, -1.235231505385821E-017, -5.560966243300748E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1615,8 +1912,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1667,6 +1964,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  1.54426165E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.54426165E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.47422910E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.552713678800501E-015, "res2":  3.244309858718304E-014, 
+    "residm":  3.279548070156128E-011, "diffor":  7.042205638074783E-009, 
+}
+etotal    : -9.362988147225112E+000
+entropy   :  0.000000000000000E+000
+fermie    :  4.656455990805348E-002
+stress_tensor: !CartTensor
+- [ 1.544261650166382E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.544261650166386E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.474229099399024E-004, ]
+cartesian_forces: !CartForces
+- [-1.050514194949796E-017,  6.287474374272621E-018,  5.079486722116634E-002, ]
+- [ 1.050514194949796E-017, -6.287474374272620E-018, -5.079486722116634E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1772,8 +2096,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1823,6 +2147,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     126.750     126.749
   sigma(1 1)=  5.12337025E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  5.12337025E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.01660169E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.438849039914203E-012, "res2":  1.460391967010195E-015, 
+    "residm":  2.880243608128265E-010, "diffor":  4.373741837454537E-010, 
+}
+etotal    : -1.068837797906593E+001
+entropy   :  0.000000000000000E+000
+fermie    :  5.887495220377979E-002
+stress_tensor: !CartTensor
+- [ 5.123370245226824E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  5.123370245226863E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.016601688246123E-003, ]
+cartesian_forces: !CartForces
+- [-8.916401522777175E-019, -1.552465920020747E-018,  1.128470090386013E-002, ]
+- [ 8.916401522777175E-019,  1.552465920020747E-018, -1.128470090386013E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1935,6 +2286,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)= -9.76903060E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.30778992E-03  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.552713678800501E-015, "res2":  1.956977966305272E-014, 
+    "residm":  3.695336710191484E-016, "diffor":  1.634959777806200E-009, 
+}
+etotal    : -9.847091655563945E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.077771568768222E-001
+stress_tensor: !CartTensor
+- [-9.769030596918585E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -9.769030596918542E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.307789923880134E-003, ]
+cartesian_forces: !CartForces
+- [-9.036716331131007E-019, -1.523060960427533E-018,  5.489056598467951E-003, ]
+- [ 9.036716331131007E-019,  1.523060960427533E-018, -5.489056598467951E-003, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2046,6 +2424,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)=  1.67533057E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.53086456E-04  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.225686219186173E-013, "res2":  2.585349767271308E-013, 
+    "residm":  2.245314776891780E-015, "diffor":  2.313026933875584E-008, 
+}
+etotal    : -9.459695968550591E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.048515580417703E-001
+stress_tensor: !CartTensor
+- [ 1.675330570484130E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.675330570484138E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.530864559369922E-004, ]
+cartesian_forces: !CartForces
+- [ 2.038963821779265E-018, -1.481709642624407E-018, -2.607141233117426E-002, ]
+- [-2.038963821779265E-018,  1.481709642624407E-018,  2.607141233117426E-002, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2134,8 +2539,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2184,6 +2589,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.41263588E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.41263588E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.15151865E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.943512183468556E-013, "res2":  4.128511941118433E-012, 
+    "residm":  5.773571587496498E-015, "diffor":  2.174927159898088E-008, 
+}
+etotal    : -9.439713897811160E+000
+entropy   :  0.000000000000000E+000
+fermie    :  7.879025115950306E-002
+stress_tensor: !CartTensor
+- [ 2.412635883646944E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.412635883646947E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.151518647784640E-004, ]
+cartesian_forces: !CartForces
+- [ 1.375360356041869E-018,  2.056028776457793E-018, -1.299247540373785E-002, ]
+- [-1.375360356041869E-018, -2.056028776457792E-018,  1.299247540373785E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2273,8 +2705,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2323,6 +2755,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.81421041E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.81421041E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.00217782E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -9.450218385609332E-013, "res2":  1.268281642997897E-011, 
+    "residm":  1.360539102290731E-014, "diffor":  3.140112289808095E-008, 
+}
+etotal    : -9.413818302641255E+000
+entropy   :  0.000000000000000E+000
+fermie    :  5.566549331516972E-002
+stress_tensor: !CartTensor
+- [ 2.814210405693946E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.814210405693949E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.002177819061837E-004, ]
+cartesian_forces: !CartForces
+- [ 8.681049406922123E-019, -8.603136547260932E-020,  5.970306350358020E-003, ]
+- [-8.681049406922122E-019,  8.603136547260932E-020, -5.970306350358020E-003, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2412,8 +2871,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2464,6 +2923,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.94851194E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.94851194E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.28115987E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  3.552713678800501E-015, "res2":  4.743720254371742E-014, 
+    "residm":  1.012881448694415E-016, "diffor":  9.262735689574697E-009, 
+}
+etotal    : -9.399405352450698E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.676335349730094E-002
+stress_tensor: !CartTensor
+- [ 2.948511939949408E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.948511939949404E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.281159871851641E-004, ]
+cartesian_forces: !CartForces
+- [-1.122806700229406E-018, -1.730933398040660E-018,  1.807310955246813E-002, ]
+- [ 1.122806700229406E-018,  1.730933398040660E-018, -1.807310955246813E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2569,8 +3055,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2619,6 +3105,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     126.750     126.749
   sigma(1 1)=  5.68830867E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  5.68830867E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.05241573E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -7.105427357601002E-014, "res2":  1.044813160616056E-013, 
+    "residm":  3.266212636375269E-009, "diffor":  1.828964190948162E-008, 
+}
+etotal    : -1.069039114807945E+001
+entropy   :  0.000000000000000E+000
+fermie    :  5.767585714596461E-002
+stress_tensor: !CartTensor
+- [ 5.688308670603261E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  5.688308670603261E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.052415727442596E-003, ]
+cartesian_forces: !CartForces
+- [ 2.719300160027388E-019, -1.631296133393161E-019,  6.687542344309296E-003, ]
+- [-2.719300160027388E-019,  1.631296133393161E-019, -6.687542344309296E-003, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2729,6 +3242,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)= -9.39700367E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -9.39700367E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.30641289E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -2.646771690706373E-013, "res2":  2.653599969165698E-012, 
+    "residm":  1.293412553201775E-015, "diffor":  4.792139937041112E-009, 
+}
+etotal    : -9.847560181170056E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.074338738944092E-001
+stress_tensor: !CartTensor
+- [-9.397003668880181E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -9.397003668880268E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.306412893706775E-003, ]
+cartesian_forces: !CartForces
+- [ 1.971244638991167E-019, -1.553993683689968E-019,  3.067297323363033E-003, ]
+- [-1.971244638991167E-019,  1.553993683689968E-019, -3.067297323363033E-003, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2841,6 +3381,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)=  1.77922451E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.47680141E-04  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -6.572520305780927E-014, "res2":  2.476216383558135E-013, 
+    "residm":  1.696881698692725E-015, "diffor":  1.998638987296686E-008, 
+}
+etotal    : -9.462049166651276E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.046593472433773E-001
+stress_tensor: !CartTensor
+- [ 1.779224513582236E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.779224513582221E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.476801414974515E-004, ]
+cartesian_forces: !CartForces
+- [-9.872312173906410E-019,  1.727055253548607E-019,  1.725394338187458E-002, ]
+- [ 9.872312173906412E-019, -1.727055253548607E-019, -1.725394338187458E-002, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2929,8 +3496,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2978,6 +3545,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.45571926E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.45571926E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.16237600E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.813660333027656E-012, "res2":  1.348402487682352E-010, 
+    "residm":  1.573692434072894E-014, "diffor":  2.173411506583428E-008, 
+}
+etotal    : -9.440811539284526E+000
+entropy   :  0.000000000000000E+000
+fermie    :  7.858025870931683E-002
+stress_tensor: !CartTensor
+- [ 2.455719264460579E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.455719264460579E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.162375995395095E-004, ]
+cartesian_forces: !CartForces
+- [ 8.122027777393220E-020,  2.393075961961919E-019,  4.594298608480745E-003, ]
+- [-8.122027777393220E-020, -2.393075961961919E-019, -4.594298608480745E-003, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3067,8 +3661,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3115,6 +3709,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.82676554E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.82676554E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.01563124E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.610978017652087E-010, "res2":  7.589790175096448E-010, 
+    "residm":  1.016137799889841E-012, "diffor":  3.271213091989586E-009, 
+}
+etotal    : -9.414166189274534E+000
+entropy   :  0.000000000000000E+000
+fermie    :  5.553078881776216E-002
+stress_tensor: !CartTensor
+- [ 2.826765543340959E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.826765543340966E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.015631235927188E-004, ]
+cartesian_forces: !CartForces
+- [ 2.112761822900579E-020,  2.381226727862467E-020, -1.410959363028028E-004, ]
+- [-2.112761822900579E-020, -2.381226727862466E-020,  1.410959363028028E-004, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3204,8 +3825,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3256,6 +3877,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  3.10269428E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.10269428E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.39644525E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -2.486899575160351E-014, "res2":  7.268067564971947E-014, 
+    "residm":  4.579820309989991E-017, "diffor":  5.527382695644234E-009, 
+}
+etotal    : -9.403493029227691E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.482042358873535E-002
+stress_tensor: !CartTensor
+- [ 3.102694277164412E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  3.102694277164410E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.396445247752805E-004, ]
+cartesian_forces: !CartForces
+- [ 3.586566913431999E-019, -2.751443099310400E-019,  4.765204720967135E-003, ]
+- [-3.586566913431999E-019,  2.751443099310400E-019, -4.765204720967135E-003, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3361,8 +4009,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3412,6 +4060,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     126.750     126.749
   sigma(1 1)=  5.94080718E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  5.94080718E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.07546472E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  3.552713678800501E-015, "res2":  2.994699894397536E-014, 
+    "residm":  4.590005338483496E-011, "diffor":  1.224147784875673E-009, 
+}
+etotal    : -1.069112929307505E+001
+entropy   :  0.000000000000000E+000
+fermie    :  5.644615605600908E-002
+stress_tensor: !CartTensor
+- [ 5.940807180449003E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  5.940807180449003E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.075464715884400E-003, ]
+cartesian_forces: !CartForces
+- [-4.794364431048761E-020,  5.757098759722598E-020,  4.418518008574407E-003, ]
+- [ 4.794364431048761E-020, -5.757098759722598E-020, -4.418518008574407E-003, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3523,6 +4198,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)= -9.28908524E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.30585555E-03  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.410605131648481E-013, "res2":  4.136667521848487E-012, 
+    "residm":  2.235540293765644E-015, "diffor":  1.463774824375826E-008, 
+}
+etotal    : -9.847707943154589E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.073338352624752E-001
+stress_tensor: !CartTensor
+- [-9.289085238099867E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -9.289085238099954E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.305855554647731E-003, ]
+cartesian_forces: !CartForces
+- [ 1.819359610669866E-019,  2.746527283665536E-019,  1.752769172124114E-003, ]
+- [-1.819359610669866E-019, -2.746527283665536E-019, -1.752769172124114E-003, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3633,6 +4335,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)=  1.82271247E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.45273277E-04  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -5.204725539442734E-013, "res2":  2.351512248143165E-011, 
+    "residm":  3.036778857292536E-015, "diffor":  2.973123260779920E-008, 
+}
+etotal    : -9.463029190879604E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.045845042726715E-001
+stress_tensor: !CartTensor
+- [ 1.822712471419212E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.822712471419216E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.452732770523389E-004, ]
+cartesian_forces: !CartForces
+- [ 1.791782487748277E-018, -1.887558935855933E-018, -1.163364659740482E-002, ]
+- [-1.791782487748277E-018,  1.887558935855933E-018,  1.163364659740482E-002, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3721,8 +4450,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3769,6 +4498,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.46101462E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.46101462E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.16384756E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -6.396660978680302E-011, "res2":  2.760080625962910E-010, 
+    "residm":  4.463283622354801E-013, "diffor":  6.014528447246398E-008, 
+}
+etotal    : -9.440946817431676E+000
+entropy   :  0.000000000000000E+000
+fermie    :  7.855410380721659E-002
+stress_tensor: !CartTensor
+- [ 2.461014615160457E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.461014615160451E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.163847555401106E-004, ]
+cartesian_forces: !CartForces
+- [ 1.595175391569658E-019, -2.359405560387138E-019, -1.652087016664619E-003, ]
+- [-1.595175391569658E-019,  2.359405560387138E-019,  1.652087016664619E-003, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3858,8 +4614,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3905,6 +4661,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.82694891E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.82694891E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.01574950E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.234444191311468E-008, "res2":  1.093111156355783E-007, 
+    "residm":  9.304384175276468E-011, "diffor":  8.986172290287744E-008, 
+}
+etotal    : -9.414166383629205E+000
+entropy   :  0.000000000000000E+000
+fermie    :  5.552828180178908E-002
+stress_tensor: !CartTensor
+- [ 2.826948908678712E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.826948908678727E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.015749501973790E-004, ]
+cartesian_forces: !CartForces
+- [ 4.537163404373491E-022, -1.646528480639588E-022,  3.220733727855117E-006, ]
+- [-4.537163404373491E-022,  1.646528480639588E-022, -3.220733727855117E-006, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3994,8 +4777,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4042,6 +4825,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  3.11355868E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.11355868E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.40819945E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.777884506282135E-010, "res2":  6.931977661373875E-009, 
+    "residm":  1.072727760546670E-012, "diffor":  5.948863388309175E-008, 
+}
+etotal    : -9.403789818765249E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.465507095032080E-002
+stress_tensor: !CartTensor
+- [ 3.113558675696616E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  3.113558675696630E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.408199449776711E-004, ]
+cartesian_forces: !CartForces
+- [-1.686864454185385E-019, -1.214727910167115E-019,  1.472397802779420E-003, ]
+- [ 1.686864454185385E-019,  1.214727910167115E-019, -1.472397802779420E-003, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4147,8 +4957,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4197,6 +5007,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     126.750     126.749
   sigma(1 1)=  6.07498264E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.07498264E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.09065422E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.207922650792170E-013, "res2":  1.966027343995942E-013, 
+    "residm":  1.618948935666620E-007, "diffor":  2.867134683316730E-009, 
+}
+etotal    : -1.069146279453969E+001
+entropy   :  0.000000000000000E+000
+fermie    :  5.550558139662577E-002
+stress_tensor: !CartTensor
+- [ 6.074982642439572E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  6.074982642439611E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.090654221529554E-003, ]
+cartesian_forces: !CartForces
+- [ 1.226892693211085E-019, -3.562003499026585E-020,  3.164792372506798E-003, ]
+- [-1.226892693211085E-019,  3.562003499026585E-020, -3.164792372506798E-003, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4308,6 +5145,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)= -9.25481052E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.30565983E-03  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -4.529709940470639E-013, "res2":  6.536260863081474E-012, 
+    "residm":  3.361257345234130E-015, "diffor":  2.106142859312037E-008, 
+}
+etotal    : -9.847756311689778E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.073020036360410E-001
+stress_tensor: !CartTensor
+- [-9.254810519355268E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -9.254810519355311E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.305659833758869E-003, ]
+cartesian_forces: !CartForces
+- [-7.708394351579602E-020, -3.342774050221312E-020,  1.007244039414515E-003, ]
+- [ 7.708394351579602E-020,  3.342774050221312E-020, -1.007244039414515E-003, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -4418,6 +5282,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)=  1.84209352E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.44169730E-04  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -5.151434834260726E-013, "res2":  3.261694250297277E-011, 
+    "residm":  4.786987328515100E-015, "diffor":  3.447086226356089E-008, 
+}
+etotal    : -9.463464850116878E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.045523254770997E-001
+stress_tensor: !CartTensor
+- [ 1.842093524030300E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.842093524030296E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.441697299606343E-004, ]
+cartesian_forces: !CartForces
+- [ 6.296054761378817E-019, -3.854007750377124E-019,  7.907032522640666E-003, ]
+- [-6.296054761378817E-019,  3.854007750377124E-019, -7.907032522640666E-003, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -4506,8 +5397,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4555,6 +5446,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.46170424E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.46170424E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.16404754E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -4.352074256530614E-013, "res2":  2.847220654453497E-011, 
+    "residm":  2.326105107492538E-015, "diffor":  1.653636669122268E-008, 
+}
+etotal    : -9.440964277235119E+000
+entropy   :  0.000000000000000E+000
+fermie    :  7.855059474472928E-002
+stress_tensor: !CartTensor
+- [ 2.461704244525770E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.461704244525764E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.164047539722789E-004, ]
+cartesian_forces: !CartForces
+- [ 6.587625209907319E-020,  2.220090570802966E-020,  5.953245859631271E-004, ]
+- [-6.587625209907319E-020, -2.220090570802966E-020, -5.953245859631271E-004, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4644,8 +5562,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4691,6 +5609,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.82694892E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.82694892E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.01574951E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.234457336352079E-008, "res2":  1.093173215954407E-007, 
+    "residm":  9.304503104760877E-011, "diffor":  9.007254799028528E-008, 
+}
+etotal    : -9.414166383731196E+000
+entropy   :  0.000000000000000E+000
+fermie    :  5.552828165025400E-002
+stress_tensor: !CartTensor
+- [ 2.826948916862765E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.826948916862765E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.015749509211160E-004, ]
+cartesian_forces: !CartForces
+- [-2.800269442297597E-024, -5.069237082335575E-024, -7.347478206465038E-008, ]
+- [ 2.800269442297597E-024,  5.069237082335575E-024,  7.347478206465038E-008, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4780,8 +5725,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4830,6 +5775,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  3.11460508E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.11460508E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.40936711E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -6.235012506294879E-013, "res2":  2.562872604581572E-011, 
+    "residm":  1.198214945742496E-014, "diffor":  4.333902594899674E-008, 
+}
+etotal    : -9.403818322698596E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.463888669490951E-002
+stress_tensor: !CartTensor
+- [ 3.114605078910183E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  3.114605078910180E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.409367106489916E-004, ]
+cartesian_forces: !CartForces
+- [-5.450568216119491E-020,  2.844807477992109E-021,  4.635949722012897E-004, ]
+- [ 5.450568216119491E-020, -2.844807477992121E-021, -4.635949722012897E-004, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4935,8 +5907,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4985,6 +5957,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     126.750     126.749
   sigma(1 1)=  6.15554059E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.15554059E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.10111800E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -2.131628207280301E-014, "res2":  2.099712434008291E-013, 
+    "residm":  4.364061837688717E-009, "diffor":  4.356543581180566E-009, 
+}
+etotal    : -1.069163838201345E+001
+entropy   :  0.000000000000000E+000
+fermie    :  5.481575851690280E-002
+stress_tensor: !CartTensor
+- [ 6.155540590153290E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  6.155540590153294E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.101118004503285E-003, ]
+cartesian_forces: !CartForces
+- [-6.598606551516220E-021, -7.735996265810112E-020,  2.403052109925352E-003, ]
+- [ 6.598606551516220E-021,  7.735996265810112E-020, -2.403052109925352E-003, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -5096,6 +6095,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)= -9.24360013E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.30559370E-03  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -6.021849685566849E-013, "res2":  7.594402155271636E-012, 
+    "residm":  4.093812664081257E-015, "diffor":  2.195421833000796E-008, 
+}
+etotal    : -9.847772296160251E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.072915856630419E-001
+stress_tensor: !CartTensor
+- [-9.243600131563466E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -9.243600131563249E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.305593696580549E-003, ]
+cartesian_forces: !CartForces
+- [-9.674580719351058E-020, -3.505705905139461E-020,  5.798011082135684E-004, ]
+- [ 9.674580719351058E-020,  3.505705905139461E-020, -5.798011082135684E-004, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -5206,6 +6232,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)=  1.85096360E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.43657661E-04  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.385558334732195E-013, "res2":  3.004798990703373E-012, 
+    "residm":  1.166736562630886E-015, "diffor":  6.591430297409051E-009, 
+}
+etotal    : -9.463664044237840E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.045378483716109E-001
+stress_tensor: !CartTensor
+- [ 1.850963596043652E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.850963596043654E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.436576607133025E-004, ]
+cartesian_forces: !CartForces
+- [ 8.476598885003362E-019,  3.837039989780279E-019, -5.393544997001225E-003, ]
+- [-8.476598885003362E-019, -3.837039989780279E-019,  5.393544997001225E-003, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -5294,8 +6347,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5343,6 +6396,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.46179298E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.46179298E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.16407257E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -2.646771690706373E-013, "res2":  1.398457827798918E-011, 
+    "residm":  1.827780709754196E-015, "diffor":  1.504715778504763E-008, 
+}
+etotal    : -9.440966544082439E+000
+entropy   :  0.000000000000000E+000
+fermie    :  7.855015409325442E-002
+stress_tensor: !CartTensor
+- [ 2.461792978605086E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.461792978605101E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.164072565731240E-004, ]
+cartesian_forces: !CartForces
+- [-8.093140796538724E-021,  1.486456744502960E-020, -2.145749725897948E-004, ]
+- [ 8.093140796538726E-021, -1.486456744502960E-020,  2.145749725897948E-004, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -5432,8 +6512,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5479,6 +6559,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.82694892E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.82694892E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.01574951E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.234457336352079E-008, "res2":  1.093171795344314E-007, 
+    "residm":  9.304500186953662E-011, "diffor":  9.006773424283552E-008, 
+}
+etotal    : -9.414166383731223E+000
+entropy   :  0.000000000000000E+000
+fermie    :  5.552828165275621E-002
+stress_tensor: !CartTensor
+- [ 2.826948916742485E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.826948916742507E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.015749509168280E-004, ]
+cartesian_forces: !CartForces
+- [ 2.834631061605897E-027, -1.174093207078276E-026,  1.676190149884326E-009, ]
+- [-2.834631061605897E-027,  1.174093207078276E-026, -1.676190149884326E-009, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -5568,8 +6675,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5618,6 +6725,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  3.11470846E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.11470846E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.40948239E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -4.245492846166599E-013, "res2":  2.426281489189007E-011, 
+    "residm":  8.699785470870682E-015, "diffor":  3.602429894021758E-008, 
+}
+etotal    : -9.403821149727090E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.463728758658775E-002
+stress_tensor: !CartTensor
+- [ 3.114708456367968E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  3.114708456367968E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.409482391204640E-004, ]
+cartesian_forces: !CartForces
+- [-2.406532758684431E-020,  1.183520395415730E-020,  1.461848614705441E-004, ]
+- [ 2.406532758684431E-020, -1.183520395415730E-020, -1.461848614705441E-004, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -5723,8 +6857,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -5773,6 +6907,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     126.750     126.749
   sigma(1 1)=  6.20822675E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.20822675E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.10862255E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -6.572520305780927E-014, "res2":  1.908580114874027E-013, 
+    "residm":  2.544461752241381E-008, "diffor":  8.422343527030723E-009, 
+}
+etotal    : -1.069174161875199E+001
+entropy   :  0.000000000000000E+000
+fermie    :  5.430686378652449E-002
+stress_tensor: !CartTensor
+- [ 6.208226753742427E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  6.208226753742436E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.108622547613962E-003, ]
+cartesian_forces: !CartForces
+- [-2.922431950981555E-019,  2.813886603661087E-020,  1.904641648001100E-003, ]
+- [ 2.922431950981555E-019, -2.813886603661087E-020, -1.904641648001100E-003, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -5884,6 +7045,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)= -9.23989122E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.30557168E-03  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -6.625811010962934E-013, "res2":  9.184025081525940E-012, 
+    "residm":  4.930337855812501E-015, "diffor":  2.430240341637965E-008, 
+}
+etotal    : -9.847777593837026E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.072881461617036E-001
+stress_tensor: !CartTensor
+- [-9.239891222537081E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -9.239891222537124E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.305571675476294E-003, ]
+cartesian_forces: !CartForces
+- [ 1.786911842679775E-020, -5.957049669587532E-020,  3.339325774598015E-004, ]
+- [-1.786911842679775E-020,  5.957049669587531E-020, -3.339325774598015E-004, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -5994,6 +7182,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)=  1.85507445E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.43419037E-04  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -2.451372438372346E-013, "res2":  1.495473315621546E-011, 
+    "residm":  1.787768379143886E-015, "diffor":  1.830202511808945E-008, 
+}
+etotal    : -9.463756285017014E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.045311948160143E-001
+stress_tensor: !CartTensor
+- [ 1.855074446883778E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.855074446883783E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.434190366936878E-004, ]
+cartesian_forces: !CartForces
+- [-8.247184378806758E-019, -4.102848365386421E-019,  3.685140147309900E-003, ]
+- [ 8.247184378806758E-019,  4.102848365386421E-019, -3.685140147309900E-003, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -6082,8 +7297,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6131,6 +7346,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.46180454E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.46180454E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.16407587E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.357314426466473E-013, "res2":  1.856403279764274E-011, 
+    "residm":  1.820712671580668E-015, "diffor":  1.563993127710981E-008, 
+}
+etotal    : -9.440966838508025E+000
+entropy   :  0.000000000000000E+000
+fermie    :  7.855009663293581E-002
+stress_tensor: !CartTensor
+- [ 2.461804543530800E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.461804543530807E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.164075869208526E-004, ]
+cartesian_forces: !CartForces
+- [-2.430330201891329E-021, -6.784174562133586E-021,  7.734269900243515E-005, ]
+- [ 2.430330201891329E-021,  6.784174562133586E-021, -7.734269900243515E-005, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -6220,8 +7462,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6267,6 +7509,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.82694892E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.82694892E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.01574951E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.234457336352079E-008, "res2":  1.093171827933466E-007, 
+    "residm":  9.304500244170972E-011, "diffor":  9.006784450508920E-008, 
+}
+etotal    : -9.414166383731235E+000
+entropy   :  0.000000000000000E+000
+fermie    :  5.552828165269229E-002
+stress_tensor: !CartTensor
+- [ 2.826948916744725E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.826948916744747E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.015749509169850E-004, ]
+cartesian_forces: !CartForces
+- [-1.839724869987023E-028,  2.647861568531096E-027, -3.823921317018000E-011, ]
+- [ 1.839724869987023E-028, -2.647861568531096E-027,  3.823921317018000E-011, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -6356,8 +7625,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6406,6 +7675,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  3.11471881E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.11471881E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.40949391E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.659295089164516E-013, "res2":  2.316386840479994E-011, 
+    "residm":  6.432047067559566E-015, "diffor":  3.319210049062318E-008, 
+}
+etotal    : -9.403821430874817E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.463712859734148E-002
+stress_tensor: !CartTensor
+- [ 3.114718809823563E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  3.114718809823567E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.409493905386218E-004, ]
+cartesian_forces: !CartForces
+- [-1.374077812549418E-021,  9.357764675391133E-021,  4.610478474223759E-005, ]
+- [ 1.374077812549418E-021, -9.357764675391133E-021, -4.610478474223759E-005, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -6511,8 +7807,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6561,6 +7857,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     126.750     126.749
   sigma(1 1)=  6.24487791E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.24487791E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.11419008E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -4.618527782440651E-014, "res2":  1.764277921817407E-013, 
+    "residm":  2.269456250197086E-008, "diffor":  8.425694048496898E-009, 
+}
+etotal    : -1.069180745085272E+001
+entropy   :  0.000000000000000E+000
+fermie    :  5.392440509948918E-002
+stress_tensor: !CartTensor
+- [ 6.244877910469506E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  6.244877910469506E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.114190081248894E-003, ]
+cartesian_forces: !CartForces
+- [ 1.271961320918296E-019, -1.141842925801149E-019,  1.558994592608417E-003, ]
+- [-1.271961320918296E-019,  1.141842925801149E-019, -1.558994592608417E-003, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -6672,6 +7995,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)= -9.23866518E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.30556433E-03  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -6.981082378842984E-013, "res2":  8.873104690935734E-012, 
+    "residm":  4.909152350171056E-015, "diffor":  2.356276838761892E-008, 
+}
+etotal    : -9.847779351248990E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.072870057882474E-001
+stress_tensor: !CartTensor
+- [-9.238665184947139E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -9.238665184947053E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.305564325736728E-003, ]
+cartesian_forces: !CartForces
+- [ 2.777967935450645E-020,  2.835845127223483E-020,  1.923599764342340E-004, ]
+- [-2.777967935450645E-020, -2.835845127223482E-020, -1.923599764342340E-004, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -6782,6 +8132,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)=  1.85698897E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.43307462E-04  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.101341240428155E-013, "res2":  9.890645858597811E-013, 
+    "residm":  8.210917145356230E-016, "diffor":  2.795265513846901E-009, 
+}
+etotal    : -9.463799250714912E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.045281072209096E-001
+stress_tensor: !CartTensor
+- [ 1.856988965834977E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.856988965834971E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.433074616967468E-004, ]
+cartesian_forces: !CartForces
+- [-2.152676846885030E-019, -5.678846726357945E-020, -2.519809163209167E-003, ]
+- [ 2.152676846885030E-019,  5.678846726357945E-020,  2.519809163209167E-003, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -6870,8 +8247,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -6919,6 +8296,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.46180603E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.46180603E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.16407628E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -2.930988785010413E-013, "res2":  1.680392861300874E-011, 
+    "residm":  1.821179017460170E-015, "diffor":  1.536363540466089E-008, 
+}
+etotal    : -9.440966876780550E+000
+entropy   :  0.000000000000000E+000
+fermie    :  7.855008924619906E-002
+stress_tensor: !CartTensor
+- [ 2.461806031862556E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.461806031862565E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.164076279129542E-004, ]
+cartesian_forces: !CartForces
+- [-1.597587228654013E-021, -4.979621025090732E-021, -2.787797248996035E-005, ]
+- [ 1.597587228654013E-021,  4.979621025090733E-021,  2.787797248996035E-005, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -7008,8 +8412,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7055,6 +8459,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.82694892E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.82694892E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.01574951E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.234455382359556E-008, "res2":  1.093171827127156E-007, 
+    "residm":  9.304500242476454E-011, "diffor":  9.006784214589055E-008, 
+}
+etotal    : -9.414166383731230E+000
+entropy   :  0.000000000000000E+000
+fermie    :  5.552828165269295E-002
+stress_tensor: !CartTensor
+- [ 2.826948916744483E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.826948916744491E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.015749509169637E-004, ]
+cartesian_forces: !CartForces
+- [ 3.742495442842436E-029, -3.944209028925631E-029,  8.726037588757240E-013, ]
+- [-3.742495442842436E-029,  3.944209028925631E-029, -8.726037588757240E-013, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -7144,8 +8575,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7194,6 +8625,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  3.11471986E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.11471986E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.40949507E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.499422973618493E-013, "res2":  2.268227261785072E-011, 
+    "residm":  5.652371159193187E-015, "diffor":  3.193594931685589E-008, 
+}
+etotal    : -9.403821458850970E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.463711274467501E-002
+stress_tensor: !CartTensor
+- [ 3.114719863925408E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  3.114719863925414E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.409495066709654E-004, ]
+cartesian_forces: !CartForces
+- [-5.577740499120170E-022, -3.192905424970110E-022,  1.454117190513080E-005, ]
+- [ 5.577740499120170E-022,  3.192905424970110E-022, -1.454117190513080E-005, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -7299,8 +8757,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7349,6 +8807,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     126.750     126.749
   sigma(1 1)=  6.27156902E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.27156902E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.11843760E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  2.309263891220326E-014, "res2":  1.562749151583560E-013, 
+    "residm":  8.484791122195151E-009, "diffor":  6.607263830027757E-009, 
+}
+etotal    : -1.069185207266124E+001
+entropy   :  0.000000000000000E+000
+fermie    :  5.363095193881687E-002
+stress_tensor: !CartTensor
+- [ 6.271569019822717E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  6.271569019822743E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.118437595407992E-003, ]
+cartesian_forces: !CartForces
+- [ 2.673390872857793E-020, -5.648801714651975E-020,  1.307923322162441E-003, ]
+- [-2.673390872857793E-020,  5.648801714651975E-020, -1.307923322162441E-003, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -7460,6 +8945,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)= -9.23825844E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.30556188E-03  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -7.265299473147024E-013, "res2":  8.594219265203414E-012, 
+    "residm":  4.858159259480763E-015, "diffor":  2.294899672473038E-008, 
+}
+etotal    : -9.847779934411871E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.072866276891861E-001
+stress_tensor: !CartTensor
+- [-9.238258441678993E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -9.238258441678993E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.305561884779151E-003, ]
+cartesian_forces: !CartForces
+- [ 2.091699685958900E-020,  1.325184688246983E-020,  1.108144473907098E-004, ]
+- [-2.091699685958900E-020, -1.325184688246983E-020, -1.108144473907098E-004, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -7570,6 +9082,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)=  1.85788382E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.43255324E-04  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.421085471520200E-013, "res2":  8.307940834747743E-012, 
+    "residm":  9.395435758930811E-016, "diffor":  1.207519861770416E-008, 
+}
+etotal    : -9.463819318058404E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.045266672801526E-001
+stress_tensor: !CartTensor
+- [ 1.857883820452402E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.857883820452393E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.432553237296800E-004, ]
+cartesian_forces: !CartForces
+- [ 1.830479881956983E-019,  2.838777036935800E-020,  1.723602204303108E-003, ]
+- [-1.830479881956982E-019, -2.838777036935800E-020, -1.723602204303108E-003, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -7658,8 +9197,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7707,6 +9246,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.46180623E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.46180623E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.16407634E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.179678742526448E-013, "res2":  1.742492510514357E-011, 
+    "residm":  1.820741177168883E-015, "diffor":  1.545746054108756E-008, 
+}
+etotal    : -9.440966881745629E+000
+entropy   :  0.000000000000000E+000
+fermie    :  7.855008825833916E-002
+stress_tensor: !CartTensor
+- [ 2.461806230387583E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.461806230387587E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.164076339380391E-004, ]
+cartesian_forces: !CartForces
+- [-2.191487931007615E-021, -4.484324704399269E-022,  1.004855004404052E-005, ]
+- [ 2.191487931007615E-021,  4.484324704399269E-022, -1.004855004404052E-005, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -7796,8 +9362,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7843,6 +9409,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.82694892E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.82694892E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.01574951E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.234460356158706E-008, "res2":  1.093171827104705E-007, 
+    "residm":  9.304500242403606E-011, "diffor":  9.006784214770997E-008, 
+}
+etotal    : -9.414166383731255E+000
+entropy   :  0.000000000000000E+000
+fermie    :  5.552828165269215E-002
+stress_tensor: !CartTensor
+- [ 2.826948916744903E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.826948916744908E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.015749509170231E-004, ]
+cartesian_forces: !CartForces
+- [ 8.993882755570670E-031, -1.191736420937499E-030, -1.977169283753107E-014, ]
+- [-8.993882755570670E-031,  1.191736420937499E-030,  1.977169283753107E-014, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -7932,8 +9525,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -7982,6 +9575,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  3.11471998E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.11471998E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.40949519E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.428368700042483E-013, "res2":  2.252432603184522E-011, 
+    "residm":  5.407459665846549E-015, "diffor":  3.149953957868672E-008, 
+}
+etotal    : -9.403821461637136E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.463711112459460E-002
+stress_tensor: !CartTensor
+- [ 3.114719975654944E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  3.114719975654948E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.409495185853350E-004, ]
+cartesian_forces: !CartForces
+- [-2.802537772902721E-022,  6.311579798462925E-023,  4.586283725370074E-006, ]
+- [ 2.802537772902721E-022, -6.311579798462925E-023, -4.586283725370074E-006, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -8087,8 +9707,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8137,6 +9757,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     126.750     126.749
   sigma(1 1)=  6.29169540E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.29169540E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.12175325E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -7.105427357601002E-015, "res2":  1.463698773921506E-013, 
+    "residm":  2.678836891774169E-009, "diffor":  8.431935093287241E-009, 
+}
+etotal    : -1.069188376823620E+001
+entropy   :  0.000000000000000E+000
+fermie    :  5.340138342419370E-002
+stress_tensor: !CartTensor
+- [ 6.291695404920987E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  6.291695404920987E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.121753249925037E-003, ]
+cartesian_forces: !CartForces
+- [-3.456277204202115E-019,  9.082417665146135E-021,  1.118597757661478E-003, ]
+- [ 3.456277204202115E-019, -9.082417665146135E-021, -1.118597757661478E-003, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -8248,6 +9895,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)= -9.23812344E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.30556107E-03  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -7.158718062783009E-013, "res2":  8.386409594122615E-012, 
+    "residm":  4.815554797088928E-015, "diffor":  2.250363467300881E-008, 
+}
+etotal    : -9.847780127940542E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.072865023299502E-001
+stress_tensor: !CartTensor
+- [-9.238123437238033E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -9.238123437237990E-005,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.305561074204424E-003, ]
+cartesian_forces: !CartForces
+- [ 4.742643031594194E-021,  2.177770250886858E-021,  6.383909374062076E-005, ]
+- [-4.742643031594194E-021, -2.177770250886858E-021, -6.383909374062076E-005, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -8356,6 +10030,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(2 2)=  1.85844714E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.43239592E-04  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.140346649388448E-009, "res2":  2.490918470461772E-008, 
+    "residm":  4.559950531451686E-011, "diffor":  2.214534536716488E-008, 
+}
+etotal    : -9.463828702913016E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.045257576622941E-001
+stress_tensor: !CartTensor
+- [ 1.858447139034785E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.858447139034772E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.432395922628080E-004, ]
+cartesian_forces: !CartForces
+- [ 2.870703769922291E-020,  2.410201245790391E-020, -1.179197645321951E-003, ]
+- [-2.870703769922290E-020, -2.410201245790391E-020,  1.179197645321951E-003, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -8444,8 +10145,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.94918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8493,6 +10194,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.46180625E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.46180625E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.16407634E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.725000000000000E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.392841563254478E-013, "res2":  1.719928631414195E-011, 
+    "residm":  1.820863096374138E-015, "diffor":  1.542268718477698E-008, 
+}
+etotal    : -9.440966882393374E+000
+entropy   :  0.000000000000000E+000
+fermie    :  7.855008814013359E-002
+stress_tensor: !CartTensor
+- [ 2.461806254318956E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.461806254318948E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.164076344685523E-004, ]
+cartesian_forces: !CartForces
+- [-2.494593726103058E-022,  4.294385740065979E-022, -3.621976304833436E-006, ]
+- [ 2.494593726103058E-022, -4.294385740065980E-022,  3.621976304833436E-006, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -8582,8 +10310,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.88826
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8629,6 +10357,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  2.82694892E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.82694892E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.01574951E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.725000000000000E+001,  5.725000000000000E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.234456448173660E-008, "res2":  1.093171827064338E-007, 
+    "residm":  9.304500242661816E-011, "diffor":  9.006784216375359E-008, 
+}
+etotal    : -9.414166383731228E+000
+entropy   :  0.000000000000000E+000
+fermie    :  5.552828165269127E-002
+stress_tensor: !CartTensor
+- [ 2.826948916744845E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.826948916744847E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.015749509170158E-004, ]
+cartesian_forces: !CartForces
+- [-2.582078840807048E-032, -2.876552314992438E-032,  6.871876511723144E-016, ]
+- [ 2.582078840807048E-032,  2.876552314992438E-032, -6.871876511723144E-016, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -8718,8 +10473,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
          ecut(hartree)=      3.125   => boxcut(ratio)=   1.83104
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -8768,6 +10523,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   sigma(1 1)=  3.11471999E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.11471999E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.40949520E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.000000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+alpha_beta_gamma_angles: [ 5.724999999999999E+001,  5.724999999999999E+001,  5.724999999999999E+001, ]
+cutoff_energies: {"ecut":  2.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.179678742526448E-013, "res2":  2.247675276416721E-011, 
+    "residm":  5.331608793428216E-015, "diffor":  3.134877640713372E-008, 
+}
+etotal    : -9.403821461915342E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.463711095332005E-002
+stress_tensor: !CartTensor
+- [ 3.114719988892823E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  3.114719988892827E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.409495199002095E-004, ]
+cartesian_forces: !CartForces
+- [-6.386785500101770E-024, -1.719822552913478E-023,  1.446493727095330E-006, ]
+- [ 6.386785500101770E-024,  1.719822552913478E-023, -1.446493727095330E-006, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -9007,7 +10789,24 @@ P           mkmem           2
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -9021,11 +10820,11 @@ P           mkmem           2
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT: First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -9034,11 +10833,13 @@ P           mkmem           2
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -9046,24 +10847,15 @@ P           mkmem           2
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [4] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=         13.4  wall=         13.9
+- Proc.   0 individual time (sec): cpu=         13.8  wall=         14.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and 122 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.4  wall=         13.9
++Overall time at end (sec) : cpu=         13.8  wall=         14.1

@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h17 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 17h48 )
   
-- input  file    -> t45.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t45/t45.in
 - output file    -> t45.out
 - root for input  files -> t45i
 - root for output files -> t45o
@@ -834,8 +834,8 @@ P           mkmem           6
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -874,6 +874,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
   sigma(1 1)= -7.32693960E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -7.32693960E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -7.32693960E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  8.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -7.460698725481052E-014, "res2":  5.037139833988597E-017, 
+    "residm":  1.085479705552574E-008, "diffor": undef, 
+}
+etotal    : -7.568533124158529E+000
+entropy   :  0.000000000000000E+000
+fermie    :  1.172503002226129E+000
+stress_tensor: !CartTensor
+- [-7.326939597798569E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -7.326939597798566E-003,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000, -7.326939597798567E-003, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1006,8 +1033,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1101,7 +1128,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
-
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -1246,6 +1272,7 @@ data: !SigmaeeData |
        14    54.148     0.000    54.148    42.851    -1.524     0.000     1.000     0.000    -1.524   -12.821    41.326    43.012
 ...
 
+
  New Fermi energy :        6.112481E-01 Ha ,    1.663291E+01 eV
  New Exchange energy :    -6.706204E-01 Ha ,   -1.824851E+01 eV
 
@@ -1372,7 +1399,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
-
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -1517,6 +1543,7 @@ data: !SigmaeeData |
        14    54.148     0.000    43.012    43.821    -0.791     0.000     1.000     0.000    -0.791     0.018    43.030    43.030
 ...
 
+
  New Fermi energy :        6.273937E-01 Ha ,    1.707225E+01 eV
  New Exchange energy :    -6.909744E-01 Ha ,   -1.880237E+01 eV
 
@@ -1643,7 +1670,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
-
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -1788,6 +1814,7 @@ data: !SigmaeeData |
        14    54.148     0.000    43.030    43.827    -0.799     0.000     1.000     0.000    -0.799    -0.001    43.029    43.029
 ...
 
+
  New Fermi energy :        6.262954E-01 Ha ,    1.704237E+01 eV
  New Exchange energy :    -6.896837E-01 Ha ,   -1.876725E+01 eV
 
@@ -1914,7 +1941,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
-
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -2059,6 +2085,7 @@ data: !SigmaeeData |
        14    54.148     0.000    43.029    43.827    -0.798     0.000     1.000     0.000    -0.798     0.000    43.029    43.029
 ...
 
+
  New Fermi energy :        6.263759E-01 Ha ,    1.704456E+01 eV
  New Exchange energy :    -6.897823E-01 Ha ,   -1.876993E+01 eV
 
@@ -2185,7 +2212,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
-
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -2330,6 +2356,7 @@ data: !SigmaeeData |
        14    54.148     0.000    43.029    43.827    -0.798     0.000     1.000     0.000    -0.798    -0.000    43.029    43.029
 ...
 
+
  New Fermi energy :        6.263704E-01 Ha ,    1.704441E+01 eV
  New Exchange energy :    -6.897758E-01 Ha ,   -1.876975E+01 eV
 
@@ -2376,8 +2403,8 @@ data: !SigmaeeData |
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2419,6 +2446,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
   sigma(1 1)=  5.21746614E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  5.21746614E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.21746614E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  8.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -5.329070518200751E-014, "res2":  4.921595626879050E-017, 
+    "residm":  8.241714500892082E-016, "diffor": undef, 
+}
+etotal    : -1.107883474042351E+001
+entropy   :  0.000000000000000E+000
+fermie    :  5.700115038148843E-001
+stress_tensor: !CartTensor
+- [ 5.217466138801921E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  5.217466138801922E-003,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  5.217466138801923E-003, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2555,8 +2609,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2871,7 +2925,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
-
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -2954,6 +3007,7 @@ data: !SigmaeeData |
         2  31.905   0.000 -18.765   3.251   0.842  -0.187 -13.071 -13.071  18.835
         3  31.905   0.000 -18.765   3.264   0.843  -0.187 -13.060 -13.060  18.845
 ...
+
 
  New Fermi energy :        9.674939E-01 Ha ,    2.632685E+01 eV
 
@@ -3310,7 +3364,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
-
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -3454,6 +3507,7 @@ data: !SigmaeeData |
        13    54.148     0.000    43.028    53.146    -3.195    -6.413     0.781    -0.280    -9.719     0.398    43.426    43.539
        14    54.148     0.000    43.029    53.146    -3.194    -6.405     0.781    -0.280    -9.712     0.405    43.434    43.548
 ...
+
 
  New Fermi energy :        6.621090E-01 Ha ,    1.801690E+01 eV
  New Exchange energy :    -3.179601E+00 Ha ,   -8.652135E+01 eV
@@ -3730,8 +3784,8 @@ data: !SigmaeeData |
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6-C.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6-C.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6-C.fhi
 -    C  APE 1.0 : Troullier-Martins scheme, , llocal= 1
 -  6.00000   4.00000  20100127                znucl, zion, pspdat
     6    0    1    1       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3820,7 +3874,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
-
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -3844,6 +3897,7 @@ data: !SigmaeeData |
         4   6.700 -12.484 -16.026   4.553   0.832  -0.203 -11.643   0.841   7.541
         5  18.617 -10.726  -5.755  -4.204   0.858  -0.165 -10.068   0.658  19.275
 ...
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -4528,10 +4582,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         31.5  wall=         31.7
+- Proc.   0 individual time (sec): cpu=         35.3  wall=         35.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  97 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         34.8  wall=         35.0
++Overall time at end (sec) : cpu=         35.3  wall=         35.5

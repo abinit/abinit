@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h32 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 17h04 )
   
-- input  file    -> t36.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t36/t36.in
 - output file    -> t36.out
 - root for input  files -> t36i
 - root for output files -> t36o
@@ -547,8 +547,8 @@ P           mkmem           4
          ecut(hartree)=     27.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/c.pbe.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/c.pbe.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/c.pbe.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/c.pbe.fhi
 - OPIUM generated C potential
 -  6.00000   4.00000    110527                znucl, zion, pspdat
     6   11    1    1      1122   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -582,6 +582,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.222     511.190
   sigma(1 1)= -4.94019668E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -4.94019668E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -4.94019668E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  8.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+cutoff_energies: {"ecut":  2.700000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  1.669775429036235E-013, "res2":  1.283079144223734E-013, 
+    "residm":  2.950572901643574E-008, "diffor": undef, 
+}
+etotal    : -1.134291328055176E+001
+entropy   :  0.000000000000000E+000
+fermie    :  4.704310808916549E-001
+stress_tensor: !CartTensor
+- [-4.940196679891983E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -4.940196679891979E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000, -4.940196679891987E-004, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -687,6 +714,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.222     511.190
   prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  2.09447E-05
   prteigrs : nnsclo,ikpt=   30    4 max resid (incl. the buffer)=  3.87275E-07
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  8.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+cutoff_energies: {"ecut":  2.700000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  0.000000000000000E+000, "res2":  0.000000000000000E+000, 
+    "residm":  9.768781697040795E-013, "diffor":  0.000000000000000E+000, 
+}
+etotal    : -1.134291328055176E+001
+entropy   :  0.000000000000000E+000
+fermie    :  4.704310808916549E-001
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -696,7 +750,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.222     511.190
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   33.386E-08; max=  20.945E-06
+ Mean square residual over all n,k,spin=   35.034E-14; max=  97.688E-14
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.250000000000      0.250000000000      0.250000000000
@@ -739,8 +793,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.222     511.190
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/c.pbe.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/c.pbe.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/c.pbe.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/c.pbe.fhi
 - OPIUM generated C potential
 -  6.00000   4.00000    110527                znucl, zion, pspdat
     6   11    1    1      1122   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1371,7 +1425,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.222     511.190
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
-
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -1443,6 +1496,7 @@ data: !SigmaeeData |
         7    26.486   -15.855    26.486    42.341    -7.159    -6.233     1.000     0.000   -13.392     2.463    28.949    28.957
         8    27.981   -16.320    27.981    44.301    -7.058    -6.853     1.000     0.000   -13.911     2.409    30.390    30.401
 ...
+
 
  New Fermi energy :        5.966684E-01 Ha ,    1.623617E+01 eV
  New Exchange energy :    -3.095551E+00 Ha ,   -8.423422E+01 eV
@@ -2109,7 +2163,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
-
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -2181,6 +2234,7 @@ data: !SigmaeeData |
         7    26.486   -15.855    28.957    42.352    -7.196    -6.286     1.000     0.000   -13.482    -0.088    28.869    28.869
         8    27.981   -16.320    30.401    44.316    -7.107    -6.848     1.000     0.000   -13.956    -0.040    30.360    30.360
 ...
+
 
  New Fermi energy :        5.957943E-01 Ha ,    1.621239E+01 eV
  New Exchange energy :    -3.093177E+00 Ha ,   -8.416963E+01 eV
@@ -2847,7 +2901,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
-
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -2919,6 +2972,7 @@ data: !SigmaeeData |
         7    26.486   -15.855    28.869    42.351    -7.197    -6.048     1.000     0.000   -13.245     0.237    29.106    29.106
         8    27.981   -16.320    30.360    44.316    -7.110    -6.574     1.000     0.000   -13.683     0.272    30.632    30.633
 ...
+
 
  New Fermi energy :        5.962858E-01 Ha ,    1.622576E+01 eV
  New Exchange energy :    -3.093749E+00 Ha ,   -8.418519E+01 eV
@@ -3585,7 +3639,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
-
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -3657,6 +3710,7 @@ data: !SigmaeeData |
         7    26.486   -15.855    28.869    42.351    -7.197    -6.163     1.000     0.000   -13.359     0.122    28.991    28.991
         8    27.981   -16.320    30.360    44.316    -7.110    -6.705     1.000     0.000   -13.814     0.141    30.502    30.502
 ...
+
 
  New Fermi energy :        5.960251E-01 Ha ,    1.621867E+01 eV
  New Exchange energy :    -3.093749E+00 Ha ,   -8.418519E+01 eV
@@ -4114,10 +4168,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         18.2  wall=         18.3
+- Proc.   0 individual time (sec): cpu=         19.3  wall=         19.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  48 WARNINGs and  18 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.4  wall=         18.5
++Overall time at end (sec) : cpu=         19.3  wall=         19.7

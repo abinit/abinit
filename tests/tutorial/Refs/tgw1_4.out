@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h22 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 17h53 )
   
-- input  file    -> tgw1_4.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tgw1_2-tgw1_3-tgw1_4-tgw1_5/tgw1_4.in
 - output file    -> tgw1_4.out
 - root for input  files -> tgw1_4i
 - root for output files -> tgw1_4o
@@ -559,8 +559,8 @@ P           mkmem           1
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -758,7 +758,6 @@ P           mkmem           1
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
-
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -774,6 +773,7 @@ data: !SigmaeeData |
         6   8.445  -9.700  -3.222  -6.532   0.797  -0.255  -9.743  -0.042   8.403
         7   8.445  -9.700  -3.222  -6.532   0.797  -0.255  -9.743  -0.042   8.403
 ...
+
 
  New Fermi energy :        2.515829E-01 Ha ,    6.845920E+00 eV
 
@@ -986,7 +986,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
-
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -1002,6 +1001,7 @@ data: !SigmaeeData |
         6   8.445  -9.700  -3.222  -6.707   0.795  -0.258  -9.882  -0.181   8.264
         7   8.445  -9.700  -3.222  -6.707   0.795  -0.258  -9.882  -0.181   8.264
 ...
+
 
  New Fermi energy :        2.463948E-01 Ha ,    6.704743E+00 eV
 
@@ -1214,7 +1214,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
-
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -1230,6 +1229,7 @@ data: !SigmaeeData |
         6   8.445  -9.700  -3.222  -6.797   0.794  -0.260  -9.953  -0.253   8.193
         7   8.445  -9.700  -3.222  -6.797   0.794  -0.260  -9.953  -0.253   8.193
 ...
+
 
  New Fermi energy :        2.438588E-01 Ha ,    6.635735E+00 eV
 
@@ -1442,7 +1442,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
-
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -1458,6 +1457,7 @@ data: !SigmaeeData |
         6   8.445  -9.700  -3.222  -6.817   0.794  -0.260  -9.969  -0.269   8.177
         7   8.445  -9.700  -3.222  -6.817   0.794  -0.260  -9.969  -0.269   8.177
 ...
+
 
  New Fermi energy :        2.432729E-01 Ha ,    6.619792E+00 eV
 
@@ -1670,7 +1670,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
-
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -1686,6 +1685,7 @@ data: !SigmaeeData |
         6   8.445  -9.700  -3.222  -6.824   0.794  -0.260  -9.975  -0.274   8.171
         7   8.445  -9.700  -3.222  -6.824   0.794  -0.260  -9.975  -0.274   8.171
 ...
+
 
  New Fermi energy :        2.430349E-01 Ha ,    6.613315E+00 eV
 
@@ -2143,10 +2143,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         15.5  wall=         15.6
+- Proc.   0 individual time (sec): cpu=         17.2  wall=         17.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  44 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.5  wall=          9.6
+.Delivered  44 WARNINGs and  15 COMMENTs to log file.
++Overall time at end (sec) : cpu=         17.2  wall=         17.2

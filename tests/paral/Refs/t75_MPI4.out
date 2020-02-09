@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h52 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 18h17 )
   
-- input  file    -> t75.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t75_MPI4/t75.in
 - output file    -> t75_MPI4.out
 - root for input  files -> t75_MPI4i
 - root for output files -> t75_MPI4o
@@ -380,8 +380,8 @@ P           mkmem           1
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.05208
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/11na.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/11na.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/11na.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/11na.pspnc
 -  Troullier-Martins psp for element  Na        Mon Oct 31 11:14:49 EST 1994
 - 11.00000   1.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -423,6 +423,33 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
   sigma(1 1)=  2.16984330E-06  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.28120984E-06  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.28120984E-06  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+cutoff_energies: {"ecut":  6.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.188646514549418E-008, "res2":  1.463378008561500E-003, 
+    "residm":  2.010544053035869E-011, "diffor": undef, 
+}
+etotal    : -1.327769547400961E+001
+entropy   :  0.000000000000000E+000
+fermie    : -1.144251454437737E-001
+stress_tensor: !CartTensor
+- [ 2.169843303710621E-006,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  1.281209838108179E-006,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.281209838108179E-006, ]
+cartesian_forces: !CartForces
+- [-8.801779745864856E-004,  2.493454340593228E-021, -2.493454340593228E-021, ]
+- [ 8.801779745864856E-004, -2.493454340593228E-021,  2.493454340593228E-021, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -524,6 +551,33 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
  -2.0711E-03  6.8356E-03  2.3015E-02  2.6944E-02  2.9796E-02  3.3104E-02
   4.1133E-02  4.1133E-02  4.9141E-02
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+cutoff_energies: {"ecut":  6.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  0.000000000000000E+000, "res2":  0.000000000000000E+000, 
+    "residm":  7.882570129657961E-011, "diffor":  0.000000000000000E+000, 
+}
+etotal    : -1.327769547400961E+001
+entropy   :  0.000000000000000E+000
+fermie    : -1.144512287821339E-001
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -596,8 +650,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/11na.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/11na.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/11na.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/11na.pspnc
 -  Troullier-Martins psp for element  Na        Mon Oct 31 11:14:49 EST 1994
 - 11.00000   1.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -834,7 +888,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    4693.000    4693.000
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
-
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -854,6 +907,7 @@ data: !SigmaeeData |
         9     0.626    -1.655     0.626     2.281    -0.165    -0.879     1.000     0.000    -1.045     0.610     1.237     1.237
        10     0.733    -1.298     0.733     2.031    -0.090    -0.619     1.000     0.000    -0.708     0.589     1.322     1.322
 ...
+
 
  New Fermi energy :       -9.091731E-02 Ha ,   -2.473986E+00 eV
  New Exchange energy :    -1.946307E-01 Ha ,   -5.296171E+00 eV
@@ -1117,7 +1171,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies only
-
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -1137,6 +1190,7 @@ data: !SigmaeeData |
         9     0.626    -1.655     1.237     2.236    -0.156    -0.631     1.000     0.000    -0.787     0.213     1.449     1.445
        10     0.733    -1.298     1.322     2.055    -0.102    -0.508     1.000     0.000    -0.610     0.123     1.445     1.449
 ...
+
 
  New Fermi energy :       -9.064789E-02 Ha ,   -2.466655E+00 eV
  New Exchange energy :    -1.859966E-01 Ha ,   -5.061225E+00 eV
@@ -1474,10 +1528,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          6.1  wall=          6.3
+- Proc.   0 individual time (sec): cpu=          5.8  wall=          6.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.4  wall=         23.5
++Overall time at end (sec) : cpu=         23.3  wall=         23.5

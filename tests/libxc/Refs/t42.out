@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h17 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 17h48 )
   
-- input  file    -> t42.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t42/t42.in
 - output file    -> t42.out
 - root for input  files -> t42i
 - root for output files -> t42o
@@ -375,8 +375,8 @@ P           mkmem           6
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.15267
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -413,6 +413,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     154.531     154.481
   sigma(1 1)=  3.54246074E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.54246074E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.54246074E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  8.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.907985046680551E-014, "res2":  6.679025003970585E-019, 
+    "residm":  1.761055523356888E-012, "diffor": undef, 
+}
+etotal    : -1.192765006529811E+001
+entropy   :  0.000000000000000E+000
+fermie    :  4.780393235564000E-001
+stress_tensor: !CartTensor
+- [ 3.542460738413334E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  3.542460738413334E-003,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.542460738413336E-003, ]
+cartesian_forces: !CartForces
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -510,8 +537,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     154.531     154.481
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -614,7 +641,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     154.531     154.481
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
-
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -759,6 +785,7 @@ data: !SigmaeeData |
        14    40.065   -11.920    40.065    42.550    -0.817     0.000     1.000     0.000    -0.817     1.667    41.732    41.733
 ...
 
+
  New Fermi energy :        5.565693E-01 Ha ,    1.514502E+01 eV
  New Exchange energy :    -6.959723E-01 Ha ,   -1.893837E+01 eV
 
@@ -893,7 +920,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
-
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -1038,6 +1064,7 @@ data: !SigmaeeData |
        14    40.065   -11.920    41.733    42.547    -0.802     0.000     1.000     0.000    -0.802     0.012    41.745    41.745
 ...
 
+
  New Fermi energy :        5.595371E-01 Ha ,    1.522578E+01 eV
  New Exchange energy :    -6.995888E-01 Ha ,   -1.903678E+01 eV
 
@@ -1172,7 +1199,6 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
-
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -1316,6 +1342,7 @@ data: !SigmaeeData |
        13    40.065   -11.920    41.745    42.547    -0.803     0.000     1.000     0.000    -0.803    -0.001    41.744    41.744
        14    40.065   -11.920    41.745    42.547    -0.803     0.000     1.000     0.000    -0.803    -0.001    41.744    41.744
 ...
+
 
  New Fermi energy :        5.593498E-01 Ha ,    1.522068E+01 eV
  New Exchange energy :    -6.994196E-01 Ha ,   -1.903217E+01 eV
@@ -1696,10 +1723,10 @@ P           mkmem           6
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.1
+- Proc.   0 individual time (sec): cpu=          6.5  wall=          6.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.4  wall=          6.5
++Overall time at end (sec) : cpu=          6.5  wall=          6.6

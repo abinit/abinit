@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h24 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 16h38 )
   
-- input  file    -> t40.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t40/t40.in
 - output file    -> t40.out
 - root for input  files -> t40i
 - root for output files -> t40o
@@ -366,8 +366,8 @@ P           mkmem           1
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.06612
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -443,6 +443,94 @@ _setup2: Arith. and geom. avg. npw (full set) are    3824.000    3824.000
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
   maximum energy difference=  3.310E+02 exceeds toldfe=  1.000E-06
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :       63
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.520000000000000E+002
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.310127328848401E+002, "res2":  1.417191771132480E+003, 
+    "residm":  6.523943134485812E-001, "diffor": undef, 
+}
+etotal    : -3.310127328848401E+002
+entropy   :  0.000000000000000E+000
+fermie    :  8.819928504564921E-001
+stress_tensor: !CartTensor
+- [-1.917222587686554E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000, -2.009400220549596E-003,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000, -1.852009673315560E-003, ]
+cartesian_forces: !CartForces
+- [-4.405646923115700E-019,  4.680999855810432E-019,  5.507058653894625E-020, ]
+- [-4.405646923115700E-019,  4.680999855810432E-019,  5.507058653894625E-020, ]
+- [-4.405646923115700E-019,  4.680999855810432E-019,  5.507058653894625E-020, ]
+- [-4.405646923115700E-019,  4.680999855810432E-019,  5.507058653894625E-020, ]
+- [-4.405646923115700E-019,  4.680999855810432E-019,  5.507058653894625E-020, ]
+- [-4.405646923115700E-019,  4.680999855810432E-019,  5.507058653894625E-020, ]
+- [-4.405646923115700E-019,  4.680999855810432E-019,  5.507058653894625E-020, ]
+- [-1.257462071352404E-001, -1.239067064171455E-001, -1.380678513770671E-001, ]
+- [-2.333570587793582E-002,  1.102412256741912E-002,  1.721915477169908E-002, ]
+- [ 9.633209651301069E-003, -2.675595933615454E-002, -7.996583264835828E-003, ]
+- [-3.559076399447575E-002,  2.122828532722198E-002,  1.082665983331568E-003, ]
+- [ 4.915332143799606E-002, -1.250367195745600E-002,  1.331182206803121E-002, ]
+- [-2.643596662446844E-002,  1.391772938017201E-002,  1.039621289862659E-002, ]
+- [ 7.566451700742457E-003, -1.760270679520189E-002,  1.553284530651262E-002, ]
+- [ 4.873294571190520E-003, -1.377644975513740E-002,  1.510076205381843E-002, ]
+- [ 4.063574802652316E-002, -9.119288295718113E-003,  9.539300515077530E-003, ]
+- [-4.063574802652316E-002, -9.119288295718113E-003, -9.539300515077530E-003, ]
+- [ 4.063574802652316E-002,  9.119288295718113E-003, -9.539300515077530E-003, ]
+- [-4.063574802652316E-002,  9.119288295718113E-003,  9.539300515077530E-003, ]
+- [ 7.293244494534921E-002, -1.295037247968659E-002, -5.999646723101400E-003, ]
+- [-7.293244494534921E-002, -1.295037247968659E-002,  5.999646723101400E-003, ]
+- [ 7.293244494534921E-002,  1.295037247968659E-002,  5.999646723101400E-003, ]
+- [-7.293244494534921E-002,  1.295037247968659E-002, -5.999646723101400E-003, ]
+- [ 2.279330272684089E-002, -1.149342026126421E-002, -6.852855804286206E-003, ]
+- [-2.279330272684089E-002,  1.149342026126421E-002, -6.852855804286206E-003, ]
+- [ 5.933523274069299E-002,  1.470940241455755E-004, -4.090021933504992E-003, ]
+- [-5.933523274069299E-002, -1.470940241455745E-004, -4.090021933504992E-003, ]
+- [ 2.279330272684089E-002,  1.149342026126421E-002,  6.852855804286206E-003, ]
+- [-2.279330272684089E-002, -1.149342026126421E-002,  6.852855804286206E-003, ]
+- [ 5.933523274069299E-002, -1.470940241455745E-004,  4.090021933504992E-003, ]
+- [-5.933523274069299E-002,  1.470940241455755E-004,  4.090021933504992E-003, ]
+- [ 3.751588388066511E-003,  2.019077777112738E-002, -1.920572036178139E-002, ]
+- [ 4.948310748672014E-003, -1.073802626558527E-002, -1.774130338981970E-002, ]
+- [-3.751588388066510E-003, -2.019077777112738E-002, -1.920572036178139E-002, ]
+- [-4.948310748672016E-003,  1.073802626558527E-002, -1.774130338981970E-002, ]
+- [-3.751588388066511E-003,  2.019077777112738E-002,  1.920572036178139E-002, ]
+- [-4.948310748672016E-003, -1.073802626558527E-002,  1.774130338981970E-002, ]
+- [ 3.751588388066510E-003, -2.019077777112738E-002,  1.920572036178139E-002, ]
+- [ 4.948310748672015E-003,  1.073802626558527E-002,  1.774130338981970E-002, ]
+- [ 3.559076399447575E-002, -2.122828532722198E-002,  1.082665983331568E-003, ]
+- [-9.633209651301069E-003,  2.675595933615454E-002, -7.996583264835828E-003, ]
+- [ 2.333570587793582E-002, -1.102412256741912E-002,  1.721915477169908E-002, ]
+- [ 1.257462071352404E-001,  1.239067064171455E-001, -1.380678513770671E-001, ]
+- [-4.873294571190522E-003,  1.377644975513740E-002,  1.510076205381843E-002, ]
+- [-7.566451700742459E-003,  1.760270679520189E-002,  1.553284530651262E-002, ]
+- [ 2.643596662446844E-002, -1.391772938017201E-002,  1.039621289862659E-002, ]
+- [-4.915332143799606E-002,  1.250367195745600E-002,  1.331182206803121E-002, ]
+- [ 2.643596662446844E-002,  1.391772938017201E-002, -1.039621289862659E-002, ]
+- [-4.915332143799606E-002, -1.250367195745600E-002, -1.331182206803121E-002, ]
+- [-4.873294571190522E-003, -1.377644975513740E-002, -1.510076205381843E-002, ]
+- [-7.566451700742459E-003, -1.760270679520189E-002, -1.553284530651262E-002, ]
+- [ 2.333570587793582E-002,  1.102412256741912E-002, -1.721915477169908E-002, ]
+- [ 1.257462071352404E-001, -1.239067064171455E-001,  1.380678513770671E-001, ]
+- [ 3.559076399447575E-002,  2.122828532722198E-002, -1.082665983331568E-003, ]
+- [-9.633209651301069E-003, -2.675595933615454E-002,  7.996583264835828E-003, ]
+- [ 7.566451700742457E-003,  1.760270679520189E-002, -1.553284530651262E-002, ]
+- [ 4.873294571190520E-003,  1.377644975513740E-002, -1.510076205381843E-002, ]
+- [ 4.915332143799606E-002,  1.250367195745600E-002, -1.331182206803121E-002, ]
+- [-2.643596662446844E-002, -1.391772938017201E-002, -1.039621289862659E-002, ]
+- [ 9.633209651301069E-003,  2.675595933615454E-002,  7.996583264835828E-003, ]
+- [-3.559076399447575E-002, -2.122828532722198E-002, -1.082665983331568E-003, ]
+- [-1.257462071352404E-001,  1.239067064171455E-001,  1.380678513770671E-001, ]
+- [-2.333570587793582E-002, -1.102412256741912E-002, -1.721915477169908E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1596,7 +1684,24 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1610,11 +1715,11 @@ P           mkmem           1
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT: First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1623,11 +1728,13 @@ P           mkmem           1
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -1635,24 +1742,15 @@ P           mkmem           1
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [4] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=         25.3  wall=         25.5
+- Proc.   0 individual time (sec): cpu=         26.8  wall=         27.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.3  wall=         25.5
++Overall time at end (sec) : cpu=         26.8  wall=         27.1

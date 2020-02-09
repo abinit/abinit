@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h28 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 16h49 )
   
-- input  file    -> t03.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t03/t03.in
 - output file    -> t03.out
 - root for input  files -> t03i
 - root for output files -> t03o
@@ -124,8 +124,8 @@ P           mkmem           1
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.13758
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -175,6 +175,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(1 1)=  4.50708168E-04  sigma(3 2)= -1.87088390E-07
   sigma(2 2)=  4.49942343E-04  sigma(3 1)=  1.03807862E-07
   sigma(3 3)=  4.50835324E-04  sigma(2 1)= -2.74664006E-08
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -6.217248937900877E-014, "res2":  2.218997026459305E-012, 
+    "residm":  1.638936222248813E-007, "diffor":  2.295946934308124E-009, 
+}
+etotal    : -9.881368826115246E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.767827928958761E-002
+stress_tensor: !CartTensor
+- [ 4.507081684917938E-004, -2.746640055573129E-008,  1.038078624442215E-007, ]
+- [-2.746640055573129E-008,  4.499423425490705E-004, -1.870883902634347E-007, ]
+- [ 1.038078624442215E-007, -1.870883902634347E-007,  4.508353236914629E-004, ]
+cartesian_forces: !CartForces
+- [ 5.033877272758757E-004,  3.116116300077220E-004, -2.379651442354355E-004, ]
+- [ 6.280634431892109E-004, -1.255073074868571E-003, -3.329878281654679E-004, ]
+- [-6.305922493445997E-004,  2.572951981997341E-003,  4.727615359773371E-004, ]
+- [-5.008589211204868E-004, -1.629490537136491E-003,  9.819143642356628E-005, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -234,6 +263,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(1 1)=  4.50685460E-04  sigma(3 2)= -1.88988980E-07
   sigma(2 2)=  4.49983448E-04  sigma(3 1)=  9.87591068E-08
   sigma(3 3)=  4.50831078E-04  sigma(2 1)= -5.87336835E-08
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -5.861977570020827E-014, "res2":  1.930705025744620E-012, 
+    "residm":  2.031794605537564E-007, "diffor":  8.069742101326008E-009, 
+}
+etotal    : -9.881358099203256E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.767583335533994E-002
+stress_tensor: !CartTensor
+- [ 4.506854600733882E-004, -5.873368352676774E-008,  9.875910675206040E-008, ]
+- [-5.873368352676774E-008,  4.499834483718001E-004, -1.889889802292710E-007, ]
+- [ 9.875910675206040E-008, -1.889889802292710E-007,  4.508310784319223E-004, ]
+cartesian_forces: !CartForces
+- [ 5.083659455694097E-004,  2.915687256217885E-004, -2.015452977792695E-004, ]
+- [ 6.389822691113018E-004, -1.203246147720410E-003, -3.362614939787923E-004, ]
+- [-5.924328602775638E-004,  2.478071908371181E-003,  4.641936204033163E-004, ]
+- [-5.549153544031477E-004, -1.566394486272559E-003,  7.361317135474548E-005, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -299,6 +357,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(2 2)=  4.50074092E-04  sigma(3 1)=  8.92841554E-08
   sigma(3 3)=  4.50825319E-04  sigma(2 1)= -1.32580270E-07
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  1.243449787580175E-014, "res2":  1.706717354121920E-013, 
+    "residm":  1.614768539662913E-008, "diffor":  1.973867871452387E-009, 
+}
+etotal    : -9.881337292807338E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.767109393666886E-002
+stress_tensor: !CartTensor
+- [ 4.506276587373916E-004, -1.325802700881454E-007,  8.928415537154000E-008, ]
+- [-1.325802700881454E-007,  4.500740916043202E-004, -1.968275021918390E-007, ]
+- [ 8.928415537154000E-008, -1.968275021918390E-007,  4.508253193356915E-004, ]
+cartesian_forces: !CartForces
+- [ 5.244356465764009E-004,  2.653984186141299E-004, -1.090920387024407E-004, ]
+- [ 6.728540366042877E-004, -1.096145472166859E-003, -3.522077477569692E-004, ]
+- [-4.915895584919025E-004,  2.261208795318010E-003,  4.487978360188164E-004, ]
+- [-7.057001246887863E-004, -1.430461741765281E-003,  1.250195044059352E-005, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -361,6 +448,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(1 1)=  4.50640309E-04  sigma(3 2)= -1.92188425E-07
   sigma(2 2)=  4.50058932E-04  sigma(3 1)=  9.01390876E-08
   sigma(3 3)=  4.50823750E-04  sigma(2 1)= -1.14290725E-07
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -2.842170943040401E-014, "res2":  8.608645850878252E-013, 
+    "residm":  5.762073277011898E-008, "diffor":  6.495066910249935E-009, 
+}
+etotal    : -9.881339860635391E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.767167078168375E-002
+stress_tensor: !CartTensor
+- [ 4.506403085376505E-004, -1.142907251870738E-007,  9.013908764598472E-008, ]
+- [-1.142907251870738E-007,  4.500589322747300E-004, -1.921884245166614E-007, ]
+- [ 9.013908764598472E-008, -1.921884245166614E-007,  4.508237497980493E-004, ]
+cartesian_forces: !CartForces
+- [ 5.196915003524263E-004,  2.589660923046619E-004, -1.298421860561528E-004, ]
+- [ 6.614191755176199E-004, -1.107673254703529E-003, -3.449592609676254E-004, ]
+- [-5.164251173669805E-004,  2.297023614500688E-003,  4.491442427504302E-004, ]
+- [-6.646855585030658E-004, -1.448316452101822E-003,  2.565720427334795E-005, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -426,6 +542,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(2 2)=  4.50257295E-04  sigma(3 1)=  8.20961117E-08
   sigma(3 3)=  4.50815031E-04  sigma(2 1)= -2.81732395E-07
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -7.460698725481052E-014, "res2":  1.437187949280766E-012, 
+    "residm":  2.669655912789448E-008, "diffor":  5.834790308409995E-009, 
+}
+etotal    : -9.881316341325549E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.766612292281465E-002
+stress_tensor: !CartTensor
+- [ 4.504526775885888E-004, -2.817323949831438E-007,  8.209611169458189E-008, ]
+- [-2.817323949831438E-007,  4.502572951834212E-004, -2.229311535800702E-007, ]
+- [ 8.209611169458189E-008, -2.229311535800702E-007,  4.508150313752219E-004, ]
+cartesian_forces: !CartForces
+- [ 5.744532613842018E-004,  2.876106703297894E-004,  1.324364415094570E-004, ]
+- [ 7.900816020992888E-004, -9.087610163713978E-004, -4.209528799222410E-004, ]
+- [-2.094868854008289E-004,  1.788463046184047E-003,  4.316759703978397E-004, ]
+- [-1.155047978082662E-003, -1.167312700142439E-003, -1.431595319850557E-004, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -489,6 +634,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(1 1)=  4.50537021E-04  sigma(3 2)= -2.13377736E-07
   sigma(2 2)=  4.50179066E-04  sigma(3 1)=  8.32700366E-08
   sigma(3 3)=  4.50822426E-04  sigma(2 1)= -2.25243632E-07
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  3.730349362740526E-014, "res2":  2.237081935085649E-013, 
+    "residm":  8.137514453791850E-009, "diffor":  2.259252699309509E-009, 
+}
+etotal    : -9.881321583305015E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.766746151484066E-002
+stress_tensor: !CartTensor
+- [ 4.505370207897881E-004, -2.252436318787864E-007,  8.327003660016149E-008, ]
+- [-2.252436318787864E-007,  4.501790658907664E-004, -2.133777360235050E-007, ]
+- [ 8.327003660016149E-008, -2.133777360235050E-007,  4.508224257838732E-004, ]
+cartesian_forces: !CartForces
+- [ 5.518385380720982E-004,  2.743772555123974E-004,  2.390927126337645E-005, ]
+- [ 7.361698904681932E-004, -9.895192501813718E-004, -3.891227548566060E-004, ]
+- [-3.373319772788765E-004,  1.997459718394786E-003,  4.385258954994152E-004, ]
+- [-9.506764512614149E-004, -1.282317723725812E-003, -7.331241190618561E-005, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -554,6 +728,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(2 2)=  4.50226017E-04  sigma(3 1)=  8.62186421E-08
   sigma(3 3)=  4.50825746E-04  sigma(2 1)= -2.83654732E-07
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  8.881784197001252E-015, "res2":  1.280122281607704E-013, 
+    "residm":  1.203916384425636E-008, "diffor":  2.462874714934116E-009, 
+}
+etotal    : -9.881322928207968E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.766767711457204E-002
+stress_tensor: !CartTensor
+- [ 4.504711813760433E-004, -2.836547318794930E-007,  8.621864208049769E-008, ]
+- [-2.836547318794930E-007,  4.502260170082290E-004, -2.334760727727113E-007, ]
+- [ 8.621864208049769E-008, -2.334760727727113E-007,  4.508257463444662E-004, ]
+cartesian_forces: !CartForces
+- [ 5.694562863999745E-004,  3.233030860790117E-004,  1.071982274105024E-004, ]
+- [ 7.935043598491817E-004, -9.683173674000717E-004, -4.243521340131132E-004, ]
+- [-2.301487961442994E-004,  1.880996077288853E-003,  4.426835184137170E-004, ]
+- [-1.132811850104857E-003, -1.235981795967793E-003, -1.255296118111062E-004, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -616,6 +819,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(1 1)=  4.50476651E-04  sigma(3 2)= -2.29650160E-07
   sigma(2 2)=  4.50225344E-04  sigma(3 1)=  8.51668738E-08
   sigma(3 3)=  4.50823931E-04  sigma(2 1)= -2.76908668E-07
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.048050535246148E-013, "res2":  1.026716808888957E-013, 
+    "residm":  8.259817162061152E-009, "diffor":  2.797977810380103E-009, 
+}
+etotal    : -9.881321515989926E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.766736174874737E-002
+stress_tensor: !CartTensor
+- [ 4.504766511688786E-004, -2.769086675997624E-007,  8.516687378364714E-008, ]
+- [-2.769086675997624E-007,  4.502253441013525E-004, -2.296501599364449E-007, ]
+- [ 8.516687378364714E-008, -2.296501599364449E-007,  4.508239310236893E-004, ]
+cartesian_forces: !CartForces
+- [ 5.686106324722497E-004,  3.121753800885012E-004,  1.010491421882302E-004, ]
+- [ 7.856830650286248E-004, -9.618440712988686E-004, -4.197823978682737E-004, ]
+- [-2.402023789047392E-004,  1.880775050550834E-003,  4.406300999142233E-004, ]
+- [-1.114091318596135E-003, -1.231106359340466E-003, -1.218968442341798E-004, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -681,6 +913,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(2 2)=  4.50286191E-04  sigma(3 1)=  1.04861101E-07
   sigma(3 3)=  4.50835307E-04  sigma(2 1)= -3.94145102E-07
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.375077994860476E-014, "res2":  5.206276339827444E-013, 
+    "residm":  1.673371379197439E-008, "diffor":  4.836295477051063E-009, 
+}
+etotal    : -9.881345533362680E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.767249991167215E-002
+stress_tensor: !CartTensor
+- [ 4.503250092333111E-004, -3.941451018836302E-007,  1.048611008508226E-007, ]
+- [-3.941451018836302E-007,  4.502861913966239E-004, -2.899045670962812E-007, ]
+- [ 1.048611008508226E-007, -2.899045670962812E-007,  4.508353067810805E-004, ]
+cartesian_forces: !CartForces
+- [ 5.966719106118564E-004,  4.752025008089992E-004,  2.565294835188400E-004, ]
+- [ 9.270973523725839E-004, -9.990288280157869E-004, -5.038772776249165E-004, ]
+- [-1.870204171570057E-005,  1.747157002158511E-003,  4.648476050044008E-004, ]
+- [-1.505067221268740E-003, -1.223330674951724E-003, -2.174998108983243E-004, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -742,6 +1003,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(1 1)=  4.50331997E-04  sigma(3 2)= -2.88921185E-07
   sigma(2 2)=  4.50281857E-04  sigma(3 1)=  1.04274850E-07
   sigma(3 3)=  4.50836271E-04  sigma(2 1)= -3.91601133E-07
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.197442310920451E-014, "res2":  7.993478257020078E-012, 
+    "residm":  1.194295270942811E-008, "diffor":  1.445588484897189E-008, 
+}
+etotal    : -9.881344993209733E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.767239915932136E-002
+stress_tensor: !CartTensor
+- [ 4.503319972431004E-004, -3.916011330783387E-007,  1.042748497834207E-007, ]
+- [-3.916011330783387E-007,  4.502818568238346E-004, -2.889211846521417E-007, ]
+- [ 1.042748497834207E-007, -2.889211846521417E-007,  4.508362713020787E-004, ]
+cartesian_forces: !CartForces
+- [ 5.945354419903178E-004,  4.727355787606970E-004,  2.497828513923346E-004, ]
+- [ 9.237007990501862E-004, -1.002435507281294E-003, -5.012731799671465E-004, ]
+- [-2.656913361174307E-005,  1.758599963012495E-003,  4.647455738775231E-004, ]
+- [-1.491667107428761E-003, -1.228900034491898E-003, -2.132552453027112E-004, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -807,6 +1097,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(2 2)=  4.50299428E-04  sigma(3 1)=  1.22587379E-07
   sigma(3 3)=  4.50846067E-04  sigma(2 1)= -4.62115245E-07
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  2.486899575160351E-014, "res2":  1.584397349604815E-013, 
+    "residm":  4.210523362355403E-009, "diffor":  2.148029773583332E-009, 
+}
+etotal    : -9.881369359590900E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.767770364448093E-002
+stress_tensor: !CartTensor
+- [ 4.502371540133739E-004, -4.621152454912742E-007,  1.225873792804856E-007, ]
+- [-4.621152454912742E-007,  4.502994275152421E-004, -3.357003286284606E-007, ]
+- [ 1.225873792804856E-007, -3.357003286284606E-007,  4.508460672393493E-004, ]
+cartesian_forces: !CartForces
+- [ 6.018000652458064E-004,  5.926451530062582E-004,  3.279852771772147E-004, ]
+- [ 1.016510476040068E-003, -1.062334566482840E-003, -5.519348936353846E-004, ]
+- [ 9.910361906626840E-005,  1.737188002792467E-003,  4.846968316700691E-004, ]
+- [-1.717414160352143E-003, -1.267498589315885E-003, -2.607472152118992E-004, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -870,6 +1189,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(1 1)=  4.50354850E-04  sigma(3 2)= -2.60950791E-07
   sigma(2 2)=  4.50296455E-04  sigma(3 1)=  9.57872037E-08
   sigma(3 3)=  4.50821045E-04  sigma(2 1)= -3.52403736E-07
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.907985046680551E-014, "res2":  2.535659578283212E-013, 
+    "residm":  1.088116187470522E-009, "diffor":  2.501422162719952E-009, 
+}
+etotal    : -9.881331526521967E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.766934884539432E-002
+stress_tensor: !CartTensor
+- [ 4.503548503679781E-004, -3.524037355319833E-007,  9.578720367447310E-008, ]
+- [-3.524037355319833E-007,  4.502964550525429E-004, -2.609507910628735E-007, ]
+- [ 9.578720367447310E-008, -2.609507910628735E-007,  4.508210446796700E-004, ]
+cartesian_forces: !CartForces
+- [ 6.069918418264984E-004,  3.944352687104092E-004,  2.326911379537976E-004, ]
+- [ 8.699334722030523E-004, -9.323332999072735E-004, -4.795307830080359E-004, ]
+- [-7.659473751964721E-005,  1.699037568428210E-003,  4.505190409349283E-004, ]
+- [-1.400330576509904E-003, -1.161139537231345E-003, -2.036793958806901E-004, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -935,6 +1283,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(2 2)=  4.50302545E-04  sigma(3 1)=  1.72848627E-07
   sigma(3 3)=  4.50878483E-04  sigma(2 1)= -6.23964134E-07
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -6.750155989720952E-014, "res2":  1.850511108057138E-012, 
+    "residm":  3.828835033302393E-009, "diffor":  4.896035909703923E-009, 
+}
+etotal    : -9.881438231039064E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.769289416108691E-002
+stress_tensor: !CartTensor
+- [ 4.500337310875604E-004, -6.239641338827939E-007,  1.728486274311694E-007, ]
+- [-6.239641338827939E-007,  4.503025454762760E-004, -4.603382592935170E-007, ]
+- [ 1.728486274311694E-007, -4.603382592935170E-007,  4.508784827709541E-004, ]
+cartesian_forces: !CartForces
+- [ 5.942365371799052E-004,  8.761293249757569E-004,  4.622903675918161E-004, ]
+- [ 1.224563594811127E-003, -1.249790620105596E-003, -6.539148022610810E-004, ]
+- [ 3.480555139721283E-004,  1.794894420554320E-003,  5.333015454221269E-004, ]
+- [-2.166855645963160E-003, -1.421233125424482E-003, -3.416771107528619E-004, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -997,6 +1374,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(1 1)=  4.50064164E-04  sigma(3 2)= -4.43834998E-07
   sigma(2 2)=  4.50300403E-04  sigma(3 1)=  1.65540195E-07
   sigma(3 3)=  4.50875751E-04  sigma(2 1)= -6.03773006E-07
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.776356839400250E-015, "res2":  8.742545769153951E-013, 
+    "residm":  8.593573849611354E-009, "diffor":  8.067044860999954E-009, 
+}
+etotal    : -9.881428562261689E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.769077593287001E-002
+stress_tensor: !CartTensor
+- [ 4.500641640536793E-004, -6.037730060028192E-007,  1.655401951614132E-007, ]
+- [-6.037730060028192E-007,  4.503004029440779E-004, -4.438349984413054E-007, ]
+- [ 1.655401951614132E-007, -4.438349984413054E-007,  4.508757508426642E-004, ]
+cartesian_forces: !CartForces
+- [ 5.934517375497731E-004,  8.413586494252214E-004,  4.435793134188289E-004, ]
+- [ 1.198977030260466E-003, -1.228836126376580E-003, -6.405645250682017E-004, ]
+- [ 3.158044728842435E-004,  1.792682213349996E-003,  5.273076223591666E-004, ]
+- [-2.108233240694482E-003, -1.405204736398638E-003, -3.303224107097938E-004, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1062,6 +1468,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(2 2)=  4.50287747E-04  sigma(3 1)=  2.04155462E-07
   sigma(3 3)=  4.50906037E-04  sigma(2 1)= -7.22188080E-07
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -2.131628207280301E-014, "res2":  2.435862462901543E-013, 
+    "residm":  4.793314520086347E-010, "diffor":  1.294707790522147E-009, 
+}
+etotal    : -9.881482555844602E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.770281237266055E-002
+stress_tensor: !CartTensor
+- [ 4.499281209235826E-004, -7.221880800208510E-007,  2.041554618607287E-007, ]
+- [-7.221880800208510E-007,  4.502877468837128E-004, -5.410470777156163E-007, ]
+- [ 2.041554618607287E-007, -5.410470777156163E-007,  4.509060373240009E-004, ]
+cartesian_forces: !CartForces
+- [ 5.747903707079370E-004,  1.039969949603004E-003,  5.192062910853211E-004, ]
+- [ 1.342951144393622E-003, -1.376613508176748E-003, -7.039225208818421E-004, ]
+- [ 4.755975047280624E-004,  1.871868976242648E-003,  5.606112620941059E-004, ]
+- [-2.393339019829621E-003, -1.535225417668904E-003, -3.758950322975849E-004, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1125,6 +1560,35 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
   sigma(1 1)=  4.49871656E-04  sigma(3 2)= -5.85772160E-07
   sigma(2 2)=  4.50278519E-04  sigma(3 1)=  2.21502003E-07
   sigma(3 3)=  4.50921891E-04  sigma(2 1)= -7.75487865E-07
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        4
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  1.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -7.105427357601002E-014, "res2":  3.930491398221187E-014, 
+    "residm":  5.495655154310932E-010, "diffor":  4.100140392135354E-010, 
+}
+etotal    : -9.881507231799640E+000
+entropy   :  0.000000000000000E+000
+fermie    :  3.770835597198760E-002
+stress_tensor: !CartTensor
+- [ 4.498716556434708E-004, -7.754878647322569E-007,  2.215020028077718E-007, ]
+- [-7.754878647322569E-007,  4.502785194789324E-004, -5.857721597695350E-007, ]
+- [ 2.215020028077718E-007, -5.857721597695350E-007,  4.509218907999869E-004, ]
+cartesian_forces: !CartForces
+- [ 5.628449376100617E-004,  1.125714032760071E-003,  5.475085113584061E-004, ]
+- [ 1.405040732217410E-003, -1.444191100642695E-003, -7.291047446975519E-004, ]
+- [ 5.416381382487927E-004,  1.914942018970768E-003,  5.745853469686276E-004, ]
+- [-2.509523808076265E-003, -1.596464951088144E-003, -3.929891136294817E-004, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1338,7 +1802,24 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1352,11 +1833,11 @@ P           mkmem           1
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT: First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1365,11 +1846,13 @@ P           mkmem           1
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -1377,24 +1860,15 @@ P           mkmem           1
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [4] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=         16.6  wall=         20.3
+- Proc.   0 individual time (sec): cpu=         16.8  wall=         19.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.6  wall=         20.3
++Overall time at end (sec) : cpu=         16.8  wall=         19.3

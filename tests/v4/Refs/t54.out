@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ANADDB 
+.Version 9.0.0 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h27 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 16h47 )
   
 
 ================================================================================
@@ -741,10 +741,10 @@ Mode  6   ( 355.64 cm-1)
            -0.000000000      -0.144954404      -0.000000001
            -0.000000000      -0.000000001      -0.144954404
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
+- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.2
 
 ================================================================================
 
-+Total cpu time      0.120  and wall time      0.123 sec
++Total cpu time      0.146  and wall time      0.150 sec
 
  anaddb : the run completed succesfully.

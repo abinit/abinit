@@ -1,5 +1,5 @@
 
-.Version 8.11.14 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Jan 2020.
-- ( at 21h20 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 16h50 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v5_t64/t64.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t64/t64.in
 - output file    -> t64.out
 - root for input  files -> t64i
 - root for output files -> t64o
@@ -498,8 +498,8 @@ P           mkmem6          4
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.13111
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -516,8 +516,8 @@ P           mkmem6          4
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/08o_001023.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/08o_001023.pspfhi
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/08o_001023.pspfhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/08o_001023.pspfhi
 - O, fhi98PP: TM-type, LDA PerdewWang, l=2 local
 -  8.00000   6.00000      1023                znucl, zion, pspdat
     6    7    2    2       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -552,6 +552,40 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
   sigma(1 1)=  4.84839346E-03  sigma(3 2)= -8.14965444E-10
   sigma(2 2)=  4.84839486E-03  sigma(3 1)= -1.41156156E-09
   sigma(3 3)=  4.70198335E-03  sigma(2 1)= -1.21323001E-09
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        9
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  4.800000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  1.199999999997457E+002, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  1.199999999997457E+002, ]
+cutoff_energies: {"ecut":  6.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -6.258744633669266E-010, "res2":  2.194251749716725E-008, 
+    "residm":  6.438625790720486E-011, "diffor": undef, 
+}
+etotal    : -9.939702963107318E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.813028460985825E-001
+stress_tensor: !CartTensor
+- [ 4.848393455832285E-003, -1.213230006150792E-009, -1.411561555626720E-009, ]
+- [-1.213230006150792E-009,  4.848394856816188E-003, -8.149654441229903E-010, ]
+- [-1.411561555626720E-009, -8.149654441229903E-010,  4.701983353780676E-003, ]
+cartesian_forces: !CartForces
+- [ 3.518176586995810E-004, -6.093660598707244E-004, -1.541976423090495E-018, ]
+- [ 3.538974492612305E-004,  6.108777083454799E-004,  1.033277255249523E-010, ]
+- [-7.059843386607109E-004, -1.045327223571083E-006, -1.033277286089052E-010, ]
+- [-5.138879568156926E-002,  7.237723175354246E-002, -5.821982318404889E-002, ]
+- [ 8.837663874839589E-002,  8.312051077287278E-003, -5.821788230688436E-002, ]
+- [-3.699185071463239E-002, -8.069190752820336E-002, -5.821674461465565E-002, ]
+- [-3.698612351305564E-002,  8.069261840712637E-002,  5.821982318404889E-002, ]
+- [-5.138676676464563E-002, -7.238038871893965E-002,  5.821788230688436E-002, ]
+- [ 8.837716715620694E-002, -8.310071312064297E-003,  5.821674461465565E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -694,8 +728,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -712,8 +746,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/08o_001023.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/08o_001023.pspfhi
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/08o_001023.pspfhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/08o_001023.pspfhi
 - O, fhi98PP: TM-type, LDA PerdewWang, l=2 local
 -  8.00000   6.00000      1023                znucl, zion, pspdat
     6    7    2    2       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1083,7 +1117,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
-
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.250, ]
 spin       : 1
@@ -1095,6 +1128,7 @@ data: !SigmaeeData |
        24   4.806 -16.240 -19.536   3.338   0.837  -0.195 -16.205   0.035   4.841
        25   6.924 -12.256  -8.574  -1.819   0.859  -0.165 -10.657   1.600   8.524
 ...
+
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1116,8 +1150,8 @@ data: !SigmaeeData |
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.13111
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1134,8 +1168,8 @@ data: !SigmaeeData |
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/08o_001023.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/08o_001023.pspfhi
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/08o_001023.pspfhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/08o_001023.pspfhi
 - O, fhi98PP: TM-type, LDA PerdewWang, l=2 local
 -  8.00000   6.00000      1023                znucl, zion, pspdat
     6    7    2    2       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1169,6 +1203,40 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
   sigma(1 1)=  4.84839831E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  4.84839831E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.70195977E-03  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        9
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  4.800000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  1.199999999997457E+002, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  1.199999999997457E+002, ]
+cutoff_energies: {"ecut":  6.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.976303565243143E-010, "res2":  3.643048190964235E-009, 
+    "residm":  8.687831050545403E-011, "diffor": undef, 
+}
+etotal    : -9.939702963080464E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.813024750570122E-001
+stress_tensor: !CartTensor
+- [ 4.848398306134333E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  4.848398306200895E-003,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.701959772321336E-003, ]
+cartesian_forces: !CartForces
+- [ 3.505447878784570E-004, -6.071613829370554E-004,  1.541976423138280E-018, ]
+- [ 3.505447878784570E-004,  6.071613829370528E-004,  1.541976423090495E-018, ]
+- [-7.010895757569139E-004, -1.348444793061335E-018,  1.541976423090495E-018, ]
+- [-5.139674157681206E-002,  7.237323018375776E-002, -5.822495698739431E-002, ]
+- [ 8.837542668115772E-002,  8.324268785612363E-003, -5.822495698739431E-002, ]
+- [-3.697868510434565E-002, -8.069749896937010E-002, -5.822495698739431E-002, ]
+- [-3.697868510434567E-002,  8.069749896937012E-002,  5.822495698739430E-002, ]
+- [-5.139674157681207E-002, -7.237323018375776E-002,  5.822495698739431E-002, ]
+- [ 8.837542668115772E-002, -8.324268785612366E-003,  5.822495698739430E-002, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1311,8 +1379,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1329,8 +1397,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
              1    1.849886
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/08o_001023.pspfhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/08o_001023.pspfhi
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/08o_001023.pspfhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/08o_001023.pspfhi
 - O, fhi98PP: TM-type, LDA PerdewWang, l=2 local
 -  8.00000   6.00000      1023                znucl, zion, pspdat
     6    7    2    2       473   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1648,7 +1716,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
-
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.250, ]
 spin       : 1
@@ -1660,6 +1727,7 @@ data: !SigmaeeData |
        24   4.806 -16.240 -19.536   3.337   0.837  -0.195 -16.206   0.034   4.840
        25   6.924 -12.256  -8.580  -1.818   0.859  -0.165 -10.661   1.596   8.520
 ...
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2157,10 +2225,10 @@ P           mkmem6          4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         34.7  wall=         34.9
+- Proc.   0 individual time (sec): cpu=         38.0  wall=         42.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         32.8  wall=         33.0
++Overall time at end (sec) : cpu=         38.0  wall=         42.4

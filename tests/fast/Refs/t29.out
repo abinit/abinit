@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h17 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 18h06 )
   
-- input  file    -> t29.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/fast_t27-t28-t29/t29.in
 - output file    -> t29.out
 - root for input  files -> t27o
 - root for output files -> t29o
@@ -140,8 +140,8 @@ P           mkmem           4
          ecut(hartree)=      2.990   => boxcut(ratio)=   2.00281
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -190,6 +190,39 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
  scprqt:  WARNING -
   nstep=    5 was not enough SCF cycles to converge;
   maximum residual=  1.070E-11 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        8
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  3.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.990000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.670088067839970E-009, "res2":  1.137368315436482E-008, 
+    "residm":  1.069565125005740E-011, "diffor": undef, 
+}
+etotal    : -3.519156517804321E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.890133033951289E-001
+stress_tensor: !CartTensor
+- [ 3.747139982343344E-004, -8.524985566912575E-013,  9.871610519372081E-013, ]
+- [-8.524985566912575E-013,  3.746964490555281E-004, -1.631231004482737E-006, ]
+- [ 9.871610519372081E-013, -1.631231004482737E-006,  3.746964489894316E-004, ]
+cartesian_forces: !CartForces
+- [-1.322439663924050E-003,  1.482337722262247E-010, -7.528230951005539E-011, ]
+- [ 3.264455998757656E-004,  2.195430174608710E-004,  2.195430959749446E-004, ]
+- [-1.732616235980020E-004,  5.034450124784326E-012, -5.738874489950504E-012, ]
+- [ 3.264456500524789E-004, -2.195431057476749E-004, -2.195430451320746E-004, ]
+- [ 9.728158016567709E-005,  6.286839285912099E-011, -3.623004637147337E-011, ]
+- [ 3.241234432772243E-004, -2.160018469537493E-004,  2.160018289553436E-004, ]
+- [ 9.728166654527354E-005, -5.062987708287811E-011, -7.057779004488221E-012, ]
+- [ 3.241233476056323E-004,  2.160017697338152E-004, -2.160017554892041E-004, ]
+...
 
  bonds_lgth_angles : about to open file t29o_TIMA_GEO
 
@@ -269,6 +302,39 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
   sigma(1 1)=  3.74713977E-04  sigma(3 2)= -1.63121218E-06
   sigma(2 2)=  3.74696375E-04  sigma(3 1)= -6.64117046E-13
   sigma(3 3)=  3.74696375E-04  sigma(2 1)=  5.63579662E-13
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        8
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  3.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.990000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.519156517799241E+001, "res2":  2.635697640761698E-008, 
+    "residm":  3.789181297954340E-015, "diffor": undef, 
+}
+etotal    : -3.519156517799241E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.890132850489546E-001
+stress_tensor: !CartTensor
+- [ 3.747139774909482E-004,  5.635796617466234E-013, -6.641170463778338E-013, ]
+- [ 5.635796617466234E-013,  3.746963752292687E-004, -1.631212175566003E-006, ]
+- [-6.641170463778338E-013, -1.631212175566003E-006,  3.746963751884923E-004, ]
+cartesian_forces: !CartForces
+- [-1.321942465073215E-003, -3.952071206742412E-011,  5.649926199367158E-011, ]
+- [ 3.264465614771690E-004,  2.192962462749282E-004,  2.192961910175319E-004, ]
+- [-1.737921492211703E-004,  1.889090465420244E-011, -2.316360590750726E-011, ]
+- [ 3.264465656291261E-004, -2.192961735597338E-004, -2.192962907877899E-004, ]
+- [ 9.730249633432462E-005, -9.098835837049678E-011,  2.527132041553060E-012, ]
+- [ 3.241182456797777E-004, -2.157434591836094E-004,  2.157434914717648E-004, ]
+- [ 9.730248944904790E-005,  6.099203783865783E-012,  4.897195089266054E-011, ]
+- [ 3.241182557249405E-004,  2.157434919873770E-004, -2.157434765362457E-004, ]
+...
 
  bonds_lgth_angles : about to open file t29o_TIMB_GEO
 
@@ -360,6 +426,39 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
   nstep=    5 was not enough SCF cycles to converge;
   maximum residual=  6.090E-14 exceeds tolwfr=  1.000E-14
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        8
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  3.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.990000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -9.471534667682135E-012, "res2":  6.744402678202353E-011, 
+    "residm":  6.089997508246687E-014, "diffor": undef, 
+}
+etotal    : -3.519156618649544E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.889999371539683E-001
+stress_tensor: !CartTensor
+- [ 3.747139448088672E-004,  6.961478229348798E-015, -1.402003423268952E-014, ]
+- [ 6.961478229348798E-015,  3.746989972369821E-004, -1.505049180752949E-006, ]
+- [-1.402003423268952E-014, -1.505049180752949E-006,  3.746989971946167E-004, ]
+cartesian_forces: !CartForces
+- [-1.219774591071491E-003, -1.136919766540166E-011,  5.681084415561390E-012, ]
+- [ 3.011184545435987E-004,  2.023076073572625E-004,  2.023076059498204E-004, ]
+- [-1.600300308190813E-004,  8.563169276691179E-013, -4.560194744705434E-013, ]
+- [ 3.011184526649327E-004, -2.023076035962002E-004, -2.023076050299698E-004, ]
+- [ 8.964581087731867E-005, -1.526203879591964E-012, -4.380008271772669E-013, ]
+- [ 2.991380436624411E-004, -1.992881804668942E-004,  1.992881809378297E-004, ]
+- [ 8.964581088441089E-005,  8.351172409280323E-013,  7.873748163197009E-013, ]
+- [ 2.991380492578703E-004,  1.992881879097992E-004, -1.992881874321193E-004, ]
+...
+
  bonds_lgth_angles : about to open file t29o_TIMC_GEO
 
  Integrated electronic density in atomic spheres:
@@ -449,6 +548,39 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
  scprqt:  WARNING -
   nstep=    5 was not enough SCF cycles to converge;
   maximum residual=  1.933E-13 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        8
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  3.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.990000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.041122909053229E-011, "res2":  2.066247863199141E-010, 
+    "residm":  1.933474552150775E-013, "diffor": undef, 
+}
+etotal    : -3.519156437558321E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.890232285399929E-001
+stress_tensor: !CartTensor
+- [ 3.747139768412786E-004, -2.965572819809006E-014,  4.577910011672301E-014, ]
+- [-2.965572819809006E-014,  3.746943426368809E-004, -1.724969681401644E-006, ]
+- [ 4.577910011672301E-014, -1.724969681401644E-006,  3.746943425944912E-004, ]
+cartesian_forces: !CartForces
+- [-1.398073928351111E-003,  3.717952969523981E-011, -2.413861637354414E-011, ]
+- [ 3.452794262352062E-004,  2.321476511790010E-004,  2.321476561802258E-004, ]
+- [-1.833798133672505E-004, -2.771906207553689E-012,  1.826108741872210E-012, ]
+- [ 3.452794305440425E-004, -2.321476615423346E-004, -2.321476565424413E-004, ]
+- [ 1.027683683197993E-004,  4.919369117018005E-012,  1.826383382067632E-012, ]
+- [ 3.426790842211033E-004, -2.281822916001017E-004,  2.281822905458421E-004, ]
+- [ 1.027683683199628E-004, -2.766960408075320E-012, -3.238064492739004E-012, ]
+- [ 3.426790640782470E-004,  2.281822654034032E-004, -2.281822664594379E-004, ]
+...
 
  bonds_lgth_angles : about to open file t29o_TIM1_GEO
 
@@ -540,6 +672,39 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
   nstep=    5 was not enough SCF cycles to converge;
   maximum residual=  2.828E-13 exceeds tolwfr=  1.000E-14
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        8
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  3.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.990000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -4.476419235288631E-011, "res2":  3.043187898949377E-010, 
+    "residm":  2.828254904990542E-013, "diffor": undef, 
+}
+etotal    : -3.519156654248265E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.889949480410221E-001
+stress_tensor: !CartTensor
+- [ 3.747139419774706E-004,  7.977515641458956E-015, -1.431471179280425E-014, ]
+- [ 7.977515641458956E-015,  3.746999132861474E-004, -1.457914457301402E-006, ]
+- [-1.431471179280425E-014, -1.457914457301402E-006,  3.746999132437334E-004, ]
+cartesian_forces: !CartForces
+- [-1.181541415554619E-003, -1.162718723751393E-011,  6.507817418478868E-012, ]
+- [ 2.916605982778954E-004,  1.959128877919504E-004,  1.959128863197127E-004, ]
+- [-1.550405444546533E-004,  8.662062916716870E-013, -4.974672879351774E-013, ]
+- [ 2.916605965907494E-004, -1.959128842150792E-004, -1.959128856892190E-004, ]
+- [ 8.682828490564425E-005, -1.533523519458536E-012, -4.886580705552994E-013, ]
+- [ 2.898020946803386E-004, -1.930792613073250E-004,  1.930792617277255E-004, ]
+- [ 8.682828490452535E-005,  8.639098185587379E-013,  8.629446863929308E-013, ]
+- [ 2.898021006501192E-004,  1.930792691610484E-004, -1.930792687428561E-004, ]
+...
+
  bonds_lgth_angles : about to open file t29o_TIM2_GEO
 
  Integrated electronic density in atomic spheres:
@@ -629,6 +794,39 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
  scprqt:  WARNING -
   nstep=    5 was not enough SCF cycles to converge;
   maximum residual=  1.025E-13 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        8
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  3.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.990000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.620747980268789E-011, "res2":  1.108325896422565E-010, 
+    "residm":  1.024804956015192E-013, "diffor": undef, 
+}
+etotal    : -3.519156767429974E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.889778959027584E-001
+stress_tensor: !CartTensor
+- [ 3.747139211454505E-004,  5.575238596821262E-015, -9.525350948797710E-015, ]
+- [ 5.575238596821262E-015,  3.747028226460289E-004, -1.296768245438818E-006, ]
+- [-9.525350948797710E-015, -1.296768245438818E-006,  3.747028226036739E-004, ]
+cartesian_forces: !CartForces
+- [-1.050968169963857E-003, -7.730273988396918E-012,  4.533353639806553E-012, ]
+- [ 2.593328863939410E-004,  1.741252751252322E-004,  1.741252741235384E-004, ]
+- [-1.378962012316214E-004,  5.716341996505676E-013, -3.431891733186054E-013, ]
+- [ 2.593328853409490E-004, -1.741252728083533E-004, -1.741252738113679E-004, ]
+- [ 7.723665678547344E-005, -1.021918260267356E-012, -3.403528196415925E-013, ]
+- [ 2.578626409312023E-004, -1.718835448713900E-004,  1.718835451324993E-004, ]
+- [ 7.723665678496146E-005,  5.727932266770968E-013,  6.078946842397820E-013, ]
+- [ 2.578626449589516E-004,  1.718835501622760E-004, -1.718835499023761E-004, ]
+...
 
  bonds_lgth_angles : about to open file t29o_TIM3_GEO
 
@@ -720,6 +918,39 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
   nstep=    5 was not enough SCF cycles to converge;
   maximum residual=  8.162E-14 exceeds tolwfr=  1.000E-14
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        8
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  3.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.990000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.301714291912504E-011, "res2":  8.840305752340132E-011, 
+    "residm":  8.161836208892798E-014, "diffor": undef, 
+}
+etotal    : -3.519156857324994E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.889626733623527E-001
+stress_tensor: !CartTensor
+- [ 3.747139054092742E-004,  7.108115258602586E-015, -1.270995800449036E-014, ]
+- [ 7.108115258602586E-015,  3.747051338108839E-004, -1.152835909542395E-006, ]
+- [-1.270995800449036E-014, -1.152835909542395E-006,  3.747051337684977E-004, ]
+cartesian_forces: !CartForces
+- [-9.343233786811716E-004, -1.031327609906765E-011,  5.780318259475617E-012, ]
+- [ 2.304775960857113E-004,  1.546881619069462E-004,  1.546881605948553E-004, ]
+- [-1.225914575881232E-004,  7.624282887194410E-013, -4.364110986079060E-013, ]
+- [ 2.304775945911762E-004, -1.546881587298436E-004, -1.546881600441632E-004, ]
+- [ 6.866422672097089E-005, -1.360494139121076E-012, -4.339794962771596E-013, ]
+- [ 2.293155934308223E-004, -1.529164267489105E-004,  1.529164271180134E-004, ]
+- [ 6.866422672088679E-005,  7.635738878270794E-013,  7.731652091141059E-013, ]
+- [ 2.293155987197273E-004,  1.529164337195759E-004, -1.529164333517983E-004, ]
+...
+
  bonds_lgth_angles : about to open file t29o_TIM4_GEO
 
  Integrated electronic density in atomic spheres:
@@ -809,6 +1040,39 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
  scprqt:  WARNING -
   nstep=    5 was not enough SCF cycles to converge;
   maximum residual=  6.451E-14 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        8
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  3.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.990000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.023181539494544E-011, "res2":  7.018594597661017E-011, 
+    "residm":  6.451273843449224E-014, "diffor": undef, 
+}
+etotal    : -3.519156928445531E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.889491322007701E-001
+stress_tensor: !CartTensor
+- [ 3.747138930001571E-004,  6.234555556812676E-015, -1.108384802033576E-014, ]
+- [ 6.234555556812676E-015,  3.747069622443042E-004, -1.024741960054754E-006, ]
+- [-1.108384802033576E-014, -1.024741960054754E-006,  3.747069622018555E-004, ]
+cartesian_forces: !CartForces
+- [-8.305163635325458E-004, -8.991569685669607E-012,  5.066432924683168E-012, ]
+- [ 2.048115985843949E-004,  1.374150514288998E-004,  1.374150502822087E-004, ]
+- [-1.089653266158943E-004,  6.639239697535458E-013, -3.819460285862495E-013, ]
+- [ 2.048115972907112E-004, -1.374150486680774E-004, -1.374150498155684E-004, ]
+- [ 6.103576977923454E-005, -1.185898685150915E-012, -3.791068598132729E-013, ]
+- [ 2.038934750472761E-004, -1.360151356139190E-004,  1.360151359339954E-004, ]
+- [ 6.103576977902850E-005,  6.650183039632709E-013,  6.765396956806828E-013, ]
+- [ 2.038934796677948E-004,  1.360151417016227E-004, -1.360151413825554E-004, ]
+...
 
  bonds_lgth_angles : about to open file t29o_TIM5_GEO
 
@@ -900,6 +1164,39 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
   nstep=    5 was not enough SCF cycles to converge;
   maximum residual=  5.093E-14 exceeds tolwfr=  1.000E-14
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        8
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  3.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.990000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -8.185452315956354E-012, "res2":  5.561916337456190E-011, 
+    "residm":  5.093062260758488E-014, "diffor": undef, 
+}
+etotal    : -3.519156984645379E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.889370995085834E-001
+stress_tensor: !CartTensor
+- [ 3.747138832083161E-004,  5.616102623028644E-015, -9.971625268344110E-015, ]
+- [ 5.616102623028644E-015,  3.747084071479228E-004, -9.108635590655397E-007, ]
+- [-9.971625268344110E-015, -9.108635590655397E-007,  3.747084071055695E-004, ]
+cartesian_forces: !CartForces
+- [-7.382303919803056E-004, -8.088640797865845E-012,  4.564867117382058E-012, ]
+- [ 1.820079112089837E-004,  1.220759959698626E-004,  1.220759949382884E-004, ]
+- [-9.685698841781077E-005,  5.965199309780869E-013, -3.436236582917599E-013, ]
+- [ 1.820079100475431E-004, -1.220759934885630E-004, -1.220759945213605E-004, ]
+- [ 5.425331676672245E-005, -1.066288954039470E-012, -3.412065990532958E-013, ]
+- [ 1.812824607243095E-004, -1.209699343137632E-004,  1.209699346009350E-004, ]
+- [ 5.425331676681718E-005,  5.982954896024535E-013,  6.081523344094185E-013, ]
+- [ 1.812824648837404E-004,  1.209699397925779E-004, -1.209699395060521E-004, ]
+...
+
  bonds_lgth_angles : about to open file t29o_TIM6_GEO
 
  Integrated electronic density in atomic spheres:
@@ -990,6 +1287,39 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
   nstep=    5 was not enough SCF cycles to converge;
   maximum residual=  4.016E-14 exceeds tolwfr=  1.000E-14
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        8
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  3.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.990000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -6.288303211476887E-012, "res2":  4.301918081071410E-011, 
+    "residm":  4.016271761798750E-014, "diffor": undef, 
+}
+etotal    : -3.519157029050422E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.889264077133970E-001
+stress_tensor: !CartTensor
+- [ 3.747138784081923E-004,  5.003906317996861E-015, -8.863682640579167E-015, ]
+- [ 5.003906317996861E-015,  3.747095513056948E-004, -8.096436322033537E-007, ]
+- [-8.863682640579167E-015, -8.096436322033537E-007,  3.747095512633277E-004, ]
+cartesian_forces: !CartForces
+- [-6.561918379343969E-004, -7.191018758764306E-012,  4.067715076659974E-012, ]
+- [ 1.617468499090758E-004,  1.084560529141849E-004,  1.084560519980859E-004, ]
+- [-8.609319991302882E-005,  5.291334372358420E-013, -3.051157486251023E-013, ]
+- [ 1.617468488796487E-004, -1.084560507136664E-004, -1.084560516303247E-004, ]
+- [ 4.822203325409194E-005, -9.465172894272682E-013, -3.040857285898591E-013, ]
+- [ 1.611736344253124E-004, -1.075821937251487E-004,  1.075821939793629E-004, ]
+- [ 4.822203325391686E-005,  5.324843566549362E-013,  5.407069767815468E-013, ]
+- [ 1.611736381253799E-004,  1.075821986005484E-004, -1.075821983463446E-004, ]
+...
+
  bonds_lgth_angles : about to open file t29o_TIM7_GEO
 
  Integrated electronic density in atomic spheres:
@@ -1079,6 +1409,39 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
  scprqt:  WARNING -
   nstep=    5 was not enough SCF cycles to converge;
   maximum residual=  3.169E-14 exceeds tolwfr=  1.000E-14
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        8
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  3.200000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  2.990000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -4.973799150320701E-012, "res2":  3.304242350445724E-011, 
+    "residm":  3.168807837566529E-014, "diffor": undef, 
+}
+etotal    : -3.519157064134720E+001
+entropy   :  0.000000000000000E+000
+fermie    :  1.889169073392955E-001
+stress_tensor: !CartTensor
+- [ 3.747138603820145E-004,  4.464320585915448E-015, -7.891875256229688E-015, ]
+- [ 4.464320585915448E-015,  3.747104509237259E-004, -7.197112918957447E-007, ]
+- [-7.891875256229688E-015, -7.197112918957447E-007,  3.747104508813033E-004, ]
+cartesian_forces: !CartForces
+- [-5.833084005004670E-004, -6.400385483060286E-012,  3.626879243106312E-012, ]
+- [ 1.437499320697929E-004,  9.637441452369820E-005,  9.637441370607139E-005, ]
+- [-7.650934616162619E-005,  4.716571174450612E-013, -2.727393259988830E-013, ]
+- [ 1.437499311559065E-004, -9.637441256590976E-005, -9.637441338369894E-005, ]
+- [ 4.286245251941441E-005, -8.423661403651526E-013, -2.698290717559370E-013, ]
+- [ 1.432964875500639E-004, -9.568328579255610E-005,  9.568328601959052E-005, ]
+- [ 4.286245251948401E-005,  4.728425773581036E-013,  4.815868570884913E-013, ]
+- [ 1.432964908474316E-004,  9.568329013301958E-005, -9.568328990786066E-005, ]
+...
 
  bonds_lgth_angles : about to open file t29o_TIM8_GEO
 
@@ -1368,7 +1731,24 @@ P           mkmem           4
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1382,11 +1762,11 @@ P           mkmem           4
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT: First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1395,11 +1775,13 @@ P           mkmem           4
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -1407,24 +1789,15 @@ P           mkmem           4
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [4] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=         39.2  wall=         39.3
+- Proc.   0 individual time (sec): cpu=         32.6  wall=         33.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         39.2  wall=         39.3
++Overall time at end (sec) : cpu=         32.6  wall=         33.0
