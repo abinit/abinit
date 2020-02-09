@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h18 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 20h11 )
   
-- input  file    -> tsv4_80.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Test_suite/seq_tsv4_80/tsv4_80.in
 - output file    -> tsv4_80.out
 - root for input  files -> tsv4_80i
 - root for output files -> tsv4_80o
@@ -343,8 +343,8 @@ P          mk1mem30        64
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.04949
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/trunk__gonze3/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/trunk__gonze3/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -361,8 +361,8 @@ P          mk1mem30        64
              1    1.353815
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/trunk__gonze3/tests/Psps_for_tests/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/trunk__gonze3/tests/Psps_for_tests/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -463,6 +463,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   sigma(1 1)=  2.56850954E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.56850954E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.56850954E-04  sigma(2 1)=  0.00000000E+00
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  8.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+cutoff_energies: {"ecut":  3.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -2.540190280342358E-013, "res2":  2.191367960145013E-013, 
+    "residm":  1.057452514513828E-015, "diffor": undef, 
+}
+etotal    : -1.010011767654432E+001
+entropy   :  0.000000000000000E+000
+fermie    :  8.275631156998013E-002
+stress_tensor: !CartTensor
+- [ 2.568509536851902E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.568509536851906E-004,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  2.568509536851906E-004, ]
+cartesian_forces: !CartForces
+- [-1.238011464565304E-031, -2.476022929130609E-032,  2.476022929130609E-032, ]
+- [ 1.238011464565304E-031,  2.476022929130609E-032, -2.476022929130609E-032, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -655,6 +682,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
   sigma(2 2)=  2.56070815E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.56070815E-04  sigma(2 1)=  0.00000000E+00
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  8.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+cutoff_energies: {"ecut":  3.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae":  1.776356839400250E-015, "res2":  3.105849048703950E-016, 
+    "residm":  7.682722989193479E-006, "diffor": undef, 
+}
+etotal    : -1.009229523860338E+001
+entropy   :  0.000000000000000E+000
+fermie    :  8.282117315165811E-002
+stress_tensor: !CartTensor
+- [ 2.565579412844659E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  2.560708150286957E-004,  3.225888056251452E-005, ]
+- [ 0.000000000000000E+000,  3.225888056251452E-005,  2.560708150286957E-004, ]
+cartesian_forces: !CartForces
+- [ 1.816687877527923E-003, -3.135211328993155E-020,  3.135211328993155E-020, ]
+- [-1.816687877527923E-003,  3.135211328993155E-020, -3.135211328993155E-020, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -771,8 +825,8 @@ Constant unreduced E calculation  - final values:
          ecut(hartree)=      3.000   => boxcut(ratio)=   1.88258
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/trunk__gonze3/tests/Psps_for_tests/13al.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/trunk__gonze3/tests/Psps_for_tests/13al.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/13al.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/13al.pspnc
 -  Troullier-Martins psp for element  Al        Thu Oct 27 17:31:05 EDT 1994
 - 13.00000   3.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -789,8 +843,8 @@ Constant unreduced E calculation  - final values:
              1    1.353815
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/trunk__gonze3/tests/Psps_for_tests/33as.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/trunk__gonze3/tests/Psps_for_tests/33as.pspnc
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/33as.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Psps_for_tests/33as.pspnc
 -  Troullier-Martins psp for element  As        Thu Oct 27 17:37:14 EDT 1994
 - 33.00000   5.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1555,59 +1609,61 @@ P          mk1mem30        64
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         18.9        0.31      0.005
-- Total wall clock time (s,m,h):         20.3        0.34      0.006
+- Total cpu        time (s,m,h):         18.9        0.32      0.005
+- Total wall clock time (s,m,h):         21.6        0.36      0.006
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           18.9, wall_time =           20.3
+- cpu_time =           18.9, wall_time =           21.6
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   6.558  34.8      6.549  32.3         105001      -1.00        1.00       1.00
-- pspini                         1.509   8.0      1.514   7.5              3      -1.00        1.00       1.00
-- fourwf%(G->r)                  1.271   6.7      1.208   6.0          36864      -1.00        1.05       1.05
-- nonlop(apply)                  1.237   6.6      1.218   6.0          86569      -1.00        1.02       1.02
-- dfpt_vtorho-kpt loop           1.205   6.4      1.266   6.2             72      -1.00        0.95       0.95
-- projbd                         0.841   4.5      0.848   4.2         169522      -1.00        0.99       0.99
-- getghc-other                   0.830   4.4      0.849   4.2             -1      -1.00        0.98       0.98
-- dfpt_vtowfk(contrib)           0.552   2.9      0.584   2.9             -1      -1.00        0.95       0.95
-- nonlop(forces)                 0.460   2.4      0.476   2.3          27648      -1.00        0.97       0.97
-- getgh1c_setup                  0.353   1.9      0.365   1.8           4608      -1.00        0.97       0.97
-- ewald                          0.165   0.9      0.164   0.8              2      -1.00        1.01       1.01
-- dfpt_scfcv  (1)                0.162   0.9      0.164   0.8              6      -1.00        0.99       0.99
-- timing timab                   0.115   0.6      0.115   0.6              9      -1.00        1.00       1.00
-- others (121)                   0.518   2.7      0.493   2.4             -1      -1.00        1.05       1.05
+- fourwf%(pot)                   6.563  34.6      6.591  30.6         105001      -1.00        1.00       1.00
+- pspini                         1.498   7.9      1.499   6.9              3      -1.00        1.00       1.00
+- fourwf%(G->r)                  1.282   6.8      1.265   5.9          36864      -1.00        1.01       1.01
+- nonlop(apply)                  1.251   6.6      1.235   5.7          86569      -1.00        1.01       1.01
+- dfpt_vtorho-kpt loop           1.140   6.0      1.123   5.2             72      -1.00        1.02       1.02
+- getghc-other                   0.868   4.6      0.870   4.0             -1      -1.00        1.00       1.00
+- projbd                         0.833   4.4      0.816   3.8         169522      -1.00        1.02       1.02
+- dfpt_vtowfk(contrib)           0.561   3.0      0.551   2.6             -1      -1.00        1.02       1.02
+- nonlop(forces)                 0.468   2.5      0.489   2.3          27648      -1.00        0.96       0.96
+- getgh1c_setup                  0.341   1.8      0.321   1.5           4608      -1.00        1.06       1.06
+- ewald                          0.166   0.9      0.167   0.8              2      -1.00        0.99       0.99
+- dfpt_scfcv  (1)                0.163   0.9      0.164   0.8              6      -1.00        0.99       0.99
+- invars2                        0.132   0.7      0.135   0.6              3      -1.00        0.98       0.98
+- timing timab                   0.115   0.6      0.115   0.5              9      -1.00        1.00       1.00
+- others (120)                   0.421   2.2      0.439   2.0             -1      -1.00        0.96       0.96
 -<END_TIMER>
 -
-- subtotal                      15.775  83.7     15.813  77.9                                  1.00       1.00
+- subtotal                      15.801  83.4     15.780  73.2                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          18.9, wall_time =          20.3
+- cpu_time =          18.9, wall_time =          21.6
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   6.558  34.8      6.549  32.3         105001      -1.00        1.00       1.00
-- pspini                         1.509   8.0      1.514   7.5              3      -1.00        1.00       1.00
-- fourwf%(G->r)                  1.271   6.7      1.208   6.0          36864      -1.00        1.05       1.05
-- nonlop(apply)                  1.237   6.6      1.218   6.0          86569      -1.00        1.02       1.02
-- dfpt_vtorho-kpt loop           1.205   6.4      1.266   6.2             72      -1.00        0.95       0.95
-- projbd                         0.841   4.5      0.848   4.2         169522      -1.00        0.99       0.99
-- getghc-other                   0.830   4.4      0.849   4.2             -1      -1.00        0.98       0.98
-- dfpt_vtowfk(contrib)           0.552   2.9      0.584   2.9             -1      -1.00        0.95       0.95
-- nonlop(forces)                 0.460   2.4      0.476   2.3          27648      -1.00        0.97       0.97
-- getgh1c_setup                  0.353   1.9      0.365   1.8           4608      -1.00        0.97       0.97
-- ewald                          0.165   0.9      0.164   0.8              2      -1.00        1.01       1.01
-- dfpt_scfcv  (1)                0.162   0.9      0.164   0.8              6      -1.00        0.99       0.99
-- timing timab                   0.115   0.6      0.115   0.6              9      -1.00        1.00       1.00
-- others (121)                   0.518   2.7      0.493   2.4             -1      -1.00        1.05       1.05
+- fourwf%(pot)                   6.563  34.6      6.591  30.6         105001      -1.00        1.00       1.00
+- pspini                         1.498   7.9      1.499   6.9              3      -1.00        1.00       1.00
+- fourwf%(G->r)                  1.282   6.8      1.265   5.9          36864      -1.00        1.01       1.01
+- nonlop(apply)                  1.251   6.6      1.235   5.7          86569      -1.00        1.01       1.01
+- dfpt_vtorho-kpt loop           1.140   6.0      1.123   5.2             72      -1.00        1.02       1.02
+- getghc-other                   0.868   4.6      0.870   4.0             -1      -1.00        1.00       1.00
+- projbd                         0.833   4.4      0.816   3.8         169522      -1.00        1.02       1.02
+- dfpt_vtowfk(contrib)           0.561   3.0      0.551   2.6             -1      -1.00        1.02       1.02
+- nonlop(forces)                 0.468   2.5      0.489   2.3          27648      -1.00        0.96       0.96
+- getgh1c_setup                  0.341   1.8      0.321   1.5           4608      -1.00        1.06       1.06
+- ewald                          0.166   0.9      0.167   0.8              2      -1.00        0.99       0.99
+- dfpt_scfcv  (1)                0.163   0.9      0.164   0.8              6      -1.00        0.99       0.99
+- invars2                        0.132   0.7      0.135   0.6              3      -1.00        0.98       0.98
+- timing timab                   0.115   0.6      0.115   0.5              9      -1.00        1.00       1.00
+- others (120)                   0.421   2.2      0.439   2.0             -1      -1.00        0.96       0.96
 -<END_TIMER>
 
-- subtotal                      15.775  83.7     15.813  77.9                                  1.00       1.00
+- subtotal                      15.801  83.4     15.780  73.2                                  1.00       1.00
 
 ================================================================================
 
@@ -1624,7 +1680,35 @@ P          mk1mem30        64
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
+-
+- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- interatomic force constants from density-functional perturbation theory,
+- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
+-
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1638,22 +1722,11 @@ P          mk1mem30        64
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
-- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
--
-- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
-- interatomic force constants from density-functional perturbation theory,
-- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
--
-- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1662,27 +1735,14 @@ P          mk1mem30        64
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [5] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=         18.9  wall=         20.3
+- Proc.   0 individual time (sec): cpu=         18.9  wall=         21.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered 698 WARNINGs and  51 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.9  wall=         20.3
++Overall time at end (sec) : cpu=         18.9  wall=         21.6
