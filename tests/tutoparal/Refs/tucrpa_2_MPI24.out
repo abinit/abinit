@@ -1,5 +1,5 @@
 
-.Version 8.11.11 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 30 Sep 2019.
-- ( at 07h07 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 23h19 )
   
 - input  file    -> tucrpa_2.in
 - output file    -> tucrpa_2_MPI24.out
@@ -9147,6 +9147,36 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   sigma(2 2)=  2.09030261E-03  sigma(3 1)= -1.12337837E-12
   sigma(3 3)=  2.09030259E-03  sigma(2 1)= -4.07535560E-12
 
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        5
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  4.100000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg":  2.000000000000000E+001, }
+convergence: {
+    "deltae": -2.557953848736361E-013, "res2":  2.952970889344967E-014, 
+    "residm":  4.088386840636724E-012, "diffor": undef, 
+}
+etotal    : -1.519284090977341E+002
+entropy   :  0.000000000000000E+000
+fermie    :  2.854236792447141E-001
+stress_tensor: !CartTensor
+- [ 2.090302630921071E-003, -4.075355599476644E-012, -1.123378372653196E-012, ]
+- [-4.075355599476644E-012,  2.090302606487019E-003, -9.601409768711952E-013, ]
+- [-1.123378372653196E-012, -9.601409768711952E-013,  2.090302594821354E-003, ]
+cartesian_forces: !CartForces
+- [-1.728002550472751E-011, -2.770204820652145E-010, -1.422026499336841E-010, ]
+- [ 3.207974391386494E-010,  3.132423875885363E-010, -2.285348532146610E-010, ]
+- [ 2.624520181183621E-010, -1.042871556174557E-010, -2.105132239267768E-010, ]
+- [-1.175639757552966E-010,  1.661007298796387E-010,  1.357537433387930E-010, ]
+- [-4.484054559969873E-010, -9.803547978550481E-011,  4.454969837363287E-010, ]
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -10805,6 +10835,36 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
   1.0857E+00  1.1107E+00  1.1548E+00  1.1835E+00  1.1874E+00  1.2522E+00
   1.3111E+00  1.3681E+00
   prteigrs : nnsclo,ikpt=   40   32 max resid (incl. the buffer)=  4.30336E-05
+
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        5
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  4.100000000000000E+001
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg":  2.000000000000000E+001, }
+convergence: {
+    "deltae":  0.000000000000000E+000, "res2":  0.000000000000000E+000, 
+    "residm":  9.993218684106072E-019, "diffor":  0.000000000000000E+000, 
+}
+etotal    : -1.519284090977341E+002
+entropy   :  0.000000000000000E+000
+fermie    :  2.854236792447141E-001
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
