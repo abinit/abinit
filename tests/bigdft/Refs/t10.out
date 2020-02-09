@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h17 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 19h03 )
   
 - input  file    -> t10.in
 - output file    -> t10.out
@@ -153,6 +153,33 @@
  ETOT  6  -1.0797395629937    -2.638E-08 8.319E-05 1.555E-06 0.000E+00 0.000E+00
 
  At SCF step    6   max grdnorm=  8.32E-05 < tolwfr=  1.00E-04 =>converged.
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -2.638304241742162E-008, "res2":  1.554609086653804E-006, 
+    "residm":  8.319255845640910E-005, "diffor": undef, 
+}
+etotal    : -1.079739562993745E+000
+entropy   :  0.000000000000000E+000
+fermie    :  0.000000000000000E+000
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [-3.456990078982819E-001, -1.134588625052875E-007, -1.134588612661558E-007, ]
+- [ 3.456990078982819E-001,  1.134588625052872E-007,  1.134588612661558E-007, ]
+...
+
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -185,6 +212,33 @@
  ETOT  7  -1.1294886277880    -1.762E-08 6.530E-05 1.038E-06 0.000E+00 0.000E+00
 
  At SCF step    7   max grdnorm=  6.53E-05 < tolwfr=  1.00E-04 =>converged.
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.761504986319551E-008, "res2":  1.038291210624759E-006, 
+    "residm":  6.530128512359176E-005, "diffor": undef, 
+}
+etotal    : -1.129488627788018E+000
+entropy   :  0.000000000000000E+000
+fermie    :  0.000000000000000E+000
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [ 5.786606615065785E-002,  1.019875314526991E-008,  1.019875362713933E-008, ]
+- [-5.786606615065785E-002, -1.019875314527076E-008, -1.019875362713933E-008, ]
+...
+
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -220,6 +274,33 @@
  ETOT  6  -1.1343044029545    -3.626E-09 2.996E-05 2.048E-07 0.000E+00 0.000E+00
 
  At SCF step    6   max grdnorm=  3.00E-05 < tolwfr=  1.00E-04 =>converged.
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -3.625548750108010E-009, "res2":  2.047619281977520E-007, 
+    "residm":  2.996318507424911E-005, "diffor": undef, 
+}
+etotal    : -1.134304402954460E+000
+entropy   :  0.000000000000000E+000
+fermie    :  0.000000000000000E+000
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [ 4.174920705387911E-002,  1.072648214039381E-007,  1.072648191806156E-007, ]
+- [-4.174920705387911E-002, -1.072648214039381E-007, -1.072648191806147E-007, ]
+...
+
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -255,6 +336,33 @@
  ETOT  6  -1.1373747406605    -5.051E-09 3.529E-05 2.877E-07 0.000E+00 0.000E+00
 
  At SCF step    6   max grdnorm=  3.53E-05 < tolwfr=  1.00E-04 =>converged.
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -5.051451257287454E-009, "res2":  2.877080171062268E-007, 
+    "residm":  3.528629036257684E-005, "diffor": undef, 
+}
+etotal    : -1.137374740660535E+000
+entropy   :  0.000000000000000E+000
+fermie    :  0.000000000000000E+000
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [ 1.032763097575738E-002, -2.880309111928080E-008, -2.880309057387121E-008, ]
+- [-1.032763097575738E-002,  2.880309111927996E-008,  2.880309057387205E-008, ]
+...
+
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -289,6 +397,33 @@
  ETOT  5  -1.1375234120812    -1.604E-08 5.795E-05 3.779E-07 0.000E+00 0.000E+00
 
  At SCF step    5   max grdnorm=  5.80E-05 < tolwfr=  1.00E-04 =>converged.
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.604216492978594E-008, "res2":  3.778674986834519E-007, 
+    "residm":  5.795186650169697E-005, "diffor": undef, 
+}
+etotal    : -1.137523412081220E+000
+entropy   :  0.000000000000000E+000
+fermie    :  0.000000000000000E+000
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [-2.509548193287309E-003, -4.851591882929182E-008, -4.851591807727479E-008, ]
+- [ 2.509548193287309E-003,  4.851591882929267E-008,  4.851591807727479E-008, ]
+...
+
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -322,6 +457,33 @@
  ETOT  4  -1.1375322277578    -1.589E-08 8.129E-05 1.865E-07 0.000E+00 0.000E+00
 
  At SCF step    4   max grdnorm=  8.13E-05 < tolwfr=  1.00E-04 =>converged.
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -1.588629894300198E-008, "res2":  1.865125268946677E-007, 
+    "residm":  8.129105442236885E-005, "diffor": undef, 
+}
+etotal    : -1.137532227757771E+000
+entropy   :  0.000000000000000E+000
+fermie    :  0.000000000000000E+000
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [ 8.341052286868131E-005, -6.130841991351476E-009, -6.130839285239604E-009, ]
+- [-8.341052286868131E-005,  6.130841991351476E-009,  6.130839285240451E-009, ]
+...
+
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -353,6 +515,33 @@
  ETOT  2  -1.1375322366878    -2.132E-08 6.721E-05 2.719E-07 0.000E+00 0.000E+00
 
  At SCF step    2   max grdnorm=  6.72E-05 < tolwfr=  1.00E-04 =>converged.
+--- !ResultsGS
+comment   : Summary of ground state results
+natom     :        2
+nsppol    :        1
+nspinor   :        1
+nspden    :        1
+nelect    :  2.000000000000000E+000
+charge    :  0.000000000000000E+000
+abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+convergence: {
+    "deltae": -2.131848564346228E-008, "res2":  2.718613391897078E-007, 
+    "residm":  6.721042662709899E-005, "diffor": undef, 
+}
+etotal    : -1.137532236687753E+000
+entropy   :  0.000000000000000E+000
+fermie    :  0.000000000000000E+000
+stress_tensor: !CartTensor
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+- [undef, undef, undef, ]
+cartesian_forces: !CartForces
+- [-7.532092109637945E-007, -9.303240750199252E-009, -9.303243100232872E-009, ]
+- [ 7.532092109637947E-007,  9.303240750199252E-009,  9.303243100232025E-009, ]
+...
+
 
 ---OUTPUT-----------------------------------------------------------------------
 
@@ -512,7 +701,24 @@
 - Comment: to be cited in case BigDFT project is used, i.e. usewvl=1.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#genovese2008
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -526,11 +732,11 @@
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -539,11 +745,13 @@
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [4] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [5] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -551,21 +759,12 @@
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [5] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=         19.7  wall=         24.9
+- Proc.   0 individual time (sec): cpu=         18.4  wall=         18.7
 
 ================================================================================
 
