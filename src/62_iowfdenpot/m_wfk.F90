@@ -3048,6 +3048,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  integer :: spin_saved, spin_sym
  integer :: itimrev_disk, ierr
  real(dp) :: ecut_eff,cpu,wall,gflops, res
+ real(dp) :: ecut_eff_disk
  character(len=500) :: msg
  logical :: isirred_kf, foundk
  logical :: needthisk
@@ -3077,7 +3078,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
 ! if I impose FORTRAN_IO and xmpio_single it complains the file is already opened by another proc
  ABI_UNUSED(comm)
 #ifdef DEV_MJV
-print *, 'calling wfk_open_read with formeig = ', formeig
+print *, 'calling wfk_open_read with formeig = ', formeig, ' path ', trim(inpath)
 #endif
  call wfk_open_read(wfk_disk,inpath,formeig,iomode,wfk_unt,xmpi_comm_self)
 
@@ -3110,7 +3111,8 @@ print *, 'wfk_disk%mband, dtset%mband ', wfk_disk%mband, dtset%mband
 
 ! NB: npw can differ as can istwfk
  mpw_disk = maxval(wfk_disk%Hdr%npwarr)
- ecut_eff = wfk_disk%hdr%ecut_eff ! ecut * dilatmx**2
+ ecut_eff_disk = wfk_disk%hdr%ecut_eff    ! ecut * dilatmx**2
+ ecut_eff = dtset%ecut*(dtset%dilatmx)**2 ! ecut * dilatmx**2
 
  ABI_MALLOC(kg_disk, (3, mpw_disk))
  ABI_MALLOC(cg_disk, (2, mpw_disk*nspinor*mband))
@@ -3354,6 +3356,9 @@ print *, 'npwarr change or need to convert the wf by symmetry, or complete it'
 #endif
            ! Compute G-sphere centered on kf
            call get_kg(kf,istwf_kf,ecut_eff,cryst%gmet,npw_kf,kg_kf)
+#ifdef DEV_MJV
+print *, ' npw_kf == npwarr(ikf), istwf_kf, ecut_eff ecut ', npw_kf,npwarr(ikf),istwf_kf, ecut_eff, wfk_disk%hdr%ecut
+#endif
            ABI_CHECK(npw_kf == npwarr(ikf), "Wrong npw_kf")
            if (present(kg)) then
              kg(:,ikg(ikf)+1:ikg(ikf)+npw_kf) = kg_kf (:,1:npw_kf)

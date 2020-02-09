@@ -1023,10 +1023,11 @@ print *, 'distrb_flags ', distrb_flags
 
 !  Set up the basis sphere of planewaves at k
    call timab(143,1,tsec)
+print *, 'before kpgio istwfk_rbz ec ec_eff ', istwfk_rbz, dtset%ecut, ecut_eff
    call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
 &   kpt_rbz,mkmem_rbz,nband_rbz,nkpt_rbz,'PERS',mpi_enreg,mpw,npwarr,npwtot,dtset%nsppol)
    call timab(143,2,tsec)
-print *, 'after kpgio'
+print *, 'after kpgio npwarr ', npwarr
 
 !  Set up the spherical harmonics (Ylm) at k
    useylmgr=0; option=0 ; nylmgr=0
@@ -1091,6 +1092,7 @@ print *, 'after kpgio'
 print *, ' fermie ', fermie
 print *, " ebands_k%eig 1087 ", ebands_k%eig
 print *, " occ_rbz 1087 ", occ_rbz
+print *, 'istwfk_rbz ', istwfk_rbz
 
 !  Initialize GS wavefunctions at k
    ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0

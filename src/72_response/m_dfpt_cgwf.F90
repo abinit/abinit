@@ -1172,6 +1172,7 @@ print *, 'skipping for deltae diff'
    ! Note that there are five "exit" instruction inside the loop.
    nlines_done = nlines_done + 1
  end do ! iline
+print *, 'shape ', shape(cwavef)
 print *, 'cgwf band,  cwavef', band, cwavef(:,1:5)
 print *, 'cgwf band,  ghc', band, ghc(:,1:5)
 
