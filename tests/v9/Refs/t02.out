@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  6 Feb 2020.
-- ( at 20h55 )
+.Starting date : Sun  9 Feb 2020.
+- ( at 06h51 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Test_suite/v9_t02/t02.in
 - output file    -> t02.out
@@ -300,9 +300,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     239.250     239.233
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
- Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
-    1   2.10000       14.315599     -0.000000   -0.000000    2.250002
-    2   2.10000       14.312174      0.000000   -0.000000    2.300004
+ Atom   Radius      Total density     mag(x)      mag(y)      mag(z)   Atomic charge
+    1   2.10000       14.315599     -0.000000   -0.000000    2.250002      1.684401
+    2   2.10000       14.312174      0.000000   -0.000000    2.300004      1.687826
  ---------------------------------------------------------------------
  Total magnetization (spheres)       0.000000   -0.000000    4.550006
  Total magnetization (exact)        -0.000000   -0.000000    4.432206
@@ -978,10 +978,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         69.6  wall=         70.4
+- Proc.   0 individual time (sec): cpu=         61.8  wall=         62.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         69.6  wall=         70.4
++Overall time at end (sec) : cpu=         61.8  wall=         62.0
