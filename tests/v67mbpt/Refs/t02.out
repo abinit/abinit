@@ -448,19 +448,6 @@ _setup2: Arith. and geom. avg. npw (full set) are     288.181     288.126
   sigma(2 2)=  2.76864062E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.76864062E-05  sigma(2 1)=  0.00000000E+00
 
-
---- !EtotSteps
-data: !EtotIters |
-    
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
-        1  -8.8665583109188    -8.867E+00 4.904E-03 5.902E+00
-        2  -8.8716164865705    -5.058E-03 7.865E-06 1.499E-01
-        3  -8.8716870540284    -7.057E-05 9.162E-06 3.282E-03
-        4  -8.8716880857425    -1.032E-06 3.499E-07 1.367E-05
-        5  -8.8716880912518    -5.509E-09 1.992E-09 6.991E-09
-        6  -8.8716880912528    -9.681E-13 8.968E-11 2.131E-11
-...
-
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -469,13 +456,13 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
+abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
+alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
 cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
 convergence: {
     "deltae": -9.681144774731365E-013, "res2":  2.131351442608115E-011, 
     "residm":  8.967595621369906E-011, "diffor": undef, 
 }
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
 etotal    : -8.871688091252757E+000
 entropy   :  0.000000000000000E+000
 fermie    :  2.176554872776119E-001
@@ -487,6 +474,7 @@ cartesian_forces: !CartForces
 - [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
 - [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
 ...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -547,7 +535,6 @@ cartesian_forces: !CartForces
 --------------------------------------------------------------------------------
 
 
-
 --- !EnergyTerms
 comment             : Components of total free energy in Hartree
 kinetic             :  3.02923675082961E+00
@@ -561,6 +548,7 @@ total_energy        : -8.87168809125276E+00
 band_energy         :  2.33747761834871E-01
 total_energy_eV     : -2.41410910137269E+02
 ...
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.76864062E-05  sigma(3 2)=  0.00000000E+00
