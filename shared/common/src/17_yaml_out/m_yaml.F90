@@ -1066,7 +1066,7 @@ end subroutine yaml_single_dict
 !!  Close a previously opened document
 !!
 !! INPUTS
-!!  [newline]= set to false to prevent adding newlines after fields
+!!  [newline]= set to false to prevent adding newlines after fields. Default: True
 !!
 !! PARENTS
 !!

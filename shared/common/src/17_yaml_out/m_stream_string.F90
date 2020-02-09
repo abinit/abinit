@@ -74,10 +74,11 @@ subroutine stream_flush(stream, unit, newline)
   character(len=stream%length) :: s
 
   call stream%to_string(s)
+  write(unit, "(a)")trim(s)
+
   if (present(newline)) then
     if (newline) write(unit, "(a)")""
   end if
-  write(unit, "(a)")trim(s)
 
   call stream%free()
 

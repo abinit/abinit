@@ -350,8 +350,11 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
      end if
      ! Will save iterations in this global variables.
+     ! MG: For the time being the document is not written to std_out
+     ! Should reconsider whether it makes sense to use yaml and global state (problematic if prtvol and/or DFMT)
      etot_yaml_doc = yamldoc_open('EtotSteps', "")
      etot_yaml_doc%use_yaml = dtset%use_yaml
+     etot_yaml_doc%use_yaml = 0
      call etot_yaml_doc%open_tabular('data', tag='EtotIters')
      call etot_yaml_doc%add_tabular_line(message)
      call wrtout(ab_out,message,'COLL')

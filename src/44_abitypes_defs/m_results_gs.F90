@@ -128,7 +128,7 @@ MODULE m_results_gs
   real(dp), allocatable :: fcart(:,:)
    ! fcart(3,natom)
    ! Cartesian forces (Hartree/Bohr)
-   ! Note : unlike fred, this array has been corrected by enforcing
+   ! Note: unlike fred, this array has been corrected by enforcing
    ! the translational symmetry, namely that the sum of force
    ! on all atoms is zero.
 
@@ -152,7 +152,7 @@ MODULE m_results_gs
    ! to change of reduced coordinates, that comes from the spatially-varying chemical potential
 
   real(dp), allocatable :: grcondft(:,:)
-   ! grcondft(nspden,natom)  
+   ! grcondft(nspden,natom)
    ! Part of the gradient of the total energy (Hartree) with respect
    ! to change of reduced coordinates, that comes from the constrained DFT contribution
 
@@ -180,7 +180,7 @@ MODULE m_results_gs
    ! to change of reduced coordinates, that comes from the XC energy
 
   real(dp), allocatable :: intgres(:,:)
-   ! intgres(nspden,natom)  
+   ! intgres(nspden,natom)
    ! Derivative of the total energy with respect to changes of constraints, in constrained DFT.
 
   real(dp) :: pel(3)
@@ -836,6 +836,7 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
  end if
  ydoc%use_yaml = dtset%use_yaml
 
+ ! Write basic dimensions and info on electrons
  call ydoc%add_int('natom', results%natom)
  call ydoc%add_int('nsppol', results%nsppol)
  call ydoc%add_int('nspinor', dtset%nspinor)
@@ -843,11 +844,18 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
  call ydoc%add_real("nelect", dtset%nelect)
  call ydoc%add_real("charge", dtset%charge)
 
+ ! Write lattice
+ abc(:) = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
+ call ydoc%add_real1d('abc', cryst%angdeg)
+ call ydoc%add_real1d('alpha_beta_gamma_angles', cryst%angdeg)
+
+ ! Write cutoff energies
  call dict%set('ecut', r=dtset%ecut)
  call dict%set('pawecutdg', r=dtset%pawecutdg)
  call ydoc%add_dict('cutoff_energies', dict)
  call dict%free()
 
+ ! Write convergence degree.
  call dict%set('deltae', r=results%deltae)
  call dict%set('res2', r=results%res2)
  call dict%set('residm', r=results%residm)
@@ -855,13 +863,12 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
  call ydoc%add_dict('convergence', dict, multiline_trig=2)
  call dict%free()
 
- abc(:) = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
- call ydoc%add_real1d('abc', cryst%angdeg)
- call ydoc%add_real1d('alpha_beta_gamma_angles', cryst%angdeg)
+ ! Write energies.
  call ydoc%add_real('etotal', results%etotal)
  call ydoc%add_real('entropy', results%entropy)
  call ydoc%add_real('fermie', results%fermie)
 
+ ! Stress tensor and forces.
  strten(1,1) = results%strten(1)
  strten(2,2) = results%strten(2)
  strten(3,3) = results%strten(3)
