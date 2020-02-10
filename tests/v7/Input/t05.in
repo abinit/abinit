@@ -55,7 +55,7 @@ nspden6 2
 nsppol6 2 
 getwfk6 0
 nband6 6
-nstep6 25
+nstep6 24
 
 # DS 7 constrained direction and amplitude, collinear spin
 magconon7 2
@@ -93,7 +93,7 @@ rprim
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t05.out,      tolnlines = 39, tolabs = 6.0e-2, tolrel = 1.1e+0, fld_options = -easy
+#%%   t05.out,      tolnlines = 43, tolabs = 1.1e+1, tolrel = 1.1e+0, fld_options = -easy
 #%% psp_files = 26fe.pspnc
 #%% [paral_info]
 #%% max_nprocs = 4

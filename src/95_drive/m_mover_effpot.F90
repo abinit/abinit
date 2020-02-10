@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mover_effpot
 !! NAME
 !!  m_mover_effpot
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (AM)
+!!  Copyright (C) 2008-2020 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -142,7 +141,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
  !type 
  type(scup_dtset_type) :: scup_inp
  !real(dp) :: cpui
-!character(len=6) :: codvsn
+!character(len=8) :: codvsn
 
 !TEST_AM
 ! integer :: ia,mu,rand_seed = 5

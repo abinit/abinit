@@ -1,3 +1,4 @@
+"""Panel dashboard."""
 import os
 from fkiss.termcolor import cprint
 
@@ -12,8 +13,7 @@ def _df(df):
     return pn.widgets.DataFrame(df, disabled=True)
 
 
-# Possible approach to display big SVG files:
-# https://github.com/ariutta/svg-pan-zoom
+# Possible approach to display big SVG files: https://github.com/ariutta/svg-pan-zoom
 #<script>
 #document.getElementById('my-embed').addEventListener('load', function(){
 #  // Will get called after embed element was loaded
@@ -25,8 +25,8 @@ def _df(df):
 class ProjectViewer(param.Parameterized):
     """
     A Dashboard to browse the source code, visualize connections among directories,
-    files and procedures. Can be executed inside jupyter notebook
-    or as standalone bokeh app
+    files and procedures inside the Abinit project.
+    Panel can can be executed either inside a jupyter notebook or as a standalone bokeh app.
     """
 
     engine = pn.widgets.Select(value="dot",
@@ -45,7 +45,7 @@ class ProjectViewer(param.Parameterized):
 
         width = 200
         self.file_select = pn.widgets.Select(name="Fortran File", width=width)
-        self.pubproc_select = pn.widgets.Select(name="Public procedure", width=width)
+        self.pubproc_select = pn.widgets.Select(name="Public Procedure", width=width)
         self.datatype_select = pn.widgets.Select(name="Datatype", width=width)
 
         self.find_proc = pn.widgets.AutocompleteInput(name='Find Procedure', options=list(self.all_pubs.keys()),
@@ -72,7 +72,8 @@ class ProjectViewer(param.Parameterized):
                 pn.Column(self.pubproc_select, self.datatype_select),
                 pn.Column(self.find_proc, self.find_proc_btn),
                 pn.Column(self.find_dtype, self.find_dtype_btn),
-                #pn.Column(self.engine), #, self.rerun_btn),
+                #pn.Column(self.engine),
+                #, self.rerun_btn),
                 #sizing_mode='scale_width'
         )
 

@@ -9,7 +9,7 @@
  ecut    8
  ecutwfn 8
  ecuteps 3.8 
- #symmorphi 0
+ symsigma 0
 
  ndtset 3
 # wavefunction calculation

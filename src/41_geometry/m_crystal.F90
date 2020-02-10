@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_crystal
 !! NAME
 !! m_crystal
@@ -7,7 +6,7 @@
 !! Module containing the definition of the crystal_t data type and methods used to handle it.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG, YP, MJV)
+!!  Copyright (C) 2008-2020 ABINIT group (MG, YP, MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

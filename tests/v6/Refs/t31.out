@@ -2,7 +2,7 @@
 .Version 8.11.12 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -47,7 +47,7 @@ _ WF disk file :      0.200 Mbytes ; DEN or POT disk file :      0.358 Mbytes.
      lnmax =       2     mgfft =      36  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =        1618          nfft =       46656          nkpt =           2
 ================================================================================
@@ -81,7 +81,7 @@ _ WF disk file :      0.397 Mbytes ; DEN or POT disk file :      0.714 Mbytes.
      lnmax =       2     mgfft =      36  mpssoang =       3    mqgrid =    3001
      natom =       2  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           4        mffmem =           1         mkmem =           2
        mpw =        1618          nfft =       46656          nkpt =           2
 ================================================================================
@@ -310,8 +310,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
 
  At SCF step   15   max residual=  9.45E-29 < tolwfr=  1.00E-28 =>converged.
 
- Compute kinetic energy density
-
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
@@ -462,8 +460,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
  ETOT 15  -7.9333340831216    -2.665E-15 8.932E-29 4.375E-26
 
  At SCF step   15   max residual=  8.93E-29 < tolwfr=  1.00E-28 =>converged.
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 
@@ -617,8 +613,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
  ETOT 15  -7.9333340831217    -5.329E-15 9.846E-29 8.074E-26
 
  At SCF step   15   max residual=  9.85E-29 < tolwfr=  1.00E-28 =>converged.
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 
@@ -795,8 +789,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1617.250    1617.250
  ETOT 15  -7.9333340831216    -1.776E-15 8.646E-29 8.141E-26
 
  At SCF step   15   max residual=  8.65E-29 < tolwfr=  1.00E-28 =>converged.
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 

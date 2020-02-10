@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_abihist
 !! NAME
 !! m_abihist
@@ -22,7 +21,7 @@
 !! * vel2hist
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (XG, SE)
+!! Copyright (C) 2001-2020 ABINIT group (XG, SE)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

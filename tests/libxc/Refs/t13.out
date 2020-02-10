@@ -2,7 +2,7 @@
 .Version 8.11.12 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -223,8 +223,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1837.000    1837.000
  ETOT  9  -4.1846644615662    -1.446E-07 1.492E-16 2.013E-10
  ETOT 10  -4.1846644361981     2.537E-08 6.632E-18 5.163E-13
 
- Compute kinetic energy density
-
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
@@ -354,8 +352,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1837.000    1837.000
  ETOT 14  -4.0954588402807    -2.430E-09 5.768E-18 5.037E-12
  ETOT 15  -4.0954588398932     3.875E-10 8.935E-20 4.856E-13
 
- Compute kinetic energy density
-
 Result for kinetic energy density :
 
 --------------------------------------------------------------------------------
@@ -479,8 +475,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1837.000    1837.000
  ETOT  8  -4.2079287083588     1.028E-07 2.311E-15 7.632E-10
  ETOT  9  -4.2079287223685    -1.401E-08 1.569E-17 1.535E-11
  ETOT 10  -4.2079287235377    -1.169E-09 1.749E-19 5.806E-14
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 
@@ -610,8 +604,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    1837.000    1837.000
  ETOT 13  -4.0771509046164    -6.990E-09 4.576E-18 2.675E-11
  ETOT 14  -4.0771509137632    -9.147E-09 5.908E-19 1.861E-12
  ETOT 15  -4.0771509108221     2.941E-09 3.850E-20 1.198E-13
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 

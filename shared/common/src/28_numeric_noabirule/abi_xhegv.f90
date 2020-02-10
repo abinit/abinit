@@ -12,7 +12,7 @@
 !!  B is also positive definite.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2019 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2001-2020 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .

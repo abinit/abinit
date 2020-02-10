@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h38 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h37 )
   
-- input  file    -> t57.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v8_t57/t57.in
 - output file    -> t57.out
 - root for input  files -> t57i
 - root for output files -> t57o
@@ -140,6 +140,12 @@ _ WF disk file :      0.281 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
  -outvars: echo values of preprocessed input variables --------
             acell      9.1360000000E+00  9.1360000000E+00  9.1360000000E+00 Bohr
               amu      4.00780000E+01  1.59994000E+01
+           chneut1          1
+           chneut2          1
+           chneut3          1
+           chneut4          1
+           chneut5          1
+           chneut6          0
            diemac      6.00000000E+00
              ecut      3.00000000E+01 Hartree
     eph_frohlichm1          0
@@ -327,12 +333,6 @@ P          mk1mem6          2
         optdriver4          0
         optdriver5          1
         optdriver6          7
-         prtefmas1          0
-         prtefmas2          0
-         prtefmas3          0
-         prtefmas4          0
-         prtefmas5          1
-         prtefmas6          0
          prtphdos1          1
          prtphdos2          1
          prtphdos3          1
@@ -463,8 +463,8 @@ P          mk1mem6          2
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -478,8 +478,8 @@ P          mk1mem6          2
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1341,7 +1341,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   26.237E-13; max=  94.227E-18
+ Mean square residual over all n,k,spin=   61.270E-18; max=  92.829E-18
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -1387,8 +1387,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1402,8 +1402,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1449,22 +1449,23 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 -inwffil : will read wavefunctions from disk file t57o_DS2_1WF7
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -27.757624794034     -2.776E+01 2.346E-01 0.000E+00
+-ETOT  1  -27.757624794034     -2.776E+01 2.424E-01 0.000E+00
  ETOT  2  -27.964661678244     -2.070E-01 4.825E-03 0.000E+00
  ETOT  3  -27.969478428039     -4.817E-03 2.311E-04 0.000E+00
  ETOT  4  -27.969624110433     -1.457E-04 4.527E-06 0.000E+00
  ETOT  5  -27.969629266851     -5.156E-06 2.461E-07 0.000E+00
- ETOT  6  -27.969629461514     -1.947E-07 5.721E-09 0.000E+00
- ETOT  7  -27.969629469153     -7.639E-09 3.336E-10 0.000E+00
- ETOT  8  -27.969629469457     -3.036E-10 9.708E-12 0.000E+00
- ETOT  9  -27.969629469469     -1.178E-11 9.464E-13 0.000E+00
+ ETOT  6  -27.969629461514     -1.947E-07 1.037E-08 0.000E+00
+ ETOT  7  -27.969629469153     -7.639E-09 8.439E-10 0.000E+00
+ ETOT  8  -27.969629469457     -3.036E-10 3.141E-11 0.000E+00
+ ETOT  9  -27.969629469469     -1.178E-11 3.635E-12 0.000E+00
+ ETOT 10  -27.969629469469      7.105E-15 9.464E-13 0.000E+00
 
- At SCF step    9   max residual=  9.46E-13 < tolwfr=  1.00E-12 =>converged.
+ At SCF step   10   max residual=  9.46E-13 < tolwfr=  1.00E-12 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  94.639E-14
+ Mean square residual over all n,k,spin=   48.791E-14; max=  94.639E-14
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    1.3569144226E+00
  prteigrs : about to open file t57t_1WF1_EIG
@@ -1505,22 +1506,23 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 -inwffil : will read wavefunctions from disk file t57o_DS2_1WF8
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -27.720468849737     -2.772E+01 2.346E-01 0.000E+00
+-ETOT  1  -27.720468849737     -2.772E+01 2.424E-01 0.000E+00
  ETOT  2  -27.964138204329     -2.437E-01 5.897E-03 0.000E+00
  ETOT  3  -27.969566296252     -5.428E-03 2.312E-04 0.000E+00
  ETOT  4  -27.969718471713     -1.522E-04 4.527E-06 0.000E+00
  ETOT  5  -27.969723472555     -5.001E-06 2.461E-07 0.000E+00
- ETOT  6  -27.969723646098     -1.735E-07 5.721E-09 0.000E+00
- ETOT  7  -27.969723652423     -6.325E-09 3.337E-10 0.000E+00
- ETOT  8  -27.969723652659     -2.358E-10 9.708E-12 0.000E+00
- ETOT  9  -27.969723652667     -7.972E-12 5.826E-13 0.000E+00
+ ETOT  6  -27.969723646098     -1.735E-07 1.183E-08 0.000E+00
+ ETOT  7  -27.969723652423     -6.325E-09 1.087E-09 0.000E+00
+ ETOT  8  -27.969723652659     -2.358E-10 2.990E-11 0.000E+00
+ ETOT  9  -27.969723652667     -7.972E-12 5.263E-12 0.000E+00
+ ETOT 10  -27.969723652667      7.105E-15 5.826E-13 0.000E+00
 
- At SCF step    9   max residual=  5.83E-13 < tolwfr=  1.00E-12 =>converged.
+ At SCF step   10   max residual=  5.83E-13 < tolwfr=  1.00E-12 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  58.255E-14
+ Mean square residual over all n,k,spin=   36.964E-14; max=  58.255E-14
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    1.3569191728E+00
  prteigrs : about to open file t57t_1WF1_EIG
@@ -1561,22 +1563,23 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
 -inwffil : will read wavefunctions from disk file t57o_DS2_1WF9
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -27.767309020787     -2.777E+01 2.399E-01 0.000E+00
+-ETOT  1  -27.767309020787     -2.777E+01 2.424E-01 0.000E+00
  ETOT  2  -27.965144003869     -1.978E-01 3.417E-03 0.000E+00
  ETOT  3  -27.969573839161     -4.430E-03 2.498E-04 0.000E+00
  ETOT  4  -27.969713172536     -1.393E-04 3.441E-06 0.000E+00
  ETOT  5  -27.969718385975     -5.213E-06 3.369E-07 0.000E+00
- ETOT  6  -27.969718595697     -2.097E-07 4.855E-09 0.000E+00
- ETOT  7  -27.969718604436     -8.739E-09 5.526E-10 0.000E+00
- ETOT  8  -27.969718604806     -3.699E-10 9.520E-12 0.000E+00
- ETOT  9  -27.969718604821     -1.516E-11 9.943E-13 0.000E+00
+ ETOT  6  -27.969718595697     -2.097E-07 1.167E-08 0.000E+00
+ ETOT  7  -27.969718604436     -8.739E-09 1.051E-09 0.000E+00
+ ETOT  8  -27.969718604806     -3.699E-10 2.843E-11 0.000E+00
+ ETOT  9  -27.969718604821     -1.516E-11 5.030E-12 0.000E+00
+ ETOT 10  -27.969718604821     -1.066E-14 9.943E-13 0.000E+00
 
- At SCF step    9   max residual=  9.94E-13 < tolwfr=  1.00E-12 =>converged.
+ At SCF step   10   max residual=  9.94E-13 < tolwfr=  1.00E-12 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  99.432E-14
+ Mean square residual over all n,k,spin=   47.691E-14; max=  99.432E-14
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    1.3569188783E+00
  prteigrs : about to open file t57t_1WF1_EIG
@@ -1796,7 +1799,6 @@ message: |
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
 
-- Reading GS states from WFK file: t57o_DS4_WFK
 - Reading DDB from file: t57o_DS3_DDB
 - Reading EFMAS information from file: t57o_DS5_EFMAS.nc
 
@@ -1837,8 +1839,8 @@ message: |
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1852,8 +1854,8 @@ message: |
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1908,6 +1910,12 @@ message: |
  -outvars: echo values of variables after computation  --------
             acell      9.1360000000E+00  9.1360000000E+00  9.1360000000E+00 Bohr
               amu      4.00780000E+01  1.59994000E+01
+           chneut1          1
+           chneut2          1
+           chneut3          1
+           chneut4          1
+           chneut5          1
+           chneut6          0
            diemac      6.00000000E+00
              ecut      3.00000000E+01 Hartree
     eph_frohlichm1          0
@@ -2059,12 +2067,6 @@ P          mk1mem6          2
         optdriver4          0
         optdriver5          1
         optdriver6          7
-         prtefmas1          0
-         prtefmas2          0
-         prtefmas3          0
-         prtefmas4          0
-         prtefmas5          1
-         prtefmas6          0
          prtphdos1          1
          prtphdos2          1
          prtphdos3          1
@@ -2183,23 +2185,22 @@ P          mk1mem6          2
 - Strong suggestion to cite this paper in your publications.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#laflamme2016
 -
-- [2] Recent developments in the ABINIT software package.
-- Computer Phys. Comm. 205, 106 (2016).
-- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
-- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
-- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
-- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
-- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
-- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
-- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
-- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
-- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment: the fourth generic paper describing the ABINIT project.
+- [2] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
 - [3] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
 - implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
@@ -2217,7 +2218,25 @@ P          mk1mem6          2
 - Comment: Some pseudopotential generated using the ONCVPSP code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#hamann2013
 -
-- [6] ABINIT: First-principles approach of materials and nanosystem properties.
+- [6] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [7] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -2226,27 +2245,14 @@ P          mk1mem6          2
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [7] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=         43.5  wall=         45.2
+- Proc.   0 individual time (sec): cpu=         38.6  wall=         39.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  24 WARNINGs and  62 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         43.5  wall=         45.2
++Overall time at end (sec) : cpu=         38.6  wall=         39.6

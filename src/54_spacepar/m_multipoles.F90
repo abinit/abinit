@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_multipoles
 !! NAME
 !!  m_multipoles
@@ -7,7 +6,7 @@
 !!  Compute spatial multipole moments of input array on FFT grid
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2003-2019 ABINIT group (MJV, MT, XG)
+!!  Copyright (C) 2003-2020 ABINIT group (MJV, MT, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

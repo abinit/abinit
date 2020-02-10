@@ -136,5 +136,5 @@ znucl 6
 #%% authors = M. Giantomassi
 #%% keywords = NC, DFPT, EPH
 #%% description = 
-#%%   Calculation of the Fan-Migdal + Debye-Waller self-energy matrix elements.
+#%%   Calculation of the Fan-Migdal + Debye-Waller self-energy matrix elements in Diamond.
 #%%<END TEST_INFO>

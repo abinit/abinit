@@ -6,7 +6,7 @@
 !!  Generates vdW-DF kernels from the user input.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2019 ABINIT group (Yann Pouillon)
+!!  Copyright (C) 2011-2020 ABINIT group (Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt.

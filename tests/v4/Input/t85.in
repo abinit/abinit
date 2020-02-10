@@ -43,8 +43,9 @@
    nfreqim2     4
    nfreqre2     5
  freqremax2     1.
-      awtr2       0       # Note : the default awtr 1 is better
+      awtr2       0     # Note : the default awtr 1 is better
       symchi      0     # Note : the default symchi 1 is better
+      symsigma    0     # Note : the default symsigma 1 is better
 
 # Calculation of the GW corrections with PPM
  optdriver3     4

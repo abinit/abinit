@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 8.11.14 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h38 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h37 )
   
-- input  file    -> t56.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v8_t56/t56.in
 - output file    -> t56.out
 - root for input  files -> t56i
 - root for output files -> t56o
@@ -152,9 +152,6 @@ P          mk1mem3          2
         optdriver1          0
         optdriver2          0
         optdriver3          1
-         prtefmas1          0
-         prtefmas2          0
-         prtefmas3          1
             rfdir1          0       0       0
             rfdir2          0       0       0
             rfdir3          1       1       1
@@ -242,8 +239,8 @@ P          mk1mem3          2
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -257,8 +254,8 @@ P          mk1mem3          2
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -316,7 +313,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1496.891    1496.853
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   17.098E-07; max=  96.670E-06
+ Mean square residual over all n,k,spin=   26.970E-13; max=  20.326E-11
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -422,7 +419,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1496.891    1496.853
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   71.261E-16; max=  84.355E-24
+ Mean square residual over all n,k,spin=   54.658E-24; max=  84.355E-24
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -465,8 +462,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1496.891    1496.853
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -480,8 +477,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1496.891    1496.853
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -526,29 +523,31 @@ _setup2: Arith. and geom. avg. npw (full set) are    1496.891    1496.853
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -27.916393073209     -2.792E+01 1.986E-01 0.000E+00
+-ETOT  1  -27.916393073209     -2.792E+01 2.393E-01 0.000E+00
  ETOT  2  -28.044112102820     -1.277E-01 2.587E-03 0.000E+00
  ETOT  3  -28.047227654813     -3.116E-03 1.914E-04 0.000E+00
  ETOT  4  -28.047323932933     -9.628E-05 2.574E-06 0.000E+00
  ETOT  5  -28.047327303228     -3.370E-06 2.080E-07 0.000E+00
- ETOT  6  -28.047327429972     -1.267E-07 2.567E-09 0.000E+00
- ETOT  7  -28.047327434926     -4.955E-09 2.907E-10 0.000E+00
- ETOT  8  -28.047327435124     -1.980E-10 4.341E-12 0.000E+00
- ETOT  9  -28.047327435132     -7.965E-12 4.562E-13 0.000E+00
- ETOT 10  -28.047327435132     -2.949E-13 8.233E-15 0.000E+00
- ETOT 11  -28.047327435132      0.000E+00 7.560E-16 0.000E+00
- ETOT 12  -28.047327435132     -6.040E-14 1.540E-17 0.000E+00
- ETOT 13  -28.047327435132      4.263E-14 1.293E-18 0.000E+00
- ETOT 14  -28.047327435132     -8.171E-14 2.837E-20 0.000E+00
- ETOT 15  -28.047327435132      7.461E-14 2.252E-21 0.000E+00
- ETOT 16  -28.047327435132     -1.776E-14 9.465E-23 0.000E+00
+ ETOT  6  -28.047327429972     -1.267E-07 5.065E-09 0.000E+00
+ ETOT  7  -28.047327434926     -4.955E-09 5.459E-10 0.000E+00
+ ETOT  8  -28.047327435124     -1.980E-10 3.731E-11 0.000E+00
+ ETOT  9  -28.047327435132     -7.965E-12 2.882E-12 0.000E+00
+ ETOT 10  -28.047327435132     -2.949E-13 9.079E-14 0.000E+00
+ ETOT 11  -28.047327435132      0.000E+00 1.316E-14 0.000E+00
+ ETOT 12  -28.047327435132     -6.040E-14 4.174E-16 0.000E+00
+ ETOT 13  -28.047327435132      4.263E-14 6.913E-17 0.000E+00
+ ETOT 14  -28.047327435132     -8.171E-14 2.244E-18 0.000E+00
+ ETOT 15  -28.047327435132      7.461E-14 3.712E-19 0.000E+00
+ ETOT 16  -28.047327435132     -1.776E-14 1.212E-20 0.000E+00
+ ETOT 17  -28.047327435132     -7.105E-15 2.002E-21 0.000E+00
+ ETOT 18  -28.047327435132      7.105E-15 9.465E-23 0.000E+00
 
- At SCF step   16   max residual=  9.47E-23 < tolwfr=  1.00E-22 =>converged.
+ At SCF step   18   max residual=  9.47E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  94.653E-24
+ Mean square residual over all n,k,spin=   48.405E-24; max=  94.651E-24
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    1.3608957166E+00
  prteigrs : about to open file t56t_1WF1_EIG
@@ -588,29 +587,31 @@ _setup2: Arith. and geom. avg. npw (full set) are    1496.891    1496.853
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -27.882729757356     -2.788E+01 1.925E-01 0.000E+00
+-ETOT  1  -27.882729757356     -2.788E+01 2.393E-01 0.000E+00
  ETOT  2  -28.043308577315     -1.606E-01 3.671E-03 0.000E+00
  ETOT  3  -28.047292149536     -3.984E-03 1.813E-04 0.000E+00
  ETOT  4  -28.047410658140     -1.185E-04 2.576E-06 0.000E+00
  ETOT  5  -28.047414578345     -3.920E-06 1.735E-07 0.000E+00
- ETOT  6  -28.047414713620     -1.353E-07 2.775E-09 0.000E+00
- ETOT  7  -28.047414718477     -4.856E-09 2.073E-10 0.000E+00
- ETOT  8  -28.047414718654     -1.771E-10 3.920E-12 0.000E+00
- ETOT  9  -28.047414718660     -6.629E-12 2.919E-13 0.000E+00
- ETOT 10  -28.047414718661     -1.990E-13 6.592E-15 0.000E+00
- ETOT 11  -28.047414718661      6.395E-14 4.423E-16 0.000E+00
- ETOT 12  -28.047414718661     -5.329E-14 1.096E-17 0.000E+00
- ETOT 13  -28.047414718661      4.619E-14 6.920E-19 0.000E+00
- ETOT 14  -28.047414718661      2.487E-14 1.795E-20 0.000E+00
- ETOT 15  -28.047414718661     -2.132E-14 1.099E-21 0.000E+00
- ETOT 16  -28.047414718661     -1.776E-14 9.381E-23 0.000E+00
+ ETOT  6  -28.047414713620     -1.353E-07 5.066E-09 0.000E+00
+ ETOT  7  -28.047414718477     -4.856E-09 5.152E-10 0.000E+00
+ ETOT  8  -28.047414718654     -1.771E-10 4.051E-11 0.000E+00
+ ETOT  9  -28.047414718660     -6.629E-12 3.505E-12 0.000E+00
+ ETOT 10  -28.047414718661     -1.990E-13 9.072E-14 0.000E+00
+ ETOT 11  -28.047414718661      6.395E-14 1.733E-14 0.000E+00
+ ETOT 12  -28.047414718661     -5.329E-14 4.473E-16 0.000E+00
+ ETOT 13  -28.047414718661      4.619E-14 9.677E-17 0.000E+00
+ ETOT 14  -28.047414718661      2.487E-14 2.543E-18 0.000E+00
+ ETOT 15  -28.047414718661     -2.132E-14 5.476E-19 0.000E+00
+ ETOT 16  -28.047414718661     -1.776E-14 1.445E-20 0.000E+00
+ ETOT 17  -28.047414718661      1.066E-14 3.109E-21 0.000E+00
+ ETOT 18  -28.047414718661      0.000E+00 9.381E-23 0.000E+00
 
- At SCF step   16   max residual=  9.38E-23 < tolwfr=  1.00E-22 =>converged.
+ At SCF step   18   max residual=  9.38E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  93.814E-24
+ Mean square residual over all n,k,spin=   53.776E-24; max=  93.814E-24
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    1.3609000759E+00
  prteigrs : about to open file t56t_1WF1_EIG
@@ -650,29 +651,31 @@ _setup2: Arith. and geom. avg. npw (full set) are    1496.891    1496.853
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -27.908395427548     -2.791E+01 1.986E-01 0.000E+00
+-ETOT  1  -27.908395427548     -2.791E+01 2.393E-01 0.000E+00
  ETOT  2  -28.044076305632     -1.357E-01 2.586E-03 0.000E+00
  ETOT  3  -28.047312873072     -3.237E-03 1.914E-04 0.000E+00
  ETOT  4  -28.047410877114     -9.800E-05 2.574E-06 0.000E+00
  ETOT  5  -28.047414263771     -3.387E-06 2.080E-07 0.000E+00
- ETOT  6  -28.047414390298     -1.265E-07 2.567E-09 0.000E+00
- ETOT  7  -28.047414395232     -4.934E-09 2.906E-10 0.000E+00
- ETOT  8  -28.047414395429     -1.969E-10 4.341E-12 0.000E+00
- ETOT  9  -28.047414395437     -7.891E-12 4.561E-13 0.000E+00
- ETOT 10  -28.047414395437     -3.482E-13 8.232E-15 0.000E+00
- ETOT 11  -28.047414395437     -2.132E-14 7.558E-16 0.000E+00
- ETOT 12  -28.047414395437      2.842E-14 1.540E-17 0.000E+00
- ETOT 13  -28.047414395437     -7.105E-15 1.293E-18 0.000E+00
- ETOT 14  -28.047414395437      3.197E-14 2.837E-20 0.000E+00
- ETOT 15  -28.047414395437     -9.237E-14 2.251E-21 0.000E+00
- ETOT 16  -28.047414395437      1.101E-13 9.313E-23 0.000E+00
+ ETOT  6  -28.047414390298     -1.265E-07 5.065E-09 0.000E+00
+ ETOT  7  -28.047414395232     -4.934E-09 5.094E-10 0.000E+00
+ ETOT  8  -28.047414395429     -1.969E-10 4.122E-11 0.000E+00
+ ETOT  9  -28.047414395437     -7.891E-12 3.670E-12 0.000E+00
+ ETOT 10  -28.047414395437     -3.482E-13 9.444E-14 0.000E+00
+ ETOT 11  -28.047414395437     -2.132E-14 1.835E-14 0.000E+00
+ ETOT 12  -28.047414395437      2.842E-14 4.554E-16 0.000E+00
+ ETOT 13  -28.047414395437     -7.105E-15 1.030E-16 0.000E+00
+ ETOT 14  -28.047414395437      3.197E-14 2.595E-18 0.000E+00
+ ETOT 15  -28.047414395437     -9.237E-14 5.859E-19 0.000E+00
+ ETOT 16  -28.047414395437      1.101E-13 1.482E-20 0.000E+00
+ ETOT 17  -28.047414395437     -3.553E-15 3.344E-21 0.000E+00
+ ETOT 18  -28.047414395437     -3.553E-15 9.313E-23 0.000E+00
 
- At SCF step   16   max residual=  9.31E-23 < tolwfr=  1.00E-22 =>converged.
+ At SCF step   18   max residual=  9.31E-23 < tolwfr=  1.00E-22 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -16.667E-03; max=  93.129E-24
+ Mean square residual over all n,k,spin=   48.986E-24; max=  93.129E-24
  dfpt_looppert : ek2=    4.5406579546E+01
           f-sum rule ratio=    1.3609000570E+00
  prteigrs : about to open file t56t_1WF1_EIG
@@ -954,9 +957,6 @@ P          mk1mem3          2
         optdriver1          0
         optdriver2          0
         optdriver3          1
-         prtefmas1          0
-         prtefmas2          0
-         prtefmas3          1
             rfdir1          0       0       0
             rfdir2          0       0       0
             rfdir3          1       1       1
@@ -1108,10 +1108,10 @@ P          mk1mem3          2
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         19.2  wall=         19.6
+- Proc.   0 individual time (sec): cpu=         17.4  wall=         17.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.2  wall=         19.6
++Overall time at end (sec) : cpu=         17.4  wall=         17.8

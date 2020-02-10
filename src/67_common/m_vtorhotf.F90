@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_vtorhotf
 !! NAME
 !!  m_vtorhotf
@@ -7,7 +6,7 @@
 !! Computes the new density from a fixed potential (vtrial) using the Thomas-Fermi functional
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MF, AR, MM)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MF, AR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_common
 !! NAME
 !!  m_common
@@ -8,7 +7,7 @@
 !!  Mainly printing routines.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, AF, GMR, LBoeri, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1874,7 +1873,7 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
 
       ! Finish to read the "file" file completely, as npsp is known,
       do ipsp=1,npsp
-        write(std_out,'(/,a)' )' Please give name of formatted atomic psp file'
+        write(std_out,'(/,a)' )' Please give name of formatted atomic psp file (and finish with a newline character)'
         read (std_in, '(a)' , iostat=ios ) filpsp
         ! It might be that a file name is missing
         if (ios /= 0) then
