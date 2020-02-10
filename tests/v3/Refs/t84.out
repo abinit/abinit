@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h45 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h42 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v3_t84/t84.in
 - output file    -> t84.out
@@ -437,6 +437,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
   sigma(2 2)=  5.28010549E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.02442026E-03  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -504,22 +505,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.78249231858542E+00
-    Hartree energy  =  3.97190950930114E-01
-    XC energy       = -2.61261807790641E+00
-    Ewald energy    = -1.13058438878511E+01
-    PspCore energy  =  1.44126513565306E+00
-    Loc. psp. energy= -1.95539061080990E+00
-    NL   psp  energy=  5.63285760150852E-01
-    >>>>>>>>> Etotal= -1.06896184112479E+01
-
- Other information on the energy :
-    Total energy(eV)= -2.90879309905391E+02 ; Band energy (Ha)=  -1.2188978791E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.78249231858542E+00
+hartree             :  3.97190950930114E-01
+xc                  : -2.61261807790641E+00
+Ewald energy        : -1.13058438878511E+01
+psp_core            :  1.44126513565306E+00
+local_psp           : -1.95539061080990E+00
+non_local_psp       :  5.63285760150852E-01
+total_energy        : -1.06896184112479E+01
+total_energy_eV     : -2.90879309905391E+02
+band_energy         : -1.21889787908248E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1218,6 +1216,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
   sigma(2 2)=  6.93480452E-04  sigma(3 1)=  1.65469902E-04
   sigma(3 3)=  6.93480452E-04  sigma(2 1)=  1.65469902E-04
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -1285,22 +1284,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.78249231859874E+00
-    Hartree energy  =  3.97190950927466E-01
-    XC energy       = -2.61261807791174E+00
-    Ewald energy    = -1.13058438878818E+01
-    PspCore energy  =  1.44126513566533E+00
-    Loc. psp. energy= -1.95539061079776E+00
-    NL   psp  energy=  5.63285760149936E-01
-    >>>>>>>>> Etotal= -1.06896184112498E+01
-
- Other information on the energy :
-    Total energy(eV)= -2.90879309905442E+02 ; Band energy (Ha)=  -1.2188978791E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.78249231859874E+00
+hartree             :  3.97190950927466E-01
+xc                  : -2.61261807791174E+00
+Ewald energy        : -1.13058438878818E+01
+psp_core            :  1.44126513566533E+00
+local_psp           : -1.95539061079776E+00
+non_local_psp       :  5.63285760149936E-01
+total_energy        : -1.06896184112498E+01
+total_energy_eV     : -2.90879309905442E+02
+band_energy         : -1.21889787907024E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2275,10 +2271,10 @@ P          mk1mem6          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.6
+- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  51 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.0  wall=          2.6
++Overall time at end (sec) : cpu=          2.0  wall=          2.3

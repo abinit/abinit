@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h54 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h07 )
   
 
  # input for ujdet, cut it using 'sed -n "/MARK/,/MARK/p" abi.out > ujdet.in '------- 

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h08 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h56 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t77/t77.in
 - output file    -> t77.out
@@ -662,6 +662,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
   sigma(2 2)=  4.54866924E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.54866924E-03  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        1
@@ -771,36 +772,34 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  6.31962427156263E+00
+hartree             :  2.57465927135713E+01
+xc                  : -1.36913857690699E+01
+Ewald energy        : -1.21308649131859E+02
+psp_core            :  1.28314572079917E+01
+local_psp           : -6.66720992207793E+01
+spherical_terms     : -4.06497676071530E+01
+internal            : -1.97424227535736E+02
+'-kT*entropy'       : -1.83459720046560E-03
+total_energy        : -1.97426062132937E+02
+total_energy_eV     : -5.37223636066755E+03
+...
 
-    Kinetic energy  =  6.31962427156263E+00
-    Hartree energy  =  2.57465927135713E+01
-    XC energy       = -1.36913857690699E+01
-    Ewald energy    = -1.21308649131859E+02
-    PspCore energy  =  1.28314572079917E+01
-    Loc. psp. energy= -6.66720992207793E+01
-    Spherical terms = -4.06497676071530E+01
-    >>>>> Internal E= -1.97424227535736E+02
 
-    -kT*entropy     = -1.83459720046560E-03
-    >>>>>>>>> Etotal= -1.97426062132937E+02
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -2.05637137985947E+01
-    Ewald energy    =-1.21308649131859E+02
-    PspCore energy  =  1.28314572079917E+01
-    Dble-C XC-energy= -2.14546568829352E+01
-    Spherical terms = -4.69286586267264E+01
-    >>>>> Internal E= -1.97424221232124E+02
-
-    -kT*entropy     = -1.83459720046560E-03
-    >>>> Etotal (DC)= -1.97426055829325E+02
-
-  >Total energy in eV           = -5.37223636066755E+03
-  >Total DC energy in eV        = -5.37223618913754E+03
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -2.056371379859473E+001
+Ewald energy        : -1.213086491318595E+002
+psp_core            :  1.283145720799169E+001
+xc_dc               : -2.145465688293523E+001
+spherical_terms     : -4.692865862672640E+001
+internal            : -1.974242212321242E+002
+'-kT*entropy'       : -1.834597200465596E-003
+total_energy_dc     : -1.974260558293246E+002
+total_energy_dc_eV  : -5.372236360667546E+003
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -877,6 +876,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
   sigma(1 1)=  4.55055743E-03  sigma(3 2)=  3.52117196E-10
   sigma(2 2)=  4.55052797E-03  sigma(3 1)= -6.46070033E-08
   sigma(3 3)=  4.55051239E-03  sigma(2 1)= -5.19840192E-08
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -987,36 +987,34 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  6.31959145201565E+00
+hartree             :  2.57464895364170E+01
+xc                  : -1.36913700676236E+01
+Ewald energy        : -1.21308649131859E+02
+psp_core            :  1.28314572079917E+01
+local_psp           : -6.66719661566389E+01
+spherical_terms     : -4.06497740936897E+01
+internal            : -1.97424221253387E+02
+'-kT*entropy'       : -1.83453984176360E-03
+total_energy        : -1.97426055793229E+02
+total_energy_eV     : -5.37223618815534E+03
+...
 
-    Kinetic energy  =  6.31959145201565E+00
-    Hartree energy  =  2.57464895364170E+01
-    XC energy       = -1.36913700676236E+01
-    Ewald energy    = -1.21308649131859E+02
-    PspCore energy  =  1.28314572079917E+01
-    Loc. psp. energy= -6.66719661566389E+01
-    Spherical terms = -4.06497740936897E+01
-    >>>>> Internal E= -1.97424221253387E+02
 
-    -kT*entropy     = -1.83453984176360E-03
-    >>>>>>>>> Etotal= -1.97426055793229E+02
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -2.05639074938293E+01
-    Ewald energy    =-1.21308649131859E+02
-    PspCore energy  =  1.28314572079917E+01
-    Dble-C XC-energy= -2.14545587695786E+01
-    Spherical terms = -4.69285631015928E+01
-    >>>>> Internal E= -1.97424221288869E+02
-
-    -kT*entropy     = -1.83453984176360E-03
-    >>>> Etotal (DC)= -1.97426055828710E+02
-
-  >Total energy in eV           = -5.37223618815534E+03
-  >Total DC energy in eV        = -5.37223618912083E+03
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -2.056390749382934E+001
+Ewald energy        : -1.213086491318595E+002
+psp_core            :  1.283145720799169E+001
+xc_dc               : -2.145455876957860E+001
+spherical_terms     : -4.692856310159279E+001
+internal            : -1.974242212888685E+002
+'-kT*entropy'       : -1.834539841763602E-003
+total_energy_dc     : -1.974260558287103E+002
+total_energy_dc_eV  : -5.372236188155335E+003
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1081,6 +1079,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      84.333      84.147
   sigma(1 1)=  4.55056227E-03  sigma(3 2)=  2.74134200E-10
   sigma(2 2)=  4.55053309E-03  sigma(3 1)= -6.43545364E-08
   sigma(3 3)=  4.55051786E-03  sigma(2 1)= -5.17762420E-08
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -1253,36 +1252,34 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  6.31959136283257E+00
+hartree             :  2.57464893441882E+01
+xc                  : -1.36913700398606E+01
+Ewald energy        : -1.21308649131859E+02
+psp_core            :  1.28314572079917E+01
+local_psp           : -6.66719659063751E+01
+spherical_terms     : -4.06497742149691E+01
+internal            : -1.97424221378052E+02
+'-kT*entropy'       : -1.83453969282007E-03
+total_energy        : -1.97426055917745E+02
+total_energy_eV     : -5.37223619154357E+03
+...
 
-    Kinetic energy  =  6.31959136283257E+00
-    Hartree energy  =  2.57464893441882E+01
-    XC energy       = -1.36913700398606E+01
-    Ewald energy    = -1.21308649131859E+02
-    PspCore energy  =  1.28314572079917E+01
-    Loc. psp. energy= -6.66719659063751E+01
-    Spherical terms = -4.06497742149691E+01
-    >>>>> Internal E= -1.97424221378052E+02
 
-    -kT*entropy     = -1.83453969282007E-03
-    >>>>>>>>> Etotal= -1.97426055917745E+02
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -2.05639080708518E+01
-    Ewald energy    =-1.21308649131859E+02
-    PspCore energy  =  1.28314572079917E+01
-    Dble-C XC-energy= -2.14545585863123E+01
-    Spherical terms = -4.69285627079854E+01
-    >>>>> Internal E= -1.97424221289017E+02
-
-    -kT*entropy     = -1.83453969282007E-03
-    >>>> Etotal (DC)= -1.97426055828710E+02
-
-  >Total energy in eV           = -5.37223619154357E+03
-  >Total DC energy in eV        = -5.37223618912082E+03
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -2.056390807085182E+001
+Ewald energy        : -1.213086491318595E+002
+psp_core            :  1.283145720799169E+001
+xc_dc               : -2.145455858631229E+001
+spherical_terms     : -4.692856270798542E+001
+internal            : -1.974242212890173E+002
+'-kT*entropy'       : -1.834539692820070E-003
+total_energy_dc     : -1.974260558287102E+002
+total_energy_dc_eV  : -5.372236191543574E+003
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1775,6 +1772,7 @@ cartesian_forces: !CartForces
   1.7945E+00  2.0691E+00  2.0873E+00  2.2683E+00  2.3274E+00  2.3404E+00
   2.5090E+00  2.5465E+00  2.5583E+00  2.5609E+00  2.6594E+00  2.8660E+00
   prteigrs : nnsclo,ikpt=   20   41 max resid (incl. the buffer)=  9.80824E-08
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -2754,10 +2752,10 @@ P           mkmem4         41
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         15.9  wall=         17.9
+- Proc.   0 individual time (sec): cpu=         15.7  wall=         15.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  11 WARNINGs and  21 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.9  wall=         17.9
++Overall time at end (sec) : cpu=         15.7  wall=         15.9

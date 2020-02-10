@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 18h00 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h05 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_telast_2-telast_3/telast_2.in
 - output file    -> telast_2.out
@@ -370,6 +370,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     424.219     424.184
   sigma(2 2)= -3.80064982E-10  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  7.75604568E-10  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        4
@@ -451,22 +452,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  5.91947827500968E+00
-    Hartree energy  =  1.65285115746595E+00
-    XC energy       = -8.68515356530415E+00
-    Ewald energy    = -1.68697612425042E+01
-    PspCore energy  =  1.45231023648193E+00
-    Loc. psp. energy= -4.92404864079688E+00
-    NL   psp  energy=  1.18338000707510E+00
-    >>>>>>>>> Etotal= -2.02709437725725E+01
-
- Other information on the energy :
-    Total energy(eV)= -5.51600432199948E+02 ; Band energy (Ha)=  -1.4274245066E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  5.91947827500968E+00
+hartree             :  1.65285115746595E+00
+xc                  : -8.68515356530415E+00
+Ewald energy        : -1.68697612425042E+01
+psp_core            :  1.45231023648193E+00
+local_psp           : -4.92404864079688E+00
+non_local_psp       :  1.18338000707510E+00
+total_energy        : -2.02709437725725E+01
+total_energy_eV     : -5.51600432199948E+02
+band_energy         : -1.42742450655858E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2418,10 +2416,10 @@ P          mk1mem3         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         55.3  wall=         56.5
+- Proc.   0 individual time (sec): cpu=         56.2  wall=         61.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and  46 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         55.3  wall=         56.5
++Overall time at end (sec) : cpu=         56.2  wall=         61.7

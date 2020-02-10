@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h38 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h38 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t48/t48.in
 - output file    -> t48.out
@@ -490,6 +490,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(1 1)=  1.36871894E-04  sigma(3 2)= -1.91452067E-09
   sigma(2 2)=  1.10417578E-04  sigma(3 1)= -1.89394417E-08
   sigma(3 3)=  1.10411942E-04  sigma(2 1)= -1.24359081E-08
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -970,6 +971,7 @@ cartesian_forces: !CartForces
   nstep=   17 was not enough SCF cycles to converge;
   maximum force difference=  1.115E-05 exceeds toldff=  1.000E-05
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -1105,6 +1107,7 @@ cartesian_forces: !CartForces
   sigma(1 1)=  2.53815100E-04  sigma(3 2)= -5.65165543E-15
   sigma(2 2)=  1.11131745E-04  sigma(3 1)=  3.35809422E-10
   sigma(3 3)=  1.11131746E-04  sigma(2 1)=  2.32981891E-10
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -1251,6 +1254,7 @@ cartesian_forces: !CartForces
   sigma(2 2)=  1.11146841E-04  sigma(3 1)=  2.90784323E-10
   sigma(3 3)=  1.11146828E-04  sigma(2 1)=  2.01782186E-10
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -1386,6 +1390,7 @@ cartesian_forces: !CartForces
   sigma(1 1)=  2.53903839E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.11135379E-04  sigma(3 1)=  2.98381981E-10
   sigma(3 3)=  1.11135380E-04  sigma(2 1)=  2.07064451E-10
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -1532,6 +1537,7 @@ cartesian_forces: !CartForces
   sigma(2 2)=  1.11141930E-04  sigma(3 1)=  2.46949354E-10
   sigma(3 3)=  1.11141920E-04  sigma(2 1)=  1.71373617E-10
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -1667,6 +1673,7 @@ cartesian_forces: !CartForces
   sigma(1 1)=  2.53952393E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.11136401E-04  sigma(3 1)=  2.52966715E-10
   sigma(3 3)=  1.11136402E-04  sigma(2 1)=  1.75549692E-10
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -1805,22 +1812,19 @@ cartesian_forces: !CartForces
       Minimum=   -6.8137E-02  at reduced coord.    0.0000    0.5000    0.5000
  Next minimum=   -6.7220E-02  at reduced coord.    0.5000    0.5000    0.5000
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.53917295910779E+00
-    Hartree energy  =  1.45930961799800E+00
-    XC energy       = -3.21819313748285E+00
-    Ewald energy    = -5.59010278084875E+00
-    PspCore energy  =  2.98722879456821E-02
-    Loc. psp. energy= -5.84102917056583E+00
-    NL   psp  energy=  1.94779476724118E+00
-    >>>>>>>>> Etotal= -8.67317545660478E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.36009106634803E+02 ; Band energy (Ha)=  -1.3534490877E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.53917295910779E+00
+hartree             :  1.45930961799800E+00
+xc                  : -3.21819313748285E+00
+Ewald energy        : -5.59010278084875E+00
+psp_core            :  2.98722879456821E-02
+local_psp           : -5.84102917056583E+00
+non_local_psp       :  1.94779476724118E+00
+total_energy        : -8.67317545660478E+00
+total_energy_eV     : -2.36009106634803E+02
+band_energy         : -1.35344908770407E+00
+...
 
 
           ===> extra information on forces <===
@@ -1989,10 +1993,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          7.5  wall=          8.9
+- Proc.   0 individual time (sec): cpu=          7.4  wall=         16.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  11 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.5  wall=          8.9
++Overall time at end (sec) : cpu=          7.4  wall=         16.2

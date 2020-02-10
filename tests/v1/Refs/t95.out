@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h39 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h38 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t95/t95.in
 - output file    -> t95.out
@@ -428,6 +428,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      57.000      57.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum residual=  8.065E-03 exceeds tolwfr=  1.000E-13
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        4
@@ -519,22 +520,19 @@ cartesian_forces: !CartForces
  Next minimum=    4.1481E-03  at reduced coord.    0.8000    0.8000    0.2000
    Integrated=    1.6000E+01
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.53566156337726E+00
-    Hartree energy  =  3.21712409303533E-01
-    XC energy       = -3.70561340435456E+00
-    Ewald energy    = -1.42954315379687E+01
-    PspCore energy  = -2.61068685512035E-01
-    Loc. psp. energy= -4.85323356404774E+00
-    NL   psp  energy=  4.76404103530585E+00
-    >>>>>>>>> Etotal= -1.44939321838964E+01
-
- Other information on the energy :
-    Total energy(eV)= -3.94399952296813E+02 ; Band energy (Ha)=  -3.5401040829E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.53566156337726E+00
+hartree             :  3.21712409303533E-01
+xc                  : -3.70561340435456E+00
+Ewald energy        : -1.42954315379687E+01
+psp_core            : -2.61068685512035E-01
+local_psp           : -4.85323356404774E+00
+non_local_psp       :  4.76404103530585E+00
+total_energy        : -1.44939321838964E+01
+total_energy_eV     : -3.94399952296813E+02
+band_energy         : -3.54010408294766E-01
+...
 
 
           ===> extra information on forces <===
@@ -617,6 +615,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      57.000      57.000
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
   maximum residual=  8.065E-03 exceeds tolwfr=  1.000E-13
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -709,22 +708,19 @@ cartesian_forces: !CartForces
  Next minimum=    4.1481E-03  at reduced coord.    0.8000    0.8000    0.2000
    Integrated=    1.6000E+01
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.53566156337726E+00
-    Hartree energy  =  3.21712409303533E-01
-    XC energy       = -3.70561340435456E+00
-    Ewald energy    = -1.42954315379687E+01
-    PspCore energy  = -2.61068685512035E-01
-    Loc. psp. energy= -4.85323356404774E+00
-    NL   psp  energy=  4.76404103530585E+00
-    >>>>>>>>> Etotal= -1.44939321838964E+01
-
- Other information on the energy :
-    Total energy(eV)= -3.94399952296813E+02 ; Band energy (Ha)=  -3.5401040829E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.53566156337726E+00
+hartree             :  3.21712409303533E-01
+xc                  : -3.70561340435456E+00
+Ewald energy        : -1.42954315379687E+01
+psp_core            : -2.61068685512035E-01
+local_psp           : -4.85323356404774E+00
+non_local_psp       :  4.76404103530585E+00
+total_energy        : -1.44939321838964E+01
+total_energy_eV     : -3.94399952296813E+02
+band_energy         : -3.54010408294765E-01
+...
 
 
           ===> extra information on forces <===
@@ -807,6 +803,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      57.000      57.000
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
   maximum residual=  7.058E-03 exceeds tolwfr=  1.000E-13
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -899,22 +896,19 @@ cartesian_forces: !CartForces
  Next minimum=    2.5934E-03  at reduced coord.    0.5000    0.5000    0.0000
    Integrated=    1.6000E+01
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.55658514625738E+00
-    Hartree energy  =  3.35038080874612E-01
-    XC energy       = -3.71224436609201E+00
-    Ewald energy    = -1.42954315379687E+01
-    PspCore energy  = -2.61068685512035E-01
-    Loc. psp. energy= -4.90724562318669E+00
-    NL   psp  energy=  4.78341161252629E+00
-    >>>>>>>>> Etotal= -1.45009553731011E+01
-
- Other information on the energy :
-    Total energy(eV)= -3.94591062994185E+02 ; Band energy (Ha)=  -3.5972348904E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.55658514625738E+00
+hartree             :  3.35038080874612E-01
+xc                  : -3.71224436609201E+00
+Ewald energy        : -1.42954315379687E+01
+psp_core            : -2.61068685512035E-01
+local_psp           : -4.90724562318669E+00
+non_local_psp       :  4.78341161252629E+00
+total_energy        : -1.45009553731011E+01
+total_energy_eV     : -3.94591062994185E+02
+band_energy         : -3.59723489043689E-01
+...
 
 
           ===> extra information on forces <===
@@ -997,6 +991,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      57.000      57.000
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
   maximum residual=  7.058E-03 exceeds tolwfr=  1.000E-13
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -1089,22 +1084,19 @@ cartesian_forces: !CartForces
  Next minimum=    1.9399E-03  at reduced coord.    0.5000    0.0000    0.5000
    Integrated=    1.6000E+01
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.55658514625738E+00
-    Hartree energy  =  3.31594429053658E-01
-    XC energy       = -3.71100523986265E+00
-    Ewald energy    = -1.42954315379687E+01
-    PspCore energy  = -2.61068685512035E-01
-    Loc. psp. energy= -4.90724562318674E+00
-    NL   psp  energy=  4.78341161252629E+00
-    >>>>>>>>> Etotal= -1.45031598986928E+01
-
- Other information on the energy :
-    Total energy(eV)= -3.94651051186288E+02 ; Band energy (Ha)=  -3.5972348904E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.55658514625738E+00
+hartree             :  3.31594429053658E-01
+xc                  : -3.71100523986265E+00
+Ewald energy        : -1.42954315379687E+01
+psp_core            : -2.61068685512035E-01
+local_psp           : -4.90724562318674E+00
+non_local_psp       :  4.78341161252629E+00
+total_energy        : -1.45031598986928E+01
+total_energy_eV     : -3.94651051186288E+02
+band_energy         : -3.59723489043689E-01
+...
 
 
           ===> extra information on forces <===
@@ -1431,10 +1423,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          7.4  wall=          9.7
+- Proc.   0 individual time (sec): cpu=          7.0  wall=          7.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.4  wall=          9.7
++Overall time at end (sec) : cpu=          7.0  wall=          7.2

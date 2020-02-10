@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h50 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h45 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t20/t20.in
 - output file    -> t20.out
@@ -373,6 +373,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     374.500     374.467
   sigma(2 2)=  1.23453525E-02  sigma(3 1)=  2.88587907E-05
   sigma(3 3)=  1.23453525E-02  sigma(2 1)= -2.88587907E-05
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        4
@@ -670,36 +671,34 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  4.49849671194703E+01
+hartree             :  5.52775494175999E+01
+xc                  : -3.21036414056552E+01
+Ewald energy        : -2.38122809319194E+02
+psp_core            :  2.14477051759375E+01
+local_psp           : -1.51037512317253E+02
+spherical_terms     : -7.24316128200517E+01
+internal            : -3.71985354149146E+02
+'-kT*entropy'       : -2.26578564238843E-17
+total_energy        : -3.71985354149146E+02
+total_energy_eV     : -1.01222362620504E+04
+...
 
-    Kinetic energy  =  4.49849671194703E+01
-    Hartree energy  =  5.52775494175999E+01
-    XC energy       = -3.21036414056552E+01
-    Ewald energy    = -2.38122809319194E+02
-    PspCore energy  =  2.14477051759375E+01
-    Loc. psp. energy= -1.51037512317253E+02
-    Spherical terms = -7.24316128200517E+01
-    >>>>> Internal E= -3.71985354149146E+02
 
-    -kT*entropy     = -2.26578564238843E-17
-    >>>>>>>>> Etotal= -3.71985354149146E+02
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -4.05702043798052E+01
-    Ewald energy    =-2.38122809319194E+02
-    PspCore energy  =  2.14477051759375E+01
-    Dble-C XC-energy= -4.52336752699317E+01
-    Spherical terms = -6.95063717206181E+01
-    >>>>> Internal E= -3.71985355513611E+02
-
-    -kT*entropy     = -2.26578564238843E-17
-    >>>> Etotal (DC)= -3.71985355513611E+02
-
-  >Total energy in eV           = -1.01222362620504E+04
-  >Total DC energy in eV        = -1.01222362991794E+04
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -4.057020437980516E+001
+Ewald energy        : -2.381228093191938E+002
+psp_core            :  2.144770517593746E+001
+xc_dc               : -4.523367526993174E+001
+spherical_terms     : -6.950637172061812E+001
+internal            : -3.719853555136114E+002
+'-kT*entropy'       : -2.265785642388433E-017
+total_energy_dc     : -3.719853555136114E+002
+total_energy_dc_eV  : -1.012223626205044E+004
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -925,6 +924,7 @@ cartesian_forces: !CartForces
   8.7297E-02  1.3796E-01  1.3796E-01  1.4934E-01  1.4934E-01  1.4963E-01
   2.9267E-01  3.1533E-01  3.1533E-01  4.6461E-01  6.1148E-01  8.1412E-01
   prteigrs : nnsclo,ikpt=   40   16 max resid (incl. the buffer)=  3.35697E-06
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -1537,10 +1537,10 @@ P           mkmem2         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         16.4  wall=         17.3
+- Proc.   0 individual time (sec): cpu=         16.2  wall=         17.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.4  wall=         17.3
++Overall time at end (sec) : cpu=         16.2  wall=         17.7

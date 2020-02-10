@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h38 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h38 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t51-t52/t52.in
 - output file    -> t52.out
@@ -220,6 +220,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     295.000     295.000
   sigma(2 2)=  1.29478875E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.29478602E-05  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -289,22 +290,19 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -1.25550    0.22652    2.52569
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.99095103550637E-01
-    Hartree energy  =  6.98415208431953E-01
-    XC energy       =  0.00000000000000E+00
-    Ewald energy    = -2.12488219803672E+00
-    PspCore energy  = -3.30087598421981E-02
-    Loc. psp. energy= -3.27151241454337E+00
-    NL   psp  energy=  1.18698745795747E+00
-    >>>>>>>>> Etotal= -2.74490560248223E+00
-
- Other information on the energy :
-    Total energy(eV)= -7.46926800086085E+01 ; Band energy (Ha)=   1.1000617015E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  7.99095103550637E-01
+hartree             :  6.98415208431953E-01
+xc                  :  0.00000000000000E+00
+Ewald energy        : -2.12488219803672E+00
+psp_core            : -3.30087598421981E-02
+local_psp           : -3.27151241454337E+00
+non_local_psp       :  1.18698745795747E+00
+total_energy        : -2.74490560248223E+00
+total_energy_eV     : -7.46926800086085E+01
+band_energy         :  1.10006170152987E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)

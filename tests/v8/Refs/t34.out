@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h37 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h57 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t34/t34.in
 - output file    -> t34.out
@@ -205,6 +205,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
   nstep=   10 was not enough SCF cycles to converge;
   maximum energy difference=  1.603E-04 exceeds toldfe=  1.000E-10
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -287,6 +288,7 @@ cartesian_forces: !CartForces
   nstep=   10 was not enough SCF cycles to converge;
   maximum energy difference=  1.534E-10 exceeds toldfe=  1.000E-10
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -366,6 +368,7 @@ cartesian_forces: !CartForces
   sigma(2 2)=  1.02684508E-02  sigma(3 1)= -2.02241530E-05
   sigma(3 3)=  9.85291903E-03  sigma(2 1)= -2.77997003E-05
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -444,6 +447,7 @@ cartesian_forces: !CartForces
   sigma(1 1)=  9.80899312E-03  sigma(3 2)=  4.20403958E-05
   sigma(2 2)=  1.02773433E-02  sigma(3 1)= -3.01835662E-05
   sigma(3 3)=  9.81027133E-03  sigma(2 1)= -3.58993630E-05
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -531,6 +535,7 @@ cartesian_forces: !CartForces
   nstep=   10 was not enough SCF cycles to converge;
   maximum energy difference=  2.862E-10 exceeds toldfe=  1.000E-10
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -615,6 +620,7 @@ cartesian_forces: !CartForces
   nstep=   10 was not enough SCF cycles to converge;
   maximum energy difference=  3.985E-10 exceeds toldfe=  1.000E-10
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -698,6 +704,7 @@ cartesian_forces: !CartForces
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
   maximum energy difference=  2.775E-10 exceeds toldfe=  1.000E-10
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -785,6 +792,7 @@ cartesian_forces: !CartForces
   nstep=   10 was not enough SCF cycles to converge;
   maximum energy difference=  1.978E-07 exceeds toldfe=  1.000E-10
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -869,6 +877,7 @@ cartesian_forces: !CartForces
   nstep=   10 was not enough SCF cycles to converge;
   maximum energy difference=  3.588E-08 exceeds toldfe=  1.000E-10
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -952,6 +961,7 @@ cartesian_forces: !CartForces
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
   maximum energy difference=  5.152E-08 exceeds toldfe=  1.000E-10
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -1039,6 +1049,7 @@ cartesian_forces: !CartForces
   nstep=   10 was not enough SCF cycles to converge;
   maximum energy difference=  3.801E-10 exceeds toldfe=  1.000E-10
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -1122,6 +1133,7 @@ cartesian_forces: !CartForces
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
   maximum energy difference=  1.935E-10 exceeds toldfe=  1.000E-10
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -1220,25 +1232,21 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.97294935838575E+01
-    Hartree energy  =  5.20772344087470E+00
-    XC energy       = -2.09371761290912E+01
-    Ewald energy    = -4.29019792568731E+01
-    PspCore energy  =  1.24673648645944E+01
-    Loc. psp. energy=  4.09176791569708E+00
-    NL   psp  energy= -5.72139238105758E+01
-    >>>>> Internal E= -4.95567293915164E+01
-
-    -kT*entropy     = -5.28065405440688E-02
-    >>>>>>>>> Etotal= -4.96095359320605E+01
-
- Other information on the energy :
-    Total energy(eV)= -1.34994412536376E+03 ; Band energy (Ha)=  -5.6784657818E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  4.97294935838575E+01
+hartree             :  5.20772344087470E+00
+xc                  : -2.09371761290912E+01
+Ewald energy        : -4.29019792568731E+01
+psp_core            :  1.24673648645944E+01
+local_psp           :  4.09176791569708E+00
+non_local_psp       : -5.72139238105758E+01
+internal            : -4.95567293915164E+01
+'-kT*entropy'       : -5.28065405440688E-02
+total_energy        : -4.96095359320605E+01
+total_energy_eV     : -1.34994412536376E+03
+band_energy         : -5.67846578177428E+00
+...
 
  rms coord change=  1.8153E-02   atom, delta coord (reduced):
      1        0.006749733405     -0.009077369937      0.029336379573
@@ -1426,10 +1434,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         55.2  wall=         55.8
+- Proc.   0 individual time (sec): cpu=         55.1  wall=         56.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         55.2  wall=         55.8
++Overall time at end (sec) : cpu=         55.1  wall=         56.6

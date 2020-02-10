@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h53 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h07 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpositron_5/tpositron_5.in
 - output file    -> tpositron_5.out
@@ -239,6 +239,7 @@ TC-DFT STEP   2 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
   posnstep=    2 was not enough SCF cycles to converge difference between
   etotal from electronic calculation and etotal from positronic calculation;
   diff=  3.166E-01 exceeds postoldfe=  1.000E-06
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -415,25 +416,21 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.23759187664527E+00
-    Hartree energy  =  6.25909911548777E-01
-    XC energy       = -4.79464396456554E+00
-    Ewald energy    = -8.39947182979609E+00
-    PspCore energy  =  2.32215214290181E-01
-    Loc. psp. energy= -2.48760557118463E+00
-    Spherical terms =  3.64385166872595E+00
-    >>> Electronic E= -7.94215269433608E+00
-
-    Positronic ener.= -1.97233948739888E-01
-    EP interaction E= -1.19362610960362E-01
-    >>>>>>>>> Etotal= -8.25874925403633E+00
-
-  >Total energy in eV           = -2.24731996155071E+02
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.23759187664527E+00
+hartree             :  6.25909911548777E-01
+xc                  : -4.79464396456554E+00
+Ewald energy        : -8.39947182979609E+00
+psp_core            :  2.32215214290181E-01
+local_psp           : -2.48760557118463E+00
+spherical_terms     :  3.64385166872595E+00
+electronic          : -7.94215269433608E+00
+positronic          : -1.97233948739888E-01
+electron_positron_interaction: -1.19362610960362E-01
+total_energy        : -8.25874925403633E+00
+total_energy_eV     : -2.24731996155071E+02
+...
 
 
 == END DATASET(S) ==============================================================
@@ -625,10 +622,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         74.3  wall=         76.8
+- Proc.   0 individual time (sec): cpu=         73.6  wall=         73.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  29 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         74.3  wall=         76.8
++Overall time at end (sec) : cpu=         73.6  wall=         73.7

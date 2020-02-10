@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h39 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h38 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t86/t86.in
 - output file    -> t86.out
@@ -196,6 +196,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
   sigma(2 2)= -3.31316479E-04  sigma(3 1)= -1.24949960E-04
   sigma(3 3)= -3.30060964E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        5
@@ -287,6 +288,7 @@ cartesian_forces: !CartForces
   sigma(1 1)= -1.15312763E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -3.31313421E-04  sigma(3 1)= -1.24950015E-04
   sigma(3 3)= -3.30058875E-04  sigma(2 1)=  0.00000000E+00
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -385,6 +387,7 @@ cartesian_forces: !CartForces
   sigma(2 2)= -3.31298736E-04  sigma(3 1)= -1.24933077E-04
   sigma(3 3)= -3.30046030E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        5
@@ -482,6 +485,7 @@ cartesian_forces: !CartForces
   sigma(1 1)= -1.15899644E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -3.31363864E-04  sigma(3 1)= -1.25006147E-04
   sigma(3 3)= -3.30102076E-04  sigma(2 1)=  0.00000000E+00
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -582,6 +586,7 @@ cartesian_forces: !CartForces
   sigma(2 2)= -3.31267713E-04  sigma(3 1)= -1.24900030E-04
   sigma(3 3)= -3.30018801E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        5
@@ -677,6 +682,7 @@ cartesian_forces: !CartForces
   sigma(1 1)= -1.14826779E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -3.31271609E-04  sigma(3 1)= -1.24902105E-04
   sigma(3 3)= -3.30020048E-04  sigma(2 1)=  0.00000000E+00
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -775,6 +781,7 @@ cartesian_forces: !CartForces
   sigma(2 2)= -3.31264700E-04  sigma(3 1)= -1.24898053E-04
   sigma(3 3)= -3.30012958E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        5
@@ -870,6 +877,7 @@ cartesian_forces: !CartForces
   sigma(1 1)= -1.14793309E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)= -3.31264870E-04  sigma(3 1)= -1.24898804E-04
   sigma(3 3)= -3.30011263E-04  sigma(2 1)=  0.00000000E+00
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -996,22 +1004,19 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.42229   -0.21114   -0.13903   -0.01751
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.81506198154692E+00
-    Hartree energy  =  2.13424250655043E+00
-    XC energy       = -3.08939410903373E+00
-    Ewald energy    = -3.04345238592127E+00
-    PspCore energy  =  2.50284053249671E-02
-    Loc. psp. energy= -7.22890903813207E+00
-    NL   psp  energy=  9.47255077873238E-01
-    >>>>>>>>> Etotal= -6.44016756179153E+00
-
- Other information on the energy :
-    Total energy(eV)= -1.75245871646629E+02 ; Band energy (Ha)=  -1.5799656398E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.81506198154692E+00
+hartree             :  2.13424250655043E+00
+xc                  : -3.08939410903373E+00
+Ewald energy        : -3.04345238592127E+00
+psp_core            :  2.50284053249671E-02
+local_psp           : -7.22890903813207E+00
+non_local_psp       :  9.47255077873238E-01
+total_energy        : -6.44016756179153E+00
+total_energy_eV     : -1.75245871646629E+02
+band_energy         : -1.57996563983955E+00
+...
 
  rms coord change=  2.3486E-05   atom, delta coord (reduced):
      1        0.000000000000      0.000000000000      0.000000000000
@@ -1181,10 +1186,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          5.2  wall=          7.0
+- Proc.   0 individual time (sec): cpu=          5.1  wall=          6.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.2  wall=          7.0
++Overall time at end (sec) : cpu=          5.1  wall=          6.8

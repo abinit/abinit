@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 18h07 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h16 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t51_MPI1-t52_MPI1-t53_MPI1/t52.in
 - output file    -> t52_MPI1.out
@@ -276,6 +276,7 @@ P           mkmem         256
   nstep=   20 was not enough non-SCF iterations to converge;
   maximum residual=  9.210E-07 exceeds tolwfr=  1.000E-18
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        1
@@ -387,6 +388,7 @@ cartesian_forces: !CartForces
  scprqt:  WARNING -
   nstep=   20 was not enough non-SCF iterations to converge;
   maximum residual=  9.210E-07 exceeds tolwfr=  1.000E-18
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -569,43 +571,43 @@ P           mkmem         256
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         12.5        0.21      0.003
+- Total cpu        time (s,m,h):         12.6        0.21      0.003
 - Total wall clock time (s,m,h):         12.7        0.21      0.004
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           12.5, wall_time =           12.7
+- cpu_time =           12.6, wall_time =           12.7
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   8.177  65.5      8.220  64.9          87909      -1.00        0.99       0.99
-- nonlop(apply)                  1.228   9.8      1.240   9.8          87909      -1.00        0.99       0.99
-- projbd                         0.800   6.4      0.810   6.4         126648      -1.00        0.99       0.99
-- getghc-other                   0.501   4.0      0.462   3.6             -1      -1.00        1.08       1.08
-- vtowfk(ssdiag)                 0.469   3.8      0.469   3.7             -1      -1.00        1.00       1.00
-- others (129)                   0.144   1.2      0.146   1.2             -1      -1.00        0.99       0.99
+- fourwf%(pot)                   8.214  65.4      8.264  64.9          87909      -1.00        0.99       0.99
+- nonlop(apply)                  1.240   9.9      1.259   9.9          87909      -1.00        0.98       0.98
+- projbd                         0.808   6.4      0.819   6.4         126648      -1.00        0.99       0.99
+- getghc-other                   0.501   4.0      0.465   3.7             -1      -1.00        1.08       1.08
+- vtowfk(ssdiag)                 0.471   3.7      0.473   3.7             -1      -1.00        1.00       1.00
+- others (129)                   0.150   1.2      0.152   1.2             -1      -1.00        0.99       0.99
 -<END_TIMER>
 -
-- subtotal                      11.320  90.7     11.346  89.6                                  1.00       1.00
+- subtotal                      11.384  90.6     11.432  89.8                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          12.5, wall_time =          12.7
+- cpu_time =          12.6, wall_time =          12.7
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   8.177  65.5      8.220  64.9          87909      -1.00        0.99       0.99
-- nonlop(apply)                  1.228   9.8      1.240   9.8          87909      -1.00        0.99       0.99
-- projbd                         0.800   6.4      0.810   6.4         126648      -1.00        0.99       0.99
-- getghc-other                   0.501   4.0      0.462   3.6             -1      -1.00        1.08       1.08
-- vtowfk(ssdiag)                 0.469   3.8      0.469   3.7             -1      -1.00        1.00       1.00
-- others (129)                   0.144   1.2      0.146   1.2             -1      -1.00        0.99       0.99
+- fourwf%(pot)                   8.214  65.4      8.264  64.9          87909      -1.00        0.99       0.99
+- nonlop(apply)                  1.240   9.9      1.259   9.9          87909      -1.00        0.98       0.98
+- projbd                         0.808   6.4      0.819   6.4         126648      -1.00        0.99       0.99
+- getghc-other                   0.501   4.0      0.465   3.7             -1      -1.00        1.08       1.08
+- vtowfk(ssdiag)                 0.471   3.7      0.473   3.7             -1      -1.00        1.00       1.00
+- others (129)                   0.150   1.2      0.152   1.2             -1      -1.00        0.99       0.99
 -<END_TIMER>
 
-- subtotal                      11.320  90.7     11.346  89.6                                  1.00       1.00
+- subtotal                      11.384  90.6     11.432  89.8                                  1.00       1.00
 
 ================================================================================
 
@@ -685,10 +687,10 @@ P           mkmem         256
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         12.5  wall=         12.7
+- Proc.   0 individual time (sec): cpu=         12.6  wall=         12.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  50 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.5  wall=         12.7
++Overall time at end (sec) : cpu=         12.6  wall=         12.7

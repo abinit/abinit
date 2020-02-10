@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h48 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h14 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t70/t70.in
 - output file    -> t70.out
@@ -201,6 +201,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
 
  At SCF step    6, forces are sufficiently converged : 
   for the second time, max diff in force=  1.788E-05 is less than < tolrff=  2.000E-02 times max force
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -264,6 +265,7 @@ cartesian_forces: !CartForces
 
  At SCF step    5, forces are sufficiently converged : 
   for the second time, max diff in force=  1.704E-05 is less than < tolrff=  2.000E-02 times max force
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -329,6 +331,7 @@ cartesian_forces: !CartForces
  ETOT  4  -6.3311254909433    -6.656E-09 5.939E-10 1.644E-05 1.092E-05 1.499E-04
  ETOT  5  -6.3311254913710    -4.277E-10 5.940E-11 3.722E-07 1.054E-05 1.604E-04
  ETOT  6  -6.3311254913899    -1.890E-11 2.063E-12 3.902E-09 2.842E-07 1.602E-04
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -394,6 +397,7 @@ cartesian_forces: !CartForces
  ETOT  4  -6.3311255363430    -1.282E-11 1.129E-12 5.368E-08 4.122E-07 2.283E-06
  ETOT  5  -6.3311255363438    -7.958E-13 1.396E-13 1.568E-09 4.730E-07 2.756E-06
  ETOT  6  -6.3311255363438    -6.750E-14 7.486E-15 1.010E-11 4.643E-08 2.710E-06
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -485,25 +489,21 @@ cartesian_forces: !CartForces
       occupation numbers for kpt#   1
    2.00000    2.00000    0.92766    0.07234
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.77358307156224E+00
-    Hartree energy  =  2.45815185507665E+00
-    XC energy       = -2.22340249062002E+00
-    Ewald energy    = -2.52301281880451E+00
-    PspCore energy  =  7.31453256942226E-02
-    Loc. psp. energy= -7.54384300258341E+00
-    NL   psp  energy= -3.39006176558929E-01
-    >>>>> Internal E= -6.32438423623375E+00
-
-    -kT*entropy     = -6.74130011009912E-03
-    >>>>>>>>> Etotal= -6.33112553634385E+00
-
- Other information on the energy :
-    Total energy(eV)= -1.72278687235301E+02 ; Band energy (Ha)=  -1.6356586264E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.77358307156224E+00
+hartree             :  2.45815185507665E+00
+xc                  : -2.22340249062002E+00
+Ewald energy        : -2.52301281880451E+00
+psp_core            :  7.31453256942226E-02
+local_psp           : -7.54384300258341E+00
+non_local_psp       : -3.39006176558929E-01
+internal            : -6.32438423623375E+00
+'-kT*entropy'       : -6.74130011009912E-03
+total_energy        : -6.33112553634385E+00
+total_energy_eV     : -1.72278687235301E+02
+band_energy         : -1.63565862644296E+00
+...
 
  rms coord change=  9.9968E-04   atom, delta coord (reduced):
      1       -0.001731490684      0.000000000000      0.000000000000
@@ -590,6 +590,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1081.000    1081.000
 
  At SCF step   20, etot is converged : 
   for the second time, diff in etot=  2.132E-13 < toldfe=  1.000E-12
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -657,32 +658,31 @@ cartesian_forces: !CartForces
       occupation numbers for kpt#   1
    2.00000    2.00000    1.00000    0.00000
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.71010573906761E+00
+hartree             :  2.42760937222325E+00
+xc                  : -1.78968697344734E+00
+Ewald energy        : -2.52301281880451E+00
+psp_core            :  7.31453256942226E-02
+local_psp           : -7.47611241727815E+00
+non_local_psp+x     : -7.39401689582848E-01
+internal            : -6.31735346212777E+00
+'-kT*entropy'       : -5.64189583547795E-03
+total_energy        : -6.32299535796325E+00
+...
 
-    Kinetic energy  =  3.71010573906761E+00
-    Hartree energy  =  2.42760937222325E+00
-    XC energy       = -1.78968697344734E+00
-    Ewald energy    = -2.52301281880451E+00
-    PspCore energy  =  7.31453256942226E-02
-    Loc. psp. energy= -7.47611241727815E+00
-    NL(psp+X) energy= -7.39401689582848E-01
-    >>>>> Internal E= -6.31735346212777E+00
 
-    -kT*entropy     = -5.64189583547795E-03
-    >>>>>>>>> Etotal= -6.32299535796325E+00
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -1.95149259744052E+00
-    Ewald energy    =-2.52301281880451E+00
-    PspCore energy  =  7.31453256942226E-02
-    Dble-C XC-energy= -1.91599233560627E+00
-    >>>>> Internal E= -6.31735242615707E+00
-
-    -kT*entropy     = -5.64189583547795E-03
-    >>>> Etotal (DC)= -6.32299432199255E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -1.951492597440517E+000
+Ewald energy        : -2.523012818804507E+000
+psp_core            :  7.314532569422255E-002
+xc_dc               : -1.915992335606268E+000
+internal            : -6.317352426157068E+000
+'-kT*entropy'       : -5.641895835477949E-003
+total_energy_dc     : -6.322994321992546E+000
+...
 
 
 == END DATASET(S) ==============================================================
@@ -845,10 +845,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          4.9  wall=          5.1
+- Proc.   0 individual time (sec): cpu=          4.8  wall=          4.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.9  wall=          5.1
++Overall time at end (sec) : cpu=          4.8  wall=          4.9

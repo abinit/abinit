@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h04 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h53 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t31-t32-t33-t34-t35/t33.in
 - output file    -> t33.out
@@ -591,10 +591,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          6.8  wall=          6.8
+- Proc.   0 individual time (sec): cpu=          6.1  wall=          6.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.8  wall=          6.8
++Overall time at end (sec) : cpu=          6.1  wall=          6.2

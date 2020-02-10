@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h53 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h06 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tgw1_2-tgw1_3-tgw1_4-tgw1_5/tgw1_4.in
 - output file    -> tgw1_4.out
@@ -758,6 +758,7 @@ P           mkmem           1
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -986,6 +987,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -1214,6 +1216,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -1442,6 +1445,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -1670,6 +1674,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -2143,10 +2148,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         17.2  wall=         17.2
+- Proc.   0 individual time (sec): cpu=         17.2  wall=         18.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  44 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.2  wall=         17.2
++Overall time at end (sec) : cpu=         17.2  wall=         18.2

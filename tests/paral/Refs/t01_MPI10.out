@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 18h22 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h33 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t01_MPI10/t01.in
 - output file    -> t01_MPI10.out
@@ -219,6 +219,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     180.125     180.086
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.913E-06 exceeds tolwfr=  1.000E-20
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -286,22 +287,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.96696690893514E+00
-    Hartree energy  =  5.27842099628801E-01
-    XC energy       = -3.30829127125286E+00
-    Ewald energy    = -8.39791921808003E+00
-    PspCore energy  = -2.35213740359409E-01
-    Loc. psp. energy= -2.06972789331676E+00
-    NL   psp  energy=  1.92246999293661E+00
-    >>>>>>>>> Etotal= -8.59387312150851E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.33851180353505E+02 ; Band energy (Ha)=   5.9981582926E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.96696690893514E+00
+hartree             :  5.27842099628801E-01
+xc                  : -3.30829127125286E+00
+Ewald energy        : -8.39791921808003E+00
+psp_core            : -2.35213740359409E-01
+local_psp           : -2.06972789331676E+00
+non_local_psp       :  1.92246999293661E+00
+total_energy        : -8.59387312150851E+00
+total_energy_eV     : -2.33851180353505E+02
+band_energy         :  5.99815829263753E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -431,45 +429,44 @@ P           mkmem           6
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          9.9        0.16      0.003
-- Total wall clock time (s,m,h):         10.0        0.17      0.003
+- Total cpu        time (s,m,h):         10.9        0.18      0.003
+- Total wall clock time (s,m,h):         11.2        0.19      0.003
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 10, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            1.0, wall_time =            1.0
+- cpu_time =            1.1, wall_time =            1.1
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- pspini                         0.489   5.0      0.490   4.9              1      -1.00        1.00       1.00
-- invars2                        0.098   1.0      0.103   1.0              1      -1.00        0.95       0.95
-- ewald                          0.081   0.8      0.081   0.8              1      -1.00        1.00       1.00
-- others (131)                   0.179   1.8      0.180   1.8             -1      -1.00        1.00       1.00
+- pspini                         0.499   4.6      0.507   4.5              1      -1.00        0.98       0.98
+- invars2                        0.130   1.2      0.135   1.2              1      -1.00        0.96       0.96
+- ewald                          0.083   0.8      0.083   0.7              1      -1.00        0.99       0.99
+- others (131)                   0.194   1.8      0.195   1.7             -1      -1.00        1.00       1.00
 -<END_TIMER>
 -
-- subtotal                       0.847   8.6      0.854   8.5                                  0.99       0.99
+- subtotal                       0.905   8.3      0.920   8.2                                  0.98       0.98
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 10, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           9.9, wall_time =          10.0
+- cpu_time =          10.9, wall_time =          11.2
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- pspini                         4.833  48.9      4.847  48.3             10      -1.00        1.00       1.00
-- invars2                        0.992  10.0      1.037  10.3             10      -1.00        0.96       0.96
-- ewald                          0.799   8.1      0.800   8.0             10      -1.00        1.00       1.00
-- stress                         0.456   4.6      0.456   4.5             10      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.446   4.5      0.446   4.4             10      -1.00        1.00       1.00
-- fourwf%(pot)                   0.360   3.6      0.361   3.6           3840      -1.00        1.00       1.00
-- abinit(2)                      0.207   2.1      0.221   2.2             10      -1.00        0.94       0.94
-- nonlop(apply)                  0.082   0.8      0.082   0.8           3840      -1.00        0.99       0.99
-- newkpt(excl. rwwf   )          0.062   0.6      0.062   0.6            -10      -1.00        1.00       1.00
-- others (125)                   0.220   2.2      0.219   2.2             -1      -1.00        1.01       1.01
+- pspini                         5.018  46.0      5.075  45.4             10      -1.00        0.99       0.99
+- invars2                        1.285  11.8      1.351  12.1             10      -1.00        0.95       0.95
+- ewald                          0.830   7.6      0.837   7.5             10      -1.00        0.99       0.99
+- stress                         0.471   4.3      0.472   4.2             10      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.461   4.2      0.461   4.1             10      -1.00        1.00       1.00
+- fourwf%(pot)                   0.362   3.3      0.363   3.2           3840      -1.00        1.00       1.00
+- abinit(2)                      0.334   3.1      0.363   3.2             10      -1.00        0.92       0.92
+- nonlop(apply)                  0.082   0.7      0.082   0.7           3840      -1.00        0.99       0.99
+- others (126)                   0.258   2.4      0.260   2.3             -1      -1.00        0.99       0.99
 -<END_TIMER>
 
-- subtotal                       8.456  85.6      8.530  85.0                                  0.99       0.99
+- subtotal                       9.101  83.5      9.264  82.8                                  0.98       0.98
 
 ================================================================================
 
@@ -549,10 +546,10 @@ P           mkmem           6
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.0
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.1  wall=         10.3
++Overall time at end (sec) : cpu=         11.1  wall=         11.4

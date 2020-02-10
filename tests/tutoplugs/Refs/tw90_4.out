@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 19h02 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h15 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutoplugs_tw90_4/tw90_4.in
 - output file    -> tw90_4.out
@@ -348,6 +348,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     144.641     144.601
   sigma(2 2)=  1.50484794E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.50484794E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -421,22 +422,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.99352956517788E+00
-    Hartree energy  =  5.49123895743979E-01
-    XC energy       = -3.53431940991171E+00
-    Ewald energy    = -8.39800922793230E+00
-    PspCore energy  =  8.48919894711432E-02
-    Loc. psp. energy= -2.50665039605457E+00
-    NL   psp  energy=  1.96283587623403E+00
-    >>>>>>>>> Etotal= -8.84859770727155E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.40782588835282E+02 ; Band energy (Ha)=   2.3152578063E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.99352956517788E+00
+hartree             :  5.49123895743979E-01
+xc                  : -3.53431940991171E+00
+Ewald energy        : -8.39800922793230E+00
+psp_core            :  8.48919894711432E-02
+local_psp           : -2.50665039605457E+00
+non_local_psp       :  1.96283587623403E+00
+total_energy        : -8.84859770727155E+00
+total_energy_eV     : -2.40782588835282E+02
+band_energy         :  2.31525780628160E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -498,6 +496,7 @@ P newkpt: treating     14 bands with npw=     144 for ikpt=   8 by node    0
   prteigrs : nnsclo,ikpt=  200    5 max resid (incl. the buffer)=  5.03277E-06
   prteigrs : nnsclo,ikpt=  200    6 max resid (incl. the buffer)=  9.95904E-06
   prteigrs : nnsclo,ikpt=  200    8 max resid (incl. the buffer)=  2.21469E-07
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -631,6 +630,7 @@ cartesian_forces: !CartForces
 - newkpt: read input wf with ikpt,npw=   6     144, make ikpt,npw=  50     144
 
 ================================================================================
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -644,7 +644,7 @@ alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.0
 cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
 convergence: {
     "deltae":  0.000000000000000E+000, "res2":  0.000000000000000E+000, 
-    "residm":  6.952623052854383E-310, "diffor":  0.000000000000000E+000, 
+    "residm":  6.953161372355374E-310, "diffor":  0.000000000000000E+000, 
 }
 etotal    : -8.848597811050521E+000
 entropy   :  0.000000000000000E+000
@@ -1026,10 +1026,10 @@ P           mkmem3         64
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          6.4  wall=          6.9
+- Proc.   0 individual time (sec): cpu=          7.1  wall=          9.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.4  wall=          6.9
++Overall time at end (sec) : cpu=          7.1  wall=          9.0

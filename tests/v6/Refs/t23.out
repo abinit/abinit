@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h58 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h47 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t23/t23.in
 - output file    -> t23.out
@@ -224,6 +224,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      62.144      62.113
   sigma(2 2)=  1.02866824E-04  sigma(3 1)= -6.46536860E-06
   sigma(3 3)=  1.45547154E-04  sigma(2 1)= -5.23565830E-05
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -290,6 +291,7 @@ cartesian_forces: !CartForces
   sigma(1 1)=  1.11843223E-04  sigma(3 2)= -1.03235370E-04
   sigma(2 2)=  1.03373727E-04  sigma(3 1)= -5.97190180E-06
   sigma(3 3)=  1.45932053E-04  sigma(2 1)= -5.09999973E-05
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -383,22 +385,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.00138065551898E+00
-    Hartree energy  =  4.89379097571143E-01
-    XC energy       = -3.57167062889814E+00
-    Ewald energy    = -8.61728137400739E+00
-    PspCore energy  =  9.17676685691355E-02
-    Loc. psp. energy= -2.29747879791618E+00
-    NL   psp  energy=  2.10266740101718E+00
-    >>>>>>>>> Etotal= -8.80123597814528E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.39493810643754E+02 ; Band energy (Ha)=   4.2279396232E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.00138065551898E+00
+hartree             :  4.89379097571143E-01
+xc                  : -3.57167062889814E+00
+Ewald energy        : -8.61728137400739E+00
+psp_core            :  9.17676685691355E-02
+local_psp           : -2.29747879791618E+00
+non_local_psp       :  2.10266740101718E+00
+total_energy        : -8.80123597814528E+00
+total_energy_eV     : -2.39493810643754E+02
+band_energy         :  4.22793962323640E-01
+...
 
  rms coord change=  1.1795E-04   atom, delta coord (reduced):
      1        0.000055670235     -0.000182534700     -0.000072907683
@@ -610,10 +609,10 @@ P           mkmem          63
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.2
+- Proc.   0 individual time (sec): cpu=          2.2  wall=          3.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.1  wall=          2.2
++Overall time at end (sec) : cpu=          2.2  wall=          3.3

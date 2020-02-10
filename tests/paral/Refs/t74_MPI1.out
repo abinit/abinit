@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 18h07 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h16 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t74_MPI1/t74.in
 - output file    -> t74_MPI1.out
@@ -306,6 +306,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.359     103.290
   sigma(2 2)=  2.27124077E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.27124077E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -381,22 +382,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.96410207065232E+00
-    Hartree energy  =  5.43236254977583E-01
-    XC energy       = -3.53253193218807E+00
-    Ewald energy    = -8.39800922793230E+00
-    PspCore energy  =  8.48919894711432E-02
-    Loc. psp. energy= -2.51053572180808E+00
-    NL   psp  energy=  2.01909949475527E+00
-    >>>>>>>>> Etotal= -8.82974707207214E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.40269636964866E+02 ; Band energy (Ha)=   2.4512487042E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.96410207065232E+00
+hartree             :  5.43236254977583E-01
+xc                  : -3.53253193218807E+00
+Ewald energy        : -8.39800922793230E+00
+psp_core            :  8.48919894711432E-02
+local_psp           : -2.51053572180808E+00
+non_local_psp       :  2.01909949475527E+00
+total_energy        : -8.82974707207214E+00
+total_energy_eV     : -2.40269636964866E+02
+band_energy         :  2.45124870416214E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1554,6 +1552,7 @@ cartesian_forces: !CartForces
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -1579,6 +1578,7 @@ data: !SigmaeeData |
         8   9.048 -10.252  -4.940  -2.659   0.816  -0.225  -8.087   2.165  11.214
         8   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000   0.000
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [   0.250,    0.000,    0.000, ]
@@ -1606,6 +1606,7 @@ data: !SigmaeeData |
         8   0.000   0.000   0.000  -0.117   0.000   0.000  -0.093  -0.093  -0.093
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
@@ -1631,6 +1632,7 @@ data: !SigmaeeData |
         8  13.370  -7.637  -1.929  -3.202   0.812  -0.232  -5.602   2.035  15.404
         8   0.000   0.000   0.000  -0.216   0.000   0.000  -0.175  -0.175  -0.175
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [   0.250,    0.250,    0.000, ]
@@ -1658,6 +1660,7 @@ data: !SigmaeeData |
         8   0.000   0.000   0.000  -0.085   0.000   0.000  -0.068  -0.068  -0.068
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.250,    0.000, ]
 spin       : 1
@@ -1683,6 +1686,7 @@ data: !SigmaeeData |
         8  11.954  -9.095  -3.681  -2.756   0.807  -0.240  -6.951   2.144  14.098
         8   0.000   0.000   0.000  -0.112   0.000   0.000  -0.090  -0.090  -0.090
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.250,    0.000, ]
@@ -1710,6 +1714,7 @@ data: !SigmaeeData |
         8   0.000   0.000   0.000  -0.105   0.000   0.000  -0.083  -0.083  -0.083
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
@@ -1735,6 +1740,7 @@ data: !SigmaeeData |
         8  15.848  -9.422  -2.675  -3.446   0.816  -0.226  -6.729   2.693  18.541
         8   0.000   0.000   0.000  -0.425   0.000   0.000  -0.346  -0.346  -0.346
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.500,    0.250, ]
@@ -2029,10 +2035,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          5.8  wall=          5.9
+- Proc.   0 individual time (sec): cpu=          5.9  wall=          6.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.8  wall=          5.9
++Overall time at end (sec) : cpu=          5.9  wall=          6.9

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 18h16 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h26 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t41_MPI4/t41.in
 - output file    -> t41_MPI4.out
@@ -235,6 +235,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     242.000     242.000
   nstep=    2 was not enough SCF cycles to converge;
   maximum energy difference=  3.175E+00 exceeds toldfe=  1.000E-07
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        8
@@ -448,6 +449,7 @@ cartesian_forces: !CartForces
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum energy difference=  1.428E-01 exceeds toldfe=  1.000E-07
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -788,36 +790,34 @@ cartesian_forces: !CartForces
   22.18574   22.30058   22.43541   22.52118   22.57870   22.80521   22.85629   22.92115
   23.07873   23.29649   23.39723   23.53502   23.58733   23.87245   23.93160   24.02034
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  5.65998596481211E+01
+hartree             :  1.56997428273715E+02
+xc                  : -4.08542774036572E+01
+Ewald energy        : -9.53422797948199E+01
+psp_core            :  6.93362037144230E+00
+local_psp           : -3.89705036169775E+02
+spherical_terms     :  4.16290049802939E+01
+internal            : -2.63741680094679E+02
+'-kT*entropy'       : -2.39973902697133E-02
+total_energy        : -2.63765677484949E+02
+total_energy_eV     : -7.17742909913591E+03
+...
 
-    Kinetic energy  =  5.65998596481211E+01
-    Hartree energy  =  1.56997428273715E+02
-    XC energy       = -4.08542774036572E+01
-    Ewald energy    = -9.53422797948199E+01
-    PspCore energy  =  6.93362037144230E+00
-    Loc. psp. energy= -3.89705036169775E+02
-    Spherical terms =  4.16290049802939E+01
-    >>>>> Internal E= -2.63741680094679E+02
 
-    -kT*entropy     = -2.39973902697133E-02
-    >>>>>>>>> Etotal= -2.63765677484949E+02
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -2.76648326660893E+01
-    Ewald energy    =-9.53422797948199E+01
-    PspCore energy  =  6.93362037144230E+00
-    Dble-C XC-energy= -1.47677271774456E+02
-    Spherical terms = -1.03788219654763E+00
-    >>>>> Internal E= -2.64788646060470E+02
-
-    -kT*entropy     = -2.39973902697133E-02
-    >>>> Etotal (DC)= -2.64812643450740E+02
-
-  >Total energy in eV           = -7.17742909913591E+03
-  >Total DC energy in eV        = -7.20591849191940E+03
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -2.766483266608935E+001
+Ewald energy        : -9.534227979481986E+001
+psp_core            :  6.933620371442299E+000
+xc_dc               : -1.476772717744557E+002
+spherical_terms     : -1.037882196547631E+000
+internal            : -2.647886460604703E+002
+'-kT*entropy'       : -2.399739026971329E-002
+total_energy_dc     : -2.648126434507400E+002
+total_energy_dc_eV  : -7.177429099135909E+003
+...
 
  rms coord change=  1.0357E-03   atom, delta coord (reduced):
      1       -0.000050886831     -0.004502943588      0.000144433869
@@ -1043,10 +1043,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         11.9  wall=         12.0
+- Proc.   0 individual time (sec): cpu=         12.1  wall=         12.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         47.8  wall=         48.0
++Overall time at end (sec) : cpu=         49.6  wall=         50.3

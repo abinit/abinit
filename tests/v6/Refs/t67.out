@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h59 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h48 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t67/t67.in
 - output file    -> t67.out
@@ -640,6 +640,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
   sigma(2 2)= -1.69915486E-04  sigma(3 1)=  1.82091737E-15
   sigma(3 3)= -1.69915488E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -717,28 +718,25 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.00681380769331E+00
-    Hartree energy  =  1.58433651546949E+00
-    XC energy       = -1.46221283118292E+00
-    Ewald energy    = -1.59795996427760E+00
-    PspCore energy  =  5.02654824574367E-07
-    Loc. psp. energy= -7.32489046330099E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -4.79391243294389E+00
-
- Other information on the energy :
-    Total energy(eV)= -1.30448991404063E+02 ; Band energy (Ha)=  -2.0668661099E+00
-
  Calculation was performed for a charged system with PBC
  You may consider including the monopole correction to the total energy
  The correction is to be divided by the dielectric constant
-    Monopole correction (Ha)= 2.22440061134641E-01
-    Monopole correction (eV)= 6.05290188937659E+00
---------------------------------------------------------------------------------
 
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  4.00681380769331E+00
+hartree             :  1.58433651546949E+00
+xc                  : -1.46221283118292E+00
+Ewald energy        : -1.59795996427760E+00
+psp_core            :  5.02654824574367E-07
+local_psp           : -7.32489046330099E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -4.79391243294389E+00
+total_energy_eV     : -1.30448991404063E+02
+band_energy         : -2.06686610991810E+00
+monopole_correction :  2.22440061134641E-01
+monopole_correction_eV:  6.05290188937659E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -792,6 +790,7 @@ cartesian_forces: !CartForces
   7.64E-23
  -7.4807E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
+
 
 
 --- !ResultsGS
@@ -2189,6 +2188,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
   sigma(2 2)= -1.70022630E-04  sigma(3 1)=  1.63288445E-15
   sigma(3 3)= -1.70022632E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -2266,28 +2266,25 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.01066085656470E+00
-    Hartree energy  =  1.59022434261689E+00
-    XC energy       = -1.46333929489207E+00
-    Ewald energy    = -1.58784060306204E+00
-    PspCore energy  =  5.02654824574367E-07
-    Loc. psp. energy= -7.34315544414638E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -4.79344964026408E+00
-
- Other information on the energy :
-    Total energy(eV)= -1.30436398174805E+02 ; Band energy (Ha)=  -2.0709953479E+00
-
  Calculation was performed for a charged system with PBC
  You may consider including the monopole correction to the total energy
  The correction is to be divided by the dielectric constant
-    Monopole correction (Ha)= 2.22440061134641E-01
-    Monopole correction (eV)= 6.05290188937659E+00
---------------------------------------------------------------------------------
 
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  4.01066085656470E+00
+hartree             :  1.59022434261689E+00
+xc                  : -1.46333929489207E+00
+Ewald energy        : -1.58784060306204E+00
+psp_core            :  5.02654824574367E-07
+local_psp           : -7.34315544414638E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -4.79344964026408E+00
+total_energy_eV     : -1.30436398174805E+02
+band_energy         : -2.07099534794961E+00
+monopole_correction :  2.22440061134641E-01
+monopole_correction_eV:  6.05290188937659E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2341,6 +2338,7 @@ cartesian_forces: !CartForces
   5.66E-23
  -7.5116E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
+
 
 
 --- !ResultsGS
@@ -4161,10 +4159,10 @@ P          mk1mem           5
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         16.6  wall=         19.3
+- Proc.   0 individual time (sec): cpu=         15.9  wall=         18.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered 197 WARNINGs and  59 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.6  wall=         19.3
++Overall time at end (sec) : cpu=         15.9  wall=         18.1

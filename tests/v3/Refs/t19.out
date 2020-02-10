@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h45 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h42 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v3_t19/t19.in
 - output file    -> t19.out
@@ -221,6 +221,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1237.000    1237.000
   sigma(2 2)=  5.13067396E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.13067396E-03  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        1
@@ -287,22 +288,19 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  7, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.26754   -0.13435   -0.13435   -0.10201   -0.10201   -0.10201    0.12381
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.54960782249315E+01
-    Hartree energy  =  7.16875057306255E+00
-    XC energy       = -1.03839638756715E+01
-    Ewald energy    = -1.29705027633400E+01
-    PspCore energy  =  1.44683303999186E+00
-    Loc. psp. energy= -5.86748923542721E+00
-    NL   psp  energy= -2.94347281005530E+01
-    >>>>>>>>> Etotal= -2.45450221370058E+01
-
- Other information on the energy :
-    Total energy(eV)= -6.67904019222261E+02 ; Band energy (Ha)=  -1.7397366790E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.54960782249315E+01
+hartree             :  7.16875057306255E+00
+xc                  : -1.03839638756715E+01
+Ewald energy        : -1.29705027633400E+01
+psp_core            :  1.44683303999186E+00
+local_psp           : -5.86748923542721E+00
+non_local_psp       : -2.94347281005530E+01
+total_energy        : -2.45450221370058E+01
+total_energy_eV     : -6.67904019222261E+02
+band_energy         : -1.73973667896125E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -654,10 +652,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.8  wall=          4.0
+- Proc.   0 individual time (sec): cpu=          3.7  wall=          5.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.8  wall=          4.0
++Overall time at end (sec) : cpu=          3.7  wall=          5.4

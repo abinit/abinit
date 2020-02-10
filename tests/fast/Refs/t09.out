@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 18h06 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h14 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/fast_t03-t05-t06-t07-t08-t09-t11-t12-t14-t16/t09.in
 - output file    -> t09.out
@@ -148,6 +148,7 @@ P           mkmem           2
  scprqt:  WARNING -
   nstep=   12 was not enough non-SCF iterations to converge;
   maximum residual=  2.053E-09 exceeds tolwfr=  1.000E-12
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -332,10 +333,10 @@ P           mkmem           2
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          0.5  wall=          0.6
+- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.5  wall=          0.6
++Overall time at end (sec) : cpu=          0.6  wall=          0.7

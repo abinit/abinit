@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h53 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h07 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpositron_4/tpositron_4.in
 - output file    -> tpositron_4.out
@@ -450,6 +450,7 @@ TC-DFT STEP  19 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  At SCF step  114, the difference between
  etotal from electronic calculation and etotal from positronic calculation
  is converged :  diff(etot_el-etot_pos)=  8.970E-06 < postoldfe=  1.000E-05
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :       15
@@ -778,6 +779,7 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  At SCF step   44, the difference between
  etotal from electronic calculation and etotal from positronic calculation
  is converged :  diff(etot_el-etot_pos)=  5.342E-06 < postoldfe=  1.000E-05
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :       15
@@ -1140,6 +1142,7 @@ TC-DFT STEP   9 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  At SCF step   64, the difference between
  etotal from electronic calculation and etotal from positronic calculation
  is converged :  diff(etot_el-etot_pos)=  8.570E-06 < postoldfe=  1.000E-05
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :       15
@@ -1464,6 +1467,7 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  At SCF step   36, the difference between
  etotal from electronic calculation and etotal from positronic calculation
  is converged :  diff(etot_el-etot_pos)=  1.311E-06 < postoldfe=  1.000E-05
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :       15
@@ -1815,39 +1819,37 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.23963355180212E+01
+hartree             :  5.69614788718690E+00
+xc                  : -3.56643643856265E+01
+Ewald energy        : -5.92968646520594E+01
+psp_core            :  1.63276322547783E+00
+local_psp           : -2.25145954658090E+01
+spherical_terms     :  2.76565828107222E+01
+electronic          : -6.00939950620868E+01
+positronic          : -8.58628913322122E-01
+electron_positron_interaction:  3.39198030093066E-01
+total_energy        : -6.06134259453159E+01
+total_energy_eV     : -1.64937520046767E+03
+...
 
-    Kinetic energy  =  2.23963355180212E+01
-    Hartree energy  =  5.69614788718690E+00
-    XC energy       = -3.56643643856265E+01
-    Ewald energy    = -5.92968646520594E+01
-    PspCore energy  =  1.63276322547783E+00
-    Loc. psp. energy= -2.25145954658090E+01
-    Spherical terms =  2.76565828107222E+01
-    >>> Electronic E= -6.00939950620868E+01
 
-    Positronic ener.= -8.58628913322122E-01
-    EP interaction E=  3.39198030093066E-01
-    >>>>>>>>> Etotal= -6.06134259453159E+01
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -7.01191612357312E-01
-    Ewald energy    =-5.92968646520594E+01
-    PspCore energy  =  1.63276322547783E+00
-    Dble-C XC-energy= -1.56050270893439E+01
-    Spherical terms =  1.44582881908359E+01
-    - EP dble-ct En.= -5.81953800443930E-01
-    >>> Electronic E= -6.00939857378909E+01
-
-    Positronic ener.= -8.58628913322122E-01
-    EP interaction E=  3.39198030093066E-01
-    >>>> Etotal (DC)= -6.06134166211199E+01
-
-  >Total energy in eV           = -1.64937520046767E+03
-  >Total DC energy in eV        = -1.64937494674340E+03
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -7.011916123573124E-001
+Ewald energy        : -5.929686465205944E+001
+psp_core            :  1.632763225477833E+000
+xc_dc               : -1.560502708934392E+001
+spherical_terms     :  1.445828819083588E+001
+electron_positron_dc: -5.819538004439302E-001
+electronic          : -6.009398573789089E+001
+positronic          : -8.586289133221223E-001
+electron_positron_interaction:  3.391980300930662E-001
+total_energy_dc     : -6.061341662111995E+001
+total_energy_dc_eV  : -1.649375200467673E+003
+...
 
  rms coord change=  1.2362E-02   atom, delta coord (reduced):
      1        0.001953070819      0.001953070819      0.001953070819
@@ -2085,10 +2087,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        348.5  wall=        348.7
+- Proc.   0 individual time (sec): cpu=        343.7  wall=        344.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered 517 WARNINGs and  43 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        348.5  wall=        348.7
++Overall time at end (sec) : cpu=        343.7  wall=        344.1

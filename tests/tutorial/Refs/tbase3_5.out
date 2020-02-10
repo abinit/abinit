@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h52 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h06 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tbase3_5/tbase3_5.in
 - output file    -> tbase3_5.out
@@ -294,6 +294,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     289.031     289.009
   sigma(2 2)=  2.93016435E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.93016435E-05  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -361,22 +362,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.02586404019091E+00
-    Hartree energy  =  5.37872698000355E-01
-    XC energy       = -3.53883494296722E+00
-    Ewald energy    = -8.43664533146725E+00
-    PspCore energy  =  8.60690571501039E-02
-    Loc. psp. energy= -2.42996662280509E+00
-    NL   psp  energy=  1.88308169779439E+00
-    >>>>>>>>> Etotal= -8.87255940410381E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.41434619765722E+02 ; Band energy (Ha)=   2.3182677458E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.02586404019091E+00
+hartree             :  5.37872698000355E-01
+xc                  : -3.53883494296722E+00
+Ewald energy        : -8.43664533146725E+00
+psp_core            :  8.60690571501039E-02
+local_psp           : -2.42996662280509E+00
+non_local_psp       :  1.88308169779439E+00
+total_energy        : -8.87255940410381E+00
+total_energy_eV     : -2.41434619765722E+02
+band_energy         :  2.31826774575600E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -609,6 +607,7 @@ cartesian_forces: !CartForces
   5.80E-13  3.49E-13  4.56E-13  3.16E-13  3.45E-13  2.86E-13  6.46E-13  2.70E-13
  -2.2675E-01  2.1749E-01  2.1749E-01  2.1749E-01  3.1047E-01  3.1047E-01
   3.1047E-01  3.3727E-01
+
 
 --- !ResultsGS
 comment   : Summary of ground state results

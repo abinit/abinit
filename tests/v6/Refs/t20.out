@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h58 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h47 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t20/t20.in
 - output file    -> t20.out
@@ -342,6 +342,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      72.500      72.452
   sigma(2 2)=  2.50331248E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.50331248E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -409,22 +410,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.92740821510649E+00
-    Hartree energy  =  7.97512420601030E-01
-    XC energy       = -4.34129937169317E+00
-    Ewald energy    = -8.47467935444799E+00
-    PspCore energy  =  7.33476114489264E-01
-    Loc. psp. energy= -2.38281143523839E+00
-    NL   psp  energy=  6.46040966139344E-01
-    >>>>>>>>> Etotal= -1.00943524450434E+01
-
- Other information on the energy :
-    Total energy(eV)= -2.74681299200206E+02 ; Band energy (Ha)=  -6.7139604398E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.92740821510649E+00
+hartree             :  7.97512420601030E-01
+xc                  : -4.34129937169317E+00
+Ewald energy        : -8.47467935444799E+00
+psp_core            :  7.33476114489264E-01
+local_psp           : -2.38281143523839E+00
+non_local_psp       :  6.46040966139344E-01
+total_energy        : -1.00943524450434E+01
+total_energy_eV     : -2.74681299200206E+02
+band_energy         : -6.71396043980775E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -533,6 +531,7 @@ cartesian_forces: !CartForces
 
            Polarization    -1.541919358E-02 (a.u. of charge)/bohr^2
            Polarization    -8.822054828E-01 C/m^2
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -684,6 +683,7 @@ cartesian_forces: !CartForces
            Polarization    -1.541919358E-02 (a.u. of charge)/bohr^2
            Polarization    -8.822054828E-01 C/m^2
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -833,6 +833,7 @@ cartesian_forces: !CartForces
 
            Polarization    -1.541919358E-02 (a.u. of charge)/bohr^2
            Polarization    -8.822054828E-01 C/m^2
+
 
 --- !ResultsGS
 comment   : Summary of ground state results

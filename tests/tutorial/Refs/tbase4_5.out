@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h52 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h06 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tbase4_5/tbase4_5.in
 - output file    -> tbase4_5.out
@@ -191,6 +191,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     294.000     293.954
   sigma(2 2)=  3.52702368E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.65832618E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        3
@@ -263,6 +264,7 @@ cartesian_forces: !CartForces
   sigma(1 1)=  3.60832010E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.60832010E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.67189730E-04  sigma(2 1)=  0.00000000E+00
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -342,6 +344,7 @@ cartesian_forces: !CartForces
   sigma(1 1)=  5.87254725E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  5.87254725E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.11557837E-04  sigma(2 1)=  0.00000000E+00
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -447,25 +450,21 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.41542775852745E+00
-    Hartree energy  =  9.16766302348189E-01
-    XC energy       = -2.32254151520946E+00
-    Ewald energy    = -6.45275888587231E+00
-    PspCore energy  =  8.70408728454554E-02
-    Loc. psp. energy= -2.26832676681845E+00
-    NL   psp  energy=  1.36366221775756E+00
-    >>>>> Internal E= -6.26073001642156E+00
-
-    -kT*entropy     = -1.49505620701263E-03
-    >>>>>>>>> Etotal= -6.26222507262857E+00
-
- Other information on the energy :
-    Total energy(eV)= -1.70403810269013E+02 ; Band energy (Ha)=   3.1895591511E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.41542775852745E+00
+hartree             :  9.16766302348189E-01
+xc                  : -2.32254151520946E+00
+Ewald energy        : -6.45275888587231E+00
+psp_core            :  8.70408728454554E-02
+local_psp           : -2.26832676681845E+00
+non_local_psp       :  1.36366221775756E+00
+internal            : -6.26073001642156E+00
+'-kT*entropy'       : -1.49505620701263E-03
+total_energy        : -6.26222507262857E+00
+total_energy_eV     : -1.70403810269013E+02
+band_energy         :  3.18955915112454E-01
+...
 
  rms coord change=  2.8048E-03   atom, delta coord (reduced):
      1        0.000000000000      0.000000000000     -0.005949929487
@@ -656,10 +655,10 @@ P           mkmem           6
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          4.8  wall=          4.9
+- Proc.   0 individual time (sec): cpu=          4.8  wall=          4.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.8  wall=          4.9
++Overall time at end (sec) : cpu=          4.8  wall=          4.8

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h47 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h43 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v4_t86/t86.in
 - output file    -> t86.out
@@ -459,6 +459,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
   sigma(2 2)=  9.91713694E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  9.91713694E-05  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -540,22 +541,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.01335511165569E+00
-    Hartree energy  =  5.52776062708889E-01
-    XC energy       = -3.53505959707193E+00
-    Ewald energy    = -8.39800922793230E+00
-    PspCore energy  =  8.48919894711432E-02
-    Loc. psp. energy= -2.49365851219966E+00
-    NL   psp  energy=  1.91753403130341E+00
-    >>>>>>>>> Etotal= -8.85817014206476E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.41043068032915E+02 ; Band energy (Ha)=   2.2481932810E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.01335511165569E+00
+hartree             :  5.52776062708889E-01
+xc                  : -3.53505959707193E+00
+Ewald energy        : -8.39800922793230E+00
+psp_core            :  8.48919894711432E-02
+local_psp           : -2.49365851219966E+00
+non_local_psp       :  1.91753403130341E+00
+total_energy        : -8.85817014206476E+00
+total_energy_eV     : -2.41043068032915E+02
+band_energy         :  2.24819328102815E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -889,6 +887,7 @@ cartesian_forces: !CartForces
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -900,6 +899,7 @@ data: !SigmaeeData |
         4   5.850 -11.213 -12.500   0.000   1.000   0.000 -12.500  -1.287   4.562
         5   8.371 -10.021  -5.651   0.000   1.000   0.000  -5.651   4.370  12.741
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.500,    0.000, ]
@@ -1021,6 +1021,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -1032,6 +1033,7 @@ data: !SigmaeeData |
         4   5.850 -11.213 -12.500   8.437   1.000   0.000  -4.063   7.150  12.999
         5   8.371 -10.021  -5.651   3.184   1.000   0.000  -2.468   7.554  15.925
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.500,    0.000, ]
@@ -1153,6 +1155,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -1164,6 +1167,7 @@ data: !SigmaeeData |
         4   5.850 -11.213 -12.500  -0.227   1.000   0.000 -12.727  -1.514   4.335
         5   8.371 -10.021  -5.651  -4.998   1.000   0.000 -10.649  -0.628   7.743
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.500,    0.000, ]
@@ -1554,10 +1558,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          9.5  wall=         12.5
+- Proc.   0 individual time (sec): cpu=          9.4  wall=          9.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.5  wall=         12.5
++Overall time at end (sec) : cpu=          9.4  wall=          9.5

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h04 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h52 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t22/t22.in
 - output file    -> t22.out
@@ -782,6 +782,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     184.500     184.482
   sigma(2 2)= -7.18209953E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -7.18209953E-05  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -840,22 +841,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.03805856091424E+00
-    Hartree energy  =  5.39649150366708E-01
-    XC energy       = -3.54883054546962E+00
-    Ewald energy    = -8.46648022654903E+00
-    PspCore energy  =  8.69853998687012E-02
-    Loc. psp. energy= -2.44100254913977E+00
-    NL   psp  energy=  1.93398449339613E+00
-    >>>>>>>>> Etotal= -8.85763571661264E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.41028525576793E+02 ; Band energy (Ha)=   2.7574774042E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.03805856091424E+00
+hartree             :  5.39649150366708E-01
+xc                  : -3.54883054546962E+00
+Ewald energy        : -8.46648022654903E+00
+psp_core            :  8.69853998687012E-02
+local_psp           : -2.44100254913977E+00
+non_local_psp       :  1.93398449339613E+00
+total_energy        : -8.85763571661264E+00
+total_energy_eV     : -2.41028525576793E+02
+band_energy         :  2.75747740423264E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -905,6 +903,7 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
   prteigrs : nnsclo,ikpt=   20    2 max resid (incl. the buffer)=  1.21261E-07
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -1006,6 +1005,7 @@ cartesian_forces: !CartForces
  scprqt:  WARNING -
   nstep=   20 was not enough non-SCF iterations to converge;
   maximum residual=  3.337E-10 exceeds tolwfr=  1.000E-21
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -3177,6 +3177,7 @@ cartesian_forces: !CartForces
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -3305,6 +3306,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -3433,6 +3435,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -3561,6 +3564,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -3689,6 +3693,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -4337,10 +4342,10 @@ P           mkmem10         6
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          6.7  wall=          6.8
+- Proc.   0 individual time (sec): cpu=          6.6  wall=          6.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  30 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.7  wall=          6.8
++Overall time at end (sec) : cpu=          6.6  wall=          6.8

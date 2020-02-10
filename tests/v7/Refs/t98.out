@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h09 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h56 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t98/t98.in
 - output file    -> t98.out
@@ -536,6 +536,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      80.963      80.930
   nstep=   10 was not enough SCF cycles to converge;
   potential residual=  3.741E-17 exceeds tolvrs=  1.000E-18
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        1
@@ -597,23 +598,20 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  6.12416732403977E+00
-    Hartree energy  =  4.07025893491336E+00
-    XC energy       = -3.31387260867073E+00
-    Ewald energy    = -1.40547235949390E+01
-    PspCore energy  =  4.70214162861624E-01
-    Loc. psp. energy= -1.43954167155840E+01
-    NL   psp  energy=  9.71659332763550E-01
-    Vd Waals DFT-D = -2.68669972132247E-03
-    >>>>>>>>> Etotal= -2.01303998643367E+01
-
- Other information on the energy :
-    Total energy(eV)= -5.47776037963759E+02 ; Band energy (Ha)=  -3.4607662577E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  6.12416732403977E+00
+hartree             :  4.07025893491336E+00
+xc                  : -3.31387260867073E+00
+Ewald energy        : -1.40547235949390E+01
+psp_core            :  4.70214162861624E-01
+local_psp           : -1.43954167155840E+01
+non_local_psp       :  9.71659332763550E-01
+VdWaals_dft_d       : -2.68669972132247E-03
+total_energy        : -2.01303998643367E+01
+total_energy_eV     : -5.47776037963759E+02
+band_energy         : -3.46076625765296E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -947,6 +945,7 @@ cartesian_forces: !CartForces
  scprqt:  WARNING -
   nstep=   10 was not enough non-SCF iterations to converge;
   maximum residual=  6.223E-22 exceeds tolwfr=  1.000E-24
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -1666,10 +1665,10 @@ P          mk1mem4        108
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         15.8  wall=         16.1
+- Proc.   0 individual time (sec): cpu=         15.2  wall=         16.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and  37 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.8  wall=         16.1
++Overall time at end (sec) : cpu=         15.2  wall=         16.2

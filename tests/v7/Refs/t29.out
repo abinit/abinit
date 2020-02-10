@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h09 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h57 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t28-t29/t29.in
 - output file    -> t29.out
@@ -302,6 +302,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     458.625     458.600
   nstep=    1 was not enough SCF cycles to converge;
   density residual=  2.365E-03 exceeds tolvrs=  1.000E-10
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        1
@@ -443,6 +444,7 @@ cartesian_forces: !CartForces
   nstep=    1 was not enough SCF cycles to converge;
   density residual=  1.266E+00 exceeds tolvrs=  1.000E-10
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        1
@@ -583,6 +585,7 @@ cartesian_forces: !CartForces
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
   density residual=  1.745E+02 exceeds tolvrs=  1.000E-10
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -840,36 +843,34 @@ cartesian_forces: !CartForces
  Next minimum=    9.9928E-04  at reduced coord.    0.5000    0.5000    0.4800
    Integrated=    1.2000E+01
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  9.27376931261165E+00
+hartree             :  5.27462782912399E+00
+xc                  : -5.00102297670252E+00
+Ewald energy        : -3.38574430088403E+01
+psp_core            :  1.34713426304455E+00
+local_psp           : -2.41381617646779E+01
+spherical_terms     :  7.29036748838557E+00
+internal            : -3.98107288570550E+01
+'-kT*entropy'       : -5.04893536395922E-02
+total_energy        : -3.98612182106946E+01
+total_energy_eV     : -1.08467890985843E+03
+...
 
-    Kinetic energy  =  9.27376931261165E+00
-    Hartree energy  =  5.27462782912399E+00
-    XC energy       = -5.00102297670252E+00
-    Ewald energy    = -3.38574430088403E+01
-    PspCore energy  =  1.34713426304455E+00
-    Loc. psp. energy= -2.41381617646779E+01
-    Spherical terms =  7.29036748838557E+00
-    >>>>> Internal E= -3.98107288570550E+01
 
-    -kT*entropy     = -5.04893536395922E-02
-    >>>>>>>>> Etotal= -3.98612182106946E+01
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -3.42378603204755E+00
-    Ewald energy    =-3.38574430088403E+01
-    PspCore energy  =  1.34713426304455E+00
-    Dble-C XC-energy= -3.75773771765420E+00
-    Spherical terms =  6.68387246206724E-02
-    >>>>> Internal E= -3.96249937708768E+01
-
-    -kT*entropy     = -5.04893536395922E-02
-    >>>> Etotal (DC)= -3.96754831245164E+01
-
-  >Total energy in eV           = -1.08467890985843E+03
-  >Total DC energy in eV        = -1.07962480113217E+03
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -3.423786032047545E+000
+Ewald energy        : -3.385744300884031E+001
+psp_core            :  1.347134263044555E+000
+xc_dc               : -3.757737717654199E+000
+spherical_terms     :  6.683872462067239E-002
+internal            : -3.962499377087682E+001
+'-kT*entropy'       : -5.048935363959225E-002
+total_energy_dc     : -3.967548312451641E+001
+total_energy_dc_eV  : -1.084678909858432E+003
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1104,10 +1105,10 @@ P           mkmem          10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        144.9  wall=        145.6
+- Proc.   0 individual time (sec): cpu=        146.8  wall=        147.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  20 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        144.9  wall=        145.6
++Overall time at end (sec) : cpu=        146.8  wall=        147.3

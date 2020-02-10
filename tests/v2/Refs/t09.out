@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h41 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h41 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v2_t09/t09.in
 - output file    -> t09.out
@@ -335,6 +335,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      67.000      66.970
   sigma(2 2)=  3.15153607E-04  sigma(3 1)= -3.78608946E-15
   sigma(3 3)= -1.88255499E-03  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -402,22 +403,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.48083564750232E+00
-    Hartree energy  =  2.42462179554950E+00
-    XC energy       = -2.12952418745415E+00
-    Ewald energy    = -3.40312010772530E+00
-    PspCore energy  =  4.47424689112462E-01
-    Loc. psp. energy= -6.66375008377337E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -6.84351224678855E+00
-
- Other information on the energy :
-    Total energy(eV)= -1.86221438697974E+02 ; Band energy (Ha)=  -2.1089039066E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.48083564750232E+00
+hartree             :  2.42462179554950E+00
+xc                  : -2.12952418745415E+00
+Ewald energy        : -3.40312010772530E+00
+psp_core            :  4.47424689112462E-01
+local_psp           : -6.66375008377337E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -6.84351224678855E+00
+total_energy_eV     : -1.86221438697974E+02
+band_energy         : -2.10890390663923E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -475,6 +473,7 @@ cartesian_forces: !CartForces
  Non-SCF case, kpt    4 (  0.00000  0.00000  0.87500), residuals and eigenvalues=
   5.68E-23  8.16E-23  6.13E-23  4.11E-23
  -4.7852E-01 -2.2152E-01 -1.7000E-01 -1.7000E-01
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -880,6 +879,7 @@ P newkpt: treating      4 bands with npw=      69 for ikpt=   4 by node    0
  Non-SCF case, kpt    4 (  0.00000  0.00000  0.58500), residuals and eigenvalues=
   4.38E-23  6.58E-23  7.72E-25  7.72E-25
  -4.7223E-01 -2.6390E-01 -1.6727E-01 -1.6727E-01
+
 
 --- !ResultsGS
 comment   : Summary of ground state results

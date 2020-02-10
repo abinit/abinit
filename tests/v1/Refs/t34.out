@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h38 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h38 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t34/t34.in
 - output file    -> t34.out
@@ -293,6 +293,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     114.000
   sigma(2 2)=  3.30715665E-02  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.30715669E-02  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        1
@@ -366,22 +367,19 @@ cartesian_forces: !CartForces
  Next minimum=    1.6010E-03  at reduced coord.    0.0000    0.0667    0.0000
    Integrated=    1.4000E+01
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.02944921657867E+01
-    Hartree energy  =  7.56026730951488E+00
-    XC energy       = -6.47997702687597E+00
-    Ewald energy    = -4.63425254981845E+01
-    PspCore energy  =  1.74864702135053E+00
-    Loc. psp. energy= -2.97983683732133E+01
-    NL   psp  energy=  2.53030931708068E+00
-    >>>>>>>>> Etotal= -5.04871550845410E+01
-
- Other information on the energy :
-    Total energy(eV)= -1.37382535700480E+03 ; Band energy (Ha)=  -3.3485673582E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.02944921657867E+01
+hartree             :  7.56026730951488E+00
+xc                  : -6.47997702687597E+00
+Ewald energy        : -4.63425254981845E+01
+psp_core            :  1.74864702135053E+00
+local_psp           : -2.97983683732133E+01
+non_local_psp       :  2.53030931708068E+00
+total_energy        : -5.04871550845410E+01
+total_energy_eV     : -1.37382535700480E+03
+band_energy         : -3.34856735816374E-01
+...
 
 
           ===> extra information on forces <===
@@ -531,10 +529,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.3
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          2.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.0  wall=          1.3
++Overall time at end (sec) : cpu=          1.0  wall=          2.6

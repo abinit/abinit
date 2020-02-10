@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h00 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h48 )
   
 
 ================================================================================
@@ -99,7 +99,7 @@ Phonon band structure files, with atomic projections, will be output
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.033  and twall      0.034 sec
+-begin at tcpu      0.030  and twall      0.030 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -378,6 +378,6 @@ Phonon band structure files, with atomic projections, will be output
 
 ================================================================================
 
-+Total cpu time      0.518  and wall time      0.522 sec
++Total cpu time      0.466  and wall time      0.469 sec
 
  anaddb : the run completed succesfully.

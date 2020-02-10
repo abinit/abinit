@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 18h04 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h15 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/wannier90_t13/t13.in
 - output file    -> t13.out
@@ -224,6 +224,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1776.375    1776.338
   sigma(2 2)= -1.45569951E-06  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -1.45569951E-06  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        1
@@ -284,22 +285,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.52321595108565E+00
-    Hartree energy  =  7.39017304188955E+00
-    XC energy       = -3.65792934945619E+00
-    Ewald energy    = -1.17372469097313E+01
-    PspCore energy  =  2.73859304494880E-01
-    Loc. psp. energy= -2.19127127997247E+01
-    NL   psp  energy=  8.68870144506291E-01
-    >>>>>>>>> Etotal= -2.12517706169358E+01
-
- Other information on the energy :
-    Total energy(eV)= -5.78290087962109E+02 ; Band energy (Ha)=  -3.4671079128E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  7.52321595108565E+00
+hartree             :  7.39017304188955E+00
+xc                  : -3.65792934945619E+00
+Ewald energy        : -1.17372469097313E+01
+psp_core            :  2.73859304494880E-01
+local_psp           : -2.19127127997247E+01
+non_local_psp       :  8.68870144506291E-01
+total_energy        : -2.12517706169358E+01
+total_energy_eV     : -5.78290087962109E+02
+band_energy         : -3.46710791276317E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -339,6 +337,7 @@ cartesian_forces: !CartForces
 -inwffil : will read wavefunctions from disk file t13o_DS1_WFK
 
 ================================================================================
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        1
@@ -352,7 +351,7 @@ alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.0
 cutoff_energies: {"ecut":  1.800000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
 convergence: {
     "deltae":  0.000000000000000E+000, "res2":  0.000000000000000E+000, 
-    "residm":  6.953338737500146E-310, "diffor":  0.000000000000000E+000, 
+    "residm":  6.953132309406203E-310, "diffor":  0.000000000000000E+000, 
 }
 etotal    : -2.125177061693533E+001
 entropy   :  0.000000000000000E+000
@@ -637,10 +636,10 @@ P           mkmem2          8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.1
+- Proc.   0 individual time (sec): cpu=          2.0  wall=          3.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.0  wall=          2.1
++Overall time at end (sec) : cpu=          2.0  wall=          3.6

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h39 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h38 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t90/t90.in
 - output file    -> t90.out
@@ -288,6 +288,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      54.000      54.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum residual=  6.830E-03 exceeds tolwfr=  1.000E-13
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        8
@@ -437,22 +438,19 @@ cartesian_forces: !CartForces
  Next minimum=    6.9241E-03  at reduced coord.    0.5000    0.5000    0.5000
    Integrated=    3.2000E+01
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  1.01920490110579E+01
-    Hartree energy  =  7.47375712443595E-01
-    XC energy       = -9.00040873903722E+00
-    Ewald energy    = -3.35916768723201E+01
-    PspCore energy  = -1.04427474204814E+00
-    Loc. psp. energy= -6.86542708800253E+00
-    NL   psp  energy=  9.97055414376207E+00
-    >>>>>>>>> Etotal= -2.95918085741445E+01
-
- Other information on the energy :
-    Total energy(eV)= -8.05234062222685E+02 ; Band energy (Ha)=   3.5638056441E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  1.01920490110579E+01
+hartree             :  7.47375712443595E-01
+xc                  : -9.00040873903722E+00
+Ewald energy        : -3.35916768723201E+01
+psp_core            : -1.04427474204814E+00
+local_psp           : -6.86542708800253E+00
+non_local_psp       :  9.97055414376207E+00
+total_energy        : -2.95918085741445E+01
+total_energy_eV     : -8.05234062222685E+02
+band_energy         :  3.56380564414297E+00
+...
 
 
           ===> extra information on forces <===
@@ -574,6 +572,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      54.000      54.000
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
   maximum residual=  6.830E-03 exceeds tolwfr=  1.000E-13
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -724,22 +723,19 @@ cartesian_forces: !CartForces
  Next minimum=    6.9241E-03  at reduced coord.    0.5000    0.5000    0.5000
    Integrated=    3.2000E+01
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  1.01920490110579E+01
-    Hartree energy  =  7.47375712443595E-01
-    XC energy       = -9.00040873903723E+00
-    Ewald energy    = -3.35916768723201E+01
-    PspCore energy  = -1.04427474204814E+00
-    Loc. psp. energy= -6.86542708800253E+00
-    NL   psp  energy=  9.97055414376207E+00
-    >>>>>>>>> Etotal= -2.95918085741445E+01
-
- Other information on the energy :
-    Total energy(eV)= -8.05234062222685E+02 ; Band energy (Ha)=   3.5638056441E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  1.01920490110579E+01
+hartree             :  7.47375712443595E-01
+xc                  : -9.00040873903723E+00
+Ewald energy        : -3.35916768723201E+01
+psp_core            : -1.04427474204814E+00
+local_psp           : -6.86542708800253E+00
+non_local_psp       :  9.97055414376207E+00
+total_energy        : -2.95918085741445E+01
+total_energy_eV     : -8.05234062222685E+02
+band_energy         :  3.56380564414297E+00
+...
 
 
           ===> extra information on forces <===
@@ -987,10 +983,10 @@ P           mkmem           4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          6.6  wall=          6.7
+- Proc.   0 individual time (sec): cpu=          6.4  wall=          6.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.6  wall=          6.7
++Overall time at end (sec) : cpu=          6.4  wall=          6.5

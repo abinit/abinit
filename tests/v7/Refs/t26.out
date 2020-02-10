@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h07 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h54 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t26/t26.in
 - output file    -> t26.out
@@ -291,6 +291,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 
  At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.238E-09 < toldfe=  1.000E-07
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        7
@@ -404,36 +405,36 @@ cartesian_forces: !CartForces
  Next minimum=    2.7348E-03  at reduced coord.    0.0333    0.0000    0.0000
    Integrated=    1.4000E+01
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  5.67300568315206E+00
-    Hartree energy  =  3.36794112968400E+00
-    XC energy       = -3.07480543888005E+00
-    Ewald energy    = -9.60643650480815E+00
-    PspCore energy  =  2.86909616680841E-01
-    Loc. psp. energy= -1.25247663393167E+01
-    Spherical terms = -8.67589167057103E+00
-    >>>>>>>>> Etotal= -2.45540435240591E+01
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -1.07838798797069E+01
-    Ewald energy    =-9.60643650480815E+00
-    PspCore energy  =  2.86909616680841E-01
-    Dble-C XC-energy= -2.43023480036192E+00
-    Spherical terms = -2.02042389498656E+00
-    >>>> Etotal (DC)= -2.45540654631827E+01
-
-  >Total energy in eV           = -6.68149503648319E+02
-  >Total DC energy in eV        = -6.68150100642233E+02
-
  Calculation was performed for a charged system with PBC
  You may consider including the monopole correction to the total energy
  The correction is to be divided by the dielectric constant
-    Monopole correction (Ha)= 1.86664307860572E-01
-    Monopole correction (eV)= 5.07939413415525E+00
---------------------------------------------------------------------------------
 
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  5.67300568315206E+00
+hartree             :  3.36794112968400E+00
+xc                  : -3.07480543888005E+00
+Ewald energy        : -9.60643650480815E+00
+psp_core            :  2.86909616680841E-01
+local_psp           : -1.25247663393167E+01
+spherical_terms     : -8.67589167057103E+00
+total_energy        : -2.45540435240591E+01
+total_energy_eV     : -6.68149503648319E+02
+monopole_correction :  1.86664307860572E-01
+monopole_correction_eV:  5.07939413415525E+00
+...
+
+
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -1.078387987970690E+001
+Ewald energy        : -9.606436504808155E+000
+psp_core            :  2.869096166808411E-001
+xc_dc               : -2.430234800361923E+000
+spherical_terms     : -2.020423894986565E+000
+total_energy_dc     : -2.455406546318270E+001
+total_energy_dc_eV  : -6.681495036483188E+002
+...
 
 
 ================================================================================
@@ -495,6 +496,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 
  At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.105E-09 < toldfe=  1.000E-07
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        7
@@ -608,36 +610,36 @@ cartesian_forces: !CartForces
  Next minimum=    2.7347E-03  at reduced coord.    0.0333    0.0000    0.0000
    Integrated=    1.4000E+01
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  5.67173320877010E+00
-    Hartree energy  =  3.36845527270188E+00
-    XC energy       = -3.07403544007773E+00
-    Ewald energy    = -9.60643650480815E+00
-    PspCore energy  =  2.86909616680841E-01
-    Loc. psp. energy= -1.25257457375461E+01
-    Spherical terms = -8.66203229016235E+00
-    >>>>>>>>> Etotal= -2.45411518744415E+01
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -1.06096225281188E+01
-    Ewald energy    =-9.60643650480815E+00
-    PspCore energy  =  2.86909616680841E-01
-    Dble-C XC-energy= -2.43098612955096E+00
-    Spherical terms = -2.18103621211329E+00
-    >>>> Etotal (DC)= -2.45411717579104E+01
-
-  >Total energy in eV           = -6.67798704021986E+02
-  >Total DC energy in eV        = -6.67799245078690E+02
-
  Calculation was performed for a charged system with PBC
  You may consider including the monopole correction to the total energy
  The correction is to be divided by the dielectric constant
-    Monopole correction (Ha)= 1.86664307860572E-01
-    Monopole correction (eV)= 5.07939413415525E+00
---------------------------------------------------------------------------------
 
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  5.67173320877010E+00
+hartree             :  3.36845527270188E+00
+xc                  : -3.07403544007773E+00
+Ewald energy        : -9.60643650480815E+00
+psp_core            :  2.86909616680841E-01
+local_psp           : -1.25257457375461E+01
+spherical_terms     : -8.66203229016235E+00
+total_energy        : -2.45411518744415E+01
+total_energy_eV     : -6.67798704021986E+02
+monopole_correction :  1.86664307860572E-01
+monopole_correction_eV:  5.07939413415525E+00
+...
+
+
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -1.060962252811879E+001
+Ewald energy        : -9.606436504808155E+000
+psp_core            :  2.869096166808411E-001
+xc_dc               : -2.430986129550961E+000
+spherical_terms     : -2.181036212113291E+000
+total_energy_dc     : -2.454117175791036E+001
+total_energy_dc_eV  : -6.677987040219857E+002
+...
 
 
 ================================================================================
@@ -699,6 +701,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 
  At SCF step    9, etot is converged : 
   for the second time, diff in etot=  1.238E-09 < toldfe=  1.000E-07
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        7
@@ -812,36 +815,36 @@ cartesian_forces: !CartForces
  Next minimum=    2.7348E-03  at reduced coord.    0.0333    0.0000    0.0000
    Integrated=    1.4000E+01
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  5.67300605857516E+00
-    Hartree energy  =  3.36794108995398E+00
-    XC energy       = -3.07480560102136E+00
-    Ewald energy    = -9.60643650480815E+00
-    PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -1.22157853778017E+01
-    Spherical terms = -8.67589182838365E+00
-    >>>>>>>>> Etotal= -2.45319721634857E+01
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -1.04748993213998E+01
-    Ewald energy    =-9.60643650480815E+00
-    PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy= -2.43023471025980E+00
-    Spherical terms = -2.02042356682565E+00
-    >>>> Etotal (DC)= -2.45319941032934E+01
-
-  >Total energy in eV           = -6.67548911383444E+02
-  >Total DC energy in eV        = -6.67549508395974E+02
-
  Calculation was performed for a charged system with PBC
  You may consider including the monopole correction to the total energy
  The correction is to be divided by the dielectric constant
-    Monopole correction (Ha)= 1.86664307860572E-01
-    Monopole correction (eV)= 5.07939413415525E+00
---------------------------------------------------------------------------------
 
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  5.67300605857516E+00
+hartree             :  3.36794108995398E+00
+xc                  : -3.07480560102136E+00
+Ewald energy        : -9.60643650480815E+00
+psp_core            :  0.00000000000000E+00
+local_psp           : -1.22157853778017E+01
+spherical_terms     : -8.67589182838365E+00
+total_energy        : -2.45319721634857E+01
+total_energy_eV     : -6.67548911383444E+02
+monopole_correction :  1.86664307860572E-01
+monopole_correction_eV:  5.07939413415525E+00
+...
+
+
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -1.047489932139984E+001
+Ewald energy        : -9.606436504808155E+000
+psp_core            :  0.000000000000000E+000
+xc_dc               : -2.430234710259798E+000
+spherical_terms     : -2.020423566825650E+000
+total_energy_dc     : -2.453199410329344E+001
+total_energy_dc_eV  : -6.675489113834436E+002
+...
 
 
 == END DATASET(S) ==============================================================
@@ -1052,10 +1055,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          9.9  wall=         10.1
+- Proc.   0 individual time (sec): cpu=          9.8  wall=          9.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.9  wall=         10.1
++Overall time at end (sec) : cpu=          9.8  wall=          9.9

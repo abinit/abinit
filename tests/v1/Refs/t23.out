@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h38 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h38 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t21-t22-t23-t24/t23.in
 - output file    -> t23.out
@@ -187,6 +187,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    9633.000    9633.000
   nstep=    2 was not enough SCF cycles to converge;
   maximum residual=  1.091E-07 exceeds tolwfr=  1.000E-14
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        1
@@ -286,22 +287,19 @@ cartesian_forces: !CartForces
       Minimum=    1.0000E+00  at reduced coord.    0.0000    0.0000    0.0000
  Next minimum=    1.0000E+00  at reduced coord.    0.0185    0.0000    0.0000
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.90697583019592E-01
-    Hartree energy  =  1.23095380198679E-01
-    XC energy       = -3.07200133211517E-01
-    Ewald energy    = -2.02664105677187E-01
-    PspCore energy  =  4.57958112768191E-07
-    Loc. psp. energy= -6.03514403815072E-01
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -4.99585221527393E-01
-
- Other information on the energy :
-    Total energy(eV)= -1.35944052337650E+01 ; Band energy (Ha)=  -2.6245292817E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  4.90697583019592E-01
+hartree             :  1.23095380198679E-01
+xc                  : -3.07200133211517E-01
+Ewald energy        : -2.02664105677187E-01
+psp_core            :  4.57958112768191E-07
+local_psp           : -6.03514403815072E-01
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -4.99585221527393E-01
+total_energy_eV     : -1.35944052337650E+01
+band_energy         : -2.62452928169160E-01
+...
 
 
           ===> extra information on forces <===
@@ -450,10 +448,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.1
+- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.0  wall=          1.1
++Overall time at end (sec) : cpu=          1.0  wall=          1.2

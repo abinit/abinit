@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h08 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h56 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t68/t68.in
 - output file    -> t68.out
@@ -906,6 +906,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
   sigma(2 2)=  4.85646418E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.85646418E-03  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -1011,22 +1012,19 @@ cartesian_forces: !CartForces
  Next minimum=    1.5001E-02  at reduced coord.    0.8000    0.7333    0.7333
    Integrated=    8.0000E+00
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.42746153805544E+00
-    Hartree energy  =  8.53940825218230E-01
-    XC energy       = -4.27325480542850E+00
-    Ewald energy    = -1.27864121744519E+01
-    PspCore energy  =  1.36841387056176E+00
-    Loc. psp. energy= -3.60688076094452E+00
-    NL   psp  energy= -7.12828627288616E-01
-    >>>>>>>>> Etotal= -1.17295601342781E+01
-
- Other information on the energy :
-    Total energy(eV)= -3.19177563322795E+02 ; Band energy (Ha)=   1.0005685439E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  7.42746153805544E+00
+hartree             :  8.53940825218230E-01
+xc                  : -4.27325480542850E+00
+Ewald energy        : -1.27864121744519E+01
+psp_core            :  1.36841387056176E+00
+local_psp           : -3.60688076094452E+00
+non_local_psp       : -7.12828627288616E-01
+total_energy        : -1.17295601342781E+01
+total_energy_eV     : -3.19177563322795E+02
+band_energy         :  1.00056854390748E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1176,6 +1174,7 @@ cartesian_forces: !CartForces
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
+
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -1199,6 +1198,7 @@ data: !SigmaeeData |
        13    42.356   -11.455    42.356    45.506    -0.977     0.000     1.000     0.000    -0.977     2.173    44.529    44.533
        14    45.043   -11.529    45.043    48.179    -1.113     0.000     1.000     0.000    -1.113     2.023    47.066    47.067
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.250,    0.000, ]
@@ -1224,6 +1224,7 @@ data: !SigmaeeData |
        14    51.735   -13.056    51.735    55.493    -1.172     0.000     1.000     0.000    -1.172     2.585    54.320    54.323
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
@@ -1247,6 +1248,7 @@ data: !SigmaeeData |
        13    47.990   -13.983    47.990    52.083    -1.525     0.000     1.000     0.000    -1.525     2.567    50.557    50.555
        14    47.990   -13.983    47.990    52.083    -1.525     0.000     1.000     0.000    -1.525     2.567    50.558    50.560
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.500,    0.250, ]
@@ -1272,6 +1274,7 @@ data: !SigmaeeData |
        14    53.062   -12.687    53.062    56.671    -1.136     0.000     1.000     0.000    -1.136     2.473    55.535    55.538
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
@@ -1295,6 +1298,7 @@ data: !SigmaeeData |
        13    43.927   -13.918    43.927    48.017    -1.693     0.000     1.000     0.000    -1.693     2.397    46.324    46.323
        14    43.927   -13.918    43.927    48.017    -1.694     0.000     1.000     0.000    -1.694     2.396    46.323    46.324
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
@@ -1462,6 +1466,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
+
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -1485,6 +1490,7 @@ data: !SigmaeeData |
        13    42.356   -11.455    44.533    45.511    -0.979     0.000     1.000     0.000    -0.979    -0.001    44.532    44.532
        14    45.043   -11.529    47.067    48.183    -1.116     0.000     1.000     0.000    -1.116     0.001    47.067    47.067
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.250,    0.000, ]
@@ -1510,6 +1516,7 @@ data: !SigmaeeData |
        14    51.735   -13.056    54.323    55.499    -1.173     0.000     1.000     0.000    -1.173     0.003    54.326    54.326
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
@@ -1533,6 +1540,7 @@ data: !SigmaeeData |
        13    47.990   -13.983    50.555    52.087    -1.529     0.000     1.000     0.000    -1.529     0.003    50.558    50.558
        14    47.990   -13.983    50.560    52.087    -1.524     0.000     1.000     0.000    -1.524     0.003    50.562    50.562
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.500,    0.250, ]
@@ -1558,6 +1566,7 @@ data: !SigmaeeData |
        14    53.062   -12.687    55.538    56.678    -1.138     0.000     1.000     0.000    -1.138     0.002    55.540    55.540
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
@@ -1581,6 +1590,7 @@ data: !SigmaeeData |
        13    43.927   -13.918    46.323    48.020    -1.693     0.000     1.000     0.000    -1.693     0.004    46.327    46.327
        14    43.927   -13.918    46.324    48.020    -1.691     0.000     1.000     0.000    -1.691     0.004    46.328    46.328
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
@@ -1748,6 +1758,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
+
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -1771,6 +1782,7 @@ data: !SigmaeeData |
        13    42.356   -11.455    44.532    45.511    -0.979     0.000     1.000     0.000    -0.979    -0.000    44.532    44.532
        14    45.043   -11.529    47.067    48.183    -1.116     0.000     1.000     0.000    -1.116     0.000    47.067    47.067
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.250,    0.000, ]
@@ -1796,6 +1808,7 @@ data: !SigmaeeData |
        14    51.735   -13.056    54.326    55.499    -1.173     0.000     1.000     0.000    -1.173     0.000    54.326    54.326
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
@@ -1819,6 +1832,7 @@ data: !SigmaeeData |
        13    47.990   -13.983    50.558    52.087    -1.529     0.000     1.000     0.000    -1.529     0.001    50.559    50.559
        14    47.990   -13.983    50.562    52.087    -1.524     0.000     1.000     0.000    -1.524     0.001    50.563    50.563
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.500,    0.250, ]
@@ -1844,6 +1858,7 @@ data: !SigmaeeData |
        14    53.062   -12.687    55.540    56.678    -1.138     0.000     1.000     0.000    -1.138     0.000    55.541    55.541
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
@@ -1867,6 +1882,7 @@ data: !SigmaeeData |
        13    43.927   -13.918    46.327    48.020    -1.693     0.000     1.000     0.000    -1.693     0.001    46.328    46.328
        14    43.927   -13.918    46.328    48.020    -1.691     0.000     1.000     0.000    -1.691     0.001    46.329    46.329
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
@@ -2034,6 +2050,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
+
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -2057,6 +2074,7 @@ data: !SigmaeeData |
        13    42.356   -11.455    44.532    45.511    -0.979     0.000     1.000     0.000    -0.979    -0.000    44.532    44.532
        14    45.043   -11.529    47.067    48.183    -1.116     0.000     1.000     0.000    -1.116    -0.000    47.067    47.067
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.250,    0.000, ]
@@ -2082,6 +2100,7 @@ data: !SigmaeeData |
        14    51.735   -13.056    54.326    55.499    -1.173     0.000     1.000     0.000    -1.173     0.000    54.326    54.326
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
@@ -2105,6 +2124,7 @@ data: !SigmaeeData |
        13    47.990   -13.983    50.559    52.087    -1.529     0.000     1.000     0.000    -1.529     0.000    50.559    50.559
        14    47.990   -13.983    50.563    52.087    -1.524     0.000     1.000     0.000    -1.524     0.000    50.563    50.563
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.500,    0.250, ]
@@ -2130,6 +2150,7 @@ data: !SigmaeeData |
        14    53.062   -12.687    55.541    56.678    -1.138     0.000     1.000     0.000    -1.138     0.000    55.541    55.541
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
@@ -2153,6 +2174,7 @@ data: !SigmaeeData |
        13    43.927   -13.918    46.328    48.020    -1.693     0.000     1.000     0.000    -1.693     0.000    46.328    46.328
        14    43.927   -13.918    46.329    48.020    -1.691     0.000     1.000     0.000    -1.691     0.000    46.329    46.329
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
@@ -2320,6 +2342,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
+
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -2343,6 +2366,7 @@ data: !SigmaeeData |
        13    42.356   -11.455    44.532    45.511    -0.979     0.000     1.000     0.000    -0.979    -0.000    44.532    44.532
        14    45.043   -11.529    47.067    48.183    -1.116     0.000     1.000     0.000    -1.116    -0.000    47.067    47.067
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.250,    0.000, ]
@@ -2368,6 +2392,7 @@ data: !SigmaeeData |
        14    51.735   -13.056    54.326    55.499    -1.173     0.000     1.000     0.000    -1.173     0.000    54.326    54.326
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
@@ -2391,6 +2416,7 @@ data: !SigmaeeData |
        13    47.990   -13.983    50.559    52.087    -1.529     0.000     1.000     0.000    -1.529     0.000    50.559    50.559
        14    47.990   -13.983    50.563    52.087    -1.524     0.000     1.000     0.000    -1.524     0.000    50.563    50.563
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.500,    0.250, ]
@@ -2416,6 +2442,7 @@ data: !SigmaeeData |
        14    53.062   -12.687    55.541    56.678    -1.138     0.000     1.000     0.000    -1.138     0.000    55.541    55.541
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
@@ -2439,6 +2466,7 @@ data: !SigmaeeData |
        13    43.927   -13.918    46.328    48.020    -1.693     0.000     1.000     0.000    -1.693     0.000    46.328    46.328
        14    43.927   -13.918    46.329    48.020    -1.691     0.000     1.000     0.000    -1.691     0.000    46.329    46.329
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
@@ -2559,6 +2587,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
   sigma(2 2)=  5.08497160E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.08497160E-03  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -2664,26 +2693,27 @@ cartesian_forces: !CartForces
  Next minimum=    1.4824E-02  at reduced coord.    0.8000    0.7333    0.7333
    Integrated=    8.0000E+00
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  7.38765111605584E+00
+hartree             :  8.49487029069005E-01
+xc                  : -3.21280207546013E+00
+Ewald energy        : -1.27864121744519E+01
+psp_core            :  1.36841387056176E+00
+local_psp           : -3.58211229461876E+00
+non_local_psp+x     : -1.76302961417242E+00
+total_energy        : -1.17388041430166E+01
+...
 
-    Kinetic energy  =  7.38765111605584E+00
-    Hartree energy  =  8.49487029069005E-01
-    XC energy       = -3.21280207546013E+00
-    Ewald energy    = -1.27864121744519E+01
-    PspCore energy  =  1.36841387056176E+00
-    Loc. psp. energy= -3.58211229461876E+00
-    NL(psp+X) energy= -1.76302961417242E+00
-    >>>>>>>>> Etotal= -1.17388041430166E+01
 
- "Double-counting" decomposition of free energy:
-    Band energy     = -6.51009459440130E-01
-    Ewald energy    =-1.27864121744519E+01
-    PspCore energy  =  1.36841387056176E+00
-    Dble-C XC-energy=  3.30203735014250E-01
-    >>>> Etotal (DC)= -1.17388040283160E+01
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -6.510094594401298E-001
+Ewald energy        : -1.278641217445190E+001
+psp_core            :  1.368413870561757E+000
+xc_dc               :  3.302037350142499E-001
+total_energy_dc     : -1.173880402831602E+001
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -3056,6 +3086,7 @@ cartesian_forces: !CartForces
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -3067,6 +3098,7 @@ data: !SigmaeeData |
         4  10.782 -16.736 -19.245   3.153   0.849  -0.178 -16.189   0.546  11.329
         5  16.014 -15.169  -8.983  -3.940   0.846  -0.182 -13.269   1.900  17.914
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.500,    0.000, ]
@@ -3451,6 +3483,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
+
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -3474,6 +3507,7 @@ data: !SigmaeeData |
        13    42.356   -11.455    44.532    53.829    -2.938    -6.264     0.757    -0.321    -9.225     0.072    44.604    44.641
        14    45.043   -11.529    47.067    56.580    -3.347    -6.166     0.647    -0.546    -9.513    -0.000    47.067    47.103
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.250,    0.000, ]
@@ -3499,6 +3533,7 @@ data: !SigmaeeData |
        14    51.735   -13.056    54.326    64.805    -3.519    -4.885     0.415    -1.409    -9.617     0.861    55.188    56.478
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
@@ -3522,6 +3557,7 @@ data: !SigmaeeData |
        13    47.990   -13.983    50.559    61.977    -4.586    -8.152     0.480    -1.084   -12.052    -0.633    49.925    49.227
        14    47.990   -13.983    50.563    61.977    -4.573    -8.165     0.457    -1.188   -12.019    -0.605    49.958    49.253
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.500,    0.250, ]
@@ -3547,6 +3583,7 @@ data: !SigmaeeData |
        14    53.062   -12.687    55.541    65.764    -3.413     0.783    -0.531     2.884   -14.254    -4.031    51.510    63.566
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
@@ -3570,6 +3607,7 @@ data: !SigmaeeData |
        13    43.927   -13.918    46.328    57.843    -5.078    -5.691     0.716    -0.397   -10.981     0.534    46.862    47.077
        14    43.927   -13.918    46.329    57.843    -5.073    -5.698     0.699    -0.430   -10.994     0.519    46.848    47.082
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
@@ -3982,6 +4020,7 @@ data: !SigmaeeData |
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -3993,6 +4032,7 @@ data: !SigmaeeData |
         4   9.411 -11.579 -12.906   2.909   0.870  -0.149 -10.203   1.376  10.787
         5  17.533 -10.577  -5.922  -3.602   0.868  -0.153  -9.663   0.914  18.447
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.500,    0.000, ]
@@ -4710,10 +4750,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         36.3  wall=         38.4
+- Proc.   0 individual time (sec): cpu=         34.4  wall=         35.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  50 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         36.3  wall=         38.4
++Overall time at end (sec) : cpu=         34.4  wall=         35.3

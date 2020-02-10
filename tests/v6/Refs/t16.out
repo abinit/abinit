@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h58 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h47 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t16/t16.in
 - output file    -> t16.out
@@ -355,6 +355,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      23.000      23.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum energy difference=  4.808E-01 exceeds toldfe=  1.000E-06
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        1
@@ -413,22 +414,19 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.20345    0.39486
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  8.93972299127038E-02
-    Hartree energy  =  1.38731905276266E-02
-    XC energy       = -1.81796141561388E-01
-    Ewald energy    = -2.55537402056578E-01
-    PspCore energy  =  2.33261276951602E-04
-    Loc. psp. energy= -1.47001043962865E-01
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -4.80830905863550E-01
-
- Other information on the energy :
-    Total energy(eV)= -1.30840743512046E+01 ; Band energy (Ha)=  -2.0345499049E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  8.93972299127038E-02
+hartree             :  1.38731905276266E-02
+xc                  : -1.81796141561388E-01
+Ewald energy        : -2.55537402056578E-01
+psp_core            :  2.33261276951602E-04
+local_psp           : -1.47001043962865E-01
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -4.80830905863550E-01
+total_energy_eV     : -1.30840743512046E+01
+band_energy         : -2.03454990491922E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -484,6 +482,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      23.000      23.000
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
   maximum energy difference=  4.808E-01 exceeds toldfe=  1.000E-06
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -543,22 +542,19 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.20345    0.39486
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  8.93972299127038E-02
-    Hartree energy  =  1.38731905276266E-02
-    XC energy       = -1.81796141561388E-01
-    Ewald energy    = -2.55537402056578E-01
-    PspCore energy  =  2.33261276951602E-04
-    Loc. psp. energy= -1.47001043962865E-01
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -4.80830905863550E-01
-
- Other information on the energy :
-    Total energy(eV)= -1.30840743512046E+01 ; Band energy (Ha)=  -2.0345499049E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  8.93972299127038E-02
+hartree             :  1.38731905276266E-02
+xc                  : -1.81796141561388E-01
+Ewald energy        : -2.55537402056578E-01
+psp_core            :  2.33261276951602E-04
+local_psp           : -1.47001043962865E-01
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -4.80830905863550E-01
+total_energy_eV     : -1.30840743512046E+01
+band_energy         : -2.03454990491922E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -607,6 +603,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      11.000      11.000
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
   maximum energy difference=  5.684E-01 exceeds toldfe=  1.000E-06
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -666,22 +663,19 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.26807    0.57015
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  5.99884900021166E-02
-    Hartree energy  =  9.29447996138603E-03
-    XC energy       = -2.12910938787740E-01
-    Ewald energy    = -3.14760707859624E-01
-    PspCore energy  =  4.66522553903205E-04
-    Loc. psp. energy= -1.10515664041930E-01
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -5.68437818171888E-01
-
- Other information on the energy :
-    Total energy(eV)= -1.54679796708161E+01 ; Band energy (Ha)=  -2.6807293227E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  5.99884900021166E-02
+hartree             :  9.29447996138603E-03
+xc                  : -2.12910938787740E-01
+Ewald energy        : -3.14760707859624E-01
+psp_core            :  4.66522553903205E-04
+local_psp           : -1.10515664041930E-01
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -5.68437818171888E-01
+total_energy_eV     : -1.54679796708161E+01
+band_energy         : -2.68072932272077E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -730,6 +724,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      11.000      11.000
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
   maximum energy difference=  5.684E-01 exceeds toldfe=  1.000E-06
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -789,22 +784,19 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.26807    0.57015
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  5.99884900021166E-02
-    Hartree energy  =  9.29447996138603E-03
-    XC energy       = -2.12910938787740E-01
-    Ewald energy    = -3.14760707859624E-01
-    PspCore energy  =  4.66522553903205E-04
-    Loc. psp. energy= -1.10515664041930E-01
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -5.68437818171888E-01
-
- Other information on the energy :
-    Total energy(eV)= -1.54679796708161E+01 ; Band energy (Ha)=  -2.6807293227E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  5.99884900021166E-02
+hartree             :  9.29447996138603E-03
+xc                  : -2.12910938787740E-01
+Ewald energy        : -3.14760707859624E-01
+psp_core            :  4.66522553903205E-04
+local_psp           : -1.10515664041930E-01
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -5.68437818171888E-01
+total_energy_eV     : -1.54679796708161E+01
+band_energy         : -2.68072932272077E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -860,6 +852,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      33.000      33.000
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
   maximum energy difference=  4.543E-01 exceeds toldfe=  1.000E-06
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -919,22 +912,19 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.18400    0.39307
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  8.61739276701404E-02
-    Hartree energy  =  1.65373171469331E-02
-    XC energy       = -1.70253182056212E-01
-    Ewald energy    = -2.30226049880733E-01
-    PspCore energy  =  1.74945957713702E-04
-    Loc. psp. energy= -1.56668488287298E-01
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -4.54261529449455E-01
-
- Other information on the energy :
-    Total energy(eV)= -1.23610848506798E+01 ; Band energy (Ha)=  -1.8400249245E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  8.61739276701404E-02
+hartree             :  1.65373171469331E-02
+xc                  : -1.70253182056212E-01
+Ewald energy        : -2.30226049880733E-01
+psp_core            :  1.74945957713702E-04
+local_psp           : -1.56668488287298E-01
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -4.54261529449455E-01
+total_energy_eV     : -1.23610848506798E+01
+band_energy         : -1.84002492450594E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -990,6 +980,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      33.000      33.000
  scprqt:  WARNING -
   nstep=    1 was not enough SCF cycles to converge;
   maximum energy difference=  4.543E-01 exceeds toldfe=  1.000E-06
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -1049,22 +1040,19 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.18400    0.39307
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  8.61739276701404E-02
-    Hartree energy  =  1.65373171469331E-02
-    XC energy       = -1.70253182056212E-01
-    Ewald energy    = -2.30226049880733E-01
-    PspCore energy  =  1.74945957713702E-04
-    Loc. psp. energy= -1.56668488287298E-01
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -4.54261529449455E-01
-
- Other information on the energy :
-    Total energy(eV)= -1.23610848506798E+01 ; Band energy (Ha)=  -1.8400249245E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  8.61739276701404E-02
+hartree             :  1.65373171469331E-02
+xc                  : -1.70253182056212E-01
+Ewald energy        : -2.30226049880733E-01
+psp_core            :  1.74945957713702E-04
+local_psp           : -1.56668488287298E-01
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -4.54261529449455E-01
+total_energy_eV     : -1.23610848506798E+01
+band_energy         : -1.84002492450594E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1336,10 +1324,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.9
+- Proc.   0 individual time (sec): cpu=          0.6  wall=          0.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and  26 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.6  wall=          0.9
++Overall time at end (sec) : cpu=          0.6  wall=          0.7

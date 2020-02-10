@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h59 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h48 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t68-t69/t68.in
 - output file    -> t68.out
@@ -208,6 +208,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    6419.000    6419.000
   nstep=   10 was not enough SCF cycles to converge;
   maximum residual=  3.354E-16 exceeds tolwfr=  1.000E-18
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -279,6 +280,7 @@ cartesian_forces: !CartForces
   sigma(1 1)=  2.52511207E-06  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.29583364E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.29583364E-05  sigma(2 1)=  0.00000000E+00
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -356,6 +358,7 @@ cartesian_forces: !CartForces
   sigma(2 2)=  1.29180866E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.29180866E-05  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -431,6 +434,7 @@ cartesian_forces: !CartForces
   sigma(2 2)=  1.29131295E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.29131295E-05  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -503,6 +507,7 @@ cartesian_forces: !CartForces
   sigma(1 1)=  8.58859982E-06  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.29129750E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.29129750E-05  sigma(2 1)=  0.00000000E+00
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -598,22 +603,19 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.89580   -0.33090
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  1.02998405534610E+00
-    Hartree energy  =  8.05073870600313E-01
-    XC energy       = -6.34027702824014E-01
-    Ewald energy    =  2.10989799259782E-01
-    PspCore energy  = -3.46091521269054E-06
-    Loc. psp. energy= -2.53949765774087E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.12748109627390E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.06803209056027E+01 ; Band energy (Ha)=  -7.2732764993E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  1.02998405534610E+00
+hartree             :  8.05073870600313E-01
+xc                  : -6.34027702824014E-01
+Ewald energy        :  2.10989799259782E-01
+psp_core            : -3.46091521269054E-06
+local_psp           : -2.53949765774087E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.12748109627390E+00
+total_energy_eV     : -3.06803209056027E+01
+band_energy         : -7.27327649932971E-01
+...
 
  rms coord change=  1.4693E-03   atom, delta coord (reduced):
      1       -0.002544904636      0.000000000000     -0.000000000000
@@ -1352,10 +1354,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.4  wall=          9.1
+- Proc.   0 individual time (sec): cpu=          8.1  wall=          9.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and  25 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.4  wall=          9.1
++Overall time at end (sec) : cpu=          8.1  wall=          9.5

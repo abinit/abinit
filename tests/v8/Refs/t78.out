@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h43 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h02 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t71-t72-t73-t74-t75-t76-t77-t78-t79-t80/t78.in
 - output file    -> t78.out
@@ -492,10 +492,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         30.3  wall=         30.4
+- Proc.   0 individual time (sec): cpu=         26.8  wall=         26.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         30.3  wall=         30.4
++Overall time at end (sec) : cpu=         26.8  wall=         26.9

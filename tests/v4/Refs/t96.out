@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h48 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h43 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v4_t95-t96/t96.in
 - output file    -> t96.out
@@ -331,6 +331,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     925.000     925.000
   sigma(2 2)=  7.13133147E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  7.13133147E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        4
@@ -459,28 +460,27 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.44327
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  5.32188206832231E-02
+local_psp           : -1.82270751600390E-01
+non_local_psp       :  0.00000000000000E+00
+positronic          : -1.29051930917168E-01
+electronic          : -8.34136092841061E+00
+electron_positron_interaction: -3.14209228310256E-01
+total_energy        : -8.78462208763803E+00
+...
 
-    Kinetic energy  =  5.32188206832231E-02
-    Loc. psp. energy= -1.82270751600390E-01
-    NL   psp  energy=  0.00000000000000E+00
-    >>> Positronic E= -1.29051930917168E-01
 
-    Electronic ener.= -8.34136092841061E+00
-    EP interaction E= -3.14209228310256E-01
-    >>>>>>>>> Etotal= -8.78462208763803E+00
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -4.43266585979246E-01
-    - EP dble-ct En.=  3.14209228310256E-01
-    >>> Positronic E= -1.29057357668991E-01
-
-    Electronic ener.= -8.34136092841061E+00
-    EP interaction E= -3.14209228310256E-01
-    >>>> Etotal (DC)= -8.78462751438985E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -4.432665859792463E-001
+electron_positron_dc:  3.142092283102559E-001
+positronic          : -1.290573576689910E-001
+electronic          : -8.341360928410607E+000
+electron_positron_interaction: -3.142092283102559E-001
+total_energy_dc     : -8.784627514389854E+000
+...
 
 
 == END DATASET(S) ==============================================================
@@ -811,10 +811,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.2
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.1  wall=          1.2
++Overall time at end (sec) : cpu=          1.1  wall=          1.1

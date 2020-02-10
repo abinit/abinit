@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h08 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h55 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t47-t48-t49/t47.in
 - output file    -> t47.out
@@ -527,6 +527,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     114.000     113.987
   sigma(2 2)=  5.96454299E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.96454299E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -594,22 +595,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.00077551154185E+00
-    Hartree energy  =  7.38727152631245E-01
-    XC energy       = -2.38303395150657E+00
-    Ewald energy    = -8.48789573682593E+00
-    PspCore energy  =  1.23030629308494E+00
-    Loc. psp. energy= -2.59596320037453E+00
-    NL   psp  energy= -5.53394380616060E-02
-    >>>>>>>>> Etotal= -8.55242336951061E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.32723275240988E+02 ; Band energy (Ha)=  -1.2806398926E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.00077551154185E+00
+hartree             :  7.38727152631245E-01
+xc                  : -2.38303395150657E+00
+Ewald energy        : -8.48789573682593E+00
+psp_core            :  1.23030629308494E+00
+local_psp           : -2.59596320037453E+00
+non_local_psp       : -5.53394380616060E-02
+total_energy        : -8.55242336951061E+00
+total_energy_eV     : -2.32723275240988E+02
+band_energy         : -1.28063989258737E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -657,6 +655,7 @@ cartesian_forces: !CartForces
   5.5082E-01  6.8992E-01  7.2772E-01  7.4042E-01  7.9848E-01  8.0491E-01
   8.1750E-01  9.2215E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
+
 
 
 --- !ResultsGS
@@ -749,6 +748,7 @@ cartesian_forces: !CartForces
   5.5082E-01  6.8992E-01  7.2772E-01  7.4042E-01  7.9848E-01  8.0491E-01
   8.1750E-01  9.2215E-01
  prteigrs : prtvol=0 or 1, do not print more k-points.
+
 
 
 --- !ResultsGS
@@ -1646,10 +1646,10 @@ P          mk1mem6         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         29.0  wall=         29.5
+- Proc.   0 individual time (sec): cpu=         28.4  wall=         29.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         29.0  wall=         29.5
++Overall time at end (sec) : cpu=         28.4  wall=         29.3

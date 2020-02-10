@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h53 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h07 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpositron_1/tpositron_1.in
 - output file    -> tpositron_1.out
@@ -260,6 +260,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     291.297     291.192
  ETOT  8  -8.0317753021139     6.156E-10 5.685E-06 1.931E-09
 
  At SCF step    8       nres2   =  1.93E-09 < tolvrs=  1.00E-08 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -379,30 +380,30 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.04555120237530E+00
+hartree             :  5.57285040338442E-01
+xc                  : -4.78055988482030E+00
+Ewald energy        : -8.39947182979609E+00
+psp_core            :  2.32215214290181E-01
+local_psp           : -2.37412821412092E+00
+spherical_terms     :  3.68736896497044E+00
+total_energy        : -8.03173950676294E+00
+total_energy_eV     : -2.18554746782054E+02
+...
 
-    Kinetic energy  =  3.04555120237530E+00
-    Hartree energy  =  5.57285040338442E-01
-    XC energy       = -4.78055988482030E+00
-    Ewald energy    = -8.39947182979609E+00
-    PspCore energy  =  2.32215214290181E-01
-    Loc. psp. energy= -2.37412821412092E+00
-    Spherical terms =  3.68736896497044E+00
-    >>>>>>>>> Etotal= -8.03173950676294E+00
 
- "Double-counting" decomposition of free energy:
-    Band energy     =  7.89043546144782E-02
-    Ewald energy    =-8.39947182979609E+00
-    PspCore energy  =  2.32215214290181E-01
-    Dble-C XC-energy= -1.87062966986254E+00
-    Spherical terms =  1.92720662864006E+00
-    >>>> Etotal (DC)= -8.03177530211391E+00
-
-  >Total energy in eV           = -2.18554746782054E+02
-  >Total DC energy in eV        = -2.18555720823089E+02
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         :  7.890435461447821E-002
+Ewald energy        : -8.399471829796086E+000
+psp_core            :  2.322152142901807E-001
+xc_dc               : -1.870629669862544E+000
+spherical_terms     :  1.927206628640060E+000
+total_energy_dc     : -8.031775302113910E+000
+total_energy_dc_eV  : -2.185547467820535E+002
+...
 
 
 ================================================================================
@@ -473,6 +474,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     283.000     283.000
  ETOT  6  -8.4549771937910    -2.072E-08 4.586E-05 1.125E-10
 
  At SCF step    6       nres2   =  1.12E-10 < tolvrs=  1.00E-08 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -640,32 +642,30 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  6, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.42320    0.07252    0.07252    0.07265    0.07940    0.14408
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  1.24407449461604E-01
+local_psp           : -3.87739581479568E-01
+spherical_terms     : -1.16539245647598E-02
+positronic          : -2.74986056582725E-01
+electronic          : -8.03177530211391E+00
+electron_positron_interaction: -1.48229532074618E-01
+total_energy        : -8.45499089077125E+00
+total_energy_eV     : -2.30072002661580E+02
+...
 
-    Kinetic energy  =  1.24407449461604E-01
-    Loc. psp. energy= -3.87739581479568E-01
-    Spherical terms = -1.16539245647598E-02
-    >>> Positronic E= -2.74986056582725E-01
 
-    Electronic ener.= -8.03177530211391E+00
-    EP interaction E= -1.48229532074618E-01
-    >>>>>>>>> Etotal= -8.45499089077125E+00
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -4.23201891677108E-01
-    Spherical terms =  0.00000000000000E+00
-    - EP dble-ct En.=  1.48229532074622E-01
-    >>> Positronic E= -2.74972359602487E-01
-
-    Electronic ener.= -8.03177530211391E+00
-    EP interaction E= -1.48229532074618E-01
-    >>>> Etotal (DC)= -8.45497719379101E+00
-
-  >Total energy in eV           = -2.30072002661580E+02
-  >Total DC energy in eV        = -2.30071629947793E+02
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -4.232018916771080E-001
+spherical_terms     :  0.000000000000000E+000
+electron_positron_dc:  1.482295320746216E-001
+positronic          : -2.749723596024868E-001
+electronic          : -8.031775302113910E+000
+electron_positron_interaction: -1.482295320746176E-001
+total_energy_dc     : -8.454977193791015E+000
+total_energy_dc_eV  : -2.300720026615799E+002
+...
 
 
 == END DATASET(S) ==============================================================
@@ -878,10 +878,10 @@ P           mkmem2          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.5  wall=          3.6
+- Proc.   0 individual time (sec): cpu=          3.5  wall=          3.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  31 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.5  wall=          3.6
++Overall time at end (sec) : cpu=          3.5  wall=          3.5

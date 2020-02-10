@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h07 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h55 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t35/t35.in
 - output file    -> t35.out
@@ -420,6 +420,7 @@ TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
   posnstep=    4 was not enough SCF cycles to converge difference between
   etotal from electronic calculation and etotal from positronic calculation;
   diff=  1.284E-05 exceeds postoldfe=  1.000E-06
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        4
@@ -580,41 +581,39 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.47812486626173E+00
+hartree             :  1.30978374939818E-02
+xc                  : -8.51081998435729E+00
+Ewald energy        : -1.07831311739987E+01
+psp_core            :  4.35622962782581E-01
+local_psp           :  4.74603991449505E-01
+spherical_terms     :  6.50736779326379E+00
+'-kT*entropy'       : -5.14343264194615E-03
+electronic          : -8.39027713974636E+00
+positronic          :  9.29314410733808E-02
+electron_positron_interaction: -3.15977474290984E-01
+total_energy        : -8.61332317296396E+00
+total_energy_eV     : -2.34380443169756E+02
+...
 
-    Kinetic energy  =  3.47812486626173E+00
-    Hartree energy  =  1.30978374939818E-02
-    XC energy       = -8.51081998435729E+00
-    Ewald energy    = -1.07831311739987E+01
-    PspCore energy  =  4.35622962782581E-01
-    Loc. psp. energy=  4.74603991449505E-01
-    Spherical terms =  6.50736779326379E+00
-    -kT*entropy     = -5.14343264194615E-03
-    >>> Electronic E= -8.39027713974636E+00
 
-    Positronic ener.=  9.29314410733808E-02
-    EP interaction E= -3.15977474290984E-01
-    >>>>>>>>> Etotal= -8.61332317296396E+00
-
- "Double-counting" decomposition of free energy:
-    Band energy     =  1.07265674044616E+00
-    Ewald energy    =-1.07831311739987E+01
-    PspCore energy  =  4.35622962782581E-01
-    Dble-C XC-energy= -4.14284342267540E+00
-    Spherical terms =  4.98631911664111E+00
-    -kT*entropy     = -5.14343264194615E-03
-    - EP dble-ct En.=  4.62328658516301E-02
-    >>> Electronic E= -8.39028634359457E+00
-
-    Positronic ener.=  9.29314410733808E-02
-    EP interaction E= -3.15977474290984E-01
-    >>>> Etotal (DC)= -8.61333237681217E+00
-
-  >Total energy in eV           = -2.34380443169756E+02
-  >Total DC energy in eV        = -2.34380693619202E+02
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         :  1.072656740446162E+000
+Ewald energy        : -1.078313117399870E+001
+psp_core            :  4.356229627825814E-001
+xc_dc               : -4.142843422675400E+000
+spherical_terms     :  4.986319116641106E+000
+'-kT*entropy'       : -5.143432641946151E-003
+electron_positron_dc:  4.623286585163015E-002
+electronic          : -8.390286343594568E+000
+positronic          :  9.293144107338083E-002
+electron_positron_interaction: -3.159774742909837E-001
+total_energy_dc     : -8.613332376812171E+000
+total_energy_dc_eV  : -2.343804431697555E+002
+...
 
 
 == END DATASET(S) ==============================================================
@@ -963,10 +962,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         33.4  wall=         33.7
+- Proc.   0 individual time (sec): cpu=         32.4  wall=         32.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         33.4  wall=         33.7
++Overall time at end (sec) : cpu=         32.4  wall=         32.5

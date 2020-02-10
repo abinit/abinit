@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h45 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h42 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v3_t54/t54.in
 - output file    -> t54.out
@@ -218,6 +218,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1553.000    1553.000
   sigma(2 2)=  4.89876475E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.89876475E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -283,28 +284,25 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.84119
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  1.91090613077938E+00
-    Hartree energy  =  1.21197445645396E+00
-    XC energy       = -6.05987228226979E-01
-    Ewald energy    = -1.80490102117720E-01
-    PspCore energy  = -1.19056952472076E-05
-    Loc. psp. energy= -4.80525557371963E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -2.46886422252623E+00
-
- Other information on the energy :
-    Total energy(eV)= -6.71812120573818E+01 ; Band energy (Ha)=  -1.6823749865E+00
-
  Calculation was performed for a charged system with PBC
  You may consider including the monopole correction to the total energy
  The correction is to be divided by the dielectric constant
-    Monopole correction (Ha)= 1.31961991697000E-01
-    Monopole correction (eV)= 3.59086841099720E+00
---------------------------------------------------------------------------------
 
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  1.91090613077938E+00
+hartree             :  1.21197445645396E+00
+xc                  : -6.05987228226979E-01
+Ewald energy        : -1.80490102117720E-01
+psp_core            : -1.19056952472076E-05
+local_psp           : -4.80525557371963E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -2.46886422252623E+00
+total_energy_eV     : -6.71812120573818E+01
+band_energy         : -1.68237498650529E+00
+monopole_correction :  1.31961991697000E-01
+monopole_correction_eV:  3.59086841099720E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -484,6 +482,7 @@ cartesian_forces: !CartForces
   18 1.24185E+00 4.248E-03 0.000E+00 6.384E-03 6.362E-03  0.00E+00  0.00E+00  6.37E-03
   19 1.24320E+00 4.987E-03 1.496E-02 0.000E+00 0.000E+00  1.69E-06 -2.71E-06  0.00E+00
   Sum of osc. strength :     1.343377E+00
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -683,10 +682,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.3  wall=          5.5
+- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.3  wall=          5.5
++Overall time at end (sec) : cpu=          1.3  wall=          1.3

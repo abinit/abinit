@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h48 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h43 )
   
 
 ================================================================================
@@ -359,6 +359,6 @@
 
 ================================================================================
 
-+Total cpu time      0.023  and wall time      0.023 sec
++Total cpu time      0.023  and wall time      0.034 sec
 
  anaddb : the run completed succesfully.

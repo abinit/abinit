@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h49 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h45 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t07/t07.in
 - output file    -> t07.out
@@ -1578,6 +1578,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     484.000     483.982
  ETOT  8  -8.3913514138219     1.681E-08 3.454E-06 2.864E-13
 
  At SCF step    8       nres2   =  2.86E-13 < tolvrs=  2.00E-10 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        4
@@ -1699,36 +1700,34 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.49196574538096E+00
+hartree             :  1.41259343611608E-02
+xc                  : -8.51744386222710E+00
+Ewald energy        : -1.07831311739987E+01
+psp_core            :  4.35622962782581E-01
+local_psp           :  4.22517331546700E-01
+spherical_terms     :  6.54998649700797E+00
+internal            : -8.38635656514643E+00
+'-kT*entropy'       : -4.98773715957252E-03
+total_energy        : -8.39134430230600E+00
+total_energy_eV     : -2.28340090911473E+02
+...
 
-    Kinetic energy  =  3.49196574538096E+00
-    Hartree energy  =  1.41259343611608E-02
-    XC energy       = -8.51744386222710E+00
-    Ewald energy    = -1.07831311739987E+01
-    PspCore energy  =  4.35622962782581E-01
-    Loc. psp. energy=  4.22517331546700E-01
-    Spherical terms =  6.54998649700797E+00
-    >>>>> Internal E= -8.38635656514643E+00
 
-    -kT*entropy     = -4.98773715957252E-03
-    >>>>>>>>> Etotal= -8.39134430230600E+00
-
- "Double-counting" decomposition of free energy:
-    Band energy     =  1.11989340522452E+00
-    Ewald energy    =-1.07831311739987E+01
-    PspCore energy  =  4.35622962782581E-01
-    Dble-C XC-energy= -4.14398418310325E+00
-    Spherical terms =  4.98523531243248E+00
-    >>>>> Internal E= -8.38636367666237E+00
-
-    -kT*entropy     = -4.98773715957252E-03
-    >>>> Etotal (DC)= -8.39135141382194E+00
-
-  >Total energy in eV           = -2.28340090911473E+02
-  >Total DC energy in eV        = -2.28340284425663E+02
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         :  1.119893405224524E+000
+Ewald energy        : -1.078313117399870E+001
+psp_core            :  4.356229627825814E-001
+xc_dc               : -4.143984183103249E+000
+spherical_terms     :  4.985235312432480E+000
+internal            : -8.386363676662366E+000
+'-kT*entropy'       : -4.987737159572518E-003
+total_energy_dc     : -8.391351413821939E+000
+total_energy_dc_eV  : -2.283400909114725E+002
+...
 
 
 ================================================================================
@@ -1805,6 +1804,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     461.000     461.000
  ETOT  7  -8.5664831901927    -2.053E-07 4.313E-04 1.555E-10
 
  At SCF step    7       nres2   =  1.55E-10 < tolvrs=  2.00E-10 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        4
@@ -1956,34 +1956,32 @@ cartesian_forces: !CartForces
    1.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000    0.00000
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  1.99273572282336E-01
+local_psp           : -1.99936987377959E-01
+spherical_terms     :  1.04737563770991E-02
+'-kT*entropy'       : -0.00000000000000E+00
+positronic          :  9.81034128147529E-03
+electronic          : -8.39135141382194E+00
+electron_positron_interaction: -1.84942182086029E-01
+total_energy        : -8.56648325462649E+00
+total_energy_eV     : -2.33105864171904E+02
+...
 
-    Kinetic energy  =  1.99273572282336E-01
-    Loc. psp. energy= -1.99936987377959E-01
-    Spherical terms =  1.04737563770991E-02
-    -kT*entropy     = -0.00000000000000E+00
-    >>> Positronic E=  9.81034128147529E-03
 
-    Electronic ener.= -8.39135141382194E+00
-    EP interaction E= -1.84942182086029E-01
-    >>>>>>>>> Etotal= -8.56648325462649E+00
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -1.45865352937195E-01
-    Spherical terms =  0.00000000000000E+00
-    -kT*entropy     = -0.00000000000000E+00
-    - EP dble-ct En.=  1.55675758652510E-01
-    >>> Positronic E=  9.81040571531488E-03
-
-    Electronic ener.= -8.39135141382194E+00
-    EP interaction E= -1.84942182086029E-01
-    >>>> Etotal (DC)= -8.56648319019265E+00
-
-  >Total energy in eV           = -2.33105864171904E+02
-  >Total DC energy in eV        = -2.33105862418570E+02
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -1.458653529371948E-001
+spherical_terms     :  0.000000000000000E+000
+'-kT*entropy'       : -0.000000000000000E+000
+electron_positron_dc:  1.556757586525098E-001
+positronic          :  9.810405715314885E-003
+electronic          : -8.391351413821937E+000
+electron_positron_interaction: -1.849421820860288E-001
+total_energy_dc     : -8.566483190192651E+000
+total_energy_dc_eV  : -2.331058641719036E+002
+...
 
 
 ================================================================================
@@ -2060,6 +2058,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     484.000     483.982
  ETOT  7  -8.5675412403752    -8.017E-08 1.182E-05 9.100E-11
 
  At SCF step    7       nres2   =  9.10E-11 < tolvrs=  2.00E-10 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        4
@@ -2213,41 +2212,39 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.47835695069085E+00
+hartree             :  1.33336138243104E-02
+xc                  : -8.51084138851491E+00
+Ewald energy        : -1.07831311739987E+01
+psp_core            :  4.35622962782581E-01
+local_psp           :  4.75497594104117E-01
+spherical_terms     :  6.50589122716402E+00
+'-kT*entropy'       : -5.11747995391508E-03
+electronic          : -8.39038769390165E+00
+positronic          :  9.81040571531505E-03
+electron_positron_interaction: -1.87015188071590E-01
+total_energy        : -8.56759247625793E+00
+total_energy_eV     : -2.33136047627502E+02
+...
 
-    Kinetic energy  =  3.47835695069085E+00
-    Hartree energy  =  1.33336138243104E-02
-    XC energy       = -8.51084138851491E+00
-    Ewald energy    = -1.07831311739987E+01
-    PspCore energy  =  4.35622962782581E-01
-    Loc. psp. energy=  4.75497594104117E-01
-    Spherical terms =  6.50589122716402E+00
-    -kT*entropy     = -5.11747995391508E-03
-    >>> Electronic E= -8.39038769390165E+00
 
-    Positronic ener.=  9.81040571531505E-03
-    EP interaction E= -1.87015188071590E-01
-    >>>>>>>>> Etotal= -8.56759247625793E+00
-
- "Double-counting" decomposition of free energy:
-    Band energy     =  1.05623438827640E+00
-    Ewald energy    =-1.07831311739987E+01
-    PspCore energy  =  4.35622962782581E-01
-    Dble-C XC-energy= -4.14314074097489E+00
-    Spherical terms =  4.98635205854311E+00
-    -kT*entropy     = -5.11747995391508E-03
-    - EP dble-ct En.=  6.28435273064753E-02
-    >>> Electronic E= -8.39033645801894E+00
-
-    Positronic ener.=  9.81040571531505E-03
-    EP interaction E= -1.87015188071590E-01
-    >>>> Etotal (DC)= -8.56754124037522E+00
-
-  >Total energy in eV           = -2.33136047627502E+02
-  >Total DC energy in eV        = -2.33134653428231E+02
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         :  1.056234388276397E+000
+Ewald energy        : -1.078313117399870E+001
+psp_core            :  4.356229627825814E-001
+xc_dc               : -4.143140740974887E+000
+spherical_terms     :  4.986352058543108E+000
+'-kT*entropy'       : -5.117479953915084E-003
+electron_positron_dc:  6.284352730647529E-002
+electronic          : -8.390336458018943E+000
+positronic          :  9.810405715315051E-003
+electron_positron_interaction: -1.870151880715899E-001
+total_energy_dc     : -8.567541240375217E+000
+total_energy_dc_eV  : -2.331360476275024E+002
+...
 
 
 ================================================================================
@@ -2365,6 +2362,7 @@ TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
   posnstep=    4 was not enough SCF cycles to converge difference between
   etotal from electronic calculation and etotal from positronic calculation;
   diff=  1.322E-05 exceeds postoldfe=  1.000E-06
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        4
@@ -2518,41 +2516,39 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.47812503097125E+00
+hartree             :  1.30978363006914E-02
+xc                  : -8.51081992235039E+00
+Ewald energy        : -1.07831311739987E+01
+psp_core            :  4.35622962782581E-01
+local_psp           :  4.74604509258968E-01
+spherical_terms     :  6.50735159805714E+00
+'-kT*entropy'       : -5.14343180800672E-03
+electronic          : -8.39029259078646E+00
+positronic          :  9.29316596446687E-02
+electron_positron_interaction: -3.15977713503176E-01
+total_energy        : -8.61333864464497E+00
+total_energy_eV     : -2.34380864175606E+02
+...
 
-    Kinetic energy  =  3.47812503097125E+00
-    Hartree energy  =  1.30978363006914E-02
-    XC energy       = -8.51081992235039E+00
-    Ewald energy    = -1.07831311739987E+01
-    PspCore energy  =  4.35622962782581E-01
-    Loc. psp. energy=  4.74604509258968E-01
-    Spherical terms =  6.50735159805714E+00
-    -kT*entropy     = -5.14343180800672E-03
-    >>> Electronic E= -8.39029259078646E+00
 
-    Positronic ener.=  9.29316596446687E-02
-    EP interaction E= -3.15977713503176E-01
-    >>>>>>>>> Etotal= -8.61333864464497E+00
-
- "Double-counting" decomposition of free energy:
-    Band energy     =  1.07265636028660E+00
-    Ewald energy    =-1.07831311739987E+01
-    PspCore energy  =  4.35622962782581E-01
-    Dble-C XC-energy= -4.14284344242115E+00
-    Spherical terms =  4.98631954220571E+00
-    -kT*entropy     = -5.14343180800672E-03
-    - EP dble-ct En.=  4.62327589463909E-02
-    >>> Electronic E= -8.39028642400658E+00
-
-    Positronic ener.=  9.29316596446687E-02
-    EP interaction E= -3.15977713503176E-01
-    >>>> Etotal (DC)= -8.61333247786509E+00
-
-  >Total energy in eV           = -2.34380864175606E+02
-  >Total DC energy in eV        = -2.34380696368992E+02
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         :  1.072656360286597E+000
+Ewald energy        : -1.078313117399870E+001
+psp_core            :  4.356229627825814E-001
+xc_dc               : -4.142843442421150E+000
+spherical_terms     :  4.986319542205715E+000
+'-kT*entropy'       : -5.143431808006717E-003
+electron_positron_dc:  4.623275894639087E-002
+electronic          : -8.390286424006577E+000
+positronic          :  9.293165964466865E-002
+electron_positron_interaction: -3.159777135031763E-001
+total_energy_dc     : -8.613332477865086E+000
+total_energy_dc_eV  : -2.343808641756065E+002
+...
 
 
 ================================================================================
@@ -2664,6 +2660,7 @@ TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
   posnstep=    4 was not enough SCF cycles to converge difference between
   etotal from electronic calculation and etotal from positronic calculation;
   diff=  1.306E-05 exceeds postoldfe=  1.000E-06
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        4
@@ -2817,41 +2814,39 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.47812491705443E+00
+hartree             :  1.30978423603727E-02
+xc                  : -8.51082000315325E+00
+Ewald energy        : -1.07831311739987E+01
+psp_core            :  4.35622962782581E-01
+local_psp           :  4.74603845480495E-01
+spherical_terms     :  6.50736789434366E+00
+'-kT*entropy'       : -5.14343189467175E-03
+electronic          : -8.39027714702508E+00
+positronic          :  9.29314425852674E-02
+electron_positron_interaction: -3.15977468480313E-01
+total_energy        : -8.61332317292013E+00
+total_energy_eV     : -2.34380443168563E+02
+...
 
-    Kinetic energy  =  3.47812491705443E+00
-    Hartree energy  =  1.30978423603727E-02
-    XC energy       = -8.51082000315325E+00
-    Ewald energy    = -1.07831311739987E+01
-    PspCore energy  =  4.35622962782581E-01
-    Loc. psp. energy=  4.74603845480495E-01
-    Spherical terms =  6.50736789434366E+00
-    -kT*entropy     = -5.14343189467175E-03
-    >>> Electronic E= -8.39027714702508E+00
 
-    Positronic ener.=  9.29314425852674E-02
-    EP interaction E= -3.15977468480313E-01
-    >>>>>>>>> Etotal= -8.61332317292013E+00
-
- "Double-counting" decomposition of free energy:
-    Band energy     =  1.07265675627740E+00
-    Ewald energy    =-1.07831311739987E+01
-    PspCore energy  =  4.35622962782581E-01
-    Dble-C XC-energy= -4.14284345163382E+00
-    Spherical terms =  4.98631911396993E+00
-    -kT*entropy     = -5.14343189467175E-03
-    - EP dble-ct En.=  4.62328737340771E-02
-    >>> Electronic E= -8.39028635076321E+00
-
-    Positronic ener.=  9.29314425852674E-02
-    EP interaction E= -3.15977468480313E-01
-    >>>> Etotal (DC)= -8.61333237665826E+00
-
-  >Total energy in eV           = -2.34380443168563E+02
-  >Total DC energy in eV        = -2.34380693615014E+02
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         :  1.072656756277398E+000
+Ewald energy        : -1.078313117399870E+001
+psp_core            :  4.356229627825814E-001
+xc_dc               : -4.142843451633819E+000
+spherical_terms     :  4.986319113969927E+000
+'-kT*entropy'       : -5.143431894671750E-003
+electron_positron_dc:  4.623287373407713E-002
+electronic          : -8.390286350763212E+000
+positronic          :  9.293144258526742E-002
+electron_positron_interaction: -3.159774684803126E-001
+total_energy_dc     : -8.613332376658256E+000
+total_energy_dc_eV  : -2.343804431685628E+002
+...
 
 
 ================================================================================
@@ -2943,6 +2938,7 @@ TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
   posnstep=    4 was not enough SCF cycles to converge difference between
   max. force from electronic calculation and max. force from positronic calculation;
   diff=  3.382E-05 exceeds postoldff=  1.500E-03
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        4
@@ -3110,41 +3106,39 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.47832747538754E+00
+hartree             :  1.32578824585614E-02
+xc                  : -8.51091088505685E+00
+Ewald energy        : -1.07823924283109E+01
+psp_core            :  4.35622962782581E-01
+local_psp           :  4.73551024100709E-01
+spherical_terms     :  6.50760860985704E+00
+'-kT*entropy'       : -5.13588391329105E-03
+electronic          : -8.39007124269459E+00
+positronic          :  9.22404887243609E-02
+electron_positron_interaction: -3.15684134459792E-01
+total_energy        : -8.61351488843002E+00
+total_energy_eV     : -2.34385660012894E+02
+...
 
-    Kinetic energy  =  3.47832747538754E+00
-    Hartree energy  =  1.32578824585614E-02
-    XC energy       = -8.51091088505685E+00
-    Ewald energy    = -1.07823924283109E+01
-    PspCore energy  =  4.35622962782581E-01
-    Loc. psp. energy=  4.73551024100709E-01
-    Spherical terms =  6.50760860985704E+00
-    -kT*entropy     = -5.13588391329105E-03
-    >>> Electronic E= -8.39007124269459E+00
 
-    Positronic ener.=  9.22404887243609E-02
-    EP interaction E= -3.15684134459792E-01
-    >>>>>>>>> Etotal= -8.61351488843002E+00
-
- "Double-counting" decomposition of free energy:
-    Band energy     =  1.07250187248322E+00
-    Ewald energy    =-1.07823924283109E+01
-    PspCore energy  =  4.35622962782581E-01
-    Dble-C XC-energy= -4.14299555903388E+00
-    Spherical terms =  4.98631173387219E+00
-    -kT*entropy     = -5.13588391329105E-03
-    - EP dble-ct En.=  4.60114981482686E-02
-    >>> Electronic E= -8.39007580397180E+00
-
-    Positronic ener.=  9.22404887243609E-02
-    EP interaction E= -3.15684134459792E-01
-    >>>> Etotal (DC)= -8.61351944970723E+00
-
-  >Total energy in eV           = -2.34385660012894E+02
-  >Total DC energy in eV        = -2.34385784131559E+02
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         :  1.072501872483218E+000
+Ewald energy        : -1.078239242831088E+001
+psp_core            :  4.356229627825814E-001
+xc_dc               : -4.142995559033880E+000
+spherical_terms     :  4.986311733872186E+000
+'-kT*entropy'       : -5.135883913291046E-003
+electron_positron_dc:  4.601149814826862E-002
+electronic          : -8.390075803971795E+000
+positronic          :  9.224048872436091E-002
+electron_positron_interaction: -3.156841344597924E-001
+total_energy_dc     : -8.613519449707226E+000
+total_energy_dc_eV  : -2.343856600128944E+002
+...
 
 
 == END DATASET(S) ==============================================================
@@ -4618,10 +4612,10 @@ P           mkmem6          6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         27.2  wall=         28.0
+- Proc.   0 individual time (sec): cpu=         26.8  wall=         27.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  43 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         27.2  wall=         28.0
++Overall time at end (sec) : cpu=         26.8  wall=         27.0

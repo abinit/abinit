@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h08 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h56 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t80/t80.in
 - output file    -> t80.out
@@ -555,6 +555,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     162.766     162.716
   sigma(2 2)=  1.03283330E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.03283330E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -622,22 +623,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.85475968600674E+00
-    Hartree energy  =  5.85770684154843E-01
-    XC energy       = -2.32774419449122E+00
-    Ewald energy    = -8.06112399413874E+00
-    PspCore energy  =  1.14515911316270E+00
-    Loc. psp. energy= -2.20308469396243E+00
-    NL   psp  energy=  4.00317017948068E-02
-    >>>>>>>>> Etotal= -7.96623169747330E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.16772188637645E+02 ; Band energy (Ha)=  -1.1725975323E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.85475968600674E+00
+hartree             :  5.85770684154843E-01
+xc                  : -2.32774419449122E+00
+Ewald energy        : -8.06112399413874E+00
+psp_core            :  1.14515911316270E+00
+local_psp           : -2.20308469396243E+00
+non_local_psp       :  4.00317017948068E-02
+total_energy        : -7.96623169747330E+00
+total_energy_eV     : -2.16772188637645E+02
+band_energy         : -1.17259753227097E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -681,6 +679,7 @@ cartesian_forces: !CartForces
  -4.0687E-01  5.0055E-02  5.0055E-02  5.0055E-02  7.4687E-02  1.4271E-01
   1.4271E-01  1.4271E-01  2.9754E-01  3.6710E-01  3.6710E-01
   prteigrs : nnsclo,ikpt=  100    1 max resid (incl. the buffer)=  9.21199E-16
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -2072,6 +2071,7 @@ Scaling of transport tensor (Eq. (FXX)) =               3.4224242865
  -3.7891E-01 -1.1200E-01  2.1300E-02  2.1300E-02  8.7085E-02  1.7950E-01
   1.7950E-01  2.6502E-01  3.3537E-01  3.3537E-01  3.5164E-01
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -2799,10 +2799,10 @@ P          mk1mem9          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.6  wall=          5.5
+- Proc.   0 individual time (sec): cpu=          3.6  wall=          4.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and  71 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.6  wall=          5.5
++Overall time at end (sec) : cpu=          3.6  wall=          4.7

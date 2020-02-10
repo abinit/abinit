@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 18h00 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h05 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_tffield_4/tffield_4.in
 - output file    -> tffield_4.out
@@ -489,6 +489,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      75.602      75.552
   sigma(2 2)= -1.38821637E-09  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -1.38821637E-09  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -556,22 +557,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.91759370362575E+00
-    Hartree energy  =  7.61530854589633E-01
-    XC energy       = -4.34890938500486E+00
-    Ewald energy    = -8.54119393747757E+00
-    PspCore energy  =  7.50882355150906E-01
-    Loc. psp. energy= -2.29452112272460E+00
-    NL   psp  energy=  6.68847786561869E-01
-    >>>>>>>>> Etotal= -1.00857697452789E+01
-
- Other information on the energy :
-    Total energy(eV)= -2.74447752062358E+02 ; Band energy (Ha)=  -6.5056945431E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.91759370362575E+00
+hartree             :  7.61530854589633E-01
+xc                  : -4.34890938500486E+00
+Ewald energy        : -8.54119393747757E+00
+psp_core            :  7.50882355150906E-01
+local_psp           : -2.29452112272460E+00
+non_local_psp       :  6.68847786561869E-01
+total_energy        : -1.00857697452789E+01
+total_energy_eV     : -2.74447752062358E+02
+band_energy         : -6.50569454308466E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -689,6 +687,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      75.810      75.758
   sigma(2 2)= -5.19352147E-07  sigma(3 1)= -9.05970427E-09
   sigma(3 3)= -5.19352147E-07  sigma(2 1)= -9.05970427E-09
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -756,22 +755,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.91769354940231E+00
-    Hartree energy  =  7.61625166992767E-01
-    XC energy       = -4.34895194132286E+00
-    Ewald energy    = -8.54114765228972E+00
-    PspCore energy  =  7.50910513954193E-01
-    Loc. psp. energy= -2.29474837443314E+00
-    NL   psp  energy=  6.68892401843949E-01
-    >>>>>>>>> Etotal= -1.00857263358525E+01
-
- Other information on the energy :
-    Total energy(eV)= -2.74446570831794E+02 ; Band energy (Ha)=  -6.5050830872E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.91769354940231E+00
+hartree             :  7.61625166992767E-01
+xc                  : -4.34895194132286E+00
+Ewald energy        : -8.54114765228972E+00
+psp_core            :  7.50910513954193E-01
+local_psp           : -2.29474837443314E+00
+non_local_psp       :  6.68892401843949E-01
+total_energy        : -1.00857263358525E+01
+total_energy_eV     : -2.74446570831794E+02
+band_energy         : -6.50508308715960E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -888,6 +884,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      75.810      75.758
   sigma(2 2)= -5.18470458E-07  sigma(3 1)= -9.47327093E-09
   sigma(3 3)= -5.18470458E-07  sigma(2 1)= -9.47327093E-09
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -955,22 +952,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.91769340042119E+00
-    Hartree energy  =  7.61624866914157E-01
-    XC energy       = -4.34895188778309E+00
-    Ewald energy    = -8.54114803443779E+00
-    PspCore energy  =  7.50910513954193E-01
-    Loc. psp. energy= -2.29474760791766E+00
-    NL   psp  energy=  6.68892304473066E-01
-    >>>>>>>>> Etotal= -1.00857264443759E+01
-
- Other information on the energy :
-    Total energy(eV)= -2.74446573784866E+02 ; Band energy (Ha)=  -6.5050834398E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.91769340042119E+00
+hartree             :  7.61624866914157E-01
+xc                  : -4.34895188778309E+00
+Ewald energy        : -8.54114803443779E+00
+psp_core            :  7.50910513954193E-01
+local_psp           : -2.29474760791766E+00
+non_local_psp       :  6.68892304473066E-01
+total_energy        : -1.00857264443759E+01
+total_energy_eV     : -2.74446573784866E+02
+band_energy         : -6.50508343980826E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1344,10 +1338,10 @@ P           mkmem3        234
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         13.1  wall=         14.4
+- Proc.   0 individual time (sec): cpu=         13.7  wall=         14.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.1  wall=         14.4
++Overall time at end (sec) : cpu=         13.7  wall=         14.0

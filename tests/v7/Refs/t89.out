@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h10 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h57 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t85-t86-t87-t88-t89/t89.in
 - output file    -> t89.out
@@ -295,6 +295,7 @@ P           mkmem           8
   nstep=   30 was not enough non-SCF iterations to converge;
   maximum residual=  7.853E-09 exceeds tolwfr=  1.000E-14
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        1
@@ -377,6 +378,7 @@ cartesian_forces: !CartForces
 
   prteigrs : nnsclo,ikpt=   30    2 max resid (incl. the buffer)=  2.38375E-07
   prteigrs : nnsclo,ikpt=   30    3 max resid (incl. the buffer)=  6.29583E-14
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -929,10 +931,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.6  wall=          3.8
+- Proc.   0 individual time (sec): cpu=          2.6  wall=          2.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.6  wall=          3.8
++Overall time at end (sec) : cpu=          2.6  wall=          2.7

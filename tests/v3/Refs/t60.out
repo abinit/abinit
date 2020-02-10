@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h45 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h42 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v3_t60-t61/t60.in
 - output file    -> t60.out
@@ -191,6 +191,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1720.250    1720.249
   sigma(2 2)=  1.42693270E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.42693270E-05  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -258,22 +259,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  5.62046378789323E+00
-    Hartree energy  =  3.50251394856991E+00
-    XC energy       = -1.10078567053406E+01
-    Ewald energy    = -1.16761873970179E+01
-    PspCore energy  =  3.72889727397312E-01
-    Loc. psp. energy= -1.35811625399529E+01
-    NL   psp  energy=  3.77644426772609E+00
-    >>>>>>>>> Etotal= -2.29928949107248E+01
-
- Other information on the energy :
-    Total energy(eV)= -6.25668489468373E+02 ; Band energy (Ha)=  -1.5103349612E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  5.62046378789323E+00
+hartree             :  3.50251394856991E+00
+xc                  : -1.10078567053406E+01
+Ewald energy        : -1.16761873970179E+01
+psp_core            :  3.72889727397312E-01
+local_psp           : -1.35811625399529E+01
+non_local_psp       :  3.77644426772609E+00
+total_energy        : -2.29928949107248E+01
+total_energy_eV     : -6.25668489468373E+02
+band_energy         : -1.51033496121629E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)

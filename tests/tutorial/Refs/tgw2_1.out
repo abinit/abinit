@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h52 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 02h06 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_1.in
 - output file    -> tgw2_1.out
@@ -219,6 +219,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     121.859     121.812
   sigma(2 2)= -1.50669055E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -1.50669055E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        1
@@ -313,25 +314,21 @@ cartesian_forces: !CartForces
  Next minimum=    4.5009E-03  at reduced coord.    0.0667    0.0000    0.0000
    Integrated=    3.0000E+00
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  8.99900174703490E-01
-    Hartree energy  =  3.56282494209724E-03
-    XC energy       = -7.99977691200650E-01
-    Ewald energy    = -2.69627278273813E+00
-    PspCore energy  =  3.65065256190695E-02
-    Loc. psp. energy=  6.06714356440703E-02
-    NL   psp  energy=  4.47003683992331E-01
-    >>>>> Internal E= -2.04860582903772E+00
-
-    -kT*entropy     = -9.50270521564336E-02
-    >>>>>>>>> Etotal= -2.14363288119416E+00
-
- Other information on the energy :
-    Total energy(eV)= -5.83312171850920E+01 ; Band energy (Ha)=   3.7215178542E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  8.99900174703490E-01
+hartree             :  3.56282494209724E-03
+xc                  : -7.99977691200650E-01
+Ewald energy        : -2.69627278273813E+00
+psp_core            :  3.65065256190695E-02
+local_psp           :  6.06714356440703E-02
+non_local_psp       :  4.47003683992331E-01
+internal            : -2.04860582903772E+00
+'-kT*entropy'       : -9.50270521564336E-02
+total_energy        : -2.14363288119416E+00
+total_energy_eV     : -5.83312171850920E+01
+band_energy         :  3.72151785421112E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -481,6 +478,7 @@ P newkpt: treating     35 bands with npw=     116 for ikpt=   8 by node    0
   2.2189E+00  2.2189E+00  2.3098E+00  2.3098E+00  2.7753E+00  2.8247E+00
   2.8420E+00  2.8420E+00  3.2061E+00  3.2061E+00  3.2194E+00
   prteigrs : nnsclo,ikpt=   50    8 max resid (incl. the buffer)=  1.24141E-05
+
 
 --- !ResultsGS
 comment   : Summary of ground state results

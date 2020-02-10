@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h40 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h59 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t93/t93.in
 - output file    -> t93.out
@@ -323,6 +323,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     534.875     534.793
   sigma(2 2)= -3.88625423E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)= -3.88625423E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -393,22 +394,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.29660454276234E+00
-    Hartree energy  =  6.26192467227281E-01
-    XC energy       = -3.13838997666344E+00
-    Ewald energy    = -8.43581958561899E+00
-    PspCore energy  =  5.61002511661397E-01
-    Loc. psp. energy= -2.40541093388425E+00
-    NL   psp  energy=  1.12943479399545E+00
-    >>>>>>>>> Etotal= -8.36638618052022E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.27660945879135E+02 ; Band energy (Ha)=  -1.8875475878E-02
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.29660454276234E+00
+hartree             :  6.26192467227281E-01
+xc                  : -3.13838997666344E+00
+Ewald energy        : -8.43581958561899E+00
+psp_core            :  5.61002511661397E-01
+local_psp           : -2.40541093388425E+00
+non_local_psp       :  1.12943479399545E+00
+total_energy        : -8.36638618052022E+00
+total_energy_eV     : -2.27660945879135E+02
+band_energy         : -1.88754758779096E-02
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1196,6 +1194,7 @@ cartesian_forces: !CartForces
  matrix elements of self-energy operator (all in [eV])
 
  Perturbative Calculation
+
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
@@ -1234,6 +1233,7 @@ data: !SigmaeeData |
        14   0.000   0.000   0.000  -0.005   0.000   0.000  -0.004  -0.004  -0.004
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
@@ -1271,6 +1271,7 @@ data: !SigmaeeData |
        14   7.959  -9.582  -4.467  -3.573   0.813  -0.230  -8.329   1.253   9.213
        14   0.000   0.000   0.000  -0.064   0.000   0.000  -0.052  -0.052  -0.052
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.500,    0.000, ]
@@ -1567,10 +1568,10 @@ P           mkmem           3
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         18.7  wall=         18.9
+- Proc.   0 individual time (sec): cpu=         18.7  wall=         18.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  20 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.7  wall=         18.9
++Overall time at end (sec) : cpu=         18.7  wall=         18.8

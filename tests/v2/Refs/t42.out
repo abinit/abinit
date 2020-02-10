@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 16h41 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h41 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v2_t42/t42.in
 - output file    -> t42.out
@@ -284,6 +284,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1309.000    1309.000
   sigma(2 2)=  5.91164438E-04  sigma(3 1)=  1.62686814E-05
   sigma(3 3)=  5.91164438E-04  sigma(2 1)=  1.62686814E-05
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -357,28 +358,25 @@ cartesian_forces: !CartForces
  Next minimum=    0.0000E+00  at reduced coord.    0.5333    0.4000    0.0000
    Integrated=    2.0000E+00
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  1.91386139091242E+00
-    Hartree energy  =  1.17616005242928E+00
-    XC energy       = -5.88080026214642E-01
-    Ewald energy    = -2.60678336556392E-01
-    PspCore energy  = -1.42868342966491E-05
-    Loc. psp. energy= -4.70362879058126E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -2.46237999684489E+00
-
- Other information on the energy :
-    Total energy(eV)= -6.70047673033319E+01 ; Band energy (Ha)=  -1.6136073472E+00
-
  Calculation was performed for a charged system with PBC
  You may consider including the monopole correction to the total energy
  The correction is to be divided by the dielectric constant
-    Monopole correction (Ha)= 1.41864873974033E-01
-    Monopole correction (eV)= 3.86033954195793E+00
---------------------------------------------------------------------------------
 
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  1.91386139091242E+00
+hartree             :  1.17616005242928E+00
+xc                  : -5.88080026214642E-01
+Ewald energy        : -2.60678336556392E-01
+psp_core            : -1.42868342966491E-05
+local_psp           : -4.70362879058126E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -2.46237999684489E+00
+total_energy_eV     : -6.70047673033319E+01
+band_energy         : -1.61360734724849E+00
+monopole_correction :  1.41864873974033E-01
+monopole_correction_eV:  3.86033954195793E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -559,6 +557,7 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
   18 1.24915E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00  0.00E+00  0.00E+00  0.00E+00
   19 1.28604E+00 2.059E-03 2.059E-03 2.060E-03 2.059E-03  2.06E-03  2.06E-03  2.06E-03
   Sum of osc. strength :     1.360436E+00
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -830,6 +829,7 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
   18 1.24790E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00  0.00E+00  0.00E+00  0.00E+00
   19 1.29044E+00 1.433E-03 1.433E-03 1.433E-03 1.433E-03  1.43E-03  1.43E-03  1.43E-03
   Sum of osc. strength :     1.360436E+00
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -1101,6 +1101,7 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
   18 1.25242E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00  0.00E+00  0.00E+00  0.00E+00
   19 1.29102E+00 2.074E-03 2.073E-03 2.074E-03 2.073E-03  2.07E-03  2.07E-03  2.07E-03
   Sum of osc. strength :     1.360436E+00
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -1332,10 +1333,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          2.0
+- Proc.   0 individual time (sec): cpu=          1.7  wall=          2.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and  30 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.7  wall=          2.0
++Overall time at end (sec) : cpu=          1.7  wall=          2.7

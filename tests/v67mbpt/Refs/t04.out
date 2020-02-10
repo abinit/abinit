@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 17h03 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 01h52 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t04-t05/t04.in
 - output file    -> t04.out
@@ -405,6 +405,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
   sigma(2 2)=  4.47191737E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.47191737E-03  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -472,22 +473,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.28840801507944E+00
-    Hartree energy  =  8.19404515297404E-01
-    XC energy       = -4.26023994973697E+00
-    Ewald energy    = -1.27864121744519E+01
-    PspCore energy  =  1.93481650847052E-01
-    Loc. psp. energy= -4.51306980421677E+00
-    NL   psp  energy=  1.60537088152989E+00
-    >>>>>>>>> Etotal= -1.16530568656519E+01
-
- Other information on the energy :
-    Total energy(eV)= -3.17095803513661E+02 ; Band energy (Ha)=   1.3210544331E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  7.28840801507944E+00
+hartree             :  8.19404515297404E-01
+xc                  : -4.26023994973697E+00
+Ewald energy        : -1.27864121744519E+01
+psp_core            :  1.93481650847052E-01
+local_psp           : -4.51306980421677E+00
+non_local_psp       :  1.60537088152989E+00
+total_energy        : -1.16530568656519E+01
+total_energy_eV     : -3.17095803513661E+02
+band_energy         :  1.32105443307335E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -548,6 +546,7 @@ cartesian_forces: !CartForces
   prteigrs : nnsclo,ikpt=  250    4 max resid (incl. the buffer)=  3.42978E-05
   prteigrs : nnsclo,ikpt=  250    5 max resid (incl. the buffer)=  3.14855E-10
   prteigrs : nnsclo,ikpt=  250    6 max resid (incl. the buffer)=  7.69097E-07
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -975,6 +974,7 @@ cartesian_forces: !CartForces
  matrix elements of self-energy operator (all in [eV])
 
  Self-Consistent on Energies and Wavefunctions
+
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
@@ -992,6 +992,7 @@ data: !SigmaeeData |
         7    27.315   -15.766    27.315    43.081    -6.819    -5.234     1.000     0.000   -12.052     3.713    31.029    31.021
         8    27.315   -15.766    27.315    43.081    -6.819    -5.240     1.000     0.000   -12.059     3.707    31.022    31.030
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.250,    0.000, ]
@@ -1011,6 +1012,7 @@ data: !SigmaeeData |
         8    27.568   -14.931    27.568    42.499    -5.657    -5.988     1.000     0.000   -11.645     3.286    30.854    30.870
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
@@ -1028,6 +1030,7 @@ data: !SigmaeeData |
         7    33.419   -16.023    33.419    49.442    -4.867    -6.775     1.000     0.000   -11.642     4.381    37.800    37.795
         8    33.419   -16.023    33.419    49.442    -4.872    -6.775     1.000     0.000   -11.646     4.377    37.796    37.801
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [  -0.250,    0.500,    0.250, ]
@@ -1047,6 +1050,7 @@ data: !SigmaeeData |
         8    26.269   -15.429    26.269    41.698    -6.459    -5.636     1.000     0.000   -12.095     3.334    29.603    29.619
 ...
 
+
 --- !SelfEnergy_ee
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
@@ -1064,6 +1068,7 @@ data: !SigmaeeData |
         7    23.226   -14.564    23.226    37.790    -7.040    -4.671     1.000     0.000   -11.711     2.853    26.079    26.082
         8    29.916   -12.642    29.916    42.558    -3.720    -6.196     1.000     0.000    -9.915     2.727    32.643    32.644
 ...
+
 
 --- !SelfEnergy_ee
 kpoint     : [   0.000,    0.000,    0.000, ]
@@ -1443,10 +1448,10 @@ P           mkmem4          6
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          4.6  wall=         17.9
+- Proc.   0 individual time (sec): cpu=          4.6  wall=          4.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.6  wall=         17.9
++Overall time at end (sec) : cpu=          4.6  wall=          4.7
