@@ -5,8 +5,8 @@
 #################################################################
 
 ! At present, does not work when the charge is imposed ?!?
-! ndtset 5
-  ndtset 3
+  ndtset 5
+! ndtset 3
 
 ! Spin variables
   nsppol 2
@@ -28,12 +28,12 @@
 ! Fourth dataset is constrained calculation for charge, assymmetric
   constraint_kind4  10 10
   spinat4           0 0 2.28     0 0 2.28  ! No constraint on the magnetisation, so initialisation only 
-  chrgat4           1.69 1.68
+  chrgat4           1.68 1.80
 
 ! Fifth dataset is constrained calculation for charge and magnetic moment, assymmetric
   constraint_kind5  11 11
   spinat5           0 0 2.25     0 0 2.30
-  chrgat5           1.69 1.68
+  chrgat5           1.68 1.80
 
 #########################
 # Common input parameters
@@ -57,6 +57,7 @@
   ! Definition of the spheres
     ratsph 2*2.1
     ratsm 0.05
+    magcon_lambda 0.2
 
   ! Convergence parameters
     iscf 7
