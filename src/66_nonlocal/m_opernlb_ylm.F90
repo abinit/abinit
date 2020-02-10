@@ -991,6 +991,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
            ffnl_dir1=2; if(dimffnl>2) ffnl_dir1=1+qdir
 !$OMP DO
            do ipw=1,npw
+             ztab(ipw)=czero
              if (idir==qdir) then
                do ilmn=1,nlmn
                  ztab(ipw)=ztab(ipw)+ffnl(ipw,1,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
@@ -1015,6 +1016,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
            idelgam=gamma(idelta,igamma)
 !$OMP DO
            do ipw=1,npw
+             ztab(ipw)=czero
              if (ialpha==igamma) then
                do ilmn=1,nlmn
                  ztab(ipw)=ztab(ipw)+ffnl(ipw,1+idelta,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
@@ -1069,6 +1071,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
            idelgam=gamma(idelta,igamma)
 !$OMP DO
            do ipw=1,npw
+             ztab(ipw)=czero
              if (ibeta==igamma) then
                do ilmn=1,nlmn
                  ztab(ipw)=ztab(ipw)+onehalf*ffnl(ipw,1+idelta,ilmn)*cmplx(gxfac_(1,ilmn),gxfac_(2,ilmn),kind=dp)
