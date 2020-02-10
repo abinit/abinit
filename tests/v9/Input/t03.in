@@ -1,15 +1,18 @@
 #################################################################
 # Automatic test for ABINIT:                                    #
-#    Test of constrained DFT in the PAW case, collinear         #
+#    Test of constrained DFT in the PAW case, non-collinear     #
 #    BCC iron, ferromagnetic, GGA, PAW                  XG 2020 #
 #################################################################
 
-! At present, does not work when the charge is imposed ?!?
-! ndtset 5
-  ndtset 3
+! At present, only test the collinear case, still with nspinor 2 .
+!! ndtset 5
+! ndtset 3
+! Moreover, due to CPU time constraints, only test dtset number 3
+  ndtset 1   jdtset 3
 
 ! Spin variables
-  nsppol 2
+  nspinor 2    nspden 4   nsppol 1
+  pawspnorb 0   ! Suppress the spin-orbit coupling, in order to reproduce exactly the collinear results when the constraints are collinear.
 
 ! First dataset is unconstrained calculation
   constraint_kind1  0 0
@@ -46,13 +49,13 @@
     chkprim 0
 
   ! K-points and occupations
-    kptopt 1
+    kptopt 4
     ngkpt 4 4 4   ! 6 6 6 is more realistic
     nshiftk 1
     shiftk 1/2 1/2 1/2
     occopt 7
     tsmear  0.008
-    nband 24
+    nband 42
 
   ! Definition of the spheres
     ratsph 2*2.1
@@ -71,7 +74,7 @@
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t02.out, tolnlines = 0, tolabs = 0.0e+00, tolrel = 0.0e+00
+#%%   t03.out, tolnlines = 2, tolabs = 1.1e-06, tolrel = 1.1e-04
 #%% psp_files = 26fe.paw
 #%% [paral_info]
 #%% max_nprocs = 28
@@ -80,12 +83,16 @@
 #%% keywords = PAW, ConstrainedDFT
 #%% description = 
 #%%   BCC iron, ferromagnetic, GGA, PAW. 
-#%%   Test constrained DFT in the PAW + collinear spin case.
-#%%   In dataset 1, unconstrained calculation, the atomic spin on atom 1 and 2 is 2.291834
-#%%   In dataset 2, symmetric constrained calculation, the atomic spin on atoms 1 and 2 is 2.280003 
+#%%   Test constrained DFT in the PAW + non-collinear spin case (still collinear constraint, to start with).
+#%%   In dataset 1, unconstrained calculation, the atomic spin on atom 1 and 2 is 2.281611 (to be compared with 2.291834 from v9#1)
+#%%      ETOT -248.85297128627, to be compared with values from v9#1, -248.85297615894
+#%%   In dataset 2, symmetric constrained calculation, the atomic spin on atoms 1 and 2 is 2.280002 
 #%%     with very minor deviation from the target 2.28
-#%%   In dataset 2, unsymmetric constrained calculation, the atomic spin on atoms 1 and 2 are 2.250002 and 2.299998  
+#%%      ETOT -248.85297085779, to be compared with values from v9#1, -248.85297448894
+#%%   In dataset 2, unsymmetric constrained calculation, the atomic spin on atoms 1 and 2 are 2.250002 and 2.300004  
 #%%     with very minor deviations from the targets 2.28 and 2.30
+#%%      ETOT -248.85295961666, to be compared with values from v9#1, -248.85296334276
+#%%   Not everything is satisfactory, even at thet level, because the Integrated potential residual has only a component along B(y) !
 #%%   At present the test does not work with the constraints on the charge.
 #%% topics = PAW, ConstrainedDFT
 #%%<END TEST_INFO>

@@ -884,18 +884,24 @@ end subroutine constrained_dft_free
 !ENDDEBUG
 
 !Make the proper combination of intgres_tmp, to single out the scalar potential residual and the magnetic field potential residuals for x,y,z.
- if(nspden==1)then
-   intgres(1,:)=intgres_tmp(1,:)
- else if(nspden==2)then
-   intgres(1,:)=half*(intgres_tmp(1,:)+intgres_tmp(2,:))
-   intgres(2,:)=half*(intgres_tmp(1,:)-intgres_tmp(2,:))
- else if(nspden==4)then
-   !Change the potential residual to the density+magnetization convention
-   intgres(1,:)=half*(intgres_tmp(1,:)+intgres_tmp(2,:))
-   intgres(2,:)= intgres_tmp(3,:)
-   intgres(3,:)=-intgres_tmp(4,:)
-   intgres(4,:)=half*(intgres_tmp(1,:)-intgres_tmp(2,:))
- endif
+ intgres(:,:)=zero
+ do iatom=1,natom
+   if(nspden==1)then
+     intgres(1,iatom)=intgres_tmp(1,iatom)
+   else if(nspden==2)then
+     intgres(1,iatom)=half*(intgres_tmp(1,iatom)+intgres_tmp(2,iatom))
+     intgres(2,iatom)=half*(intgres_tmp(1,iatom)-intgres_tmp(2,iatom))
+   else if(nspden==4)then
+     !Change the potential residual to the density+magnetization convention
+     intgres(1,iatom)=half*(intgres_tmp(1,iatom)+intgres_tmp(2,iatom))
+     intgres(2,iatom)= intgres_tmp(3,iatom)
+     intgres(3,iatom)=-intgres_tmp(4,iatom)
+     intgres(4,iatom)=half*(intgres_tmp(1,iatom)-intgres_tmp(2,iatom))
+   endif
+   conkind=c_dft%constraint_kind(c_dft%typat(iatom))
+   if(conkind <10)intgres(1,iatom)=zero
+   if( mod(conkind,10)==0 .and. nspden>1)intgres(2:nspden,iatom)=zero
+ enddo
 !Print the potential residuals
  call prtdenmagsph(cplex1,intgres,natom,nspden,ntypat,std_out,11,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
  ABI_DEALLOCATE(intgres_tmp)
@@ -963,6 +969,7 @@ end subroutine constrained_dft_free
  intgden_delta(:,:)=zero
  do iatom=1,natom
 
+!  The integrated density must be in the total density+magnetization representation
    if(nspden==2)then
      intgd           =intgden(1,iatom)+intgden(2,iatom)
      intgden(2,iatom)=intgden(1,iatom)-intgden(2,iatom)
