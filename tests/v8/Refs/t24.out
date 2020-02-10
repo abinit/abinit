@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 06h51 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 11h40 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Test_suite/v8_t24/t24.in
 - output file    -> t24.out
@@ -361,7 +361,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.000     783.000
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
  Atom  Sphere_radius  Integrated_potresid
     1        1.00000          0.56241777
-    2        1.00000          0.00000592
+    2        1.00000          0.00000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -699,7 +699,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.000     783.000
                       -6.0269791323E-02 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
            grchrg1     0.0000000000E+00  0.0000000000E+00
-           grchrg2     5.6241776940E-01  5.9206933333E-06
+           grchrg2     5.6241776940E-01  0.0000000000E+00
            grchrg3    -1.9373004004E-02 -1.9373096148E-02
            grchrg4     6.1182533276E-02 -1.0095431668E-01
            istwfk        2
@@ -833,10 +833,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.9  wall=          2.1
+- Proc.   0 individual time (sec): cpu=          1.9  wall=          2.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.9  wall=          2.1
++Overall time at end (sec) : cpu=          1.9  wall=          2.0
