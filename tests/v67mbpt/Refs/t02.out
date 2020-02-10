@@ -352,7 +352,6 @@ P           mkmem          16
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
            tolwfr      1.00000000E-10
             typat      1  1
-         use_yaml           1
               wtk        0.00463    0.03704    0.03704    0.01852    0.02778    0.11111
                          0.11111    0.11111    0.05556    0.02778    0.11111    0.05556
                          0.01389    0.11111    0.11111    0.05556
@@ -380,22 +379,10 @@ P           mkmem          16
 == DATASET  1 ==================================================================
 -   nproc =    1
 
---- !IterStart
-dtset:     1
-...
-
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
---- !IterStart
-timimage:     1
-...
-
---- !IterStart
-image:     1
-...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -547,10 +534,6 @@ band_energy         :  2.33747761834871E-01
 ================================================================================
 == DATASET  2 ==================================================================
 -   nproc =    1
-
---- !IterStart
-dtset:     2
-...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1042,10 +1025,6 @@ dtset:     2
 == DATASET  3 ==================================================================
 -   nproc =    1
 
---- !IterStart
-dtset:     3
-...
-
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  mkfilename : getscr/=0, take file _SCR from output of DATASET   2.
@@ -1186,10 +1165,6 @@ data: !SigmaeeData |
 == DATASET  4 ==================================================================
 -   nproc =    1
 
---- !IterStart
-dtset:     4
-...
-
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  mkfilename : getscr/=0, take file _SCR from output of DATASET   2.
@@ -1329,10 +1304,6 @@ data: !SigmaeeData |
 ================================================================================
 == DATASET  5 ==================================================================
 -   nproc =    1
-
---- !IterStart
-dtset:     5
-...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1733,7 +1704,6 @@ P           mkmem          16
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
            tolwfr      1.00000000E-10
             typat      1  1
-         use_yaml           1
               wtk        0.00463    0.03704    0.03704    0.01852    0.02778    0.11111
                          0.11111    0.11111    0.05556    0.02778    0.11111    0.05556
                          0.01389    0.11111    0.11111    0.05556

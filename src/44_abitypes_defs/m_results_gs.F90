@@ -859,7 +859,7 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
  call dict%set('res2', r=results%res2)
  call dict%set('residm', r=results%residm)
  call dict%set('diffor', r=results%diffor)
- call ydoc%add_dict('convergence', dict, multiline_trig=2)
+ call ydoc%add_dict('convergence', dict, multiline_trig=2) !, real_fmt="(es9.2)"
  call dict%free()
 
  ! Write energies.

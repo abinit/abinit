@@ -1439,7 +1439,6 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
 !      Cross product
        ivec1 = symrel_uni(ii,:); ivec2 = symrel_uni(jj,:)
        uniaxis = ivec1 .x. ivec2
-       !uniaxis=symrel_uni(ii,:) .x. symrel_uni(jj,:)
        if(sum(uniaxis**2)/=0)then
          found=1 ; exit
        end if

@@ -239,22 +239,10 @@ P           mkmem2          5
 == DATASET  1 ==================================================================
 -   nproc =    4   -> not optimal: autoparal keyword recommended in input file
 
---- !IterStart
-dtset:     1
-...
-
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
-
---- !IterStart
-timimage:     1
-...
-
---- !IterStart
-image:     1
-...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.2605000  0.0000000  0.0000000  G(1)=  0.1377316  0.0000000  0.0000000
@@ -689,24 +677,12 @@ total_energy_dc_eV  : -4.122733899252305E+003
 == DATASET  2 ==================================================================
 -   nproc =    4
 
---- !IterStart
-dtset:     2
-...
-
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
-
---- !IterStart
-timimage:     1
-...
-
---- !IterStart
-image:     1
-...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.2605000  0.0000000  0.0000000  G(1)=  0.1377316  0.0000000  0.0000000
@@ -1349,7 +1325,6 @@ P           mkmem2          5
           usepawu1          1
           usepawu2         10
            useylm           1
-         use_yaml           1
          wfoptalg1         10
          wfoptalg2        114
               wtk        0.18750    0.50000    0.18750    0.06250    0.06250
