@@ -812,6 +812,7 @@ end subroutine constrained_dft_free
 !!
 !! OUTPUT
 !!  e_constrained_dft=correction to the total energy, to make it variational
+!!  grcondft=d(E_constrained_DFT)/d(xred) (hartree)
 !!  intgres(nspden,natom)=integrated residuals from constrained DFT. They are also Lagrange parameters, or gradients with respect to constraints.
 !!
 !! SIDE EFFECTS
@@ -826,7 +827,7 @@ end subroutine constrained_dft_free
 !!
 !! SOURCE
 
- subroutine constrained_residual(c_dft,e_constrained_dft,intgres,mpi_enreg,rhor,vresid,xred)
+ subroutine constrained_residual(c_dft,e_constrained_dft,grcondft,intgres,mpi_enreg,rhor,vresid,xred)
 
 !Arguments ------------------------------------
 !scalars
@@ -834,6 +835,7 @@ end subroutine constrained_dft_free
  type(constrained_dft_t),intent(in) :: c_dft
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
+ real(dp),intent(out) :: grcondft(:,:) ! 3,natom
  real(dp),intent(out) :: intgres(:,:) ! nspden,natom
  real(dp),intent(in) :: rhor(c_dft%nfftf,c_dft%nspden)
  real(dp),intent(inout) :: vresid(c_dft%nfftf,c_dft%nspden)
@@ -849,6 +851,7 @@ end subroutine constrained_dft_free
  real(dp) :: corr_denmag(4)
  real(dp), allocatable :: coeffs_constr_dft(:,:) ! nspden,natom
  real(dp), allocatable :: gr_dum(:,:,:) ! 3,nspden,natom
+ real(dp), allocatable :: gr_intgden(:,:,:) ! 3,nspden,natom
  real(dp), allocatable :: intgden(:,:) ! nspden,natom
  real(dp), allocatable :: intgden_delta(:,:) ! nspden,natom
  real(dp), allocatable :: intgres_tmp(:,:) ! nspden,natom
@@ -869,8 +872,8 @@ end subroutine constrained_dft_free
 
 !We need the integrated magnetic moments 
  ABI_ALLOCATE(intgden,(nspden,natom))
- ABI_ALLOCATE(gr_dum,(3,nspden,natom))
- call calcdenmagsph(c_dft%gmet,gr_dum,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
+ ABI_ALLOCATE(gr_intgden,(3,nspden,natom))
+ call calcdenmagsph(c_dft%gmet,gr_intgden,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
 &  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
 
@@ -880,6 +883,7 @@ end subroutine constrained_dft_free
 
 !We need the integrated residuals
  ABI_ALLOCATE(intgres_tmp,(nspden,natom))
+ ABI_ALLOCATE(gr_dum,(3,nspden,natom))
  intgres_tmp(:,:)=zero
  call calcdenmagsph(c_dft%gmet,gr_dum,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
 &  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres_tmp,rhomag=rhomag)
@@ -971,6 +975,7 @@ end subroutine constrained_dft_free
 !Compute the energy correction, to make the energy functional variational
 !Also projects the residual in case constraint_kind 2
  e_constrained_dft=zero
+ grcondft=zero
  ABI_ALLOCATE(intgden_delta,(nspden,natom))
  intgden_delta(:,:)=zero
  do iatom=1,natom
@@ -980,6 +985,11 @@ end subroutine constrained_dft_free
      intgd           =intgden(1,iatom)+intgden(2,iatom)
      intgden(2,iatom)=intgden(1,iatom)-intgden(2,iatom)
      intgden(1,iatom)=intgd
+     do ii=1,3
+       intgd           =gr_intgden(ii,1,iatom)+gr_intgden(ii,2,iatom)
+       gr_intgden(ii,2,iatom)=gr_intgden(ii,1,iatom)-gr_intgden(ii,2,iatom)
+       gr_intgden(ii,1,iatom)=intgd
+     enddo
    endif
 
    !Comparison with the target value, and computation of the correction in terms of density and magnetization coefficients.
@@ -1035,7 +1045,9 @@ end subroutine constrained_dft_free
 !  because chrgat and spinat have directly been used in the definition of intgden_delta.
 !  WOOPS : chrgat comes with a POSITIVE sign in intgden_delta ?!?!
    e_constrained_dft=e_constrained_dft-sum(intgden_delta(:,iatom)*intgres(:,iatom))
-
+   grcondft(1,iatom)=grcondft(1,iatom)+sum(gr_intgden(1,:,iatom)*intgres(:,iatom))
+   grcondft(2,iatom)=grcondft(2,iatom)+sum(gr_intgden(2,:,iatom)*intgres(:,iatom))
+   grcondft(3,iatom)=grcondft(3,iatom)+sum(gr_intgden(3,:,iatom)*intgres(:,iatom))
  enddo
 
  ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
