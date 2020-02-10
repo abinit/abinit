@@ -405,8 +405,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    ABI_ALLOCATE(amass,(dtset%natom,nimage))
    do iimage=1,nimage
      if (any(amu_img(:,iimage)/=amu_img(:,1))) then
-       msg='HIST file is not compatible with variable masses!'
-       MSG_ERROR(msg)
+       MSG_ERROR('HIST file is not compatible with variable masses!')
      end if
      amass(:,iimage)=amu_emass*amu_img(dtset%typat(:),iimage)
    end do
@@ -505,7 +504,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      call wrtout(ab_out ,msg,'COLL')
      call wrtout(std_out,msg,'PERS')
    end if
-   call yaml_iterstart('timimage', itimimage, ab_out, dtset%use_yaml)
+   call yaml_iterstart('timimage', itimimage, ab_out, 0)
 
    call timab(704,2,tsec)
 
@@ -544,7 +543,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          if (dtset%prtvolimg==0) call wrtout(ab_out ,msg,'COLL')
          if (do_write_log) call wrtout(std_out,msg,'PERS')
        end if
-       call yaml_iterstart('image', iimage, ab_out, dtset%use_yaml)
+       call yaml_iterstart('image', iimage, ab_out, 0)
 
        acell(:)     =res_img(iimage)%acell(:)
        rprim(:,:)   =res_img(iimage)%rprim(:,:)

@@ -834,8 +834,6 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
  else
    ydoc = yamldoc_open('ResultsGS', '', width=width)
  end if
- ydoc%use_yaml = dtset%use_yaml
- ydoc%use_yaml = 1
 
  ! Write basic dimensions and info on electrons
  call ydoc%add_int('natom', results%natom)

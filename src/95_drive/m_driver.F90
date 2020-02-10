@@ -182,8 +182,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  integer :: ii,iimage,iimage_get,jdtset,jdtset_status,jj,kk,linalg_max_size
  integer :: mtypalch,mu,mxnimage,nimage,openexit,paw_size,prtvol
  real(dp) :: etotal
- character(len=500) :: message
- character(len=500) :: dilatmx_errmsg
+ character(len=500) :: msg, dilatmx_errmsg
  logical :: converged,results_gathered,test_img,use_results_all
  type(dataset_type) :: dtset
  type(datafiles_type) :: dtfil
@@ -217,13 +216,13 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !Structured debugging if prtvol==-level
  prtvol=dtsets(1)%prtvol
  if(prtvol==-level)then
-   write(message,'(80a,a,a)')  ('=',ii=1,80),ch10,' driver : enter , debug mode '
-   call wrtout(std_out,message,'COLL')
+   write(msg,'(80a,a,a)')  ('=',ii=1,80),ch10,' driver : enter , debug mode '
+   call wrtout(std_out,msg)
  end if
 
  if(ndtset>mdtset)then
-   write(message,'(a,i2,a,i5,a)')'  The maximal allowed ndtset is ',mdtset,' while the input value is ',ndtset,'.'
-   MSG_BUG(message)
+   write(msg,'(a,i0,a,i0,a)')'  The maximal allowed ndtset is ',mdtset,' while the input value is ',ndtset,'.'
+   MSG_BUG(msg)
  end if
 
  mtypalch=dtsets(1)%ntypalch
@@ -273,24 +272,24 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    dtset%ndtset = ndtset
 
 !  Print DATASET number
-   write(message,'(83a)') ch10,('=',mu=1,80),ch10,'== DATASET'
+   write(msg,'(83a)') ch10,('=',mu=1,80),ch10,'== DATASET'
    if (jdtset>=100) then
-     write(message,'(2a,i4,65a)') trim(message),' ',jdtset,' ',('=',mu=1,64)
+     write(msg,'(2a,i4,65a)') trim(msg),' ',jdtset,' ',('=',mu=1,64)
    else
-     write(message,'(2a,i2,67a)') trim(message),' ',jdtset,' ',('=',mu=1,66)
+     write(msg,'(2a,i2,67a)') trim(msg),' ',jdtset,' ',('=',mu=1,66)
    end if
-   write(message,'(3a,i5)') trim(message),ch10,'-   nproc =',mpi_enregs(idtset)%nproc
+   write(msg,'(3a,i5)') trim(msg),ch10,'-   nproc =',mpi_enregs(idtset)%nproc
 
    if (dtset%optdriver == RUNL_GSTATE) then
      if (.not. mpi_distrib_is_ok(mpi_enregs(idtset),dtset%mband,dtset%nkpt,dtset%mkmem,dtset%nsppol)) then
-       write(message,'(2a)') trim(message),'   -> not optimal: autoparal keyword recommended in input file'
+       write(msg,'(2a)') trim(msg),'   -> not optimal: autoparal keyword recommended in input file'
      end if
    end if
 
-   write(message,'(3a)') trim(message),ch10,' '
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'PERS')     ! PERS is choosen to make debugging easier
-   call yaml_iterstart('dtset', jdtset, ab_out, dtset%use_yaml)
+   write(msg,'(3a)') trim(msg),ch10,' '
+   call wrtout(ab_out,msg,'COLL')
+   call wrtout(std_out,msg,'PERS')     ! PERS is choosen to make debugging easier
+   call yaml_iterstart('dtset', jdtset, ab_out, 0)
 
    if ( dtset%np_slk == 0 ) then
      call xgScalapack_config(SLK_DISABLED,dtset%slk_rankpp)
@@ -636,8 +635,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        vdw_params%tolerance = dtset%vdw_df_tolerance
        vdw_params%tweaks = dtset%vdw_df_tweaks
        vdw_params%zab = dtset%vdw_df_zab
-       write(message,'(a,1x,a)') ch10,'[vdW-DF] *** Before init ***'
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(a,1x,a)') ch10,'[vdW-DF] *** Before init ***'
+       call wrtout(std_out,msg,'COLL')
        call xc_vdw_show(std_out,vdw_params)
        if ( dtset%irdvdw == 1 ) then
          write(vdw_filnam,'(a,a)') trim(filnam(3)),'_VDW.nc'
@@ -646,24 +645,24 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
          call xc_vdw_init(vdw_params)
        end if
        call xc_vdw_libxc_init(vdw_params%functional)
-       write(message,'(a,1x,a)') ch10,'[vdW-DF] *** After init ***'
-       call wrtout(std_out,message,'COLL')
+       write(msg,'(a,1x,a)') ch10,'[vdW-DF] *** After init ***'
+       call wrtout(std_out,msg,'COLL')
 !      call xc_vdw_get_params(vdw_params)
        call xc_vdw_memcheck(std_out)
        call xc_vdw_show(std_out)
        call xc_vdw_show(ab_out)
 
-       write (message,'(a,1x,a,e10.3,a)')ch10,&
+       write (msg,'(a,1x,a,e10.3,a)')ch10,&
 &       '[vdW-DF] activation threshold: vdw_df_threshold=',dtset%vdw_df_threshold,ch10
        call xc_vdw_trigger(.false.)
-       call wrtout(std_out,message,'COLL')
+       call wrtout(std_out,msg,'COLL')
      end if
 #else
      if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
-       write(message,'(3a)')&
+       write(msg,'(3a)')&
 &       'vdW-DF functionals are not fully operational yet.',ch10,&
 &       'Action: modify vdw_xc'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
 #endif
    end if
@@ -715,10 +714,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    case(6)
 
-     write(message,'(3a)')&
+     write(msg,'(3a)')&
       'The optdriver value 6 has been disabled since ABINITv6.0.',ch10,&
       'Action: modify optdriver in the input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
 
    case (RUNL_BSE)
      call bethe_salpeter(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
@@ -753,11 +752,11 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    case default
      ! Bad value for optdriver
-     write(message,'(a,i0,4a)')&
+     write(msg,'(a,i0,4a)')&
       'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
       'This is not allowed. ',ch10,&
       'Action: modify optdriver in the input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end select
 
    call timab(643,1,tsec)
