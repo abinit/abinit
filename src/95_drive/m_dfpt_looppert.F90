@@ -1626,7 +1626,7 @@ print *, 'mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol ', &
 print *, 'init cg1 from disk ', shape(cg1)
      call wfk_read_my_kptbands(fiwf1i, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1, &
-&            cg1, eigen=eigen1)
+&            cg1, eigen=eigen1, ask_accurate_=0)
    else
 print *, 'init cg1 to 0'
      cg1 = zero
@@ -1650,7 +1650,7 @@ print *, 'init cg1 to 0'
 &        (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
        call wfk_read_my_kptbands(fiwf1i, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kmq_rbz, nkpt_rbz, npwar1_mq, &
-&            cg1_mq, eigen=eigen1_mq)
+&            cg1_mq, eigen=eigen1_mq, ask_accurate_=0)
      else
        cg1_mq = zero
        eigen1_mq = zero

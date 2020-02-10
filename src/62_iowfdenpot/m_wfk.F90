@@ -3015,7 +3015,7 @@ end subroutine wfk_read_eigenvalues
 
 subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
 &          formeig, istwfk_in, kptns_in, nkpt_in, npwarr, &
-&          cg, kg, eigen, occ)
+&          cg, kg, eigen, occ, ask_accurate_)
 
 !Arguments ------------------------------------
 !scalars
@@ -3032,6 +3032,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  integer, intent(out), optional :: kg(3,dtset%mpw*nkpt_in)
  real(dp), intent(out), optional :: eigen(dtset%mband*(2*dtset%mband)**formeig*nkpt_in*dtset%nsppol)
  real(dp), intent(out), optional :: occ(dtset%mband*nkpt_in*dtset%nsppol)
+ integer, intent(in), optional :: ask_accurate_
 
 !Arguments ------------------------------------
 !arrays
@@ -3048,8 +3049,10 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  integer :: nband_me_saved, iband_saved, chksymbreak, iout
  integer :: spin_saved, spin_sym
  integer :: itimrev_disk, ierr
+ integer :: ask_accurate, sppoldbl
  real(dp) :: ecut_eff,cpu,wall,gflops, res
  real(dp) :: ecut_eff_disk
+ real(dp) :: dksqmax
  character(len=500) :: msg
  logical :: isirred_kf, foundk
  logical :: needthisk
@@ -3130,7 +3133,7 @@ print *, 'itimrev,dtset%kptopt ', itimrev, dtset%kptopt
 
  chksymbreak = 0
  iout = 0
- ABI_ALLOCATE (rbz2disk, (6,nkpt_in))
+! ABI_ALLOCATE (rbz2disk, (6,nkpt_in))
  ABI_ALLOCATE (symrelT, (3,3,cryst%nsym))
 ! TODO: from Matteo, this should be symrel straight, not transposed. Perhaps the logic in mapkptsets is transposed?
  do isym=1,cryst%nsym
@@ -3139,8 +3142,22 @@ print *, 'itimrev,dtset%kptopt ', itimrev, dtset%kptopt
 #ifdef DEV_MJV
 print *, 'wfk_disk%hdr%nkpt cryst%timrev ', wfk_disk%hdr%nkpt, cryst%timrev
 #endif
- call mapkptsets(chksymbreak, cryst%gmet, iout, wfk_disk%hdr%kptns, wfk_disk%hdr%nkpt, kptns_in, nkpt_in, &
-&     nkirred_disk, cryst%nsym, symrelT, cryst%timrev-1, rbz2disk, xmpi_comm_self)
+! call mapkptsets(chksymbreak, cryst%gmet, iout, wfk_disk%hdr%kptns, wfk_disk%hdr%nkpt, kptns_in, nkpt_in, &
+!&     nkirred_disk, cryst%nsym, symrelT, cryst%timrev-1, rbz2disk, xmpi_comm_self)
+
+ ask_accurate=1
+ if (present(ask_accurate_)) ask_accurate=ask_accurate_
+ sppoldbl = 1
+ ABI_ALLOCATE (rbz2disk, (nkpt_in, 6))
+ dksqmax = zero
+ call listkk(dksqmax, cryst%gmet, rbz2disk, wfk_disk%hdr%kptns, kptns_in, wfk_disk%hdr%nkpt, nkpt_in, cryst%nsym, &
+   sppoldbl, cryst%symafm, cryst%symrel, cryst%timrev-1, xmpi_comm_self, use_symrec=.False.)
+
+ if (ask_accurate == 1) then
+print *, ' dksqmax ', dksqmax
+   ABI_CHECK(dksqmax < tol12, " WF file read but k-points too far from requested set")
+ end if
+
 
  ! More efficienct algorithm based on random access IO:
  !   For each point in the irred disk set:
@@ -3153,7 +3170,7 @@ print *, 'wfk_disk%hdr%nkpt cryst%timrev ', wfk_disk%hdr%nkpt, cryst%timrev
  ABI_MALLOC(iperm, (nkpt_in))
  ABI_MALLOC(rbz2disk_sort, (nkpt_in))
  iperm = [(ii, ii=1,nkpt_in)]
- rbz2disk_sort = rbz2disk(1,:)
+ rbz2disk_sort = rbz2disk(:,1)
  call sort_int(nkpt_in, rbz2disk_sort, iperm)
 #ifdef DEV_MJV
 print *, 'iperm ', iperm
@@ -3177,7 +3194,8 @@ print *, 'rbz2disk_sort ', rbz2disk_sort
  do spin=1,nsppol
    jj = 0
    do ikpt=1,nkpt_in
-     ik_disk = rbz2disk(1,ikpt)
+     ik_disk = rbz2disk(ikpt,1)
+     !ik_disk = rbz2disk(1,ikpt)
 
      ! conversion of single spin AFM wfk file to full 2 component one in memory
      spin_sym=spin
@@ -3249,7 +3267,8 @@ print *, ' spin, ik_disk, nqst, needthisk ', spin, ik_disk, nqst, needthisk
      nband_me_saved = -1
      do jj=0,nqst-1
        ikf = iperm(iqst+jj)
-       ABI_CHECK(ik_disk == rbz2disk(1,ikf), "ik_disk !/ ind qq(1)")
+       ABI_CHECK(ik_disk == rbz2disk(ikf,1), "ik_disk !/ ind qq(1)")
+       !ABI_CHECK(ik_disk == rbz2disk(1,ikf), "ik_disk !/ ind qq(1)")
 
        kf = kptns_in(:,ikf)
 #ifdef DEV_MJV
@@ -3302,11 +3321,14 @@ print *, 'reading from file for iband, ik_disk, spin, formeig ', iband, ik_disk,
          end if
        
          ! reset isym for each spin_sym
-         isym = rbz2disk(2,ikf)
+         isym = rbz2disk(ikf,2)
+         !isym = rbz2disk(2,ikf)
          ! there is a first time reversal possible from the irred set found above to the kptns in input.
          ! a second possible time reversal if the irred k is not explicitly in the disk file, but only it's time reversed image
-         itimrev = rbz2disk(3,ikf)
-         g0 = rbz2disk(4:6,ikf) ! IS(k_disk) + g0 = k_bz
+         itimrev = rbz2disk(ikf,3)
+         !itimrev = rbz2disk(3,ikf)
+         g0 = rbz2disk(ikf,4:6) ! IS(k_disk) + g0 = k_bz
+         !g0 = rbz2disk(4:6,ikf) ! IS(k_disk) + g0 = k_bz
 
          ! complete the spin down wfk with an AFM symop
          if (spin_sym /= spin) then
