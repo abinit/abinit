@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 19h03 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 03h19 )
   
-- input  file    -> t12.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t12/t12.in
 - output file    -> t12.out
 - root for input  files -> t12i
 - root for output files -> t12o
@@ -104,8 +104,8 @@
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/78pt.18.khgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/78pt.18.khgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/78pt.18.khgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/78pt.18.khgh
 - Goedecker pseudopotential for Pt
 - 78.00000  18.00000     70301                znucl, zion, pspdat
    10   11    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -158,6 +158,7 @@
  ETOT  4  -119.99042467197    -7.697E-04 6.189E-03 4.156E+00
 
  At SCF step    4   max grdnorm=  6.19E-03 < tolwfr=  1.00E-02 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        1
@@ -208,26 +209,27 @@ cartesian_forces: !CartForces
   -3.80871   -2.13337   -2.13330   -2.13330   -0.27675   -0.27668   -0.27668   -0.24367
   -0.24367   -0.22449
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.81059889589596E+01
+hartree             :  9.99525747604144E+01
+xc                  : -1.14813545611133E+01
+'Ion-ion energy'    :  0.00000000000000E+00
+psp_core            :  0.00000000000000E+00
+local_psp           : -2.33765091829283E+02
+non_local_psp       : -1.28027618782220E+01
+total_energy        : -1.19990644549244E+02
+...
 
-    Kinetic energy  =  3.81059889589596E+01
-    Hartree energy  =  9.99525747604144E+01
-    XC energy       = -1.14813545611133E+01
-    Ion-ion energy  =  0.00000000000000E+00
-    PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -2.33765091829283E+02
-    NL   psp  energy= -1.28027618782220E+01
-    >>>>>>>>> Etotal= -1.19990644549244E+02
 
- "Double-counting" decomposition of free energy:
-    Band energy     = -2.34250883504220E+01
-    Ion-ion energy  = 0.00000000000000E+00
-    PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy= -9.64951788922482E+01
-    >>>> Etotal (DC)= -1.19920267242670E+02
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -2.342508835042204E+001
+'Ion-ion energy'    :  0.000000000000000E+000
+psp_core            :  0.000000000000000E+000
+xc_dc               : -9.649517889224818E+001
+total_energy_dc     : -1.199202672426702E+002
+...
 
 
 == END DATASET(S) ==============================================================
@@ -369,10 +371,10 @@ cartesian_forces: !CartForces
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         19.8  wall=         19.9
+- Proc.   0 individual time (sec): cpu=         20.2  wall=         20.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.0  wall=         25.5
++Overall time at end (sec) : cpu=         20.2  wall=         20.4

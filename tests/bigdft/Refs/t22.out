@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 19h03 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 03h19 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/bigdft_t22/t22.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t22/t22.in
 - output file    -> t22.out
 - root for input  files -> t22i
 - root for output files -> t22o
@@ -118,8 +118,8 @@ P           mkmem           1
          ecut(hartree)=     40.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/HGH/1h.1.hgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/HGH/1h.1.hgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/1h.1.hgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/1h.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for H,  from PRB58, 3641 (1998)
 -  1.00000   1.00000     10605                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -137,8 +137,8 @@ P           mkmem           1
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/HGH/8o.6.hgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/HGH/8o.6.hgh
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/8o.6.hgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/8o.6.hgh
 - Hartwigsen-Goedecker-Hutter psp for O,  from PRB58, 3641 (1998)
 -  8.00000   6.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -184,6 +184,7 @@ _setup2: Arith. and geom. avg. npw (full set) are   12053.000   12053.000
   sigma(1 1)=  7.88527086E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  7.84018200E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  7.91175304E-03  sigma(2 1)=  0.00000000E+00
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -259,22 +260,19 @@ cartesian_forces: !CartForces
    0.32409    0.32571    0.32804    0.34140    0.35203    0.36445    0.41151    0.45416
    0.49017    0.49845    0.50067    0.52639    0.52964    0.54160
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  1.30674081669327E+01
-    Hartree energy  =  2.12541199980061E+01
-    XC energy       = -4.10422126947041E+00
-    Ion-ion energy  =  7.03587966819977E+00
-    PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -5.54956583612487E+01
-    NL   psp  energy=  1.24072779414826E+00
-    >>>>>>>>> Etotal= -1.70017440034323E+01
-
- Other information on the energy :
-    Total energy(eV)= -4.62640982366849E+02 ; Band energy (Ha)=  -4.0591728885E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  1.30674081669327E+01
+hartree             :  2.12541199980061E+01
+xc                  : -4.10422126947041E+00
+'Ion-ion energy'    :  7.03587966819977E+00
+psp_core            :  0.00000000000000E+00
+local_psp           : -5.54956583612487E+01
+non_local_psp       :  1.24072779414826E+00
+total_energy        : -1.70017440034323E+01
+total_energy_eV     : -4.62640982366849E+02
+band_energy         : -4.05917288853739E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -426,10 +424,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         16.5  wall=         16.6
+- Proc.   0 individual time (sec): cpu=         16.2  wall=         16.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.1  wall=         14.2
++Overall time at end (sec) : cpu=         16.2  wall=         16.3

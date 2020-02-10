@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 10 Feb 2020.
-- ( at 00h31 )
+- ( at 03h18 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_paral_t01_MPI4/t01.in
 - output file    -> t01_MPI4.out
@@ -166,6 +166,7 @@
  ETOT  8  -31.261989996898     7.928E-09 3.376E-05 6.839E-07
 
  At SCF step    8       nres2   =  6.84E-07 < tolvrs=  1.00E-06 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -225,26 +226,27 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  7, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.10798   -0.62651   -0.40309   -0.40307   -0.36404   -0.14444   -0.14437
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.37092493227969E+01
+hartree             :  4.29974734941007E+01
+xc                  : -6.70850885029605E+00
+'Ion-ion energy'    :  1.57441152968349E+01
+psp_core            :  0.00000000000000E+00
+local_psp           : -1.09824356335698E+02
+non_local_psp       :  2.82003559817700E+00
+total_energy        : -3.12619914740849E+01
+...
 
-    Kinetic energy  =  2.37092493227969E+01
-    Hartree energy  =  4.29974734941007E+01
-    XC energy       = -6.70850885029605E+00
-    Ion-ion energy  =  1.57441152968349E+01
-    PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -1.09824356335698E+02
-    NL   psp  energy=  2.82003559817700E+00
-    >>>>>>>>> Etotal= -3.12619914740849E+01
 
- "Double-counting" decomposition of free energy:
-    Band energy     = -6.09818710181490E+00
-    Ion-ion energy  = 1.57441152968349E+01
-    PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy= -4.09079181919179E+01
-    >>>> Etotal (DC)= -3.12619899968979E+01
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -6.098187101814900E+000
+'Ion-ion energy'    :  1.574411529683492E+001
+psp_core            :  0.000000000000000E+000
+xc_dc               : -4.090791819191791E+001
+total_energy_dc     : -3.126198999689789E+001
+...
 
 
 ================================================================================
@@ -283,6 +285,7 @@ cartesian_forces: !CartForces
  ETOT 12  -31.261989915078     1.444E-06 6.628E-07 2.458E-07
 
  At SCF step   12       vres2   =  2.46E-07 < tolvrs=  1.00E-06 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -342,26 +345,27 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  7, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.10797   -0.62651   -0.40309   -0.40307   -0.36404   -0.14443   -0.14436
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.37092743404434E+01
+hartree             :  4.29975072729516E+01
+xc                  : -6.70851148384381E+00
+'Ion-ion energy'    :  1.57441152968349E+01
+psp_core            :  0.00000000000000E+00
+local_psp           : -1.09824401416456E+02
+non_local_psp       :  2.82002607499263E+00
+total_energy        : -3.12619899150777E+01
+...
 
-    Kinetic energy  =  2.37092743404434E+01
-    Hartree energy  =  4.29975072729516E+01
-    XC energy       = -6.70851148384381E+00
-    Ion-ion energy  =  1.57441152968349E+01
-    PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -1.09824401416456E+02
-    NL   psp  energy=  2.82002607499263E+00
-    >>>>>>>>> Etotal= -3.12619899150777E+01
 
- "Double-counting" decomposition of free energy:
-    Band energy     = -6.09816055994506E+00
-    Ion-ion energy  = 1.57441152968349E+01
-    PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy= -4.09079511611695E+01
-    >>>> Etotal (DC)= -3.12619964242796E+01
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -6.098160559945057E+000
+'Ion-ion energy'    :  1.574411529683492E+001
+psp_core            :  0.000000000000000E+000
+xc_dc               : -4.090795116116949E+001
+total_energy_dc     : -3.126199642427962E+001
+...
 
 
 == END DATASET(S) ==============================================================
@@ -516,10 +520,10 @@ cartesian_forces: !CartForces
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.9  wall=          3.0
+- Proc.   0 individual time (sec): cpu=          2.9  wall=          3.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.6  wall=         11.7
++Overall time at end (sec) : cpu=         11.7  wall=         11.9

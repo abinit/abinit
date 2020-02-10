@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 19h03 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 03h19 )
   
-- input  file    -> t07.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t07/t07.in
 - output file    -> t07.out
 - root for input  files -> t07i
 - root for output files -> t07o
@@ -109,8 +109,8 @@
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/HGH/6c.4.hgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/HGH/6c.4.hgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/6c.4.hgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/6c.4.hgh
 - Hartwigsen-Goedecker-Hutter psp for C,  from PRB58, 3641 (1998)
 -  6.00000   4.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -153,6 +153,7 @@
  ETOT 11  -22.738710655466    -7.390E-08 8.176E-05 1.116E-05
 
  At SCF step   11   max grdnorm=  8.18E-05 < tolwfr=  1.00E-04 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        4
@@ -227,26 +228,27 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  1.78235831074843E+01
+hartree             : -2.28380715774968E+01
+xc                  : -6.98695434010344E+00
+Ewald energy        : -3.99188395603882E+01
+psp_core            :  0.00000000000000E+00
+local_psp           :  2.73679539699178E+01
+non_local_psp       :  1.81361770888672E+00
+total_energy        : -2.27387106916997E+01
+...
 
-    Kinetic energy  =  1.78235831074843E+01
-    Hartree energy  = -2.28380715774968E+01
-    XC energy       = -6.98695434010344E+00
-    Ewald energy    = -3.99188395603882E+01
-    PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy=  2.73679539699178E+01
-    NL   psp  energy=  1.81361770888672E+00
-    >>>>>>>>> Etotal= -2.27387106916997E+01
 
- "Double-counting" decomposition of free energy:
-    Band energy     = -7.81346504534917E+00
-    Ewald energy    =-3.99188395603882E+01
-    PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy=  2.49935768180217E+01
-    >>>> Etotal (DC)= -2.27387277877156E+01
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -7.813465045349169E+000
+Ewald energy        : -3.991883956038821E+001
+psp_core            :  0.000000000000000E+000
+xc_dc               :  2.499357681802174E+001
+total_energy_dc     : -2.273872778771565E+001
+...
 
 
 == END DATASET(S) ==============================================================
@@ -396,10 +398,10 @@ cartesian_forces: !CartForces
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         74.4  wall=         74.7
+- Proc.   0 individual time (sec): cpu=         75.5  wall=         75.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         89.6  wall=         89.9
++Overall time at end (sec) : cpu=         75.5  wall=         75.6

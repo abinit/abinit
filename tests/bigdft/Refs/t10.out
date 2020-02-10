@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 19h03 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 03h19 )
   
-- input  file    -> t10.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t10/t10.in
 - output file    -> t10.out
 - root for input  files -> t10i
 - root for output files -> t10o
@@ -105,8 +105,8 @@
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.00709
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.pspgth
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -153,6 +153,7 @@
  ETOT  6  -1.0797395629937    -2.638E-08 8.319E-05 1.555E-06 0.000E+00 0.000E+00
 
  At SCF step    6   max grdnorm=  8.32E-05 < tolwfr=  1.00E-04 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -212,6 +213,7 @@ cartesian_forces: !CartForces
  ETOT  7  -1.1294886277880    -1.762E-08 6.530E-05 1.038E-06 0.000E+00 0.000E+00
 
  At SCF step    7   max grdnorm=  6.53E-05 < tolwfr=  1.00E-04 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -274,6 +276,7 @@ cartesian_forces: !CartForces
  ETOT  6  -1.1343044029545    -3.626E-09 2.996E-05 2.048E-07 0.000E+00 0.000E+00
 
  At SCF step    6   max grdnorm=  3.00E-05 < tolwfr=  1.00E-04 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -336,6 +339,7 @@ cartesian_forces: !CartForces
  ETOT  6  -1.1373747406605    -5.051E-09 3.529E-05 2.877E-07 0.000E+00 0.000E+00
 
  At SCF step    6   max grdnorm=  3.53E-05 < tolwfr=  1.00E-04 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -397,6 +401,7 @@ cartesian_forces: !CartForces
  ETOT  5  -1.1375234120812    -1.604E-08 5.795E-05 3.779E-07 0.000E+00 0.000E+00
 
  At SCF step    5   max grdnorm=  5.80E-05 < tolwfr=  1.00E-04 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -457,6 +462,7 @@ cartesian_forces: !CartForces
  ETOT  4  -1.1375322277578    -1.589E-08 8.129E-05 1.865E-07 0.000E+00 0.000E+00
 
  At SCF step    4   max grdnorm=  8.13E-05 < tolwfr=  1.00E-04 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -515,6 +521,7 @@ cartesian_forces: !CartForces
  ETOT  2  -1.1375322366878    -2.132E-08 6.721E-05 2.719E-07 0.000E+00 0.000E+00
 
  At SCF step    2   max grdnorm=  6.72E-05 < tolwfr=  1.00E-04 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -598,26 +605,27 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.37230
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  1.07696772694977E+00
+hartree             :  1.27853318441885E+00
+xc                  : -6.44301288543586E-01
+'Ion-ion energy'    :  6.88425933524715E-01
+psp_core            :  0.00000000000000E+00
+local_psp           : -3.53715779452274E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.13753223817299E+00
+...
 
-    Kinetic energy  =  1.07696772694977E+00
-    Hartree energy  =  1.27853318441885E+00
-    XC energy       = -6.44301288543586E-01
-    Ion-ion energy  =  6.88425933524715E-01
-    PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -3.53715779452274E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.13753223817299E+00
 
- "Double-counting" decomposition of free energy:
-    Band energy     = -7.44613783660290E-01
-    Ion-ion energy  = 6.88425933524715E-01
-    PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy= -1.08136042793054E+00
-    >>>> Etotal (DC)= -1.13754827806611E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -7.446137836602902E-001
+'Ion-ion energy'    :  6.884259335247153E-001
+psp_core            :  0.000000000000000E+000
+xc_dc               : -1.081360427930538E+000
+total_energy_dc     : -1.137548278066113E+000
+...
 
  rms coord change=  6.9806E-03   atom, delta coord (reduced):
      1       -0.012090780710      0.000000014707      0.000000014707
@@ -764,10 +772,10 @@ cartesian_forces: !CartForces
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         18.4  wall=         18.7
+- Proc.   0 individual time (sec): cpu=         18.9  wall=         19.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.7  wall=         24.9
++Overall time at end (sec) : cpu=         18.9  wall=         19.2

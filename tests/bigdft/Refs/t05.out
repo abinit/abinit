@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 19h03 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 03h19 )
   
-- input  file    -> t05.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t05/t05.in
 - output file    -> t05.out
 - root for input  files -> t05i
 - root for output files -> t05o
@@ -120,8 +120,8 @@
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/31ga.hgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/31ga.hgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/31ga.hgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/31ga.hgh
 - Hartwigsen-Goedecker-Hutter psp for ga, from PRB58, 3641 (1998) paper
 - 31.00000   3.00000      1124                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -147,8 +147,8 @@
              2    0.945855
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/HGH/5b.3.hgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/HGH/5b.3.hgh
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/5b.3.hgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/5b.3.hgh
 - Hartwigsen-Goedecker-Hutter psp for B,  from PRB58, 3641 (1998)
 -  5.00000   3.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -170,8 +170,8 @@
              0    1.154608
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   3  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/1h.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/1h.psphgh
+- pspini: atom type   3  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/1h.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/1h.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Hydrogen,  from PRB58, 3641 (1998) paper
 -  1.00000   1.00000    991006                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -215,6 +215,7 @@
 
  At SCF step   14, etot is converged : 
   for the second time, diff in etot=  3.672E-07 < toldfe=  1.000E-06
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        8
@@ -288,26 +289,27 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  6, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.80028   -0.54123   -0.48509   -0.44243   -0.33200   -0.24024
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  1.21902924617502E+01
+hartree             :  3.21003335493134E+01
+xc                  : -5.17508958723320E+00
+'Ion-ion energy'    :  3.07911585008009E+01
+psp_core            :  0.00000000000000E+00
+local_psp           : -7.67985054251482E+01
+non_local_psp       :  1.49840858371103E+00
+total_energy        : -5.39340191680587E+00
+...
 
-    Kinetic energy  =  1.21902924617502E+01
-    Hartree energy  =  3.21003335493134E+01
-    XC energy       = -5.17508958723320E+00
-    Ion-ion energy  =  3.07911585008009E+01
-    PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -7.67985054251482E+01
-    NL   psp  energy=  1.49840858371103E+00
-    >>>>>>>>> Etotal= -5.39340191680587E+00
 
- "Double-counting" decomposition of free energy:
-    Band energy     = -5.68252231980482E+00
-    Ion-ion energy  = 3.07911585008009E+01
-    PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy= -3.05020090829856E+01
-    >>>> Etotal (DC)= -5.39337290198955E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -5.682522319804816E+000
+'Ion-ion energy'    :  3.079115850080089E+001
+psp_core            :  0.000000000000000E+000
+xc_dc               : -3.050200908298562E+001
+total_energy_dc     : -5.393372901989551E+000
+...
 
 
 == END DATASET(S) ==============================================================
@@ -469,10 +471,10 @@ cartesian_forces: !CartForces
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         22.0  wall=         22.1
+- Proc.   0 individual time (sec): cpu=         22.4  wall=         22.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.4  wall=         27.7
++Overall time at end (sec) : cpu=         22.4  wall=         22.6

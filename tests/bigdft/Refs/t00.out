@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h17 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 03h19 )
   
-- input  file    -> t00.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t00/t00.in
 - output file    -> t00.out
 - root for input  files -> t00i
 - root for output files -> t00o
@@ -104,8 +104,8 @@ P           mkmem           1
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.pspgth
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -148,6 +148,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2103.000    2103.000
  scprqt:  WARNING -
   nstep=    3 was not enough SCF cycles to converge;
   maximum energy difference=  1.090E-04 exceeds toldfe=  1.000E-08
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -199,22 +200,19 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.38071    0.23092
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  1.82301491606761E-01
-    Hartree energy  =  2.48841639565828E-01
-    XC energy       = -2.13599445765759E-01
-    Ion-ion energy  =  0.00000000000000E+00
-    PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -7.79863586817434E-01
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -5.62319901410604E-01
-
- Other information on the energy :
-    Total energy(eV)= -1.53015026894013E+01 ; Band energy (Ha)=  -3.8071183150E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  1.82301491606761E-01
+hartree             :  2.48841639565828E-01
+xc                  : -2.13599445765759E-01
+'Ion-ion energy'    :  0.00000000000000E+00
+psp_core            :  0.00000000000000E+00
+local_psp           : -7.79863586817434E-01
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -5.62319901410604E-01
+total_energy_eV     : -1.53015026894013E+01
+band_energy         : -3.80711831503750E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -356,4 +354,4 @@ P           mkmem           1
 
  Calculation completed.
 .Delivered   2 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.4  wall=          0.4
++Overall time at end (sec) : cpu=          0.4  wall=          0.5

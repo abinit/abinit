@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 10 Feb 2020.
-- ( at 00h31 )
+- ( at 03h18 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_paral_t02_MPI4/t02.in
 - output file    -> t02_MPI4.out
@@ -177,6 +177,7 @@ P           mkmem           1
  ETOT 10  -37.787496618481     2.313E-08 7.820E-06 2.495E-07
 
  At SCF step   10       nres2   =  2.49E-07 < tolvrs=  1.00E-06 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        3
@@ -277,30 +278,30 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  8, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -1.03666   -1.00092   -0.46379   -0.43408   -0.43353   -0.42415   -0.29314   -0.29237
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  2.37897657629082E+01
+hartree             :  6.14951663977704E+01
+xc                  : -8.25811867808849E+00
+'Ion-ion energy'    :  3.01083584208382E+01
+psp_core            :  0.00000000000000E+00
+local_psp           : -1.49905767534460E+02
+spherical_terms     :  4.98302638373791E+00
+total_energy        : -3.77875692472942E+01
+total_energy_eV     : -1.02825205192445E+03
+...
 
-    Kinetic energy  =  2.37897657629082E+01
-    Hartree energy  =  6.14951663977704E+01
-    XC energy       = -8.25811867808849E+00
-    Ion-ion energy  =  3.01083584208382E+01
-    PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -1.49905767534460E+02
-    Spherical terms =  4.98302638373791E+00
-    >>>>>>>>> Etotal= -3.77875692472942E+01
 
- "Double-counting" decomposition of free energy:
-    Band energy     = -8.75727074434071E+00
-    Ion-ion energy  = 3.01083584208382E+01
-    PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy= -5.89842337028631E+01
-    Spherical terms = -1.54350592115378E-01
-    >>>> Etotal (DC)= -3.77874966184810E+01
-
-  >Total energy in eV           = -1.02825205192445E+03
-  >Total DC energy in eV        = -1.02825007559394E+03
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -8.757270744340710E+000
+'Ion-ion energy'    :  3.010835842083822E+001
+psp_core            :  0.000000000000000E+000
+xc_dc               : -5.898423370286311E+001
+spherical_terms     : -1.543505921153780E-001
+total_energy_dc     : -3.778749661848098E+001
+total_energy_dc_eV  : -1.028252051924452E+003
+...
 
 
 == END DATASET(S) ==============================================================
@@ -441,10 +442,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.5  wall=          8.6
+- Proc.   0 individual time (sec): cpu=          8.7  wall=          8.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         34.1  wall=         34.2
++Overall time at end (sec) : cpu=         35.0  wall=         35.2

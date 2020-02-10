@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 19h03 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 03h19 )
   
-- input  file    -> t09.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t09/t09.in
 - output file    -> t09.out
 - root for input  files -> t09i
 - root for output files -> t09o
@@ -113,8 +113,8 @@
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10744
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspgth
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspgth
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspgth
 - Goedecker-Teter-Hutter  Fri May 31 17:22:04 EDT 1996
 - 14.00000   4.00000    960531                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -139,8 +139,8 @@
              1    0.169080
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.pspgth
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -185,6 +185,7 @@
  scprqt:  WARNING -
   nstep=    5 was not enough SCF cycles to converge;
   maximum energy difference=  1.933E-03 exceeds toldfe=  1.000E-06
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -247,26 +248,27 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.49721   -0.31384   -0.31379   -0.31379
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.72517994826755E+00
+hartree             :  1.11214522291544E+01
+xc                  : -2.47593880202008E+00
+'Ion-ion energy'    :  7.01168188308251E+00
+psp_core            :  0.00000000000000E+00
+local_psp           : -2.63887091161736E+01
+non_local_psp       :  7.74487648527342E-01
+total_energy        : -6.23184620916187E+00
+...
 
-    Kinetic energy  =  3.72517994826755E+00
-    Hartree energy  =  1.11214522291544E+01
-    XC energy       = -2.47593880202008E+00
-    Ion-ion energy  =  7.01168188308251E+00
-    PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -2.63887091161736E+01
-    NL   psp  energy=  7.74487648527342E-01
-    >>>>>>>>> Etotal= -6.23184620916187E+00
 
- "Double-counting" decomposition of free energy:
-    Band energy     = -2.88027639050475E+00
-    Ion-ion energy  = 7.01168188308251E+00
-    PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy= -1.03658404776823E+01
-    >>>> Etotal (DC)= -6.23443498510458E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -2.880276390504752E+000
+'Ion-ion energy'    :  7.011681883082505E+000
+psp_core            :  0.000000000000000E+000
+xc_dc               : -1.036584047768233E+001
+total_energy_dc     : -6.234434985104582E+000
+...
 
 
 == END DATASET(S) ==============================================================
@@ -418,10 +420,10 @@ cartesian_forces: !CartForces
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         10.4  wall=         10.8
+- Proc.   0 individual time (sec): cpu=         10.5  wall=         10.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.8  wall=          9.9
++Overall time at end (sec) : cpu=         10.5  wall=         10.6

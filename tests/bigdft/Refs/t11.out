@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 19h03 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 03h19 )
   
-- input  file    -> t11.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t11/t11.in
 - output file    -> t11.out
 - root for input  files -> t11i
 - root for output files -> t11o
@@ -97,8 +97,8 @@
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/HGH/14si.4.hgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/HGH/14si.4.hgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/14si.4.hgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/HGH/14si.4.hgh
 - Hartwigsen-Goedecker-Hutter psp for Si,  from PRB58, 3641 (1998)
 - 14.00000   4.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -137,6 +137,7 @@
  ETOT  6  -3.7455925950841    -8.085E-08 6.065E-05 1.037E-06
 
  At SCF step    6   max grdnorm=  6.06E-05 < tolwfr=  1.00E-04 =>converged.
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        1
@@ -182,26 +183,27 @@ cartesian_forces: !CartForces
  kpt#   1, nband=  4, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.39712   -0.15037   -0.15037   -0.15037
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  1.35474317499573E+00
+hartree             :  2.94370623656790E+00
+xc                  : -9.67720255035399E-01
+'Ion-ion energy'    :  0.00000000000000E+00
+psp_core            :  0.00000000000000E+00
+local_psp           : -7.90096638549845E+00
+non_local_psp       :  8.24644630039848E-01
+total_energy        : -3.74559259893037E+00
+...
 
-    Kinetic energy  =  1.35474317499573E+00
-    Hartree energy  =  2.94370623656790E+00
-    XC energy       = -9.67720255035399E-01
-    Ion-ion energy  =  0.00000000000000E+00
-    PspCore energy  =  0.00000000000000E+00
-    Loc. psp. energy= -7.90096638549845E+00
-    NL   psp  energy=  8.24644630039848E-01
-    >>>>>>>>> Etotal= -3.74559259893037E+00
 
- "Double-counting" decomposition of free energy:
-    Band energy     = -1.09496786354372E+00
-    Ion-ion energy  = 0.00000000000000E+00
-    PspCore energy  =  0.00000000000000E+00
-    Dble-C XC-energy= -2.65061781441468E+00
-    >>>> Etotal (DC)= -3.74558567795839E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -1.094967863543717E+000
+'Ion-ion energy'    :  0.000000000000000E+000
+psp_core            :  0.000000000000000E+000
+xc_dc               : -2.650617814414679E+000
+total_energy_dc     : -3.745585677958395E+000
+...
 
 
 == END DATASET(S) ==============================================================
@@ -336,10 +338,10 @@ cartesian_forces: !CartForces
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          9.1  wall=          9.2
+- Proc.   0 individual time (sec): cpu=          9.0  wall=          9.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.3  wall=          9.5
++Overall time at end (sec) : cpu=          9.0  wall=          9.2
