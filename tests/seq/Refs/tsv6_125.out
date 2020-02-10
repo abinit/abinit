@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 20h11 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 11h26 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Test_suite/seq_tsv6_125/tsv6_125.in
 - output file    -> tsv6_125.out
@@ -295,6 +295,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     832.000     832.000
   nstep=   12 was not enough SCF cycles to converge;
   maximum force difference=  7.260E-03 exceeds toldff=  5.000E-06
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        5
@@ -477,6 +478,7 @@ cartesian_forces: !CartForces
   nstep=   12 was not enough SCF cycles to converge;
   maximum force difference=  1.051E-03 exceeds toldff=  5.000E-06
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        5
@@ -617,24 +619,21 @@ cartesian_forces: !CartForces
    0.87058    0.88232    0.88295    1.02394    1.06969    1.16368    1.16531    1.22082
    1.44846    1.45573    1.50405    1.51559    1.54492    1.71806
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  9.78022299595853E+01
-    Hartree energy  =  1.29108333652712E+01
-    XC energy       = -2.99156241088629E+01
-    Ewald energy    = -2.00096133787527E+02
-    PspCore energy  =  1.30844553784756E+01
-    Loc. psp. energy= -7.16700758317439E+01
-    NL   psp  energy=  2.40367364933838E+01
-    Electric energy =  1.19673227915703E-04
-    Kohn-Sham energy= -1.53847578531417E+02
-    >>>>>>>>> Etotal= -1.53847458858190E+02
-
- Other information on the energy :
-    Total energy(eV)= -4.18640225887575E+03 ; Band energy (Ha)=   3.8153911148E+01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  9.78022299595853E+01
+hartree             :  1.29108333652712E+01
+xc                  : -2.99156241088629E+01
+Ewald energy        : -2.00096133787527E+02
+psp_core            :  1.30844553784756E+01
+local_psp           : -7.16700758317439E+01
+non_local_psp       :  2.40367364933838E+01
+electric            :  1.19673227915703E-04
+kohn_sham           : -1.53847578531417E+02
+total_energy        : -1.53847458858190E+02
+total_energy_eV     : -4.18640225887575E+03
+band_energy         :  3.81539111478125E+01
+...
 
 
 Constant reduced ebar and d calculation  - final values:
@@ -771,21 +770,21 @@ P           mkmem           1
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   1.325   6.8      1.332   6.8           2971      -1.00        0.99       0.99
-- pspini                         0.854   4.4      0.855   4.3              1      -1.00        1.00       1.00
-- ewald                          0.607   3.1      0.607   3.1              2      -1.00        1.00       1.00
-- nonlop(apply)                  0.557   2.8      0.549   2.8           2971      -1.00        1.01       1.01
-- projbd                         0.546   2.8      0.555   2.8           4710      -1.00        0.98       0.98
-- stress                         0.344   1.8      0.344   1.7              2      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.339   1.7      0.340   1.7              2      -1.00        1.00       1.00
-- nonlop(forces)                 0.146   0.7      0.144   0.7            528      -1.00        1.02       1.02
-- fourwf%(den)                   0.134   0.7      0.135   0.7            528      -1.00        0.99       0.99
-- forces                         0.130   0.7      0.128   0.6             24      -1.00        1.01       1.01
-- timing timab                   0.113   0.6      0.113   0.6              9      -1.00        1.00       1.00
-- others (123)                   0.307   1.6      0.311   1.6             -1      -1.00        0.99       0.99
+- fourwf%(pot)                   1.326   6.8      1.345   6.8           2971      -1.00        0.99       0.99
+- pspini                         0.857   4.4      0.858   4.4              1      -1.00        1.00       1.00
+- ewald                          0.606   3.1      0.606   3.1              2      -1.00        1.00       1.00
+- nonlop(apply)                  0.559   2.9      0.559   2.8           2971      -1.00        1.00       1.00
+- projbd                         0.546   2.8      0.521   2.6           4710      -1.00        1.05       1.05
+- stress                         0.335   1.7      0.335   1.7              2      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.330   1.7      0.330   1.7              2      -1.00        1.00       1.00
+- nonlop(forces)                 0.144   0.7      0.152   0.8            528      -1.00        0.95       0.95
+- fourwf%(den)                   0.133   0.7      0.123   0.6            528      -1.00        1.08       1.08
+- timing timab                   0.129   0.7      0.129   0.7              9      -1.00        1.00       1.00
+- forces                         0.128   0.7      0.129   0.7             24      -1.00        0.99       0.99
+- others (123)                   0.305   1.6      0.304   1.5             -1      -1.00        1.00       1.00
 -<END_TIMER>
 -
-- subtotal                       5.403  27.5      5.413  27.5                                  1.00       1.00
+- subtotal                       5.398  27.6      5.391  27.4                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
@@ -795,21 +794,21 @@ P           mkmem           1
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   1.325   6.8      1.332   6.8           2971      -1.00        0.99       0.99
-- pspini                         0.854   4.4      0.855   4.3              1      -1.00        1.00       1.00
-- ewald                          0.607   3.1      0.607   3.1              2      -1.00        1.00       1.00
-- nonlop(apply)                  0.557   2.8      0.549   2.8           2971      -1.00        1.01       1.01
-- projbd                         0.546   2.8      0.555   2.8           4710      -1.00        0.98       0.98
-- stress                         0.344   1.8      0.344   1.7              2      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.339   1.7      0.340   1.7              2      -1.00        1.00       1.00
-- nonlop(forces)                 0.146   0.7      0.144   0.7            528      -1.00        1.02       1.02
-- fourwf%(den)                   0.134   0.7      0.135   0.7            528      -1.00        0.99       0.99
-- forces                         0.130   0.7      0.128   0.6             24      -1.00        1.01       1.01
-- timing timab                   0.113   0.6      0.113   0.6              9      -1.00        1.00       1.00
-- others (123)                   0.307   1.6      0.311   1.6             -1      -1.00        0.99       0.99
+- fourwf%(pot)                   1.326   6.8      1.345   6.8           2971      -1.00        0.99       0.99
+- pspini                         0.857   4.4      0.858   4.4              1      -1.00        1.00       1.00
+- ewald                          0.606   3.1      0.606   3.1              2      -1.00        1.00       1.00
+- nonlop(apply)                  0.559   2.9      0.559   2.8           2971      -1.00        1.00       1.00
+- projbd                         0.546   2.8      0.521   2.6           4710      -1.00        1.05       1.05
+- stress                         0.335   1.7      0.335   1.7              2      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.330   1.7      0.330   1.7              2      -1.00        1.00       1.00
+- nonlop(forces)                 0.144   0.7      0.152   0.8            528      -1.00        0.95       0.95
+- fourwf%(den)                   0.133   0.7      0.123   0.6            528      -1.00        1.08       1.08
+- timing timab                   0.129   0.7      0.129   0.7              9      -1.00        1.00       1.00
+- forces                         0.128   0.7      0.129   0.7             24      -1.00        0.99       0.99
+- others (123)                   0.305   1.6      0.304   1.5             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                       5.403  27.5      5.413  27.5                                  1.00       1.00
+- subtotal                       5.398  27.6      5.391  27.4                                  1.00       1.00
 
 ================================================================================
 

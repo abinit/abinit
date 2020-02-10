@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 20h11 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 11h26 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Test_suite/seq_tsv2_82/tsv2_82.in
 - output file    -> tsv2_82.out
@@ -488,6 +488,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     204.219     204.183
   sigma(2 2)=  2.83664436E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.83664436E-04  sigma(2 1)=  0.00000000E+00
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -555,22 +556,19 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.04622771909342E+00
-    Hartree energy  =  7.37571858608052E-01
-    XC energy       = -2.39745443897321E+00
-    Ewald energy    = -8.55244247246721E+00
-    PspCore energy  =  1.25858810183988E+00
-    Loc. psp. energy= -2.64215363575157E+00
-    NL   psp  energy= -7.74116631161531E-02
-    >>>>>>>>> Etotal= -8.62707453076679E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.34754636645524E+02 ; Band energy (Ha)=  -1.3247242569E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  3.04622771909342E+00
+hartree             :  7.37571858608052E-01
+xc                  : -2.39745443897321E+00
+Ewald energy        : -8.55244247246721E+00
+psp_core            :  1.25858810183988E+00
+local_psp           : -2.64215363575157E+00
+non_local_psp       : -7.74116631161531E-02
+total_energy        : -8.62707453076679E+00
+total_energy_eV     : -2.34754636645524E+02
+band_energy         : -1.32472425685004E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -620,6 +618,7 @@ cartesian_forces: !CartForces
   5.51E-23  7.48E-23  9.28E-23  9.75E-23
  -4.2901E-01 -2.6028E-02  1.3325E-02  1.5927E-02
  prteigrs : prtvol=0 or 1, do not print more k-points.
+
 
 
 --- !ResultsGS
@@ -744,6 +743,7 @@ cartesian_forces: !CartForces
            Polarization     1.558966308E-02 (a.u. of charge)/bohr^2
            Polarization     8.919588549E-01 C/m^2
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -854,6 +854,7 @@ cartesian_forces: !CartForces
 
            Polarization    -1.558966308E-02 (a.u. of charge)/bohr^2
            Polarization    -8.919588549E-01 C/m^2
+
 
 --- !ResultsGS
 comment   : Summary of ground state results
@@ -1198,7 +1199,7 @@ P           mkmem4         47
 ================================================================================
 
 - Total cpu        time (s,m,h):          5.9        0.10      0.002
-- Total wall clock time (s,m,h):          6.3        0.11      0.002
+- Total wall clock time (s,m,h):          6.3        0.10      0.002
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
@@ -1207,23 +1208,23 @@ P           mkmem4         47
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   3.470  58.6      3.447  54.4          14058      -1.00        1.01       1.01
-- ewald                          0.333   5.6      0.335   5.3              4      -1.00        0.99       0.99
-- nonlop(apply)                  0.320   5.4      0.342   5.4          14058      -1.00        0.93       0.93
-- pspini                         0.205   3.5      0.205   3.2              4      -1.00        1.00       1.00
-- getghc-other                   0.174   2.9      0.156   2.5             -1      -1.00        1.11       1.11
-- projbd                         0.164   2.8      0.159   2.5          20564      -1.00        1.03       1.03
-- invars2                        0.160   2.7      0.167   2.6              4      -1.00        0.96       0.96
-- vtowfk(ssdiag)                 0.135   2.3      0.154   2.4             -1      -1.00        0.88       0.88
-- fourwf%(den)                   0.117   2.0      0.094   1.5            800      -1.00        1.24       1.24
-- timing timab                   0.116   2.0      0.116   1.8              9      -1.00        1.00       1.00
-- stress                         0.047   0.8      0.046   0.7              1      -1.00        1.01       1.01
-- ewald2 (+vdw_dftd)             0.046   0.8      0.045   0.7              1      -1.00        1.01       1.01
-- abinit(2)                      0.034   0.6      0.034   0.5              1      -1.00        0.99       0.99
-- others (121)                   0.129   2.2      0.140   2.2             -1      -1.00        0.92       0.92
+- fourwf%(pot)                   3.450  58.3      3.442  54.8          14058      -1.00        1.00       1.00
+- ewald                          0.340   5.7      0.341   5.4              4      -1.00        1.00       1.00
+- nonlop(apply)                  0.320   5.4      0.336   5.3          14058      -1.00        0.95       0.95
+- pspini                         0.207   3.5      0.209   3.3              4      -1.00        0.99       0.99
+- getghc-other                   0.172   2.9      0.183   2.9             -1      -1.00        0.94       0.94
+- invars2                        0.168   2.8      0.175   2.8              4      -1.00        0.96       0.96
+- projbd                         0.163   2.8      0.145   2.3          20564      -1.00        1.13       1.13
+- vtowfk(ssdiag)                 0.135   2.3      0.126   2.0             -1      -1.00        1.07       1.07
+- fourwf%(den)                   0.116   2.0      0.107   1.7            800      -1.00        1.09       1.09
+- timing timab                   0.114   1.9      0.114   1.8              9      -1.00        1.00       1.00
+- stress                         0.046   0.8      0.046   0.7              1      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.046   0.8      0.046   0.7              1      -1.00        0.99       0.99
+- fourdp                         0.034   0.6      0.037   0.6            110      -1.00        0.93       0.93
+- others (121)                   0.124   2.1      0.125   2.0             -1      -1.00        0.99       0.99
 -<END_TIMER>
 -
-- subtotal                       5.447  92.1      5.440  85.8                                  1.00       1.00
+- subtotal                       5.436  91.9      5.432  86.5                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
@@ -1233,23 +1234,23 @@ P           mkmem4         47
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   3.470  58.6      3.447  54.4          14058      -1.00        1.01       1.01
-- ewald                          0.333   5.6      0.335   5.3              4      -1.00        0.99       0.99
-- nonlop(apply)                  0.320   5.4      0.342   5.4          14058      -1.00        0.93       0.93
-- pspini                         0.205   3.5      0.205   3.2              4      -1.00        1.00       1.00
-- getghc-other                   0.174   2.9      0.156   2.5             -1      -1.00        1.11       1.11
-- projbd                         0.164   2.8      0.159   2.5          20564      -1.00        1.03       1.03
-- invars2                        0.160   2.7      0.167   2.6              4      -1.00        0.96       0.96
-- vtowfk(ssdiag)                 0.135   2.3      0.154   2.4             -1      -1.00        0.88       0.88
-- fourwf%(den)                   0.117   2.0      0.094   1.5            800      -1.00        1.24       1.24
-- timing timab                   0.116   2.0      0.116   1.8              9      -1.00        1.00       1.00
-- stress                         0.047   0.8      0.046   0.7              1      -1.00        1.01       1.01
-- ewald2 (+vdw_dftd)             0.046   0.8      0.045   0.7              1      -1.00        1.01       1.01
-- abinit(2)                      0.034   0.6      0.034   0.5              1      -1.00        0.99       0.99
-- others (121)                   0.129   2.2      0.140   2.2             -1      -1.00        0.92       0.92
+- fourwf%(pot)                   3.450  58.3      3.442  54.8          14058      -1.00        1.00       1.00
+- ewald                          0.340   5.7      0.341   5.4              4      -1.00        1.00       1.00
+- nonlop(apply)                  0.320   5.4      0.336   5.3          14058      -1.00        0.95       0.95
+- pspini                         0.207   3.5      0.209   3.3              4      -1.00        0.99       0.99
+- getghc-other                   0.172   2.9      0.183   2.9             -1      -1.00        0.94       0.94
+- invars2                        0.168   2.8      0.175   2.8              4      -1.00        0.96       0.96
+- projbd                         0.163   2.8      0.145   2.3          20564      -1.00        1.13       1.13
+- vtowfk(ssdiag)                 0.135   2.3      0.126   2.0             -1      -1.00        1.07       1.07
+- fourwf%(den)                   0.116   2.0      0.107   1.7            800      -1.00        1.09       1.09
+- timing timab                   0.114   1.9      0.114   1.8              9      -1.00        1.00       1.00
+- stress                         0.046   0.8      0.046   0.7              1      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.046   0.8      0.046   0.7              1      -1.00        0.99       0.99
+- fourdp                         0.034   0.6      0.037   0.6            110      -1.00        0.93       0.93
+- others (121)                   0.124   2.1      0.125   2.0             -1      -1.00        0.99       0.99
 -<END_TIMER>
 
-- subtotal                       5.447  92.1      5.440  85.8                                  1.00       1.00
+- subtotal                       5.436  91.9      5.432  86.5                                  1.00       1.00
 
 ================================================================================
 

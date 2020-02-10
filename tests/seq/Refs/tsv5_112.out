@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 20h11 )
+.Starting date : Mon 10 Feb 2020.
+- ( at 11h26 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Test_suite/seq_tsv5_112/tsv5_112.in
 - output file    -> tsv5_112.out
@@ -290,6 +290,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    2006.000    2005.997
   nstep=    1 was not enough SCF cycles to converge;
   maximum energy difference=  7.654E+01 exceeds toldfe=  1.000E-12
 
+
 --- !ResultsGS
 comment   : Summary of ground state results
 natom     :        2
@@ -415,30 +416,30 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+comment             : Components of total free energy in Hartree
+kinetic             :  1.84291216290703E+01
+hartree             :  3.86265356086168E+01
+xc                  : -1.41228519784002E+01
+Ewald energy        : -4.19984027657600E+01
+psp_core            :  8.20417311467282E-01
+local_psp           : -1.06626165586716E+02
+spherical_terms     :  9.89651710739660E+00
+total_energy        : -9.49748286743252E+01
+total_energy_eV     : -2.58439652009480E+03
+...
 
-    Kinetic energy  =  1.84291216290703E+01
-    Hartree energy  =  3.86265356086168E+01
-    XC energy       = -1.41228519784002E+01
-    Ewald energy    = -4.19984027657600E+01
-    PspCore energy  =  8.20417311467282E-01
-    Loc. psp. energy= -1.06626165586716E+02
-    Spherical terms =  9.89651710739660E+00
-    >>>>>>>>> Etotal= -9.49748286743252E+01
 
- "Double-counting" decomposition of free energy:
-    Band energy     =  9.19832229143122E-01
-    Ewald energy    =-4.19984027657600E+01
-    PspCore energy  =  8.20417311467282E-01
-    Dble-C XC-energy= -3.41699581542375E+01
-    Spherical terms = -2.10959993840206E+00
-    >>>> Etotal (DC)= -7.65377113177892E+01
-
-  >Total energy in eV           = -2.58439652009480E+03
-  >Total DC energy in eV        = -2.08269704243423E+03
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         :  9.198322291431220E-001
+Ewald energy        : -4.199840276576004E+001
+psp_core            :  8.204173114672819E-001
+xc_dc               : -3.416995815423749E+001
+spherical_terms     : -2.109599938402063E+000
+total_energy_dc     : -7.653771131778919E+001
+total_energy_dc_eV  : -2.584396520094798E+003
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -543,54 +544,54 @@ P           mkmem          32
 ================================================================================
 
 - Total cpu        time (s,m,h):          6.8        0.11      0.002
-- Total wall clock time (s,m,h):          6.8        0.11      0.002
+- Total wall clock time (s,m,h):          6.9        0.11      0.002
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            6.8, wall_time =            6.8
+- cpu_time =            6.8, wall_time =            6.9
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   3.127  46.0      3.156  46.1           2821      -1.00        0.99       0.99
-- pspini                         0.792  11.7      0.796  11.6              1      -1.00        0.99       0.99
-- initberry                      0.616   9.1      0.616   9.0              1      -1.00        1.00       1.00
-- nonlop(apply)                  0.601   8.9      0.564   8.2           2821      -1.00        1.07       1.07
-- projbd                         0.221   3.3      0.235   3.4           2245      -1.00        0.94       0.94
-- fourwf%(den)                   0.161   2.4      0.164   2.4            256      -1.00        0.98       0.98
-- timing timab                   0.117   1.7      0.118   1.7              9      -1.00        0.99       0.99
-- vtowfk(ssdiag)                 0.091   1.3      0.094   1.4             -1      -1.00        0.97       0.97
-- nonlop(forstr)                 0.074   1.1      0.072   1.1            256      -1.00        1.03       1.03
-- getghc-other                   0.063   0.9      0.055   0.8             -1      -1.00        1.15       1.15
-- newkpt(excl. rwwf   )          0.040   0.6      0.041   0.6             -1      -1.00        0.98       0.98
-- others (123)                   0.286   4.2      0.282   4.1             -1      -1.00        1.02       1.02
+- fourwf%(pot)                   3.150  46.1      3.157  45.8           2821      -1.00        1.00       1.00
+- pspini                         0.799  11.7      0.802  11.6              1      -1.00        1.00       1.00
+- initberry                      0.614   9.0      0.613   8.9              1      -1.00        1.00       1.00
+- nonlop(apply)                  0.609   8.9      0.581   8.4           2821      -1.00        1.05       1.05
+- projbd                         0.223   3.3      0.241   3.5           2245      -1.00        0.93       0.93
+- fourwf%(den)                   0.161   2.4      0.173   2.5            256      -1.00        0.93       0.93
+- timing timab                   0.115   1.7      0.115   1.7              9      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.093   1.4      0.083   1.2             -1      -1.00        1.12       1.12
+- nonlop(forstr)                 0.074   1.1      0.072   1.0            256      -1.00        1.03       1.03
+- getghc-other                   0.067   1.0      0.073   1.1             -1      -1.00        0.92       0.92
+- newkpt(excl. rwwf   )          0.040   0.6      0.040   0.6             -1      -1.00        1.00       1.00
+- others (123)                   0.287   4.2      0.281   4.1             -1      -1.00        1.02       1.02
 -<END_TIMER>
 -
-- subtotal                       6.191  91.1      6.193  90.4                                  1.00       1.00
+- subtotal                       6.232  91.2      6.231  90.5                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           6.8, wall_time =           6.8
+- cpu_time =           6.8, wall_time =           6.9
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   3.127  46.0      3.156  46.1           2821      -1.00        0.99       0.99
-- pspini                         0.792  11.7      0.796  11.6              1      -1.00        0.99       0.99
-- initberry                      0.616   9.1      0.616   9.0              1      -1.00        1.00       1.00
-- nonlop(apply)                  0.601   8.9      0.564   8.2           2821      -1.00        1.07       1.07
-- projbd                         0.221   3.3      0.235   3.4           2245      -1.00        0.94       0.94
-- fourwf%(den)                   0.161   2.4      0.164   2.4            256      -1.00        0.98       0.98
-- timing timab                   0.117   1.7      0.118   1.7              9      -1.00        0.99       0.99
-- vtowfk(ssdiag)                 0.091   1.3      0.094   1.4             -1      -1.00        0.97       0.97
-- nonlop(forstr)                 0.074   1.1      0.072   1.1            256      -1.00        1.03       1.03
-- getghc-other                   0.063   0.9      0.055   0.8             -1      -1.00        1.15       1.15
-- newkpt(excl. rwwf   )          0.040   0.6      0.041   0.6             -1      -1.00        0.98       0.98
-- others (123)                   0.286   4.2      0.282   4.1             -1      -1.00        1.02       1.02
+- fourwf%(pot)                   3.150  46.1      3.157  45.8           2821      -1.00        1.00       1.00
+- pspini                         0.799  11.7      0.802  11.6              1      -1.00        1.00       1.00
+- initberry                      0.614   9.0      0.613   8.9              1      -1.00        1.00       1.00
+- nonlop(apply)                  0.609   8.9      0.581   8.4           2821      -1.00        1.05       1.05
+- projbd                         0.223   3.3      0.241   3.5           2245      -1.00        0.93       0.93
+- fourwf%(den)                   0.161   2.4      0.173   2.5            256      -1.00        0.93       0.93
+- timing timab                   0.115   1.7      0.115   1.7              9      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.093   1.4      0.083   1.2             -1      -1.00        1.12       1.12
+- nonlop(forstr)                 0.074   1.1      0.072   1.0            256      -1.00        1.03       1.03
+- getghc-other                   0.067   1.0      0.073   1.1             -1      -1.00        0.92       0.92
+- newkpt(excl. rwwf   )          0.040   0.6      0.040   0.6             -1      -1.00        1.00       1.00
+- others (123)                   0.287   4.2      0.281   4.1             -1      -1.00        1.02       1.02
 -<END_TIMER>
 
-- subtotal                       6.191  91.1      6.193  90.4                                  1.00       1.00
+- subtotal                       6.232  91.2      6.231  90.5                                  1.00       1.00
 
 ================================================================================
 
