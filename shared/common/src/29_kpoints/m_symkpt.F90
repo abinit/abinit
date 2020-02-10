@@ -729,8 +729,6 @@ subroutine mapkptsets(chksymbreak,gmet,iout,k_in,nk_in,&
      end do
      if(tident==1)then
        identi=isym
-       !write(message, '(a,i0)' )' symkpt : found identity, with number',identi
-       !call wrtout(std_out,message,'COLL')
        exit
      end if
    end do
@@ -799,7 +797,9 @@ subroutine mapkptsets(chksymbreak,gmet,iout,k_in,nk_in,&
  ! Initialize 
  bz2kin_smap = 0
 
-   ! HM: Here I invert the itim and isym loop to generate the same mapping as listkk
+print *, 'k_in ', k_in
+print *, 'kbz ', kbz
+ ! HM: Here I invert the itim and isym loop to generate the same mapping as listkk
  do itim=0,timrev
    do isym=1,nsym
 
@@ -825,6 +825,7 @@ subroutine mapkptsets(chksymbreak,gmet,iout,k_in,nk_in,&
 
        bz2kin_smap(1:3, ikpt_found) = [ik_in,isym,itim]
        bz2kin_smap(4:6, ikpt_found) = nint(kbz(:,ikpt_found)-ksym)
+print *, 'bz2kin_smap(1:3, ikpt_found= ', ikpt_found, ' : ik_in,isym,itim  ', bz2kin_smap(1:3, ikpt_found)
 print *, ' g0 calculation ', kbz(:,ikpt_found)-ksym, '   ', bz2kin_smap(4:6, ikpt_found)
      end do
 

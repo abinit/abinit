@@ -1580,6 +1580,8 @@ print *, ' occkq ', occkq
      dim_eig2rf=1
    end if
    mcg1=mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol
+print *, 'mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol ', &
+& mpw1,dtset%nspinor,dtset%mband_mem,mk1mem_rbz,dtset%nsppol
    if (one*mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol > huge(1)) then
      write (message,'(4a, 5(a,i0), 2a)')&
 &     "Default integer is not wide enough to store the size of the GS wavefunction array (WFK1, mcg1).",ch10,&
@@ -1621,10 +1623,12 @@ print *, ' occkq ', occkq
    call timab(144,1,tsec)
    if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &      (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
+print *, 'init cg1 from disk ', shape(cg1)
      call wfk_read_my_kptbands(fiwf1i, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1, &
 &            cg1, eigen=eigen1)
    else
+print *, 'init cg1 to 0'
      cg1 = zero
      eigen1 = zero
 !     call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&

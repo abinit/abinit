@@ -1170,7 +1170,7 @@ subroutine wfk_read_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_
 !Local variables-------------------------------
 !scalars
  integer :: ierr,npw_disk,nspinor_disk,nband_disk,band
- integer :: ipw,my_bcount,npwso,npw_tot,nb_block,base
+ integer :: ipw,my_bcount,npwso,npw_tot_disk,nb_block,base
  integer :: npw_read,nspinor_read,nband_read
  character(len=500) :: msg,errmsg
 !arrays
@@ -1201,28 +1201,29 @@ subroutine wfk_read_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_
  nband_disk   = Wfk%nband(ik_ibz,spin)
  nb_block     = (band_block(2) - band_block(1) + 1)
  ABI_CHECK(nb_block>0,"nband <=0")
- npw_tot      = npw_disk * nspinor_disk * nb_block
+ npw_tot_disk = npw_disk * nspinor_disk * nb_block
 
+print *, 'npw_disk , nspinor_disk , nb_block ', npw_disk, nspinor_disk, nb_block, shape(cg_k)
  if (present(kg_k)) then
    ABI_CHECK(SIZE(kg_k,DIM=2) >= npw_disk,"kg_k too small")
  end if
 
  if (present(cg_k)) then
-   ABI_CHECK(SIZE(cg_k, DIM=2) >= npw_tot,"cg_k too small")
+   ABI_CHECK(SIZE(cg_k, DIM=2) >= npw_tot_disk,"cg_k too small")
  end if
 
  if (present(eig_k)) then
    if (Wfk%formeig==0) then
-      ABI_CHECK(SIZE(eig_k) >= nband_disk, "GS eig_k too small")
+      ABI_CHECK(SIZE(eig_k) <= nband_disk, "GS eig_k too large, not enough data on disk")
    else if (Wfk%formeig==1) then
-      ABI_CHECK(SIZE(eig_k) >= 2*nband_disk**2, "DFPT eig_k too small")
+      ABI_CHECK(SIZE(eig_k) <= 2*nband_disk**2, "DFPT eig_k too large, not enough data on disk")
    else
      MSG_ERROR("formeig != [0,1]")
    end if
  end if
 
  if (present(occ_k)) then
-   ABI_CHECK(SIZE(occ_k) >= nband_disk, "GS occ_k too small")
+   ABI_CHECK(SIZE(occ_k) <= nband_disk, "GS occ_k too large, not enough data on disk")
    if (Wfk%formeig==1) then
      MSG_ERROR("occ_k cannot be used when formeig ==1")
    end if
@@ -3043,7 +3044,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  integer :: iomode,nsppol,nkirred_disk,isym,itimrev
  integer :: npw_disk,npw_kf,istwf_disk,istwf_kf
  integer :: ikpt,ii,jj,kk,ll,iqst,nqst
- integer :: wfk_unt, iband, nband_me
+ integer :: wfk_unt, iband, nband_me, nband_me_disk
  integer :: nband_me_saved, iband_saved, chksymbreak, iout
  integer :: spin_saved, spin_sym
  integer :: itimrev_disk, ierr
@@ -3096,6 +3097,7 @@ print *, 'calling wfk_open_read with formeig = ', formeig, ' path ', trim(inpath
 
 #ifdef DEV_MJV
 print *, 'wfk_disk%mband, dtset%mband ', wfk_disk%mband, dtset%mband
+print *, 'wfk_disk%Hdr%npwarr ',wfk_disk%Hdr%npwarr
 #endif
 ! ABI_CHECK(wfk_disk%mband >= dtset%mband, "input mband too large for this file")
  mband = wfk_disk%mband;
@@ -3275,17 +3277,19 @@ print *, 'spin_sym, spin,  nsppol, wfk_disk%nsppol ', spin_sym, spin, nsppol, wf
          if (.not. distrb_flags(ikf,iband+nband_me-1,spin_sym)) then
            stop "wfk_read_my_kptbands: bands not contiguous in distrb_flags"
          end if
+! if nband_me goes beyond the end of the bands on disk, just read those we have
+         nband_me_disk = min(mband,iband+nband_me)-iband
 
 ! may need to re-read if for a different equivalent k if I need other bands
-         if (iband /= iband_saved .or. nband_me /= nband_me_saved .or. spin /= spin_saved) then
+         if (iband /= iband_saved .or. nband_me_disk /= nband_me_saved .or. spin /= spin_saved) then
 #ifdef DEV_MJV
 print *, 'reading from file for iband, ik_disk, spin, formeig ', iband, ik_disk, spin, formeig
 #endif
            if (formeig > 0) then
-             call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_disk,spin,xmpio_single,&
+             call wfk_disk%read_band_block([iband,iband+nband_me_disk-1],ik_disk,spin,xmpio_single,&
                kg_k=kg_disk,cg_k=cg_disk,eig_k=eig_disk)
            else 
-             call wfk_disk%read_band_block([iband,iband+nband_me-1],ik_disk,spin,xmpio_single,&
+             call wfk_disk%read_band_block([iband,iband+nband_me_disk-1],ik_disk,spin,xmpio_single,&
                kg_k=kg_disk,cg_k=cg_disk,eig_k=eig_disk,occ_k=occ_disk)
            end if
            ! in nsppol=1 nspden=2 case the occupations are doubled
@@ -3293,7 +3297,7 @@ print *, 'reading from file for iband, ik_disk, spin, formeig ', iband, ik_disk,
              occ_disk = half * occ_disk
            end if
            iband_saved = iband
-           nband_me_saved = nband_me
+           nband_me_saved = nband_me_disk
            spin_saved = spin
          end if
        
@@ -3348,8 +3352,8 @@ print *, 'npwarr is the same and irred kf, so just copy over'
            if (present(kg)) then
              kg(:,ikg(ikf)+1:ikg(ikf)+npw_kf) = kg_disk (:,1:npw_kf)
            end if
-           cg(:,icg(ikf,spin_sym)+1:icg(ikf,spin_sym)+npw_kf*nband_me*dtset%nspinor) = &
-&             cg_disk(:,1:npw_kf*nband_me*dtset%nspinor)
+           cg(:,icg(ikf,spin_sym)+1:icg(ikf,spin_sym)+npw_kf*nband_me_disk*dtset%nspinor) = &
+&             cg_disk(:,1:npw_kf*nband_me_disk*dtset%nspinor)
          else
 #ifdef DEV_MJV
 print *, 'npwarr change or need to convert the wf by symmetry, or complete it'
@@ -3375,9 +3379,9 @@ print *, ' npw_kf == npwarr(ikf), istwf_kf, ecut_eff ecut ', npw_kf,npwarr(ikf),
            ABI_CALLOC(work, (2, work_ngfft(4),work_ngfft(5),work_ngfft(6)))
   
            ! Rotate nband_k wavefunctions (output in cg)
-           call cgtk_rotate(cryst,k_disk,isym,itimrev,g0,nspinor,nband_me,&
+           call cgtk_rotate(cryst,k_disk,isym,itimrev,g0,nspinor,nband_me_disk,&
 &            npw_disk,kg_disk,npw_kf,kg_kf,istwf_disk,istwf_kf,cg_disk,&
-&            cg(:,icg(ikf,spin_sym)+1:icg(ikf,spin_sym)+npw_kf*nband_me*dtset%nspinor),&
+&            cg(:,icg(ikf,spin_sym)+1:icg(ikf,spin_sym)+npw_kf*nband_me_disk*dtset%nspinor),&
 &            work_ngfft,work)
 
            ABI_FREE(work)
