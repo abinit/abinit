@@ -2020,6 +2020,10 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
  end do ! istep
 
+ if(allocated(nhatgr))then
+   ABI_DEALLOCATE(nhatgr)
+ endif
+
  ! Avoid pending requests if itime == ntime.
  call xmpi_wait(quitsum_request,ierr)
  if (timelimit_exit == 1) istep = istep - 1
