@@ -144,11 +144,10 @@ class LineCountDifference(LineDifference):
 
     def __repr__(self):
         if self.line_count != (0, 0):
-            return ('{} have more significant lines than {} ({} > {}).\n'
+            return ('{} has more significant lines than {} ({} > {}).\n'
                     .format(self.more, self.less, *self.line_count))
 
-        return '{} have more significant lines than {}.\n'.format(self.more,
-                                                                  self.less)
+        return '{} has more significant lines than {}.\n'.format(self.more, self.less)
 
 
 class MetaCharDifference(LineDifference):

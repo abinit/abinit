@@ -1095,7 +1095,7 @@ subroutine yamldoc_write_and_free(self, unit, newline)
  call self%stream%push('...')
 
  if (self%use_yaml == 1) then
-   !write(unit, "(a)")""
+   write(unit, "(a)")""
    call self%stream%flush(unit, newline=nl)
  else
    call self%stream%free()

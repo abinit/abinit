@@ -353,7 +353,6 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ! MG: For the time being the document is not written to std_out
      ! Should reconsider whether it makes sense to use yaml and global state (problematic if prtvol and/or DFMT)
      etot_yaml_doc = yamldoc_open('EtotSteps', "")
-     etot_yaml_doc%use_yaml = dtset%use_yaml
      etot_yaml_doc%use_yaml = 0
      call etot_yaml_doc%open_tabular('data', tag='EtotIters')
      call etot_yaml_doc%add_tabular_line(message)
@@ -1481,7 +1480,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
  etotaldc = etotaldc + eent
 
  write(msg,'(a,80a)') ch10,('-',mu=1,80)
- call wrtout(iout,msg,'COLL')
+ !call wrtout(iout,msg,'COLL')
 
 !============= Printing of Etotal by direct scheme ===========
 
@@ -1497,11 +1496,11 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
    if (directE_avail) then
      write(msg, '(2a)' ) ' Components of total free energy (in Hartree) :',ch10
-     call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg,'COLL')
      edoc = yamldoc_open('EnergyTerms', 'Components of total free energy in Hartree', width=20, real_fmt='(es21.14)')
-     edoc%use_yaml = dtset%use_yaml
+     !edoc%use_yaml = dtset%use_yaml
      write(msg, '(a,es21.14)' ) '    Kinetic energy  = ',energies%e_kinetic
-     call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg,'COLL')
      call edoc%add_real('kinetic', energies%e_kinetic)
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
@@ -1514,7 +1513,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
          '    XC energy       = ',exc_semilocal,ch10,&
          '    '//eneName//'  = ',enevalue,ch10,&
          '    PspCore energy  = ',energies%e_corepsp
-       call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg,'COLL')
        call edoc%add_real('hartree', energies%e_hartree)
        call edoc%add_real('xc', exc_semilocal)
        call edoc%add_real(eneName, enevalue)
@@ -1522,13 +1521,13 @@ subroutine prtene(dtset,energies,iout,usepaw)
 #if defined DEV_YP_VDWXC
        if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 10) .and. (xc_vdw_status()) ) then
          write(msg, '(a,es21.14)' )'    vdW-DF energy   = ',energies%e_xc_vdw
-         call wrtout(iout,msg,'COLL')
+         !call wrtout(iout,msg,'COLL')
          call edoc%add_real('VdWaals_df', energies%e_xc_vdw)
        end if
 #endif
      end if
      write(msg, '(a,es21.14)' ) '    Loc. psp. energy= ',energies%e_localpsp
-     call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg,'COLL')
      call edoc%add_real('local_psp', energies%e_localpsp)
      if (usepaw==0) then
        if(abs(energies%e_fock0)<tol8)then
@@ -1538,27 +1537,27 @@ subroutine prtene(dtset,energies,iout,usepaw)
          write(msg, '(a,es21.14)' ) '    NL(psp+X) energy= ',energies%e_nlpsp_vfock-energies%e_fock0
          call edoc%add_real('non_local_psp+x', energies%e_nlpsp_vfock-energies%e_fock0)
        endif
-       call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg,'COLL')
      else
        write(msg, '(a,es21.14)' ) '    Spherical terms = ',energies%e_paw
-       call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg,'COLL')
        call edoc%add_real('spherical_terms', energies%e_paw)
-       !XG20181025 Does not work (yet)...
-       !if(abs(energies%e_nlpsp_vfock)>tol8)then
-       !  write(msg, '(a,es21.14)' )'    Fock-type term  = ',energies%e_nlpsp_vfock
-       !  call wrtout(iout,msg,'COLL')
-       !  write(msg, '(a,es21.14)' ) '    -frozen Fock en.= ',-energies%e_fock0
-       !  call wrtout(iout,msg,'COLL')
-       !endif
+       !!!XG20181025 Does not work (yet)...
+       !!!if(abs(energies%e_nlpsp_vfock)>tol8)then
+       !!!  write(msg, '(a,es21.14)' )'    Fock-type term  = ',energies%e_nlpsp_vfock
+       !!!  call wrtout(iout,msg,'COLL')
+       !!!  write(msg, '(a,es21.14)' ) '    -frozen Fock en.= ',-energies%e_fock0
+       !!!  call wrtout(iout,msg,'COLL')
+       !!!endif
      end if
      if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
        write(msg, '(a,es21.14)' ) '    Vd Waals DFT-D = ',energies%e_vdw_dftd
-       call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg,'COLL')
        call edoc%add_real('VdWaals_dft_d', energies%e_vdw_dftd)
      end if
      if (dtset%nzchempot>=1) then
        write(msg, '(a,es21.14)' ) '    Chem. potential = ',energies%e_chempot
-       call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg,'COLL')
        call edoc%add_real('chem_potential', energies%e_chempot)
      end if
      if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
@@ -1567,47 +1566,45 @@ subroutine prtene(dtset,energies,iout,usepaw)
          write(msg, '(a,es21.14,a,a,a,es21.14)' ) &
            '    >>>>> Internal E= ',etotal-eent,ch10,ch10,&
            '    -kT*entropy     = ',eent
-         call wrtout(iout,msg,'COLL')
+         !call wrtout(iout,msg,'COLL')
          call edoc%add_real('-kT*entropy', eent)
        else
          write(msg, '(a,es21.14,a)' ) '    >>>>> Internal E= ',etotal-eent,ch10
-         call wrtout(iout,msg,'COLL')
+         !call wrtout(iout,msg,'COLL')
        end if
      else if (ipositron/=0) then
        if (dtset%occopt>=3.and.dtset%occopt<=8) then
          write(msg, '(a,es21.14)' ) '    -kT*entropy     = ',eent
-         call wrtout(iout,msg,'COLL')
+         !call wrtout(iout,msg,'COLL')
          call edoc%add_real('-kT*entropy', eent)
        end if
        write(msg, '(3a,es21.14,a)' ) &
         '    >>> ',EPName(ipositron),' E= ',etotal-energies%e0_electronpositron -energies%e_electronpositron,ch10
-       call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg,'COLL')
        write(msg, '(3a,es21.14,2a,es21.14)' ) &
         '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
         '    EP interaction E= '             ,energies%e_electronpositron
-       call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg,'COLL')
        if(ipositron == 1) then
-        call edoc%add_real('positronic', etotal- &
-                                              energies%e0_electronpositron-energies%e_electronpositron)
+        call edoc%add_real('positronic', etotal - energies%e0_electronpositron-energies%e_electronpositron)
         call edoc%add_real('electronic', energies%e0_electronpositron)
        else
-        call edoc%add_real('electronic', etotal- &
-                                              energies%e0_electronpositron-energies%e_electronpositron)
+        call edoc%add_real('electronic', etotal- energies%e0_electronpositron-energies%e_electronpositron)
         call edoc%add_real('positronic', energies%e0_electronpositron)
        end if
-       call edoc%add_real('electron_positiron_interaction', energies%e_electronpositron)
+       call edoc%add_real('electron_positron_interaction', energies%e_electronpositron)
      end if
      if ((dtset%berryopt==4 .or.  dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
           dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17) .and.ipositron/=1) then
        write(msg, '(a,es21.14)' ) '    Electric energy = ',energies%e_elecfield
-       call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg,'COLL')
        write(msg, '(a,es21.14)' ) '    Kohn-Sham energy= ',etotal-energies%e_elecfield
-       call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg,'COLL')
        call edoc%add_real('electric', energies%e_elecfield)
        call edoc%add_real('kohn_sham', etotal-energies%e_elecfield)
      end if
      write(msg, '(a,es21.14)' ) '    >>>>>>>>> Etotal= ',etotal
-     call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg,'COLL')
      call edoc%add_real('total_energy', etotal)
 
    else
@@ -1627,9 +1624,9 @@ subroutine prtene(dtset,energies,iout,usepaw)
    write(msg, '(4a,es21.14)' ) ch10,&
     ' "Double-counting" decomposition of free energy:',ch10,&
     '    Band energy     = ',energies%e_eigenvalues
-   call wrtout(iout,msg,'COLL')
+   !call wrtout(iout,msg,'COLL')
    dc_edoc = yamldoc_open('EnergyTermsDC', '"Double-counting" decomposition of free energy', width=20)
-   dc_edoc%use_yaml = dtset%use_yaml
+   !dc_edoc%use_yaml = dtset%use_yaml
    call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
    if (ipositron/=1) then
      write(msg, '(2(a,es21.14,a),a,es21.14)' ) &
@@ -1637,30 +1634,31 @@ subroutine prtene(dtset,energies,iout,usepaw)
        '    PspCore energy  = ',energies%e_corepsp-energies%e_corepspdc,ch10,&
        '    Dble-C XC-energy= ',-energies%e_hartree+energies%e_xc-energies%e_xcdc -energies%e_fock0 + &
        energies%e_hybcomp_E0-energies%e_hybcomp_v0
-     call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg,'COLL')
      call dc_edoc%add_real(eneName, enevalue)
      call dc_edoc%add_real('psp_core', energies%e_corepsp-energies%e_corepspdc)
-     call dc_edoc%add_real('xc_dc', -energies%e_hartree+energies%e_xc-energies%e_xcdc)
+     call dc_edoc%add_real('xc_dc', -energies%e_hartree+energies%e_xc-energies%e_xcdc - energies%e_fock0 + &
+                                     energies%e_hybcomp_E0-energies%e_hybcomp_v0)
    end if
    if ((dtset%berryopt==4 .or.  dtset%berryopt==6 .or. dtset%berryopt==7 .or.  &
         dtset%berryopt==14 .or. dtset%berryopt==16 .or. dtset%berryopt==17).and.ipositron/=1) then
      write(msg, '(a,es21.14)' ) '    Electric field  = ',energies%e_elecfield
-     call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg,'COLL')
      call dc_edoc%add_real('electric_field', energies%e_elecfield)
    end if
    if (usepaw==1) then
      write(msg, '(a,es21.14)' ) '    Spherical terms = ',energies%e_pawdc
-     call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg,'COLL')
      call dc_edoc%add_real('spherical_terms', energies%e_pawdc)
    end if
    if ((dtset%vdw_xc>=5.and.dtset%vdw_xc<=7).and.ipositron/=1) then
      write(msg, '(a,es21.14)' ) '    Vd Waals DFT-D = ',energies%e_vdw_dftd
-     call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg,'COLL')
      call dc_edoc%add_real('VdWaals_dft_d', energies%e_vdw_dftd)
    end if
    if (dtset%nzchempot>=1) then
      write(msg, '(a,es21.14)' ) '    Chem. potential = ',energies%e_chempot
-     call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg,'COLL')
      call dc_edoc%add_real('chem_potential', energies%e_chempot)
    end if
    if(dtset%occopt>=3.and.dtset%occopt<=8.and.ipositron==0) then
@@ -1668,28 +1666,28 @@ subroutine prtene(dtset,energies,iout,usepaw)
        write(msg, '(a,es21.14,a,a,a,es21.14)' ) &
         '    >>>>> Internal E= ',etotaldc-eent,ch10,ch10,&
         '    -kT*entropy     = ',eent
-       call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg,'COLL')
        call dc_edoc%add_real('internal', etotaldc-eent)
        call dc_edoc%add_real('-kT*entropy', eent)
      else
        write(msg, '(a,es21.14,a)' ) '    >>>>> Internal E= ',etotaldc-eent,ch10
-       call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg,'COLL')
        call dc_edoc%add_real('internal', etotaldc-eent)
      end if
    else if (ipositron/=0) then
      if (dtset%occopt>=3 .and. dtset%occopt<=8) then
        write(msg, '(a,es21.14)' ) '    -kT*entropy     = ',eent
-       call wrtout(iout,msg,'COLL')
+       !call wrtout(iout,msg,'COLL')
        call dc_edoc%add_real('-kT*entropy', eent)
      end if
      write(msg, '(a,es21.14,4a,es21.14,a)' ) &
        '    - EP dble-ct En.= ',-energies%edc_electronpositron,ch10,&
        '    >>> ',EPName(ipositron),' E= ',etotaldc-energies%e0_electronpositron -energies%e_electronpositron,ch10
-     call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg,'COLL')
      write(msg, '(3a,es21.14,2a,es21.14)' ) &
       '    ',EPName(3-ipositron),' ener.= ',energies%e0_electronpositron,ch10,&
       '    EP interaction E= '            ,energies%e_electronpositron
-     call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg,'COLL')
      call dc_edoc%add_real('electron_positron_dc', -energies%edc_electronpositron)
      if(ipositron == 1) then
        call dc_edoc%add_real('positronic', etotaldc-energies%e0_electronpositron-energies%e_electronpositron)
@@ -1701,7 +1699,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
      call dc_edoc%add_real('electron_positron_interaction', energies%e_electronpositron)
    end if
    write(msg, '(a,es21.14)' ) '    >>>> Etotal (DC)= ',etotaldc
-   call wrtout(iout,msg,'COLL')
+   !call wrtout(iout,msg,'COLL')
    call dc_edoc%add_real('total_energy_dc', etotaldc)
  end if
 
@@ -1711,27 +1709,27 @@ subroutine prtene(dtset,energies,iout,usepaw)
    write(msg, '(a,a,a,a,es21.14,a,es18.10)' ) ch10,&
      ' Other information on the energy :',ch10,&
      '    Total energy(eV)= ',etotal*Ha_eV,' ; Band energy (Ha)= ',energies%e_eigenvalues
-   call wrtout(iout,msg,'COLL')
-   call edoc%add_real('band_energy', energies%e_eigenvalues)
+   !call wrtout(iout,msg,'COLL')
    call edoc%add_real('total_energy_eV', etotal*Ha_eV)
+   call edoc%add_real('band_energy', energies%e_eigenvalues)
  end if
 
  if ((optdc==0.or.optdc==2).and.(.not.directE_avail)) then
    write(msg, '(a,a,es18.10)' ) ch10,' Band energy (Ha)= ',energies%e_eigenvalues
-   call wrtout(iout,msg,'COLL')
+   !call wrtout(iout,msg,'COLL')
    !call edoc%add_real('band_energy', energies%e_eigenvalues)
  end if
 
  if (usepaw==1) then
    if ((optdc==0.or.optdc==2).and.(directE_avail)) then
      write(msg, '(a,a,es21.14)' ) ch10,'  >Total energy in eV           = ',etotal*Ha_eV
-     call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg,'COLL')
      call edoc%add_real('total_energy_eV', etotal*Ha_eV)
    end if
    if (optdc>=1) then
      if (optdc==1) write(msg, '(a,a,es21.14)' ) ch10,'  >Total DC energy in eV        = ',etotaldc*Ha_eV
      if (optdc==2) write(msg, '(a,es21.14)' ) '  >Total DC energy in eV        = ',etotaldc*Ha_eV
-     call wrtout(iout,msg,'COLL')
+     !call wrtout(iout,msg,'COLL')
      call dc_edoc%add_real('total_energy_dc_eV', etotal*Ha_eV)
    end if
  end if
@@ -1743,24 +1741,20 @@ subroutine prtene(dtset,energies,iout,usepaw)
      ch10,' The correction is to be divided by the dielectric constant'
    call wrtout(iout,msg,'COLL')
    write(msg, '(a,es21.14)' ) '    Monopole correction (Ha)=',energies%e_monopole
-   call wrtout(iout,msg,'COLL')
+   !call wrtout(iout,msg,'COLL')
    write(msg, '(a,es21.14)' ) '    Monopole correction (eV)=',energies%e_monopole*Ha_eV
-   call wrtout(iout,msg,'COLL')
+   !call wrtout(iout,msg,'COLL')
    call edoc%add_real('monopole_correction', energies%e_monopole)
    call edoc%add_real('monopole_correction_eV', energies%e_monopole*Ha_eV)
  end if
 
- write(msg,'(a,80a)')('-',mu=1,80)
- call wrtout(iout,msg,'COLL')
- call wrtout(iout, ch10, 'COLL')
+ !write(msg,'(a,80a)')('-',mu=1,80)
+ !call wrtout(iout,msg,'COLL')
+ !call wrtout(iout, ch10, 'COLL')
 
  ! Write components of total energies in Yaml format.
  call edoc%write_and_free(iout)
-
- if (optdc >= 1) then
-   !call wrtout(iout, ch10, 'COLL')
-   call dc_edoc%write_and_free(iout)
- end if
+ if (optdc >= 1) call dc_edoc%write_and_free(iout)
 
 end subroutine prtene
 !!***

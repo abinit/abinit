@@ -542,7 +542,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  if (use_gpu_cuda==1) then
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
    if (ii<=0) then
-     write(msg,'(3a)')&
+     write(msg,'(5a)')&
 &     'Input variables use_gpu_cuda is on',ch10,&
 &     'but no available GPU device has been detected !',ch10,&
 &     'Action: change the input variable use_gpu_cuda.'
