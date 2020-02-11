@@ -3133,34 +3133,36 @@ print *, 'itimrev,dtset%kptopt ', itimrev, dtset%kptopt
  sppoldbl = 1
  ABI_ALLOCATE (rbz2disk, (sppoldbl*nkpt_in, 6))
 
- chksymbreak = 0
- iout = 0
- ABI_ALLOCATE (symrelT, (3,3,cryst%nsym))
+ ask_accurate=1
+ if (present(ask_accurate_)) ask_accurate=ask_accurate_
+
+ if (ask_accurate == 1) then
+   chksymbreak = 0
+   iout = 0
+   ABI_ALLOCATE (symrelT, (3,3,cryst%nsym))
 ! TODO: from Matteo, this should be symrel straight, not transposed. Perhaps the logic in mapkptsets is transposed?
- do isym=1,cryst%nsym
-   symrelT(:,:,isym) = transpose(cryst%symrel(:,:,isym))
- end do
+   do isym=1,cryst%nsym
+     symrelT(:,:,isym) = transpose(cryst%symrel(:,:,isym))
+   end do
 #ifdef DEV_MJV
 print *, 'wfk_disk%hdr%nkpt cryst%timrev ', wfk_disk%hdr%nkpt, cryst%timrev
 #endif
- call mapkptsets(chksymbreak, cryst%gmet, iout, wfk_disk%hdr%kptns, wfk_disk%hdr%nkpt, kptns_in, nkpt_in, &
-&     nkirred_disk, cryst%nsym, symrelT, cryst%timrev-1, rbz2disk, xmpi_comm_self)
+   call mapkptsets(chksymbreak, cryst%gmet, iout, wfk_disk%hdr%kptns, wfk_disk%hdr%nkpt, kptns_in, nkpt_in, &
+&       nkirred_disk, cryst%nsym, symrelT, cryst%timrev-1, rbz2disk, xmpi_comm_self)
 
 write(201, *) 'rbz2disk mapkptsets'
 write(201, *) rbz2disk
+ end if ! no accurate k
 
-rbz2disk = 0
- ask_accurate=1
- if (present(ask_accurate_)) ask_accurate=ask_accurate_
  dksqmax = zero
  call listkk(dksqmax, cryst%gmet, rbz2disk, wfk_disk%hdr%kptns, kptns_in, wfk_disk%hdr%nkpt, nkpt_in, cryst%nsym, &
    sppoldbl, cryst%symafm, cryst%symrel, cryst%timrev-1, xmpi_comm_self, use_symrec=.False.)
-   !sppoldbl, cryst%symafm, cryst%symrec, cryst%timrev-1, xmpi_comm_self, use_symrec=.True.)
 
 write(202, *) 'rbz2disk listkk'
 write(202, *) rbz2disk
- if (ask_accurate == 1) then
 print *, ' dksqmax ', dksqmax
+
+ if (ask_accurate == 1) then
    ABI_CHECK(dksqmax < tol8, " WF file read but k-points too far from requested set")
  end if
 
