@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 01h43 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h07 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v4_t86/t86.in
 - output file    -> t86.out
@@ -461,6 +461,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.297     188.215
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -468,23 +469,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  6.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.25704,    7.25704,    7.25704, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.765698698363849E-012, "res2":  6.627410200400412E-011, 
-    "residm":  9.852457774557365E-011, "diffor": undef, 
+    "deltae": -1.77E-12, "res2":  6.63E-11, 
+    "residm":  9.85E-11, "diffor": undef, 
 }
 etotal    : -8.858170142064759E+000
 entropy   :  0.000000000000000E+000
 fermie    :  2.149662491700456E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 9.917136936805589E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  9.917136936805616E-005,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  9.917136936805573E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -2.917721929545207E+000
+cartesian_forces:
 - [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
 - [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -542,6 +545,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.01335511165569E+00
 hartree             :  5.52776062708889E-01
@@ -889,6 +893,7 @@ band_energy         :  2.24819328102815E-01
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.521
@@ -902,6 +907,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 3, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :    3.519
@@ -1023,6 +1029,7 @@ data: !SigmaeeData |
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 4, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.521
@@ -1036,6 +1043,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 4, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :    3.519
@@ -1157,6 +1165,7 @@ data: !SigmaeeData |
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 5, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.521
@@ -1170,6 +1179,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 5, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :    3.519
@@ -1558,10 +1568,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          9.4  wall=          9.5
+- Proc.   0 individual time (sec): cpu=          9.4  wall=          9.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.4  wall=          9.5
++Overall time at end (sec) : cpu=          9.4  wall=          9.6

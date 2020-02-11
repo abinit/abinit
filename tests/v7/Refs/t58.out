@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 01h55 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h15 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t58-t59/t58.in
 - output file    -> t58.out
@@ -378,6 +378,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     111.625     111.563
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -385,23 +386,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   4.71711,    4.71711,    4.71711, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  5.329070518200751E-015, "res2":  6.730122727072870E-028, 
-    "residm":  7.791270507802946E-017, "diffor": undef, 
+    "deltae":  5.33E-15, "res2":  6.73E-28, 
+    "residm":  7.79E-17, "diffor": undef, 
 }
 etotal    : -1.169212561806229E+001
 entropy   :  0.000000000000000E+000
 fermie    :  5.210387074470602E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.324870596483244E-003,  3.148283325982783E-012, -6.712217819190330E-011, ]
 - [ 3.148283325982783E-012,  3.324870595484355E-003,  1.007994884678325E-011, ]
 - [-6.712217819190330E-011,  1.007994884678325E-011,  3.324870594464036E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa: -9.782105370876015E+001
+cartesian_forces:
 - [ 1.207132409943885E-009, -8.006254115622804E-009,  7.760764523086325E-010, ]
 - [-1.207132409943885E-009,  8.006254115622804E-009, -7.760764523086325E-010, ]
+force_length_stats: {"min":  8.133853224572715E-009, "max":  8.133853224572715E-009, "mean":  8.133853224572715E-009, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -453,6 +456,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.31278107654033E+00
 hartree             :  9.59210800763781E-01
@@ -1659,6 +1663,7 @@ band_energy         :  1.53084956964084E+00
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 4, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -1666,23 +1671,20 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   4.71711,    4.71711,    4.71711, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  0.000000000000000E+000, "res2":  0.000000000000000E+000, 
-    "residm":  8.705259498038617E-017, "diffor":  0.000000000000000E+000, 
+    "deltae":  0.00E+00, "res2":  0.00E+00, 
+    "residm":  8.71E-17, "diffor":  0.00E+00, 
 }
 etotal    : -1.169212561806229E+001
 entropy   :  0.000000000000000E+000
 fermie    :  5.210387074470602E-001
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {"min": null, "max": null, "mean": null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3350,10 +3352,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         20.9  wall=         23.1
+- Proc.   0 individual time (sec): cpu=         20.8  wall=         22.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and  65 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         20.9  wall=         23.1
++Overall time at end (sec) : cpu=         20.8  wall=         22.7

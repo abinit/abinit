@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 02h05 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h33 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_telast_5/telast_5.in
 - output file    -> telast_5.out
@@ -392,6 +392,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     424.219     424.184
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        4
 nsppol    :        1
@@ -399,25 +400,27 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.600000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  1.200000000000000E+002, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  1.200000000000000E+002, ]
-cutoff_energies: {"ecut":  6.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.53896,    7.53896,   12.27780, ]
+lattice_angles: [ 90.000,  90.000, 120.000, ]
+cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -3.907985046680551E-014, "res2":  6.240439466820294E-021, 
-    "residm":  6.050254560968519E-024, "diffor":  1.051425509132718E-012, 
+    "deltae": -3.91E-14, "res2":  6.24E-21, 
+    "residm":  6.05E-24, "diffor":  1.05E-12, 
 }
 etotal    : -2.027094377257313E+001
 entropy   :  0.000000000000000E+000
 fermie    :  8.616173657087181E-002
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [-3.800643584572772E-010,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000, -3.800643571562345E-010,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  7.756047171701697E-010, ]
-cartesian_forces: !CartForces
+pressure_GPa: -1.517732029962317E-007
+cartesian_forces:
 - [-0.000000000000000E+000, -0.000000000000000E+000,  7.907129965749962E-008, ]
 - [-0.000000000000000E+000, -0.000000000000000E+000,  7.907129965749960E-008, ]
 - [-0.000000000000000E+000, -0.000000000000000E+000, -7.907129965749962E-008, ]
 - [-0.000000000000000E+000, -0.000000000000000E+000, -7.907129965749962E-008, ]
+force_length_stats: {"min":  7.907129965749960E-008, "max":  7.907129965749962E-008, "mean":  7.907129965749962E-008, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -473,6 +476,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  5.91947827500975E+00
 hartree             :  1.65285115746601E+00
@@ -548,6 +552,7 @@ band_energy         : -1.42742450655855E+00
  Mean square residual over all n,k,spin=   00.000E+00; max=  00.000E+00
 
 --- !ResultsGS
+iteration_state: {"dtset": 2, }
 comment   : Summary of ground state results
 natom     :        4
 nsppol    :        1
@@ -555,25 +560,20 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.600000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  1.200000000000000E+002, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  1.200000000000000E+002, ]
-cutoff_energies: {"ecut":  6.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.53896,    7.53896,   12.27780, ]
+lattice_angles: [ 90.000,  90.000, 120.000, ]
+cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  0.000000000000000E+000, "res2":  0.000000000000000E+000, 
-    "residm":  8.030841070883471E-021, "diffor":  0.000000000000000E+000, 
+    "deltae":  0.00E+00, "res2":  0.00E+00, 
+    "residm":  8.03E-21, "diffor":  0.00E+00, 
 }
 etotal    : -2.027094377257313E+001
 entropy   :  0.000000000000000E+000
 fermie    :  8.616173657087181E-002
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {"min": null, "max": null, "mean": null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1227,10 +1227,10 @@ P          mk1mem3         32
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          7.9  wall=          8.3
+- Proc.   0 individual time (sec): cpu=          7.9  wall=          8.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.9  wall=          8.3
++Overall time at end (sec) : cpu=          7.9  wall=          8.2

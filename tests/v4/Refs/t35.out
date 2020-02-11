@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 01h42 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h07 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v4_t35/t35.in
 - output file    -> t35.out
@@ -241,6 +241,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     738.000     738.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -248,22 +249,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  2.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  2.500000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   5.00000,    5.00000,    5.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  25.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  0.000000000000000E+000, "res2":  9.240685293789694E-013, 
-    "residm":  1.373664834978052E-015, "diffor": undef, 
+    "deltae":  0.00E+00, "res2":  9.24E-13, 
+    "residm":  1.37E-15, "diffor": undef, 
 }
 etotal    : -2.532145625521353E+000
 entropy   :  0.000000000000000E+000
 fermie    : -6.063716128013334E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [-6.204747384369927E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000, -6.204747384369971E-005,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000, -6.204747384370014E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa:  1.825499398266443E+000
+cartesian_forces:
 - [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -299,6 +302,7 @@ cartesian_forces: !CartForces
   -0.60637
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.56989753822825E+00
 hartree             :  6.11338490257439E-01
@@ -361,6 +365,7 @@ band_energy         : -1.21274322560267E+00
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 2, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -368,22 +373,20 @@ nspinor   :        1
 nspden    :        1
 nelect    :  2.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  2.500000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   5.00000,    5.00000,    5.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  25.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  0.000000000000000E+000, "res2":  0.000000000000000E+000, 
-    "residm":  8.761738677233922E-015, "diffor":  0.000000000000000E+000, 
+    "deltae":  0.00E+00, "res2":  0.00E+00, 
+    "residm":  8.76E-15, "diffor":  0.00E+00, 
 }
 etotal    : -2.532145625521353E+000
 entropy   :  0.000000000000000E+000
 fermie    : -5.795078385244554E-001
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
-- [undef, undef, undef, ]
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {"min": null, "max": null, "mean": null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -410,6 +413,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.58468956194253E+00
 hartree             :  6.11338490257439E-01
@@ -423,6 +427,7 @@ total_energy        : -2.51735360180708E+00
 
 
 --- !EnergyTermsDC
+iteration_state     : {"dtset": 2, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -1.210878455637131E+000
 Ewald energy        : -1.134918991792262E+000
@@ -470,6 +475,7 @@ total_energy_dc     : -2.530280852534744E+000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 3, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -477,22 +483,20 @@ nspinor   :        1
 nspden    :        1
 nelect    :  2.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  2.500000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   5.00000,    5.00000,    5.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  25.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  0.000000000000000E+000, "res2":  0.000000000000000E+000, 
-    "residm":  8.761738677233922E-015, "diffor":  0.000000000000000E+000, 
+    "deltae":  0.00E+00, "res2":  0.00E+00, 
+    "residm":  8.76E-15, "diffor":  0.00E+00, 
 }
 etotal    : -2.532145625521353E+000
 entropy   :  0.000000000000000E+000
 fermie    : -5.795078385244554E-001
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
-- [undef, undef, undef, ]
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {"min": null, "max": null, "mean": null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -519,6 +523,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 3, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.58468956194253E+00
 hartree             :  6.11338490257439E-01
@@ -532,6 +537,7 @@ total_energy        : -2.51735360180708E+00
 
 
 --- !EnergyTermsDC
+iteration_state     : {"dtset": 3, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -1.210878455637131E+000
 Ewald energy        : -1.134918991792262E+000

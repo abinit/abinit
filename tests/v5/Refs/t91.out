@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 01h46 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h13 )
   
 
 ================================================================================
@@ -399,10 +399,10 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
 ;  1  2.60331046E-03  2.60331046E-03  2.60331046E-03
 ;     0.00000000E+00  0.00000000E+00  0.00000000E+00
 -
-- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.2
+- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.3
 
 ================================================================================
 
-+Total cpu time      2.230  and wall time      2.236 sec
++Total cpu time      2.281  and wall time      2.314 sec
 
  anaddb : the run completed succesfully.

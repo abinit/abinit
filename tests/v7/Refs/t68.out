@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 01h56 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h16 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t68/t68.in
 - output file    -> t68.out
@@ -908,6 +908,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -915,23 +916,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg":  4.000000000000000E+001, }
+lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":   8.0, "pawecutdg":  40.0, }
 convergence: {
-    "deltae":  5.861977570020827E-014, "res2":  5.555196272695164E-016, 
-    "residm":  1.643528244603630E-009, "diffor": undef, 
+    "deltae":  5.86E-14, "res2":  5.56E-16, 
+    "residm":  1.64E-09, "diffor": undef, 
 }
 etotal    : -1.172956013427811E+001
 entropy   :  0.000000000000000E+000
 fermie    :  3.962419843851124E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 4.856464180338551E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  4.856464180338554E-003,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  4.856464180338565E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa: -1.428820851150698E+002
+cartesian_forces:
 - [ 3.272405415409003E-025,  1.636202707704501E-024, -6.217570289277105E-024, ]
 - [-3.272405415409003E-025, -1.636202707704501E-024,  6.217570289277105E-024, ]
+force_length_stats: {"min":  6.437579201441246E-024, "max":  6.437579201441246E-024, "mean":  6.437579201441246E-024, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1013,6 +1016,7 @@ cartesian_forces: !CartForces
    Integrated=    8.0000E+00
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  7.42746153805544E+00
 hartree             :  8.53940825218230E-01
@@ -1176,6 +1180,7 @@ band_energy         :  1.00056854390748E-01
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 2, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :    8.820
@@ -1201,6 +1206,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 2, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   10.773
@@ -1226,6 +1232,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 2, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   11.068
@@ -1251,6 +1258,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 2, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   19.831
@@ -1276,6 +1284,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 2, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   10.896
@@ -1301,6 +1310,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 2, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    5.231
@@ -1468,6 +1478,7 @@ data: !SigmaeeData |
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 3, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :   11.875
@@ -1493,6 +1504,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 3, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   13.957
@@ -1518,6 +1530,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 3, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   14.312
@@ -1543,6 +1556,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 3, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   23.786
@@ -1568,6 +1582,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 3, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   14.138
@@ -1593,6 +1608,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    8.058
@@ -1760,6 +1776,7 @@ data: !SigmaeeData |
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 4, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :   11.886
@@ -1785,6 +1802,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 4, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   13.970
@@ -1810,6 +1828,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 4, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   14.316
@@ -1835,6 +1854,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 4, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   23.779
@@ -1860,6 +1880,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 4, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   14.148
@@ -1885,6 +1906,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 4, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    8.097
@@ -2052,6 +2074,7 @@ data: !SigmaeeData |
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 5, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :   11.887
@@ -2077,6 +2100,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 5, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   13.970
@@ -2102,6 +2126,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 5, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   14.316
@@ -2127,6 +2152,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 5, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   23.778
@@ -2152,6 +2178,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 5, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   14.148
@@ -2177,6 +2204,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 5, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    8.100
@@ -2344,6 +2372,7 @@ data: !SigmaeeData |
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 6, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :   11.887
@@ -2369,6 +2398,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 6, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   13.970
@@ -2394,6 +2424,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 6, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   14.316
@@ -2419,6 +2450,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 6, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   23.778
@@ -2444,6 +2476,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 6, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   14.148
@@ -2469,6 +2502,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 6, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    8.100
@@ -2589,6 +2623,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 7, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -2596,23 +2631,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg":  4.000000000000000E+001, }
+lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":   8.0, "pawecutdg":  40.0, }
 convergence: {
-    "deltae": -1.953992523340276E-014, "res2":  2.487984840745093E-016, 
-    "residm":  7.472253842062388E-017, "diffor": undef, 
+    "deltae": -1.95E-14, "res2":  2.49E-16, 
+    "residm":  7.47E-17, "diffor": undef, 
 }
 etotal    : -1.173880414301661E+001
 entropy   :  0.000000000000000E+000
 fermie    :  3.458518394794855E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 5.084971598533411E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  5.084971598533428E-003,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  5.084971598533421E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa: -1.496050043343911E+002
+cartesian_forces:
 - [-6.544810830818003E-025, -1.244633286218811E-041, -1.963443249245402E-024, ]
 - [ 6.544810830818007E-025,  1.244633286218811E-041,  1.963443249245402E-024, ]
+force_length_stats: {"min":  2.069650908032383E-024, "max":  2.069650908032383E-024, "mean":  2.069650908032383E-024, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2694,6 +2731,7 @@ cartesian_forces: !CartForces
    Integrated=    8.0000E+00
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 7, }
 comment             : Components of total free energy in Hartree
 kinetic             :  7.38765111605584E+00
 hartree             :  8.49487029069005E-01
@@ -2707,6 +2745,7 @@ total_energy        : -1.17388041430166E+01
 
 
 --- !EnergyTermsDC
+iteration_state     : {"dtset": 7, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -6.510094594401298E-001
 Ewald energy        : -1.278641217445190E+001
@@ -3088,6 +3127,7 @@ total_energy_dc     : -1.173880402831602E+001
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 9, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    5.231
@@ -3101,6 +3141,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 9, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   11.068
@@ -3485,6 +3526,7 @@ data: !SigmaeeData |
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 11, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :   11.887
@@ -3510,6 +3552,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 11, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   13.970
@@ -3535,6 +3578,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 11, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   14.316
@@ -3560,6 +3604,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 11, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   23.778
@@ -3585,6 +3630,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 11, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   14.148
@@ -3610,6 +3656,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 11, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    8.101
@@ -4022,6 +4069,7 @@ data: !SigmaeeData |
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 13, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    8.122
@@ -4035,6 +4083,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
+iteration_state: {"dtset": 13, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   14.388
@@ -4750,10 +4799,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         34.4  wall=         35.3
+- Proc.   0 individual time (sec): cpu=         34.5  wall=         34.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  50 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         34.4  wall=         35.3
++Overall time at end (sec) : cpu=         34.5  wall=         34.7

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 02h06 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h34 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tbs_1-tbs_2-tbs_3-tbs_4/tbs_2.in
 - output file    -> tbs_2.out
@@ -658,10 +658,10 @@ P           mkmem          64
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         34.3  wall=         34.4
+- Proc.   0 individual time (sec): cpu=         34.2  wall=         34.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         34.3  wall=         34.4
++Overall time at end (sec) : cpu=         34.2  wall=         34.3

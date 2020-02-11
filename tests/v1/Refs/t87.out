@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 01h38 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h01 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t87/t87.in
 - output file    -> t87.out
@@ -606,6 +606,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -613,22 +614,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -3.783640067922533E-013, "res2":  1.292953769392690E-010, 
-    "residm":  6.835261236210204E-016, "diffor": undef, 
+    "deltae": -3.78E-13, "res2":  1.29E-10, 
+    "residm":  6.84E-16, "diffor": undef, 
 }
 etotal    : -4.347730957863746E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309592733092198E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010681360069595E-005, -2.587640670867837E-013, -2.445419767321918E-013, ]
 - [-2.587640670867837E-013,  3.010681262611019E-005, -7.959735176060781E-014, ]
 - [-2.445419767321918E-013, -7.959735176060781E-014,  3.010681298572701E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857728726070825E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -664,6 +667,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880776449692E-01
 hartree             :  1.26904880748930E-01
@@ -734,6 +738,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 2, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -741,22 +746,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863976E-001, "res2":  1.320275421481982E-012, 
-    "residm":  2.283072328495143E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863976E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971221E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622732E-005,  2.359682370360282E-013,  1.942683477958465E-013, ]
 - [ 2.359682370360282E-013,  3.010687567811998E-005,  6.229907271678079E-014, ]
 - [ 1.942683477958465E-013,  6.229907271678079E-014,  3.010687543825242E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386383E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -792,6 +799,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023829E-01
@@ -862,6 +870,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 3, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -869,22 +878,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863976E-001, "res2":  1.320275423055501E-012, 
-    "residm":  2.283072326489654E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863976E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971220E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622710E-005,  2.359682306638947E-013,  1.942683552701070E-013, ]
 - [ 2.359682306638947E-013,  3.010687567811988E-005,  6.229906146773265E-014, ]
 - [ 1.942683552701070E-013,  6.229906146773265E-014,  3.010687543825248E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386359E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -920,6 +931,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 3, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023829E-01
@@ -990,6 +1002,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 4, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -997,22 +1010,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863973E-001, "res2":  1.320275409213573E-012, 
-    "residm":  2.283072289799498E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863973E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971223E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622732E-005,  2.359682526143577E-013,  1.942683896673411E-013, ]
 - [ 2.359682526143577E-013,  3.010687567812020E-005,  6.229905202661298E-014, ]
 - [ 1.942683896673411E-013,  6.229905202661298E-014,  3.010687543825240E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386403E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1048,6 +1063,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 4, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023828E-01
@@ -1118,6 +1134,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 5, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -1125,22 +1142,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863971E-001, "res2":  1.320275417997584E-012, 
-    "residm":  2.283072290893528E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863971E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971222E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622721E-005,  2.359682301857743E-013,  1.942683482072430E-013, ]
 - [ 2.359682301857743E-013,  3.010687567812004E-005,  6.229909080389366E-014, ]
 - [ 1.942683482072430E-013,  6.229909080389366E-014,  3.010687543825245E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386382E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1176,6 +1195,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 5, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023828E-01
@@ -1246,6 +1266,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 6, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -1253,22 +1274,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863973E-001, "res2":  1.320275422469349E-012, 
-    "residm":  2.283072328558405E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863973E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971220E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622726E-005,  2.359682557714622E-013,  1.942683743197365E-013, ]
 - [ 2.359682557714622E-013,  3.010687567812009E-005,  6.229906303054034E-014, ]
 - [ 1.942683743197365E-013,  6.229906303054034E-014,  3.010687543825240E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386387E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1304,6 +1327,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 6, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023829E-01
@@ -1374,6 +1398,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 7, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -1381,22 +1406,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863975E-001, "res2":  1.320275410960321E-012, 
-    "residm":  2.283072326252913E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863975E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971220E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622721E-005,  2.359682409665798E-013,  1.942683671568610E-013, ]
 - [ 2.359682409665798E-013,  3.010687567812009E-005,  6.229906760003109E-014, ]
 - [ 1.942683671568610E-013,  6.229906760003109E-014,  3.010687543825251E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386392E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1432,6 +1459,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 7, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023829E-01
@@ -1497,6 +1525,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 8, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -1504,22 +1533,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  0.000000000000000E+000, "res2":  0.000000000000000E+000, 
-    "residm":  1.294451992104066E-321, "diffor": undef, 
+    "deltae":  0.00E+00, "res2":  0.00E+00, 
+    "residm":  1.29-321, "diffor": undef, 
 }
 etotal    : -4.347730957863744E-001
 entropy   :  0.000000000000000E+000
 fermie    :  0.000000000000000E+000
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010681360069619E-005, -2.587640787480561E-013, -2.445419845862035E-013, ]
 - [-2.587640787480561E-013,  3.010681262610995E-005, -7.959735814678989E-014, ]
 - [-2.445419845862035E-013, -7.959735814678989E-014,  3.010681298572685E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857728726070809E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1544,6 +1575,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 8, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880776449692E-01
 hartree             :  1.26904880748930E-01
@@ -1599,6 +1631,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 9, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -1606,22 +1639,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  0.000000000000000E+000, "res2":  0.000000000000000E+000, 
-    "residm":  0.000000000000000E+000, "diffor": undef, 
+    "deltae":  0.00E+00, "res2":  0.00E+00, 
+    "residm":  0.00E+00, "diffor": undef, 
 }
 etotal    : -4.347730957863750E-001
 entropy   :  0.000000000000000E+000
 fermie    :  0.000000000000000E+000
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010681360069622E-005, -2.587640732015024E-013, -2.445419845198471E-013, ]
 - [-2.587640732015024E-013,  3.010681262611054E-005, -7.959736473707474E-014, ]
 - [-2.445419845198471E-013, -7.959736473707474E-014,  3.010681298572726E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857728726070911E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1646,6 +1681,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 9, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880776449693E-01
 hartree             :  1.26904880748931E-01
@@ -1706,6 +1742,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 10, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -1713,22 +1750,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863977E-001, "res2":  1.320275416816305E-012, 
-    "residm":  2.283072330706520E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863977E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971221E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622723E-005,  2.359682235413776E-013,  1.942683819259667E-013, ]
 - [ 2.359682235413776E-013,  3.010687567811988E-005,  6.229905109431657E-014, ]
 - [ 1.942683819259667E-013,  6.229905109431657E-014,  3.010687543825251E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386373E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1764,6 +1803,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 10, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023829E-01
@@ -1834,6 +1874,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 11, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -1841,22 +1882,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863977E-001, "res2":  1.320275416816305E-012, 
-    "residm":  2.283072330706520E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863977E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971221E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622723E-005,  2.359682235413776E-013,  1.942683819259667E-013, ]
 - [ 2.359682235413776E-013,  3.010687567811988E-005,  6.229905109431657E-014, ]
 - [ 1.942683819259667E-013,  6.229905109431657E-014,  3.010687543825251E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386373E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1892,6 +1935,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 11, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023829E-01
@@ -1962,6 +2006,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 12, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -1969,22 +2014,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863977E-001, "res2":  1.320275416816305E-012, 
-    "residm":  2.283072330706520E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863977E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971221E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622723E-005,  2.359682235413776E-013,  1.942683819259667E-013, ]
 - [ 2.359682235413776E-013,  3.010687567811988E-005,  6.229905109431657E-014, ]
 - [ 1.942683819259667E-013,  6.229905109431657E-014,  3.010687543825251E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386373E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2020,6 +2067,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 12, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023829E-01
@@ -2090,6 +2138,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 13, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -2097,22 +2146,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863973E-001, "res2":  1.320275407064344E-012, 
-    "residm":  2.283072288377512E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863973E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971222E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622715E-005,  2.359682323055167E-013,  1.942683681104179E-013, ]
 - [ 2.359682323055167E-013,  3.010687567812015E-005,  6.229904288654647E-014, ]
 - [ 1.942683681104179E-013,  6.229904288654647E-014,  3.010687543825240E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386382E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2148,6 +2199,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 13, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023828E-01
@@ -2218,6 +2270,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 14, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -2225,22 +2278,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863973E-001, "res2":  1.320275401174978E-012, 
-    "residm":  2.283072291841168E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863973E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971222E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622723E-005,  2.359682548244120E-013,  1.942683618439675E-013, ]
 - [ 2.359682548244120E-013,  3.010687567812015E-005,  6.229906004686714E-014, ]
 - [ 1.942683618439675E-013,  6.229906004686714E-014,  3.010687543825251E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386400E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2276,6 +2331,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 14, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023829E-01
@@ -2346,6 +2402,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 15, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -2353,22 +2410,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863973E-001, "res2":  1.320275401174978E-012, 
-    "residm":  2.283072291841168E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863973E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971222E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622723E-005,  2.359682548244120E-013,  1.942683618439675E-013, ]
 - [ 2.359682548244120E-013,  3.010687567812015E-005,  6.229906004686714E-014, ]
 - [ 1.942683618439675E-013,  6.229906004686714E-014,  3.010687543825251E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386400E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2404,6 +2463,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 15, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023829E-01
@@ -2474,6 +2534,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 16, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -2481,22 +2542,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863973E-001, "res2":  1.320275410836130E-012, 
-    "residm":  2.283072290732155E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863973E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971222E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622721E-005,  2.359682291508109E-013,  1.942683671056209E-013, ]
 - [ 2.359682291508109E-013,  3.010687567812009E-005,  6.229904886604970E-014, ]
 - [ 1.942683671056209E-013,  6.229904886604970E-014,  3.010687543825237E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386379E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2532,6 +2595,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 16, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023828E-01
@@ -2602,6 +2666,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 17, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -2609,22 +2674,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863973E-001, "res2":  1.320275413396314E-012, 
-    "residm":  2.283072292895867E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863973E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971222E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622729E-005,  2.359682486521426E-013,  1.942683768742762E-013, ]
 - [ 2.359682486521426E-013,  3.010687567812020E-005,  6.229906689937331E-014, ]
 - [ 1.942683768742762E-013,  6.229906689937331E-014,  3.010687543825245E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386406E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2660,6 +2727,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 17, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023829E-01
@@ -2730,6 +2798,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 18, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -2737,22 +2806,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863973E-001, "res2":  1.320275413396314E-012, 
-    "residm":  2.283072292895867E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863973E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971222E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622729E-005,  2.359682486521426E-013,  1.942683768742762E-013, ]
 - [ 2.359682486521426E-013,  3.010687567812020E-005,  6.229906689937331E-014, ]
 - [ 1.942683768742762E-013,  6.229906689937331E-014,  3.010687543825245E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386406E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2788,6 +2859,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 18, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023829E-01
@@ -2858,6 +2930,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 19, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -2865,22 +2938,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863978E-001, "res2":  1.320275418488935E-012, 
-    "residm":  2.283072331245756E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863978E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971221E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622715E-005,  2.359682348682039E-013,  1.942683691153640E-013, ]
 - [ 2.359682348682039E-013,  3.010687567811988E-005,  6.229905375270837E-014, ]
 - [ 1.942683691153640E-013,  6.229905375270837E-014,  3.010687543825245E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386360E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2916,6 +2991,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 19, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023829E-01
@@ -2986,6 +3062,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 20, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -2993,22 +3070,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863978E-001, "res2":  1.320275418488935E-012, 
-    "residm":  2.283072331245756E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863978E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971221E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622715E-005,  2.359682348682039E-013,  1.942683691153640E-013, ]
 - [ 2.359682348682039E-013,  3.010687567811988E-005,  6.229905375270837E-014, ]
 - [ 1.942683691153640E-013,  6.229905375270837E-014,  3.010687543825245E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386360E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3044,6 +3123,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 20, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023829E-01
@@ -3114,6 +3194,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     515.000     515.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 21, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -3121,22 +3202,24 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  5.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.347730957863978E-001, "res2":  1.320275418488935E-012, 
-    "residm":  2.283072331245756E-015, "diffor": undef, 
+    "deltae": -4.35E-01, "res2":  1.32E-12, 
+    "residm":  2.28E-15, "diffor": undef, 
 }
 etotal    : -4.347730957863978E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.309591574971221E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.010687498622715E-005,  2.359682348682039E-013,  1.942683691153640E-013, ]
 - [ 2.359682348682039E-013,  3.010687567811988E-005,  6.229905375270837E-014, ]
 - [ 1.942683691153640E-013,  6.229905375270837E-014,  3.010687543825245E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -8.857747054386360E-001
+cartesian_forces:
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3172,6 +3255,7 @@ cartesian_forces: !CartForces
   -0.23096
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 21, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.39880587783838E-01
 hartree             :  1.26904799023829E-01
@@ -3477,10 +3561,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          3.5  wall=          6.3
+- Proc.   0 individual time (sec): cpu=          3.6  wall=          5.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and 192 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.5  wall=          6.3
++Overall time at end (sec) : cpu=          3.6  wall=          5.5

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 01h56 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h16 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t58-t59/t59.in
 - output file    -> t59.out
@@ -1016,10 +1016,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          6.3  wall=          6.7
+- Proc.   0 individual time (sec): cpu=          6.3  wall=          7.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.3  wall=          6.7
++Overall time at end (sec) : cpu=          6.3  wall=          7.1

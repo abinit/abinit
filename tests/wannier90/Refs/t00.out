@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 02h15 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h42 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/wannier90_t00/t00.in
 - output file    -> t00.out
@@ -183,6 +183,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     117.625     117.597
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -190,23 +191,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  4.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.49533,    7.49533,    7.49533, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":   4.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.335502886792206E-002, "res2":  4.133900154178340E-001, 
-    "residm":  1.171913592398755E-004, "diffor": undef, 
+    "deltae": -1.34E-02, "res2":  4.13E-01, 
+    "residm":  1.17E-04, "diffor": undef, 
 }
 etotal    : -1.062008513354395E+001
 entropy   :  0.000000000000000E+000
 fermie    :  7.779042082345537E-003
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.141392219717229E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  3.141392219717237E-004,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  3.141392219717220E-004, ]
-cartesian_forces: !CartForces
+pressure_GPa: -9.242293443337305E+000
+cartesian_forces:
 - [ 6.350578356496196E-030,  6.350578356496196E-030, -1.905173506948859E-029, ]
 - [-6.350578356496196E-030, -6.350578356496196E-030,  1.905173506948859E-029, ]
+force_length_stats: {"min":  2.106248561024974E-029, "max":  2.106248561024974E-029, "mean":  2.106248561024974E-029, }
 ...
 
 
@@ -302,6 +305,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.12911171398280E+00
 hartree             :  8.50476458435567E-01

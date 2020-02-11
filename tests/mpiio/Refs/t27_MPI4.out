@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 02h25 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h54 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/mpiio_t27_MPI4/t27.in
 - output file    -> t27_MPI4.out
@@ -420,6 +420,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     255.094     255.080
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -427,23 +428,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  2.500000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  25.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -2.131628207280301E-014, "res2":  5.722614691215501E-021, 
-    "residm":  5.089128440634649E-022, "diffor": undef, 
+    "deltae": -2.13E-14, "res2":  5.72E-21, 
+    "residm":  5.09E-22, "diffor": undef, 
 }
 etotal    : -1.201647389004476E+001
 entropy   :  0.000000000000000E+000
 fermie    :  2.525935655907100E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 1.358529707669311E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  1.358529707669316E-003,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  1.358529707669302E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa: -3.996931720580000E+001
+cartesian_forces:
 - [ 4.808295041347119E-030,  0.000000000000000E+000,  4.808295041347119E-030, ]
 - [-4.808295041347119E-030,  0.000000000000000E+000, -4.808295041347119E-030, ]
+force_length_stats: {"min":  6.799956059364398E-030, "max":  6.799956059364398E-030, "mean":  6.799956059364398E-030, }
 ...
 
  bonds_lgth_angles : about to open file t27_MPI4o_DS1_GEO
@@ -494,6 +497,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  7.72815176868875E+00
 hartree             :  1.01562010004079E+00
@@ -559,6 +563,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     134.313     134.277
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 2, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -566,23 +571,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  2.500000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  25.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.201647389004478E+001, "res2":  1.057539170019449E-022, 
-    "residm":  1.233679030013750E-023, "diffor": undef, 
+    "deltae": -1.20E+01, "res2":  1.06E-22, 
+    "residm":  1.23E-23, "diffor": undef, 
 }
 etotal    : -1.201647389004478E+001
 entropy   :  0.000000000000000E+000
 fermie    :  2.525935655899518E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 1.358529707672841E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  1.358529707672845E-003,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  1.358529707672845E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa: -3.996931720590396E+001
+cartesian_forces:
 - [ 2.163732768606204E-029,  2.404147520673560E-030, -1.682903264471492E-029, ]
 - [-2.163732768606204E-029, -2.404147520673560E-030,  1.682903264471492E-029, ]
+force_length_stats: {"min":  2.751672608527526E-029, "max":  2.751672608527526E-029, "mean":  2.751672608527526E-029, }
 ...
 
  bonds_lgth_angles : about to open file t27_MPI4o_DS2_GEO
@@ -633,6 +640,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  7.72815176868833E+00
 hartree             :  1.01562010004055E+00
@@ -698,6 +706,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     128.156     128.146
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 3, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -705,23 +714,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  2.500000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  25.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.201647389004477E+001, "res2":  1.503300088687265E-024, 
-    "residm":  4.860791351942334E-025, "diffor": undef, 
+    "deltae": -1.20E+01, "res2":  1.50E-24, 
+    "residm":  4.86E-25, "diffor": undef, 
 }
 etotal    : -1.201647389004477E+001
 entropy   :  0.000000000000000E+000
 fermie    :  2.525935655899457E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 1.358529707671124E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  1.358529707671124E-003,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  1.358529707671124E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa: -3.996931720585336E+001
+cartesian_forces:
 - [ 2.404147520673560E-030,  2.404147520673560E-030,  2.404147520673560E-030, ]
 - [-2.404147520673560E-030, -2.404147520673560E-030, -2.404147520673560E-030, ]
+force_length_stats: {"min":  4.164105654697353E-030, "max":  4.164105654697353E-030, "mean":  4.164105654697353E-030, }
 ...
 
  bonds_lgth_angles : about to open file t27_MPI4o_DS3_GEO
@@ -772,6 +783,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 3, }
 comment             : Components of total free energy in Hartree
 kinetic             :  7.72815176868853E+00
 hartree             :  1.01562010004064E+00
@@ -849,6 +861,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.844     127.836
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 4, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -856,23 +869,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  2.500000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  25.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.458388965147606E-012, "res2":  2.600972779388563E-012, 
-    "residm":  8.863388353075400E-016, "diffor": undef, 
+    "deltae": -1.46E-12, "res2":  2.60E-12, 
+    "residm":  8.86E-16, "diffor": undef, 
 }
 etotal    : -1.201647389004480E+001
 entropy   :  0.000000000000000E+000
 fermie    :  2.525935656200988E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 1.358529905770491E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  1.358529905770491E-003,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  1.358529905770489E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa: -3.996932303413696E+001
+cartesian_forces:
 - [ 0.000000000000000E+000, -9.616590082694239E-030,  1.442488512404136E-029, ]
 - [ 7.006492321624085E-046,  9.616590082694239E-030, -1.442488512404136E-029, ]
+force_length_stats: {"min":  1.733655431913628E-029, "max":  1.733655431913628E-029, "mean":  1.733655431913628E-029, }
 ...
 
  bonds_lgth_angles : about to open file t27_MPI4o_DS4_GEO
@@ -923,6 +938,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 4, }
 comment             : Components of total free energy in Hartree
 kinetic             :  7.72815174720253E+00
 hartree             :  1.01562009087870E+00
@@ -991,6 +1007,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     511.875     511.840
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 5, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -998,23 +1015,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  2.500000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  25.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.201647389004468E+001, "res2":  4.325124687671695E-014, 
-    "residm":  1.966511840664326E-017, "diffor": undef, 
+    "deltae": -1.20E+01, "res2":  4.33E-14, 
+    "residm":  1.97E-17, "diffor": undef, 
 }
 etotal    : -1.201647389004468E+001
 entropy   :  0.000000000000000E+000
 fermie    :  2.525935648104837E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 1.358529662649783E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  1.358529662649781E-003,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  1.358529662649790E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa: -3.996931588128006E+001
+cartesian_forces:
 - [-1.923318016538848E-029,  4.808295041347119E-030,  4.808295041347119E-030, ]
 - [ 1.923318016538848E-029, -4.808295041347119E-030, -4.808295041347119E-030, ]
+force_length_stats: {"min":  2.039986817809319E-029, "max":  2.039986817809319E-029, "mean":  2.039986817809319E-029, }
 ...
 
  bonds_lgth_angles : about to open file t27_MPI4o_DS5_GEO
@@ -1065,6 +1084,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 5, }
 comment             : Components of total free energy in Hartree
 kinetic             :  7.72815177553988E+00
 hartree             :  1.01562010266384E+00
@@ -1148,6 +1168,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     134.313     134.277
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 6, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -1155,23 +1176,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  2.500000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  25.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -8.881784197001252E-015, "res2":  1.085031258909008E-018, 
-    "residm":  4.319555413911924E-022, "diffor": undef, 
+    "deltae": -8.88E-15, "res2":  1.09E-18, 
+    "residm":  4.32E-22, "diffor": undef, 
 }
 etotal    : -1.201647388459611E+001
 entropy   :  0.000000000000000E+000
 fermie    :  2.525935672341265E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 1.358529661815476E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  1.358529661815473E-003,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  1.358529661815469E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa: -3.996931585673376E+001
+cartesian_forces:
 - [ 3.846636033077695E-029,  0.000000000000000E+000, -1.923318016538848E-029, ]
 - [-3.846636033077695E-029,  2.802596928649634E-045,  1.923318016538848E-029, ]
+force_length_stats: {"min":  4.300669827330928E-029, "max":  4.300669827330928E-029, "mean":  4.300669827330928E-029, }
 ...
 
  bonds_lgth_angles : about to open file t27_MPI4o_DS6_GEO
@@ -1222,6 +1245,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 6, }
 comment             : Components of total free energy in Hartree
 kinetic             :  7.72815168786840E+00
 hartree             :  1.01562008786878E+00
@@ -1573,10 +1597,10 @@ P           mkmem6         10
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         13.3  wall=         14.1
+- Proc.   0 individual time (sec): cpu=         13.4  wall=         16.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         53.7  wall=         56.0
++Overall time at end (sec) : cpu=         59.3  wall=         65.1

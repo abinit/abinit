@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 02h15 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h41 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutoplugs_tw90_3/tw90_3.in
 - output file    -> tw90_3.out
@@ -240,6 +240,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1875.000    1875.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        5
 nsppol    :        1
@@ -247,26 +248,28 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  12.00000,   12.00000,   12.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   8.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.261213355974178E-013, "res2":  4.518222725384934E-012, 
-    "residm":  1.768055547852179E-013, "diffor":  2.878365451194909E-008, 
+    "deltae": -1.26E-13, "res2":  4.52E-12, 
+    "residm":  1.77E-13, "diffor":  2.88E-08, 
 }
 etotal    : -6.594728208900525E+000
 entropy   :  0.000000000000000E+000
 fermie    : -2.449912373169608E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 1.692874084216562E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  1.692874084216560E-004,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  1.692874084216560E-004, ]
-cartesian_forces: !CartForces
+pressure_GPa: -4.980606672018413E+000
+cartesian_forces:
 - [ 1.387778780781446E-018, -1.387778780781446E-018, -0.000000000000000E+000, ]
 - [-3.104432871616968E-002, -3.104432871616967E-002, -3.104432871616968E-002, ]
 - [-3.104432871616969E-002,  3.104432871616967E-002,  3.104432871616968E-002, ]
 - [ 3.104432871616968E-002, -3.104432871616967E-002,  3.104432871616968E-002, ]
 - [ 3.104432871616968E-002,  3.104432871616968E-002, -3.104432871616968E-002, ]
+force_length_stats: {"min":  1.962615573354719E-018, "max":  5.377035462327538E-002, "mean":  4.301628369862030E-002, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -326,6 +329,7 @@ cartesian_forces: !CartForces
   -0.41521   -0.24520   -0.24499   -0.24499   -0.04203
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.95760970664192E+00
 hartree             :  3.06065991704156E+00
@@ -379,6 +383,7 @@ band_energy         : -2.30079096940696E+00
 ================================================================================
 
 --- !ResultsGS
+iteration_state: {"dtset": 2, }
 comment   : Summary of ground state results
 natom     :        5
 nsppol    :        1
@@ -386,26 +391,20 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  12.00000,   12.00000,   12.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   8.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  0.000000000000000E+000, "res2":  0.000000000000000E+000, 
-    "residm":  6.953037547555252E-310, "diffor":  0.000000000000000E+000, 
+    "deltae":  0.00E+00, "res2":  0.00E+00, 
+    "residm":  6.95-310, "diffor":  0.00E+00, 
 }
 etotal    : -6.395787699671416E+000
 entropy   :  0.000000000000000E+000
 fermie    : -2.449912373169608E-001
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {"min": null, "max": null, "mean": null, }
 ...
 
 

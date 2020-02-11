@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 01h54 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h14 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t26/t26.in
 - output file    -> t26.out
@@ -293,6 +293,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   for the second time, diff in etot=  1.238E-09 < toldfe=  1.000E-07
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        7
 nsppol    :        1
@@ -300,28 +301,20 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.400000000000000E+001
 charge    : -1.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg":  1.500000000000000E+001, }
+lattice_lengths: [   7.60000,    7.60000,    7.60000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  15.0, }
 convergence: {
-    "deltae":  1.237946634091713E-009, "res2":  6.847551644514572E-009, 
-    "residm":  2.686321932634269E-005, "diffor":  0.000000000000000E+000, 
+    "deltae":  1.24E-09, "res2":  6.85E-09, 
+    "residm":  2.69E-05, "diffor":  0.00E+00, 
 }
 etotal    : -2.455406546318270E+001
 entropy   :  0.000000000000000E+000
 fermie    : -7.246742248494459E-002
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {"min": null, "max": null, "mean": null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -410,6 +403,7 @@ cartesian_forces: !CartForces
  The correction is to be divided by the dielectric constant
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  5.67300568315206E+00
 hartree             :  3.36794112968400E+00
@@ -426,6 +420,7 @@ monopole_correction_eV:  5.07939413415525E+00
 
 
 --- !EnergyTermsDC
+iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -1.078387987970690E+001
 Ewald energy        : -9.606436504808155E+000
@@ -498,6 +493,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   for the second time, diff in etot=  1.105E-09 < toldfe=  1.000E-07
 
 --- !ResultsGS
+iteration_state: {"dtset": 2, }
 comment   : Summary of ground state results
 natom     :        7
 nsppol    :        1
@@ -505,28 +501,20 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.400000000000000E+001
 charge    : -1.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg":  1.500000000000000E+001, }
+lattice_lengths: [   7.60000,    7.60000,    7.60000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  15.0, }
 convergence: {
-    "deltae":  1.105341596030485E-009, "res2":  6.191883851849557E-009, 
-    "residm":  2.717810566683077E-005, "diffor":  0.000000000000000E+000, 
+    "deltae":  1.11E-09, "res2":  6.19E-09, 
+    "residm":  2.72E-05, "diffor":  0.00E+00, 
 }
 etotal    : -2.454117175791036E+001
 entropy   :  0.000000000000000E+000
 fermie    : -5.958849302438247E-002
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {"min": null, "max": null, "mean": null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -615,6 +603,7 @@ cartesian_forces: !CartForces
  The correction is to be divided by the dielectric constant
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  5.67173320877010E+00
 hartree             :  3.36845527270188E+00
@@ -631,6 +620,7 @@ monopole_correction_eV:  5.07939413415525E+00
 
 
 --- !EnergyTermsDC
+iteration_state     : {"dtset": 2, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -1.060962252811879E+001
 Ewald energy        : -9.606436504808155E+000
@@ -703,6 +693,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   for the second time, diff in etot=  1.238E-09 < toldfe=  1.000E-07
 
 --- !ResultsGS
+iteration_state: {"dtset": 3, }
 comment   : Summary of ground state results
 natom     :        7
 nsppol    :        1
@@ -710,28 +701,20 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.400000000000000E+001
 charge    : -1.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg":  1.500000000000000E+001, }
+lattice_lengths: [   7.60000,    7.60000,    7.60000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  15.0, }
 convergence: {
-    "deltae":  1.237854263536065E-009, "res2":  6.848304183512642E-009, 
-    "residm":  2.686337877673286E-005, "diffor":  0.000000000000000E+000, 
+    "deltae":  1.24E-09, "res2":  6.85E-09, 
+    "residm":  2.69E-05, "diffor":  0.00E+00, 
 }
 etotal    : -2.453199410329344E+001
 entropy   :  0.000000000000000E+000
 fermie    : -5.039746176789388E-002
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {"min": null, "max": null, "mean": null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -820,6 +803,7 @@ cartesian_forces: !CartForces
  The correction is to be divided by the dielectric constant
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 3, }
 comment             : Components of total free energy in Hartree
 kinetic             :  5.67300605857516E+00
 hartree             :  3.36794108995398E+00
@@ -836,6 +820,7 @@ monopole_correction_eV:  5.07939413415525E+00
 
 
 --- !EnergyTermsDC
+iteration_state     : {"dtset": 3, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -1.047489932139984E+001
 Ewald energy        : -9.606436504808155E+000
@@ -1055,10 +1040,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          9.8  wall=          9.9
+- Proc.   0 individual time (sec): cpu=          9.8  wall=         10.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.8  wall=          9.9
++Overall time at end (sec) : cpu=          9.8  wall=         10.0

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 01h43 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h07 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v4_t92/t92.in
 - output file    -> t92.out
@@ -156,6 +156,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    8039.000    8039.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -163,23 +164,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  4.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  22.00000,   26.00000,   13.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   8.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.594102875898898E-013, "res2":  2.739134679756784E-010, 
-    "residm":  5.736843479649365E-015, "diffor": undef, 
+    "deltae": -4.59E-13, "res2":  2.74E-10, 
+    "residm":  5.74E-15, "diffor": undef, 
 }
 etotal    : -1.688767995125110E+000
 entropy   :  0.000000000000000E+000
 fermie    : -1.337067288415268E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 1.720300372280975E-007,  6.854066472513549E-008, -6.965620296974547E-007, ]
 - [ 6.854066472513549E-008,  2.276294706374998E-007, -1.050386607962614E-006, ]
 - [-6.965620296974547E-007, -1.050386607962614E-006,  5.520180237816071E-006, ]
-cartesian_forces: !CartForces
+pressure_GPa: -5.805588970362766E-002
+cartesian_forces:
 - [ 8.462994634462931E-004,  1.275829573265151E-003, -1.306653291817787E-002, ]
 - [-8.462994634462931E-004, -1.275829573265151E-003,  1.306653291817787E-002, ]
+force_length_stats: {"min":  1.315592058290385E-002, "max":  1.315592058290385E-002, "mean":  1.315592058290385E-002, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -221,6 +224,7 @@ cartesian_forces: !CartForces
   -0.20368   -0.13371
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  5.62446529962030E-01
 hartree             :  1.08640075244863E+00
@@ -369,10 +373,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          1.9
+- Proc.   0 individual time (sec): cpu=          1.7  wall=          3.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.8  wall=          1.9
++Overall time at end (sec) : cpu=          1.7  wall=          3.3

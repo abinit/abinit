@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 02h33 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 03h00 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t31_MPI10/t31.in
 - output file    -> t31_MPI10.out
@@ -1125,6 +1125,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1175.000    1175.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :      256
 nsppol    :        1
@@ -1132,21 +1133,22 @@ nspinor   :        1
 nspden    :        1
 nelect    :  7.680000000000000E+002
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  6.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  25.62000,   25.62000,   25.62000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.327143327941485E-003, "res2":  9.792093293774940E-004, 
-    "residm":  2.855293780077414E-008, "diffor": undef, 
+    "deltae": -4.33E-03, "res2":  9.79E-04, 
+    "residm":  2.86E-08, "diffor": undef, 
 }
 etotal    : -6.096627959469965E+002
 entropy   :  0.000000000000000E+000
 fermie    :  5.083727961962496E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [-3.892446877493537E-003, -1.510557243986380E-011,  3.358601138518155E-011, ]
 - [-1.510557243986380E-011, -3.892447087599944E-003,  5.330497817642139E-011, ]
 - [ 3.358601138518155E-011,  5.330497817642139E-011, -3.892447096781250E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa:  1.145197258446694E+002
+cartesian_forces:
 - [ 8.588216522591988E-009,  3.267845694566242E-007, -3.135659869135114E-007, ]
 - [-9.294682817340522E-008,  2.441712550893588E-007, -1.812213099128116E-007, ]
 - [ 4.959631407618294E-007,  1.097167772234489E-007, -1.466007159493807E-007, ]
@@ -1403,6 +1405,7 @@ cartesian_forces: !CartForces
 - [ 2.705322504950734E-007,  4.306794863484506E-008, -1.102935407671764E-007, ]
 - [-1.033959094225070E-007,  1.965229463057360E-007, -1.190884703570062E-007, ]
 - [-6.418554912420573E-008, -1.737007423815126E-007, -1.718720502356284E-008, ]
+force_length_stats: {"min":  5.300380694506023E-008, "max":  8.349048948744958E-007, "mean":  3.634560058942545E-007, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3163,6 +3166,7 @@ cartesian_forces: !CartForces
    Integrated=    7.6800E+02
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.09710928855064E+02
 hartree             :  3.05044664050131E+00
@@ -3228,6 +3232,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1175.000    1175.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 2, }
 comment   : Summary of ground state results
 natom     :      256
 nsppol    :        1
@@ -3235,21 +3240,22 @@ nspinor   :        1
 nspden    :        1
 nelect    :  7.680000000000000E+002
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  6.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  25.62000,   25.62000,   25.62000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -4.327160576394817E-003, "res2":  9.761601697459104E-004, 
-    "residm":  1.124854541658437E-005, "diffor": undef, 
+    "deltae": -4.33E-03, "res2":  9.76E-04, 
+    "residm":  1.12E-05, "diffor": undef, 
 }
 etotal    : -6.096627968995667E+002
 entropy   :  0.000000000000000E+000
 fermie    :  5.083727449683324E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [-3.892447827722072E-003,  3.457880872241378E-012,  1.719177976775174E-012, ]
 - [ 3.457880872241378E-012, -3.892447661174923E-003, -1.314314422871320E-011, ]
 - [ 1.719177976775174E-012, -1.314314422871320E-011, -3.892447845000501E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa:  1.145197481264048E+002
+cartesian_forces:
 - [-1.514413860036495E-007, -1.641999222868911E-008, -8.427616666456083E-008, ]
 - [-1.012291437789470E-007,  3.978326073774793E-009, -7.833751734360637E-009, ]
 - [ 1.501508199702957E-007, -2.000734309802117E-008,  2.485143694833187E-008, ]
@@ -3506,6 +3512,7 @@ cartesian_forces: !CartForces
 - [ 1.893800793275769E-007,  3.072192764558384E-008,  8.152881268846192E-008, ]
 - [ 1.613799379065360E-008, -1.463579077703007E-008,  1.262948886136779E-007, ]
 - [-1.137830502249946E-007,  4.468774569842915E-008, -1.650170326168395E-008, ]
+force_length_stats: {"min":  2.337240966201351E-008, "max":  4.131026003073240E-007, "mean":  1.643189782579564E-007, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -5272,6 +5279,7 @@ cartesian_forces: !CartForces
    Integrated=    7.6800E+02
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.09710931756431E+02
 hartree             :  3.05044557495195E+00
@@ -6904,10 +6912,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=        328.6  wall=        329.0
+- Proc.   0 individual time (sec): cpu=        327.9  wall=        328.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       3286.3  wall=       3289.7
++Overall time at end (sec) : cpu=       3278.7  wall=       3281.8

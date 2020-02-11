@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 01h55 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h15 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t35/t35.in
 - output file    -> t35.out
@@ -422,6 +422,7 @@ TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
   diff=  1.284E-05 exceeds postoldfe=  1.000E-06
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        4
 nsppol    :        1
@@ -429,25 +430,20 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.200000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg":  1.500000000000000E+001, }
+lattice_lengths: [   7.65339,    7.65339,    7.65339, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   8.0, "pawecutdg":  15.0, }
 convergence: {
-    "deltae":  1.639577362766431E-012, "res2":  2.376970697016530E-011, 
-    "residm":  8.455165941097055E-006, "diffor":  0.000000000000000E+000, 
+    "deltae":  1.64E-12, "res2":  2.38E-11, 
+    "residm":  8.46E-06, "diffor":  0.00E+00, 
 }
 etotal    : -8.613332284535067E+000
 entropy   :  0.000000000000000E+000
 fermie    : -1.598648710475331E-001
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {"min": null, "max": null, "mean": null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -582,6 +578,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.47812486626173E+00
 hartree             :  1.30978374939818E-02
@@ -600,6 +597,7 @@ total_energy_eV     : -2.34380443169756E+02
 
 
 --- !EnergyTermsDC
+iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  1.072656740446162E+000
 Ewald energy        : -1.078313117399870E+001
@@ -962,10 +960,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         32.4  wall=         32.5
+- Proc.   0 individual time (sec): cpu=         32.8  wall=         32.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         32.4  wall=         32.5
++Overall time at end (sec) : cpu=         32.8  wall=         32.9

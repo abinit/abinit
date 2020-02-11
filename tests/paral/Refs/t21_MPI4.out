@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 02h26 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h55 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t21_MPI4/t21.in
 - output file    -> t21_MPI4.out
@@ -1774,6 +1774,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -1781,23 +1782,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.136868377216160E-013, "res2":  3.748820678591038E-012, 
-    "residm":  4.867170475036886E-016, "diffor": undef, 
+    "deltae": -1.14E-13, "res2":  3.75E-12, 
+    "residm":  4.87E-16, "diffor": undef, 
 }
 etotal    : -7.258584833328593E+000
 entropy   :  0.000000000000000E+000
 fermie    :  2.927683987482559E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [-1.279645183031021E-003, -2.720915054365161E-004, -2.720915054365161E-004, ]
 - [-2.720915054365161E-004, -1.279645183031021E-003, -2.720915054365172E-004, ]
 - [-2.720915054365161E-004, -2.720915054365172E-004, -1.279645183031021E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa:  3.764845475421200E+001
+cartesian_forces:
 - [-1.083364421365603E-001, -1.083364421365602E-001, -1.083364421365602E-001, ]
 - [ 1.083364421365603E-001,  1.083364421365602E-001,  1.083364421365602E-001, ]
+force_length_stats: {"min":  1.876442220917681E-001, "max":  1.876442220917681E-001, "mean":  1.876442220917681E-001, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1845,6 +1848,7 @@ cartesian_forces: !CartForces
   13.55483   14.54558   14.54558   16.53844
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.06784172385295E+00
 hartree             :  8.43091006650371E-01
@@ -1918,6 +1922,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 2, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -1925,23 +1930,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.136868377216160E-013, "res2":  3.748820678591038E-012, 
-    "residm":  4.867170475036886E-016, "diffor": undef, 
+    "deltae": -1.14E-13, "res2":  3.75E-12, 
+    "residm":  4.87E-16, "diffor": undef, 
 }
 etotal    : -7.258584833328593E+000
 entropy   :  0.000000000000000E+000
 fermie    :  3.010071913069894E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [-1.279645183031021E-003, -2.720915054365161E-004, -2.720915054365161E-004, ]
 - [-2.720915054365161E-004, -1.279645183031021E-003, -2.720915054365172E-004, ]
 - [-2.720915054365161E-004, -2.720915054365172E-004, -1.279645183031021E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa:  3.764845475421200E+001
+cartesian_forces:
 - [-1.083364421365603E-001, -1.083364421365602E-001, -1.083364421365602E-001, ]
 - [ 1.083364421365603E-001,  1.083364421365602E-001,  1.083364421365602E-001, ]
+force_length_stats: {"min":  1.876442220917681E-001, "max":  1.876442220917681E-001, "mean":  1.876442220917681E-001, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1992,6 +1999,7 @@ cartesian_forces: !CartForces
   13.55483   14.54558   14.54558   16.53844
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.06784172385295E+00
 hartree             :  8.43091006650371E-01
@@ -2067,6 +2075,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 3, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -2074,23 +2083,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -3.552713678800501E-014, "res2":  1.095028457215264E-012, 
-    "residm":  3.516530057238013E-008, "diffor": undef, 
+    "deltae": -3.55E-14, "res2":  1.10E-12, 
+    "residm":  3.52E-08, "diffor": undef, 
 }
 etotal    : -7.899419014282333E+000
 entropy   :  0.000000000000000E+000
 fermie    :  2.245813887383499E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 2.332560683736317E-005, -2.515144327356017E-004, -2.515144327356017E-004, ]
 - [-2.515144327356017E-004,  2.332560683736328E-005, -2.515144327356015E-004, ]
 - [-2.515144327356017E-004, -2.515144327356015E-004,  2.332560683736333E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -6.862629307531417E-001
+cartesian_forces:
 - [-5.851647815594729E-002, -5.851647815594729E-002, -5.851647815594731E-002, ]
 - [ 5.851647815594729E-002,  5.851647815594729E-002,  5.851647815594731E-002, ]
+force_length_stats: {"min":  1.013535132460951E-001, "max":  1.013535132460951E-001, "mean":  1.013535132460951E-001, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2142,6 +2153,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 3, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.06725042820958E+00
 hartree             :  5.78444795082999E-01
@@ -2215,6 +2227,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 4, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -2222,23 +2235,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -3.552713678800501E-014, "res2":  1.095028457215264E-012, 
-    "residm":  3.516530057238013E-008, "diffor": undef, 
+    "deltae": -3.55E-14, "res2":  1.10E-12, 
+    "residm":  3.52E-08, "diffor": undef, 
 }
 etotal    : -7.899419014282333E+000
 entropy   :  0.000000000000000E+000
 fermie    :  2.363521562271824E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 2.332560683736317E-005, -2.515144327356017E-004, -2.515144327356017E-004, ]
 - [-2.515144327356017E-004,  2.332560683736328E-005, -2.515144327356015E-004, ]
 - [-2.515144327356017E-004, -2.515144327356015E-004,  2.332560683736333E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -6.862629307531417E-001
+cartesian_forces:
 - [-5.851647815594729E-002, -5.851647815594729E-002, -5.851647815594731E-002, ]
 - [ 5.851647815594729E-002,  5.851647815594729E-002,  5.851647815594731E-002, ]
+force_length_stats: {"min":  1.013535132460951E-001, "max":  1.013535132460951E-001, "mean":  1.013535132460951E-001, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2293,6 +2308,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 4, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.06725042820958E+00
 hartree             :  5.78444795082999E-01
@@ -2375,6 +2391,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 5, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -2382,23 +2399,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -5.716316309190006E-012, "res2":  5.681261995955050E-010, 
-    "residm":  1.124075137981874E-014, "diffor":  1.736378124339577E-007, 
+    "deltae": -5.72E-12, "res2":  5.68E-10, 
+    "residm":  1.12E-14, "diffor":  1.74E-07, 
 }
 etotal    : -7.258584833328479E+000
 entropy   :  0.000000000000000E+000
 fermie    :  2.927683971429023E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [-1.279645748962463E-003, -2.720908108451268E-004, -2.720908108451269E-004, ]
 - [-2.720908108451268E-004, -1.279645748962463E-003, -2.720908108451268E-004, ]
 - [-2.720908108451269E-004, -2.720908108451268E-004, -1.279645748962464E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa:  3.764847140448709E+001
+cartesian_forces:
 - [-1.083364650476278E-001, -1.083364650476278E-001, -1.083364650476278E-001, ]
 - [ 1.083364650476278E-001,  1.083364650476278E-001,  1.083364650476278E-001, ]
+force_length_stats: {"min":  1.876442617749011E-001, "max":  1.876442617749011E-001, "mean":  1.876442617749011E-001, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2447,6 +2466,7 @@ cartesian_forces: !CartForces
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 5, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -2454,23 +2474,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -2.096101070492296E-013, "res2":  2.515249155768012E-012, 
-    "residm":  5.360897289491295E-017, "diffor":  1.139356415463810E-008, 
+    "deltae": -2.10E-13, "res2":  2.52E-12, 
+    "residm":  5.36E-17, "diffor":  1.14E-08, 
 }
 etotal    : -7.301119074480905E+000
 entropy   :  0.000000000000000E+000
 fermie    :  2.697693795168190E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [-1.130464899659438E-003, -6.164367835654816E-005, -6.164367835654851E-005, ]
 - [-6.164367835654816E-005, -1.130464899659438E-003, -6.164367835654847E-005, ]
 - [-6.164367835654851E-005, -6.164367835654847E-005, -1.130464899659438E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa:  3.325942002551299E+001
+cartesian_forces:
 - [-2.742663339363308E-002, -2.742663339363308E-002, -2.742663339363310E-002, ]
 - [ 2.742663339363308E-002,  2.742663339363308E-002,  2.742663339363310E-002, ]
+force_length_stats: {"min":  4.750432251833773E-002, "max":  4.750432251833773E-002, "mean":  4.750432251833773E-002, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2522,6 +2544,7 @@ cartesian_forces: !CartForces
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 5, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -2529,23 +2552,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.660893644839234E-013, "res2":  5.117947959951263E-012, 
-    "residm":  8.129730082731939E-016, "diffor":  7.283257513366823E-009, 
+    "deltae": -1.66E-13, "res2":  5.12E-12, 
+    "residm":  8.13E-16, "diffor":  7.28E-09, 
 }
 etotal    : -7.304905828058300E+000
 entropy   :  0.000000000000000E+000
 fermie    :  2.606532329092607E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [-1.118093438648407E-003,  1.983248157911332E-006,  1.983248157911681E-006, ]
 - [ 1.983248157911332E-006, -1.118093438648406E-003,  1.983248157911704E-006, ]
 - [ 1.983248157911681E-006,  1.983248157911704E-006, -1.118093438648407E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa:  3.289543913745612E+001
+cartesian_forces:
 - [ 9.106778786914560E-004,  9.106778786914561E-004,  9.106778786914559E-004, ]
 - [-9.106778786914560E-004, -9.106778786914561E-004, -9.106778786914559E-004, ]
+force_length_stats: {"min":  1.577340355222648E-003, "max":  1.577340355222648E-003, "mean":  1.577340355222648E-003, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2594,6 +2619,7 @@ cartesian_forces: !CartForces
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 5, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -2601,23 +2627,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -3.884892407768348E-012, "res2":  1.009515277713356E-009, 
-    "residm":  7.523652582617778E-016, "diffor":  6.024106007841381E-008, 
+    "deltae": -3.88E-12, "res2":  1.01E-09, 
+    "residm":  7.52E-16, "diffor":  6.02E-08, 
 }
 etotal    : -7.304910421722051E+000
 entropy   :  0.000000000000000E+000
 fermie    :  2.599650655129854E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [-1.118081195974550E-003, -3.292265705286220E-009, -3.292265705178911E-009, ]
 - [-3.292265705286220E-009, -1.118081195974549E-003, -3.292265704787591E-009, ]
 - [-3.292265705178911E-009, -3.292265704787591E-009, -1.118081195974549E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa:  3.289507894561631E+001
+cartesian_forces:
 - [-1.608619108618713E-006, -1.608619108618714E-006, -1.608619108618713E-006, ]
 - [ 1.608619108618713E-006,  1.608619108618714E-006,  1.608619108618713E-006, ]
+force_length_stats: {"min":  2.786210026153770E-006, "max":  2.786210026153770E-006, "mean":  2.786210026153770E-006, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2689,6 +2717,7 @@ cartesian_forces: !CartForces
   13.72279   14.38942   14.38942   17.25034
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 5, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.03530259074679E+00
 hartree             :  8.42601639634120E-01
@@ -2772,6 +2801,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 6, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -2779,23 +2809,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -5.716316309190006E-012, "res2":  5.681261995955050E-010, 
-    "residm":  1.124075137981874E-014, "diffor":  1.736378124339577E-007, 
+    "deltae": -5.72E-12, "res2":  5.68E-10, 
+    "residm":  1.12E-14, "diffor":  1.74E-07, 
 }
 etotal    : -7.258584833328479E+000
 entropy   :  0.000000000000000E+000
 fermie    :  3.010071474158402E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [-1.279645748962463E-003, -2.720908108451268E-004, -2.720908108451269E-004, ]
 - [-2.720908108451268E-004, -1.279645748962463E-003, -2.720908108451268E-004, ]
 - [-2.720908108451269E-004, -2.720908108451268E-004, -1.279645748962464E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa:  3.764847140448709E+001
+cartesian_forces:
 - [-1.083364650476278E-001, -1.083364650476278E-001, -1.083364650476278E-001, ]
 - [ 1.083364650476278E-001,  1.083364650476278E-001,  1.083364650476278E-001, ]
+force_length_stats: {"min":  1.876442617749011E-001, "max":  1.876442617749011E-001, "mean":  1.876442617749011E-001, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2844,6 +2876,7 @@ cartesian_forces: !CartForces
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 6, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -2851,23 +2884,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -2.096101070492296E-013, "res2":  2.515249155768012E-012, 
-    "residm":  5.360897289491295E-017, "diffor":  1.139356415463810E-008, 
+    "deltae": -2.10E-13, "res2":  2.52E-12, 
+    "residm":  5.36E-17, "diffor":  1.14E-08, 
 }
 etotal    : -7.301119074480905E+000
 entropy   :  0.000000000000000E+000
 fermie    :  3.248666108231441E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [-1.130464899659438E-003, -6.164367835654816E-005, -6.164367835654851E-005, ]
 - [-6.164367835654816E-005, -1.130464899659438E-003, -6.164367835654847E-005, ]
 - [-6.164367835654851E-005, -6.164367835654847E-005, -1.130464899659438E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa:  3.325942002551299E+001
+cartesian_forces:
 - [-2.742663339363308E-002, -2.742663339363308E-002, -2.742663339363310E-002, ]
 - [ 2.742663339363308E-002,  2.742663339363308E-002,  2.742663339363310E-002, ]
+force_length_stats: {"min":  4.750432251833773E-002, "max":  4.750432251833773E-002, "mean":  4.750432251833773E-002, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2919,6 +2954,7 @@ cartesian_forces: !CartForces
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 6, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -2926,23 +2962,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.660893644839234E-013, "res2":  5.117947959951263E-012, 
-    "residm":  8.129730082731939E-016, "diffor":  7.283257513366823E-009, 
+    "deltae": -1.66E-13, "res2":  5.12E-12, 
+    "residm":  8.13E-16, "diffor":  7.28E-09, 
 }
 etotal    : -7.304905828058300E+000
 entropy   :  0.000000000000000E+000
 fermie    :  3.294591331087717E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [-1.118093438648407E-003,  1.983248157911332E-006,  1.983248157911681E-006, ]
 - [ 1.983248157911332E-006, -1.118093438648406E-003,  1.983248157911704E-006, ]
 - [ 1.983248157911681E-006,  1.983248157911704E-006, -1.118093438648407E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa:  3.289543913745612E+001
+cartesian_forces:
 - [ 9.106778786914560E-004,  9.106778786914561E-004,  9.106778786914559E-004, ]
 - [-9.106778786914560E-004, -9.106778786914561E-004, -9.106778786914559E-004, ]
+force_length_stats: {"min":  1.577340355222648E-003, "max":  1.577340355222648E-003, "mean":  1.577340355222648E-003, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2991,6 +3029,7 @@ cartesian_forces: !CartForces
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 6, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -2998,23 +3037,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -3.884892407768348E-012, "res2":  1.009515277713356E-009, 
-    "residm":  7.523652582617778E-016, "diffor":  6.024106007841381E-008, 
+    "deltae": -3.88E-12, "res2":  1.01E-09, 
+    "residm":  7.52E-16, "diffor":  6.02E-08, 
 }
 etotal    : -7.304910421722051E+000
 entropy   :  0.000000000000000E+000
 fermie    :  3.293194949628380E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [-1.118081195974550E-003, -3.292265705286220E-009, -3.292265705178911E-009, ]
 - [-3.292265705286220E-009, -1.118081195974549E-003, -3.292265704787591E-009, ]
 - [-3.292265705178911E-009, -3.292265704787591E-009, -1.118081195974549E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa:  3.289507894561631E+001
+cartesian_forces:
 - [-1.608619108618713E-006, -1.608619108618714E-006, -1.608619108618713E-006, ]
 - [ 1.608619108618713E-006,  1.608619108618714E-006,  1.608619108618713E-006, ]
+force_length_stats: {"min":  2.786210026153770E-006, "max":  2.786210026153770E-006, "mean":  2.786210026153770E-006, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3089,6 +3130,7 @@ cartesian_forces: !CartForces
   13.72279   14.38942   14.38942   17.25034
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 6, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.03530259074679E+00
 hartree             :  8.42601639634120E-01
@@ -3176,6 +3218,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 7, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -3183,23 +3226,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  2.575717417130363E-014, "res2":  4.236740489398854E-015, 
-    "residm":  3.973026181099768E-008, "diffor":  3.854318877949403E-010, 
+    "deltae":  2.58E-14, "res2":  4.24E-15, 
+    "residm":  3.97E-08, "diffor":  3.85E-10, 
 }
 etotal    : -7.899419014282307E+000
 entropy   :  0.000000000000000E+000
 fermie    :  2.245813895685569E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 2.332563113906255E-005, -2.515144584452619E-004, -2.515144584452618E-004, ]
 - [-2.515144584452619E-004,  2.332563113906265E-005, -2.515144584452617E-004, ]
 - [-2.515144584452618E-004, -2.515144584452617E-004,  2.332563113906228E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -6.862636457336974E-001
+cartesian_forces:
 - [-5.851647777051541E-002, -5.851647777051543E-002, -5.851647777051542E-002, ]
 - [ 5.851647777051541E-002,  5.851647777051543E-002,  5.851647777051542E-002, ]
+force_length_stats: {"min":  1.013535125785075E-001, "max":  1.013535125785075E-001, "mean":  1.013535125785075E-001, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3249,6 +3294,7 @@ cartesian_forces: !CartForces
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 7, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -3256,23 +3302,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  1.154631945610163E-014, "res2":  1.253352069953036E-014, 
-    "residm":  1.623299160429001E-009, "diffor":  3.849415092238573E-010, 
+    "deltae":  1.15E-14, "res2":  1.25E-14, 
+    "residm":  1.62E-09, "diffor":  3.85E-10, 
 }
 etotal    : -7.915051256640472E+000
 entropy   :  0.000000000000000E+000
 fermie    :  2.150215964785661E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 1.065205471315165E-004, -1.296866125971392E-004, -1.296866125971392E-004, ]
 - [-1.296866125971392E-004,  1.065205471315162E-004, -1.296866125971391E-004, ]
 - [-1.296866125971392E-004, -1.296866125971391E-004,  1.065205471315162E-004, ]
-cartesian_forces: !CartForces
+pressure_GPa: -3.133942167918575E+000
+cartesian_forces:
 - [-3.164113908058271E-002, -3.164113908058271E-002, -3.164113908058271E-002, ]
 - [ 3.164113908058271E-002,  3.164113908058271E-002,  3.164113908058271E-002, ]
+force_length_stats: {"min":  5.480406049692244E-002, "max":  5.480406049692244E-002, "mean":  5.480406049692244E-002, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3325,6 +3373,7 @@ cartesian_forces: !CartForces
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 7, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -3332,23 +3381,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  0.000000000000000E+000, "res2":  1.456732895754212E-012, 
-    "residm":  6.655660813579433E-007, "diffor":  7.833532815308426E-009, 
+    "deltae":  0.00E+00, "res2":  1.46E-12, 
+    "residm":  6.66E-07, "diffor":  7.83E-09, 
 }
 etotal    : -7.923552830475755E+000
 entropy   :  0.000000000000000E+000
 fermie    :  1.987016639713523E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 1.488253088500744E-004,  1.840511373210220E-006,  1.840511373210209E-006, ]
 - [ 1.840511373210220E-006,  1.488253088500744E-004,  1.840511373210165E-006, ]
 - [ 1.840511373210209E-006,  1.840511373210165E-006,  1.488253088500744E-004, ]
-cartesian_forces: !CartForces
+pressure_GPa: -4.378591019466858E+000
+cartesian_forces:
 - [ 4.759183198547783E-004,  4.759183198547783E-004,  4.759183198547781E-004, ]
 - [-4.759183198547783E-004, -4.759183198547783E-004, -4.759183198547781E-004, ]
+force_length_stats: {"min":  8.243147102412918E-004, "max":  8.243147102412918E-004, "mean":  8.243147102412918E-004, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3399,6 +3450,7 @@ cartesian_forces: !CartForces
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 7, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -3406,23 +3458,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -2.131628207280301E-014, "res2":  1.248728861183729E-012, 
-    "residm":  4.098507902092652E-004, "diffor":  3.909778501464206E-009, 
+    "deltae": -2.13E-14, "res2":  1.25E-12, 
+    "residm":  4.10E-04, "diffor":  3.91E-09, 
 }
 etotal    : -7.923555518224100E+000
 entropy   :  0.000000000000000E+000
 fermie    :  1.982620083526813E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 1.488376039611020E-004,  7.382089658599632E-010,  7.382089659758529E-010, ]
 - [ 7.382089658599632E-010,  1.488376039611020E-004,  7.382089659857963E-010, ]
 - [ 7.382089659758529E-010,  7.382089659857963E-010,  1.488376039611020E-004, ]
-cartesian_forces: !CartForces
+pressure_GPa: -4.378952754061229E+000
+cartesian_forces:
 - [ 1.584649831236408E-007,  1.584649831236409E-007,  1.584649831236408E-007, ]
 - [-1.584649831236408E-007, -1.584649831236409E-007, -1.584649831236408E-007, ]
+force_length_stats: {"min":  2.744694019906906E-007, "max":  2.744694019906906E-007, "mean":  2.744694019906906E-007, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3498,6 +3552,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 7, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.04405880673539E+00
 hartree             :  5.69182400504054E-01
@@ -3583,6 +3638,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 8, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -3590,23 +3646,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  2.575717417130363E-014, "res2":  4.236740489398854E-015, 
-    "residm":  3.973026181099768E-008, "diffor":  3.854318877949403E-010, 
+    "deltae":  2.58E-14, "res2":  4.24E-15, 
+    "residm":  3.97E-08, "diffor":  3.85E-10, 
 }
 etotal    : -7.899419014282307E+000
 entropy   :  0.000000000000000E+000
 fermie    :  2.363517414818482E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 2.332563113906255E-005, -2.515144584452619E-004, -2.515144584452618E-004, ]
 - [-2.515144584452619E-004,  2.332563113906265E-005, -2.515144584452617E-004, ]
 - [-2.515144584452618E-004, -2.515144584452617E-004,  2.332563113906228E-005, ]
-cartesian_forces: !CartForces
+pressure_GPa: -6.862636457336974E-001
+cartesian_forces:
 - [-5.851647777051541E-002, -5.851647777051543E-002, -5.851647777051542E-002, ]
 - [ 5.851647777051541E-002,  5.851647777051543E-002,  5.851647777051542E-002, ]
+force_length_stats: {"min":  1.013535125785075E-001, "max":  1.013535125785075E-001, "mean":  1.013535125785075E-001, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3656,6 +3714,7 @@ cartesian_forces: !CartForces
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 8, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -3663,23 +3722,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  1.154631945610163E-014, "res2":  1.253352069953036E-014, 
-    "residm":  1.623299160429001E-009, "diffor":  3.849415092238573E-010, 
+    "deltae":  1.15E-14, "res2":  1.25E-14, 
+    "residm":  1.62E-09, "diffor":  3.85E-10, 
 }
 etotal    : -7.915051256640472E+000
 entropy   :  0.000000000000000E+000
 fermie    :  2.503767928066015E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 1.065205471315165E-004, -1.296866125971392E-004, -1.296866125971392E-004, ]
 - [-1.296866125971392E-004,  1.065205471315162E-004, -1.296866125971391E-004, ]
 - [-1.296866125971392E-004, -1.296866125971391E-004,  1.065205471315162E-004, ]
-cartesian_forces: !CartForces
+pressure_GPa: -3.133942167918575E+000
+cartesian_forces:
 - [-3.164113908058271E-002, -3.164113908058271E-002, -3.164113908058271E-002, ]
 - [ 3.164113908058271E-002,  3.164113908058271E-002,  3.164113908058271E-002, ]
+force_length_stats: {"min":  5.480406049692244E-002, "max":  5.480406049692244E-002, "mean":  5.480406049692244E-002, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3732,6 +3793,7 @@ cartesian_forces: !CartForces
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 8, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -3739,23 +3801,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  0.000000000000000E+000, "res2":  1.456732895754212E-012, 
-    "residm":  6.655660813579433E-007, "diffor":  7.833532815308426E-009, 
+    "deltae":  0.00E+00, "res2":  1.46E-12, 
+    "residm":  6.66E-07, "diffor":  7.83E-09, 
 }
 etotal    : -7.923552830475755E+000
 entropy   :  0.000000000000000E+000
 fermie    :  2.549981901912266E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 1.488253088500744E-004,  1.840511373210220E-006,  1.840511373210209E-006, ]
 - [ 1.840511373210220E-006,  1.488253088500744E-004,  1.840511373210165E-006, ]
 - [ 1.840511373210209E-006,  1.840511373210165E-006,  1.488253088500744E-004, ]
-cartesian_forces: !CartForces
+pressure_GPa: -4.378591019466858E+000
+cartesian_forces:
 - [ 4.759183198547783E-004,  4.759183198547783E-004,  4.759183198547781E-004, ]
 - [-4.759183198547783E-004, -4.759183198547783E-004, -4.759183198547781E-004, ]
+force_length_stats: {"min":  8.243147102412918E-004, "max":  8.243147102412918E-004, "mean":  8.243147102412918E-004, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3806,6 +3870,7 @@ cartesian_forces: !CartForces
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 8, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -3813,23 +3878,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -2.131628207280301E-014, "res2":  1.248728861183729E-012, 
-    "residm":  4.098507902092652E-004, "diffor":  3.909778501464206E-009, 
+    "deltae": -2.13E-14, "res2":  1.25E-12, 
+    "residm":  4.10E-04, "diffor":  3.91E-09, 
 }
 etotal    : -7.923555518224100E+000
 entropy   :  0.000000000000000E+000
 fermie    :  2.486560619386376E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 1.488376039611020E-004,  7.382089658599632E-010,  7.382089659758529E-010, ]
 - [ 7.382089658599632E-010,  1.488376039611020E-004,  7.382089659857963E-010, ]
 - [ 7.382089659758529E-010,  7.382089659857963E-010,  1.488376039611020E-004, ]
-cartesian_forces: !CartForces
+pressure_GPa: -4.378952754061229E+000
+cartesian_forces:
 - [ 1.584649831236408E-007,  1.584649831236409E-007,  1.584649831236408E-007, ]
 - [-1.584649831236408E-007, -1.584649831236409E-007, -1.584649831236408E-007, ]
+force_length_stats: {"min":  2.744694019906906E-007, "max":  2.744694019906906E-007, "mean":  2.744694019906906E-007, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3908,6 +3975,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 8, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.04405880673539E+00
 hartree             :  5.69182400504054E-01
@@ -4247,219 +4315,219 @@ P           mkmem8          5
 
  Test the timer : 
   a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
-- CPU time =    1.8598E-06 sec,    Wall time =    1.8600E-06 sec
+- CPU time =    1.9584E-06 sec,    Wall time =    1.9860E-06 sec
 
-- Total cpu        time (s,m,h):         62.4        1.04      0.017
-- Total wall clock time (s,m,h):         62.9        1.05      0.017
+- Total cpu        time (s,m,h):         64.7        1.08      0.018
+- Total wall clock time (s,m,h):         68.3        1.14      0.019
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           15.4, wall_time =           15.8
+- cpu_time =           15.6, wall_time =           17.1
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- vtowfk(ssdiag)                11.898  19.1     11.924  19.0             -1      -1.00        1.00       1.00
-- lobpcgwf2                     11.894  19.1     11.920  19.0            552      -1.00        1.00       1.00
-- fourwf%(pot)                   7.926  12.7      7.942  12.6          16560      -1.00        1.00       1.00
-- nonlop(apply)                  0.638   1.0      0.648   1.0          16560      -1.00        0.98       0.98
-- ewald                          0.568   0.9      0.571   0.9             20      -1.00        1.00       1.00
-- invars2                        0.535   0.9      0.536   0.9              8      -1.00        1.00       1.00
-- stress                         0.388   0.6      0.389   0.6             20      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.376   0.6      0.377   0.6             20      -1.00        1.00       1.00
-- pspini                         0.323   0.5      0.323   0.5              8      -1.00        1.00       1.00
-- fourdp                         0.288   0.5      0.289   0.5            820      -1.00        1.00       1.00
-- vtowfk(contrib)                0.216   0.3      0.216   0.3            432      -1.00        1.00       1.00
-- mkrho/=                        0.140   0.2      0.142   0.2            136      -1.00        0.99       0.99
-- getghc-other                   0.129   0.2      0.119   0.2             -1      -1.00        1.08       1.08
-- timing timab                   0.107   0.2      0.107   0.2             11      -1.00        1.00       1.00
-- abinit(2)                      0.101   0.2      0.104   0.2              1      -1.00        0.98       0.98
+- vtowfk(ssdiag)                12.042  18.6     12.077  17.7             -1      -1.00        1.00       1.00
+- lobpcgwf2                     12.038  18.6     12.073  17.7            552      -1.00        1.00       1.00
+- fourwf%(pot)                   7.990  12.4      8.010  11.7          16560      -1.00        1.00       1.00
+- nonlop(apply)                  0.631   1.0      0.636   0.9          16560      -1.00        0.99       0.99
+- ewald                          0.592   0.9      0.595   0.9             20      -1.00        0.99       0.99
+- invars2                        0.534   0.8      0.536   0.8              8      -1.00        1.00       1.00
+- stress                         0.381   0.6      0.382   0.6             20      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.369   0.6      0.370   0.5             20      -1.00        1.00       1.00
+- pspini                         0.327   0.5      0.328   0.5              8      -1.00        1.00       1.00
+- fourdp                         0.290   0.4      0.291   0.4            820      -1.00        1.00       1.00
+- vtowfk(contrib)                0.217   0.3      0.217   0.3            432      -1.00        1.00       1.00
+- mkrho/=                        0.142   0.2      0.144   0.2            136      -1.00        0.98       0.98
+- timing timab                   0.113   0.2      0.115   0.2             11      -1.00        0.99       0.99
+- getghc-other                   0.110   0.2      0.106   0.2             -1      -1.00        1.03       1.03
+- abinit(2)                      0.096   0.1      0.099   0.1              1      -1.00        0.97       0.97
 - forces                         0.082   0.1      0.083   0.1            108      -1.00        0.99       0.99
 - nonlop(forces)                 0.075   0.1      0.076   0.1           3312      -1.00        0.99       0.99
-- symrhg(no FFT)                 0.073   0.1      0.073   0.1            136      -1.00        1.00       1.00
-- xc:pot/=fourdp                 0.070   0.1      0.070   0.1            156      -1.00        1.00       1.00
-- setsym                         0.011   0.0      0.011   0.0              8      -1.00        1.00       1.00
+- symrhg(no FFT)                 0.072   0.1      0.072   0.1            136      -1.00        1.00       1.00
+- xc:pot/=fourdp                 0.071   0.1      0.071   0.1            156      -1.00        1.00       1.00
+- setsym                         0.012   0.0      0.012   0.0              8      -1.00        0.98       0.98
 - scfcv-scprqt                   0.007   0.0      0.009   0.0            136      -1.00        0.84       0.84
-- prep_bandfft_tabs              0.003   0.0      0.003   0.0            120      -1.00        0.99       0.99
+- prep_bandfft_tabs              0.005   0.0      0.005   0.0            120      -1.00        0.99       0.99
 - newkpt(excl. rwwf   )          0.001   0.0      0.002   0.0             -1      -1.00        0.94       0.94
 - vtowfk  (1)                    0.001   0.0      0.001   0.0            432      -1.00        1.00       1.00
 - kpgsph                         0.001   0.0      0.001   0.0             48      -1.00        0.87       0.87
-- inwffil(excl. calls)           0.000   0.0      0.000   0.0              8      -1.00        1.04       1.04
+- inwffil(excl. calls)           0.000   0.0      0.000   0.0              8      -1.00        0.99       0.99
 - others (108)                   0.000   0.0      0.000   0.0             -1      -1.00        0.00       0.00
 -<END_TIMER>
 -
-- subtotal                      35.853  57.4     35.935  57.1                                  1.00       1.00
+- subtotal                      36.199  56.0     36.310  53.2                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          62.4, wall_time =          62.9
+- cpu_time =          64.7, wall_time =          68.3
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- vtowfk(ssdiag)                47.626  76.3     47.718  75.9             -4      -1.00        1.00       1.00
-- lobpcgwf2                     47.610  76.3     47.702  75.8           2208      -1.00        1.00       1.00
-- fourwf%(pot)                  31.716  50.8     31.782  50.5          66240      -1.00        1.00       1.00
-- nonlop(apply)                  2.530   4.1      2.562   4.1          66240      -1.00        0.99       0.99
-- ewald                          2.268   3.6      2.275   3.6             80      -1.00        1.00       1.00
-- invars2                        2.130   3.4      2.134   3.4             32      -1.00        1.00       1.00
-- stress                         1.537   2.5      1.540   2.4             80      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             1.491   2.4      1.493   2.4             80      -1.00        1.00       1.00
-- pspini                         1.296   2.1      1.296   2.1             32      -1.00        1.00       1.00
-- fourdp                         1.230   2.0      1.233   2.0           3280      -1.00        1.00       1.00
-- vtowfk(contrib)                0.863   1.4      0.866   1.4           1728      -1.00        1.00       1.00
-- mkrho/=                        0.562   0.9      0.565   0.9            544      -1.00        0.99       0.99
-- getghc-other                   0.496   0.8      0.467   0.7             -4      -1.00        1.06       1.06
-- timing timab                   0.431   0.7      0.431   0.7             44      -1.00        1.00       1.00
-- abinit(2)                      0.390   0.6      0.398   0.6              4      -1.00        0.98       0.98
-- prep_bandfft_tabs              0.349   0.6      0.349   0.6            480      -1.00        1.00       1.00
-- forces                         0.328   0.5      0.329   0.5            432      -1.00        1.00       1.00
-- nonlop(forces)                 0.299   0.5      0.301   0.5          13248      -1.00        0.99       0.99
-- symrhg(no FFT)                 0.290   0.5      0.290   0.5            544      -1.00        1.00       1.00
-- xc:pot/=fourdp                 0.278   0.4      0.278   0.4            624      -1.00        1.00       1.00
-- scfcv-scprqt                   0.054   0.1      0.056   0.1            544      -1.00        0.97       0.97
-- setsym                         0.045   0.1      0.045   0.1             32      -1.00        1.00       1.00
-- kpgsph                         0.007   0.0      0.007   0.0            192      -1.00        0.98       0.98
+- vtowfk(ssdiag)                48.207  74.6     48.331  70.8             -4      -1.00        1.00       1.00
+- lobpcgwf2                     48.192  74.5     48.315  70.8           2208      -1.00        1.00       1.00
+- fourwf%(pot)                  31.824  49.2     31.907  46.7          66240      -1.00        1.00       1.00
+- nonlop(apply)                  2.498   3.9      2.520   3.7          66240      -1.00        0.99       0.99
+- ewald                          2.303   3.6      2.311   3.4             80      -1.00        1.00       1.00
+- invars2                        2.113   3.3      2.121   3.1             32      -1.00        1.00       1.00
+- stress                         1.526   2.4      1.529   2.2             80      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             1.481   2.3      1.484   2.2             80      -1.00        1.00       1.00
+- pspini                         1.304   2.0      1.305   1.9             32      -1.00        1.00       1.00
+- fourdp                         1.303   2.0      1.307   1.9           3280      -1.00        1.00       1.00
+- vtowfk(contrib)                0.868   1.3      0.869   1.3           1728      -1.00        1.00       1.00
+- mkrho/=                        0.566   0.9      0.573   0.8            544      -1.00        0.99       0.99
+- prep_bandfft_tabs              0.550   0.9      0.551   0.8            480      -1.00        1.00       1.00
+- getghc-other                   0.498   0.8      0.480   0.7             -4      -1.00        1.04       1.04
+- timing timab                   0.443   0.7      0.445   0.7             44      -1.00        1.00       1.00
+- abinit(2)                      0.387   0.6      0.400   0.6              4      -1.00        0.97       0.97
+- forces                         0.327   0.5      0.327   0.5            432      -1.00        1.00       1.00
+- nonlop(forces)                 0.296   0.5      0.299   0.4          13248      -1.00        0.99       0.99
+- symrhg(no FFT)                 0.289   0.4      0.290   0.4            544      -1.00        1.00       1.00
+- xc:pot/=fourdp                 0.281   0.4      0.281   0.4            624      -1.00        1.00       1.00
+- scfcv-scprqt                   0.057   0.1      0.058   0.1            544      -1.00        0.97       0.97
+- setsym                         0.046   0.1      0.048   0.1             32      -1.00        0.98       0.98
+- kpgsph                         0.015   0.0      0.015   0.0            192      -1.00        0.99       0.99
 - newkpt(excl. rwwf   )          0.006   0.0      0.006   0.0             -4      -1.00        0.98       0.98
-- vtowfk  (1)                    0.005   0.0      0.005   0.0           1728      -1.00        1.01       1.01
-- inwffil(excl. calls)           0.000   0.0      0.000   0.0             32      -1.00        1.02       1.02
+- vtowfk  (1)                    0.005   0.0      0.005   0.0           1728      -1.00        1.00       1.00
+- inwffil(excl. calls)           0.000   0.0      0.000   0.0             32      -1.00        1.01       1.01
 - others (108)                   0.000   0.0      0.000   0.0             -1      -1.00        0.00       0.00
 -<END_TIMER>
 
-- subtotal                     143.838 230.5    144.128 229.2                                  1.00       1.00
+- subtotal                     145.386 224.9    145.776 213.5                                  1.00       1.00
 
  Partitioning of abinit
-- abinit                        62.413 100.0     62.893 100.0              4                   0.99       0.99
+- abinit                        64.659 100.0     68.276 100.0              4                   0.95       0.95
  
 - abinit(1)                      0.110   0.2      0.112   0.2              4                   0.98       0.98
-- abinit(2)                      0.390   0.6      0.398   0.6              4                   0.98       0.98
-- indefo+macroin+invars2m        2.134   3.4      2.137   3.4              4                   1.00       1.00
-- abinit(4)                      2.839   4.5      2.854   4.5              4                   0.99       0.99
-- abinit(5)                      0.358   0.6      0.362   0.6              4                   0.99       0.99
-- driver                        58.711  94.1     59.136  94.0              4                   0.99       0.99
-- abinit(6)                      0.056   0.1      0.091   0.1              4                   0.62       0.62
-- timing timab                   0.431   0.7      0.431   0.7             44                   1.00       1.00
+- abinit(2)                      0.387   0.6      0.400   0.6              4                   0.97       0.97
+- indefo+macroin+invars2m        2.117   3.3      2.124   3.1              4                   1.00       1.00
+- abinit(4)                      2.818   4.4      2.843   4.2              4                   0.99       0.99
+- abinit(5)                      0.375   0.6      0.379   0.6              4                   0.99       0.99
+- driver                        60.947  94.3     64.522  94.5              4                   0.94       0.94
+- abinit(6)                      0.057   0.1      0.069   0.1              4                   0.83       0.83
+- timing timab                   0.443   0.7      0.445   0.7             44                   1.00       1.00
 
-- subtotal                      62.413 100.0     62.893 100.0                                  0.99       0.99
+- subtotal                      64.659 100.0     68.276 100.0                                  0.95       0.95
 
  Partitioning of driver
-- driver                        58.711  94.1     59.136  94.0              4                   0.99       0.99
+- driver                        60.947  94.3     64.522  94.5              4                   0.94       0.94
  
-- gstateimg                     58.405  93.6     58.829  93.5             32                   0.99       0.99
-- driver(aft. select case)       0.298   0.5      0.299   0.5             32                   1.00       1.00
+- gstateimg                     60.376  93.4     63.949  93.7             32                   0.94       0.94
+- driver(aft. select case)       0.563   0.9      0.565   0.8             32                   1.00       1.00
 
-- subtotal                      58.711  94.1     59.136  94.0                                  0.99       0.99
+- subtotal                      60.947  94.3     64.522  94.5                                  0.94       0.94
 
  Partitioning of gstateimg+gstate
-- gstateimg                     58.405  93.6     58.829  93.5             32                   0.99       0.99
+- gstateimg                     60.376  93.4     63.949  93.7             32                   0.94       0.94
  
-- gstate->kpgsph                 0.081   0.1      0.082   0.1             64                   0.99       0.99
-- gstate(pspini)                 1.296   2.1      1.297   2.1             32                   1.00       1.00
-- gstate  (2)                    0.104   0.2      0.104   0.2             32                   1.00       1.00
-- gstate(...scfcv)              56.458  90.5     56.744  90.2             32                   0.99       0.99
-- gstate  (3)                    0.464   0.7      0.601   1.0             32                   0.77       0.77
+- gstate->kpgsph                 0.105   0.2      0.106   0.2             64                   0.99       0.99
+- gstate(pspini)                 1.304   2.0      1.305   1.9             32                   1.00       1.00
+- gstate  (2)                    0.106   0.2      0.107   0.2             32                   0.99       0.99
+- gstate(...scfcv)              58.335  90.2     59.678  87.4             32                   0.98       0.98
+- gstate  (3)                    0.524   0.8      2.751   4.0             32                   0.19       0.19
 
-- subtotal                      58.404  93.6     58.829  93.5                                  0.99       0.99
+- subtotal                      60.376  93.4     63.949  93.7                                  0.94       0.94
 
  Partitioning of scfcv_core
-- scfcv_core                    56.421  90.4     56.704  90.2             80                   1.00       1.00
+- scfcv_core                    58.297  90.2     59.636  87.3             80                   0.98       0.98
  
-- scfcv_core(iniloop, setv       2.518   4.0      2.526   4.0            544                   1.00       1.00
-- scfcv_core(vtorho(f))         50.528  81.0     50.630  80.5            544                   1.00       1.00
-- scfcv_core(etotfor)            0.319   0.5      0.320   0.5           1088                   1.00       1.00
-- scfcv-scprqt                   0.054   0.1      0.056   0.1            544                   0.97       0.97
-- scfcv_core(rhotov)             0.510   0.8      0.510   0.8            544                   1.00       1.00
-- scfcv_core(mix pot)            0.468   0.8      0.470   0.7            464                   1.00       1.00
-- scfcv_core(afterscfloop)       1.633   2.6      1.637   2.6             80                   1.00       1.00
-- scfcv_core(outscfcv)           0.362   0.6      0.527   0.8             80                   0.69       0.69
+- scfcv_core(iniloop, setv       2.625   4.1      2.635   3.9            544                   1.00       1.00
+- scfcv_core(vtorho(f))         51.321  79.4     51.460  75.4            544                   1.00       1.00
+- scfcv_core(etotfor)            0.317   0.5      0.318   0.5           1088                   1.00       1.00
+- scfcv-scprqt                   0.057   0.1      0.058   0.1            544                   0.97       0.97
+- scfcv_core(rhotov)             0.512   0.8      0.513   0.8            544                   1.00       1.00
+- scfcv_core(mix pot)            0.467   0.7      0.468   0.7            464                   1.00       1.00
+- scfcv_core(afterscfloop)       1.620   2.5      1.623   2.4             80                   1.00       1.00
+- scfcv_core(outscfcv)           1.349   2.1      2.530   3.7             80                   0.53       0.53
 
-- subtotal                      56.421  90.4     56.704  90.2                                  1.00       1.00
+- subtotal                      58.297  90.2     59.636  87.3                                  0.98       0.98
 
  Partitioning of rhotov
-- rhotov                         0.508   0.8      0.509   0.8            544                   1.00       1.00
+- rhotov                         0.510   0.8      0.511   0.7            544                   1.00       1.00
  
 - rhotov(rhotoxc)                0.244   0.4      0.244   0.4            544                   1.00       1.00
-- rhotov(other)                  0.048   0.1      0.048   0.1            544                   1.00       1.00
-- (other)                        0.208   0.3      0.208   0.3             -1                   1.00       1.00
+- rhotov(other)                  0.049   0.1      0.049   0.1            544                   1.00       1.00
+- (other)                        0.208   0.3      0.209   0.3             -1                   1.00       1.00
 
-- subtotal                       0.508   0.8      0.509   0.8                                  1.00       1.00
+- subtotal                       0.510   0.8      0.511   0.7                                  1.00       1.00
 
  Partitioning of vtorho
-- vtorho                        50.526  81.0     50.628  80.5            544                   1.00       1.00
+- vtorho                        51.318  79.4     51.458  75.4            544                   1.00       1.00
  
-- vtorho(bef. kpt  loop)         0.017   0.0      0.017   0.0            544                   0.99       0.99
-- vtorho(bef. vtowfk)            0.364   0.6      0.365   0.6           1728                   1.00       1.00
-- vtowfk                        48.494  77.7     48.589  77.3           1728                   1.00       1.00
-- vtorho(aft. kpt loop)          0.051   0.1      0.052   0.1            544                   0.99       0.99
-- vtorho(newocc)                 0.297   0.5      0.298   0.5            272                   1.00       1.00
-- vtorho(mkrho 1)                0.895   1.4      0.898   1.4            272                   1.00       1.00
-- vtorho(mkrho 2)                0.375   0.6      0.377   0.6            816                   0.99       0.99
-- (other)                        0.016   0.0      0.015   0.0             -1                   1.07       1.07
+- vtorho(bef. kpt  loop)         0.018   0.0      0.018   0.0            544                   0.99       0.99
+- vtorho(bef. vtowfk)            0.565   0.9      0.566   0.8           1728                   1.00       1.00
+- vtowfk                        49.081  75.9     49.204  72.1           1728                   1.00       1.00
+- vtorho(aft. kpt loop)          0.052   0.1      0.054   0.1            544                   0.98       0.98
+- vtorho(newocc)                 0.297   0.5      0.301   0.4            272                   0.99       0.99
+- vtorho(mkrho 1)                0.896   1.4      0.903   1.3            272                   0.99       0.99
+- vtorho(mkrho 2)                0.378   0.6      0.380   0.6            816                   0.99       0.99
+- (other)                        0.016   0.0      0.015   0.0             -1                   1.05       1.05
 
-- subtotal                      50.526  81.0     50.628  80.5                                  1.00       1.00
+- subtotal                      51.318  79.4     51.458  75.4                                  1.00       1.00
 
  Partitioning of vtowfk
-- vtowfk                        48.494  77.7     48.589  77.3           1728                   1.00       1.00
+- vtowfk                        49.081  75.9     49.204  72.1           1728                   1.00       1.00
  
-- vtowfk(2)                     47.623  76.3     47.716  75.9             -4                   1.00       1.00
-- prep_nonlop%vtowfk             0.328   0.5      0.330   0.5           5376                   0.99       0.99
-- prep_fourwf%vtow               0.473   0.8      0.473   0.8           5184                   1.00       1.00
-- vtowfk(3)                      0.062   0.1      0.062   0.1             -4                   0.99       0.99
+- vtowfk(2)                     48.205  74.6     48.328  70.8             -4                   1.00       1.00
+- prep_nonlop%vtowfk             0.325   0.5      0.325   0.5           5376                   1.00       1.00
+- prep_fourwf%vtow               0.478   0.7      0.478   0.7           5184                   1.00       1.00
+- vtowfk(3)                      0.065   0.1      0.065   0.1             -4                   0.99       0.99
 
-- subtotal                      48.494  77.7     48.589  77.3                                  1.00       1.00
+- subtotal                      49.081  75.9     49.204  72.1                                  1.00       1.00
 
  Partitioning of getghc
-- getghc                        34.743  55.7     34.812  55.4          66240                   1.00       1.00
+- getghc                        34.821  53.9     34.907  51.1          66240                   1.00       1.00
  
-- fourwf%getghc                 31.716  50.8     31.782  50.5          66240                   1.00       1.00
-- nonlop%getghc                  2.530   4.1      2.562   4.1          66240                   0.99       0.99
-- getghc-other                   0.496   0.8      0.467   0.7             -4                   1.06       1.06
+- fourwf%getghc                 31.824  49.2     31.907  46.7          66240                   1.00       1.00
+- nonlop%getghc                  2.498   3.9      2.520   3.7          66240                   0.99       0.99
+- getghc-other                   0.498   0.8      0.480   0.7             -4                   1.04       1.04
 
-- subtotal                      34.743  55.7     34.812  55.4                                  1.00       1.00
+- subtotal                      34.821  53.9     34.907  51.1                                  1.00       1.00
 
  Partitioning of fourwf (upwards partitioning)
-- fourwf                        32.596  52.2     32.665  51.9          69696                   1.00       1.00
+- fourwf                        32.710  50.6     32.798  48.0          69696                   1.00       1.00
  
-- fourwf%getghc                 31.716  50.8     31.782  50.5          66240                   1.00       1.00
-- fourwf%prep_four               0.880   1.4      0.882   1.4           3456                   1.00       1.00
+- fourwf%getghc                 31.824  49.2     31.907  46.7          66240                   1.00       1.00
+- fourwf%prep_four               0.886   1.4      0.891   1.3           3456                   0.99       0.99
 
-- subtotal                      32.596  52.2     32.665  51.9                                  1.00       1.00
+- subtotal                      32.710  50.6     32.798  48.0                                  1.00       1.00
 
  Partitioning of prep_getghc
-- prep_getghc                   36.013  57.7     36.082  57.4          66240                   1.00       1.00
+- prep_getghc                   36.179  56.0     36.264  53.1          66240                   1.00       1.00
  
-- prep_getghc(before if)         0.209   0.3      0.209   0.3          66240                   1.00       1.00
-- prep_getghc(alltoall)          0.764   1.2      0.772   1.2         132480                   0.99       0.99
-- prep_getghc(getghc - 1 )      34.934  56.0     34.997  55.6          66240                   1.00       1.00
-- (other)                        0.107   0.2      0.104   0.2             -1                   1.03       1.03
+- prep_getghc(before if)         0.208   0.3      0.209   0.3          66240                   0.99       0.99
+- prep_getghc(alltoall)          0.846   1.3      0.855   1.3         132480                   0.99       0.99
+- prep_getghc(getghc - 1 )      35.016  54.2     35.096  51.4          66240                   1.00       1.00
+- (other)                        0.110   0.2      0.105   0.2             -1                   1.05       1.05
 
-- subtotal                      36.013  57.7     36.082  57.4                                  1.00       1.00
+- subtotal                      36.179  56.0     36.264  53.1                                  1.00       1.00
 
  Partitioning of prep_fourwf
-- prep_fourwf                    0.956   1.5      0.957   1.5          10368                   1.00       1.00
+- prep_fourwf                    0.964   1.5      0.969   1.4          10368                   1.00       1.00
  
-- fourwf%prep_four               0.880   1.4      0.882   1.4           3456                   1.00       1.00
-- alltoall%prep_fo               0.040   0.1      0.040   0.1          10368                   0.99       0.99
+- fourwf%prep_four               0.886   1.4      0.891   1.3           3456                   0.99       0.99
+- alltoall%prep_fo               0.042   0.1      0.042   0.1          10368                   0.99       0.99
 
-- subtotal                       0.920   1.5      0.923   1.5                                  1.00       1.00
+- subtotal                       0.928   1.4      0.934   1.4                                  0.99       0.99
 
  Partitioning of prep_nonlop
-- prep_nonlop                    0.772   1.2      0.775   1.2          19104                   1.00       1.00
+- prep_nonlop                    0.771   1.2      0.772   1.1          19104                   1.00       1.00
  
-- nonlop%prep_nonl%vtowfk        0.261   0.4      0.266   0.4           5376                   0.98       0.98
-- nonlop%prep_nonl%forstrn       0.029   0.0      0.029   0.0            480                   0.99       0.99
-- prep_nonlop(alltoall)          0.066   0.1      0.067   0.1          19104                   0.99       0.99
-- (other)                        0.416   0.7      0.413   0.7             -1                   1.01       1.01
+- nonlop%prep_nonl%vtowfk        0.259   0.4      0.261   0.4           5376                   0.99       0.99
+- nonlop%prep_nonl%forstrn       0.029   0.0      0.030   0.0            480                   0.99       0.99
+- prep_nonlop(alltoall)          0.069   0.1      0.072   0.1          19104                   0.96       0.96
+- (other)                        0.413   0.6      0.409   0.6             -1                   1.01       1.01
 
-- subtotal                       0.772   1.2      0.775   1.2                                  1.00       1.00
+- subtotal                       0.771   1.2      0.772   1.1                                  1.00       1.00
 
  Partitioning of mkrho (upwards partitioning)
-- mkrho                          0.894   1.4      0.897   1.4            272                   1.00       1.00
+- mkrho                          0.895   1.4      0.902   1.3            272                   0.99       0.99
  
-- mkrho%vtorho                   0.894   1.4      0.897   1.4            272                   1.00       1.00
+- mkrho%vtorho                   0.895   1.4      0.902   1.3            272                   0.99       0.99
 
-- subtotal                       0.894   1.4      0.897   1.4                                  1.00       1.00
+- subtotal                       0.895   1.4      0.902   1.3                                  0.99       0.99
 
  Partitioning of inwffil
 - inwffil                        0.007   0.0      0.007   0.0             32                   0.99       0.99
@@ -4474,96 +4542,95 @@ P           mkmem8          5
 - subtotal                       0.006   0.0      0.006   0.0                                  0.98       0.98
 
  Partitioning of newvtr
-- newvtr                         0.467   0.7      0.468   0.7            464                   1.00       1.00
+- newvtr                         0.465   0.7      0.467   0.7            464                   1.00       1.00
  
-- newvtr(call prcref_PMA)        0.325   0.5      0.325   0.5            464                   1.00       1.00
-- newvtr(aft. prcref_PMA)        0.114   0.2      0.115   0.2            464                   0.99       0.99
+- newvtr(call prcref_PMA)        0.324   0.5      0.324   0.5            464                   1.00       1.00
+- newvtr(aft. prcref_PMA)        0.113   0.2      0.114   0.2            464                   0.99       0.99
 
-- subtotal                       0.467   0.7      0.468   0.7                                  1.00       1.00
+- subtotal                       0.465   0.7      0.467   0.7                                  1.00       1.00
 
  Partitioning of  fourdp (upwards partitioning)
-- fourdp                         1.230   2.0      1.233   2.0           3280                   1.00       1.00
+- fourdp                         1.303   2.0      1.307   1.9           3280                   1.00       1.00
  
-- fourdp%(other)                 1.230   2.0      1.233   2.0           3280                   1.00       1.00
+- fourdp%(other)                 1.303   2.0      1.307   1.9           3280                   1.00       1.00
 
-- subtotal                       1.230   2.0      1.233   2.0                                  1.00       1.00
+- subtotal                       1.303   2.0      1.307   1.9                                  1.00       1.00
 
  Partitioning of afterscfloop
-- afterscfloop                   1.633   2.6      1.636   2.6             80                   1.00       1.00
+- afterscfloop                   1.620   2.5      1.623   2.4             80                   1.00       1.00
  
-- afterscfloop(forstr)           1.625   2.6      1.628   2.6             80                   1.00       1.00
+- afterscfloop(forstr)           1.613   2.5      1.616   2.4             80                   1.00       1.00
 
-- subtotal                       1.633   2.6      1.636   2.6                                  1.00       1.00
+- subtotal                       1.619   2.5      1.622   2.4                                  1.00       1.00
 
  Partitioning of forstr
-- forstr                         1.624   2.6      1.627   2.6             80                   1.00       1.00
+- forstr                         1.612   2.5      1.615   2.4             80                   1.00       1.00
  
-- forstr(forstrnps)              0.074   0.1      0.074   0.1             80                   1.00       1.00
-- forstr(forces)                 0.013   0.0      0.013   0.0             80                   1.00       1.00
-- forstr(stress)                 1.537   2.5      1.540   2.4             80                   1.00       1.00
+- forstr(forstrnps)              0.073   0.1      0.073   0.1             80                   1.00       1.00
+- forstr(stress)                 1.526   2.4      1.529   2.2             80                   1.00       1.00
 
-- subtotal                       1.624   2.6      1.627   2.6                                  1.00       1.00
+- subtotal                       1.612   2.5      1.615   2.4                                  1.00       1.00
 
  Partitioning of forstrnps
-- forstrnps                      0.074   0.1      0.074   0.1             80                   1.00       1.00
+- forstrnps                      0.073   0.1      0.073   0.1             80                   1.00       1.00
  
 - forstrnps(bef.loop band)       0.021   0.0      0.021   0.0            240                   1.00       1.00
-- forstrnps(nonlop+prep_ba       0.035   0.1      0.035   0.1            480                   1.00       1.00
+- forstrnps(nonlop+prep_ba       0.036   0.1      0.036   0.1            480                   1.00       1.00
 
-- subtotal                       0.074   0.1      0.074   0.1                                  1.00       1.00
+- subtotal                       0.073   0.1      0.073   0.1                                  1.00       1.00
 
  Partitioning of outscfcv
-- outscfcv                       0.361   0.6      0.527   0.8             80                   0.69       0.69
+- outscfcv                       1.348   2.1      2.530   3.7             80                   0.53       0.53
  
-- outscfcv([PAW]prtden)          0.031   0.0      0.033   0.1             80                   0.94       0.94
-- outscfcv(prtelf)               0.100   0.2      0.212   0.3             40                   0.47       0.47
-- outscfcv(calcdenmagsph)        0.220   0.4      0.221   0.4             80                   1.00       1.00
+- outscfcv([PAW]prtden)          1.018   1.6      1.998   2.9             80                   0.51       0.51
+- outscfcv(prtelf)               0.101   0.2      0.210   0.3             40                   0.48       0.48
+- outscfcv(calcdenmagsph)        0.218   0.3      0.218   0.3             80                   1.00       1.00
 
-- subtotal                       0.352   0.6      0.467   0.7                                  0.75       0.75
+- subtotal                       1.337   2.1      2.427   3.6                                  0.55       0.55
 
  Partitioning of lobpcgwf2 core engine
-- lobpcgwf2                     47.610  76.3     47.702  75.8           2208                   1.00       1.00
+- lobpcgwf2                     48.192  74.5     48.315  70.8           2208                   1.00       1.00
  
-- lobpcg_init                    0.027   0.0      0.033   0.1           2208                   0.83       0.83
-- lobpcg_run                    47.128  75.5     47.215  75.1           2208                   1.00       1.00
-- lobpcg_orthoWrtPrev            0.759   1.2      0.758   1.2          55200                   1.00       1.00
-- lobpcg_Bortho                  2.542   4.1      2.547   4.0          68448                   1.00       1.00
-- lobpcg_RayleighRitz            6.299  10.1      6.314  10.0          68448                   1.00       1.00
-- lobpcg_maxResidu               0.398   0.6      0.403   0.6         119232                   0.99       0.99
-- lobpcg_run@getAX_BX           36.362  58.3     36.432  57.9          66240                   1.00       1.00
-- lobpcg_pcond                   0.075   0.1      0.075   0.1          52992                   0.99       0.99
-- lobpcg_RayleighRitz@hegv       1.703   2.7      1.706   2.7          68448                   1.00       1.00
+- lobpcg_init                    0.027   0.0      0.033   0.0           2208                   0.83       0.83
+- lobpcg_run                    47.708  73.8     47.826  70.0           2208                   1.00       1.00
+- lobpcg_orthoWrtPrev            0.784   1.2      0.785   1.2          55200                   1.00       1.00
+- lobpcg_Bortho                  2.639   4.1      2.649   3.9          68448                   1.00       1.00
+- lobpcg_RayleighRitz            6.419   9.9      6.437   9.4          68448                   1.00       1.00
+- lobpcg_maxResidu               0.521   0.8      0.526   0.8         119232                   0.99       0.99
+- lobpcg_run@getAX_BX           36.532  56.5     36.619  53.6          66240                   1.00       1.00
+- lobpcg_pcond                   0.076   0.1      0.077   0.1          52992                   0.99       0.99
+- lobpcg_RayleighRitz@hegv       1.719   2.7      1.722   2.5          68448                   1.00       1.00
 
-- subtotal                      95.293 152.7     95.482 151.8                                  1.00       1.00
+- subtotal                      96.425 149.1     96.675 141.6                                  1.00       1.00
 
  Partitioning of low-level xgBlock type
-- xgBlock_potrf                  0.150   0.2      0.150   0.2          68448                   1.00       1.00
+- xgBlock_potrf                  0.158   0.2      0.159   0.2          68448                   0.99       0.99
  
-- xgBlock_trsm                   1.195   1.9      1.204   1.9         205344                   0.99       0.99
-- xgBlock_gemm                   3.846   6.2      3.921   6.2         850080                   0.98       0.98
-- xgBlock_heev                   0.218   0.4      0.220   0.4          15456                   0.99       0.99
-- xgBlock_hegvx                  1.324   2.1      1.341   2.1          52992                   0.99       0.99
-- xgBlock_copy                   0.585   0.9      0.582   0.9         496800                   1.00       1.00
-- xgBlock_cshift                 0.090   0.1      0.091   0.1          52992                   0.99       0.99
+- xgBlock_trsm                   1.211   1.9      1.225   1.8         205344                   0.99       0.99
+- xgBlock_gemm                   4.003   6.2      4.087   6.0         850080                   0.98       0.98
+- xgBlock_heev                   0.217   0.3      0.219   0.3          15456                   0.99       0.99
+- xgBlock_hegvx                  1.340   2.1      1.354   2.0          52992                   0.99       0.99
+- xgBlock_copy                   0.589   0.9      0.591   0.9         496800                   1.00       1.00
+- xgBlock_cshift                 0.092   0.1      0.092   0.1          52992                   1.00       1.00
 
-- subtotal                       7.258  11.6      7.360  11.7                                  0.99       0.99
+- subtotal                       7.451  11.5      7.568  11.1                                  0.98       0.98
 -
 -Synchronisation (=leave_test) and MPI calls 
-- communic.MPI                   0.249   0.4      0.249   0.4           4188                   1.00       1.00
+- communic.MPI                   0.253   0.4      0.253   0.4           4188                   1.00       1.00
 -
-- forstrnps:synchr               0.000   0.0      0.000   0.0             96                   2.99       2.99
-- mkrho :MPIrhor                 0.000   0.0      0.000   0.0            272                   1.00       1.00
-- alltoall%back_wf               1.042   1.7      1.031   1.6          69696                   1.01       1.01
-- alltoall%forw_wf               0.783   1.3      0.790   1.3          66240                   0.99       0.99
-- subtotal                       1.825   2.9      1.821   2.9                                  1.00       1.00
+- forstrnps:synchr               0.000   0.0      0.000   0.0             96                   1.02       1.02
+- mkrho :MPIrhor                 0.000   0.0      0.000   0.0            272                   0.99       0.99
+- alltoall%back_wf               1.069   1.7      1.060   1.6          69696                   1.01       1.01
+- alltoall%forw_wf               0.774   1.2      0.782   1.1          66240                   0.99       0.99
+- subtotal                       1.844   2.9      1.842   2.7                                  1.00       1.00
 
  Additional information
-- timana(1)                      0.000   0.0      0.000   0.0              4                   1.00       1.00
-- total timab                    6.126   9.8      6.127   9.7        3280508                   1.00       1.00
-- fourwf                        32.596  52.2     32.665  51.9          69696                   1.00       1.00
-- mklocl(2)                      0.084   0.1      0.084   0.1            432                   1.00       1.00
-- newocc                         0.296   0.5      0.298   0.5            272                   1.00       1.00
-- nonlop(total)                  3.119   5.0      3.158   5.0          85344                   0.99       0.99
+- timana(1)                      0.000   0.0      0.000   0.0              4                   0.99       0.99
+- total timab                    6.297   9.7      6.328   9.3        3280508                   1.00       1.00
+- fourwf                        32.710  50.6     32.798  48.0          69696                   1.00       1.00
+- mklocl(2)                      0.085   0.1      0.085   0.1            432                   1.00       1.00
+- newocc                         0.296   0.5      0.300   0.4            272                   0.99       0.99
+- nonlop(total)                  3.083   4.8      3.110   4.6          85344                   0.99       0.99
 
  timana : in multi dataset mode, the more detailed analysis is not done.
 
@@ -4652,10 +4719,10 @@ P           mkmem8          5
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         15.4  wall=         15.8
+- Proc.   0 individual time (sec): cpu=         15.6  wall=         17.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered 144 WARNINGs and  28 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         62.7  wall=         63.2
++Overall time at end (sec) : cpu=         64.9  wall=         68.5

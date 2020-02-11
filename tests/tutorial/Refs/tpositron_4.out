@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 02h07 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h35 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpositron_4/tpositron_4.in
 - output file    -> tpositron_4.out
@@ -452,6 +452,7 @@ TC-DFT STEP  19 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  is converged :  diff(etot_el-etot_pos)=  8.970E-06 < postoldfe=  1.000E-05
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :       15
 nsppol    :        1
@@ -459,21 +460,19 @@ nspinor   :        1
 nspden    :        1
 nelect    :  6.000000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg":  1.500000000000000E+001, }
+lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":   8.0, "pawecutdg":  15.0, }
 convergence: {
-    "deltae":  8.534399853488139E-010, "res2":  3.934208063639334E-009, 
-    "residm":  7.601585995039421E-009, "diffor":  7.894577927977653E-007, 
+    "deltae":  8.53E-10, "res2":  3.93E-09, 
+    "residm":  7.60E-09, "diffor":  7.89E-07, 
 }
 etotal    : -6.058808197408390E+001
 entropy   :  0.000000000000000E+000
 fermie    :  2.040757789563249E-001
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces:
 - [ 2.390777654093355E-003,  2.390777654093356E-003,  2.390777654093353E-003, ]
 - [-2.390777654093355E-003, -2.390777654093354E-003,  2.390777654093354E-003, ]
 - [-2.390777654093356E-003,  2.390777654093356E-003, -2.390777654093355E-003, ]
@@ -489,6 +488,7 @@ cartesian_forces: !CartForces
 - [ 7.430610817165330E-003, -3.805144241486973E-019,  6.211550363890406E-019, ]
 - [-4.090712786622373E-019,  7.430610817165331E-003, -5.507047130373934E-020, ]
 - [-1.132045150212123E-018,  1.083488350308999E-018,  7.430610817165327E-003, ]
+force_length_stats: {"min":  5.116287580783396E-019, "max":  2.318412305251231E-002, "mean":  1.025893003860009E-002, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -781,6 +781,7 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  is converged :  diff(etot_el-etot_pos)=  5.342E-06 < postoldfe=  1.000E-05
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :       15
 nsppol    :        1
@@ -788,21 +789,19 @@ nspinor   :        1
 nspden    :        1
 nelect    :  6.000000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg":  1.500000000000000E+001, }
+lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":   8.0, "pawecutdg":  15.0, }
 convergence: {
-    "deltae":  6.588365408788377E-010, "res2":  7.006306473163465E-009, 
-    "residm":  1.768281045438359E-010, "diffor":  8.040071177509156E-007, 
+    "deltae":  6.59E-10, "res2":  7.01E-09, 
+    "residm":  1.77E-10, "diffor":  8.04E-07, 
 }
 etotal    : -6.059056130502942E+001
 entropy   :  0.000000000000000E+000
 fermie    :  2.042457714565903E-001
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces:
 - [ 2.171887127691550E-003,  2.171887127691553E-003,  2.171887127691552E-003, ]
 - [-2.171887127691552E-003, -2.171887127691552E-003,  2.171887127691552E-003, ]
 - [-2.171887127691552E-003,  2.171887127691552E-003, -2.171887127691552E-003, ]
@@ -818,6 +817,7 @@ cartesian_forces: !CartForces
 - [ 6.717700211174749E-003, -1.242458484181369E-019, -2.571922302182064E-019, ]
 - [-6.870627468792347E-019,  6.717700211174747E-003,  6.615779161731517E-019, ]
 - [-3.694132347231299E-019,  3.094350205760649E-019,  6.717700211174749E-003, ]
+force_length_stats: {"min":  3.086141685826570E-019, "max":  2.214845372945971E-002, "mean":  9.596486106583584E-003, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1144,6 +1144,7 @@ TC-DFT STEP   9 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  is converged :  diff(etot_el-etot_pos)=  8.570E-06 < postoldfe=  1.000E-05
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :       15
 nsppol    :        1
@@ -1151,21 +1152,19 @@ nspinor   :        1
 nspden    :        1
 nelect    :  6.000000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg":  1.500000000000000E+001, }
+lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":   8.0, "pawecutdg":  15.0, }
 convergence: {
-    "deltae":  5.413198778114747E-010, "res2":  8.052955817243647E-009, 
-    "residm":  2.592542458625835E-012, "diffor":  6.859677287298846E-007, 
+    "deltae":  5.41E-10, "res2":  8.05E-09, 
+    "residm":  2.59E-12, "diffor":  6.86E-07, 
 }
 etotal    : -6.061289053446953E+001
 entropy   :  0.000000000000000E+000
 fermie    :  1.940538035666340E-001
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces:
 - [-4.600350782008504E-003, -4.600350782008505E-003, -4.600350782008504E-003, ]
 - [ 4.600350782008505E-003,  4.600350782008505E-003, -4.600350782008505E-003, ]
 - [ 4.600350782008504E-003, -4.600350782008504E-003,  4.600350782008504E-003, ]
@@ -1181,6 +1180,7 @@ cartesian_forces: !CartForces
 - [-6.204011064965503E-003, -4.998980818373819E-019,  3.894379158417461E-019, ]
 - [-6.462192100114035E-019, -6.204011064965503E-003,  3.894379158417461E-019, ]
 - [-5.487960529706187E-021, -1.480880444022560E-020, -6.204011064965501E-003, ]
+force_length_stats: {"min":  2.024933850530237E-019, "max":  7.968041287077949E-003, "mean":  5.751375395119386E-003, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1469,6 +1469,7 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  is converged :  diff(etot_el-etot_pos)=  1.311E-06 < postoldfe=  1.000E-05
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :       15
 nsppol    :        1
@@ -1476,21 +1477,19 @@ nspinor   :        1
 nspden    :        1
 nelect    :  6.000000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg":  1.500000000000000E+001, }
+lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":   8.0, "pawecutdg":  15.0, }
 convergence: {
-    "deltae":  6.328804147415212E-011, "res2":  3.407301810025620E-010, 
-    "residm":  1.149405649833701E-012, "diffor":  1.108804997488472E-007, 
+    "deltae":  6.33E-11, "res2":  3.41E-10, 
+    "residm":  1.15E-12, "diffor":  1.11E-07, 
 }
 etotal    : -6.061341662111996E+001
 entropy   :  0.000000000000000E+000
 fermie    :  1.935813726317738E-001
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces:
 - [-3.856555896146014E-003, -3.856555896146014E-003, -3.856555896146014E-003, ]
 - [ 3.856555896146014E-003,  3.856555896146014E-003, -3.856555896146014E-003, ]
 - [ 3.856555896146014E-003, -3.856555896146014E-003,  3.856555896146014E-003, ]
@@ -1506,6 +1505,7 @@ cartesian_forces: !CartForces
 - [-5.483278385804019E-003,  1.355954688022191E-019, -1.370202714501070E-019, ]
 - [ 1.645057237341853E-020, -5.483278385804017E-003,  5.411595884551660E-020, ]
 - [ 1.648427232324024E-019,  1.355954688022191E-019, -5.483278385804019E-003, ]
+force_length_stats: {"min":  2.471789677701905E-019, "max":  6.679750754354220E-003, "mean":  4.945797681471378E-003, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1820,6 +1820,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.23963355180212E+01
 hartree             :  5.69614788718690E+00
@@ -1837,6 +1838,7 @@ total_energy_eV     : -1.64937520046767E+03
 
 
 --- !EnergyTermsDC
+iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -7.011916123573124E-001
 Ewald energy        : -5.929686465205944E+001
@@ -2087,10 +2089,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        343.7  wall=        344.1
+- Proc.   0 individual time (sec): cpu=        344.1  wall=        344.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered 517 WARNINGs and  43 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        343.7  wall=        344.1
++Overall time at end (sec) : cpu=        344.1  wall=        344.4

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 02h26 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h56 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t41_MPI4/t41.in
 - output file    -> t41_MPI4.out
@@ -237,6 +237,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     242.000     242.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        8
 nsppol    :        1
@@ -244,21 +245,22 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.800000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  3.000000000000000E+000, "pawecutdg":  5.000000000000000E+001, }
+lattice_lengths: [  15.70600,   15.70600,   15.70600, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   3.0, "pawecutdg":  50.0, }
 convergence: {
-    "deltae":  3.174634237554017E+000, "res2":  1.622655449156260E+001, 
-    "residm":  2.480257513215079E-004, "diffor": undef, 
+    "deltae":  3.17E+00, "res2":  1.62E+01, 
+    "residm":  2.48E-04, "diffor": undef, 
 }
 etotal    : -2.646623536698557E+002
 entropy   :  0.000000000000000E+000
 fermie    : -1.677576924915751E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 5.097432366001530E-003,  1.346236240864097E-005,  1.899389038951419E-005, ]
 - [ 1.346236240864097E-005,  5.305254156065427E-003, -8.609473489847399E-005, ]
 - [ 1.899389038951419E-005, -8.609473489847399E-005,  5.324628841948511E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa: -1.542378384099842E+002
+cartesian_forces:
 - [-9.041577127702510E+000, -8.000834644722929E+002,  2.566302419164581E+001, ]
 - [-8.485008841040189E+000,  6.613296531904047E+001,  2.542180931670841E+001, ]
 - [-8.496768692164711E+000,  2.416498556060983E+002, -1.782942078353376E+002, ]
@@ -267,6 +269,7 @@ cartesian_forces: !CartForces
 - [-8.874531364578695E+000,  2.273892506367603E+002,  2.530997995087485E+001, ]
 - [-8.423867097865273E+000,  6.623023505228421E+001,  2.548245361665413E+001, ]
 - [-8.641463073327452E+000,  6.634367982810161E+001,  2.545299247407343E+001, ]
+force_length_stats: {"min":  7.135707999811247E+001, "max":  8.005459955865147E+002, "mean":  2.136675255582508E+002, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -452,6 +455,7 @@ cartesian_forces: !CartForces
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        8
 nsppol    :        1
@@ -459,21 +463,22 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.800000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  3.000000000000000E+000, "pawecutdg":  5.000000000000000E+001, }
+lattice_lengths: [  15.70600,   15.70600,   15.70600, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":   3.0, "pawecutdg":  50.0, }
 convergence: {
-    "deltae":  1.428246436128688E-001, "res2":  9.313313270293079E+000, 
-    "residm":  4.146195033094153E-005, "diffor": undef, 
+    "deltae":  1.43E-01, "res2":  9.31E+00, 
+    "residm":  4.15E-05, "diffor": undef, 
 }
 etotal    : -2.648126434507400E+002
 entropy   :  0.000000000000000E+000
 fermie    : -1.744618223797176E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 5.486749690896469E-003, -2.612336662240113E-006,  1.224197022598121E-005, ]
 - [-2.612336662240113E-006,  5.600501437196988E-003, -9.091954058268975E-005, ]
 - [ 1.224197022598121E-005, -9.091954058268975E-005,  5.620276967823353E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa: -1.638507882015503E+002
+cartesian_forces:
 - [-4.394749812914938E+000, -8.069826343101443E+000,  1.253741385967143E+001, ]
 - [-2.143323859727417E+002,  1.218402239028576E+001, -1.851824645300277E+002, ]
 - [ 2.325147482597292E+002,  1.536229940607436E+002,  1.244428433944487E+001, ]
@@ -482,6 +487,7 @@ cartesian_forces: !CartForces
 - [-4.265173528738959E+000, -8.071009920649647E+000,  1.233473687760395E+001, ]
 - [-4.502897731188367E+002, -1.871405136450958E+002, -9.414398112589915E+001, ]
 - [ 3.796768672239505E+002,  2.668113660970374E+001,  1.796181128901631E+002, ]
+force_length_stats: {"min":  1.534531329785102E+001, "max":  4.966342122780079E+002, "mean":  2.013584855438657E+002, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -791,6 +797,7 @@ cartesian_forces: !CartForces
   23.07873   23.29649   23.39723   23.53502   23.58733   23.87245   23.93160   24.02034
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  5.65998596481211E+01
 hartree             :  1.56997428273715E+02
@@ -807,6 +814,7 @@ total_energy_eV     : -7.17742909913591E+03
 
 
 --- !EnergyTermsDC
+iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -2.766483266608935E+001
 Ewald energy        : -9.534227979481986E+001
@@ -1043,10 +1051,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         12.1  wall=         12.6
+- Proc.   0 individual time (sec): cpu=         12.1  wall=         12.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         49.6  wall=         50.3
++Overall time at end (sec) : cpu=         49.1  wall=         49.5

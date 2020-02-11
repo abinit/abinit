@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 02h27 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 02h56 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t54_MPI4/t54.in
 - output file    -> t54_MPI4.out
@@ -498,6 +498,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      15.000      15.000
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -505,23 +506,25 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.49533,    7.49533,    7.49533, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":   1.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  5.329070518200751E-015, "res2":  3.667477442695268E-021, 
-    "residm":  9.087205956341605E-023, "diffor": undef, 
+    "deltae":  5.33E-15, "res2":  3.67E-21, 
+    "residm":  9.09E-23, "diffor": undef, 
 }
 etotal    : -8.020640350388769E+000
 entropy   :  0.000000000000000E+000
 fermie    :  1.541721827703640E-002
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 1.148432079491203E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  1.148432079491203E-003,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  1.148432079491202E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa: -3.378803261744628E+001
+cartesian_forces:
 - [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
 - [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -565,6 +568,7 @@ cartesian_forces: !CartForces
 
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.65974436478609E+00
 hartree             :  3.57196304955234E-01
@@ -630,6 +634,7 @@ band_energy         : -1.09104076158043E+00
 
 
 --- !ResultsGS
+iteration_state: {"dtset": 2, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -637,23 +642,20 @@ nspinor   :        1
 nspden    :        1
 nelect    :  8.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   7.49533,    7.49533,    7.49533, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+cutoff_energies: {"ecut":   1.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  0.000000000000000E+000, "res2":  0.000000000000000E+000, 
-    "residm":  8.223716080787816E-023, "diffor":  0.000000000000000E+000, 
+    "deltae":  0.00E+00, "res2":  0.00E+00, 
+    "residm":  8.22E-23, "diffor":  0.00E+00, 
 }
 etotal    : -8.020640350388769E+000
 entropy   :  0.000000000000000E+000
 fermie    :  1.541721827703640E-002
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {"min": null, "max": null, "mean": null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2208,61 +2210,56 @@ P          mk1mem5          4
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          8.3        0.14      0.002
-- Total wall clock time (s,m,h):          8.7        0.15      0.002
+- Total cpu        time (s,m,h):          9.3        0.15      0.003
+- Total wall clock time (s,m,h):         10.0        0.17      0.003
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            1.8, wall_time =            2.3
+- cpu_time =            1.8, wall_time =            2.6
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- invars2                        0.365   4.4      0.369   4.2              5      -1.00        0.99       0.99
-- fourwf%(pot)                   0.227   2.7      0.228   2.6           4828      -1.00        0.99       0.99
-- pspini                         0.188   2.3      0.190   2.2              5      -1.00        0.99       0.99
-- ewald                          0.172   2.1      0.174   2.0              2      -1.00        0.99       0.99
-- abinit(2)                      0.076   0.9      0.080   0.9              1      -1.00        0.96       0.96
-- stress                         0.049   0.6      0.050   0.6              1      -1.00        0.97       0.97
-- ewald2 (+vdw_dftd)             0.049   0.6      0.050   0.6              1      -1.00        0.97       0.97
-- fourwf%(G->r)                  0.043   0.5      0.044   0.5           1712      -1.00        0.98       0.98
-- others (126)                   0.206   2.5      0.215   2.5             -1      -1.00        0.96       0.96
+- invars2                        0.368   4.0      0.369   3.7              5      -1.00        1.00       1.00
+- fourwf%(pot)                   0.225   2.4      0.226   2.3           4828      -1.00        1.00       1.00
+- pspini                         0.189   2.0      0.190   1.9              5      -1.00        1.00       1.00
+- ewald                          0.165   1.8      0.166   1.7              2      -1.00        1.00       1.00
+- abinit(2)                      0.078   0.8      0.081   0.8              1      -1.00        0.96       0.96
+- others (129)                   0.343   3.7      0.353   3.5             -1      -1.00        0.97       0.97
 -<END_TIMER>
 -
-- subtotal                       1.375  16.6      1.400  16.0                                  0.98       0.98
+- subtotal                       1.369  14.8      1.385  13.8                                  0.99       0.99
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           8.3, wall_time =           8.7
+- cpu_time =           9.3, wall_time =          10.0
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- invars2                        1.465  17.7      1.480  16.9             20      -1.00        0.99       0.99
-- fourwf%(pot)                   0.884  10.7      0.889  10.2          18879      -1.00        0.99       0.99
-- pspini                         0.753   9.1      0.760   8.7             20      -1.00        0.99       0.99
-- ewald                          0.692   8.4      0.696   8.0              8      -1.00        0.99       0.99
-- abinit(2)                      0.300   3.6      0.313   3.6              4      -1.00        0.96       0.96
-- stress                         0.199   2.4      0.200   2.3              4      -1.00        0.99       0.99
-- ewald2 (+vdw_dftd)             0.198   2.4      0.200   2.3              4      -1.00        0.99       0.99
-- nonlop(apply)                  0.172   2.1      0.174   2.0          16127      -1.00        0.99       0.99
-- fourwf%(G->r)                  0.172   2.1      0.173   2.0           6848      -1.00        0.99       0.99
-- pead_nl_resp                   0.100   1.2      0.100   1.1             60      -1.00        1.00       1.00
-- getghc-other                   0.078   0.9      0.075   0.9             -4      -1.00        1.05       1.05
-- projbd                         0.073   0.9      0.073   0.8          32756      -1.00        0.99       0.99
-- wfsinp(excl. calls)            0.062   0.7      0.062   0.7             88      -1.00        1.00       1.00
-- inwffil(excl. calls)           0.057   0.7      0.064   0.7            124      -1.00        0.88       0.88
-- dfpt_vtorho-kpt loop           0.052   0.6      0.052   0.6            256      -1.00        1.00       1.00
-- dfpt_vtowfk(contrib)           0.051   0.6      0.052   0.6             -4      -1.00        0.99       0.99
-- fourdp                         0.050   0.6      0.050   0.6           1004      -1.00        0.99       0.99
-- vtorho(MPI)                    0.048   0.6      0.049   0.6             48      -1.00        0.98       0.98
-- dfpt_vtorho:MPI                0.046   0.6      0.046   0.5            256      -1.00        1.00       1.00
-- getgh1c_setup                  0.045   0.5      0.045   0.5           1024      -1.00        1.00       1.00
-- others (114)                   0.062   0.8      0.064   0.7             -1      -1.00        0.98       0.98
+- invars2                        1.494  16.1      1.499  14.9             20      -1.00        1.00       1.00
+- fourwf%(pot)                   0.879   9.5      0.883   8.8          18879      -1.00        1.00       1.00
+- pspini                         0.749   8.1      0.750   7.5             20      -1.00        1.00       1.00
+- ewald                          0.665   7.2      0.666   6.6              8      -1.00        1.00       1.00
+- abinit(2)                      0.305   3.3      0.317   3.2              4      -1.00        0.96       0.96
+- stress                         0.184   2.0      0.184   1.8              4      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.183   2.0      0.183   1.8              4      -1.00        1.00       1.00
+- fourwf%(G->r)                  0.172   1.9      0.173   1.7           6848      -1.00        1.00       1.00
+- nonlop(apply)                  0.171   1.8      0.175   1.7          16127      -1.00        0.98       0.98
+- pead_nl_resp                   0.102   1.1      0.102   1.0             60      -1.00        1.00       1.00
+- getghc-other                   0.076   0.8      0.073   0.7             -4      -1.00        1.04       1.04
+- projbd                         0.069   0.7      0.071   0.7          32756      -1.00        0.99       0.99
+- wfsinp(excl. calls)            0.063   0.7      0.064   0.6             88      -1.00        1.00       1.00
+- dfpt_vtorho:MPI                0.061   0.7      0.062   0.6            256      -1.00        0.99       0.99
+- inwffil(excl. calls)           0.057   0.6      0.064   0.6            124      -1.00        0.89       0.89
+- dfpt_vtorho-kpt loop           0.051   0.6      0.051   0.5            256      -1.00        1.00       1.00
+- dfpt_vtowfk(contrib)           0.051   0.6      0.051   0.5             -4      -1.00        1.01       1.01
+- fourdp                         0.050   0.5      0.051   0.5           1004      -1.00        0.99       0.99
+- others (116)                   0.158   1.7      0.159   1.6             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                       5.558  67.1      5.616  64.3                                  0.99       0.99
+- subtotal                       5.543  59.8      5.578  55.5                                  0.99       0.99
 
 ================================================================================
 
@@ -2344,10 +2341,10 @@ P          mk1mem5          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.8  wall=          2.3
+- Proc.   0 individual time (sec): cpu=          1.8  wall=          2.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.6  wall=          9.0
++Overall time at end (sec) : cpu=          9.6  wall=         10.3
