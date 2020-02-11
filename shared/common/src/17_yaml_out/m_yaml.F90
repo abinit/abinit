@@ -1242,9 +1242,9 @@ subroutine yaml_start_field(stream, label, tag, width)
 
  character(len=len_trim(label)+2) :: quoted
 
-#ifdef HAVE_DEBUG_MODE
+!#ifdef HAVE_DEBUG_MODE
  call forbid_reserved_label(trim(label))
-#endif
+!#endif
 
  quoted = yaml_quote_string(label)
  if (present(width)) then
@@ -1350,9 +1350,9 @@ subroutine yaml_print_dict(stream, pl, key_size, s_size, kfmt, ifmt, rfmt, sfmt,
  do i=1,pl%length()
    call pl%iter(key, type_code, vi, vr, vs)
 
-#ifdef HAVE_DEBUG_MODE
+!#ifdef HAVE_DEBUG_MODE
    call forbid_reserved_label(trim(key))
-#endif
+!#endif
 
    call string_clear(tmp_key)
    write(tmp_key, kfmt) '"'//trim(key)//'"'
