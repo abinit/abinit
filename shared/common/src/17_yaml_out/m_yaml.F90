@@ -76,7 +76,8 @@ module m_yaml
    character(len=20) :: default_ifmt = '(I8)'
    ! Default format for integer
 
-   character(len=20) :: default_rfmt = '(ES23.15E3)'
+   !character(len=20) :: default_rfmt = '(ES23.15E3)'
+   character(len=20) :: default_rfmt = '(ES16.8)'
    ! Default format for real
 
    character(len=20) :: default_kfmt = "(A)"
@@ -1241,7 +1242,10 @@ subroutine yaml_start_field(stream, label, tag, width)
 
  character(len=len_trim(label)+2) :: quoted
 
+#ifdef HAVE_DEBUG_MODE
  call forbid_reserved_label(trim(label))
+#endif
+
  quoted = yaml_quote_string(label)
  if (present(width)) then
    if (width > len_trim(label)) then
@@ -1346,7 +1350,9 @@ subroutine yaml_print_dict(stream, pl, key_size, s_size, kfmt, ifmt, rfmt, sfmt,
  do i=1,pl%length()
    call pl%iter(key, type_code, vi, vr, vs)
 
+#ifdef HAVE_DEBUG_MODE
    call forbid_reserved_label(trim(key))
+#endif
 
    call string_clear(tmp_key)
    write(tmp_key, kfmt) '"'//trim(key)//'"'

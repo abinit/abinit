@@ -1625,7 +1625,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
     ' "Double-counting" decomposition of free energy:',ch10,&
     '    Band energy     = ',energies%e_eigenvalues
    !call wrtout(iout,msg,'COLL')
-   dc_edoc = yamldoc_open('EnergyTermsDC', '"Double-counting" decomposition of free energy', width=20)
+   dc_edoc = yamldoc_open('EnergyTermsDC', '"Double-counting" decomposition of free energy', width=20, real_fmt="(es21.14)")
    !dc_edoc%use_yaml = dtset%use_yaml
    call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
    if (ipositron/=1) then

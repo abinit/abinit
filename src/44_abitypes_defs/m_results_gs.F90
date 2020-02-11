@@ -856,9 +856,12 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
  call dict%free()
 
  ! Write convergence degree.
+ ! It seems there's a portability problem on for residm computed with nstep = 0
+ ! because one may get very small value e.g. 7.91-323. residm with nstep > 0 are OK though
+ ! so print zero if residm < tol30.
  call dict%set('deltae', r=results%deltae)
  call dict%set('res2', r=results%res2)
- call dict%set('residm', r=results%residm)
+ call dict%set('residm', r=merge(results%residm, zero, results%residm > tol30))
  call dict%set('diffor', r=results%diffor)
  call ydoc%add_dict('convergence', dict, multiline_trig=2, real_fmt="(es9.2)")
  call dict%free()
@@ -890,7 +893,7 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
 
  if (strten(1,1) /= MAGIC_UNDEF) then
    call ydoc%add_real2d('cartesian_stress_tensor', strten)
-   call ydoc%add_real('pressure_GPa', - get_trace(strten) * HaBohr3_GPa / three)
+   call ydoc%add_real('pressure_GPa', - get_trace(strten) * HaBohr3_GPa / three, real_fmt="(es12.4)")
  else
    call ydoc%add_string('cartesian_stress_tensor', "null")
    call ydoc%add_string('pressure_GPa', "null")
@@ -899,7 +902,7 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
  if (results%fcart(1,1) /= MAGIC_UNDEF) then
    call ydoc%add_real2d('cartesian_forces', results%fcart)
    fnorms = [(sqrt(sum(results%fcart(:, ii) ** 2)), ii=1,results%natom)]
-   ! Write Force statistics
+   ! Write force statistics
    call dict%set('min', r=minval(fnorms))
    call dict%set('max', r=maxval(fnorms))
    call dict%set('mean', r=sum(fnorms) / results%natom)
