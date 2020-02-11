@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_driver
 !! NAME
 !!  m_driver
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group ()
+!!  Copyright (C) 2008-2020 ABINIT group ()
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,11 +25,9 @@
 module m_driver
 
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_errors
  use m_dtset
- use m_dtfil
  use m_results_out
  use m_results_respfn
  use m_yaml
@@ -39,6 +36,7 @@ module m_driver
  use m_abi_linalg
  use m_abicore
  use m_exit
+ use m_dtfil
  use m_fftcore
  use libxc_functionals
 #if defined DEV_YP_VDWXC
@@ -46,7 +44,7 @@ module m_driver
 #endif
  use m_xgScalapack
 
- use defs_datatypes, only : pseudopotential_type
+ use defs_datatypes, only : pseudopotential_type, pspheader_type
  use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
  use m_xg,           only : xg_finalize
@@ -58,7 +56,6 @@ module m_driver
  use m_fftw3,        only : fftw3_init_threads, fftw3_cleanup
  use m_psps,         only : psps_init_global, psps_init_from_dtset, psps_free
  use m_mpinfo,       only : mpi_distrib_is_ok
- use m_dtfil,        only : dtfil_init, dtfil_init_img
  use m_respfn_driver,    only : respfn
  use m_screening_driver, only : screening
  use m_sigma_driver,     only : sigma
@@ -100,7 +97,7 @@ contains
 !! selected big arrays are allocated, then the gstate, respfn, ...  subroutines are called.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (XG,MKV,MM,MT,FJ)
+!! Copyright (C) 1999-2020 ABINIT group (XG,MKV,MM,MT,FJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -165,7 +162,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  !scalars
  integer,intent(in) :: ndtset,ndtset_alloc,npsp
  real(dp),intent(in) :: cpui
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  character(len=fnlen),intent(in) :: filstat
  type(MPI_type),intent(inout) :: mpi_enregs(0:ndtset_alloc)
  !arrays
@@ -202,7 +199,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  integer,allocatable :: jdtset_(:),npwtot(:)
  real(dp) :: acell(3),rprim(3,3),rprimd(3,3),tsec(2)
  real(dp),allocatable :: acell_img(:,:),amu_img(:,:),rprim_img(:,:,:)
- real(dp),allocatable :: fcart_img(:,:,:),fred_img(:,:,:)
+ real(dp),allocatable :: fcart_img(:,:,:),fred_img(:,:,:),intgres_img(:,:,:)
  real(dp),allocatable :: etotal_img(:),mixalch_img(:,:,:),strten_img(:,:),miximage(:,:)
  real(dp),allocatable :: occ(:),xcart(:,:),xred(:,:),xredget(:,:)
  real(dp),allocatable :: occ_img(:,:),vel_cell_img(:,:,:),vel_img(:,:,:),xred_img(:,:,:)
@@ -613,7 +610,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    call echo_xc_name(dtset%ixc)
 
    if (dtset%ixc<0) then
-     call libxc_functionals_init(dtset%ixc,dtset%nspden)
+     call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
 
 #if defined DEV_YP_VDWXC
      if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
@@ -693,11 +690,12 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
      ABI_ALLOCATE(fcart_img,(3,dtset%natom,nimage))
      ABI_ALLOCATE(fred_img,(3,dtset%natom,nimage))
+     ABI_ALLOCATE(intgres_img,(dtset%nspden,dtset%natom,nimage))
      ABI_ALLOCATE(etotal_img,(nimage))
      ABI_ALLOCATE(strten_img,(6,nimage))
 
      call gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
-&     fred_img,iexit,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
+&     fred_img,iexit,intgres_img,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
 &     pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
 &     filnam,filstat,idtset,jdtset_,ndtset)
 
@@ -728,19 +726,21 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    case(RUNL_GWLS)
      ! For running G0W0 calculations with Lanczos basis for dielectric operator
      ! and Sternheimer equation for avoiding the use of conduction states (MC+JJL)
+     ABI_ALLOCATE(etotal_img,(nimage))
      ABI_ALLOCATE(fcart_img,(3,dtset%natom,nimage))
      ABI_ALLOCATE(fred_img,(3,dtset%natom,nimage))
-     ABI_ALLOCATE(etotal_img,(nimage))
+     ABI_ALLOCATE(intgres_img,(dtset%nspden,dtset%natom,nimage))
      ABI_ALLOCATE(strten_img,(6,nimage))
 
      call gwls_sternheimer(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
-&     fred_img,iexit,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
+&     fred_img,iexit,intgres_img,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
 &     pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,xred_img,&
 &     filnam,filstat,idtset,jdtset_,ndtset)
 
      ABI_DEALLOCATE(etotal_img)
      ABI_DEALLOCATE(fcart_img)
      ABI_DEALLOCATE(fred_img)
+     ABI_DEALLOCATE(intgres_img)
      ABI_DEALLOCATE(strten_img)
 
    case (RUNL_WFK)
@@ -765,7 +765,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
 !  Transfer of multi dataset outputs from temporaries:
 !  acell, xred, occ rprim, and vel might be modified from their input values
-!  etotal, fcart, fred, and strten have been computed
+!  etotal, fcart, fred, intgres, and strten have been computed
 !  npwtot was already computed before, but is stored only now
 
    if(dtset%optdriver==RUNL_GSTATE)then
@@ -777,6 +777,12 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        results_out(idtset)%strten(:,iimage)                =strten_img(:,iimage)
        results_out(idtset)%fcart(1:3,1:dtset%natom,iimage)=fcart_img(:,:,iimage)
        results_out(idtset)%fred(1:3,1:dtset%natom,iimage) =fred_img(:,:,iimage)
+       if(dtset%nspden/=2)then
+         results_out(idtset)%intgres(1:dtset%nspden,1:dtset%natom,iimage) =intgres_img(:,:,iimage)
+       else
+         results_out(idtset)%intgres(1,1:dtset%natom,iimage) =intgres_img(1,:,iimage)
+         results_out(idtset)%intgres(4,1:dtset%natom,iimage) =intgres_img(2,:,iimage)
+       endif
        results_out(idtset)%mixalch(1:dtset%npspalch,1:dtset%ntypalch,iimage) &
 &       =mixalch_img(1:dtset%npspalch,1:dtset%ntypalch,iimage)
        results_out(idtset)%npwtot(1:dtset%nkpt,iimage)    =npwtot(1:dtset%nkpt)
@@ -789,6 +795,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      ABI_DEALLOCATE(etotal_img)
      ABI_DEALLOCATE(fcart_img)
      ABI_DEALLOCATE(fred_img)
+     ABI_DEALLOCATE(intgres_img)
      ABI_DEALLOCATE(strten_img)
    else
      results_out(idtset)%acell(:,1)                =acell(:)

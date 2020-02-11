@@ -1,8 +1,8 @@
--Succesfully open /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk__baguetl/tests/v8/Input/t37_HIST.nc for reading
+-Succesfully open /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/v8/Input/t37_HIST.nc for reading
  Extracting information from NetCDF file...
   
 .Version    2.0 of PHONONS
-.Copyright (C) 1998-2019 ABINIT group (FB,JB).
+.Copyright (C) 1998-2020 ABINIT group (FB,JB).
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -15,7 +15,7 @@
  acknowledgments of the ABINIT effort.
  For more information, see http://www.abinit.org .
 
-.Starting date :  2 Oct 2018.
+.Starting date : 25 Nov 2019.
   
  #############################################################################
  ######################### ECHO OF INPUT FILE ################################
@@ -1069,7 +1069,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350       -0.577350        0.577350
  Second local vector :        0.816497       -0.408248        0.408248
- Third  local vector :        0.000000        0.707107        0.707107
+ Third  local vector :       -0.000000        0.707107        0.707107
   -0.01840  0.00000  0.00000
    0.00000  0.00261  0.00000
    0.00000  0.00000  0.00261
@@ -1084,7 +1084,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350        0.577350       -0.577350
  Second local vector :        0.816497        0.408248       -0.408248
- Third  local vector :        0.000000       -0.707107       -0.707107
+ Third  local vector :       -0.000000       -0.707107       -0.707107
   -0.01840  0.00000  0.00000
    0.00000  0.00261  0.00000
    0.00000  0.00000  0.00261
@@ -1114,7 +1114,7 @@
  Transformation to local coordinates 
  First  local vector :        0.577350       -0.577350       -0.577350
  Second local vector :        0.816497        0.408248        0.408248
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
   -0.01840  0.00000  0.00000
    0.00000  0.00261  0.00000
    0.00000  0.00000  0.00261
@@ -1159,7 +1159,7 @@
  Transformation to local coordinates 
  First  local vector :        0.577350        0.577350        0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
   -0.01840  0.00000  0.00000
    0.00000  0.00261  0.00000
    0.00000  0.00000  0.00261
@@ -1264,7 +1264,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.816497       -0.408248       -0.408248
  Second local vector :        0.577350       -0.577350       -0.577350
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -1279,7 +1279,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248       -0.816497       -0.408248
  Second local vector :        0.912871       -0.365148       -0.182574
- Third  local vector :        0.000000       -0.447214        0.894427
+ Third  local vector :       -0.000000       -0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -1339,7 +1339,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248       -0.408248        0.816497
  Second local vector :        0.912871       -0.182574        0.365148
- Third  local vector :        0.000000        0.894427        0.447214
+ Third  local vector :       -0.000000        0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -1369,7 +1369,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248        0.408248       -0.816497
  Second local vector :        0.912871        0.182574       -0.365148
- Third  local vector :        0.000000       -0.894427       -0.447214
+ Third  local vector :       -0.000000       -0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -1384,7 +1384,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.816497        0.408248        0.408248
  Second local vector :        0.577350        0.577350        0.577350
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -1429,7 +1429,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248        0.816497        0.408248
  Second local vector :        0.912871        0.365148        0.182574
- Third  local vector :        0.000000        0.447214       -0.894427
+ Third  local vector :       -0.000000        0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -1459,7 +1459,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248       -0.408248       -0.816497
  Second local vector :        0.912871        0.182574        0.365148
- Third  local vector :        0.000000       -0.894427        0.447214
+ Third  local vector :       -0.000000       -0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -1474,7 +1474,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248       -0.816497        0.408248
  Second local vector :        0.912871        0.365148       -0.182574
- Third  local vector :        0.000000        0.447214        0.894427
+ Third  local vector :       -0.000000        0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -1519,7 +1519,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248        0.408248        0.816497
  Second local vector :        0.912871       -0.182574       -0.365148
- Third  local vector :        0.000000        0.894427       -0.447214
+ Third  local vector :       -0.000000        0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -1534,7 +1534,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248        0.816497       -0.408248
  Second local vector :        0.912871       -0.365148        0.182574
- Third  local vector :        0.000000       -0.447214       -0.894427
+ Third  local vector :       -0.000000       -0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -1579,7 +1579,7 @@
  Transformation to local coordinates 
  First  local vector :        0.816497       -0.408248        0.408248
  Second local vector :        0.577350        0.577350       -0.577350
- Third  local vector :        0.000000        0.707107        0.707107
+ Third  local vector :       -0.000000        0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -1594,7 +1594,7 @@
  Transformation to local coordinates 
  First  local vector :        0.816497        0.408248       -0.408248
  Second local vector :        0.577350       -0.577350        0.577350
- Third  local vector :        0.000000       -0.707107       -0.707107
+ Third  local vector :       -0.000000       -0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -2179,7 +2179,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.904534       -0.301511        0.301511
  Second local vector :        0.426401       -0.639602        0.639602
- Third  local vector :        0.000000        0.707107        0.707107
+ Third  local vector :       -0.000000        0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -2194,7 +2194,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.904534        0.301511       -0.301511
  Second local vector :        0.426401        0.639602       -0.639602
- Third  local vector :        0.000000       -0.707107       -0.707107
+ Third  local vector :       -0.000000       -0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -2464,7 +2464,7 @@
  Transformation to local coordinates 
  First  local vector :        0.904534       -0.301511       -0.301511
  Second local vector :        0.426401        0.639602        0.639602
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -2509,7 +2509,7 @@
  Transformation to local coordinates 
  First  local vector :        0.904534        0.301511        0.301511
  Second local vector :        0.426401       -0.639602       -0.639602
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -2539,7 +2539,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350       -0.577350        0.577350
  Second local vector :        0.816497       -0.408248        0.408248
- Third  local vector :        0.000000        0.707107        0.707107
+ Third  local vector :       -0.000000        0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -2554,7 +2554,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350        0.577350       -0.577350
  Second local vector :        0.816497        0.408248       -0.408248
- Third  local vector :        0.000000       -0.707107       -0.707107
+ Third  local vector :       -0.000000       -0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -2584,7 +2584,7 @@
  Transformation to local coordinates 
  First  local vector :        0.577350       -0.577350       -0.577350
  Second local vector :        0.816497        0.408248        0.408248
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -2629,7 +2629,7 @@
  Transformation to local coordinates 
  First  local vector :        0.577350        0.577350        0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -2674,7 +2674,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784       -0.534522        0.267261
  Second local vector :        0.597614       -0.717137        0.358569
- Third  local vector :        0.000000        0.447214        0.894427
+ Third  local vector :       -0.000000        0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -2689,7 +2689,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784       -0.267261        0.534522
  Second local vector :        0.597614       -0.358569        0.717137
- Third  local vector :        0.000000        0.894427        0.447214
+ Third  local vector :       -0.000000        0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -2704,7 +2704,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784        0.267261       -0.534522
  Second local vector :        0.597614        0.358569       -0.717137
- Third  local vector :        0.000000       -0.894427       -0.447214
+ Third  local vector :       -0.000000       -0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -2734,7 +2734,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784        0.534522       -0.267261
  Second local vector :        0.597614        0.717137       -0.358569
- Third  local vector :        0.000000       -0.447214       -0.894427
+ Third  local vector :       -0.000000       -0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -2764,7 +2764,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.534522       -0.801784       -0.267261
  Second local vector :        0.845154       -0.507093       -0.169031
- Third  local vector :        0.000000       -0.316228        0.948683
+ Third  local vector :       -0.000000       -0.316228        0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -2959,7 +2959,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.534522        0.801784        0.267261
  Second local vector :        0.845154        0.507093        0.169031
- Third  local vector :        0.000000        0.316228       -0.948683
+ Third  local vector :       -0.000000        0.316228       -0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3139,7 +3139,7 @@
  Transformation to local coordinates 
  First  local vector :        0.534522       -0.801784        0.267261
  Second local vector :        0.845154        0.507093       -0.169031
- Third  local vector :        0.000000        0.316228        0.948683
+ Third  local vector :       -0.000000        0.316228        0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3169,7 +3169,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784       -0.534522       -0.267261
  Second local vector :        0.597614        0.717137        0.358569
- Third  local vector :        0.000000       -0.447214        0.894427
+ Third  local vector :       -0.000000       -0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3184,7 +3184,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784       -0.267261       -0.534522
  Second local vector :        0.597614        0.358569        0.717137
- Third  local vector :        0.000000       -0.894427        0.447214
+ Third  local vector :       -0.000000       -0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3289,7 +3289,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784        0.267261        0.534522
  Second local vector :        0.597614       -0.358569       -0.717137
- Third  local vector :        0.000000        0.894427       -0.447214
+ Third  local vector :       -0.000000        0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3304,7 +3304,7 @@
  Transformation to local coordinates 
  First  local vector :        0.534522        0.801784       -0.267261
  Second local vector :        0.845154       -0.507093        0.169031
- Third  local vector :        0.000000       -0.316228       -0.948683
+ Third  local vector :       -0.000000       -0.316228       -0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3349,7 +3349,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784        0.534522        0.267261
  Second local vector :        0.597614       -0.717137       -0.358569
- Third  local vector :        0.000000        0.447214       -0.894427
+ Third  local vector :       -0.000000        0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3469,7 +3469,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.942809       -0.235702       -0.235702
  Second local vector :        0.333333       -0.666667       -0.666667
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3529,7 +3529,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.942809        0.235702        0.235702
  Second local vector :        0.333333        0.666667        0.666667
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3574,7 +3574,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.235702       -0.942809       -0.235702
  Second local vector :        0.971825       -0.228665       -0.057166
- Third  local vector :        0.000000       -0.242536        0.970143
+ Third  local vector :       -0.000000       -0.242536        0.970143
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3604,7 +3604,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.235702       -0.235702       -0.942809
  Second local vector :        0.971825       -0.057166       -0.228665
- Third  local vector :        0.000000       -0.970143        0.242536
+ Third  local vector :       -0.000000       -0.970143        0.242536
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3649,7 +3649,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.235702        0.235702        0.942809
  Second local vector :        0.971825        0.057166        0.228665
- Third  local vector :        0.000000        0.970143       -0.242536
+ Third  local vector :       -0.000000        0.970143       -0.242536
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3679,7 +3679,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.235702        0.942809        0.235702
  Second local vector :        0.971825        0.228665        0.057166
- Third  local vector :        0.000000        0.242536       -0.970143
+ Third  local vector :       -0.000000        0.242536       -0.970143
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3724,7 +3724,7 @@
  Transformation to local coordinates 
  First  local vector :        0.235702       -0.942809        0.235702
  Second local vector :        0.971825        0.228665       -0.057166
- Third  local vector :        0.000000        0.242536        0.970143
+ Third  local vector :       -0.000000        0.242536        0.970143
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3769,7 +3769,7 @@
  Transformation to local coordinates 
  First  local vector :        0.235702       -0.235702        0.942809
  Second local vector :        0.971825        0.057166       -0.228665
- Third  local vector :        0.000000        0.970143        0.242536
+ Third  local vector :       -0.000000        0.970143        0.242536
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3784,7 +3784,7 @@
  Transformation to local coordinates 
  First  local vector :        0.235702        0.235702       -0.942809
  Second local vector :        0.971825       -0.057166        0.228665
- Third  local vector :        0.000000       -0.970143       -0.242536
+ Third  local vector :       -0.000000       -0.970143       -0.242536
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3844,7 +3844,7 @@
  Transformation to local coordinates 
  First  local vector :        0.235702        0.942809       -0.235702
  Second local vector :        0.971825       -0.228665        0.057166
- Third  local vector :        0.000000       -0.242536       -0.970143
+ Third  local vector :       -0.000000       -0.242536       -0.970143
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -3985,7 +3985,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350       -0.577350        0.577350
  Second local vector :        0.816497       -0.408248        0.408248
- Third  local vector :        0.000000        0.707107        0.707107
+ Third  local vector :       -0.000000        0.707107        0.707107
   -0.01840  0.00000  0.00000
    0.00000  0.00261  0.00000
    0.00000  0.00000  0.00261
@@ -4000,7 +4000,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350        0.577350       -0.577350
  Second local vector :        0.816497        0.408248       -0.408248
- Third  local vector :        0.000000       -0.707107       -0.707107
+ Third  local vector :       -0.000000       -0.707107       -0.707107
   -0.01840  0.00000  0.00000
    0.00000  0.00261  0.00000
    0.00000  0.00000  0.00261
@@ -4030,7 +4030,7 @@
  Transformation to local coordinates 
  First  local vector :        0.577350       -0.577350       -0.577350
  Second local vector :        0.816497        0.408248        0.408248
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
   -0.01840  0.00000  0.00000
    0.00000  0.00261  0.00000
    0.00000  0.00000  0.00261
@@ -4075,7 +4075,7 @@
  Transformation to local coordinates 
  First  local vector :        0.577350        0.577350        0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
   -0.01840  0.00000  0.00000
    0.00000  0.00261  0.00000
    0.00000  0.00000  0.00261
@@ -4720,7 +4720,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.666667       -0.666667       -0.333333
  Second local vector :        0.745356       -0.596285       -0.298142
- Third  local vector :        0.000000       -0.447214        0.894427
+ Third  local vector :       -0.000000       -0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -4750,7 +4750,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.666667       -0.333333       -0.666667
  Second local vector :        0.745356       -0.298142       -0.596285
- Third  local vector :        0.000000       -0.894427        0.447214
+ Third  local vector :       -0.000000       -0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -4885,7 +4885,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.333333       -0.666667        0.666667
  Second local vector :        0.942809       -0.235702        0.235702
- Third  local vector :        0.000000        0.707107        0.707107
+ Third  local vector :       -0.000000        0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -4945,7 +4945,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.333333        0.666667        0.666667
  Second local vector :        0.942809        0.235702        0.235702
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -4975,7 +4975,7 @@
  Transformation to local coordinates 
  First  local vector :        0.333333       -0.666667       -0.666667
  Second local vector :        0.942809        0.235702        0.235702
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -5005,7 +5005,7 @@
  Transformation to local coordinates 
  First  local vector :        0.333333       -0.666667        0.666667
  Second local vector :        0.942809        0.235702       -0.235702
- Third  local vector :       -0.000000        0.707107        0.707107
+ Third  local vector :        0.000000        0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -5020,7 +5020,7 @@
  Transformation to local coordinates 
  First  local vector :        0.666667       -0.666667        0.333333
  Second local vector :        0.745356        0.596285       -0.298142
- Third  local vector :        0.000000        0.447214        0.894427
+ Third  local vector :       -0.000000        0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -5080,7 +5080,7 @@
  Transformation to local coordinates 
  First  local vector :        0.666667        0.333333       -0.666667
  Second local vector :        0.745356       -0.298142        0.596285
- Third  local vector :        0.000000       -0.894427       -0.447214
+ Third  local vector :       -0.000000       -0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -5125,7 +5125,7 @@
  Transformation to local coordinates 
  First  local vector :        0.666667        0.333333        0.666667
  Second local vector :        0.745356       -0.298142       -0.596285
- Third  local vector :        0.000000        0.894427       -0.447214
+ Third  local vector :       -0.000000        0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -5140,7 +5140,7 @@
  Transformation to local coordinates 
  First  local vector :        0.666667        0.666667        0.333333
  Second local vector :        0.745356       -0.596285       -0.298142
- Third  local vector :        0.000000        0.447214       -0.894427
+ Third  local vector :       -0.000000        0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -5185,7 +5185,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.904534       -0.301511        0.301511
  Second local vector :        0.426401       -0.639602        0.639602
- Third  local vector :        0.000000        0.707107        0.707107
+ Third  local vector :       -0.000000        0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -5200,7 +5200,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.904534        0.301511       -0.301511
  Second local vector :        0.426401        0.639602       -0.639602
- Third  local vector :        0.000000       -0.707107       -0.707107
+ Third  local vector :       -0.000000       -0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -5470,7 +5470,7 @@
  Transformation to local coordinates 
  First  local vector :        0.904534       -0.301511       -0.301511
  Second local vector :        0.426401        0.639602        0.639602
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -5515,7 +5515,7 @@
  Transformation to local coordinates 
  First  local vector :        0.904534        0.301511        0.301511
  Second local vector :        0.426401       -0.639602       -0.639602
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -5530,7 +5530,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350       -0.577350       -0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -5560,7 +5560,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350        0.577350       -0.577350
  Second local vector :        0.816497        0.408248       -0.408248
- Third  local vector :        0.000000       -0.707107       -0.707107
+ Third  local vector :       -0.000000       -0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -5620,7 +5620,7 @@
  Transformation to local coordinates 
  First  local vector :        0.577350        0.577350       -0.577350
  Second local vector :        0.816497       -0.408248        0.408248
- Third  local vector :       -0.000000       -0.707107       -0.707107
+ Third  local vector :        0.000000       -0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -5635,7 +5635,7 @@
  Transformation to local coordinates 
  First  local vector :        0.577350        0.577350        0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -6220,7 +6220,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.485071       -0.727607        0.485071
  Second local vector :        0.874475       -0.403604        0.269069
- Third  local vector :        0.000000        0.554700        0.832050
+ Third  local vector :       -0.000000        0.554700        0.832050
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -6295,7 +6295,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.485071        0.485071        0.727607
  Second local vector :        0.874475        0.269069        0.403604
- Third  local vector :        0.000000        0.832050       -0.554700
+ Third  local vector :       -0.000000        0.832050       -0.554700
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -6565,7 +6565,7 @@
  Transformation to local coordinates 
  First  local vector :        0.485071       -0.727607        0.485071
  Second local vector :        0.874475        0.403604       -0.269069
- Third  local vector :        0.000000        0.554700        0.832050
+ Third  local vector :       -0.000000        0.554700        0.832050
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -6580,7 +6580,7 @@
  Transformation to local coordinates 
  First  local vector :        0.485071       -0.485071        0.727607
  Second local vector :        0.874475        0.269069       -0.403604
- Third  local vector :        0.000000        0.832050        0.554700
+ Third  local vector :       -0.000000        0.832050        0.554700
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -6625,7 +6625,7 @@
  Transformation to local coordinates 
  First  local vector :        0.485071        0.485071       -0.727607
  Second local vector :        0.874475       -0.269069        0.403604
- Third  local vector :        0.000000       -0.832050       -0.554700
+ Third  local vector :       -0.000000       -0.832050       -0.554700
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -6655,7 +6655,7 @@
  Transformation to local coordinates 
  First  local vector :        0.485071        0.727607       -0.485071
  Second local vector :        0.874475       -0.403604        0.269069
- Third  local vector :        0.000000       -0.554700       -0.832050
+ Third  local vector :       -0.000000       -0.554700       -0.832050
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -6700,7 +6700,7 @@
  Transformation to local coordinates 
  First  local vector :        0.727607       -0.485071       -0.485071
  Second local vector :        0.685994        0.514496        0.514496
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -6805,7 +6805,7 @@
  Transformation to local coordinates 
  First  local vector :        0.727607        0.485071        0.485071
  Second local vector :        0.685994       -0.514496       -0.514496
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7306,7 +7306,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248       -0.816497       -0.408248
  Second local vector :        0.912871       -0.365148       -0.182574
- Third  local vector :        0.000000       -0.447214        0.894427
+ Third  local vector :       -0.000000       -0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7336,7 +7336,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248       -0.408248       -0.816497
  Second local vector :        0.912871       -0.182574       -0.365148
- Third  local vector :        0.000000       -0.894427        0.447214
+ Third  local vector :       -0.000000       -0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7351,7 +7351,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.816497       -0.408248       -0.408248
  Second local vector :        0.577350       -0.577350       -0.577350
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7381,7 +7381,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248       -0.408248        0.816497
  Second local vector :        0.912871       -0.182574        0.365148
- Third  local vector :        0.000000        0.894427        0.447214
+ Third  local vector :       -0.000000        0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7441,7 +7441,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.816497        0.408248        0.408248
  Second local vector :        0.577350        0.577350        0.577350
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7471,7 +7471,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248        0.816497        0.408248
  Second local vector :        0.912871        0.365148        0.182574
- Third  local vector :        0.000000        0.447214       -0.894427
+ Third  local vector :       -0.000000        0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7501,7 +7501,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248       -0.816497        0.408248
  Second local vector :        0.912871        0.365148       -0.182574
- Third  local vector :        0.000000        0.447214        0.894427
+ Third  local vector :       -0.000000        0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7546,7 +7546,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248        0.408248       -0.816497
  Second local vector :        0.912871       -0.182574        0.365148
- Third  local vector :        0.000000       -0.894427       -0.447214
+ Third  local vector :       -0.000000       -0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7561,7 +7561,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248        0.816497       -0.408248
  Second local vector :        0.912871       -0.365148        0.182574
- Third  local vector :        0.000000       -0.447214       -0.894427
+ Third  local vector :       -0.000000       -0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7576,7 +7576,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248        0.408248        0.816497
  Second local vector :        0.912871       -0.182574       -0.365148
- Third  local vector :        0.000000        0.894427       -0.447214
+ Third  local vector :       -0.000000        0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7621,7 +7621,7 @@
  Transformation to local coordinates 
  First  local vector :        0.816497       -0.408248        0.408248
  Second local vector :        0.577350        0.577350       -0.577350
- Third  local vector :        0.000000        0.707107        0.707107
+ Third  local vector :       -0.000000        0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7636,7 +7636,7 @@
  Transformation to local coordinates 
  First  local vector :        0.816497        0.408248       -0.408248
  Second local vector :        0.577350       -0.577350        0.577350
- Third  local vector :        0.000000       -0.707107       -0.707107
+ Third  local vector :       -0.000000       -0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7876,7 +7876,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.333333       -0.666667        0.666667
  Second local vector :        0.942809       -0.235702        0.235702
- Third  local vector :        0.000000        0.707107        0.707107
+ Third  local vector :       -0.000000        0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7906,7 +7906,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.333333        0.666667        0.666667
  Second local vector :        0.942809        0.235702        0.235702
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7921,7 +7921,7 @@
  Transformation to local coordinates 
  First  local vector :        0.333333       -0.666667       -0.666667
  Second local vector :        0.942809        0.235702        0.235702
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -7936,7 +7936,7 @@
  Transformation to local coordinates 
  First  local vector :        0.333333       -0.666667        0.666667
  Second local vector :        0.942809        0.235702       -0.235702
- Third  local vector :       -0.000000        0.707107        0.707107
+ Third  local vector :        0.000000        0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -8356,7 +8356,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350       -0.577350       -0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -8371,7 +8371,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350       -0.577350        0.577350
  Second local vector :        0.816497       -0.408248        0.408248
- Third  local vector :        0.000000        0.707107        0.707107
+ Third  local vector :       -0.000000        0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -8386,7 +8386,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350        0.577350       -0.577350
  Second local vector :        0.816497        0.408248       -0.408248
- Third  local vector :        0.000000       -0.707107       -0.707107
+ Third  local vector :       -0.000000       -0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -8461,7 +8461,7 @@
  Transformation to local coordinates 
  First  local vector :        0.577350        0.577350        0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -8611,7 +8611,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784       -0.534522        0.267261
  Second local vector :        0.597614       -0.717137        0.358569
- Third  local vector :        0.000000        0.447214        0.894427
+ Third  local vector :       -0.000000        0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -8626,7 +8626,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784       -0.267261       -0.534522
  Second local vector :        0.597614       -0.358569       -0.717137
- Third  local vector :        0.000000       -0.894427        0.447214
+ Third  local vector :       -0.000000       -0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -8641,7 +8641,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784       -0.267261        0.534522
  Second local vector :        0.597614       -0.358569        0.717137
- Third  local vector :        0.000000        0.894427        0.447214
+ Third  local vector :       -0.000000        0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -8671,7 +8671,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784        0.534522       -0.267261
  Second local vector :        0.597614        0.717137       -0.358569
- Third  local vector :        0.000000       -0.447214       -0.894427
+ Third  local vector :       -0.000000       -0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -8746,7 +8746,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.534522       -0.801784       -0.267261
  Second local vector :        0.845154       -0.507093       -0.169031
- Third  local vector :        0.000000       -0.316228        0.948683
+ Third  local vector :       -0.000000       -0.316228        0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -8926,7 +8926,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.534522        0.801784        0.267261
  Second local vector :        0.845154        0.507093        0.169031
- Third  local vector :        0.000000        0.316228       -0.948683
+ Third  local vector :       -0.000000        0.316228       -0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -9091,7 +9091,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784       -0.534522       -0.267261
  Second local vector :        0.597614        0.717137        0.358569
- Third  local vector :        0.000000       -0.447214        0.894427
+ Third  local vector :       -0.000000       -0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -9106,7 +9106,7 @@
  Transformation to local coordinates 
  First  local vector :        0.534522       -0.801784        0.267261
  Second local vector :        0.845154        0.507093       -0.169031
- Third  local vector :        0.000000        0.316228        0.948683
+ Third  local vector :       -0.000000        0.316228        0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -9211,7 +9211,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784        0.267261       -0.534522
  Second local vector :        0.597614       -0.358569        0.717137
- Third  local vector :        0.000000       -0.894427       -0.447214
+ Third  local vector :       -0.000000       -0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -9241,7 +9241,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784        0.267261        0.534522
  Second local vector :        0.597614       -0.358569       -0.717137
- Third  local vector :        0.000000        0.894427       -0.447214
+ Third  local vector :       -0.000000        0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -9256,7 +9256,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784        0.534522        0.267261
  Second local vector :        0.597614       -0.717137       -0.358569
- Third  local vector :        0.000000        0.447214       -0.894427
+ Third  local vector :       -0.000000        0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -9286,7 +9286,7 @@
  Transformation to local coordinates 
  First  local vector :        0.534522        0.801784       -0.267261
  Second local vector :        0.845154       -0.507093        0.169031
- Third  local vector :        0.000000       -0.316228       -0.948683
+ Third  local vector :       -0.000000       -0.316228       -0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -9586,7 +9586,7 @@
  Transformation to local coordinates 
  First  local vector :        0.727607       -0.485071       -0.485071
  Second local vector :        0.685994        0.514496        0.514496
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -9631,7 +9631,7 @@
  Transformation to local coordinates 
  First  local vector :        0.727607        0.485071        0.485071
  Second local vector :        0.685994       -0.514496       -0.514496
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -9676,7 +9676,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.942809       -0.235702       -0.235702
  Second local vector :        0.333333       -0.666667       -0.666667
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -9736,7 +9736,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.942809        0.235702        0.235702
  Second local vector :        0.333333        0.666667        0.666667
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -9781,7 +9781,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.235702       -0.942809        0.235702
  Second local vector :        0.971825       -0.228665        0.057166
- Third  local vector :        0.000000        0.242536        0.970143
+ Third  local vector :       -0.000000        0.242536        0.970143
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -9826,7 +9826,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.235702        0.235702       -0.942809
  Second local vector :        0.971825        0.057166       -0.228665
- Third  local vector :        0.000000       -0.970143       -0.242536
+ Third  local vector :       -0.000000       -0.970143       -0.242536
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -9841,7 +9841,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.235702        0.235702        0.942809
  Second local vector :        0.971825        0.057166        0.228665
- Third  local vector :        0.000000        0.970143       -0.242536
+ Third  local vector :       -0.000000        0.970143       -0.242536
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -10312,7 +10312,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.816497       -0.408248       -0.408248
  Second local vector :        0.577350       -0.577350       -0.577350
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -10357,7 +10357,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.816497        0.408248        0.408248
  Second local vector :        0.577350        0.577350        0.577350
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -10372,7 +10372,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248       -0.408248       -0.816497
  Second local vector :        0.912871       -0.182574       -0.365148
- Third  local vector :        0.000000       -0.894427        0.447214
+ Third  local vector :       -0.000000       -0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -10387,7 +10387,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248       -0.816497       -0.408248
  Second local vector :        0.912871       -0.365148       -0.182574
- Third  local vector :        0.000000       -0.447214        0.894427
+ Third  local vector :       -0.000000       -0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -10417,7 +10417,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248       -0.408248        0.816497
  Second local vector :        0.912871       -0.182574        0.365148
- Third  local vector :        0.000000        0.894427        0.447214
+ Third  local vector :       -0.000000        0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -10477,7 +10477,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248        0.816497        0.408248
  Second local vector :        0.912871        0.365148        0.182574
- Third  local vector :        0.000000        0.447214       -0.894427
+ Third  local vector :       -0.000000        0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -10522,7 +10522,7 @@
  Transformation to local coordinates 
  First  local vector :        0.816497       -0.408248       -0.408248
  Second local vector :        0.577350        0.577350        0.577350
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -10537,7 +10537,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248       -0.816497        0.408248
  Second local vector :        0.912871        0.365148       -0.182574
- Third  local vector :        0.000000        0.447214        0.894427
+ Third  local vector :       -0.000000        0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -10582,7 +10582,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248        0.408248       -0.816497
  Second local vector :        0.912871       -0.182574        0.365148
- Third  local vector :        0.000000       -0.894427       -0.447214
+ Third  local vector :       -0.000000       -0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -10612,7 +10612,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248        0.408248        0.816497
  Second local vector :        0.912871       -0.182574       -0.365148
- Third  local vector :        0.000000        0.894427       -0.447214
+ Third  local vector :       -0.000000        0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -10627,7 +10627,7 @@
  Transformation to local coordinates 
  First  local vector :        0.816497        0.408248        0.408248
  Second local vector :        0.577350       -0.577350       -0.577350
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -10642,7 +10642,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248        0.816497       -0.408248
  Second local vector :        0.912871       -0.365148        0.182574
- Third  local vector :        0.000000       -0.447214       -0.894427
+ Third  local vector :       -0.000000       -0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -10852,7 +10852,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.666667       -0.333333       -0.666667
  Second local vector :        0.745356       -0.298142       -0.596285
- Third  local vector :        0.000000       -0.894427        0.447214
+ Third  local vector :       -0.000000       -0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -10972,7 +10972,7 @@
  Transformation to local coordinates 
  First  local vector :        0.666667        0.333333       -0.666667
  Second local vector :        0.745356       -0.298142        0.596285
- Third  local vector :        0.000000       -0.894427       -0.447214
+ Third  local vector :       -0.000000       -0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -10987,7 +10987,7 @@
  Transformation to local coordinates 
  First  local vector :        0.666667        0.333333        0.666667
  Second local vector :        0.745356       -0.298142       -0.596285
- Third  local vector :        0.000000        0.894427       -0.447214
+ Third  local vector :       -0.000000        0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -11362,7 +11362,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350       -0.577350       -0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -11407,7 +11407,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350        0.577350        0.577350
  Second local vector :        0.816497        0.408248        0.408248
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -11452,7 +11452,7 @@
  Transformation to local coordinates 
  First  local vector :        0.577350        0.577350       -0.577350
  Second local vector :        0.816497       -0.408248        0.408248
- Third  local vector :        0.000000       -0.707107       -0.707107
+ Third  local vector :       -0.000000       -0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -11467,7 +11467,7 @@
  Transformation to local coordinates 
  First  local vector :        0.577350        0.577350        0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -11602,7 +11602,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.534522       -0.801784       -0.267261
  Second local vector :        0.845154       -0.507093       -0.169031
- Third  local vector :        0.000000       -0.316228        0.948683
+ Third  local vector :       -0.000000       -0.316228        0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -11632,7 +11632,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784       -0.267261       -0.534522
  Second local vector :        0.597614       -0.358569       -0.717137
- Third  local vector :        0.000000       -0.894427        0.447214
+ Third  local vector :       -0.000000       -0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -11677,7 +11677,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784       -0.534522        0.267261
  Second local vector :        0.597614       -0.717137        0.358569
- Third  local vector :        0.000000        0.447214        0.894427
+ Third  local vector :       -0.000000        0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -11692,7 +11692,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784       -0.267261        0.534522
  Second local vector :        0.597614       -0.358569        0.717137
- Third  local vector :        0.000000        0.894427        0.447214
+ Third  local vector :       -0.000000        0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -11782,7 +11782,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784        0.534522       -0.267261
  Second local vector :        0.597614        0.717137       -0.358569
- Third  local vector :        0.000000       -0.447214       -0.894427
+ Third  local vector :       -0.000000       -0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -11827,7 +11827,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.534522        0.801784        0.267261
  Second local vector :        0.845154        0.507093        0.169031
- Third  local vector :        0.000000        0.316228       -0.948683
+ Third  local vector :       -0.000000        0.316228       -0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -12007,7 +12007,7 @@
  Transformation to local coordinates 
  First  local vector :        0.534522       -0.801784        0.267261
  Second local vector :        0.845154        0.507093       -0.169031
- Third  local vector :        0.000000        0.316228        0.948683
+ Third  local vector :       -0.000000        0.316228        0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -12142,7 +12142,7 @@
  Transformation to local coordinates 
  First  local vector :        0.534522        0.801784       -0.267261
  Second local vector :        0.845154       -0.507093        0.169031
- Third  local vector :        0.000000       -0.316228       -0.948683
+ Third  local vector :       -0.000000       -0.316228       -0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -12217,7 +12217,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784       -0.534522       -0.267261
  Second local vector :        0.597614        0.717137        0.358569
- Third  local vector :        0.000000       -0.447214        0.894427
+ Third  local vector :       -0.000000       -0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -12262,7 +12262,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784        0.267261       -0.534522
  Second local vector :        0.597614       -0.358569        0.717137
- Third  local vector :        0.000000       -0.894427       -0.447214
+ Third  local vector :       -0.000000       -0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -12277,7 +12277,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784        0.267261        0.534522
  Second local vector :        0.597614       -0.358569       -0.717137
- Third  local vector :        0.000000        0.894427       -0.447214
+ Third  local vector :       -0.000000        0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -12307,7 +12307,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784        0.534522        0.267261
  Second local vector :        0.597614       -0.717137       -0.358569
- Third  local vector :        0.000000        0.447214       -0.894427
+ Third  local vector :       -0.000000        0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -12457,7 +12457,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.485071       -0.727607        0.485071
  Second local vector :        0.874475       -0.403604        0.269069
- Third  local vector :        0.000000        0.554700        0.832050
+ Third  local vector :       -0.000000        0.554700        0.832050
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -12577,7 +12577,7 @@
  Transformation to local coordinates 
  First  local vector :        0.485071       -0.727607        0.485071
  Second local vector :        0.874475        0.403604       -0.269069
- Third  local vector :        0.000000        0.554700        0.832050
+ Third  local vector :       -0.000000        0.554700        0.832050
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -12592,7 +12592,7 @@
  Transformation to local coordinates 
  First  local vector :        0.485071        0.727607       -0.485071
  Second local vector :        0.874475       -0.403604        0.269069
- Third  local vector :        0.000000       -0.554700       -0.832050
+ Third  local vector :       -0.000000       -0.554700       -0.832050
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -12667,7 +12667,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.942809       -0.235702        0.235702
  Second local vector :        0.333333       -0.666667        0.666667
- Third  local vector :        0.000000        0.707107        0.707107
+ Third  local vector :       -0.000000        0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -12682,7 +12682,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.942809        0.235702       -0.235702
  Second local vector :        0.333333        0.666667       -0.666667
- Third  local vector :        0.000000       -0.707107       -0.707107
+ Third  local vector :       -0.000000       -0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -12787,7 +12787,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.235702       -0.942809       -0.235702
  Second local vector :        0.971825       -0.228665       -0.057166
- Third  local vector :        0.000000       -0.242536        0.970143
+ Third  local vector :       -0.000000       -0.242536        0.970143
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -12862,7 +12862,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.235702        0.235702       -0.942809
  Second local vector :        0.971825        0.057166       -0.228665
- Third  local vector :        0.000000       -0.970143       -0.242536
+ Third  local vector :       -0.000000       -0.970143       -0.242536
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -13318,7 +13318,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.816497       -0.408248       -0.408248
  Second local vector :        0.577350       -0.577350       -0.577350
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -13363,7 +13363,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.816497        0.408248        0.408248
  Second local vector :        0.577350        0.577350        0.577350
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -13378,7 +13378,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248       -0.816497       -0.408248
  Second local vector :        0.912871       -0.365148       -0.182574
- Third  local vector :        0.000000       -0.447214        0.894427
+ Third  local vector :       -0.000000       -0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -13423,7 +13423,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248       -0.408248        0.816497
  Second local vector :        0.912871       -0.182574        0.365148
- Third  local vector :        0.000000        0.894427        0.447214
+ Third  local vector :       -0.000000        0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -13438,7 +13438,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248        0.408248       -0.816497
  Second local vector :        0.912871        0.182574       -0.365148
- Third  local vector :        0.000000       -0.894427       -0.447214
+ Third  local vector :       -0.000000       -0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -13468,7 +13468,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.408248        0.816497        0.408248
  Second local vector :        0.912871        0.365148        0.182574
- Third  local vector :        0.000000        0.447214       -0.894427
+ Third  local vector :       -0.000000        0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -13513,7 +13513,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248       -0.816497        0.408248
  Second local vector :        0.912871        0.365148       -0.182574
- Third  local vector :        0.000000        0.447214        0.894427
+ Third  local vector :       -0.000000        0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -13528,7 +13528,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248       -0.408248       -0.816497
  Second local vector :        0.912871        0.182574        0.365148
- Third  local vector :        0.000000       -0.894427        0.447214
+ Third  local vector :       -0.000000       -0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -13543,7 +13543,7 @@
  Transformation to local coordinates 
  First  local vector :        0.816497       -0.408248       -0.408248
  Second local vector :        0.577350        0.577350        0.577350
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -13603,7 +13603,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248        0.816497       -0.408248
  Second local vector :        0.912871       -0.365148        0.182574
- Third  local vector :        0.000000       -0.447214       -0.894427
+ Third  local vector :       -0.000000       -0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -13648,7 +13648,7 @@
  Transformation to local coordinates 
  First  local vector :        0.816497        0.408248        0.408248
  Second local vector :        0.577350       -0.577350       -0.577350
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -13663,7 +13663,7 @@
  Transformation to local coordinates 
  First  local vector :        0.408248        0.408248        0.816497
  Second local vector :        0.912871       -0.182574       -0.365148
- Third  local vector :        0.000000        0.894427       -0.447214
+ Third  local vector :       -0.000000        0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -13858,7 +13858,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.666667       -0.666667       -0.333333
  Second local vector :        0.745356       -0.596285       -0.298142
- Third  local vector :        0.000000       -0.447214        0.894427
+ Third  local vector :       -0.000000       -0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -13963,7 +13963,7 @@
  Transformation to local coordinates 
  First  local vector :        0.666667       -0.666667        0.333333
  Second local vector :        0.745356        0.596285       -0.298142
- Third  local vector :        0.000000        0.447214        0.894427
+ Third  local vector :       -0.000000        0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -13993,7 +13993,7 @@
  Transformation to local coordinates 
  First  local vector :        0.666667        0.666667        0.333333
  Second local vector :        0.745356       -0.596285       -0.298142
- Third  local vector :        0.000000        0.447214       -0.894427
+ Third  local vector :       -0.000000        0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -14368,7 +14368,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350       -0.577350       -0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -14398,7 +14398,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.577350        0.577350       -0.577350
  Second local vector :        0.816497        0.408248       -0.408248
- Third  local vector :        0.000000       -0.707107       -0.707107
+ Third  local vector :       -0.000000       -0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -14428,7 +14428,7 @@
  Transformation to local coordinates 
  First  local vector :        0.577350       -0.577350       -0.577350
  Second local vector :        0.816497        0.408248        0.408248
- Third  local vector :        0.000000       -0.707107        0.707107
+ Third  local vector :       -0.000000       -0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -14473,7 +14473,7 @@
  Transformation to local coordinates 
  First  local vector :        0.577350        0.577350        0.577350
  Second local vector :        0.816497       -0.408248       -0.408248
- Third  local vector :        0.000000        0.707107       -0.707107
+ Third  local vector :       -0.000000        0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -14623,7 +14623,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.534522       -0.801784       -0.267261
  Second local vector :        0.845154       -0.507093       -0.169031
- Third  local vector :        0.000000       -0.316228        0.948683
+ Third  local vector :       -0.000000       -0.316228        0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -14638,7 +14638,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784       -0.534522        0.267261
  Second local vector :        0.597614       -0.717137        0.358569
- Third  local vector :        0.000000        0.447214        0.894427
+ Third  local vector :       -0.000000        0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -14698,7 +14698,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784       -0.267261        0.534522
  Second local vector :        0.597614       -0.358569        0.717137
- Third  local vector :        0.000000        0.894427        0.447214
+ Third  local vector :       -0.000000        0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -14743,7 +14743,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784        0.267261       -0.534522
  Second local vector :        0.597614        0.358569       -0.717137
- Third  local vector :        0.000000       -0.894427       -0.447214
+ Third  local vector :       -0.000000       -0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -14758,7 +14758,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.801784        0.534522       -0.267261
  Second local vector :        0.597614        0.717137       -0.358569
- Third  local vector :        0.000000       -0.447214       -0.894427
+ Third  local vector :       -0.000000       -0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -14833,7 +14833,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.534522        0.801784        0.267261
  Second local vector :        0.845154        0.507093        0.169031
- Third  local vector :        0.000000        0.316228       -0.948683
+ Third  local vector :       -0.000000        0.316228       -0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -15013,7 +15013,7 @@
  Transformation to local coordinates 
  First  local vector :        0.534522       -0.801784        0.267261
  Second local vector :        0.845154        0.507093       -0.169031
- Third  local vector :        0.000000        0.316228        0.948683
+ Third  local vector :       -0.000000        0.316228        0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -15163,7 +15163,7 @@
  Transformation to local coordinates 
  First  local vector :        0.534522        0.801784       -0.267261
  Second local vector :        0.845154       -0.507093        0.169031
- Third  local vector :        0.000000       -0.316228       -0.948683
+ Third  local vector :       -0.000000       -0.316228       -0.948683
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -15208,7 +15208,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784       -0.534522       -0.267261
  Second local vector :        0.597614        0.717137        0.358569
- Third  local vector :        0.000000       -0.447214        0.894427
+ Third  local vector :       -0.000000       -0.447214        0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -15238,7 +15238,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784       -0.267261       -0.534522
  Second local vector :        0.597614        0.358569        0.717137
- Third  local vector :        0.000000       -0.894427        0.447214
+ Third  local vector :       -0.000000       -0.894427        0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -15298,7 +15298,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784        0.534522        0.267261
  Second local vector :        0.597614       -0.717137       -0.358569
- Third  local vector :        0.000000        0.447214       -0.894427
+ Third  local vector :       -0.000000        0.447214       -0.894427
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -15313,7 +15313,7 @@
  Transformation to local coordinates 
  First  local vector :        0.801784        0.267261        0.534522
  Second local vector :        0.597614       -0.358569       -0.717137
- Third  local vector :        0.000000        0.894427       -0.447214
+ Third  local vector :       -0.000000        0.894427       -0.447214
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -15493,7 +15493,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.485071        0.485071        0.727607
  Second local vector :        0.874475        0.269069        0.403604
- Third  local vector :        0.000000        0.832050       -0.554700
+ Third  local vector :       -0.000000        0.832050       -0.554700
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -15583,7 +15583,7 @@
  Transformation to local coordinates 
  First  local vector :        0.485071       -0.485071        0.727607
  Second local vector :        0.874475        0.269069       -0.403604
- Third  local vector :        0.000000        0.832050        0.554700
+ Third  local vector :       -0.000000        0.832050        0.554700
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -15598,7 +15598,7 @@
  Transformation to local coordinates 
  First  local vector :        0.485071        0.485071       -0.727607
  Second local vector :        0.874475       -0.269069        0.403604
- Third  local vector :        0.000000       -0.832050       -0.554700
+ Third  local vector :       -0.000000       -0.832050       -0.554700
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -15673,7 +15673,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.942809       -0.235702        0.235702
  Second local vector :        0.333333       -0.666667        0.666667
- Third  local vector :        0.000000        0.707107        0.707107
+ Third  local vector :       -0.000000        0.707107        0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -15688,7 +15688,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.942809        0.235702       -0.235702
  Second local vector :        0.333333        0.666667       -0.666667
- Third  local vector :        0.000000       -0.707107       -0.707107
+ Third  local vector :       -0.000000       -0.707107       -0.707107
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -15793,7 +15793,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.235702       -0.942809        0.235702
  Second local vector :        0.971825       -0.228665        0.057166
- Third  local vector :        0.000000        0.242536        0.970143
+ Third  local vector :       -0.000000        0.242536        0.970143
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -15838,7 +15838,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.235702       -0.235702       -0.942809
  Second local vector :        0.971825       -0.057166       -0.228665
- Third  local vector :        0.000000       -0.970143        0.242536
+ Third  local vector :       -0.000000       -0.970143        0.242536
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
    0.00000  0.00000  0.00000
@@ -15974,7 +15974,7 @@
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
  
-.[1] Thermal evolution of vibrational properties of $\alpha$-U
+.[1] Thermal evolution of vibrational properties of $\\alpha$-U
  J. Bouchet and F. Bottin, Phys. Rev. B 92, 174108 (2015).
  Strong suggestion to cite this paper in your publications.
  This paper is also available at http://www.arxiv.org/abs/xxxx

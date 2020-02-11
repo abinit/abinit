@@ -5,7 +5,10 @@ tests_abirules     Launch the abirules tests
                    Warning: for some of the tests, the file make.log
                    must be present in the top directory. This means one has
                    to compile with the command: `make > make.log 2>&1`
+
 tests_buildsys     Launch the buildsys tests
+
+tests_libpaw       Launch the libpaw tests
 
 ==============================================================================
 [This file can be found at doc/help_make/help_make_abichecks.txt]

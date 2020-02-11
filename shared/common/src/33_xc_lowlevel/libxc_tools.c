@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015-2019 ABINIT group (MT)
+ * Copyright (C) 2015-2020 ABINIT group (MT)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,13 +82,19 @@ void xc_get_flags_constants(int *xc_cst_flags_have_exc,
                             int *xc_cst_flags_have_vxc,
                             int *xc_cst_flags_have_fxc,
                             int *xc_cst_flags_have_kxc,
-                            int *xc_cst_flags_have_lxc)
+                            int *xc_cst_flags_have_lxc,
+                            int *xc_cst_flags_needs_laplacian)
 {
  *xc_cst_flags_have_exc  = XC_FLAGS_HAVE_EXC;
  *xc_cst_flags_have_vxc  = XC_FLAGS_HAVE_VXC;
  *xc_cst_flags_have_fxc  = XC_FLAGS_HAVE_FXC;
  *xc_cst_flags_have_kxc  = XC_FLAGS_HAVE_KXC;
  *xc_cst_flags_have_lxc  = XC_FLAGS_HAVE_LXC;
+#if ( XC_MAJOR_VERSION > 3 )
+ *xc_cst_flags_needs_laplacian  = XC_FLAGS_NEEDS_LAPLACIAN;
+#else
+ *xc_cst_flags_needs_laplacian  = 1;
+#endif
 }
 
 /* ===============================================================

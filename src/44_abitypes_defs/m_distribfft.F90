@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_distribfft
 !! NAME
 !!  m_distribfft
@@ -8,7 +7,7 @@
 !!  used for FFT parallelization with MPI and n2 plane sharing
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2019 ABINIT group (FD,MT)
+!! Copyright (C) 2011-2020 ABINIT group (FD,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

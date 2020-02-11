@@ -1,8 +1,8 @@
 
-.Version 8.11.6 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.14 of MULTIBINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed  3 Apr 2019.
-- ( at 11h31 )
+.Starting date : Wed 15 Jan 2020.
+- ( at 21h51 )
   
 -  nproc =    4
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/biederj_multibini-proddev/tests/paral/Input/t98_sys.xml
+-/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/paral/Input/t98_sys.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -60,8 +60,8 @@
 
 ================================================================================
 
--Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/biederj_multibini-proddev/tests/paral/Input/t98_sys.xml
--Reading the file /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/biederj_multibini-proddev/tests/paral/Input/t98_sys.xml with LibXML library
+-Opening the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/paral/Input/t98_sys.xml
+-Reading the file /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/paral/Input/t98_sys.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -1506,6 +1506,6 @@
 
 ================================================================================
 
-+Total cpu time      0.180  and wall time      0.190 sec
++Total cpu time      0.186  and wall time      0.194 sec
 
  multibinit : the run completed succesfully.

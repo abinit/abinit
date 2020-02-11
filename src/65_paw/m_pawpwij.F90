@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pawpwij
 !! NAME
 !!  m_pawpwij
@@ -10,7 +9,7 @@
 !!    - pawpwij_t: Onsite matrix elements of a plane wave for a given atom type.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG,GKA)
+!! Copyright (C) 2008-2020 ABINIT group (MG,GKA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,7 +35,8 @@ MODULE m_pawpwij
  use m_geometry,       only : metric
  use m_paw_numeric,    only : paw_jbessel_4spline, paw_spline
  use m_splines,        only : splfit
- use m_pawang,         only : pawang_type, realgaunt
+ use m_pawang,         only : pawang_type
+ use m_paw_sphharm,     only : realgaunt
  use m_pawrad,         only : pawrad_type, pawrad_init, pawrad_free, pawrad_copy, simp_gen
  use m_pawtab,         only : pawtab_type
  use m_pawcprj,        only : pawcprj_type

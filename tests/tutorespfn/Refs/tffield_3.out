@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 09h52 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h21 )
   
 
 ================================================================================
@@ -78,7 +78,7 @@
    0.6348587   1.2241902   0.6348587  -0.0000000  -0.0000000  -0.0000000
    0.6348587   0.6348587   1.2241902  -0.0000000  -0.0000000  -0.0000000
   -0.0000000  -0.0000000  -0.0000000   0.8774857   0.0000000   0.0000000
-   0.0000000   0.0000000   0.0000000   0.0000000   0.8774857  -0.0000000
+   0.0000000   0.0000000  -0.0000000   0.0000000   0.8774857  -0.0000000
    0.0000000   0.0000000   0.0000000   0.0000000  -0.0000000   0.8774857
 
  Elastic Tensor (relaxed ion) (unit:10^2GP):
@@ -118,9 +118,9 @@
 
  Proper piezoelectric constants (clamped ion) (unit:c/m^2)
 
+      0.00000000      0.00000000     -0.00000000
       0.00000000      0.00000000      0.00000000
       0.00000000      0.00000000      0.00000000
-     -0.00000000     -0.00000000      0.00000000
      -0.64879283      0.00000000      0.00000000
       0.00000000     -0.64879282      0.00000000
       0.00000000      0.00000000     -0.64879282
@@ -129,7 +129,7 @@
   Acoustic sum rule violation met : the eigenvalues of accoustic mode
   are too large at Gamma point
   Increase cutoff energy or k-points sampling.
-  The three eigenvalues are:    1.305542E-06    1.581522E-18    1.305542E-06
+  The three eigenvalues are:    1.305542E-06   -8.810345E-18    1.305542E-06
 
  Proper piezoelectric constants (relaxed ion) (unit:c/m^2)
 
@@ -140,10 +140,10 @@
       0.00000000      0.04575010     -0.00000000
       0.00000000     -0.00000000      0.04575011
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.0
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
 
 ================================================================================
 
-+Total cpu time      0.051  and wall time      0.034 sec
++Total cpu time      0.013  and wall time      0.013 sec
 
  anaddb : the run completed succesfully.

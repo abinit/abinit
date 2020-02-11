@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mpinfo
 !! NAME
 !! m_mpinfo
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MT, GG, XG, FJ, AR, MB, CMartins)
+!!  Copyright (C) 2008-2020 ABINIT group (MT, GG, XG, FJ, AR, MB, CMartins)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -527,7 +526,7 @@ end subroutine unset_mpi_enreg_fft
 !!
 !! PARENTS
 !!      dfpt_eltfrhar,dfpt_eltfrloc,dfpt_vlocal,fftpac,fourdp,hartre,hartrestr
-!!      indirect_parallel_Fourier,initro,laplacian,m_fock,m_ioarr,mag_constr
+!!      indirect_parallel_Fourier,initro,laplacian,m_fock,m_ioarr,mag_penalty
 !!      make_efg_el,mkcore,mkcore_paw,mklocl_realspace,mklocl_recipspace
 !!      moddiel,out1dm,posdoppler,prcrskerker2,strhar,symrhg,vlocalstr,xcden
 !!      xcpot

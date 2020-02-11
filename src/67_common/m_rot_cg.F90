@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_rot_cg
 !! NAME
 !! m_rot_cg
@@ -110,7 +109,7 @@ subroutine diag_occ(occ_nd_cpx, nband, occ_diag)
   ABI_ALLOCATE(work,(1))
   work = czero
   call zheev('V', 'U', nband, occ_nd_cpx, nband, occ_diag, work, -1, rwork, info)
-  lwork = work(1)
+  lwork = int(work(1))
   ABI_DEALLOCATE(work)
 
 ! Compute the eigenvalues (occ_diag) and vectors

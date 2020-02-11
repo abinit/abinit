@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fstab
 !! NAME
 !!
@@ -6,7 +5,7 @@
 !!  Tools for the management of a set of Fermi surface k-points
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG, MVer)
+!!  Copyright (C) 2008-2020 ABINIT group (MG, MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -692,7 +691,10 @@ subroutine fstab_print(fstab, header, unit, prtvol)
 !Local variables-------------------------------
 !scalars
  integer :: my_unt,my_prtvol,spin
- type(fstab_t),pointer :: fs
+ class(fstab_t),pointer :: fs
+! changed from type() to class() based on fortran compile error message
+! by NP
+! type(fstab_t),pointer :: fs
  character(len=500) :: msg
 
 ! *************************************************************************

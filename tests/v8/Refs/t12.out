@@ -1,8 +1,8 @@
 
-.Version 8.9.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.4 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 26 Apr 2018.
-- ( at 13h21 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h36 )
   
 - input  file    -> t12.in
 - output file    -> t12.out
@@ -151,8 +151,8 @@ P           mkmem           8
          ecut(hartree)=     20.000   => boxcut(ratio)=   2.19954
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is 26fe.pspnc
-- pspatm: opening atomic psp file    26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -186,7 +186,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -47.247594365737    -4.725E+01 6.571E-02 2.827E+03
- ETOT  2  -48.272420344897    -1.025E+00 3.763E-02 1.512E+03
+ ETOT  2  -48.272420344898    -1.025E+00 3.763E-02 1.512E+03
  ETOT  3  -49.570027414969    -1.298E+00 3.849E-02 3.535E+01
  ETOT  4  -49.505274256695     6.475E-02 5.577E-04 1.029E+02
  ETOT  5  -49.608952939078    -1.037E-01 8.535E-04 7.370E-01
@@ -198,11 +198,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
  ETOT 11  -49.609777820316    -3.922E-06 2.429E-05 1.702E-04
  ETOT 12  -49.609778035702    -2.154E-07 1.999E-05 3.121E-06
  ETOT 13  -49.609778039646    -3.944E-09 2.177E-05 5.467E-10
- ETOT 14  -49.609778039647    -9.166E-13 1.816E-05 3.295E-11
- ETOT 15  -49.609778039647    -1.350E-13 1.985E-05 1.159E-11
+ ETOT 14  -49.609778039647    -1.187E-12 1.816E-05 3.295E-11
+ ETOT 15  -49.609778039647    -2.274E-13 1.985E-05 1.159E-11
 
  At SCF step   15, etot is converged : 
-  for the second time, diff in etot=  1.350E-13 < toldfe=  1.000E-10
+  for the second time, diff in etot=  2.274E-13 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  9.92763571E-03  sigma(3 2)= -6.18118583E-05
@@ -224,16 +224,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   5.00000000000000E-01  5.50000000000000E-01  5.20000000000000E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.38568E-03 7.45684E-03 (free atoms)
- -0.00000000000000E+00  9.38568313926471E-03  8.87256518843717E-03
- -0.00000000000000E+00 -9.38568313926471E-03 -8.87256518843717E-03
+ -0.00000000000000E+00  9.38568313927476E-03  8.87256518843630E-03
+ -0.00000000000000E+00 -9.38568313927476E-03 -8.87256518843630E-03
  Reduced forces (fred)
- -0.00000000000000E+00 -5.08704026148147E-02 -4.80893033213294E-02
-  0.00000000000000E+00  5.08704026148147E-02  4.80893033213294E-02
+ -0.00000000000000E+00 -5.08704026148692E-02 -4.80893033213247E-02
+  0.00000000000000E+00  5.08704026148692E-02  4.80893033213247E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Kinetic energy of ions (ekin) [Ha]=  0.00000000000000E+00
- Total energy (etotal) [Ha]= -4.96097780396474E+01
+ Total energy (etotal) [Ha]= -4.96097780396475E+01
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
@@ -244,12 +244,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
  ETOT  1  -49.609778203112    -4.961E+01 1.834E-05 4.645E-07
  ETOT  2  -49.609778201606     1.506E-09 1.707E-05 1.494E-06
  ETOT  3  -49.609778203399    -1.793E-09 1.454E-05 9.728E-08
- ETOT  4  -49.609778203500    -1.018E-10 1.594E-05 1.887E-10
- ETOT  5  -49.609778203500     2.487E-13 1.360E-05 9.391E-11
- ETOT  6  -49.609778203501    -4.334E-13 1.488E-05 2.460E-13
+ ETOT  4  -49.609778203500    -1.015E-10 1.594E-05 1.887E-10
+ ETOT  5  -49.609778203500    -2.842E-14 1.360E-05 9.391E-11
+ ETOT  6  -49.609778203501    -5.045E-13 1.488E-05 2.460E-13
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  4.334E-13 < toldfe=  1.000E-10
+  for the second time, diff in etot=  5.045E-13 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  9.92764703E-03  sigma(3 2)= -6.18063251E-05
@@ -265,26 +265,26 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  0.00000000000000E+00  4.60973481882826E-06  4.35771931297763E-06
+  0.00000000000000E+00  4.60973481883320E-06  4.35771931297720E-06
   2.71000000000000E+00  2.98099539026518E+00  2.81839564228069E+00
  Reduced coordinates (xred)
-  0.00000000000000E+00  8.50504579119605E-07  8.04007253316905E-07
+  0.00000000000000E+00  8.50504579120516E-07  8.04007253316827E-07
   5.00000000000000E-01  5.49999149495421E-01  5.19999195992747E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.38528E-03 7.45628E-03 (free atoms)
- -0.00000000000000E+00  9.38528203776449E-03  8.87158600843492E-03
- -0.00000000000000E+00 -9.38528203776449E-03 -8.87158600843492E-03
+ -0.00000000000000E+00  9.38528203779260E-03  8.87158600843920E-03
+ -0.00000000000000E+00 -9.38528203779260E-03 -8.87158600843920E-03
  Reduced forces (fred)
- -0.00000000000000E+00 -5.08682286446835E-02 -4.80839961657173E-02
-  0.00000000000000E+00  5.08682286446835E-02  4.80839961657173E-02
+ -0.00000000000000E+00 -5.08682286448359E-02 -4.80839961657405E-02
+  0.00000000000000E+00  5.08682286448359E-02  4.80839961657405E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 9.21947E-07 7.32479E-07 (free atoms)
-  0.00000000000000E+00  9.21946963765652E-07  8.71543862595525E-07
-  0.00000000000000E+00 -9.21946963765652E-07 -8.71543862595525E-07
- Kinetic energy of ions (ekin) [Ha]=  1.63859318085727E-07
- Total energy (etotal) [Ha]= -4.96097782035006E+01
+  0.00000000000000E+00  9.21946963766639E-07  8.71543862595440E-07
+  0.00000000000000E+00 -9.21946963766639E-07 -8.71543862595440E-07
+ Kinetic energy of ions (ekin) [Ha]=  1.63859318085897E-07
+ Total energy (etotal) [Ha]= -4.96097782035009E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-1.63853E-07
-           Relative     =-3.30284E-09
+           Relative     =-3.30285E-09
 
 --- Iteration: ( 3/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
@@ -296,11 +296,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
  ETOT  2  -49.609778677792     1.366E-08 1.279E-05 1.355E-05
  ETOT  3  -49.609778694044    -1.625E-08 1.091E-05 8.762E-07
  ETOT  4  -49.609778694960    -9.157E-10 1.177E-05 1.509E-09
- ETOT  5  -49.609778694960    -5.187E-13 1.001E-05 7.880E-10
- ETOT  6  -49.609778694962    -1.961E-12 1.074E-05 2.189E-12
+ ETOT  5  -49.609778694960    -6.395E-13 1.001E-05 7.880E-10
+ ETOT  6  -49.609778694962    -1.883E-12 1.074E-05 2.189E-12
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  1.961E-12 < toldfe=  1.000E-10
+  for the second time, diff in etot=  1.883E-12 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  9.92767456E-03  sigma(3 2)= -6.17892157E-05
@@ -316,26 +316,26 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  0.00000000000000E+00  1.84385452770235E-05  1.74299154124614E-05
+  0.00000000000000E+00  1.84385452770610E-05  1.74299154124647E-05
   2.71000000000000E+00  2.98098156145472E+00  2.81838257008459E+00
  Reduced coordinates (xred)
-  0.00000000000000E+00  3.40194562306707E-06  3.21585155211464E-06
+  0.00000000000000E+00  3.40194562307398E-06  3.21585155211526E-06
   5.00000000000000E-01  5.49996598054377E-01  5.19996784148448E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.38389E-03 7.45461E-03 (free atoms)
- -0.00000000000000E+00  9.38388808190394E-03  8.86883916635075E-03
- -0.00000000000000E+00 -9.38388808190394E-03 -8.86883916635075E-03
+ -0.00000000000000E+00  9.38388808190218E-03  8.86883916635451E-03
+ -0.00000000000000E+00 -9.38388808190218E-03 -8.86883916635451E-03
  Reduced forces (fred)
- -0.00000000000000E+00 -5.08606734039194E-02 -4.80691082816211E-02
-  0.00000000000000E+00  5.08606734039194E-02  4.80691082816211E-02
+ -0.00000000000000E+00 -5.08606734039098E-02 -4.80691082816415E-02
+  0.00000000000000E+00  5.08606734039098E-02  4.80691082816415E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.84383E-06 1.46488E-06 (free atoms)
-  0.00000000000000E+00  1.84383482778787E-06  1.74294344927368E-06
-  0.00000000000000E+00 -1.84383482778787E-06 -1.74294344927368E-06
- Kinetic energy of ions (ekin) [Ha]=  6.55363883259666E-07
+  0.00000000000000E+00  1.84383482779251E-06  1.74294344927427E-06
+  0.00000000000000E+00 -1.84383482779251E-06 -1.74294344927427E-06
+ Kinetic energy of ions (ekin) [Ha]=  6.55363883261616E-07
  Total energy (etotal) [Ha]= -4.96097786949623E+01
 
  Difference of energy with previous step (new-old):
-           Absolute (Ha)=-4.91462E-07
-           Relative     =-9.90655E-09
+           Absolute (Ha)=-4.91461E-07
+           Relative     =-9.90654E-09
 
 --- Iteration: ( 4/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
@@ -345,13 +345,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -49.609779503990    -4.961E+01 9.731E-06 1.167E-05
  ETOT  2  -49.609779466034     3.796E-08 8.746E-06 3.764E-05
- ETOT  3  -49.609779511188    -4.515E-08 7.415E-06 2.433E-06
+ ETOT  3  -49.609779511189    -4.515E-08 7.415E-06 2.433E-06
  ETOT  4  -49.609779513732    -2.543E-09 7.822E-06 4.178E-09
- ETOT  5  -49.609779513734    -1.876E-12 6.613E-06 2.182E-09
- ETOT  6  -49.609779513738    -4.654E-12 6.948E-06 6.129E-12
+ ETOT  5  -49.609779513734    -1.855E-12 6.613E-06 2.182E-09
+ ETOT  6  -49.609779513739    -4.860E-12 6.948E-06 6.129E-12
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  4.654E-12 < toldfe=  1.000E-10
+  for the second time, diff in etot=  4.860E-12 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  9.92772010E-03  sigma(3 2)= -6.17611242E-05
@@ -367,21 +367,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  0.00000000000000E+00  4.14850621046518E-05  3.92138901009073E-05
+  0.00000000000000E+00  4.14850621047201E-05  3.92138901009181E-05
   2.71000000000000E+00  2.98095851493790E+00  2.81836078610990E+00
  Reduced coordinates (xred)
-  0.00000000000000E+00  7.65407049901324E-06  7.23503507396813E-06
+  0.00000000000000E+00  7.65407049902584E-06  7.23503507397013E-06
   5.00000000000000E-01  5.49992345929501E-01  5.19992764964926E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.38156E-03 7.45182E-03 (free atoms)
- -0.00000000000000E+00  9.38156488630987E-03  8.86426661442008E-03
- -0.00000000000000E+00 -9.38156488630987E-03 -8.86426661442008E-03
+ -0.00000000000000E+00  9.38156488632871E-03  8.86426661443230E-03
+ -0.00000000000000E+00 -9.38156488632871E-03 -8.86426661443230E-03
  Reduced forces (fred)
- -0.00000000000000E+00 -5.08480816837995E-02 -4.80443250501568E-02
-  0.00000000000000E+00  5.08480816837995E-02  4.80443250501568E-02
+ -0.00000000000000E+00 -5.08480816839016E-02 -4.80443250502231E-02
+  0.00000000000000E+00  5.08480816839016E-02  4.80443250502231E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 2.76554E-06 2.19705E-06 (free atoms)
-  0.00000000000000E+00  2.76553700123447E-06  2.61398639829270E-06
-  0.00000000000000E+00 -2.76553700123447E-06 -2.61398639829270E-06
- Kinetic energy of ions (ekin) [Ha]=  1.47421931244964E-06
+  0.00000000000000E+00  2.76553700123747E-06  2.61398639829363E-06
+  0.00000000000000E+00 -2.76553700123747E-06 -2.61398639829363E-06
+ Kinetic energy of ions (ekin) [Ha]=  1.47421931245182E-06
  Total energy (etotal) [Ha]= -4.96097795137385E+01
 
  Difference of energy with previous step (new-old):
@@ -398,11 +398,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
  ETOT  2  -49.609780565850     7.439E-08 5.367E-06 7.376E-05
  ETOT  3  -49.609780654343    -8.849E-08 4.546E-06 4.766E-06
  ETOT  4  -49.609780659327    -4.983E-09 4.696E-06 8.179E-09
- ETOT  5  -49.609780659330    -3.901E-12 3.968E-06 4.271E-09
- ETOT  6  -49.609780659340    -9.734E-12 4.088E-06 1.205E-11
+ ETOT  5  -49.609780659331    -4.043E-12 3.968E-06 4.271E-09
+ ETOT  6  -49.609780659340    -9.670E-12 4.088E-06 1.205E-11
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  9.734E-12 < toldfe=  1.000E-10
+  for the second time, diff in etot=  9.670E-12 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  9.92778365E-03  sigma(3 2)= -6.17220714E-05
@@ -418,21 +418,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  0.00000000000000E+00  7.37470032481934E-05  6.97051518028951E-05
+  0.00000000000000E+00  7.37470032483110E-05  6.97051518029254E-05
   2.71000000000000E+00  2.98092625299675E+00  2.81833029484820E+00
  Reduced coordinates (xred)
-  0.00000000000000E+00  1.36064581638733E-05  1.28607291149253E-05
+  0.00000000000000E+00  1.36064581638950E-05  1.28607291149309E-05
   5.00000000000000E-01  5.49986393541836E-01  5.19987139270885E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.37831E-03 7.44792E-03 (free atoms)
- -0.00000000000000E+00  9.37831391547121E-03  8.85787144063123E-03
- -0.00000000000000E+00 -9.37831391547121E-03 -8.85787144063123E-03
+ -0.00000000000000E+00  9.37831391548698E-03  8.85787144063525E-03
+ -0.00000000000000E+00 -9.37831391548698E-03 -8.85787144063525E-03
  Reduced forces (fred)
- -0.00000000000000E+00 -5.08304614218539E-02 -4.80096632082213E-02
-  0.00000000000000E+00  5.08304614218539E-02  4.80096632082213E-02
+ -0.00000000000000E+00 -5.08304614219394E-02 -4.80096632082430E-02
+  0.00000000000000E+00  5.08304614219394E-02  4.80096632082430E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 3.68697E-06 2.92890E-06 (free atoms)
-  0.00000000000000E+00  3.68696533014983E-06  3.48449052087587E-06
-  0.00000000000000E+00 -3.68696533014983E-06 -3.48449052087587E-06
- Kinetic energy of ions (ekin) [Ha]=  2.61993587885610E-06
+  0.00000000000000E+00  3.68696533015569E-06  3.48449052087842E-06
+  0.00000000000000E+00 -3.68696533015569E-06 -3.48449052087842E-06
+ Kinetic energy of ions (ekin) [Ha]=  2.61993587886230E-06
  Total energy (etotal) [Ha]= -4.96097806593402E+01
 
  Difference of energy with previous step (new-old):
@@ -448,12 +448,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
  ETOT  1  -49.609782099517    -4.961E+01 3.536E-06 3.779E-05
  ETOT  2  -49.609781976585     1.229E-07 3.044E-06 1.219E-04
  ETOT  3  -49.609782122826    -1.462E-07 2.595E-06 7.876E-06
- ETOT  4  -49.609782131061    -8.234E-09 2.628E-06 1.351E-08
- ETOT  5  -49.609782131067    -6.331E-12 2.235E-06 7.053E-09
- ETOT  6  -49.609782131082    -1.539E-11 2.260E-06 1.993E-11
+ ETOT  4  -49.609782131060    -8.234E-09 2.628E-06 1.351E-08
+ ETOT  5  -49.609782131067    -6.303E-12 2.235E-06 7.053E-09
+ ETOT  6  -49.609782131082    -1.558E-11 2.260E-06 1.993E-11
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  1.539E-11 < toldfe=  1.000E-10
+  for the second time, diff in etot=  1.558E-11 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  9.92786521E-03  sigma(3 2)= -6.16720648E-05
@@ -469,21 +469,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  0.00000000000000E+00  1.15221175309097E-04  1.08897418598430E-04
+  0.00000000000000E+00  1.15221175309280E-04  1.08897418598484E-04
   2.71000000000000E+00  2.98088477882469E+00  2.81829110258140E+00
  Reduced coordinates (xred)
-  0.00000000000000E+00  2.12585194297227E-05  2.00917746491569E-05
+  0.00000000000000E+00  2.12585194297564E-05  2.00917746491668E-05
   5.00000000000000E-01  5.49978741480570E-01  5.19979908225351E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.37414E-03 7.44291E-03 (free atoms)
- -0.00000000000000E+00  9.37413731132908E-03  8.84965701580983E-03
- -0.00000000000000E+00 -9.37413731132908E-03 -8.84965701580983E-03
+ -1.09159719357151E-31  9.37413731134277E-03  8.84965701581318E-03
+  1.09159719357151E-31 -9.37413731134277E-03 -8.84965701581318E-03
  Reduced forces (fred)
- -0.00000000000000E+00 -5.08078242274036E-02 -4.79651410256893E-02
-  0.00000000000000E+00  5.08078242274036E-02  4.79651410256893E-02
+  5.91645678915759E-31 -5.08078242274778E-02 -4.79651410257074E-02
+ -5.91645678915759E-31  5.08078242274778E-02  4.79651410257074E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 4.60803E-06 3.66031E-06 (free atoms)
-  0.00000000000000E+00  4.60802875195848E-06  4.35427693423089E-06
-  0.00000000000000E+00 -4.60802875195848E-06 -4.35427693423089E-06
- Kinetic energy of ions (ekin) [Ha]=  4.09182892152920E-06
+  0.00000000000000E+00  4.60802875196573E-06  4.35427693423343E-06
+  0.00000000000000E+00 -4.60802875196573E-06 -4.35427693423343E-06
+ Kinetic energy of ions (ekin) [Ha]=  4.09182892153826E-06
  Total energy (etotal) [Ha]= -4.96097821310824E+01
 
  Difference of energy with previous step (new-old):
@@ -500,11 +500,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
  ETOT  2  -49.609783697395     1.836E-07 1.644E-06 1.820E-04
  ETOT  3  -49.609783915760    -2.184E-07 1.422E-06 1.176E-05
  ETOT  4  -49.609783928054    -1.229E-08 1.409E-06 2.017E-08
- ETOT  5  -49.609783928063    -9.059E-12 1.215E-06 1.053E-08
- ETOT  6  -49.609783928087    -2.371E-11 1.203E-06 2.974E-11
+ ETOT  5  -49.609783928064    -9.486E-12 1.215E-06 1.053E-08
+ ETOT  6  -49.609783928087    -2.357E-11 1.203E-06 2.974E-11
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  2.371E-11 < toldfe=  1.000E-10
+  for the second time, diff in etot=  2.357E-11 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  9.92796480E-03  sigma(3 2)= -6.16111146E-05
@@ -520,22 +520,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  0.00000000000000E+00  1.65903475647789E-04  1.56782621534075E-04
+ -1.07226581521609E-34  1.65903475648050E-04  1.56782621534156E-04
   2.71000000000000E+00  2.98083409652435E+00  2.81824321737847E+00
  Reduced coordinates (xred)
-  0.00000000000000E+00  3.06094973519906E-05  2.89266829398663E-05
+ -1.97835021257582E-35  3.06094973520387E-05  2.89266829398811E-05
   5.00000000000000E-01  5.49969390502648E-01  5.19971073317060E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.36904E-03 7.43680E-03 (free atoms)
-  1.09159719357151E-31  9.36903807220050E-03  8.83962325118868E-03
- -1.09159719357151E-31 -9.36903807220050E-03 -8.83962325118868E-03
+  1.09159719357151E-31  9.36903807219818E-03  8.83962325118896E-03
+ -1.09159719357151E-31 -9.36903807219818E-03 -8.83962325118896E-03
  Reduced forces (fred)
- -5.91645678915759E-31 -5.07801863513267E-02 -4.79107580214427E-02
-  5.91645678915759E-31  5.07801863513267E-02  4.79107580214427E-02
+ -5.91645678915759E-31 -5.07801863513141E-02 -4.79107580214442E-02
+  5.91645678915759E-31  5.07801863513141E-02  4.79107580214442E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 5.52864E-06 4.39118E-06 (free atoms)
-  0.00000000000000E+00  5.52863644775857E-06  5.22316710056998E-06
-  0.00000000000000E+00 -5.52863644775857E-06 -5.22316710056998E-06
- Kinetic energy of ions (ekin) [Ha]=  5.88901973394208E-06
- Total energy (etotal) [Ha]= -4.96097839280870E+01
+ -1.60839872282414E-35  5.52863644776707E-06  5.22316710057281E-06
+  1.60839872282414E-35 -5.52863644776707E-06 -5.22316710057281E-06
+ Kinetic energy of ions (ekin) [Ha]=  5.88901973395466E-06
+ Total energy (etotal) [Ha]= -4.96097839280872E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-1.79700E-06
@@ -551,11 +551,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
  ETOT  2  -49.609785727254     2.562E-07 8.627E-07 2.541E-04
  ETOT  3  -49.609786032075    -3.048E-07 7.620E-07 1.641E-05
  ETOT  4  -49.609786049237    -1.716E-08 7.367E-07 2.816E-08
- ETOT  5  -49.609786049250    -1.295E-11 6.487E-07 1.469E-08
- ETOT  6  -49.609786049283    -3.310E-11 6.269E-07 4.147E-11
+ ETOT  5  -49.609786049250    -1.293E-11 6.487E-07 1.469E-08
+ ETOT  6  -49.609786049283    -3.311E-11 6.269E-07 4.147E-11
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  3.310E-11 < toldfe=  1.000E-10
+  for the second time, diff in etot=  3.311E-11 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  9.92808243E-03  sigma(3 2)= -6.15392275E-05
@@ -571,22 +571,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  1.07226581521609E-34  2.25788895328891E-04  2.13350904535754E-04
+ -1.07226581521609E-34  2.25788895329227E-04  2.13350904535861E-04
   2.71000000000000E+00  2.98077421110467E+00  2.81818664909546E+00
  Reduced coordinates (xred)
-  1.97835021257582E-35  4.16584677728581E-05  3.93636355232018E-05
+ -1.97835021257582E-35  4.16584677729202E-05  3.93636355232216E-05
   5.00000000000000E-01  5.49958341532227E-01  5.19960636364477E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.36302E-03 7.42958E-03 (free atoms)
-  4.36638877428604E-31  9.36302185878035E-03  8.82777721978643E-03
- -4.36638877428604E-31 -9.36302185878035E-03 -8.82777721978643E-03
+ -4.36638877428604E-31  9.36302185877960E-03  8.82777721978807E-03
+  4.36638877428604E-31 -9.36302185877960E-03 -8.82777721978807E-03
  Reduced forces (fred)
- -2.36658271566304E-30 -5.07475784745895E-02 -4.78465525312425E-02
-  2.36658271566304E-30  5.07475784745895E-02  4.78465525312425E-02
+  2.36658271566304E-30 -5.07475784745854E-02 -4.78465525312513E-02
+ -2.36658271566304E-30  5.07475784745854E-02  4.78465525312513E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 6.44870E-06 5.12139E-06 (free atoms)
-  1.60839872282414E-35  6.44869793523070E-06  6.09098230346952E-06
- -1.60839872282414E-35 -6.44869793523070E-06 -6.09098230346952E-06
- Kinetic energy of ions (ekin) [Ha]=  8.01043593969205E-06
- Total energy (etotal) [Ha]= -4.96097860492829E+01
+  5.36132907608046E-36  6.44869793523819E-06  6.09098230347224E-06
+ -5.36132907608046E-36 -6.44869793523819E-06 -6.09098230347224E-06
+ Kinetic energy of ions (ekin) [Ha]=  8.01043593970525E-06
+ Total energy (etotal) [Ha]= -4.96097860492830E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-2.12120E-06
@@ -602,11 +602,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
  ETOT  2  -49.609788064957     3.409E-07 4.453E-07 3.380E-04
  ETOT  3  -49.609788470510    -4.056E-07 4.040E-07 2.184E-05
  ETOT  4  -49.609788493345    -2.284E-08 3.797E-07 3.748E-08
- ETOT  5  -49.609788493363    -1.752E-11 3.433E-07 1.954E-08
- ETOT  6  -49.609788493406    -4.340E-11 3.226E-07 5.511E-11
+ ETOT  5  -49.609788493363    -1.748E-11 3.433E-07 1.954E-08
+ ETOT  6  -49.609788493407    -4.363E-11 3.226E-07 5.511E-11
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  4.340E-11 < toldfe=  1.000E-10
+  for the second time, diff in etot=  4.363E-11 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  9.92821810E-03  sigma(3 2)= -6.14564176E-05
@@ -622,22 +622,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  6.43359489129655E-34  2.94871524681670E-04  2.78590631356512E-04
+ -5.36132907608046E-34  2.94871524682082E-04  2.78590631356648E-04
   2.71000000000000E+00  2.98070512847532E+00  2.81812140936864E+00
  Reduced coordinates (xred)
-  1.18701012754549E-34  5.44043403471715E-05  5.14004854901313E-05
+ -9.89175106287908E-35  5.44043403472475E-05  5.14004854901564E-05
   5.00000000000000E-01  5.49945595659653E-01  5.19948599514510E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.35609E-03 7.42126E-03 (free atoms)
- -0.00000000000000E+00  9.35609232078054E-03  8.81412250046774E-03
- -0.00000000000000E+00 -9.35609232078054E-03 -8.81412250046774E-03
+ -0.00000000000000E+00  9.35609232079449E-03  8.81412250046969E-03
+ -0.00000000000000E+00 -9.35609232079449E-03 -8.81412250046969E-03
  Reduced forces (fred)
- -0.00000000000000E+00 -5.07100203786306E-02 -4.77725439525352E-02
-  0.00000000000000E+00  5.07100203786306E-02  4.77725439525352E-02
+ -0.00000000000000E+00 -5.07100203787061E-02 -4.77725439525457E-02
+  0.00000000000000E+00  5.07100203787061E-02  4.77725439525457E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 7.36812E-06 5.85083E-06 (free atoms)
-  7.50586070651265E-35  7.36812341886172E-06  6.95754487302979E-06
- -7.50586070651265E-35 -7.36812341886172E-06 -6.95754487302979E-06
- Kinetic energy of ions (ekin) [Ha]=  1.04548143618253E-05
- Total energy (etotal) [Ha]= -4.96097884934063E+01
+ -6.43359489129655E-35  7.36812341886921E-06  6.95754487303273E-06
+  6.43359489129655E-35 -7.36812341886921E-06 -6.95754487303273E-06
+ Kinetic energy of ions (ekin) [Ha]=  1.04548143618407E-05
+ Total energy (etotal) [Ha]= -4.96097884934066E+01
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-2.44412E-06
@@ -653,11 +653,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
  ETOT  2  -49.609790709112     4.376E-07 2.285E-07 4.339E-04
  ETOT  3  -49.609791229615    -5.205E-07 2.126E-07 2.803E-05
  ETOT  4  -49.609791258926    -2.931E-08 1.945E-07 4.811E-08
- ETOT  5  -49.609791258949    -2.223E-11 1.807E-07 2.508E-08
- ETOT  6  -49.609791259005    -5.592E-11 1.652E-07 7.061E-11
+ ETOT  5  -49.609791258949    -2.218E-11 1.807E-07 2.508E-08
+ ETOT  6  -49.609791259005    -5.603E-11 1.652E-07 7.061E-11
 
  At SCF step    6, etot is converged : 
-  for the second time, diff in etot=  5.592E-11 < toldfe=  1.000E-10
+  for the second time, diff in etot=  5.603E-11 < toldfe=  1.000E-10
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  9.92837185E-03  sigma(3 2)= -6.13627004E-05
@@ -673,21 +673,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
-  1.17949239673770E-33  3.73144556885114E-04  3.52488389092003E-04
-  2.71000000000000E+00  2.98062685544312E+00  2.81804751161091E+00
+ -9.65039233694483E-34  3.73144556885615E-04  3.52488389092170E-04
+  2.71000000000000E+00  2.98062685544311E+00  2.81804751161091E+00
  Reduced coordinates (xred)
-  2.17618523383340E-34  6.88458592038957E-05  6.50347581350560E-05
+ -1.78051519131823E-34  6.88458592039881E-05  6.50347581350867E-05
   5.00000000000000E-01  5.49931154140796E-01  5.19934965241865E-01
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.34826E-03 7.41185E-03 (free atoms)
- -0.00000000000000E+00  9.34825525080540E-03  8.79866382108577E-03
- -0.00000000000000E+00 -9.34825525080540E-03 -8.79866382108577E-03
+ -0.00000000000000E+00  9.34825525081364E-03  8.79866382108500E-03
+ -0.00000000000000E+00 -9.34825525081364E-03 -8.79866382108500E-03
  Reduced forces (fred)
- -0.00000000000000E+00 -5.06675434593653E-02 -4.76887579102848E-02
-  0.00000000000000E+00  5.06675434593653E-02  4.76887579102848E-02
+ -0.00000000000000E+00 -5.06675434594099E-02 -4.76887579102807E-02
+  0.00000000000000E+00  5.06675434594099E-02  4.76887579102807E-02
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 8.28682E-06 6.57941E-06 (free atoms)
-  5.36132907608046E-35  8.28682336287780E-06  7.82267731928584E-06
- -5.36132907608046E-35 -8.28682336287780E-06 -7.82267731928584E-06
- Kinetic energy of ions (ekin) [Ha]=  1.32207010186954E-05
+ -4.28906326086437E-35  8.28682336288738E-06  7.82267731928899E-06
+  4.28906326086437E-35 -8.28682336288738E-06 -7.82267731928899E-06
+ Kinetic energy of ions (ekin) [Ha]=  1.32207010187165E-05
  Total energy (etotal) [Ha]= -4.96097912590046E+01
 
  Difference of energy with previous step (new-old):
@@ -697,16 +697,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.0340E-09; max=  1.6520E-07
+ Mean square residual over all n,k,spin=   10.340E-10; max=  16.520E-08
  reduced coordinates (array xred) for    2 atoms
-       0.000000000000      0.000068845859      0.000065034758
+      -0.000000000000      0.000068845859      0.000065034758
        0.500000000000      0.549931154141      0.519934965242
  rms dE/dt=  4.0172E-02; max dE/dt=  5.0668E-02; dE/dt below (all hartree)
     1       0.000000000000     -0.050667543459     -0.047688757910
     2       0.000000000000      0.050667543459      0.047688757910
 
  cartesian coordinates (angstrom) at end:
-    1      0.00000000000000     0.00019745959501     0.00018652882180
+    1     -0.00000000000000     0.00019745959501     0.00018652882180
     2      1.43407023527890     1.57727979921178     1.49124651586826
 
  cartesian forces (hartree/bohr) at end:
@@ -715,8 +715,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
  frms,max,avg= 7.4118455E-03 9.3482553E-03   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00000000000000     0.48070657224396     0.45244544701501
-    2     -0.00000000000000    -0.48070657224396    -0.45244544701501
+    1     -0.00000000000000     0.48070657224438     0.45244544701497
+    2     -0.00000000000000    -0.48070657224438    -0.45244544701497
  frms,max,avg= 3.8113239E-01 4.8070657E-01   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  5.420000000000  5.420000000000  5.420000000000 bohr
               =  2.868140470558  2.868140470558  2.868140470558 angstroms
@@ -737,23 +737,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     681.125     681.108
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  4.97273828752181E+01
-    Hartree energy  =  5.20718873001086E+00
-    XC energy       = -2.09368346183482E+01
+    Kinetic energy  =  4.97273828752191E+01
+    Hartree energy  =  5.20718873001111E+00
+    XC energy       = -2.09368346183484E+01
     Ewald energy    = -4.29014963822666E+01
     PspCore energy  =  1.24673648645944E+01
-    Loc. psp. energy=  4.09094931986220E+00
-    NL   psp  energy= -5.72115916182049E+01
-    >>>>> Internal E= -4.95570368291341E+01
+    Loc. psp. energy=  4.09094931986230E+00
+    NL   psp  energy= -5.72115916182061E+01
+    >>>>> Internal E= -4.95570368291342E+01
 
-    -kT*entropy     = -5.27544298704095E-02
+    -kT*entropy     = -5.27544298704098E-02
     >>>>>>>>> Etotal= -4.96097912590046E+01
 
  Other information on the energy :
     Total energy(eV)= -1.34995107316325E+03 ; Band energy (Ha)=  -5.6797291497E+00
 --------------------------------------------------------------------------------
+
+
  rms coord change=  5.4679E-05   atom, delta coord (reduced):
-     1        0.000000000000      0.000068845859      0.000065034758
+     1       -0.000000000000      0.000068845859      0.000065034758
      2        0.000000000000     -0.000068845859     -0.000065034758
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -842,15 +844,15 @@ P           mkmem           8
                        0.5000000 -0.4500000 -0.4800000     0.0000000  0.0000000  0.0000000
            toldfe      1.00000000E-10 Hartree
             typat      1  1
-              vel      5.3613290761E-35  8.2868233629E-06  7.8226773193E-06
-                      -5.3613290761E-35 -8.2868233629E-06 -7.8226773193E-06
+              vel     -4.2890632609E-35  8.2868233629E-06  7.8226773193E-06
+                       4.2890632609E-35 -8.2868233629E-06 -7.8226773193E-06
               wtk        0.12500    0.12500    0.12500    0.12500    0.12500    0.12500
                          0.12500    0.12500
-           xangst      6.2416049406E-34  1.9745959501E-04  1.8652882180E-04
+           xangst     -5.1067676787E-34  1.9745959501E-04  1.8652882180E-04
                        1.4340702353E+00  1.5772797992E+00  1.4912465159E+00
-            xcart      1.1794923967E-33  3.7314455689E-04  3.5248838909E-04
+            xcart     -9.6503923369E-34  3.7314455689E-04  3.5248838909E-04
                        2.7100000000E+00  2.9806268554E+00  2.8180475116E+00
-             xred      2.1761852338E-34  6.8845859204E-05  6.5034758135E-05
+             xred     -1.7805151913E-34  6.8845859204E-05  6.5034758135E-05
                        5.0000000000E-01  5.4993115414E-01  5.1993496524E-01
             znucl       26.00000
 
@@ -887,48 +889,52 @@ P           mkmem           8
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [3] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         19.3  wall=         19.3
+- Proc.   0 individual time (sec): cpu=         33.9  wall=         34.0
 
 ================================================================================
 
  Calculation completed.
-.Delivered  20 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.3  wall=         19.3
+.Delivered   0 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=         33.9  wall=         34.0

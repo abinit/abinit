@@ -47,10 +47,11 @@ freqremax  4
 awtr       1
 gwgamma   -4   # bootstrap kernel in TC-TC dielectric function
 gwgamma1? -6   # bootstrap (head-only) kernel in TC-TC dielectric function
-gwgamma2? -8   # bootstrap (rpa-type) kernel in TC-TC dielectric function
+gwgamma2? -8   # rpa bootstrap kernel in TC-TC dielectric function
 
 gwpara     2
 symchi     1
+symsigma   0
 icutcoul   7   # Gygi-Baldereschi auxiliary function
 
 nband      16

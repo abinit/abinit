@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_invovl
 !! NAME
 !!  m_invovl
@@ -11,7 +10,7 @@
 !!  inv_s_projs = - (s_projs^-1 + projs'*projs)^-1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2019 ABINIT group (AL)
+!! Copyright (C) 2013-2020 ABINIT group (AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

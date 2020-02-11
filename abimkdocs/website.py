@@ -40,8 +40,8 @@ def my_unicode(s):
 
 def escape(text, tag=None, cls=None):
     """Escape HTML entities in ``text`` string. Enclose new text in ``tag`` if tag with class ``cls``."""
-    import cgi
-    text = cgi.escape(text, quote=True)
+    import html
+    text = html.escape(text, quote=True)
     if tag:
         text = '<{tag} class="{cls}">\n{text}\n</{tag}>\n'.format(tag=tag, text=text, cls=cls if cls else "")
     return text
@@ -95,7 +95,8 @@ class MyEntry(Entry):
         """String with authors. Empty if authors are not provided."""
         try:
             #return ", ".join(my_unicode(p) for p in self.persons["author"])
-            return ", ".join( my_unicode(p).partition(',')[2]+" "+my_unicode(p).partition(',')[0] for p in self.persons["author"])
+            return ", ".join(my_unicode(p).partition(',')[2] + " " +
+                             my_unicode(p).partition(',')[0] for p in self.persons["author"])
         except KeyError:
             return ""
 
@@ -358,7 +359,7 @@ class Website(object):
 
         # Find pdf files and sort them by basename.
         self.pdfs = OrderedDict(sorted([t for t in self.walk_filepath() if t[0].endswith(".pdf")],
-            key=lambda t: t[0]))
+                                key=lambda t: t[0]))
 
         cprint("Initial website generation completed in %.2f [s]" % (time.time() - start), "green")
 
@@ -481,10 +482,11 @@ This page gathers the autoconf files used by the buildbot testfarm
 """)
         for f in os.listdir(dirpath):
             path = os.path.join(dirpath, f)
-            if os.path.isdir(path): continue
+            if os.path.isdir(path) or path.endswith(".swp"): continue
             app("## %s  " %  f)
             with io.open(path, "rt", encoding="utf-8") as fh:
                 # Remove all comments except for options that are specified.
+                #print(path)
                 ac_lines = []
                 inblock = False
                 for l in reversed(fh.readlines()):
@@ -855,9 +857,9 @@ The bibtex file is available [here](../abiref.bib).
 
         tutorial_readme = """
 
-!!! note 
+!!! note
 
-    Supposing you made your own install of ABINIT, the input files to run the examples 
+    Supposing you made your own install of ABINIT, the input files to run the examples
     are in the *~abinit/tests/* directory where *~abinit* is the absolute path of the abinit top-level directory.
     If you have NOT made your own install, ask your system administrator where to find the package, especially the executable and test files.
 
@@ -878,6 +880,7 @@ The bibtex file is available [here](../abiref.bib).
     export ABI_TESTS=$ABI_HOME/tests/
     export ABI_PSPDIR=$ABI_TESTS/Psps_for_tests/  # Pseudopotentials used in examples.
     ```
+
     Examples in this tutorial use these shell variables: copy and paste
     the code snippets into the terminal (**remember to set ABI_HOME first!**).
     The 'export PATH' line adds the directory containing the executables to your [PATH](http://www.linfo.org/path_env_var.html)
@@ -1219,14 +1222,17 @@ The bibtex file is available [here](../abiref.bib).
                 html_classes.append("abifile-wikilink")
 
             elif namespace == "ac":
-                # Handle [[ac:abiref_gnu_5.3_debug.ac]]
+                # Handle [[ac:abiref_gnu_9.2_debug.ac]]
                 # The following is incorrect: files in /build/config-examples are generated when makemake is issued.
                 # url = "/build/config-examples/%s" % name
                 # By contrast, the following is a permanent reference
-                url = "/abichecks/buildsys/Refs/%s" % name
-                if a.text is None: a.text = name
-                target = "_blank"
-                html_classes.append("abifile-wikilink")
+                # FIXME: buildsys refs are not generated anymore (YP)
+                #url = "/abichecks/buildsys/Refs/%s" % name
+                #if a.text is None: a.text = name
+                #target = "_blank"
+                #html_classes.append("abifile-wikilink")
+                url = "/build/config-template.ac9"
+                pass
 
             elif namespace == "pdf":
                 # Handle [[pdf:howto_chebfi.pdf]] or [[pdf:howto_chebfi]]
@@ -1288,7 +1294,7 @@ The bibtex file is available [here](../abiref.bib).
         return a
 
     def build_varsearch_html(self, page_rpath):
-        # Build single dictionary mapping varname --> var. Add @code if not abinit.
+        """Build single dictionary mapping varname --> var. Add @code if not abinit."""
         allvars = {}
         for code, vd in self.codevars.items():
             allvars.update({v.abivarname: v for v in vd.values()})

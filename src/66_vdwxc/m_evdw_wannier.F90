@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_evdw_wannier
 !! NAME
 !! m_evdw_wannier
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2019 ABINIT group (CE, TR, AR)
+!!  Copyright (C) 2010-2020 ABINIT group (CE, TR, AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

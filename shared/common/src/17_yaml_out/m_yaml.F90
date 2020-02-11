@@ -9,7 +9,7 @@
 !!  strings, numbers, dictionaries from m_pair_list and 1D arrays of dictionaries.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (TC, MG)
+!! Copyright (C) 2009-2020 ABINIT group (TC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +32,9 @@
 module m_yaml
 
  use defs_basis
+#ifdef HAVE_FC_IEEE_ARITHMETIC
  use ieee_arithmetic
+#endif
  use m_errors
  use m_pair_list
  use m_stream_string
@@ -1113,9 +1115,13 @@ subroutine format_real(val, dest, formt)
   character(len=*),intent(out) :: dest
   character(len=*),intent(in) :: formt
 
+#ifdef HAVE_FC_IEEE_ARITHMETIC
   if (ieee_is_nan(val)) then  ! NaN
     write(dest, '(a)') '.nan'
   else if (val == MAGIC_UNDEF) then
+#else
+  if (val == MAGIC_UNDEF) then
+#endif
     write(dest, '(a)') 'undef'
   else
     write(dest, trim(formt)) val

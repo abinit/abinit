@@ -7,7 +7,7 @@
 !! Treat XC functionals closely linked with the Perdew-Wang 92 LSD and the PBE GGA.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (XG,MF,LG,CE)
+!!  Copyright (C) 1998-2020 ABINIT group (XG,MF,LG,CE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -70,14 +70,13 @@ contains
 !!  exexch= choice of local exact exchange. Active if exexch=1
 !!  npts= number of points to be computed
 !!  nspden=1 for unpolarized, 2 for spin-polarized
-!!  grho2_updn(npts,ngr2)=square of the gradient of the spin-up,
+!!  grho2_updn(npts,2*nspden-1)=square of the gradient of the spin-up,
 !!     and, if nspden==2, spin-down, and total density (Hartree/Bohr**2),
 !!     only used if gradient corrected functional (option=2,-2,-4 and 4 or beyond)
 !!  option= see above
 !!  order=its absolute value gives the maximal derivative of Exc to be computed.
 !!  rho_updn(npts,nspden)=spin-up and spin-down density (Hartree/bohr**3)
 !!  ndvxci= size of dvxci(npts,ndvxci)
-!!  ngr2= size of grho2_updn(npts,ngr2)
 !!  nd2vxci=size of d2vxci(npts,nd2vxci)
 !!
 !! OUTPUT
@@ -139,16 +138,16 @@ contains
 !!
 !! SOURCE
 
-subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci, & !Mandatory Arguments
-&                d2vxci,dvxcdgr,dvxci,exexch,grho2_updn)                          !Optional Arguments
+subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,nd2vxci, & !Mandatory Arguments
+&                d2vxci,dvxcdgr,dvxci,exexch,grho2_updn)                       !Optional Arguments
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ndvxci,nd2vxci,ngr2,npts,nspden,option,order
+ integer,intent(in) :: ndvxci,nd2vxci,npts,nspden,option,order
  integer,intent(in),optional :: exexch
 !arrays
  real(dp),intent(in) :: rho_updn(npts,nspden)
- real(dp),intent(in),optional :: grho2_updn(npts,ngr2)
+ real(dp),intent(in),optional :: grho2_updn(npts,2*nspden-1)
  real(dp),intent(out) :: exci(npts),vxci(npts,nspden)
  real(dp),intent(out),optional :: d2vxci(npts,nd2vxci),dvxcdgr(npts,3)
  real(dp),intent(out),optional :: dvxci(npts,ndvxci)
@@ -285,14 +284,6 @@ subroutine xcpbe(exci,npts,nspden,option,order,rho_updn,vxci,ndvxci,ngr2,nd2vxci
 &   '    15       2, 5,6,7',ch10,&
 &   '  While we have: ndvxc=',ndvxci,', option=',option,', nspden=',nspden,', order=',order
    MSG_BUG(message)
- end if
-
- if (present(grho2_updn)) then
-   if (ngr2/=2*nspden-1 ) then
-     write(message, '(a,2i6)' )&
-&     ' ngr2 must be 2*nspden-1 ! ngr2,nspden=',ngr2,nspden
-     MSG_BUG(message)
-   end if
  end if
 
  if ((option == 1 .or. option == -1 .or. option ==3) .and.  (present(grho2_updn) .or. present(dvxcdgr))) then

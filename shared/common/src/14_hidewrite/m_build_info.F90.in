@@ -8,7 +8,7 @@
 !!  and its build parameters (useful for debugging).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2019 ABINIT group (Yann Pouillon, Matteo Giantomassi)
+!!  Copyright (C) 2005-2020 ABINIT group (Yann Pouillon, Matteo Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,17 +61,17 @@ module m_build_info
 &   "@FC_LDFLAGS@"
 
 ! Info on optimizations
-  character(len=*),parameter :: enable_debug    = &
-&   "@enable_debug@"
-  character(len=*),parameter :: enable_optim = &
-&   "@enable_optim@"
+  character(len=*),parameter :: with_debug_flavor = &
+&   "@with_debug_flavor@"
+  character(len=*),parameter :: with_optim_flavor = &
+&   "@with_optim_flavor@"
   character(len=*),parameter :: cpu_info = &
 &   "@abi_cpu_vendor@_@abi_cpu_model@"
 
 ! Info on MPI
-  character(len=*),parameter :: enable_mpi       = &
-&   "@enable_mpi@"
-  character(len=*),parameter :: enable_mpi_io    = &
+  character(len=*),parameter :: with_mpi      = &
+&   "@with_mpi@"
+  character(len=*),parameter :: enable_mpi_io = &
 &   "@enable_mpi_io@"
 
 ! Info on openMP
@@ -79,24 +79,24 @@ module m_build_info
 &   "@enable_openmp@"
 
 ! Info on GPU
-  character(len=*),parameter :: enable_gpu    = &
-&   "@enable_gpu@"
+  character(len=*),parameter :: with_gpu      = &
+&   "@with_gpu@"
 
-! Info on connectors / fallbacks
-  character(len=*),parameter :: enable_connectors = &
-&   "@enable_connectors@"
-  character(len=*),parameter :: enable_fallbacks  = &
-&   "@enable_fallbacks@"
-  character(len=*),parameter :: dft_flavor        = &
-&   "@lib_dft_flavor@"
-  character(len=*),parameter :: fft_flavor        = &
-&   "@lib_fft_flavor@"
-  character(len=*),parameter :: linalg_flavor     = &
-&   "@lib_linalg_flavor@"
-  character(len=*),parameter :: timer_flavor      = &
-&   "@lib_timer_flavor@"
-  character(len=*),parameter :: trio_flavor       = &
-&   "@lib_trio_flavor@"
+! Info on external dependencies
+  character(len=*),parameter :: linalg_flavor       = &
+&   "@sd_linalg_flavor@"
+  character(len=*),parameter :: fft_flavor          = &
+&   "@sd_fft_flavor@"
+  character(len=*),parameter :: with_hdf5           = &
+&   "@sd_hdf5_enable@"
+  character(len=*),parameter :: with_netcdf         = &
+&   "@sd_netcdf_enable@"
+  character(len=*),parameter :: with_netcdf_fortran = &
+&   "@sd_netcdf_fortran_enable@"
+  character(len=*),parameter :: with_libxc          = &
+&   "@sd_libxc_enable@"
+  character(len=*),parameter :: with_wannier90      = &
+&   "@sd_wannier90_enable@"
 
 ! Info on experimental features
   character(len=*),parameter :: enable_exports = &
@@ -161,24 +161,24 @@ subroutine dump_config(my_unit)
   write(my_unit,'(2a)')'  FC_LDFLAGS       : ',trim(fc_ldflags)
   write(my_unit,*)
   write(my_unit,'(a) ')' === Optimizations === '
-  write(my_unit,'(2a)')'  Debug level        : ',trim(enable_debug)
-  write(my_unit,'(2a)')'  Optimization level : ',trim(enable_optim)
+  write(my_unit,'(2a)')'  Debug level        : ',trim(with_debug_flavor)
+  write(my_unit,'(2a)')'  Optimization level : ',trim(with_optim_flavor)
   write(my_unit,'(2a)')'  Architecture       : ',trim(cpu_info)
   write(my_unit,*)
   write(my_unit,'(a) ')' === Multicore === '
-  write(my_unit,'(2a)')'  Parallel build : ',trim(enable_mpi)
+  write(my_unit,'(2a)')'  Parallel build : ',trim(with_mpi)
   write(my_unit,'(2a)')'  Parallel I/O   : ',trim(enable_mpi_io)
   write(my_unit,'(2a)')'  openMP support : ',trim(enable_openmp)
-  write(my_unit,'(2a)')'  GPU support    : ',trim(enable_gpu)
+  write(my_unit,'(2a)')'  GPU support    : ',trim(with_gpu)
   write(my_unit,*)
   write(my_unit,'(a) ')' === Connectors / Fallbacks === '
-  write(my_unit,'(2a)')'  Connectors on : ',trim(enable_connectors)
-  write(my_unit,'(2a)')'  Fallbacks on  : ',trim(enable_fallbacks)
-  write(my_unit,'(2a)')'  DFT flavor    : ',trim(dft_flavor)
-  write(my_unit,'(2a)')'  FFT flavor    : ',trim(fft_flavor)
-  write(my_unit,'(2a)')'  LINALG flavor : ',trim(linalg_flavor)
-  write(my_unit,'(2a)')'  TIMER flavor  : ',trim(timer_flavor)
-  write(my_unit,'(2a)')'  TRIO flavor   : ',trim(trio_flavor)
+  write(my_unit,'(2a)')'  LINALG flavor  : ',trim(linalg_flavor)
+  write(my_unit,'(2a)')'  FFT flavor     : ',trim(fft_flavor)
+  write(my_unit,'(2a)')'  HDF5           : ',trim(with_hdf5)
+  write(my_unit,'(2a)')'  NetCDF         : ',trim(with_netcdf)
+  write(my_unit,'(2a)')'  NetCDF Fortran : ',trim(with_netcdf_fortran)
+  write(my_unit,'(2a)')'  LibXC          : ',trim(with_libxc)
+  write(my_unit,'(2a)')'  Wannier90      : ',trim(with_wannier90)
   write(my_unit,*)
   write(my_unit,'(a)' )' === Experimental features === '
   write(my_unit,'(2a)')'  Exports             : ',trim(enable_exports)

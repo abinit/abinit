@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psp1
 !! NAME
 !!  m_psp1
@@ -7,7 +6,7 @@
 !!  Initialize pspcod=1 or 4 pseudopotential (Teter format)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FrD, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, FrD, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

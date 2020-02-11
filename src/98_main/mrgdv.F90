@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/mrgdv
 !! NAME
 !! mrgdv
@@ -7,7 +6,7 @@
 !! This program merges DFPT potentials for different q-vectors and perturbations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2019 ABINIT group (MG)
+!! Copyright (C) 2004-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

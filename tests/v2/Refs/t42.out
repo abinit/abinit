@@ -1,8 +1,8 @@
 
-.Version 8.7.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 27 Sep 2017.
-- ( at 15h29 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h26 )
   
 - input  file    -> t42.in
 - output file    -> t42.out
@@ -216,8 +216,8 @@ P           mkmem           1
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/2he.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/2he.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/2he.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/2he.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Hydrogen,  from PRB58, 3641 (1998) paper
 -  2.00000   2.00000    991006                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -235,8 +235,8 @@ P           mkmem           1
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/1h.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/1h.psphgh
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/1h.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/1h.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Hydrogen,  from PRB58, 3641 (1998) paper
 -  1.00000   1.00000    991006                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -270,11 +270,11 @@ _setup2: Arith. and geom. avg. npw (full set) are    1309.000    1309.000
  ETOT  5  -2.4623799779379    -1.499E-07 2.281E-10 1.842E-05
  ETOT  6  -2.4623799961969    -1.826E-08 1.064E-10 5.883E-07
  ETOT  7  -2.4623799968405    -6.436E-10 2.862E-12 3.808E-09
- ETOT  8  -2.4623799968449    -4.352E-12 1.923E-14 1.948E-10
+ ETOT  8  -2.4623799968449    -4.354E-12 1.923E-14 1.948E-10
  ETOT  9  -2.4623799968449    -1.954E-14 2.898E-16 1.103E-12
- ETOT 10  -2.4623799968449    -3.775E-14 5.599E-18 5.389E-15
- ETOT 11  -2.4623799968449     3.642E-14 4.418E-20 1.206E-16
- ETOT 12  -2.4623799968449     1.776E-15 3.987E-22 6.889E-19
+ ETOT 10  -2.4623799968449    -4.086E-14 5.599E-18 5.389E-15
+ ETOT 11  -2.4623799968449     3.997E-14 4.418E-20 1.206E-16
+ ETOT 12  -2.4623799968449     3.553E-15 3.987E-22 6.889E-19
  ETOT 13  -2.4623799968449    -2.087E-14 5.600E-23 1.733E-19
 
  At SCF step   13   max residual=  5.60E-23 < tolwfr=  1.00E-22 =>converged.
@@ -293,8 +293,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1309.000    1309.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.6002E-23; max=  5.6002E-23
-   0.0000  0.0000  0.0000    1  5.60019E-23 kpt; spin; max resid(k); each band:
+ Mean square residual over all n,k,spin=   56.004E-24; max=  56.004E-24
+   0.0000  0.0000  0.0000    1  5.60044E-23 kpt; spin; max resid(k); each band:
   5.60E-23
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
@@ -351,6 +351,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1309.000    1309.000
     Monopole correction (Ha)= 1.41864873974033E-01
     Monopole correction (eV)= 3.86033954195793E+00
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  5.91164438E-04  sigma(3 2)=  1.62686814E-05
@@ -539,7 +541,7 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.7243E-10; max=  9.2277E-10
+ Mean square residual over all n,k,spin=   37.243E-11; max=  92.277E-11
    0.0000  0.0000  0.0000    1  9.22768E-10 kpt; spin; max resid(k); each band:
   2.87E-22 5.62E-10 9.23E-10 8.60E-11 3.06E-10 5.49E-10 5.81E-10 7.07E-11
   5.33E-11 2.76E-11 4.29E-10 5.53E-10 3.91E-10 8.44E-10 7.42E-11 4.33E-10
@@ -595,8 +597,8 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/2he.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/2he.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/2he.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/2he.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Hydrogen,  from PRB58, 3641 (1998) paper
 -  2.00000   2.00000    991006                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -614,8 +616,8 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/1h.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/1h.psphgh
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/1h.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/1h.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Hydrogen,  from PRB58, 3641 (1998) paper
 -  1.00000   1.00000    991006                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -719,7 +721,7 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
   11 1.16492E+00 8.477E-02 3.609E-02 4.902E-02 1.692E-01  4.21E-02 -7.81E-02 -9.11E-02
   12 1.17744E+00 1.835E-02 3.128E-02 6.127E-04 2.314E-02 -4.38E-03 -2.69E-02  3.77E-03
   13 1.17744E+00 1.835E-02 5.406E-03 3.609E-02 1.355E-02 -1.40E-02  8.56E-03 -2.21E-02
-  14 1.23212E+00 7.117E-05 3.294E-06 8.650E-05 1.237E-04  1.69E-05 -2.02E-05 -1.03E-04
+  14 1.23212E+00 7.117E-05 3.295E-06 8.650E-05 1.237E-04  1.69E-05 -2.02E-05 -1.03E-04
   15 1.23212E+00 7.122E-05 1.392E-04 5.589E-05 1.858E-05 -8.82E-05 -5.08E-05  3.22E-05
   16 1.23936E+00 3.496E-03 4.878E-03 5.586E-03 2.380E-05 -5.22E-03  3.41E-04 -3.65E-04
   17 1.23936E+00 3.496E-03 2.112E-03 1.407E-03 6.969E-03  1.72E-03 -3.84E-03 -3.13E-03
@@ -783,7 +785,7 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.7243E-10; max=  9.2277E-10
+ Mean square residual over all n,k,spin=   37.243E-11; max=  92.277E-11
    0.0000  0.0000  0.0000    1  9.22768E-10 kpt; spin; max resid(k); each band:
   2.87E-22 5.62E-10 9.23E-10 8.60E-11 3.06E-10 5.49E-10 5.81E-10 7.07E-11
   5.33E-11 2.76E-11 4.29E-10 5.53E-10 3.91E-10 8.44E-10 7.42E-11 4.33E-10
@@ -839,8 +841,8 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/2he.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/2he.psphgh
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/2he.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/2he.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Hydrogen,  from PRB58, 3641 (1998) paper
 -  2.00000   2.00000    991006                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -858,8 +860,8 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
          --- l  ekb(1:nproj) -->
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/1h.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/trunk_ace_2/tests/Psps_for_tests/1h.psphgh
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/1h.psphgh
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/1h.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Hydrogen,  from PRB58, 3641 (1998) paper
 -  1.00000   1.00000    991006                znucl, zion, pspdat
     3    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1027,7 +1029,7 @@ P newkpt: treating     20 bands with npw=     655 for ikpt=   1 by node    0
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.7243E-10; max=  9.2277E-10
+ Mean square residual over all n,k,spin=   37.243E-11; max=  92.277E-11
    0.0000  0.0000  0.0000    1  9.22768E-10 kpt; spin; max resid(k); each band:
   2.87E-22 5.62E-10 9.23E-10 8.60E-11 3.06E-10 5.49E-10 5.81E-10 7.07E-11
   5.33E-11 2.76E-11 4.29E-10 5.53E-10 3.91E-10 8.44E-10 7.42E-11 4.33E-10
@@ -1170,48 +1172,52 @@ P           mkmem           1
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at http://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [3] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.2
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.8
 
 ================================================================================
 
  Calculation completed.
-.Delivered  16 WARNINGs and  26 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.1  wall=          1.2
+.Delivered  16 WARNINGs and  30 COMMENTs to log file.
++Overall time at end (sec) : cpu=          1.6  wall=          1.8

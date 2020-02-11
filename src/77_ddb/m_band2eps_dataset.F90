@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_band2eps_dataset
 !! NAME
 !!  m_band2eps_dataset
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
+!!  Copyright (C) 2014-2020 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

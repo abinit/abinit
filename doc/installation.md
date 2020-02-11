@@ -265,7 +265,7 @@ machine, e.g. abiref.pcpm.ucl.ac.be or my_machine ... , and taking the first
 word of the returned chain of character, e.g. abiref or my_machine ...
 
 There is a template for such a file, located in ~abinit/doc/config/. Its name
-is config-template.ac. Examples of such files, that have been used for testing
+is config-template.ac9. Examples of such files, that have been used for testing
 the package, can be found in ~abinit/doc/build/config-examples/. By the way,
 the known problems observed for these different tests are mentioned in the
 ~abinit/KNOWN_PROBLEMS file, and the hostname.ac files are correspondingly

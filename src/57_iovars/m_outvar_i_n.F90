@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outvar_i_n
 !! NAME
 !!  m_outvar_i_n
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -664,14 +663,13 @@ subroutine outvar_i_n (dtsets,iout,&
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr, narrm,ncid,ndtset_alloc,'lexexch','INT',multivals%ntypat)
 
 !ldaminushalf
+ narr=mxvals%ntypat             ! default size for all datasets
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%ntypat
    if(idtset==0)narrm(idtset)=mxvals%ntypat
-   if (narrm(idtset)>0) then
-     intarr(1:narrm(idtset),idtset)=dtsets(idtset)%ldaminushalf(1:narrm(idtset))
-   end if
+   if (narrm(idtset)>0) intarr(1:narrm(idtset),idtset)=dtsets(idtset)%ldaminushalf(1:narrm(idtset))
  end do
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr, narrm,ncid,ndtset_alloc,'ldaminushalf','INT',multivals%ntypat)
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'ldaminushalf','INT',multivals%ntypat)
 
 !localrdwf
  intarr(1,:)=dtsets(:)%localrdwf
@@ -682,9 +680,7 @@ subroutine outvar_i_n (dtsets,iout,&
  do idtset=0,ndtset_alloc       ! specific size for each dataset
    narrm(idtset)=dtsets(idtset)%ntypat
    if(idtset==0)narrm(idtset)=mxvals%ntypat
-   if (narrm(idtset)>0) then
-     intarr(1:narrm(idtset),idtset)=dtsets(idtset)%lpawu(1:narrm(idtset))
-   end if
+   if (narrm(idtset)>0) intarr(1:narrm(idtset),idtset)=dtsets(idtset)%lpawu(1:narrm(idtset))
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,narr,narrm,ncid,ndtset_alloc,'lpawu','INT',multivals%ntypat)
 

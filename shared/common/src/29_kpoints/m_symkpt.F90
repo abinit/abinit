@@ -4,7 +4,7 @@
 !!  m_symkpt
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XG,LSI,HM)
+!!  Copyright (C) 1999-2020 ABINIT group (XG,LSI,HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -127,6 +127,15 @@ subroutine symkpt(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,timrev
 ! *********************************************************************
 
  ABI_UNUSED((/comm/))
+
+!DEBUG
+!write(std_out,*)' symkpt : enter '
+!write(std_out,*)' chksymbreak,iout,nkbz,nsym,timrev,comm=',chksymbreak,iout,nkbz,nsym,timrev,comm
+!write(std_out,*)' symrec=',symrec
+!do ikpt=1,nkbz
+!  write(std_out,'(a,i4,3f12.4)' )' ikpt, bz(:,ikpt)=',ikpt,kbz(:,ikpt)
+!enddo
+!ENDDEBUG
 
  if (timrev/=1 .and. timrev/=0) then
    write(message,'(a,i0)')' timrev should be 0 or 1, while it is equal to ',timrev
@@ -633,13 +642,13 @@ subroutine symkpt_new(chksymbreak,gmet,ibz2bz,iout,kbz,nkbz,nkibz,nsym,symrec,ti
  if(iout/=0)then
    if(nkbz/=nkibz)then
      write(message, '(a,a,a,i6,a)' )&
-     ' symkpt : the number of k-points, thanks to the symmetries,',ch10,' is reduced to',nkibz,' .'
+     ' symkpt_new : the number of k-points, thanks to the symmetries,',ch10,' is reduced to',nkibz,' .'
      call wrtout(iout,message,'COLL')
      if(iout/=std_out) call wrtout(std_out,message,'COLL')
 
      nkpout=nkibz
    else
-     write(message, '(a)' )' symkpt : not enough symmetry to change the number of k points.'
+     write(message, '(a)' )' symkpt_new : not enough symmetry to change the number of k points.'
      call wrtout(iout,message,'COLL')
      if (iout/=std_out) call wrtout(std_out,message,'COLL')
    end if

@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 09h40 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h21 )
   
 - input  file    -> tbase4_3.in
 - output file    -> tbase4_3.out
@@ -34,7 +34,7 @@
 -    mband =           3        mffmem =           1         mkmem =           2
        mpw =          90          nfft =        3375          nkpt =           2
 ================================================================================
-P This job should need less than                       2.142 Mbytes of memory.
+P This job should need less than                       2.130 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =           2
        mpw =          90          nfft =        3375          nkpt =           2
 ================================================================================
-P This job should need less than                       2.142 Mbytes of memory.
+P This job should need less than                       2.130 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =           2
        mpw =          90          nfft =        3375          nkpt =           2
 ================================================================================
-P This job should need less than                       2.142 Mbytes of memory.
+P This job should need less than                       2.130 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =           2
        mpw =          90          nfft =        3375          nkpt =           2
 ================================================================================
-P This job should need less than                       2.142 Mbytes of memory.
+P This job should need less than                       2.130 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -102,7 +102,7 @@ _ WF disk file :      0.010 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          10
        mpw =          92          nfft =        3375          nkpt =          10
 ================================================================================
-P This job should need less than                       2.188 Mbytes of memory.
+P This job should need less than                       2.175 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -119,7 +119,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          10
        mpw =          92          nfft =        3375          nkpt =          10
 ================================================================================
-P This job should need less than                       2.188 Mbytes of memory.
+P This job should need less than                       2.175 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -136,7 +136,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          10
        mpw =          92          nfft =        3375          nkpt =          10
 ================================================================================
-P This job should need less than                       2.188 Mbytes of memory.
+P This job should need less than                       2.175 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -153,7 +153,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          10
        mpw =          92          nfft =        3375          nkpt =          10
 ================================================================================
-P This job should need less than                       2.188 Mbytes of memory.
+P This job should need less than                       2.175 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -170,7 +170,7 @@ _ WF disk file :      0.044 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          28
        mpw =          94          nfft =        3375          nkpt =          28
 ================================================================================
-P This job should need less than                       2.294 Mbytes of memory.
+P This job should need less than                       2.281 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.122 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -187,7 +187,7 @@ _ WF disk file :      0.122 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          28
        mpw =          94          nfft =        3375          nkpt =          28
 ================================================================================
-P This job should need less than                       2.294 Mbytes of memory.
+P This job should need less than                       2.281 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.122 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -204,7 +204,7 @@ _ WF disk file :      0.122 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          28
        mpw =          94          nfft =        3375          nkpt =          28
 ================================================================================
-P This job should need less than                       2.294 Mbytes of memory.
+P This job should need less than                       2.281 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.122 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -221,7 +221,7 @@ _ WF disk file :      0.122 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 -    mband =           3        mffmem =           1         mkmem =          28
        mpw =          94          nfft =        3375          nkpt =          28
 ================================================================================
-P This job should need less than                       2.294 Mbytes of memory.
+P This job should need less than                       2.281 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.122 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 ================================================================================
@@ -231,7 +231,7 @@ _ WF disk file :      0.122 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -766,14 +766,14 @@ P           mkmem34        28
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
   No XC core correction.
   1.024700          amesh (Hamman grid)
- pspatm : epsatm=    1.36305739
+  pspatm : epsatm=    1.36305739
          --- l  ekb(1:nproj) -->
              0    1.768744
              1    0.900554
@@ -799,7 +799,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  ETOT  2  -2.0915546297426    -2.681E-04 3.236E-10 1.004E-02
  ETOT  3  -2.0915604404745    -5.811E-06 1.050E-07 5.229E-05
  ETOT  4  -2.0915604691264    -2.865E-08 7.314E-10 1.924E-07
- ETOT  5  -2.0915604692007    -7.431E-11 1.449E-12 7.990E-10
+ ETOT  5  -2.0915604692008    -7.431E-11 1.449E-12 7.990E-10
 
  At SCF step    5, etot is converged : 
   for the second time, diff in etot=  7.431E-11 < toldfe=  1.000E-06
@@ -836,10 +836,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Lengths [Bohr]
   5.37401153701776E+00  5.37401153701776E+00  5.37401153701776E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  4.66771536069966E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  4.66771536069964E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  4.66771536069964E-05
- Total energy (etotal) [Ha]= -2.09156046920075E+00
+  4.66771536070467E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  4.66771536070466E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  4.66771536070465E-05
+ Total energy (etotal) [Ha]= -2.09156046920076E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
@@ -875,7 +875,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.58935760897760E+00  7.58935760897760E+00  7.58935760897760E+00
+  7.58935760897759E+00  7.58935760897759E+00  7.58935760897759E+00
  Real space primitive translations (rprimd) [bohr]
   0.00000000000000E+00  3.79467880448880E+00  3.79467880448880E+00
   3.79467880448880E+00  0.00000000000000E+00  3.79467880448880E+00
@@ -884,11 +884,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.36648623015779E+00  5.36648623015779E+00  5.36648623015779E+00
+  5.36648623015778E+00  5.36648623015778E+00  5.36648623015778E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  3.51614364757652E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  3.51614364757651E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  3.51614364757653E-05
+  3.51614364757088E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  3.51614364757087E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  3.51614364757086E-05
  Total energy (etotal) [Ha]= -2.09157932489121E+00
 
  Difference of energy with previous step (new-old):
@@ -902,7 +902,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0916026660288    -2.092E+00 2.573E-11 1.460E-04
- ETOT  2  -2.0916027316067    -6.558E-08 1.827E-14 9.020E-06
+ ETOT  2  -2.0916027316068    -6.558E-08 1.827E-14 9.020E-06
  ETOT  3  -2.0916027361006    -4.494E-09 6.594E-11 5.483E-09
 
  At SCF step    3, etot is converged : 
@@ -929,21 +929,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.55740829272385E+00  7.55740829272385E+00  7.55740829272385E+00
+  7.55740829272415E+00  7.55740829272415E+00  7.55740829272415E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.77870414636193E+00  3.77870414636193E+00
-  3.77870414636193E+00  0.00000000000000E+00  3.77870414636193E+00
-  3.77870414636193E+00  3.77870414636193E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.07909248030002E+02
+  0.00000000000000E+00  3.77870414636208E+00  3.77870414636208E+00
+  3.77870414636208E+00  0.00000000000000E+00  3.77870414636208E+00
+  3.77870414636208E+00  3.77870414636208E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.07909248030015E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.34389465198049E+00  5.34389465198049E+00  5.34389465198049E+00
+  5.34389465198070E+00  5.34389465198070E+00  5.34389465198070E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -1.58500217304968E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -1.58500217304974E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -1.58500217304963E-06
- Total energy (etotal) [Ha]= -2.09160273610057E+00
+ -1.58500217191924E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -1.58500217191908E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -1.58500217191935E-06
+ Total energy (etotal) [Ha]= -2.09160273610065E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-2.34112E-05
@@ -956,16 +956,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0916027818065    -2.092E+00 3.738E-14 2.844E-07
- ETOT  2  -2.0916027819343    -1.279E-10 3.436E-17 1.763E-08
- ETOT  3  -2.0916027819431    -8.819E-12 1.280E-13 1.024E-11
+ ETOT  2  -2.0916027819344    -1.279E-10 3.436E-17 1.763E-08
+ ETOT  3  -2.0916027819430    -8.620E-12 1.280E-13 1.024E-11
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  8.819E-12 < toldfe=  1.000E-06
+  for the second time, diff in etot=  8.620E-12 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.13606394E-08  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.13606394E-08  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.13606394E-08  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.13606367E-08  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.13606367E-08  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.13606367E-08  sigma(2 1)=  0.00000000E+00
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -983,25 +983,25 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.55876978577743E+00  7.55876978577743E+00  7.55876978577743E+00
+  7.55876978577678E+00  7.55876978577678E+00  7.55876978577678E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.77938489288872E+00  3.77938489288872E+00
-  3.77938489288872E+00  0.00000000000000E+00  3.77938489288872E+00
-  3.77938489288872E+00  3.77938489288872E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.07967579201973E+02
+  0.00000000000000E+00  3.77938489288839E+00  3.77938489288839E+00
+  3.77938489288839E+00  0.00000000000000E+00  3.77938489288839E+00
+  3.77938489288839E+00  3.77938489288839E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.07967579201945E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.34485737295121E+00  5.34485737295121E+00  5.34485737295121E+00
+  5.34485737295075E+00  5.34485737295075E+00  5.34485737295075E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  2.13606393538891E-08  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  2.13606393536722E-08  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  2.13606393538891E-08
- Total energy (etotal) [Ha]= -2.09160278194314E+00
+  2.13606367313666E-08  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  2.13606367312582E-08  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  2.13606367313124E-08
+ Total energy (etotal) [Ha]= -2.09160278194299E+00
 
  Difference of energy with previous step (new-old):
-           Absolute (Ha)=-4.58426E-08
-           Relative     =-2.19174E-08
+           Absolute (Ha)=-4.58423E-08
+           Relative     =-2.19173E-08
 
  At Broyd/MD step   4, gradients are converged : 
   max grad (force/stress) = 2.1361E-06 < tolmxf= 5.0000E-05 ha/bohr (free atoms)
@@ -1010,8 +1010,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   7.6949E-14; max=  1.2796E-13
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   76.949E-15; max=  12.796E-14
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1042,31 +1041,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.70955629152364E-01
-    Hartree energy  =  3.85032994160116E-03
-    XC energy       = -8.08446913185108E-01
-    Ewald energy    = -2.72952873526231E+00
-    PspCore energy  =  3.78740746869542E-02
-    Loc. psp. energy=  8.26933400961289E-02
-    NL   psp  energy=  4.52593601268747E-01
-    >>>>> Internal E= -2.09000867330163E+00
+    Kinetic energy  =  8.70955629152760E-01
+    Hartree energy  =  3.85032994160424E-03
+    XC energy       = -8.08446913185370E-01
+    Ewald energy    = -2.72952873526255E+00
+    PspCore energy  =  3.78740746869640E-02
+    Loc. psp. energy=  8.26933400962499E-02
+    NL   psp  energy=  4.52593601268863E-01
+    >>>>> Internal E= -2.09000867330148E+00
 
-    -kT*entropy     = -1.59410864151631E-03
-    >>>>>>>>> Etotal= -2.09160278194314E+00
+    -kT*entropy     = -1.59410864151470E-03
+    >>>>>>>>> Etotal= -2.09160278194299E+00
 
  Other information on the energy :
-    Total energy(eV)= -5.69154061820988E+01 ; Band energy (Ha)=   3.6061338058E-01
+    Total energy(eV)= -5.69154061820946E+01 ; Band energy (Ha)=   3.6061338058E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.13606394E-08  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.13606394E-08  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.13606394E-08  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.13606367E-08  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.13606367E-08  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.13606367E-08  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.2845E-04 GPa]
-- sigma(1 1)=  6.28451601E-04  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  6.28451601E-04  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  6.28451601E-04  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  6.28451524E-04  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  6.28451524E-04  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  6.28451524E-04  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 12 ==================================================================
@@ -1150,10 +1151,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Lengths [Bohr]
   5.37401153701776E+00  5.37401153701776E+00  5.37401153701776E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  4.66665725713028E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  4.66665725713027E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  4.66665725713031E-05
- Total energy (etotal) [Ha]= -2.09315457784181E+00
+  4.66665725713280E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  4.66665725713280E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  4.66665725713281E-05
+ Total energy (etotal) [Ha]= -2.09315457784182E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
@@ -1200,9 +1201,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Lengths [Bohr]
   5.36648793603602E+00  5.36648793603602E+00  5.36648793603602E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  3.51640948900786E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  3.51640948900786E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  3.51640948900787E-05
+  3.51640948900770E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  3.51640948900770E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  3.51640948900770E-05
  Total energy (etotal) [Ha]= -2.09317342986844E+00
 
  Difference of energy with previous step (new-old):
@@ -1243,21 +1244,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.55737913824310E+00  7.55737913824310E+00  7.55737913824310E+00
+  7.55737913824316E+00  7.55737913824316E+00  7.55737913824316E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.77868956912155E+00  3.77868956912155E+00
-  3.77868956912155E+00  0.00000000000000E+00  3.77868956912155E+00
-  3.77868956912155E+00  3.77868956912155E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.07907999178873E+02
+  0.00000000000000E+00  3.77868956912158E+00  3.77868956912158E+00
+  3.77868956912158E+00  0.00000000000000E+00  3.77868956912158E+00
+  3.77868956912158E+00  3.77868956912158E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.07907999178876E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.34387403664944E+00  5.34387403664944E+00  5.34387403664944E+00
+  5.34387403664949E+00  5.34387403664949E+00  5.34387403664949E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -1.61963085783820E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -1.61963085783815E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -1.61963085783837E-06
- Total energy (etotal) [Ha]= -2.09319684272976E+00
+ -1.61963085766072E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -1.61963085766083E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -1.61963085766077E-06
+ Total energy (etotal) [Ha]= -2.09319684272978E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-2.34129E-05
@@ -1269,17 +1270,17 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.0931968904415    -2.093E+00 3.904E-14 2.969E-07
+ ETOT  1  -2.0931968904416    -2.093E+00 3.904E-14 2.969E-07
  ETOT  2  -2.0931968905749    -1.334E-10 3.588E-17 1.840E-08
- ETOT  3  -2.0931968905841    -9.126E-12 1.336E-13 1.069E-11
+ ETOT  3  -2.0931968905841    -9.177E-12 1.336E-13 1.069E-11
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  9.126E-12 < toldfe=  1.000E-06
+  for the second time, diff in etot=  9.177E-12 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.20078192E-08  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.20078192E-08  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.20078192E-08  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.20078197E-08  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.20078197E-08  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.20078197E-08  sigma(2 1)=  0.00000000E+00
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1297,21 +1298,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.55877033877999E+00  7.55877033877999E+00  7.55877033877999E+00
+  7.55877033877992E+00  7.55877033877992E+00  7.55877033877992E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.77938516939000E+00  3.77938516939000E+00
-  3.77938516939000E+00  0.00000000000000E+00  3.77938516939000E+00
-  3.77938516939000E+00  3.77938516939000E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.07967602898826E+02
+  0.00000000000000E+00  3.77938516938996E+00  3.77938516938996E+00
+  3.77938516938996E+00  0.00000000000000E+00  3.77938516938996E+00
+  3.77938516938996E+00  3.77938516938996E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.07967602898822E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.34485776398307E+00  5.34485776398307E+00  5.34485776398307E+00
+  5.34485776398301E+00  5.34485776398301E+00  5.34485776398301E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  2.20078192251063E-08  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  2.20078192252147E-08  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  2.20078192251063E-08
- Total energy (etotal) [Ha]= -2.09319689058407E+00
+  2.20078197343560E-08  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  2.20078197344644E-08  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  2.20078197344102E-08
+ Total energy (etotal) [Ha]= -2.09319689058411E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-4.78543E-08
@@ -1324,8 +1325,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.0325E-14; max=  1.3359E-13
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   80.325E-15; max=  13.359E-14
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1356,31 +1356,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.70955505698043E-01
-    Hartree energy  =  3.85032882019863E-03
-    XC energy       = -8.08446859100496E-01
-    Ewald energy    = -2.72952853556894E+00
-    PspCore energy  =  3.78740663743090E-02
-    Loc. psp. energy=  8.26932459151270E-02
-    NL   psp  energy=  4.52593574560726E-01
-    >>>>> Internal E= -2.09000867330103E+00
+    Kinetic energy  =  8.70955505697976E-01
+    Hartree energy  =  3.85032882019829E-03
+    XC energy       = -8.08446859100437E-01
+    Ewald energy    = -2.72952853556897E+00
+    PspCore energy  =  3.78740663743101E-02
+    Loc. psp. energy=  8.26932459151370E-02
+    NL   psp  energy=  4.52593574560702E-01
+    >>>>> Internal E= -2.09000867330108E+00
 
-    -kT*entropy     = -3.18821728303123E-03
-    >>>>>>>>> Etotal= -2.09319689058407E+00
+    -kT*entropy     = -3.18821728303230E-03
+    >>>>>>>>> Etotal= -2.09319689058411E+00
 
  Other information on the energy :
-    Total energy(eV)= -5.69587840842414E+01 ; Band energy (Ha)=   3.6061320365E-01
+    Total energy(eV)= -5.69587840842427E+01 ; Band energy (Ha)=   3.6061320365E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.20078192E-08  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.20078192E-08  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.20078192E-08  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.20078197E-08  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.20078197E-08  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.20078197E-08  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.4749E-04 GPa]
-- sigma(1 1)=  6.47492287E-04  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  6.47492287E-04  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  6.47492287E-04  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  6.47492302E-04  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  6.47492302E-04  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  6.47492302E-04  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 13 ==================================================================
@@ -1464,9 +1466,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Lengths [Bohr]
   5.37401153701776E+00  5.37401153701776E+00  5.37401153701776E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  4.66665728596892E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  4.66665728596891E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  4.66665728596893E-05
+  4.66665728596969E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  4.66665728596967E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  4.66665728596970E-05
  Total energy (etotal) [Ha]= -2.09474868650962E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
@@ -1505,18 +1507,18 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Scale of Primitive Cell (acell) [bohr]
   7.58936002138799E+00  7.58936002138799E+00  7.58936002138799E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.79468001069400E+00  3.79468001069400E+00
-  3.79468001069400E+00  0.00000000000000E+00  3.79468001069400E+00
-  3.79468001069400E+00  3.79468001069400E+00  0.00000000000000E+00
+  0.00000000000000E+00  3.79468001069399E+00  3.79468001069399E+00
+  3.79468001069399E+00  0.00000000000000E+00  3.79468001069399E+00
+  3.79468001069399E+00  3.79468001069399E+00  0.00000000000000E+00
  Unitary Cell Volume (ucvol) [Bohr^3]=  1.09283721117518E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
   5.36648793598953E+00  5.36648793598953E+00  5.36648793598953E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  3.51640949973929E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  3.51640949973929E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  3.51640949973931E-05
+  3.51640949973783E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  3.51640949973784E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  3.51640949973783E-05
  Total energy (etotal) [Ha]= -2.09476753853331E+00
 
  Difference of energy with previous step (new-old):
@@ -1557,21 +1559,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.55737913838373E+00  7.55737913838373E+00  7.55737913838373E+00
+  7.55737913838379E+00  7.55737913838379E+00  7.55737913838379E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.77868956919186E+00  3.77868956919186E+00
-  3.77868956919186E+00  0.00000000000000E+00  3.77868956919186E+00
-  3.77868956919186E+00  3.77868956919186E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.07907999184897E+02
+  0.00000000000000E+00  3.77868956919189E+00  3.77868956919189E+00
+  3.77868956919189E+00  0.00000000000000E+00  3.77868956919189E+00
+  3.77868956919189E+00  3.77868956919189E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.07907999184900E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.34387403674888E+00  5.34387403674888E+00  5.34387403674888E+00
+  5.34387403674892E+00  5.34387403674892E+00  5.34387403674892E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -1.61963056714257E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -1.61963056714278E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -1.61963056714257E-06
- Total energy (etotal) [Ha]= -2.09479095138720E+00
+ -1.61963056699295E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -1.61963056699295E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -1.61963056699300E-06
+ Total energy (etotal) [Ha]= -2.09479095138721E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-2.34129E-05
@@ -1583,17 +1585,17 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.0947909990992    -2.095E+00 3.904E-14 2.969E-07
- ETOT  2  -2.0947909992326    -1.334E-10 3.588E-17 1.840E-08
- ETOT  3  -2.0947909992418    -9.209E-12 1.336E-13 1.069E-11
+ ETOT  1  -2.0947909990993    -2.095E+00 3.904E-14 2.969E-07
+ ETOT  2  -2.0947909992326    -1.333E-10 3.588E-17 1.840E-08
+ ETOT  3  -2.0947909992418    -9.208E-12 1.336E-13 1.069E-11
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  9.209E-12 < toldfe=  1.000E-06
+  for the second time, diff in etot=  9.208E-12 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.20078140E-08  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.20078140E-08  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.20078140E-08  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.20078138E-08  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.20078138E-08  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.20078138E-08  sigma(2 1)=  0.00000000E+00
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1611,21 +1613,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.55877033866886E+00  7.55877033866886E+00  7.55877033866886E+00
+  7.55877033866880E+00  7.55877033866880E+00  7.55877033866880E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.77938516933443E+00  3.77938516933443E+00
-  3.77938516933443E+00  0.00000000000000E+00  3.77938516933443E+00
-  3.77938516933443E+00  3.77938516933443E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.07967602894064E+02
+  0.00000000000000E+00  3.77938516933440E+00  3.77938516933440E+00
+  3.77938516933440E+00  0.00000000000000E+00  3.77938516933440E+00
+  3.77938516933440E+00  3.77938516933440E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.07967602894061E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.34485776390449E+00  5.34485776390449E+00  5.34485776390449E+00
+  5.34485776390444E+00  5.34485776390444E+00  5.34485776390444E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  2.20078139622805E-08  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  2.20078139622263E-08  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  2.20078139623347E-08
- Total energy (etotal) [Ha]= -2.09479099924182E+00
+  2.20078138020354E-08  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  2.20078138021980E-08  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  2.20078138020896E-08
+ Total energy (etotal) [Ha]= -2.09479099924181E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-4.78546E-08
@@ -1638,8 +1640,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.0325E-14; max=  1.3359E-13
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   80.325E-15; max=  13.359E-14
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1670,31 +1671,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.70955505705819E-01
-    Hartree energy  =  3.85032882032932E-03
-    XC energy       = -8.08446859097659E-01
-    Ewald energy    = -2.72952853560907E+00
-    PspCore energy  =  3.78740663759794E-02
-    Loc. psp. energy=  8.26932459331400E-02
-    NL   psp  energy=  4.52593574560448E-01
+    Kinetic energy  =  8.70955505705845E-01
+    Hartree energy  =  3.85032882032956E-03
+    XC energy       = -8.08446859097679E-01
+    Ewald energy    = -2.72952853560909E+00
+    PspCore energy  =  3.78740663759804E-02
+    Loc. psp. energy=  8.26932459331531E-02
+    NL   psp  energy=  4.52593574560454E-01
     >>>>> Internal E= -2.09000867331101E+00
 
-    -kT*entropy     = -4.78232593080470E-03
-    >>>>>>>>> Etotal= -2.09479099924182E+00
+    -kT*entropy     = -4.78232593080447E-03
+    >>>>>>>>> Etotal= -2.09479099924181E+00
 
  Other information on the energy :
-    Total energy(eV)= -5.70021619868420E+01 ; Band energy (Ha)=   3.6061320368E-01
+    Total energy(eV)= -5.70021619868419E+01 ; Band energy (Ha)=   3.6061320368E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.20078140E-08  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.20078140E-08  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.20078140E-08  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.20078138E-08  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.20078138E-08  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.20078138E-08  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.4749E-04 GPa]
-- sigma(1 1)=  6.47492132E-04  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  6.47492132E-04  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  6.47492132E-04  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  6.47492128E-04  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  6.47492128E-04  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  6.47492128E-04  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 14 ==================================================================
@@ -1778,9 +1781,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Lengths [Bohr]
   5.37401153701776E+00  5.37401153701776E+00  5.37401153701776E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  4.66644630146820E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  4.66644630146820E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  4.66644630146821E-05
+  4.66644630146802E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  4.66644630146804E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  4.66644630146803E-05
  Total energy (etotal) [Ha]= -2.09634280820712E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
@@ -1828,9 +1831,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Lengths [Bohr]
   5.36648827613947E+00  5.36648827613947E+00  5.36648827613947E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  3.51626535877831E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  3.51626535877833E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  3.51626535877833E-05
+  3.51626535877430E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  3.51626535877431E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  3.51626535877429E-05
  Total energy (etotal) [Ha]= -2.09636165856425E+00
 
  Difference of energy with previous step (new-old):
@@ -1843,17 +1846,17 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.0963849995945    -2.096E+00 2.581E-11 1.463E-04
+ ETOT  1  -2.0963849995944    -2.096E+00 2.581E-11 1.463E-04
  ETOT  2  -2.0963850652964    -6.570E-08 1.831E-14 9.037E-06
- ETOT  3  -2.0963850697987    -4.502E-09 6.607E-11 5.493E-09
+ ETOT  3  -2.0963850697988    -4.502E-09 6.607E-11 5.493E-09
 
  At SCF step    3, etot is converged : 
   for the second time, diff in etot=  4.502E-09 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)= -1.61961753E-06  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)= -1.61961753E-06  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)= -1.61961753E-06  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)= -1.61961752E-06  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)= -1.61961752E-06  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)= -1.61961752E-06  sigma(2 1)=  0.00000000E+00
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1871,21 +1874,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.55738050032756E+00  7.55738050032756E+00  7.55738050032756E+00
+  7.55738050032770E+00  7.55738050032770E+00  7.55738050032770E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.77869025016378E+00  3.77869025016378E+00
-  3.77869025016378E+00  0.00000000000000E+00  3.77869025016378E+00
-  3.77869025016378E+00  3.77869025016378E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.07908057524432E+02
+  0.00000000000000E+00  3.77869025016385E+00  3.77869025016385E+00
+  3.77869025016385E+00  0.00000000000000E+00  3.77869025016385E+00
+  3.77869025016385E+00  3.77869025016385E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.07908057524438E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.34387499978860E+00  5.34387499978860E+00  5.34387499978860E+00
+  5.34387499978870E+00  5.34387499978870E+00  5.34387499978870E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -1.61961752530835E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -1.61961752530835E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -1.61961752530835E-06
- Total energy (etotal) [Ha]= -2.09638506979875E+00
+ -1.61961752497816E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -1.61961752497827E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -1.61961752497821E-06
+ Total energy (etotal) [Ha]= -2.09638506979876E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-2.34112E-05
@@ -1899,15 +1902,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0963851175103    -2.096E+00 3.903E-14 2.969E-07
  ETOT  2  -2.0963851176437    -1.334E-10 3.588E-17 1.840E-08
- ETOT  3  -2.0963851176528    -9.134E-12 1.336E-13 1.069E-11
+ ETOT  3  -2.0963851176528    -9.116E-12 1.336E-13 1.069E-11
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  9.134E-12 < toldfe=  1.000E-06
+  for the second time, diff in etot=  9.116E-12 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.20101431E-08  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.20101431E-08  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.20101431E-08  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.20101428E-08  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.20101428E-08  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.20101428E-08  sigma(2 1)=  0.00000000E+00
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1925,24 +1928,24 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.55877170659041E+00  7.55877170659041E+00  7.55877170659041E+00
+  7.55877170659028E+00  7.55877170659028E+00  7.55877170659028E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.77938585329521E+00  3.77938585329521E+00
-  3.77938585329521E+00  0.00000000000000E+00  3.77938585329521E+00
-  3.77938585329521E+00  3.77938585329521E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.07967661511232E+02
+  0.00000000000000E+00  3.77938585329514E+00  3.77938585329514E+00
+  3.77938585329514E+00  0.00000000000000E+00  3.77938585329514E+00
+  3.77938585329514E+00  3.77938585329514E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.07967661511226E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.34485873117109E+00  5.34485873117109E+00  5.34485873117109E+00
+  5.34485873117100E+00  5.34485873117100E+00  5.34485873117100E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  2.20101431384662E-08  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  2.20101431386288E-08  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  2.20101431384120E-08
- Total energy (etotal) [Ha]= -2.09638511765280E+00
+  2.20101428151029E-08  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  2.20101428150487E-08  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  2.20101428152113E-08
+ Total energy (etotal) [Ha]= -2.09638511765279E+00
 
  Difference of energy with previous step (new-old):
-           Absolute (Ha)=-4.78541E-08
+           Absolute (Ha)=-4.78540E-08
            Relative     =-2.28269E-08
 
  At Broyd/MD step   4, gradients are converged : 
@@ -1952,8 +1955,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   8.0326E-14; max=  1.3360E-13
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   80.326E-15; max=  13.360E-14
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -1984,31 +1986,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.750      89.749
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.70955502225769E-01
-    Hartree energy  =  3.85032464561236E-03
-    XC energy       = -8.08446724383816E-01
-    Ewald energy    = -2.72952804164244E+00
-    PspCore energy  =  3.78740458136139E-02
-    Loc. psp. energy=  8.26929814291755E-02
-    NL   psp  energy=  4.52593510136634E-01
-    >>>>> Internal E= -2.09000840177546E+00
+    Kinetic energy  =  8.70955502225817E-01
+    Hartree energy  =  3.85032464561282E-03
+    XC energy       = -8.08446724383843E-01
+    Ewald energy    = -2.72952804164249E+00
+    PspCore energy  =  3.78740458136159E-02
+    Loc. psp. energy=  8.26929814291996E-02
+    NL   psp  energy=  4.52593510136646E-01
+    >>>>> Internal E= -2.09000840177544E+00
 
-    -kT*entropy     = -6.37671587734982E-03
-    >>>>>>>>> Etotal= -2.09638511765280E+00
+    -kT*entropy     = -6.37671587734934E-03
+    >>>>>>>>> Etotal= -2.09638511765279E+00
 
  Other information on the energy :
-    Total energy(eV)= -5.70455401548417E+01 ; Band energy (Ha)=   3.6061303973E-01
+    Total energy(eV)= -5.70455401548413E+01 ; Band energy (Ha)=   3.6061303973E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.20101431E-08  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.20101431E-08  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.20101431E-08  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.20101428E-08  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.20101428E-08  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.20101428E-08  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.4756E-04 GPa]
-- sigma(1 1)=  6.47560659E-04  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  6.47560659E-04  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  6.47560659E-04  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  6.47560650E-04  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  6.47560650E-04  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  6.47560650E-04  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 21 ==================================================================
@@ -2092,10 +2096,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Lengths [Bohr]
   5.37401153701776E+00  5.37401153701776E+00  5.37401153701776E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  1.00112502104996E-04  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  1.00112502104996E-04  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  1.00112502104995E-04
- Total energy (etotal) [Ha]= -2.09675859934239E+00
+  1.00112502104941E-04  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  1.00112502104941E-04  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  1.00112502104941E-04
+ Total energy (etotal) [Ha]= -2.09675859934238E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
 --------------------------------------------------------------------------------
@@ -2131,21 +2135,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.57717434952006E+00  7.57717434952006E+00  7.57717434952006E+00
+  7.57717434952007E+00  7.57717434952007E+00  7.57717434952007E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.78858717476003E+00  3.78858717476003E+00
-  3.78858717476003E+00  0.00000000000000E+00  3.78858717476003E+00
-  3.78858717476003E+00  3.78858717476003E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.08758159606932E+02
+  0.00000000000000E+00  3.78858717476004E+00  3.78858717476004E+00
+  3.78858717476004E+00  0.00000000000000E+00  3.78858717476004E+00
+  3.78858717476004E+00  3.78858717476004E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.08758159606933E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.35787136477840E+00  5.35787136477840E+00  5.35787136477840E+00
+  5.35787136477841E+00  5.35787136477841E+00  5.35787136477841E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  7.84529010426748E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  7.84529010426747E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  7.84529010426747E-05
- Total energy (etotal) [Ha]= -2.09684668984743E+00
+  7.84529010426997E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  7.84529010426997E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  7.84529010426999E-05
+ Total energy (etotal) [Ha]= -2.09684668984744E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-8.80905E-05
@@ -2185,20 +2189,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.49782252042835E+00  7.49782252042835E+00  7.49782252042835E+00
+  7.49782252042812E+00  7.49782252042812E+00  7.49782252042812E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.74891126021417E+00  3.74891126021417E+00
-  3.74891126021417E+00  0.00000000000000E+00  3.74891126021417E+00
-  3.74891126021417E+00  3.74891126021417E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05376914248462E+02
+  0.00000000000000E+00  3.74891126021406E+00  3.74891126021406E+00
+  3.74891126021406E+00  0.00000000000000E+00  3.74891126021406E+00
+  3.74891126021406E+00  3.74891126021406E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05376914248452E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30176114832810E+00  5.30176114832810E+00  5.30176114832810E+00
+  5.30176114832793E+00  5.30176114832793E+00  5.30176114832793E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -9.35291773521265E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -9.35291773521271E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -9.35291773521287E-06
+ -9.35291773551135E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -9.35291773551119E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -9.35291773551103E-06
  Total energy (etotal) [Ha]= -2.09696984127152E+00
 
  Difference of energy with previous step (new-old):
@@ -2211,7 +2215,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
- ETOT  1  -2.0969713423373    -2.097E+00 1.061E-10 1.177E-05
+ ETOT  1  -2.0969713423372    -2.097E+00 1.061E-10 1.177E-05
  ETOT  2  -2.0969713474762    -5.139E-09 1.045E-14 7.120E-07
  ETOT  3  -2.0969713478205    -3.443E-10 6.994E-12 5.906E-10
 
@@ -2239,20 +2243,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.50603936335908E+00  7.50603936335908E+00  7.50603936335908E+00
+  7.50603936335911E+00  7.50603936335911E+00  7.50603936335911E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.75301968167954E+00  3.75301968167954E+00
-  3.75301968167954E+00  0.00000000000000E+00  3.75301968167954E+00
-  3.75301968167954E+00  3.75301968167954E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05723740862523E+02
+  0.00000000000000E+00  3.75301968167956E+00  3.75301968167956E+00
+  3.75301968167956E+00  0.00000000000000E+00  3.75301968167956E+00
+  3.75301968167956E+00  3.75301968167956E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05723740862525E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30757133368436E+00  5.30757133368436E+00  5.30757133368436E+00
+  5.30757133368438E+00  5.30757133368438E+00  5.30757133368438E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  6.72483494047109E-07  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  6.72483494047272E-07  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  6.72483494047380E-07
+  6.72483494081858E-07  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  6.72483494081912E-07  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  6.72483494081858E-07
  Total energy (etotal) [Ha]= -2.09697134782050E+00
 
  Difference of energy with previous step (new-old):
@@ -2267,15 +2271,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0969713557114    -2.097E+00 5.163E-13 5.269E-08
  ETOT  2  -2.0969713557344    -2.294E-11 4.669E-17 3.187E-09
- ETOT  3  -2.0969713557359    -1.533E-12 3.126E-14 2.654E-12
+ ETOT  3  -2.0969713557359    -1.531E-12 3.126E-14 2.654E-12
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  1.533E-12 < toldfe=  1.000E-06
+  for the second time, diff in etot=  1.531E-12 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.17464082E-09  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.17464082E-09  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.17464082E-09  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.17464083E-09  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.17464084E-09  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.17464084E-09  sigma(2 1)=  0.00000000E+00
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2293,20 +2297,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.50548650226834E+00  7.50548650226834E+00  7.50548650226834E+00
+  7.50548650226835E+00  7.50548650226835E+00  7.50548650226835E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.75274325113417E+00  3.75274325113417E+00
-  3.75274325113417E+00  0.00000000000000E+00  3.75274325113417E+00
-  3.75274325113417E+00  3.75274325113417E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05700381177836E+02
+  0.00000000000000E+00  3.75274325113418E+00  3.75274325113418E+00
+  3.75274325113418E+00  0.00000000000000E+00  3.75274325113418E+00
+  3.75274325113418E+00  3.75274325113418E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05700381177837E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30718040185804E+00  5.30718040185804E+00  5.30718040185804E+00
+  5.30718040185805E+00  5.30718040185805E+00  5.30718040185805E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  2.17464081724711E-09  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  2.17464081724711E-09  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  2.17464081746395E-09
+  2.17464083497381E-09  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  2.17464083508223E-09  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  2.17464083508223E-09
  Total energy (etotal) [Ha]= -2.09697135573591E+00
 
  Difference of energy with previous step (new-old):
@@ -2320,8 +2324,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.4256E-14; max=  3.1259E-14
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   14.256E-15; max=  31.259E-15
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -2352,12 +2355,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.76931266783935E-01
-    Hartree energy  =  4.34980069241841E-03
-    XC energy       = -8.13990738605058E-01
-    Ewald energy    = -2.74890632702848E+00
-    PspCore energy  =  3.86864466608242E-02
-    Loc. psp. energy=  9.58687552571920E-02
+    Kinetic energy  =  8.76931266783931E-01
+    Hartree energy  =  4.34980069241835E-03
+    XC energy       = -8.13990738605057E-01
+    Ewald energy    = -2.74890632702847E+00
+    PspCore energy  =  3.86864466608240E-02
+    Loc. psp. energy=  9.58687552571900E-02
     NL   psp  energy=  4.50637038059865E-01
     >>>>> Internal E= -2.09642375817930E+00
 
@@ -2365,18 +2368,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
     >>>>>>>>> Etotal= -2.09697135573591E+00
 
  Other information on the energy :
-    Total energy(eV)= -5.70614925043546E+01 ; Band energy (Ha)=   3.7152948408E-01
+    Total energy(eV)= -5.70614925043545E+01 ; Band energy (Ha)=   3.7152948408E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.17464082E-09  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.17464082E-09  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.17464082E-09  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.17464083E-09  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.17464084E-09  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.17464084E-09  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -6.3980E-05 GPa]
-- sigma(1 1)=  6.39801310E-05  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  6.39801310E-05  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  6.39801310E-05  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  6.39801315E-05  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  6.39801315E-05  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  6.39801315E-05  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 22 ==================================================================
@@ -2460,9 +2465,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Lengths [Bohr]
   5.37401153701776E+00  5.37401153701776E+00  5.37401153701776E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  9.96781930040549E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  9.96781930040549E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  9.96781930040549E-05
+  9.96781930040654E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  9.96781930040655E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  9.96781930040657E-05
  Total energy (etotal) [Ha]= -2.09734121255660E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
@@ -2510,9 +2515,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Lengths [Bohr]
   5.35794138424197E+00  5.35794138424197E+00  5.35794138424197E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  7.81321103776217E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  7.81321103776218E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  7.81321103776219E-05
+  7.81321103776100E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  7.81321103776100E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  7.81321103776100E-05
  Total energy (etotal) [Ha]= -2.09742855515488E+00
 
  Difference of energy with previous step (new-old):
@@ -2553,21 +2558,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.49816327756871E+00  7.49816327756871E+00  7.49816327756871E+00
+  7.49816327756880E+00  7.49816327756880E+00  7.49816327756880E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.74908163878435E+00  3.74908163878435E+00
-  3.74908163878435E+00  0.00000000000000E+00  3.74908163878435E+00
-  3.74908163878435E+00  3.74908163878435E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05391282247096E+02
+  0.00000000000000E+00  3.74908163878440E+00  3.74908163878440E+00
+  3.74908163878440E+00  0.00000000000000E+00  3.74908163878440E+00
+  3.74908163878440E+00  3.74908163878440E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05391282247099E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30200210001278E+00  5.30200210001278E+00  5.30200210001278E+00
+  5.30200210001284E+00  5.30200210001284E+00  5.30200210001284E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -9.07679679292158E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -9.07679679292158E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -9.07679679292158E-06
- Total energy (etotal) [Ha]= -2.09755109367411E+00
+ -9.07679679276751E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -9.07679679276757E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -9.07679679276746E-06
+ Total energy (etotal) [Ha]= -2.09755109367412E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-1.22539E-04
@@ -2607,20 +2612,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.50616775159506E+00  7.50616775159506E+00  7.50616775159506E+00
+  7.50616775159501E+00  7.50616775159501E+00  7.50616775159501E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.75308387579753E+00  3.75308387579753E+00
-  3.75308387579753E+00  0.00000000000000E+00  3.75308387579753E+00
-  3.75308387579753E+00  3.75308387579753E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05729166060597E+02
+  0.00000000000000E+00  3.75308387579751E+00  3.75308387579751E+00
+  3.75308387579751E+00  0.00000000000000E+00  3.75308387579751E+00
+  3.75308387579751E+00  3.75308387579751E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05729166060595E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30766211787665E+00  5.30766211787665E+00  5.30766211787665E+00
+  5.30766211787661E+00  5.30766211787661E+00  5.30766211787661E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  6.34224501999410E-07  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  6.34224501999193E-07  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  6.34224501999139E-07
+  6.34224501993284E-07  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  6.34224501993121E-07  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  6.34224501993230E-07
  Total energy (etotal) [Ha]= -2.09755252149650E+00
 
  Difference of energy with previous step (new-old):
@@ -2634,16 +2639,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0975525285521    -2.098E+00 4.572E-13 4.771E-08
- ETOT  2  -2.0975525285728    -2.068E-11 4.349E-17 2.900E-09
- ETOT  3  -2.0975525285742    -1.420E-12 2.851E-14 2.276E-12
+ ETOT  2  -2.0975525285728    -2.070E-11 4.349E-17 2.900E-09
+ ETOT  3  -2.0975525285742    -1.419E-12 2.851E-14 2.276E-12
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  1.420E-12 < toldfe=  1.000E-06
+  for the second time, diff in etot=  1.419E-12 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.86629264E-09  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.86629264E-09  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.86629264E-09  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.86629258E-09  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.86629258E-09  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.86629258E-09  sigma(2 1)=  0.00000000E+00
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2661,20 +2666,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.50564341507978E+00  7.50564341507978E+00  7.50564341507978E+00
+  7.50564341507973E+00  7.50564341507973E+00  7.50564341507973E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.75282170753989E+00  3.75282170753989E+00
-  3.75282170753989E+00  0.00000000000000E+00  3.75282170753989E+00
-  3.75282170753989E+00  3.75282170753989E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05707010764363E+02
+  0.00000000000000E+00  3.75282170753986E+00  3.75282170753986E+00
+  3.75282170753986E+00  0.00000000000000E+00  3.75282170753986E+00
+  3.75282170753986E+00  3.75282170753986E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05707010764361E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30729135597107E+00  5.30729135597107E+00  5.30729135597107E+00
+  5.30729135597103E+00  5.30729135597103E+00  5.30729135597103E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  1.86629263692478E-09  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  1.86629263687057E-09  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  1.86629263725004E-09
+  1.86629258195573E-09  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  1.86629258200994E-09  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  1.86629258190152E-09
  Total energy (etotal) [Ha]= -2.09755252857417E+00
 
  Difference of energy with previous step (new-old):
@@ -2688,8 +2693,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.3009E-14; max=  2.8508E-14
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   13.009E-15; max=  28.508E-15
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -2720,31 +2724,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.76506830497712E-01
-    Hartree energy  =  4.28335850926448E-03
-    XC energy       = -8.13920187995218E-01
-    Ewald energy    = -2.74884885845499E+00
-    PspCore energy  =  3.86840203776126E-02
-    Loc. psp. energy=  9.59071926101076E-02
-    NL   psp  energy=  4.50825098806753E-01
+    Kinetic energy  =  8.76506830497722E-01
+    Hartree energy  =  4.28335850926460E-03
+    XC energy       = -8.13920187995223E-01
+    Ewald energy    = -2.74884885845501E+00
+    PspCore energy  =  3.86840203776134E-02
+    Loc. psp. energy=  9.59071926101170E-02
+    NL   psp  energy=  4.50825098806755E-01
     >>>>> Internal E= -2.09656254564876E+00
 
-    -kT*entropy     = -9.89982925411863E-04
+    -kT*entropy     = -9.89982925411890E-04
     >>>>>>>>> Etotal= -2.09755252857417E+00
 
  Other information on the energy :
     Total energy(eV)= -5.70773070215454E+01 ; Band energy (Ha)=   3.7129145302E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.86629264E-09  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.86629264E-09  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.86629264E-09  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.86629258E-09  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.86629258E-09  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.86629258E-09  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.4908E-05 GPa]
-- sigma(1 1)=  5.49082158E-05  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  5.49082158E-05  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  5.49082158E-05  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  5.49082142E-05  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  5.49082142E-05  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.49082142E-05  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 23 ==================================================================
@@ -2828,9 +2834,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Lengths [Bohr]
   5.37401153701776E+00  5.37401153701776E+00  5.37401153701776E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  1.03755888660386E-04  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  1.03755888660386E-04  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  1.03755888660386E-04
+  1.03755888660380E-04  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  1.03755888660380E-04  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  1.03755888660380E-04
  Total energy (etotal) [Ha]= -2.09759402997163E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
@@ -2878,9 +2884,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Lengths [Bohr]
   5.35728397673693E+00  5.35728397673693E+00  5.35728397673693E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  8.14596691767132E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  8.14596691767131E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  8.14596691767129E-05
+  8.14596691767118E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  8.14596691767117E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  8.14596691767120E-05
  Total energy (etotal) [Ha]= -2.09768872084537E+00
 
  Difference of energy with previous step (new-old):
@@ -2921,20 +2927,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.49353566674018E+00  7.49353566674018E+00  7.49353566674018E+00
+  7.49353566674017E+00  7.49353566674017E+00  7.49353566674017E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.74676783337009E+00  3.74676783337009E+00
-  3.74676783337009E+00  0.00000000000000E+00  3.74676783337009E+00
-  3.74676783337009E+00  3.74676783337009E+00  0.00000000000000E+00
+  0.00000000000000E+00  3.74676783337008E+00  3.74676783337008E+00
+  3.74676783337008E+00  0.00000000000000E+00  3.74676783337008E+00
+  3.74676783337008E+00  3.74676783337008E+00  0.00000000000000E+00
  Unitary Cell Volume (ucvol) [Bohr^3]=  1.05196270928344E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.29872988501524E+00  5.29872988501524E+00  5.29872988501524E+00
+  5.29872988501523E+00  5.29872988501523E+00  5.29872988501523E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -9.95929564332214E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -9.95929564332219E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -9.95929564332225E-06
+ -9.95929564334729E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -9.95929564334751E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -9.95929564334735E-06
  Total energy (etotal) [Ha]= -2.09782164665452E+00
 
  Difference of energy with previous step (new-old):
@@ -2975,21 +2981,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.50229524276849E+00  7.50229524276849E+00  7.50229524276849E+00
+  7.50229524276850E+00  7.50229524276850E+00  7.50229524276850E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.75114762138424E+00  3.75114762138424E+00
-  3.75114762138424E+00  0.00000000000000E+00  3.75114762138424E+00
-  3.75114762138424E+00  3.75114762138424E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05565610190602E+02
+  0.00000000000000E+00  3.75114762138425E+00  3.75114762138425E+00
+  3.75114762138425E+00  0.00000000000000E+00  3.75114762138425E+00
+  3.75114762138425E+00  3.75114762138425E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05565610190603E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30492384062517E+00  5.30492384062517E+00  5.30492384062517E+00
+  5.30492384062519E+00  5.30492384062519E+00  5.30492384062519E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  6.51058888349876E-07  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  6.51058888349822E-07  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  6.51058888349822E-07
- Total energy (etotal) [Ha]= -2.09782336600627E+00
+  6.51058888360609E-07  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  6.51058888360664E-07  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  6.51058888360447E-07
+ Total energy (etotal) [Ha]= -2.09782336600628E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-1.71935E-06
@@ -3003,15 +3009,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0978233734579    -2.098E+00 7.770E-13 5.108E-08
  ETOT  2  -2.0978233734799    -2.201E-11 4.679E-17 3.108E-09
- ETOT  3  -2.0978233734814    -1.484E-12 3.048E-14 2.338E-12
+ ETOT  3  -2.0978233734814    -1.482E-12 3.048E-14 2.338E-12
 
  At SCF step    3, etot is converged : 
-  for the second time, diff in etot=  1.484E-12 < toldfe=  1.000E-06
+  for the second time, diff in etot=  1.482E-12 < toldfe=  1.000E-06
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.59242553E-09  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.59242553E-09  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.59242553E-09  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.59242552E-09  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.59242552E-09  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.59242552E-09  sigma(2 1)=  0.00000000E+00
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3029,7 +3035,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.50175597802362E+00  7.50175597802362E+00  7.50175597802362E+00
+  7.50175597802363E+00  7.50175597802363E+00  7.50175597802363E+00
  Real space primitive translations (rprimd) [bohr]
   0.00000000000000E+00  3.75087798901181E+00  3.75087798901181E+00
   3.75087798901181E+00  0.00000000000000E+00  3.75087798901181E+00
@@ -3038,15 +3044,15 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30454252286722E+00  5.30454252286722E+00  5.30454252286722E+00
+  5.30454252286723E+00  5.30454252286723E+00  5.30454252286723E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  2.59242552549726E-09  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  2.59242552544305E-09  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  2.59242552587673E-09
+  2.59242552446727E-09  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  2.59242552441306E-09  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  2.59242552430464E-09
  Total energy (etotal) [Ha]= -2.09782337348136E+00
 
  Difference of energy with previous step (new-old):
-           Absolute (Ha)=-7.47509E-09
+           Absolute (Ha)=-7.47508E-09
            Relative     =-3.56326E-09
 
  At Broyd/MD step   5, gradients are converged : 
@@ -3056,8 +3062,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.3903E-14; max=  3.0477E-14
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   13.903E-15; max=  30.477E-15
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -3088,26 +3093,28 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.76343242474114E-01
+    Kinetic energy  =  8.76343242474113E-01
     Hartree energy  =  4.27045849967729E-03
-    XC energy       = -8.14287496195569E-01
-    Ewald energy    = -2.75027332186666E+00
-    PspCore energy  =  3.87441901444790E-02
-    Loc. psp. energy=  9.66921512114115E-02
+    XC energy       = -8.14287496195567E-01
+    Ewald energy    = -2.75027332186665E+00
+    PspCore energy  =  3.87441901444789E-02
+    Loc. psp. energy=  9.66921512114105E-02
     NL   psp  energy=  4.51099161380430E-01
     >>>>> Internal E= -2.09741161435211E+00
 
-    -kT*entropy     = -4.11759129248400E-04
+    -kT*entropy     = -4.11759129248410E-04
     >>>>>>>>> Etotal= -2.09782337348136E+00
 
  Other information on the energy :
-    Total energy(eV)= -5.70846770862815E+01 ; Band energy (Ha)=   3.7167902441E-01
+    Total energy(eV)= -5.70846770862814E+01 ; Band energy (Ha)=   3.7167902441E-01
 --------------------------------------------------------------------------------
 
+
+
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  2.59242553E-09  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  2.59242553E-09  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  2.59242553E-09  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  2.59242552E-09  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  2.59242552E-09  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  2.59242552E-09  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -7.6272E-05 GPa]
 - sigma(1 1)=  7.62717794E-05  sigma(3 2)=  0.00000000E+00
@@ -3196,9 +3203,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Lengths [Bohr]
   5.37401153701776E+00  5.37401153701776E+00  5.37401153701776E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  1.00442873864905E-04  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  1.00442873864905E-04  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  1.00442873864905E-04
+  1.00442873864917E-04  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  1.00442873864917E-04  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  1.00442873864917E-04
  Total energy (etotal) [Ha]= -2.09778153383493E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
@@ -3246,10 +3253,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Lengths [Bohr]
   5.35781810212892E+00  5.35781810212892E+00  5.35781810212892E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  7.89502938385753E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  7.89502938385753E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  7.89502938385751E-05
- Total energy (etotal) [Ha]= -2.09787032687524E+00
+  7.89502938385995E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  7.89502938385995E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  7.89502938385998E-05
+ Total energy (etotal) [Ha]= -2.09787032687523E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-8.87930E-05
@@ -3289,21 +3296,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.49640487362649E+00  7.49640487362649E+00  7.49640487362649E+00
+  7.49640487362642E+00  7.49640487362642E+00  7.49640487362642E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.74820243681325E+00  3.74820243681325E+00
-  3.74820243681325E+00  0.00000000000000E+00  3.74820243681325E+00
-  3.74820243681325E+00  3.74820243681325E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05317153297253E+02
+  0.00000000000000E+00  3.74820243681321E+00  3.74820243681321E+00
+  3.74820243681321E+00  0.00000000000000E+00  3.74820243681321E+00
+  3.74820243681321E+00  3.74820243681321E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05317153297249E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30075872066118E+00  5.30075872066118E+00  5.30075872066118E+00
+  5.30075872066112E+00  5.30075872066112E+00  5.30075872066112E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -9.23349769160596E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -9.23349769160585E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -9.23349769160596E-06
- Total energy (etotal) [Ha]= -2.09799651556222E+00
+ -9.23349769167231E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -9.23349769167253E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -9.23349769167215E-06
+ Total energy (etotal) [Ha]= -2.09799651556223E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-1.26189E-04
@@ -3343,20 +3350,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.50461423870267E+00  7.50461423870267E+00  7.50461423870267E+00
+  7.50461423870264E+00  7.50461423870264E+00  7.50461423870264E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.75230711935133E+00  3.75230711935133E+00
-  3.75230711935133E+00  0.00000000000000E+00  3.75230711935133E+00
-  3.75230711935133E+00  3.75230711935133E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05663532982823E+02
+  0.00000000000000E+00  3.75230711935132E+00  3.75230711935132E+00
+  3.75230711935132E+00  0.00000000000000E+00  3.75230711935132E+00
+  3.75230711935132E+00  3.75230711935132E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05663532982822E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30656361837578E+00  5.30656361837578E+00  5.30656361837578E+00
+  5.30656361837576E+00  5.30656361837576E+00  5.30656361837576E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  6.20430743724113E-07  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  6.20430743724005E-07  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  6.20430743724005E-07
+  6.20430743681559E-07  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  6.20430743681233E-07  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  6.20430743681287E-07
  Total energy (etotal) [Ha]= -2.09799800856017E+00
 
  Difference of energy with previous step (new-old):
@@ -3408,9 +3415,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
  Lengths [Bohr]
   5.30619699971255E+00  5.30619699971255E+00  5.30619699971255E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  1.85715318281156E-09  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  1.85715318291998E-09  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  1.85715318302840E-09
+  1.85715317571004E-09  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  1.85715317581846E-09  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  1.85715317576425E-09
  Total energy (etotal) [Ha]= -2.09799801540567E+00
 
  Difference of energy with previous step (new-old):
@@ -3424,8 +3431,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.2915E-14; max=  2.8288E-14
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   12.915E-15; max=  28.288E-15
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -3456,21 +3462,23 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.76130564025523E-01
+    Kinetic energy  =  8.76130564025524E-01
     Hartree energy  =  4.23896097078377E-03
-    XC energy       = -8.14033810633396E-01
+    XC energy       = -8.14033810633395E-01
     Ewald energy    = -2.74941578424988E+00
-    PspCore energy  =  3.87079600267294E-02
-    Loc. psp. energy=  9.62312886142496E-02
+    PspCore energy  =  3.87079600267295E-02
+    Loc. psp. energy=  9.62312886142498E-02
     NL   psp  energy=  4.51088408525840E-01
     >>>>> Internal E= -2.09705241272015E+00
 
-    -kT*entropy     = -9.45602685518559E-04
+    -kT*entropy     = -9.45602685518558E-04
     >>>>>>>>> Etotal= -2.09799801540567E+00
 
  Other information on the energy :
     Total energy(eV)= -5.70894293347218E+01 ; Band energy (Ha)=   3.7126479347E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.85715318E-09  sigma(3 2)=  0.00000000E+00
@@ -3478,9 +3486,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.000      88.972
   sigma(3 3)=  1.85715318E-09  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.4639E-05 GPa]
-- sigma(1 1)=  5.46393239E-05  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  5.46393239E-05  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  5.46393239E-05  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  5.46393236E-05  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  5.46393236E-05  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.46393236E-05  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET 31 ==================================================================
@@ -3564,9 +3572,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Lengths [Bohr]
   5.37401153701776E+00  5.37401153701776E+00  5.37401153701776E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  1.10104052571595E-04  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  1.10104052571595E-04  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  1.10104052571595E-04
+  1.10104052571588E-04  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  1.10104052571588E-04  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  1.10104052571588E-04
  Total energy (etotal) [Ha]= -2.09809751837189E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
@@ -3614,9 +3622,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Lengths [Bohr]
   5.35626052355400E+00  5.35626052355400E+00  5.35626052355400E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  8.57269272981728E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  8.57269272981728E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  8.57269272981725E-05
+  8.57269272981897E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  8.57269272981896E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  8.57269272981896E-05
  Total energy (etotal) [Ha]= -2.09820379737085E+00
 
  Difference of energy with previous step (new-old):
@@ -3630,7 +3638,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0983508399595    -2.098E+00 4.672E-06 1.129E-03
- ETOT  2  -2.0983513110071    -4.710E-07 5.738E-11 6.865E-05
+ ETOT  2  -2.0983513110072    -4.710E-07 5.738E-11 6.865E-05
  ETOT  3  -2.0983513434563    -3.245E-08 9.597E-10 4.983E-08
 
  At SCF step    3, etot is converged : 
@@ -3657,21 +3665,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.49042018403912E+00  7.49042018403912E+00  7.49042018403912E+00
+  7.49042018403902E+00  7.49042018403902E+00  7.49042018403902E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.74521009201956E+00  3.74521009201956E+00
-  3.74521009201956E+00  0.00000000000000E+00  3.74521009201956E+00
-  3.74521009201956E+00  3.74521009201956E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05065117516774E+02
+  0.00000000000000E+00  3.74521009201951E+00  3.74521009201951E+00
+  3.74521009201951E+00  0.00000000000000E+00  3.74521009201951E+00
+  3.74521009201951E+00  3.74521009201951E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05065117516770E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.29652690607065E+00  5.29652690607065E+00  5.29652690607065E+00
+  5.29652690607058E+00  5.29652690607058E+00  5.29652690607058E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -6.47078356811725E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -6.47078356811725E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -6.47078356811714E-06
- Total energy (etotal) [Ha]= -2.09835134345627E+00
+ -6.47078356825521E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -6.47078356825516E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -6.47078356825538E-06
+ Total energy (etotal) [Ha]= -2.09835134345628E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-1.47546E-04
@@ -3711,20 +3719,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.49616622379755E+00  7.49616622379755E+00  7.49616622379755E+00
+  7.49616622379757E+00  7.49616622379757E+00  7.49616622379757E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.74808311189878E+00  3.74808311189878E+00
-  3.74808311189878E+00  0.00000000000000E+00  3.74808311189878E+00
-  3.74808311189878E+00  3.74808311189878E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05307095227722E+02
+  0.00000000000000E+00  3.74808311189879E+00  3.74808311189879E+00
+  3.74808311189879E+00  0.00000000000000E+00  3.74808311189879E+00
+  3.74808311189879E+00  3.74808311189879E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05307095227723E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30058996974880E+00  5.30058996974880E+00  5.30058996974880E+00
+  5.30058996974882E+00  5.30058996974882E+00  5.30058996974882E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  2.73075076669940E-07  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  2.73075076670049E-07  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  2.73075076670320E-07
+  2.73075076689131E-07  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  2.73075076689022E-07  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  2.73075076689239E-07
  Total energy (etotal) [Ha]= -2.09835209340807E+00
 
  Difference of energy with previous step (new-old):
@@ -3738,8 +3746,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.7639E-12; max=  5.3748E-12
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   17.639E-13; max=  53.748E-13
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -3770,21 +3777,23 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.76160619723480E-01
-    Hartree energy  =  4.19647806416192E-03
-    XC energy       = -8.14766591267441E-01
-    Ewald energy    = -2.75232415044553E+00
-    PspCore energy  =  3.88309272952834E-02
-    Loc. psp. energy=  9.82174496018998E-02
-    NL   psp  energy=  4.51275162207908E-01
+    Kinetic energy  =  8.76160619723475E-01
+    Hartree energy  =  4.19647806416190E-03
+    XC energy       = -8.14766591267440E-01
+    Ewald energy    = -2.75232415044552E+00
+    PspCore energy  =  3.88309272952830E-02
+    Loc. psp. energy=  9.82174496018966E-02
+    NL   psp  energy=  4.51275162207907E-01
     >>>>> Internal E= -2.09841010482024E+00
 
-    -kT*entropy     =  5.80114121753693E-05
+    -kT*entropy     =  5.80114121753727E-05
     >>>>>>>>> Etotal= -2.09835209340807E+00
 
  Other information on the energy :
     Total energy(eV)= -5.70990642871614E+01 ; Band energy (Ha)=   3.7242080795E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.73075077E-07  sigma(3 2)=  0.00000000E+00
@@ -3878,9 +3887,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Lengths [Bohr]
   5.37401153701776E+00  5.37401153701776E+00  5.37401153701776E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  1.09944732558609E-04  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  1.09944732558609E-04  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  1.09944732558609E-04
+  1.09944732558606E-04  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  1.09944732558606E-04  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  1.09944732558606E-04
  Total energy (etotal) [Ha]= -2.09806588191595E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
@@ -3928,9 +3937,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Lengths [Bohr]
   5.35628620918163E+00  5.35628620918163E+00  5.35628620918163E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  8.57652214217078E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  8.57652214217077E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  8.57652214217078E-05
+  8.57652214217005E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  8.57652214217007E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  8.57652214217007E-05
  Total energy (etotal) [Ha]= -2.09817193103355E+00
 
  Difference of energy with previous step (new-old):
@@ -3971,20 +3980,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.48987059437332E+00  7.48987059437332E+00  7.48987059437332E+00
+  7.48987059437334E+00  7.48987059437334E+00  7.48987059437334E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.74493529718666E+00  3.74493529718666E+00
-  3.74493529718666E+00  0.00000000000000E+00  3.74493529718666E+00
-  3.74493529718666E+00  3.74493529718666E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05041992592621E+02
+  0.00000000000000E+00  3.74493529718667E+00  3.74493529718667E+00
+  3.74493529718667E+00  0.00000000000000E+00  3.74493529718667E+00
+  3.74493529718667E+00  3.74493529718667E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05041992592622E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.29613828749109E+00  5.29613828749109E+00  5.29613828749109E+00
+  5.29613828749110E+00  5.29613828749110E+00  5.29613828749110E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -6.34859610661241E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -6.34859610661246E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -6.34859610661236E-06
+ -6.34859610660146E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -6.34859610660146E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -6.34859610660151E-06
  Total energy (etotal) [Ha]= -2.09832081243567E+00
 
  Difference of energy with previous step (new-old):
@@ -4036,9 +4045,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Lengths [Bohr]
   5.30015488570953E+00  5.30015488570953E+00  5.30015488570953E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  2.85662787591996E-07  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  2.85662787591887E-07  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  2.85662787591833E-07
+  2.85662787596170E-07  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  2.85662787596224E-07  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  2.85662787596387E-07
  Total energy (etotal) [Ha]= -2.09832153936093E+00
 
  Difference of energy with previous step (new-old):
@@ -4052,8 +4061,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.7533E-12; max=  5.3637E-12
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   17.533E-13; max=  53.637E-13
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -4084,7 +4092,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.76198818101224E-01
+    Kinetic energy  =  8.76198818101223E-01
     Hartree energy  =  4.15737665048277E-03
     XC energy       = -8.14793470469109E-01
     Ewald energy    = -2.75255008578792E+00
@@ -4093,12 +4101,14 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
     NL   psp  energy=  4.51245282181852E-01
     >>>>> Internal E= -2.09838381225948E+00
 
-    -kT*entropy     =  6.22728985458160E-05
+    -kT*entropy     =  6.22728985457944E-05
     >>>>>>>>> Etotal= -2.09832153936093E+00
 
  Other information on the energy :
     Total energy(eV)= -5.70982328692564E+01 ; Band energy (Ha)=   3.7261609812E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.85662788E-07  sigma(3 2)=  0.00000000E+00
@@ -4192,9 +4202,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Lengths [Bohr]
   5.37401153701776E+00  5.37401153701776E+00  5.37401153701776E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  1.07889988143479E-04  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  1.07889988143479E-04  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  1.07889988143480E-04
+  1.07889988143484E-04  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  1.07889988143484E-04  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  1.07889988143484E-04
  Total energy (etotal) [Ha]= -2.09808277387073E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
@@ -4242,9 +4252,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Lengths [Bohr]
   5.35661747578741E+00  5.35661747578741E+00  5.35661747578741E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  8.42965472397219E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  8.42965472397219E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  8.42965472397220E-05
+  8.42965472397339E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  8.42965472397338E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  8.42965472397337E-05
  Total energy (etotal) [Ha]= -2.09818497108059E+00
 
  Difference of energy with previous step (new-old):
@@ -4285,21 +4295,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.49127199564794E+00  7.49127199564794E+00  7.49127199564794E+00
+  7.49127199564790E+00  7.49127199564790E+00  7.49127199564790E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.74563599782397E+00  3.74563599782397E+00
-  3.74563599782397E+00  0.00000000000000E+00  3.74563599782397E+00
-  3.74563599782397E+00  3.74563599782397E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05100965651764E+02
+  0.00000000000000E+00  3.74563599782395E+00  3.74563599782395E+00
+  3.74563599782395E+00  0.00000000000000E+00  3.74563599782395E+00
+  3.74563599782395E+00  3.74563599782395E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05100965651762E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.29712922783554E+00  5.29712922783554E+00  5.29712922783554E+00
+  5.29712922783551E+00  5.29712922783551E+00  5.29712922783551E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -6.10113929634481E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -6.10113929634491E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -6.10113929634491E-06
- Total energy (etotal) [Ha]= -2.09832992113828E+00
+ -6.10113929639820E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -6.10113929639836E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -6.10113929639831E-06
+ Total energy (etotal) [Ha]= -2.09832992113829E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-1.44950E-04
@@ -4339,20 +4349,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.49677521007766E+00  7.49677521007766E+00  7.49677521007766E+00
+  7.49677521007768E+00  7.49677521007768E+00  7.49677521007768E+00
  Real space primitive translations (rprimd) [bohr]
-  0.00000000000000E+00  3.74838760503883E+00  3.74838760503883E+00
-  3.74838760503883E+00  0.00000000000000E+00  3.74838760503883E+00
-  3.74838760503883E+00  3.74838760503883E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05332762662661E+02
+  0.00000000000000E+00  3.74838760503884E+00  3.74838760503884E+00
+  3.74838760503884E+00  0.00000000000000E+00  3.74838760503884E+00
+  3.74838760503884E+00  3.74838760503884E+00  0.00000000000000E+00
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05332762662662E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30102058807712E+00  5.30102058807712E+00  5.30102058807712E+00
+  5.30102058807713E+00  5.30102058807713E+00  5.30102058807713E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  2.46317788330939E-07  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  2.46317788331210E-07  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  2.46317788330994E-07
+  2.46317788356527E-07  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  2.46317788356635E-07  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  2.46317788356581E-07
  Total energy (etotal) [Ha]= -2.09833059857283E+00
 
  Difference of energy with previous step (new-old):
@@ -4366,8 +4376,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.6497E-12; max=  5.0466E-12
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   16.497E-13; max=  50.466E-13
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -4398,21 +4407,23 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.76136531979423E-01
-    Hartree energy  =  4.14369295011414E-03
-    XC energy       = -8.14662840364355E-01
-    Ewald energy    = -2.75210057062634E+00
-    PspCore energy  =  3.88214649943354E-02
-    Loc. psp. energy=  9.83001793066947E-02
-    NL   psp  energy=  4.51202217325777E-01
+    Kinetic energy  =  8.76136531979418E-01
+    Hartree energy  =  4.14369295011407E-03
+    XC energy       = -8.14662840364352E-01
+    Ewald energy    = -2.75210057062633E+00
+    PspCore energy  =  3.88214649943352E-02
+    Loc. psp. energy=  9.83001793066926E-02
+    NL   psp  energy=  4.51202217325776E-01
     >>>>> Internal E= -2.09815932443435E+00
 
-    -kT*entropy     = -1.71274138483250E-04
+    -kT*entropy     = -1.71274138483254E-04
     >>>>>>>>> Etotal= -2.09833059857283E+00
 
  Other information on the energy :
     Total energy(eV)= -5.70984793829489E+01 ; Band energy (Ha)=   3.7243728955E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.46317788E-07  sigma(3 2)=  0.00000000E+00
@@ -4506,9 +4517,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Lengths [Bohr]
   5.37401153701776E+00  5.37401153701776E+00  5.37401153701776E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  1.05150235105572E-04  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  1.05150235105572E-04  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  1.05150235105572E-04
+  1.05150235105580E-04  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  1.05150235105580E-04  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  1.05150235105580E-04
  Total energy (etotal) [Ha]= -2.09818603576470E+00
 
 --- Iteration: ( 2/10) Internal Cycle: (1/1)
@@ -4556,9 +4567,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Lengths [Bohr]
   5.35705917972044E+00  5.35705917972044E+00  5.35705917972044E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  8.21527402098320E-05  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  8.21527402098321E-05  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  8.21527402098321E-05
+  8.21527402098388E-05  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  8.21527402098389E-05  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  8.21527402098387E-05
  Total energy (etotal) [Ha]= -2.09828311272250E+00
 
  Difference of energy with previous step (new-old):
@@ -4599,20 +4610,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.49395736715257E+00  7.49395736715257E+00  7.49395736715257E+00
+  7.49395736715256E+00  7.49395736715256E+00  7.49395736715256E+00
  Real space primitive translations (rprimd) [bohr]
   0.00000000000000E+00  3.74697868357628E+00  3.74697868357628E+00
   3.74697868357628E+00  0.00000000000000E+00  3.74697868357628E+00
   3.74697868357628E+00  3.74697868357628E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05214031759531E+02
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05214031759530E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.29902807223647E+00  5.29902807223647E+00  5.29902807223647E+00
+  5.29902807223646E+00  5.29902807223646E+00  5.29902807223646E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
- -5.72137427491004E-06  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00 -5.72137427491004E-06  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00 -5.72137427490993E-06
+ -5.72137427491101E-06  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00 -5.72137427491080E-06  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00 -5.72137427491096E-06
  Total energy (etotal) [Ha]= -2.09842120847769E+00
 
  Difference of energy with previous step (new-old):
@@ -4653,21 +4664,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
  Reduced forces (fred)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
  Scale of Primitive Cell (acell) [bohr]
-  7.49913981022563E+00  7.49913981022563E+00  7.49913981022563E+00
+  7.49913981022561E+00  7.49913981022561E+00  7.49913981022561E+00
  Real space primitive translations (rprimd) [bohr]
   0.00000000000000E+00  3.74956990511281E+00  3.74956990511281E+00
   3.74956990511281E+00  0.00000000000000E+00  3.74956990511281E+00
   3.74956990511281E+00  3.74956990511281E+00  0.00000000000000E+00
- Unitary Cell Volume (ucvol) [Bohr^3]=  1.05432464905821E+02
+ Unitary Cell Volume (ucvol) [Bohr^3]=  1.05432464905820E+02
  Angles (23,13,12)= [degrees]
   6.00000000000000E+01  6.00000000000000E+01  6.00000000000000E+01
  Lengths [Bohr]
-  5.30269261287654E+00  5.30269261287654E+00  5.30269261287654E+00
+  5.30269261287653E+00  5.30269261287653E+00  5.30269261287653E+00
  Stress tensor in cartesian coordinates (strten) [Ha/bohr^3]
-  1.68504170403982E-07  0.00000000000000E+00  0.00000000000000E+00
-  0.00000000000000E+00  1.68504170404145E-07  0.00000000000000E+00
-  0.00000000000000E+00  0.00000000000000E+00  1.68504170403982E-07
- Total energy (etotal) [Ha]= -2.09842181417585E+00
+  1.68504170361915E-07  0.00000000000000E+00  0.00000000000000E+00
+  0.00000000000000E+00  1.68504170361915E-07  0.00000000000000E+00
+  0.00000000000000E+00  0.00000000000000E+00  1.68504170362023E-07
+ Total energy (etotal) [Ha]= -2.09842181417584E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-6.05698E-07
@@ -4680,8 +4691,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.4609E-12; max=  4.4664E-12
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
+ Mean square residual over all n,k,spin=   14.609E-13; max=  44.664E-13
  reduced coordinates (array xred) for    1 atoms
        0.000000000000      0.000000000000      0.000000000000
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
@@ -4712,21 +4722,23 @@ _setup2: Arith. and geom. avg. npw (full set) are      89.361      89.328
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  8.75788379910964E-01
-    Hartree energy  =  4.12720640366920E-03
+    Kinetic energy  =  8.75788379910969E-01
+    Hartree energy  =  4.12720640366918E-03
     XC energy       = -8.14419540244759E-01
-    Ewald energy    = -2.75123278877654E+00
-    PspCore energy  =  3.87847534639152E-02
-    Loc. psp. energy=  9.77170924451374E-02
-    NL   psp  energy=  4.51283629376785E-01
-    >>>>> Internal E= -2.09795126742083E+00
+    Ewald energy    = -2.75123278877655E+00
+    PspCore energy  =  3.87847534639155E-02
+    Loc. psp. energy=  9.77170924451410E-02
+    NL   psp  energy=  4.51283629376787E-01
+    >>>>> Internal E= -2.09795126742082E+00
 
-    -kT*entropy     = -4.70546755017599E-04
-    >>>>>>>>> Etotal= -2.09842181417585E+00
+    -kT*entropy     = -4.70546755017586E-04
+    >>>>>>>>> Etotal= -2.09842181417584E+00
 
  Other information on the energy :
-    Total energy(eV)= -5.71009614857365E+01 ; Band energy (Ha)=   3.7187389013E-01
+    Total energy(eV)= -5.71009614857364E+01 ; Band energy (Ha)=   3.7187389013E-01
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.68504170E-07  sigma(3 2)=  0.00000000E+00
@@ -5181,29 +5193,29 @@ P           mkmem34        28
                        5.0000000000E-01  5.0000000000E-01  0.0000000000E+00
            shiftk      5.00000000E-01  5.00000000E-01  5.00000000E-01
           spgroup         225
-           strten11    2.1360639354E-08  2.1360639354E-08  2.1360639354E-08
+           strten11    2.1360636731E-08  2.1360636731E-08  2.1360636731E-08
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten12    2.2007819225E-08  2.2007819225E-08  2.2007819225E-08
+           strten12    2.2007819734E-08  2.2007819734E-08  2.2007819734E-08
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten13    2.2007813962E-08  2.2007813962E-08  2.2007813962E-08
+           strten13    2.2007813802E-08  2.2007813802E-08  2.2007813802E-08
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten14    2.2010143138E-08  2.2010143139E-08  2.2010143138E-08
+           strten14    2.2010142815E-08  2.2010142815E-08  2.2010142815E-08
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten21    2.1746408172E-09  2.1746408172E-09  2.1746408175E-09
+           strten21    2.1746408350E-09  2.1746408351E-09  2.1746408351E-09
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten22    1.8662926369E-09  1.8662926369E-09  1.8662926373E-09
+           strten22    1.8662925820E-09  1.8662925820E-09  1.8662925819E-09
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten23    2.5924255255E-09  2.5924255254E-09  2.5924255259E-09
+           strten23    2.5924255245E-09  2.5924255244E-09  2.5924255243E-09
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten24    1.8571531828E-09  1.8571531829E-09  1.8571531830E-09
+           strten24    1.8571531757E-09  1.8571531758E-09  1.8571531758E-09
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten31    2.7307507667E-07  2.7307507667E-07  2.7307507667E-07
+           strten31    2.7307507669E-07  2.7307507669E-07  2.7307507669E-07
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten32    2.8566278759E-07  2.8566278759E-07  2.8566278759E-07
+           strten32    2.8566278760E-07  2.8566278760E-07  2.8566278760E-07
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten33    2.4631778833E-07  2.4631778833E-07  2.4631778833E-07
+           strten33    2.4631778836E-07  2.4631778836E-07  2.4631778836E-07
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten34    1.6850417040E-07  1.6850417040E-07  1.6850417040E-07
+           strten34    1.6850417036E-07  1.6850417036E-07  1.6850417036E-07
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symrel      1  0  0   0  1  0   0  0  1      -1  0  0   0 -1  0   0  0 -1
                        0 -1  1   0 -1  0   1 -1  0       0  1 -1   0  1  0  -1  1  0
@@ -5299,51 +5311,69 @@ P           mkmem34        28
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
+- [1] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [2] Ab initio pseudopotentials for electronic structure calculations of poly-atomic systems, 
 - using density-functional theory.
 - M. Fuchs, M. Scheffler, Comput. Phys. Commun. 119, 67 (1999).
-- Comment : Some pseudopotential generated using the FHI code were used.
+- Comment: Some pseudopotential generated using the FHI code were used.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [5] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- [5] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=         31.2  wall=         16.7
+- Proc.   0 individual time (sec): cpu=          9.3  wall=         13.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered  45 WARNINGs and  65 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         31.2  wall=         16.7
+.Delivered  41 WARNINGs and  82 COMMENTs to log file.
++Overall time at end (sec) : cpu=          9.3  wall=         13.2

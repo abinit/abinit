@@ -1,8 +1,8 @@
 
-.Version 8.9.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 11 Jun 2018.
-- ( at 16h56 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h22 )
   
 - input  file    -> tgw1_4.in
 - output file    -> tgw1_4.out
@@ -559,8 +559,8 @@ P           mkmem           1
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/bruneval_beauty/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/bruneval_beauty/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -628,16 +628,16 @@ P           mkmem           1
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
        -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -23.210  -0.000  -0.558   0.000  -0.669  -0.000  -0.701   0.000
-       -0.000   0.000 -16.635  -0.000  -0.363   0.000  -0.475  -0.000  -0.507
+    2   0.000 -23.210  -0.000  -0.558  -0.000  -0.669   0.000  -0.701   0.000
+       -0.000   0.000 -16.635   0.000  -0.363  -0.000  -0.475  -0.000  -0.507
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -5.689  -0.000  -0.102   0.000  -0.186  -0.000  -0.211   0.000
-       -0.000   0.000  -1.949  -0.000  -0.065   0.000  -0.149  -0.000  -0.173
+    2   0.000  -5.689  -0.000  -0.102  -0.000  -0.186   0.000  -0.211   0.000
+       -0.000   0.000  -1.949   0.000  -0.065  -0.000  -0.149  -0.000  -0.173
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  96.4963
@@ -649,10 +649,10 @@ P           mkmem           1
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+      0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-     -0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+      0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
@@ -759,22 +759,28 @@ P           mkmem           1
 
  Perturbative Calculation
 
- k =    0.000   0.000   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-    4   5.915 -11.652 -17.103   4.660   0.785  -0.274 -12.273  -0.620   5.295
-    5   8.445  -9.700  -3.222  -6.522   0.797  -0.255  -9.734  -0.034   8.411
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    2.530
+QP_gap     :    3.114
+Delta_QP_KS:    0.584
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        2   5.915 -11.652 -17.103   4.651   0.783  -0.277 -12.279  -0.626   5.289
+        3   5.915 -11.652 -17.103   4.651   0.783  -0.277 -12.279  -0.626   5.289
+        4   5.915 -11.652 -17.103   4.651   0.783  -0.277 -12.279  -0.626   5.289
+        5   8.445  -9.700  -3.222  -6.532   0.797  -0.255  -9.743  -0.042   8.403
+        6   8.445  -9.700  -3.222  -6.532   0.797  -0.255  -9.743  -0.042   8.403
+        7   8.445  -9.700  -3.222  -6.532   0.797  -0.255  -9.743  -0.042   8.403
+...
 
- E^0_gap          2.530
- E^GW_gap         3.116
- DeltaE^GW_gap    0.586
-
-
- New Fermi energy :        2.632389E-01 Ha ,    7.163094E+00 eV
+ New Fermi energy :        2.515829E-01 Ha ,    6.845920E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   3.1164 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.1164 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.1141 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.1141 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                        Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
@@ -871,19 +877,19 @@ P           mkmem           1
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-      0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+     -0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-      0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+     -0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -981,22 +987,28 @@ P           mkmem           1
 
  Perturbative Calculation
 
- k =    0.000   0.000   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-    4   5.915 -11.652 -17.103   4.471   0.785  -0.274 -12.421  -0.768   5.147
-    5   8.445  -9.700  -3.222  -6.710   0.795  -0.257  -9.884  -0.184   8.261
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    2.530
+QP_gap     :    3.118
+Delta_QP_KS:    0.588
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        2   5.915 -11.652 -17.103   4.471   0.785  -0.273 -12.422  -0.770   5.146
+        3   5.915 -11.652 -17.103   4.471   0.785  -0.273 -12.422  -0.770   5.146
+        4   5.915 -11.652 -17.103   4.471   0.785  -0.273 -12.422  -0.770   5.146
+        5   8.445  -9.700  -3.222  -6.707   0.795  -0.258  -9.882  -0.181   8.264
+        6   8.445  -9.700  -3.222  -6.707   0.795  -0.258  -9.882  -0.181   8.264
+        7   8.445  -9.700  -3.222  -6.707   0.795  -0.258  -9.882  -0.181   8.264
+...
 
- E^0_gap          2.530
- E^GW_gap         3.115
- DeltaE^GW_gap    0.585
-
-
- New Fermi energy :        2.604864E-01 Ha ,    7.088194E+00 eV
+ New Fermi energy :        2.463948E-01 Ha ,    6.704743E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   3.1146 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.1146 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.1184 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.1184 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                        Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
@@ -1072,16 +1084,16 @@ P           mkmem           1
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
        -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -24.709  -0.000  -0.524   0.000  -0.524  -0.000  -0.524   0.000
-       -0.000   0.000 -16.920  -0.000  -0.162  -0.000  -0.162   0.000  -0.162
+    2   0.000 -24.709  -0.000  -0.524  -0.000  -0.524   0.000  -0.524  -0.000
+       -0.000   0.000 -16.920   0.000  -0.162   0.000  -0.162  -0.000  -0.162
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.934  -0.000  -0.082  -0.000  -0.082  -0.000  -0.082  -0.000
-       -0.000   0.000  -2.134   0.000   0.098   0.000   0.098   0.000   0.098
+    2   0.000  -6.934  -0.000  -0.082   0.000  -0.082   0.000  -0.082  -0.000
+       -0.000   0.000  -2.134   0.000   0.098   0.000   0.098  -0.000   0.098
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  98.3494
@@ -1102,10 +1114,10 @@ P           mkmem           1
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -1203,22 +1215,28 @@ P           mkmem           1
 
  Perturbative Calculation
 
- k =    0.000   0.000   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-    4   5.915 -11.652 -17.103   4.384   0.785  -0.273 -12.490  -0.838   5.078
-    5   8.445  -9.700  -3.222  -6.800   0.794  -0.259  -9.956  -0.255   8.190
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    2.530
+QP_gap     :    3.114
+Delta_QP_KS:    0.584
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        2   5.915 -11.652 -17.103   4.386   0.785  -0.273 -12.489  -0.836   5.079
+        3   5.915 -11.652 -17.103   4.386   0.785  -0.273 -12.489  -0.836   5.079
+        4   5.915 -11.652 -17.103   4.386   0.785  -0.273 -12.489  -0.836   5.079
+        5   8.445  -9.700  -3.222  -6.797   0.794  -0.260  -9.953  -0.253   8.193
+        6   8.445  -9.700  -3.222  -6.797   0.794  -0.260  -9.953  -0.253   8.193
+        7   8.445  -9.700  -3.222  -6.797   0.794  -0.260  -9.953  -0.253   8.193
+...
 
- E^0_gap          2.530
- E^GW_gap         3.112
- DeltaE^GW_gap    0.582
-
-
- New Fermi energy :        2.591725E-01 Ha ,    7.052442E+00 eV
+ New Fermi energy :        2.438588E-01 Ha ,    6.635735E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   3.1121 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.1121 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.1138 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.1138 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                        Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
@@ -1294,16 +1312,16 @@ P           mkmem           1
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
        -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -24.713  -0.000  -0.523   0.000  -0.523  -0.000  -0.523   0.000
-       -0.000   0.000 -16.918  -0.000  -0.162  -0.000  -0.162   0.000  -0.162
+    2   0.000 -24.713  -0.000  -0.523  -0.000  -0.523   0.000  -0.523   0.000
+       -0.000   0.000 -16.918   0.000  -0.162  -0.000  -0.162  -0.000  -0.162
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.938  -0.000  -0.082  -0.000  -0.082  -0.000  -0.082  -0.000
-       -0.000   0.000  -2.133   0.000   0.098   0.000   0.098   0.000   0.098
+    2   0.000  -6.938  -0.000  -0.082  -0.000  -0.082   0.000  -0.082   0.000
+       -0.000   0.000  -2.133   0.000   0.098  -0.000   0.098  -0.000   0.098
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  98.5074
@@ -1324,10 +1342,10 @@ P           mkmem           1
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -1425,22 +1443,28 @@ P           mkmem           1
 
  Perturbative Calculation
 
- k =    0.000   0.000   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-    4   5.915 -11.652 -17.103   4.363   0.785  -0.274 -12.506  -0.854   5.062
-    5   8.445  -9.700  -3.222  -6.820   0.794  -0.259  -9.971  -0.271   8.174
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    2.530
+QP_gap     :    3.114
+Delta_QP_KS:    0.583
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        2   5.915 -11.652 -17.103   4.364   0.784  -0.275 -12.504  -0.852   5.063
+        3   5.915 -11.652 -17.103   4.364   0.784  -0.275 -12.504  -0.852   5.063
+        4   5.915 -11.652 -17.103   4.364   0.784  -0.275 -12.504  -0.852   5.063
+        5   8.445  -9.700  -3.222  -6.817   0.794  -0.260  -9.969  -0.269   8.177
+        6   8.445  -9.700  -3.222  -6.817   0.794  -0.260  -9.969  -0.269   8.177
+        7   8.445  -9.700  -3.222  -6.817   0.794  -0.260  -9.969  -0.269   8.177
+...
 
- E^0_gap          2.530
- E^GW_gap         3.113
- DeltaE^GW_gap    0.583
-
-
- New Fermi energy :        2.588866E-01 Ha ,    7.044661E+00 eV
+ New Fermi energy :        2.432729E-01 Ha ,    6.619792E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   3.1126 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.1126 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.1136 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.1136 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                        Bottom of conduction at :   0.0000  0.0000  0.0000
 
 ================================================================================
@@ -1516,16 +1540,16 @@ P           mkmem           1
     1  -0.000   0.000  -0.000  -0.001   0.001   0.001  -0.001  -0.000   0.000
        -0.000   0.000   0.000  -0.001  -0.001   0.001   0.001  -0.000  -0.000
 
-    2   0.000 -24.714  -0.000  -0.523   0.000  -0.523  -0.000  -0.523   0.000
-       -0.000   0.000 -16.918  -0.000  -0.162  -0.000  -0.162   0.000  -0.162
+    2   0.000 -24.714  -0.000  -0.523  -0.000  -0.523   0.000  -0.523  -0.000
+       -0.000   0.000 -16.918   0.000  -0.162   0.000  -0.162  -0.000  -0.162
 
   chi0(G,G') at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000   0.000
        -0.000   0.000   0.000  -0.000  -0.000   0.000   0.000  -0.000  -0.000
 
-    2   0.000  -6.939  -0.000  -0.081  -0.000  -0.081  -0.000  -0.081  -0.000
-       -0.000   0.000  -2.133   0.000   0.098   0.000   0.098   0.000   0.098
+    2   0.000  -6.939  -0.000  -0.081  -0.000  -0.081   0.000  -0.081  -0.000
+       -0.000   0.000  -2.133   0.000   0.098   0.000   0.098  -0.000   0.098
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =  98.5227
@@ -1537,19 +1561,19 @@ P           mkmem           1
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-      0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
+     -0.000   0.002   0.002  -0.006  -0.006   0.006   0.006  -0.002  -0.002
        1       2       3       4       5       6       7       8       9
       0.010   0.002  -0.002  -0.006   0.006   0.006  -0.006  -0.002   0.002
-      0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
+     -0.000  -0.002  -0.002   0.006   0.006  -0.006  -0.006   0.002   0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  16.7000 [eV]
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
+     -0.000   0.004   0.004  -0.011  -0.011   0.011   0.011  -0.004  -0.004
        1       2       3       4       5       6       7       8       9
       0.207   0.004  -0.004  -0.011   0.011   0.011  -0.011  -0.004   0.004
-      0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
+     -0.000  -0.004  -0.004   0.011   0.011  -0.011  -0.011   0.004   0.004
 
 
 
@@ -1647,22 +1671,28 @@ P           mkmem           1
 
  Perturbative Calculation
 
- k =    0.000   0.000   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-    4   5.915 -11.652 -17.103   4.353   0.784  -0.275 -12.513  -0.860   5.055
-    5   8.445  -9.700  -3.222  -6.827   0.794  -0.259  -9.977  -0.277   8.168
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    2.530
+QP_gap     :    3.115
+Delta_QP_KS:    0.585
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+        2   5.915 -11.652 -17.103   4.355   0.784  -0.275 -12.512  -0.859   5.056
+        3   5.915 -11.652 -17.103   4.355   0.784  -0.275 -12.512  -0.859   5.056
+        4   5.915 -11.652 -17.103   4.355   0.784  -0.275 -12.512  -0.859   5.056
+        5   8.445  -9.700  -3.222  -6.824   0.794  -0.260  -9.975  -0.274   8.171
+        6   8.445  -9.700  -3.222  -6.824   0.794  -0.260  -9.975  -0.274   8.171
+        7   8.445  -9.700  -3.222  -6.824   0.794  -0.260  -9.975  -0.274   8.171
+...
 
- E^0_gap          2.530
- E^GW_gap         3.114
- DeltaE^GW_gap    0.584
-
-
- New Fermi energy :        2.587818E-01 Ha ,    7.041811E+00 eV
+ New Fermi energy :        2.430349E-01 Ha ,    6.613315E+00 eV
 
  === QP Band Gaps ===
   >>>> For spin  1
-   Minimum direct gap =   3.1137 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap    =   3.1137 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   3.1153 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   3.1153 [eV], Top of valence bands at :   0.0000  0.0000  0.0000
                                        Bottom of conduction at :   0.0000  0.0000  0.0000
 
 == END DATASET(S) ==============================================================
@@ -2050,7 +2080,24 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -2062,47 +2109,44 @@ P           mkmem           1
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [4] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
--
-- Proc.   0 individual time (sec): cpu=          9.8  wall=          9.9
+- Proc.   0 individual time (sec): cpu=         15.5  wall=         15.6
 
 ================================================================================
 
  Calculation completed.
-.Delivered  44 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.8  wall=          9.9
+.Delivered  44 WARNINGs and  10 COMMENTs to log file.
++Overall time at end (sec) : cpu=          9.5  wall=          9.6

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2011-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2011-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -81,8 +81,7 @@ def run_script(name, title, cmdline, stop_on_error=True,
       indent_output=True):
 
   print("[%s]   %s" % (name, title))
-
-  (ret, msg) = getstatusoutput(cmdline)
+  (ret, msg) = getstatusoutput(cmdline + " 2>&1")
   if ( msg != "" ):
     if ( indent_output ):
       sys.stderr.write("    " + re.sub("\n", "\n    ", msg) + "\n")
@@ -90,7 +89,7 @@ def run_script(name, title, cmdline, stop_on_error=True,
       sys.stderr.write(msg + "\n")
   if ( (ret != 0) and stop_on_error ):
     sys.stderr.write("cmdline: %s\n" % cmdline)
-    sys.stderr.write("[%s] Aborting now!\n" % (name))
+    sys.stderr.write("[%s] Aborting now! (ret = %d)\n" % (name, ret))
     sys.exit(1)
 
   return ret
@@ -148,6 +147,7 @@ my_configs  = {
   "make":"config/specs/makemake.conf",
   "bsys":"config/specs/buildsys.conf",
   "bins":"config/specs/binaries.conf",
+  "libs":"config/specs/corelibs.conf",
   "fbks":"config/specs/fbversion.conf"}
 
 # Check if we are in the top of the ABINIT source tree
@@ -183,11 +183,19 @@ else:
     (my_name, my_configs["bins"]))
   sys.stderr.write("[%s] Aborting now!" % (my_name))
   sys.exit(12)
+if ( os.path.exists(my_configs["libs"]) ):
+  lcnf = MyConfigParser()
+  lcnf.read(my_configs["libs"])
+else:
+  sys.stderr.write("[%s] Could not find config file (%s)" % \
+    (my_name, my_configs["bins"]))
+  sys.stderr.write("[%s] Aborting now!" % (my_name))
+  sys.exit(13)
 if ( not os.path.exists(my_configs["fbks"]) ):
   sys.stderr.write("[%s] Could not find config file (%s)" % \
     (my_name, my_configs["fbks"]))
   sys.stderr.write("[%s] Aborting now!" % (my_name))
-  sys.exit(13)
+  sys.exit(14)
 
 # Parse command-line arguments
 from optparse import OptionParser
@@ -250,6 +258,10 @@ if ( opts.run_clean ):
     "find . -depth -name 'tmp-*' -exec rm -rf {} \;")
   run_script(my_name, "Removing old files",
     "find src -name '*.old' -exec rm -f {} \;")
+  run_script(my_name, "Removing compiled Python files",
+    "find . -name '*.pyc' -o -name '*.pyo' -exec rm -f {} \;")
+  run_script(my_name, "Removing compiled Python cache directories",
+    "find . -depth -name '__pycache__' -exec rm -rf {} \;")
   run_script(my_name, "Removing symbolic links in common",
     "find shared/common/src -type l -exec rm -f {} \;")
   run_script(my_name, "Removing symbolic links in core",
@@ -257,7 +269,7 @@ if ( opts.run_clean ):
 
   print_header(my_name, "Abinit scripts outputs")
   run_script(my_name, "Removing file lists",
-    "rm -f config/dist/*.lst")
+    "rm -f config/dist/auto-*.lst")
   run_script(my_name, "Removing M4 macros",
     "rm -f config/m4/auto-*.m4")
   #run_script(my_name, "Removing abilint outputs ",
@@ -292,10 +304,7 @@ if ( opts.run_clean ):
     "rm -f Makefile.am Makefile.in Makefile")
   cln_dirs = ["."]
   for bsub in bcnf.sections():
-    if ( bcnf.get(bsub, "type") == "master" ):
-      cln_dirs += bcnf.get(bsub, "subdirs").split()
-    elif ( (bcnf.get(bsub, "type") == "subsystem") and \
-           (bcnf.get(bsub, "mode") == "attached") ):
+    if ( bcnf.get(bsub, "type") in ("master", "subsystem") ):
       cln_dirs += bcnf.get(bsub, "subdirs").split()
   for dcln in cln_dirs:
     run_script(my_name, "Removing local data in %s/" % dcln,
@@ -323,6 +332,8 @@ if ( opts.run_clean ):
   for block in sorted(abinit_blocks.keys()):
     run_script(my_name, "Removing binary Fortran modules in %s" % block,
       "find %s -name '*.mod' -exec rm {} \;" % abinit_blocks[block])
+  run_script(my_name, "Removing Python-generated files in src/",
+    "find src -name '*.pickle' -exec rm {} \;")
   abinit_bins = xcnf.sections()
   abinit_bins.sort()
   abinit_bins = "src/98_main/" + " src/98_main/".join(abinit_bins)
@@ -348,6 +359,8 @@ if ( opts.run_clean ):
     "rm -f shared/common/src/14_hidewrite/m_build_info.F90")
 
   print_header(my_name, "Subsystems")
+  run_script(my_name, "Removing copied files in shared/common",
+    "/bin/rm -f shared/common/AUTHORS shared/common/COPYING shared/common/ChangeLog shared/common/NEWS shared/common/README shared/common/README.md")
   for subsys in bcnf.sections():
     if ( bcnf.get(subsys, "type") == "subsystem" ):
       for subdir in bcnf.get(subsys, "subdirs").split():
@@ -365,6 +378,16 @@ if ( opts.run_clean ):
     "find . -depth -name '_project_py[23].pickle' -exec rm {} \;")
   run_script(my_name, "Removing abisrc output files",
     "rm -f abisrc.stderr abisrc.stdout")
+
+  # Remove LibPAW symlink
+  libpaw_dir = [item for item in lcnf.sections() \
+    if ( lcnf.get(item, "parent") == "libpaw" )][0]
+  libpaw_ln = os.path.join("shared", "common", "src", libpaw_dir)
+  if ( os.path.exists(libpaw_ln) ):
+    if ( os.path.islink(libpaw_ln) ):
+      os.remove(libpaw_ln)
+    else:
+      raise OSError("a file is blocking the way: '%s' is not a symlink" % libpaw_ln)
 
   now = strftime("%Y/%m/%d %H:%M:%S +0000", gmtime())
   print_message(my_name, "--------------------------------------")
@@ -467,12 +490,10 @@ if ( opts.run_buildsys ):
     "./config/scripts/make-macros-dirflags")
   run_script(my_name, "Generating macros for core libraries",
     "./config/scripts/make-macros-corelibs")
-  run_script(my_name, "Generating macros for fallback linking",
-    "./config/scripts/make-macros-linking")
+  run_script(my_name, "Generating macros for feature triggers",
+    "./config/scripts/make-macros-triggers")
   run_script(my_name, "Generating macros for configure output",
     "./config/scripts/make-macros-output")
-  run_script(my_name, "Generating macros for include flags",
-    "./config/scripts/make-macros-incflags")
   run_script(my_name, "Generating source split symlink maker",
     "./config/scripts/make-symlink-maker")
 else:
@@ -491,8 +512,6 @@ if ( opts.run_source ):
 
   # Create a symlink to the sources of LibPAW, so that the same naming
   # conventions can be used in the whole shared section of ABINIT
-  lcnf = MyConfigParser()
-  lcnf.read(os.path.join("config", "specs", "corelibs.conf"))
   libpaw_dir = [item for item in lcnf.sections() \
     if ( lcnf.get(item, "parent") == "libpaw" )][0]
   src = os.path.join("..", "..", "libpaw", "src")
@@ -519,19 +538,13 @@ if ( opts.run_source ):
        *** functions that are not declared inside modules or that   ***
        *** there is a syntax error in the Fortran code or a bug     ***
        *** See above error message.                                 ***
-       *** Please note that procedures outside Fortran modules      ***
-       *** are not allowed any longer. See abisrc.stderr for errors ***
+       ****                                                         ***
+       *** Please note that procedures outside Fortran modules are  ***
+       *** not allowed any longer. See abisrc.stderr for details    ***
+       *** about the errors.                                        ***
        ****************************************************************\n""")
     sys.stderr.write("[%s] Aborting now\n" % (my_name))
     sys.exit(1)
-
-  # Remove LibPAW symlink
-  if ( os.path.exists(dst) ):
-    if ( os.path.islink(dst) ):
-      os.remove(dst)
-    else:
-      raise OSError("a file is blocking the way: '%s' is not a symlink" % dst)
-
 else:
   print_message(my_name, "*** Skipping source tree update ***")
 
@@ -540,7 +553,7 @@ print_header(my_name, "Synchronization of subsystems")
 
 if ( opts.run_subsystems ):
   run_script(my_name, "Wiping out former file lists for subsystems",
-    "rm -f config/dist/*.lst")
+    "rm -f config/dist/auto-*.lst")
 
   sub_togls = []
   togl_mode = {"attached":"detached", "detached":"attached"}
@@ -571,6 +584,8 @@ if ( opts.run_subsystems ):
     "./config/scripts/make-file-lists")
   run_script(my_name, "Generating macros for subsystems",
     "./config/scripts/make-macros-subsystems")
+  run_script(my_name, "Populating required files in shared/common",
+    "/bin/cp -f AUTHORS COPYING ChangeLog NEWS README README.md shared/common")
 else:
   print_message(my_name, "*** Skipping synchronization of subsystems ***")
 

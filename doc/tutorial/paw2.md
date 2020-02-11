@@ -16,12 +16,12 @@ This tutorial should take about 2h00.
 [TUTORIAL_README]
 
 ## 1. The PAW atomic dataset - introduction
-  
+
 The PAW method is based on the definition of spherical augmentation
 regions of radius $r_c$ around the atoms of the system in which a basis of
 atomic **partial-waves** $\phi_i$, of **pseudized partial-waves** $\tphi_i$, and of **projectors** $\tprj_i$
 (dual to $\tphi_i$) have to be defined. This set of _partial-waves_ and _projectors_
-functions (plus some additional atomic data) are stored in a so-called **PAW dataset**. 
+functions (plus some additional atomic data) are stored in a so-called **PAW dataset**.
 A PAW dataset has to be generated for each atomic species in order
 to reproduce atomic behavior as accurate as possible while requiring minimal
 CPU and memory resources in executing ABINIT for the crystal simulations.
@@ -44,7 +44,7 @@ It is done according the following procedure (all parameters that define a PAW d
   A **smooth core density** equal to the core density outside a given $r_{core}$ matching radius is computed.
 
   4. Choose the size of the PAW basis (**number of partial-waves and projectors**).
-  Then choose the partial-waves included in the basis. The later can be atomic eigen-functions 
+  Then choose the partial-waves included in the basis. The later can be atomic eigen-functions
   related to valence electrons (**bound states**) and/or **additional atomic functions**, solution
   of the wave equation for a given $l$ quantum number at arbitrary **reference energies** (unbound states).
 
@@ -65,7 +65,7 @@ the second one is the [[http://www.physics.rutgers.edu/~dhv/uspp| Ultra-Soft USP
 
 It is highly recommended to refer to the following papers to understand
 correctly the generation of PAW atomic datasets:
-  
+
 1. "Projector augmented-wave method" - [[cite:Bloechl1994]]
 
 2. "A projector Augmented Wave (PAW) code for electronic structure" - [[cite:Holzwarth2001]]
@@ -77,7 +77,7 @@ correctly the generation of PAW atomic datasets:
 5. "Notes for revised form of atompaw code" (by N. Holzwarth) - [[http://www.wfu.edu/%7Enatalie/papers/pwpaw/notes/atompaw/atompawEqns.pdf|PDF]]
 
 ## 2. Use of the generation code
-  
+
 *Before continuing, you might consider to work in a different subdirectory as
 for the other tutorials. Why not `Work_paw2`?*
 
@@ -87,19 +87,19 @@ mkdir Work_paw2
 cd Work_paw2
 ```
 
-Provided that ABINIT has been compiled with the `--with-dft-flavor="...+atompaw"` option, 
+Provided that ABINIT has been compiled with the `--with-dft-flavor="...+atompaw"` option,
 the `ATOMPAW` code is directly available from command line. Try to type:
 
      atompaw
 
-If `atompaw vx.y.z` message appears, everything is fine.  
+If `atompaw vx.y.z` message appears, everything is fine.
 Otherwise, you can try:
 
     $ABI_HOME/fallbacks/exports/bin/atompaw
 
 !!! Note
     In the following, we name *atompaw* the `ATOMPAW` executable.
-  
+
 **How to use `ATOMPAW`?**
 
 1. Edit an input file in a text editor (content of input explained [here](paw2_assets/atompaw-usersguide.pdf))
@@ -109,7 +109,7 @@ Partial waves $\phi_i$, PS partial-waves $\tphi_i$ and projectors $\tprj_i$ are 
 Logarithmic derivatives from atomic Hamiltonian and PAW Hamiltonian
 resolutions are given in `logderiv.l` files.
 A summary of the atomic _all-electron_ computation and PAW dataset properties
-can be found in the `Atom_name` file (`Atom_name` is the first parameter of the input file).  
+can be found in the `Atom_name` file (`Atom_name` is the first parameter of the input file).
 
 Resulting PAW dataset is contained in:
 
@@ -145,21 +145,21 @@ This file has been built in the following way:
 ```
     GGA-PBE scalarrelativistic loggrid 2000
 ```
-2. Electronic configuration:  
+2. Electronic configuration:
    _How many electronic states do we need to include in the computation?
    Besides the fully and partially occupied states, it is recommended to add all
    states that could be reached by electrons in the solid. Here, for Nickel, the
-   $4p$ state is concerned. So we decide to add it in the computation._  
+   $4p$ state is concerned. So we decide to add it in the computation._
     * 3rd line: define the <span style="color:green">electronic configuration</span>.
       A line with the maximum $n$ quantum number for each electronic shell; here `4 4 3` means `4s, 4p, 3d`.
 ```
     4 4 3 0 0 0
 ```
    * Following lines : definition of <span style="color:green">occupation numbers</span>.
-     For each partially occupied shell enter the occupation number.  
+     For each partially occupied shell enter the occupation number.
      _An excited configuration may be useful if the PAW dataset is intended for use in a
      context where the material is charged (such as oxides). Although, in our
-     experience, the results are not highly dependent on the chosen electronic configuration._  
+     experience, the results are not highly dependent on the chosen electronic configuration._
      We choose here the $[3d^8 4s^2 4p^0]$ configuration.
      Only $3d$ and $4p$ shells are partially occupied (`3 2 8` and `4 1 0` lines).
      A `0 0 0` ends the occupation section.
@@ -169,22 +169,22 @@ This file has been built in the following way:
     0 0 0
 ```
 
-3. Selection of <span style="color:green">core and valence electrons</span>.  
+3. Selection of <span style="color:green">core and valence electrons</span>.
    _In a first approach, select only electrons from outer shells as valence. But, if particular
     thermodynamical conditions are to be simulated, it is generally needed to
     include "semi-core states" in the set of valence electrons. Semi-core states
-    are generally needed with transition metal and rare-earth materials._  
-    Note that all wave functions designated as valence electrons will be used in the partial-wave basis.  
+    are generally needed with transition metal and rare-earth materials._
+    Note that all wave functions designated as valence electrons will be used in the partial-wave basis.
     Core shells are designated by a $c$ and valence shells by a $v$.
-    All $s$ states first, then $p$ states and finally $d$ states.  
+    All $s$ states first, then $p$ states and finally $d$ states.
     Here:
 ```
     c
-    c 
-    c 
-    v 
-    c 
-    c 
+    c
+    c
+    v
+    c
+    c
     v
     v
 ```
@@ -205,7 +205,7 @@ means:
 ```
     2
 ```
-    * A line with the <span style="color:green">$r_{PAW}$</span> radius.  
+    * A line with the <span style="color:green">$r_{PAW}$</span> radius.
       _Select it to be slightly less than half the inter-atomic distance
       in the solid (as a first choice). Here $r_{PAW}=2.3 a.u$.
       If only one radius is input, all others pseudization radii will be equal
@@ -213,13 +213,13 @@ means:
 ```
     2.3
 ```
-    * Next lines: add <span style="color:green">additional _partial-waves_</span> $\phi_i$ if needed.  
+    * Next lines: add <span style="color:green">additional _partial-waves_</span> $\phi_i$ if needed.
       Choose to have 2 partial-waves per angular momentum in the basis (this choice is not
       necessarily optimal but this is the most common one; if $r_{PAW}$ is small enough,
-      1 partial-wave per $l$ may suffice).  
+      1 partial-wave per $l$ may suffice).
       As a first guess, put
       all <span style="color:green">reference energies</span>
-      for additional partial-waves to 0 Rydberg.  
+      for additional partial-waves to 0 Rydberg.
       For each angular momentum, first add "y" to add an additional partial-wave.
       Then, next line, put the value in Rydberg units.
       Repeat this for each new partial-wave and finally put "n".
@@ -233,20 +233,20 @@ means:
 ```
 means that an additional $s$\- partial-wave at $E_{ref}=0.5 Ry$ as been added,
 ```
-    y  
-    1.  
+    y
+    1.
     n
 ```
 means that an additional $p$\- partial-wave at $E_{ref}=1. Ry$ has been added,
 ```
-    y  
-    1.  
+    y
+    1.
     n
 ```
 means that an additional $d$- partial-wave at $E_{ref}=1. Ry$ as been added.
 Finally, partial-waves basis contains two $s$\-, two $p$\-  and two $d$\- partial-waves.
       * Next line: definition of the <span style="color:green">generation scheme for pseudo partial
-        waves $\tphi_i$</span>, and of projectors $\tprj_i$.  
+        waves $\tphi_i$</span>, and of projectors $\tprj_i$.
         _We begin here with a simple scheme (i.e. "Bloechl" scheme, proposed by P. Blochl [[cite:Bloechl1994]]).
         This will probably be changed later to make the PAW dataset more efficient._
 ```
@@ -254,7 +254,7 @@ Finally, partial-waves basis contains two $s$\-, two $p$\-  and two $d$\- partia
 ```
       * Next line: <span style="color:green">generation scheme for local pseudopotential
         $V_{loc}$</span>. In order to get PS partial-waves, the atomic potential has to be "pseudized"
-        using an arbitrary pseudization scheme.  
+        using an arbitrary pseudization scheme.
         *We choose here a "Troullier-Martins" using a wave equation at $l_{loc}=3$ and $E_{loc}=0. Ry$.
         As a first draft, it is always recommended to put $l_{loc}=1+lmax$.*
 ```
@@ -274,7 +274,7 @@ Finally, partial-waves basis contains two $s$\-, two $p$\-  and two $d$\- partia
 
 At this stage, run `ATOMPAW`. For this purpose, simply enter:
 
-    atompaw < Ni.atompaw.input1  
+    atompaw < Ni.atompaw.input1
 
 Lot of files are produced. We will examine some of them.
 A summary of the PAW dataset generation process has been written in a file
@@ -283,7 +283,7 @@ Open it. It should look like:
 
      Completed calculations for Ni
      Exchange-correlation type: GGA, Perdew-Burke-Ernzerhof
-      Radial integration grid is logarithmic 
+      Radial integration grid is logarithmic
     r0 =   2.2810899E-04 h =   6.3870518E-03   n =      2000 rmax =   8.0000000E+01
      Scalar relativistic calculation
        AEatom converged in          28  iterations
@@ -304,13 +304,13 @@ Open it. It should look like:
          Total                    :    -3041.0743834043615
      Completed calculations for Ni
      Exchange-correlation type: GGA, Perdew-Burke-Ernzerhof
-      Radial integration grid is logarithmic 
+      Radial integration grid is logarithmic
     r0 =   2.2810899E-04 h =   6.3870518E-03   n =      2000 rmax =   8.0000000E+01
      Scalar relativistic calculation
        SCatom converged in           3  iterations
          for nz =  28.00
          delta  =    3.0160553423681305E-018
-       Valence Electron Orbital energies:         
+       Valence Electron Orbital energies:
       n  l     occupancy       energy
      4  0      2.0000000E+00 -4.1475541E-01
      4  1      0.0000000E+00 -9.0035739E-02
@@ -319,9 +319,9 @@ Open it. It should look like:
       Total energy
          Total                    :    -3041.0743834044238
          Valence                  :    -185.18230020220784
-      paw parameters: 
+      paw parameters:
            lmax =            2
-             rc =    2.3096984974114871     
+             rc =    2.3096984974114871
             irc =         1445
      Vloc: Norm-conserving Troullier-Martins with l= 3;e=   0.0000E+00
      Projector type: Bloechl + Gram-Schmidt ortho.
@@ -370,18 +370,18 @@ difference in the results appears.
 You just have to replace `2000` by `700` in the second line of *Ni.atompaw.input1* file.
 Then run:
 
-    atompaw < Ni.atompaw.input1 
-    
+    atompaw < Ni.atompaw.input1
+
 again and look at the Ni file:
 
        Summary of PAW energies
-             Total valence energy       -185.18230025525258     
-               Smooth energy             11.634042250372509     
-               One center               -196.81634250562510     
-               Smooth kinetic            15.117781978173387     
-               Vloc energy              -2.8024659321889955     
-               Smooth exch-corr         -3.3712015020489359     
-               One-center xc            -123.08319452733129     
+             Total valence energy       -185.18230025525258
+               Smooth energy             11.634042250372509
+               One center               -196.81634250562510
+               Smooth kinetic            15.117781978173387
+               Vloc energy              -2.8024659321889955
+               Smooth exch-corr         -3.3712015020489359
+               One-center xc            -123.08319452733129
 
 As you see, results obtained with this new grid are very close to previous ones, expecially the `valence energy`.
 We can keep the 700 points grid.
@@ -398,7 +398,7 @@ but accuracy can be affected.
 ### 4.b. The relativistic approximation of the wave equation
 
 The _scalar-relativistic_ option should give better results than _non-relativistic_ one,
-but it sometimes produces difficulties for the convergence of the atomic problem 
+but it sometimes produces difficulties for the convergence of the atomic problem
 (either at the all-electron resolution step or at the PAW Hamiltonian solution step).
 If convergence cannot be reached, try a non-relativistic calculation (not recommended for high Z materials).
 
@@ -428,13 +428,13 @@ Below the first $s$\- partial-wave /projector of the Ni example:
   * The maxima of $\tphi_i$ and $\tprj_i$ functions should roughly have the same order of magnitude.
     If not, you can try to get this in three ways:
     1. **Change the matching radius** for this partial-wave; but this is not always
-       possible (PAW spheres should not overlap in the solid).  
+       possible (PAW spheres should not overlap in the solid).
     2. **Change the pseudopotential scheme** (see later).
     3. If there are two (or more) partial-waves for the angular momentum $l$ under
        consideration, decreasing the magnitude of the projector is possible by
        **displacing the references energies**. Moving the energies away from each other
        generally reduces the magnitude of the projectors, but too big a difference
-       between energies can lead to wrong logarithmic derivatives (see following section).  
+       between energies can lead to wrong logarithmic derivatives (see following section).
 
 Example: plot the `wfn6` file, related to the second $d$- partial-wave:
 
@@ -454,7 +454,7 @@ Now the PS partial-wave and projector have the same order of magnitude!
 
 !!! Important
     Note again that you should always check the two `Valence energy` values in `Ni` file and make
-    sure they are as close as possible.  
+    sure they are as close as possible.
     If not, choices for projectors and/or partial-waves are certainly not judicious.
 
 ## 6. Examine the logarithmic derivatives
@@ -485,17 +485,17 @@ Here are the three logarithmic derivative curves for the current dataset:
 
 ![l=1 logderivatives](paw2_assets/log1a.jpg)
 
-![l=2 logderivatives](paw2_assets/log2a.jpg)  
+![l=2 logderivatives](paw2_assets/log2a.jpg)
 
 As you can see, except for $l=2$, exact and PAW logarithmic derivatives do not match!
 According to the previous remarks, try other values for the references
 energies of the $s$\- and $p$\- additional partial-waves.
 First, edit again the `Ni.atompaw.input1` file and put $E_{ref}=3~Ry$ for the
-additional $s$\- state (line 18); run `ATOMPAW` again. Plot the `logderiv.0` file.  
+additional $s$\- state (line 18); run `ATOMPAW` again. Plot the `logderiv.0` file.
 You should get:
 
 ![l=0 log derivatives](paw2_assets/log0b.jpg)
-  
+
 Then put $E_{ref}=4~Ry$ for the second $p$\- state (line 21); run `ATOMPAW` again.
 Plot again the `logderiv.1` file. You should get:
 
@@ -523,14 +523,14 @@ This generally shows the presence of a _ghost state_.
   * If not, it can be useful to change the pseudopotential scheme. Norm-conserving pseudopotentials are
     sometimes too attractive near $r=0$.
     - A 1st solution is to change the quantum number used to generate the norm-conserving pseudopotential.
-      But this is generally not sufficient.  
+      But this is generally not sufficient.
     - A 2nd solution is to select a `ultrasoft` pseudopotential, freeing the
-      norm conservation constraint (simply replace `troulliermartins` by `ultrasoft` in the input file).  
+      norm conservation constraint (simply replace `troulliermartins` by `ultrasoft` in the input file).
     - A 3rd solution is to select a simple `bessel` pseudopotential (replace
       `troulliermartins` by `bessel` in the input file). But, in that case, one has to
       noticeably decrease the matching radius $r_{Vloc}$ if one wants to keep reasonable
       physical results. Selecting a value of $r_{Vloc}$ between $0.6~r_{PAW}$ and $0.8~r_{PAW}$ is
-      a good choice.  
+      a good choice.
       To change the value of $r_{Vloc}$, one has to explicitely put all matching radii:
       $r_{PAW}$, $r_{shape}$, $r_{Vloc}$ and $r_{core}$; see [user's guide](paw2_assets/atompaw-usersguide.pdf).
    * Last solution : try to change the matching radius $r_c$ for one (or both) $l$ partial-wave(s). In some cases,
@@ -542,7 +542,7 @@ To see an example of ghost state, use the
 *\$ABI_HOME/doc/tutorial/paw2_assets/Ni.ghost.atompaw.input* file and run it with `ATOMPAW`.
 Look at the $l=1$ logarithmic derivatives (`logderiv.1` file). They look like:
 
-![Ni l=1 log derivatives](paw2_assets/log1c.jpg) 
+![Ni l=1 log derivatives](paw2_assets/log1c.jpg)
 
 Now, edit the *Ni.ghost.atompaw.input* file and replace `troulliermartins` by
 `ultrasoft`. Run `ATOMPAW` again... and look at `logderiv.1` file.
@@ -566,7 +566,7 @@ You are about to run a DFT computation and determine the size of the _plane
 wave basis_ needed to reach a given accuracy. If the _cut-off energy_ defining the
 _plane waves basis_ is too high (higher than 20 Hartree),
 some changes have to be made in the input file.
- 
+
 Copy *\$ABI_TESTS/tutorial/Input/tpaw2_x.files* and
 *\$ABI_TESTS/tutorial/Input/tpaw2_1.in* in your working directory.
 Edit *tpaw2_1.in*, and activate the 8 datasets.
@@ -574,9 +574,9 @@ Run ABINIT with them.
 
 {% dialog tests/tutorial/Input/tpaw2_x.files tests/tutorial/Input/tpaw2_1.in %}
 
-ABINIT computes the _total energy_ of ferromagnetic FCC Nickel for several values of [[ecut]].  
+ABINIT computes the _total energy_ of ferromagnetic FCC Nickel for several values of [[ecut]].
 At the end of output file, you get this:
-  
+
       ecut1     8.00000000E+00 Hartree
       ecut2     1.00000000E+01 Hartree
       ecut3     1.20000000E+01 Hartree
@@ -593,25 +593,25 @@ At the end of output file, you get this:
     etotal6    -3.9626889070E+01
     etotal7    -3.9628094989E+01
     etotal8    -3.9628458879E+01
-  
-`etotal` convergence (at 1 mHartree) is achieve for 18<=$e_{cut}$<=20 Hartree  
+
+`etotal` convergence (at 1 mHartree) is achieve for 18<=$e_{cut}$<=20 Hartree
 `etotal` convergence (at 0,1 mHartree) is achieve for $e_{cut}$>22 Hartree
 
 This is not a good result for a PAW dataset; let's try to optimize it.
 
-* 1st possibility: use `vanderbilt` projectors instead of `bloechl` ones.  
+* 1st possibility: use `vanderbilt` projectors instead of `bloechl` ones.
   Vanderbilt's projectors generally are more localized in reciprocal space than
-  Bloechl's ones .  
+  Bloechl's ones .
   Keyword `bloechl` has to be replaced by `vanderbilt` in the `ATOMPAW` input file
   and $r_c$ values have to be added at the end of the file (one for each PS partial-wave).
   See this input file: *\$ABI_HOME/doc/tutorial/paw2_assets/Ni.atompaw.input.vanderbilt*.
 
-* 2nd possibility: use `RRKJ` pseudization scheme for projectors.  
+* 2nd possibility: use `RRKJ` pseudization scheme for projectors.
   Use this input file for `ATOMPAW`: *\$ABI_HOME/doc/tutorial/paw2_assets/Ni.atompaw.input2*.
   As you can see `bloechl` has been changed by `custom rrkj`
   and 6 $r_c$ values have been added at the end of the file, each one
   corresponding to the matching radius of one PS partial-wave.
-  Repeat the entire procedure (`ATOMPAW` \+ `ABINIT`)... and get a new ABINIT output file.  
+  Repeat the entire procedure (`ATOMPAW` \+ `ABINIT`)... and get a new ABINIT output file.
   _Note: You have check again at log derivatives._
 
 {% dialog tutorial/paw2_assets/Ni.atompaw.input2 %}
@@ -633,15 +633,15 @@ This is not a good result for a PAW dataset; let's try to optimize it.
     etotal7    -3.9629045275E+01
     etotal8    -3.9629064079E+01
 
-`etotal` convergence (at 1 mHartree) is achieve for 12 <= $e_{cut}$ <= 14 Hartree  
+`etotal` convergence (at 1 mHartree) is achieve for 12 <= $e_{cut}$ <= 14 Hartree
 `etotal` convergence (at 0,1 mHartree) is achieve for 16 <= $e_{cut}$ <= 18 Hartree
 
 This is a reasonable result for a PAW dataset!
 
-* 3rd possibility: use _enhanced polynomial_ pseudization scheme for projectors.  
+* 3rd possibility: use _enhanced polynomial_ pseudization scheme for projectors.
   Edit *\$ABI_HOME/doc/tutorial/paw2_assets/Ni.atompaw.input2* and replace `custom rrkj`
   by `custom polynom2 7 10`.
-  Repeat the entire procedure (`ATOMPAW` \+ `ABINIT`)... and look at the `ecut` convergence.  
+  Repeat the entire procedure (`ATOMPAW` \+ `ABINIT`)... and look at the `ecut` convergence.
 
 ### Optional_exercise
 
@@ -684,8 +684,8 @@ Results are below:
 
 **Summary of convergence results**
 
-![ecut convergence](paw2_assets/ecut.jpg)  
-  
+![ecut convergence](paw2_assets/ecut.jpg)
+
 !!! Final_remarks
 
     * The localization of projectors in reciprocal space can (generally) be predicted by a look at `tprod.i` files.
@@ -718,12 +718,12 @@ Run ABINIT (this may take a while...).
 ABINIT computes the converged ground state of ferromagnetic FCC Nickel for several volumes around equilibrium.
 Plot the `etotal` vs `acell` curve:
 
-![etotal vs acell](paw2_assets/acell-etotal.jpg)  
+![etotal vs acell](paw2_assets/acell-etotal.jpg)
 
 From this graph and output file, you can extract some physical quantities:
 
-    Equilibrium cell parameter:     a0 = 3.523 angstrom  
-    Bulk modulus:                    B = 199 GPa  
+    Equilibrium cell parameter:     a0 = 3.523 angstrom
+    Bulk modulus:                    B = 199 GPa
     Magnetic moment at equilibrium: mu = 0.60
 
 Compare these results with published results:
@@ -731,31 +731,31 @@ Compare these results with published results:
 * all-electron GGA-FLAPW from [[cite:Kresse1999]]:
 
 ````
-    a0 = 3.52 angstrom  
-     B = 200 GPa  
+    a0 = 3.52 angstrom
+     B = 200 GPa
     mu = 0.60
 ````
 
 * GGA-PAW with VASP code from [[cite:Kresse1999]]:
 
 ````
-    a0 = 3.52 angstrom  
-     B = 194 GPa  
+    a0 = 3.52 angstrom
+     B = 194 GPa
     mu = 0.61
 ````
 
 * Experimental results from from [[cite:Dewaele2008]]:
 
 ````
-    a0 = 3.52 angstrom  
+    a0 = 3.52 angstrom
      B = 183 GPa
 ````
 
 You should always compare results with all-electron ones (or other PAW computations),
 not with experimental ones
 
-**Additional remark**:  
-It can be useful to test the sensitivity of results to some `ATOMPAW` input parameters 
+**Additional remark**:
+It can be useful to test the sensitivity of results to some `ATOMPAW` input parameters
 (see [user's guide](paw2_assets/atompaw-usersguide.pdf) for details on keywords):
 
   * The analytical form and the cut-off radius $r_{shape}$ of the shape function used in
@@ -797,7 +797,7 @@ depends on the "locality" of these radial functions in reciprocal space.
 In [[cite:KingSmith1991|this paper]] a method to enforce the locality (in reciprocal space)
 of projectors $\tprj_i$ is presented; the projectors expressed in reciprocal space $\tprj_i(g)$
 are modified according to the following scheme:
-The reciprocal space is divided in 3 regions:  
+The reciprocal space is divided in 3 regions:
 
 * If $g < g_{max}$, $\tprj_i$(g) is unchanged
 
@@ -809,10 +809,10 @@ The reciprocal space is divided in 3 regions:
 ![RSO](paw2_assets/RSO.png)
 
 The above transformation of $\tprj_i(g)$ is only possible if $\tprj_i(r)$ is defined outside
-the spherical augmentation region up to a radius $R_0$, with $R_0 > r_c$.  
+the spherical augmentation region up to a radius $R_0$, with $R_0 > r_c$.
 In practice we have to:
 
-1. Impose an error $W$ ($W$ is the maximum error admitted on total energy)  
+1. Impose an error $W$ ($W$ is the maximum error admitted on total energy)
 2. Adjust $g_{max}$ according to $E_{cut}$ ($g_{max} <= E_{cut}$)
 3. Choose $\gamma$ so that $2 g_{max} < \gamma < 3 g_{max}$
 

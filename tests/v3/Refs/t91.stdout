@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of MRGSCR 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of MRGSCR 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  MRGSCR comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 19h44 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h27 )
   
 >>>  Enter the number of files to merge: 
 >>>  Enter the prefix for the final output file: 
@@ -125,8 +125,8 @@
         -------------------                         ------------
 
   calculation expects a polariz         |  input file contains a polariz
-. ABINIT  code version 8.0.5            |  ABINIT  code version 8.0.5
-. date 20160509 bantot   20 natom    2  |  date 20160509 bantot   20 natom    2
+. ABINIT  code version 8.11.1           |  ABINIT  code version 8.11.1
+. date 20191125 bantot   20 natom    2  |  date 20191125 bantot   20 natom    2
   nkpt   2 nsym 48 ngfft  16,  16,  16  |  nkpt   2 nsym 48 ngfft  16,  16,  16
   ntypat  1 ecut_eff   5.0727770        |  ntypat  1 ecut_eff   5.0727770
   usepaw  0                             |  usepaw  0
@@ -274,8 +274,8 @@
         -------------------                         ------------
 
   calculation expects a polariz         |  input file contains a polariz
-. ABINIT  code version 8.0.5            |  ABINIT  code version 8.0.5
-. date 20160509 bantot   20 natom    2  |  date 20160509 bantot   20 natom    2
+. ABINIT  code version 8.11.1           |  ABINIT  code version 8.11.1
+. date 20191125 bantot   20 natom    2  |  date 20191125 bantot   20 natom    2
   nkpt   2 nsym 48 ngfft  16,  16,  16  |  nkpt   2 nsym 48 ngfft  16,  16,  16
   ntypat  1 ecut_eff   5.0727770        |  ntypat  1 ecut_eff   5.0727770
   usepaw  0                             |  usepaw  0

@@ -9,6 +9,7 @@ gwpara      2
 fftgw       11  # Use the coarsest FFT mesh for oscillator (compatible with symmetries)
 
 use_yaml    1   # enable YAML document output for tests
+symsigma    0
 
 # Parameters for the calculation of the WFK file
 nband1      30         # Number of (occ and empty) bands to be computed in the GS part.
@@ -152,7 +153,7 @@ bdgw
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t02.out, use_yaml = yes, tolnlines = 12, tolabs = 6.0e-3, tolrel = 6.0e-2, fld_options =  -medium
+#%%   t02.out, use_yaml = no, tolnlines = 12, tolabs = 6.0e-3, tolrel = 6.0e-2, fld_options =  -medium
 #%% psp_files = 14si.pspnc
 #%% [paral_info]
 #%% max_nprocs = 16

@@ -1,8 +1,8 @@
 
-.Version 8.1.4 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 8.11.12 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 16 Aug 2016.
-- ( at 19h44 )
+.Starting date : Mon 25 Nov 2019.
+- ( at 08h26 )
   
 - input  file    -> t47.in
 - output file    -> t47.out
@@ -228,8 +228,8 @@ P           mkmem           1
          ecut(hartree)=     15.000   => boxcut(ratio)=   2.06487
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/gonze_develop/tests/Psps_for_tests/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT_GIT/abiref_gnu_5.3_openmpi/gonze_develop/tests/Psps_for_tests/26fe.pspnc
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/26fe.pspnc
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -240,7 +240,7 @@ P           mkmem           1
     2  18.664  23.972    1   2.2918558        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.56404770202776    2.06158206779471    6.88331421535388   rchrg,fchrg,qchrg
- pspatm : epsatm=   62.03296659
+  pspatm : epsatm=   62.03296659
          --- l  ekb(1:nproj) -->
              1    1.561134
              2   -8.115829
@@ -272,7 +272,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
     1   2.00000        5.657339      0.729326    0.772868    0.027863
     2   2.00000        6.181103      0.854425   -0.467197   -0.238386
@@ -283,7 +283,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.4839E-03; max=  8.5734E-03
+ Mean square residual over all n,k,spin=   24.839E-04; max=  85.734E-04
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.374000000000      0.000000000000      0.000000000000
@@ -296,13 +296,13 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
     2      1.97912276012660     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.24529374342609    -0.00468069375481     0.00937401515271
-    2      0.24529374342609     0.00468069375481    -0.00937401515271
+    1     -0.24529374342608    -0.00468069375482     0.00937401515271
+    2      0.24529374342608     0.00468069375482    -0.00937401515271
  frms,max,avg= 1.4174955E-01 2.4529374E-01   4.590E-03  7.773E-03  1.413E-03 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1    -12.61351037511391    -0.24069093004343     0.48203119954754
-    2     12.61351037511391     0.24069093004343    -0.48203119954754
+    1    -12.61351037511340    -0.24069093004357     0.48203119954761
+    2     12.61351037511340     0.24069093004357    -0.48203119954761
  frms,max,avg= 7.2890541E+00 1.2613510E+01   2.360E-01  3.997E-01  7.264E-02 e/A
  length scales= 10.000000000000  6.000000000000  6.000000000000 bohr
               =  5.291772085900  3.175063251540  3.175063251540 angstroms
@@ -327,21 +327,23 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  4.78553240833059E+01
+    Kinetic energy  =  4.78553240833060E+01
     Hartree energy  =  1.26552778568443E+01
-    XC energy       = -2.05619286889601E+01
+    XC energy       = -2.05619286889600E+01
     Ewald energy    = -2.94719359147418E+01
     PspCore energy  =  5.51404147463563E+00
     Loc. psp. energy= -1.01228949405730E+01
     NL   psp  energy= -5.37388172817934E+01
     >>>>> Internal E= -4.78709334112824E+01
 
-    -kT*entropy     = -2.26244375249945E-11
+    -kT*entropy     = -2.26244375248252E-11
     >>>>>>>>> Etotal= -4.78709334113050E+01
 
  Other information on the energy :
     Total energy(eV)= -1.30263434479152E+03 ; Band energy (Ha)=  -4.4033650433E+00
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.65320794E-02  sigma(3 2)= -1.26341629E-04
@@ -393,7 +395,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
     1   2.00000        6.453714      0.773118    0.491825   -0.141167
     2   2.00000        1.976482      0.579035   -0.124136   -0.069965
@@ -404,7 +406,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.7512E-03; max=  2.1582E-02
+ Mean square residual over all n,k,spin=   27.512E-04; max=  21.582E-03
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.374000000000      0.000000000000      0.000000000000
@@ -422,8 +424,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
  frms,max,avg= 1.1230809E-01 1.9294343E-01   3.439E-02  4.254E-03 -5.106E-03 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -9.92154925414975     0.87890679492153    -0.91988887960883
-    2      9.92154925414975    -0.87890679492153     0.91988887960883
+    1     -9.92154925414987     0.87890679492154    -0.91988887960879
+    2      9.92154925414987    -0.87890679492154     0.91988887960879
  frms,max,avg= 5.7751136E+00 9.9215493E+00   1.768E+00  2.187E-01 -2.626E-01 e/A
  length scales= 10.000000000000  6.000000000000  6.000000000000 bohr
               =  5.291772085900  3.175063251540  3.175063251540 angstroms
@@ -445,17 +447,19 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  3.11325334940520E+01
-    Hartree energy  =  7.89046101935506E+00
-    XC energy       = -1.82955303403318E+01
+    Hartree energy  =  7.89046101935505E+00
+    XC energy       = -1.82955303403317E+01
     Ewald energy    = -2.94719359147418E+01
     PspCore energy  =  5.51404147463563E+00
-    Loc. psp. energy= -6.81362263841105E+00
+    Loc. psp. energy= -6.81362263841103E+00
     NL   psp  energy= -3.33043556608439E+01
     >>>>>>>>> Etotal= -4.33484085662858E+01
 
  Other information on the energy :
     Total energy(eV)= -1.17957018521732E+03 ; Band energy (Ha)=  -1.4983233486E+00
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.09223709E-02  sigma(3 2)=  2.30841817E-05
@@ -507,7 +511,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
     1   2.00000        6.962862     -0.144969    0.502304   -0.078719
     2   2.00000        1.601113      0.308860    0.008385   -0.088680
@@ -518,7 +522,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.9955E-03; max=  2.4267E-02
+ Mean square residual over all n,k,spin=   29.955E-04; max=  24.267E-03
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.374000000000      0.000000000000      0.000000000000
@@ -531,13 +535,13 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
     2      1.97912276012660     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.27044656651951    -0.00824757792317    -0.00385185348777
-    2      0.27044656651951     0.00824757792317     0.00385185348777
+    1     -0.27044656651953    -0.00824757792317    -0.00385185348777
+    2      0.27044656651953     0.00824757792317     0.00385185348777
  frms,max,avg= 1.5623082E-01 2.7044657E-01   5.039E-02 -6.865E-03 -6.098E-03 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1    -13.90692043368663    -0.42410747314788    -0.19807025345542
-    2     13.90692043368663     0.42410747314788     0.19807025345542
+    1    -13.90692043368752    -0.42410747314786    -0.19807025345529
+    2     13.90692043368752     0.42410747314786     0.19807025345529
  frms,max,avg= 8.0337110E+00 1.3906920E+01   2.591E+00 -3.530E-01 -3.136E-01 e/A
  length scales= 10.000000000000  6.000000000000  6.000000000000 bohr
               =  5.291772085900  3.175063251540  3.175063251540 angstroms
@@ -562,21 +566,23 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  3.18483012911788E+01
-    Hartree energy  =  9.46861403358291E+00
+    Kinetic energy  =  3.18483012911791E+01
+    Hartree energy  =  9.46861403358329E+00
     XC energy       = -1.84183832522155E+01
     Ewald energy    = -2.94719359147418E+01
     PspCore energy  =  5.51404147463563E+00
-    Loc. psp. energy= -6.82601202986302E+00
-    NL   psp  energy= -3.41533032395439E+01
-    >>>>> Internal E= -4.20386776369668E+01
+    Loc. psp. energy= -6.82601202986305E+00
+    NL   psp  energy= -3.41533032395442E+01
+    >>>>> Internal E= -4.20386776369666E+01
 
-    -kT*entropy     = -2.67908931513473E-05
-    >>>>>>>>> Etotal= -4.20387044278600E+01
+    -kT*entropy     = -2.67908931513466E-05
+    >>>>>>>>> Etotal= -4.20387044278597E+01
 
  Other information on the energy :
-    Total energy(eV)= -1.14393132316358E+03 ; Band energy (Ha)=  -1.4515868408E+00
+    Total energy(eV)= -1.14393132316357E+03 ; Band energy (Ha)=  -1.4515868408E+00
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.28078375E-02  sigma(3 2)=  2.39477831E-05
@@ -628,7 +634,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
     1   2.00000        6.402236      0.489722    0.533411   -0.618942
     2   2.00000        2.014023      0.513349   -0.168608   -0.256297
@@ -639,12 +645,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.7626E-03; max=  2.0420E-02
+ Mean square residual over all n,k,spin=   27.626E-04; max=  20.420E-03
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.374000000000      0.000000000000      0.000000000000
  rms dE/dt=  8.9255E-01; max dE/dt=  1.1828E+00; dE/dt below (all hartree)
-    1       1.182761346062     -0.105995437879      0.143156934833
+    1       1.182761346063     -0.105995437879      0.143156934833
     2      -1.824433006303      0.013004591802     -0.143230045658
 
  cartesian coordinates (angstrom) at end:
@@ -652,13 +658,13 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
     2      1.97912276012660     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.15035971761826     0.00991666914007    -0.02386558170761
-    2      0.15035971761826    -0.00991666914007     0.02386558170761
+    1     -0.15035971761827     0.00991666914007    -0.02386558170761
+    2      0.15035971761827    -0.00991666914007     0.02386558170761
  frms,max,avg= 8.8083201E-02 1.5035972E-01   3.208E-02  7.749E-03  6.093E-06 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -7.73180690093109     0.50993558717717    -1.22721745068812
-    2      7.73180690093109    -0.50993558717717     1.22721745068812
+    1     -7.73180690093152     0.50993558717722    -1.22721745068797
+    2      7.73180690093152    -0.50993558717722     1.22721745068797
  frms,max,avg= 4.5294199E+00 7.7318069E+00   1.650E+00  3.985E-01  3.133E-04 e/A
  length scales= 10.000000000000  6.000000000000  6.000000000000 bohr
               =  5.291772085900  3.175063251540  3.175063251540 angstroms
@@ -684,12 +690,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
  Components of total free energy (in Hartree) :
 
     Kinetic energy  =  3.10125261228776E+01
-    Hartree energy  =  7.78103250067199E+00
+    Hartree energy  =  7.78103250067202E+00
     XC energy       = -1.82781152281544E+01
     Ewald energy    = -2.94719359147418E+01
     PspCore energy  =  5.51404147463563E+00
-    Loc. psp. energy= -6.88583998545292E+00
-    NL   psp  energy= -3.31570234947949E+01
+    Loc. psp. energy= -6.88583998545291E+00
+    NL   psp  energy= -3.31570234947950E+01
     >>>>> Internal E= -4.34853145249588E+01
 
     -kT*entropy     = -3.02104752318458E-18
@@ -698,6 +704,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
  Other information on the energy :
     Total energy(eV)= -1.18329558581149E+03 ; Band energy (Ha)=  -1.4752292931E+00
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.08076535E-02  sigma(3 2)= -1.43519864E-04
@@ -749,7 +757,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
     1   2.00000        7.613757     -0.003127    0.099942    0.077711
     2   2.00000        1.236929      0.048309    0.002504   -0.021794
@@ -760,7 +768,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.0861E-03; max=  2.0292E-02
+ Mean square residual over all n,k,spin=   30.861E-04; max=  20.292E-03
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.374000000000      0.000000000000      0.000000000000
@@ -773,13 +781,13 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
     2      1.97912276012660     0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.36819786182190     0.01698617067487     0.00502782411154
-    2      0.36819786182190    -0.01698617067487    -0.00502782411154
+    1     -0.36819786182191     0.01698617067487     0.00502782411154
+    2      0.36819786182191    -0.01698617067487    -0.00502782411154
  frms,max,avg= 2.1282503E-01 3.6819786E-01   5.734E-02  9.353E-03 -1.601E-02 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1    -18.93349371784771     0.87346394183731     0.25854108918305
-    2     18.93349371784771    -0.87346394183731    -0.25854108918305
+    1    -18.93349371784829     0.87346394183714     0.25854108918297
+    2     18.93349371784829    -0.87346394183714    -0.25854108918297
  frms,max,avg= 1.0943902E+01 1.8933494E+01   2.949E+00  4.809E-01 -8.234E-01 e/A
  length scales= 10.000000000000  6.000000000000  6.000000000000 bohr
               =  5.291772085900  3.175063251540  3.175063251540 angstroms
@@ -809,16 +817,18 @@ _setup2: Arith. and geom. avg. npw (full set) are    1001.000    1001.000
     XC energy       = -1.86770289933682E+01
     Ewald energy    = -2.94719359147418E+01
     PspCore energy  =  5.51404147463563E+00
-    Loc. psp. energy= -7.09682986514490E+00
+    Loc. psp. energy= -7.09682986514489E+00
     NL   psp  energy= -3.57943247186652E+01
-    >>>>> Internal E= -4.05036865996306E+01
+    >>>>> Internal E= -4.05036865996305E+01
 
     -kT*entropy     = -3.02104752318458E-18
-    >>>>>>>>> Etotal= -4.05036865996306E+01
+    >>>>>>>>> Etotal= -4.05036865996305E+01
 
  Other information on the energy :
-    Total energy(eV)= -1.10216136380769E+03 ; Band energy (Ha)=  -1.7694023590E+00
+    Total energy(eV)= -1.10216136380768E+03 ; Band energy (Ha)=  -1.7694023590E+00
 --------------------------------------------------------------------------------
+
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.48578857E-02  sigma(3 2)=  1.20979750E-04
@@ -970,48 +980,52 @@ P           mkmem           1
 - M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xue, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
 - is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - [3] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
 - L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
 - The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
 - Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
 - the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
+- [4] First-principles computation of material properties: the ABINIT software project. 
 - X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
 - M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
 - Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- Comment: the original paper describing the ABINIT project.
+- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
-- Proc.   0 individual time (sec): cpu=         10.5  wall=         10.6
+- Proc.   0 individual time (sec): cpu=         11.7  wall=         13.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered   5 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.5  wall=         10.6
+.Delivered   5 WARNINGs and  15 COMMENTs to log file.
++Overall time at end (sec) : cpu=         11.7  wall=         13.9

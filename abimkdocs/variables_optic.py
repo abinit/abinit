@@ -62,9 +62,9 @@ Variable(
     defaultval="1.d-3 Ha",
     mnemonics="Delta OMEGA",
     text=r"""
-This parameter species the step size $\Delta\omega$ for the grid over which the
+This parameter specifies the step size $\Delta\omega$ for the grid over which the
 optic utility computes the susceptibilities. The maximum energy is set by the
-companion paramter [[optic:maxomega]]. The susceptibilities are thus computed at
+companion parameter [[optic:maxomega]]. The susceptibilities are thus computed at
 [[optic:maxomega]]/[[optic:domega]] energy points (zero excluded). In order
 to capture more features, decrease the step size to get a finer energy
 grid. In order to go to higher frequency, increase the maximum.
@@ -98,9 +98,9 @@ Variable(
     defaultval="1 Ha",
     mnemonics="MAXimum value of OMEGA",
     text=r"""
-This parameter species the maximum energy for the grid over which the
+This parameter specifies the maximum energy for the grid over which the
 optic utility computes the susceptibilities. The grid step size is set by the
-companion paramter [[optic:domega]]. The susceptibilities are thus computed at
+companion parameter [[optic:domega]]. The susceptibilities are thus computed at
 [[optic:maxomega]]/[[optic:domega]] energy points (zero excluded). In order
 to capture more features, decrease the step size to get a finer energy
 grid. In order to go to higher frequency, increase the maximum.
@@ -134,10 +134,10 @@ Variable(
     defaultval=0,
     mnemonics="NUMber of LINear COMPonents",
     text=r"""
-This parameter species how many components (out of 9 possible)
+This parameter specifies how many components (out of 9 possible)
 of the linear optical dielectric tensor to calculate.
 Some of these may be either equal to each other, or zero, depending upon the
-symmetry of the material (for detail see [[cite:Draxl2006]]).
+symmetry of the material (for details see [[cite:Draxl2006]]).
 The directions of the requested components are specified by the parameter
 [[optic:lin_comp]].
 """,
@@ -152,12 +152,43 @@ Variable(
     defaultval=0,
     mnemonics="NUMber of NON-LINear COMPonents",
     text=r"""
-This parameter species how many components (out of 27 possible)
-of the second-order nonlinear optical dielectric tensor to calculate.
+This parameter specifies how many components (out of 27 possible)
+of the second-order nonlinear optical tensor to calculate.
 Some of these may be either equal to each other, or zero, depending upon the
-symmetry of the material (for detail see [[cite:Draxl2006]]).
-The directions of the requested components are specified by the parameter
-[[optic:nonlin_comp]].
+symmetry of the material. The directions of the requested components are specified by the parameter [[optic:nonlin_comp]].
+""",
+),
+
+Variable(
+    abivarname="num_linel_comp@optic",
+    varset="optic",
+    vartype="integer",
+    topics=['Optic_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="NUMber of LINear ELetro-optic  COMPonents",
+    text=r"""
+This parameter specifies how many components (out of 27 possible)
+of the linear electro-optical susceptibility to calculate.
+Some of these may be either equal to each other, or zero, depending upon the
+symmetry of the material. The directions of the requested components are specified by the parameter [[optic:linel_comp]].
+""",
+),
+
+Variable(
+    abivarname="linel_comp@optic",
+    varset="optic",
+    vartype="integer",
+    topics=['Optic_basic'],
+    dimensions=[['num_linel_comp']],
+    defaultval=0,
+    mnemonics="LINear ELectro-optic COMPonents",
+    text=r"""
+This parameter specifies the directions of the [[optic:num_linel_comp]] requested components
+of the linear electro-optical susceptibility. The components are specified in
+cartesian coordinates, where 1, 2, and 3 represent x, y, and z respectively. For
+example, 111 represents the xxx component, and 321 represents zyx. There should be
+[[optic:num_linel_comp]] entries.
 """,
 ),
 
@@ -178,7 +209,7 @@ comparison with experiments one needs to correct for this.
 The scissors shift is normally chosen to be the difference between the experimental and
 theoretical band-gap, and simply shifts the conduction bands. Alternatively, one may
 determine the self energy using the [[tutorial:gw1|GW approach]], in which case
-the opening of the gap due to the GW correction can be used as scissor shift.
+the opening of the gap due to the GW correction can be used as the scissor shift.
 """,
 ),
 
@@ -192,7 +223,7 @@ Variable(
     mnemonics="TOLERANCE",
     text=r"""
 This parameter sets a scale for discarding small energy denominators.
-When energy denominators are smaller than **tolerance** , the term is discarded from the sum.
+When energy denominators are smaller than **tolerance**, the term is discarded from the sum.
 See also [[optic:broadening]].
 """,
 ),
@@ -206,7 +237,7 @@ Variable(
     mnemonics="WaveFunction K FILE",
     commentdefault="no default",
     text=r"""
-This parameter species the name of the ground state wavefunction file, which
+This parameter specifies the name of the ground state wavefunction file, which
 should have been produced in a preparatory Abinit run. It should include both
 the valence and conduction states to be used in the optic calculation
 (see [[help:optic]]).

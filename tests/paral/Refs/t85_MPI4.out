@@ -2,7 +2,7 @@
 .Version 8.9.4 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu6.3 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -306,7 +306,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     202.750     202.738
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
     1   2.53946       16.644827      0.000000   -0.000000    0.000000
  ---------------------------------------------------------------------
@@ -1047,7 +1047,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      50.750      50.748
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note:      this is a rough approximation of local magnetic moments
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
  Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
     1   2.53946       16.456544      0.000000   -0.000000    0.000000
  ---------------------------------------------------------------------

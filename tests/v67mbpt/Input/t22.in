@@ -2,6 +2,7 @@
 # Input file for GW calculation
 
 ndtset 10  # Total number of datasets
+symsigma 0
 #jdtset 1 2 3 4 5 6 7 8 9 10  # Specification of datasets
 
 # List of datasets

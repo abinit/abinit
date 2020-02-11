@@ -1051,7 +1051,7 @@ Variable(
 This number define the series of grids that will be used for the estimation of
 the phonon DOS. The coarsest will be tried first, then the next, ... then the
 one described by [[anaddb:ng2qpt]]. The intermediate grids are defined for
-igrid=1... **ngrids** , by the numbers ngqpt_igrid(ii)=(ng2qpt(ii)*igrid)/**ngrids**
+igrid=1... **ngrids**, by the numbers ngqpt_igrid(ii)=(ng2qpt(ii)*igrid)/**ngrids**
 """,
 ),
 
@@ -1565,8 +1565,8 @@ b) Case [[anaddb:nqshft]]=2 The two q1shft vectors must form a BCC lattice. For
 example, use 0.0 0.0 0.0 and 0.5 0.5 0.5
 
 c) Case [[anaddb:nqshft]]=4 The four q1shft vectors must form a FCC lattice. For
-example, use 0.0 0.0 0.0 , 0.0 0.5 0.5 , 0.5 0.0 0.5 , 0.5 0.5 0.0 or 0.5 0.5 0.5 ,
-0.0 0.0 0.5 , 0.0 0.5 0.0 , 0.5 0.0 0.0 (the latter is referred to as shifted)
+example, use 0.0 0.0 0.0, 0.0 0.5 0.5, 0.5 0.0 0.5, 0.5 0.5 0.0 or 0.5 0.5 0.5,
+0.0 0.0 0.5, 0.0 0.5 0.0, 0.5 0.0 0.0 (the latter is referred to as shifted)
 
 Further comments: by using this technique, it is possible to increase smoothly
 the number of q-points, at least less abruptly than relying on series of grids
@@ -2054,5 +2054,120 @@ The default values will not work.
 """,
 ),
 
-]
+# ABINIT 9
+Variable(
+    abivarname="ddb_path@anaddb",
+    varset="anaddb",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="DDB PATH",
+    text=r"""
+This variable specifies the input DDB file when anaddb is invoked with the new syntax:
 
+    anaddb t01.in > log 2> err
+
+instead of the legacy mode based on the files file. Example:
+
+    ddb_path = "out_DDB"
+
+!!! important
+
+    Shell variables e.g. $HOME or tilde syntax `~` for user home are not supported.
+""",
+),
+
+Variable(
+    abivarname="output@anaddb",
+    varset="anaddb",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="OUTPUT file",
+    text=r"""
+This variable specifies the name of the output file when anaddb is invoked with the new syntax:
+
+    anaddb t01.in > log 2> err
+
+instead of the legacy mode based on the files file. Example:
+
+    output = "t01.out"
+""",
+),
+
+#Variable(
+#    abivarname="md_output@anaddb",
+#    varset="anaddb",
+#    vartype="string",
+#    topics=['Control_useful'],
+#    dimensions="scalar",
+#    defaultval="",
+#    mnemonics="Molecular Dynamics OUTPUT",
+#    text=r"""
+#This variable specifies the name of the MD output file when anaddb is invoked with the new syntax:
+#
+#    anaddb t01.in > log 2> err
+#
+#instead of the legacy mode based on the files file.
+#Note This variable is optional and used ...
+#""",
+#),
+
+Variable(
+    abivarname="gkk_path@anaddb",
+    varset="anaddb",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="GKK PATH",
+    text=r"""
+This variable specifies the name of the GKK file when anaddb is invoked with the new syntax:
+
+    anaddb t01.in > log 2> err
+
+instead of the legacy mode based on the files file.
+This variable is optional and used for performing EPH calculation with [[elphflag@anaddb]].
+""",
+),
+
+Variable(
+    abivarname="eph_prefix@anaddb",
+    varset="anaddb",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="EPH PREFIX",
+    text=r"""
+This variable specifies the prefix for the elphon output files when anaddb is invoked with the new syntax:
+
+    anaddb t01.in > log 2> err
+
+instead of the legacy mode based on the files file.
+This variable is optional and used for performing EPH calculation with [[elphflag@anaddb]].
+""",
+),
+
+Variable(
+    abivarname="ddk_path@anaddb",
+    varset="anaddb",
+    vartype="string",
+    topics=['Control_useful'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="DDK PATH",
+    text=r"""
+This variable specifies the name the input file with the matrix elements of the velocity operator
+when anaddb is invoked with the new syntax:
+
+    anaddb t01.in > log 2> err
+
+instead of the legacy mode based on the files file.
+This variable is optional and used for performing transport calculations with [[elphflag@anaddb]].
+""",
+),
+
+]

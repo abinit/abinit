@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_anaddb_dataset
 !! NAME
 !!  m_anaddb_dataset
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
+!!  Copyright (C) 2014-2020 ABINIT group (XG,JCC,CL,MVeithen,XW,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,7 +30,7 @@ module m_anaddb_dataset
 
  use m_fstrings,  only : next_token, rmquotes, sjoin, inupper
  use m_symtk,     only : mati3det
- use m_parser,    only : intagm, chkvars_in_string
+ use m_parser,    only : intagm, chkvars_in_string, instrng
  use m_ddb,       only : DDB_QTOL
 
  implicit none
@@ -987,7 +986,6 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 
 !P
-
  anaddb_dtset%piezoflag=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'piezoflag',tread,'INT')
  if(tread==1) anaddb_dtset%piezoflag=intarr(1)
@@ -1538,8 +1536,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
    anaddb_dtset%qpath(:,:)=zero
    call intagm(dprarr,intarr,jdtset,marr,3*anaddb_dtset%nqpath,string(1:lenstr),'qpath',tread,'DPR')
    if(tread==1) then
-     anaddb_dtset%qpath(1:3,1:anaddb_dtset%nqpath)=&
-&     reshape(dprarr(1:3*anaddb_dtset%nqpath),(/3,anaddb_dtset%nqpath/))
+     anaddb_dtset%qpath(1:3,1:anaddb_dtset%nqpath)= reshape(dprarr(1:3*anaddb_dtset%nqpath),(/3,anaddb_dtset%nqpath/))
    else
      write(message,'(3a)')&
      'nqpath is non zero but qpath is absent ',ch10,&
@@ -1671,7 +1668,7 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 
 !check that q-grid refinement is a divisor of ngqpt in each direction
  if(any(anaddb_dtset%qrefine(1:3) > 1) .and. &
-&   any(abs(dmod(dble(anaddb_dtset%ngqpt(1:3))/dble(anaddb_dtset%qrefine(1:3)),one)) > tol10) ) then
+    any(abs(dmod(dble(anaddb_dtset%ngqpt(1:3))/dble(anaddb_dtset%qrefine(1:3)),one)) > tol10) ) then
    write(message, '(a,3i10,a,a,a,3i8,a,a)' )&
    'qrefine is',anaddb_dtset%qrefine(1:3),' The only allowed values',ch10,&
    'are integers which are divisors of the ngqpt grid', anaddb_dtset%ngqpt(1:3),ch10,&
@@ -1682,8 +1679,8 @@ subroutine invars9 (anaddb_dtset,lenstr,natom,string)
 !check that fermie and nelect are not both specified
  if(abs(anaddb_dtset%elph_fermie) > tol10 .and. abs(anaddb_dtset%ep_extrael) > tol10) then
    write(message, '(a,E10.2,a,E10.2,a,a,a)' )&
-&   'elph_fermie (',anaddb_dtset%elph_fermie,') and ep_extrael (',anaddb_dtset%ep_extrael, '), may not both be non 0',ch10,&
-&   'Action: remove one of the two in your input file.'
+    'elph_fermie (',anaddb_dtset%elph_fermie,') and ep_extrael (',anaddb_dtset%ep_extrael, '), may not both be non 0',ch10,&
+    'Action: remove one of the two in your input file.'
    MSG_ERROR(message)
  end if
 
@@ -1915,21 +1912,10 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
      write(nunit, '(a)') '    linewidth comes from which phonon mode !!!'
    end if
 
-   if (anaddb_dtset%prtbltztrp== 1) then
-     write(nunit, '(a)') ' Will output input files for BoltzTraP'
-   end if
-
-   if (anaddb_dtset%prtfsurf == 1) then
-     write(nunit, '(a)') ' Will output fermi surface in XCrysDen format'
-   end if
-
-   if (anaddb_dtset%prt_ifc == 1) then
-     write(nunit, '(a)') ' Will output real space IFC in AI2PS and TDEP format'
-   end if
-
-   if (anaddb_dtset%prtnest == 1) then
-     write(nunit, '(a)') ' Will output nesting factor'
-   end if
+   if (anaddb_dtset%prtbltztrp== 1) write(nunit, '(a)') ' Will output input files for BoltzTraP'
+   if (anaddb_dtset%prtfsurf == 1) write(nunit, '(a)') ' Will output fermi surface in XCrysDen format'
+   if (anaddb_dtset%prt_ifc == 1) write(nunit, '(a)') ' Will output real space IFC in AI2PS and TDEP format'
+   if (anaddb_dtset%prtnest == 1) write(nunit, '(a)') ' Will output nesting factor'
 
    if (anaddb_dtset%ifltransport == 1) then
      write(nunit, '(a)') ' Will perform transport calculation in elphon to get'
@@ -1969,7 +1955,7 @@ subroutine outvars_anaddb (anaddb_dtset,nunit)
    write(nunit,'(3x,a9)')'    qph1l'
    do iph1=1,anaddb_dtset%nph1l
      write(nunit,'(19x,3es16.8,2x,es11.3)') &
-&     (anaddb_dtset%qph1l(ii,iph1),ii=1,3),anaddb_dtset%qnrml1(iph1)
+       (anaddb_dtset%qph1l(ii,iph1),ii=1,3),anaddb_dtset%qnrml1(iph1)
    end do
  end if
 
@@ -2012,6 +1998,7 @@ end subroutine outvars_anaddb
 !! Initialize the code ppddb9: write heading and make the first i/os
 !!
 !! INPUTS
+!!  input_path: String with input file path. Empty string activates files file legacy mode.
 !!
 !! OUTPUT
 !! character(len=fnlen) filnam(7)=character strings giving file names
@@ -2035,36 +2022,89 @@ end subroutine outvars_anaddb
 !!
 !! SOURCE
 
-subroutine anaddb_init(filnam)
+subroutine anaddb_init(input_path, filnam)
 
 !Arguments -------------------------------
 !arrays
+ character(len=*),intent(in) :: input_path
  character(len=*),intent(out) :: filnam(7)
+
+!Local variables -------------------------
+!scalars
+ integer :: lenstr, marr, jdtset, tread
+ character(len=strlen) :: string
+!arrays
+ integer,allocatable :: intarr(:)
+ real(dp),allocatable :: dprarr(:)
 
 ! *********************************************************************
 
-!Read the file names
- write(std_out,*)' Give name for formatted input file: '
- read(std_in, '(a)' ) filnam(1)
- write(std_out,'(a,a)' )'-   ',trim(filnam(1))
- write(std_out,*)' Give name for formatted output file: '
- read(std_in, '(a)' ) filnam(2)
- write(std_out,'(a,a)' )'-   ',trim(filnam(2))
- write(std_out,*)' Give name for input derivative database: '
- read(std_in, '(a)' ) filnam(3)
- write(std_out,'(a,a)' )'-   ',trim(filnam(3))
- write(std_out,*)' Give name for output molecular dynamics: '
- read(std_in, '(a)' ) filnam(4)
- write(std_out,'(a,a)' )'-   ',trim(filnam(4))
- write(std_out,*)' Give name for input elphon matrix elements (GKK file): '
- read(std_in, '(a)' ) filnam(5)
- write(std_out,'(a,a)' )'-   ',trim(filnam(5))
- write(std_out,*)' Give root name for elphon output files: '
- read(std_in, '(a)' ) filnam(6)
- write(std_out,'(a,a)' )'-   ',trim(filnam(6))
- write(std_out,*)' Give name for file containing ddk filenames for elphon/transport: '
- read(std_in, '(a)' ) filnam(7)
- write(std_out,'(a,a)' )'-   ',trim(filnam(7))
+ if (len_trim(input_path) == 0) then
+   ! Legacy Files file mode.
+   write(std_out, "(2a)")"DeprecationWarning: ",ch10
+   write(std_out, "(a)") "     The files file has been deprecated in Abinit9 and will be removed in Abinit10."
+   write(std_out, "(2a)")"     Use the syntax `anaddb t01.abi` where t01.abi is an anaddb input with ddb_path.",ch10
+   write(std_out, "(3a)")'            ddb_path = "out_DDB"',ch10,ch10
+
+   write(std_out,*)' Give name for formatted input file: '
+   read(std_in, '(a)' ) filnam(1)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(1))
+   write(std_out,*)' Give name for formatted output file: '
+   read(std_in, '(a)' ) filnam(2)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(2))
+   write(std_out,*)' Give name for input derivative database: '
+   read(std_in, '(a)' ) filnam(3)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(3))
+   write(std_out,*)' Give name for output molecular dynamics: '
+   read(std_in, '(a)' ) filnam(4)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(4))
+   write(std_out,*)' Give name for input elphon matrix elements (GKK file): '
+   read(std_in, '(a)' ) filnam(5)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(5))
+   write(std_out,*)' Give root name for elphon output files: '
+   read(std_in, '(a)' ) filnam(6)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(6))
+   write(std_out,*)' Give name for file containing ddk filenames for elphon/transport: '
+   read(std_in, '(a)' ) filnam(7)
+   write(std_out,'(a,a)' )'-   ',trim(filnam(7))
+
+ else
+   ! Read input
+   call instrng(input_path, lenstr, 1, strlen, string)
+   ! To make case-insensitive, map characters to upper case.
+   call inupper(string(1:lenstr))
+
+   filnam = ""
+   filnam(1) = input_path
+   filnam(2) = "run.abo"
+
+   marr = 3
+   ABI_MALLOC(intarr, (marr))
+   ABI_MALLOC(dprarr, (marr))
+   jdtset = 0
+
+   ! Allow user to override default values
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "output_file", tread, 'KEY', key_value=filnam(2))
+   write(std_out, "(2a)")'- Name for formatted output file: ', trim(filnam(2))
+
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddb_path", tread, 'KEY', key_value=filnam(3))
+   ABI_CHECK(tread == 1, "ddb_path variable must be specified in the input file")
+   write(std_out, "(2a)")'- Input derivative database: ', trim(filnam(3))
+
+   ! Nobody knows the scope of this line in the files file.
+   !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "md_output", tread, 'KEY', key_value=filnam(4))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gkk_path", tread, 'KEY', key_value=filnam(5))
+   if (tread == 1) write(std_out, "(2a)")'- Name for input elphon matrix elements (GKK file): ', trim(filnam(5))
+
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "eph_prefix", tread, 'KEY', key_value=filnam(6))
+   if (tread == 1) write(std_out, "(2a)")"- Root name for elphon output files: ", trim(filnam(6))
+
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddk_path", tread, 'KEY', key_value=filnam(7))
+   if (tread == 1) write(std_out, "(2a)")"- File containing ddk filenames for elphon/transport: ", trim(filnam(7))
+
+   ABI_FREE(intarr)
+   ABI_FREE(dprarr)
+ end if
 
 end subroutine anaddb_init
 !!***
@@ -2161,13 +2201,13 @@ subroutine anaddb_chkvars(string)
  list_logicals=' '
 
 !String input variables
- list_strings=' gruns_ddbs'
+ list_strings=' gruns_ddbs ddb_path output_file gkk_path eph_prefix ddk_path' ! md_output
 !</ANADDB_VARS>
 
 !Extra token, also admitted:
 !<ANADDB_UNITS>
  list_vars=trim(list_vars)//' au Angstr Angstrom Angstroms Bohr Bohrs eV Ha'
- list_vars=trim(list_vars)//' Hartree Hartrees K Ry Rydberg Rydbergs T Tesla'
+ list_vars=trim(list_vars)//' Hartree Hartrees K nm Ry Rydberg Rydbergs T Tesla'
 !</ANADDB_UNITS>
 
 !<ANADDB_OPERATORS>

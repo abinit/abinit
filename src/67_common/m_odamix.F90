@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_odamix
 !! NAME
 !!  m_odamix
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -120,7 +119,6 @@ contains
 !!  rhog(2,nfft)=array for Fourier transform of electron density
 !!  rhor(nfft,nspden)=array for electron density in electrons/bohr**3
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
-!!  [taug(2,nfftf*dtset%usekden)]=array for Fourier transform of kinetic energy density
 !!  [taur(nfftf,nspden*dtset%usekden)]=array for kinetic energy density
 !!  ucvol = unit cell volume (Bohr**3)
 !!  usepaw= 0 for non paw calculation; =1 for paw calculation
@@ -190,7 +188,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
 &          paw_an,pawang,pawfgrtab,pawrad,pawrhoij,pawtab,&
 &          red_ptot,psps,rhog,rhor,rprimd,strsxc,ucvol,usepaw,&
 &          usexcnhat,vhartr,vpsp,vtrial,vxc,vxcavg,xccc3d,xred,&
-&          taug,taur,vxctau,add_tfw) ! optional arguments
+&          taur,vxctau,add_tfw) ! optional arguments
 
 !Arguments ------------------------------------
 !scalars
@@ -210,7 +208,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  logical :: add_tfw_
  real(dp),intent(in) :: gprimd(3,3)
  real(dp),intent(in) :: red_ptot(3),rprimd(3,3),vpsp(nfft),xred(3,dtset%natom)
- real(dp),intent(in),optional :: taug(2,nfft*dtset%usekden),taur(nfft,dtset%nspden*dtset%usekden)
+ real(dp),intent(in),optional :: taur(nfft,dtset%nspden*dtset%usekden)
  real(dp),intent(inout) :: kxc(nfft,nkxc),nhat(nfft,dtset%nspden*usepaw)
  real(dp),intent(inout) :: nvresid(nfft,dtset%nspden),rhog(2,nfft)
  real(dp),intent(inout) :: rhor(nfft,dtset%nspden),vhartr(nfft)
@@ -363,7 +361,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  optxc=1
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 & nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,strsxc,&
-& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
 !------Compute parts of total energy depending on potentials--------
 
@@ -603,7 +601,7 @@ subroutine odamix(deltae,dtset,elast,energies,etotal,&
  optxc=1;if (nkxc>0) optxc=2
  call rhotoxc(energies%e_xc,kxc,mpi_enreg,nfft,ngfft,&
 & nhat,usepaw,nhatgr,nhatgrdim,nkxc,nk3xc,nmxc,n3xccc,optxc,rhor,rprimd,strsxc,&
-& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taug=taug,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
+& usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr,vxctau=vxctau,add_tfw=add_tfw_)
 
  if (nhatgrdim>0)  then
    ABI_DEALLOCATE(nhatgr)

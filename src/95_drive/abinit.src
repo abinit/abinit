@@ -1,6 +1,6 @@
  # -*- Python -*-
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -32,6 +32,7 @@ sources = [
  "m_gwls_sternheimer.F90",
  "m_mover.F90",
  "m_mover_effpot.F90",
+ "m_multibinit_driver.F90",
  "m_nonlinear.F90",
  "m_precpred_1geo.F90",
  "m_respfn_driver.F90",

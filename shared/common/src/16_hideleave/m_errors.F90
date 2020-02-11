@@ -7,7 +7,7 @@
 !!  This module contains low-level procedures to check assertions and handle errors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG,YP,NCJ,MT)
+!! Copyright (C) 2008-2020 ABINIT group (MG,YP,NCJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -115,6 +115,7 @@ include "fexcp.h"
    module procedure unused_cplx_dpc
    module procedure unused_cplx_spc
    module procedure unused_logical
+   module procedure unused_logical1B
    module procedure unused_ch
  end interface unused_var
 
@@ -1158,6 +1159,41 @@ elemental subroutine unused_logical(var)
 end subroutine unused_logical
 !!***
 
+!!****f* m_errors/unused_logical1B
+!! NAME
+!!  unused_logical1B
+!!
+!! FUNCTION
+!!  Helper function used to silence compiler warnings due to unused variables.
+!!  Interfaced via the ABI_UNUSED macro.
+!!
+!! INPUTS
+!!  var= 1 Byte Scalar logical value
+!!
+!! OUTPUT
+!!  None
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!      signal
+!!
+!! SOURCE
+
+elemental subroutine unused_logical1B(var)
+
+!Arguments ------------------------------------
+ logical*1,intent(in) :: var
+
+!Local variables-------------------------------
+ logical :: dummy
+! *********************************************************************
+
+ dummy = var
+
+end subroutine unused_logical1B
+!!***
+
 !----------------------------------------------------------------------
 
 !!****f* m_errors/unused_ch
@@ -1459,14 +1495,15 @@ subroutine abinit_doctor(prefix, print_mem_report)
        '-   Remaining memory at the end of the calculation is ',memtot
    else
      ! This msg will make the test fail if the memory leak occurs on master (no dash in the first column)
-     write(msg,'(2a,2(a,i0),3a,f12.4,9a)') &
+     write(msg,'(2a,2(a,i0),3a,f12.4,1x,11a)') &
        'MEMORY CONSUMPTION REPORT:',ch10, &
        '   There were ',nalloc,' allocations and ',nfree,' deallocations',ch10, &
        '   Remaining memory at the end of the calculation: ',memtot * b2Mb, " (Mb)", ch10, &
        '   As a help for debugging, you might set call abimem_init(2) in the main program,', ch10, &
-       '   then use tests/Scripts/abimem.py to analyse the file abimem_rank[num].mocc that has been created.',ch10, &
-       '   Note that abimem files can easily be multiple GB in size so do not use this option normally!',ch10, &
-       '   Note also the command line option `abinit --abimem-level 2` '
+       '   or use the command line option `abinit --abimem-level 2`', ch10, &
+       '   then use tests/Scripts/abimem.py to analyse the file abimem_rank[num].mocc that has been created,',ch10, &
+       '   e.g. from tests/Scripts issue the command: ./abimem.py leaks ../<dir>/<subdir>/abimem_rank0.mocc .',ch10, &
+       '   Note that abimem files can easily be multiple GB in size so do not use this option normally!'
      ! And this will make the code call mpi_abort if the leak occurs on my_rank != master
      ierr = ierr + 1
      errmsg = strcat(errmsg, ch10, msg)
@@ -1567,14 +1604,14 @@ subroutine abi_abort(mode_paral,exit_status,print_config)
 
 ! **********************************************************************
 
- call wrtout(std_out,ch10//' abi_abort: decision taken to exit ...','PERS')
+ call wrtout(std_out, ch10//' abinit_abort: decision taken to exit. Check above messages for more info', 'PERS')
 
-! Caveat: Do not use MPI collective calls!
+ ! Caveat: Do not use MPI collective calls!
  if (mode_paral == "COLL") then
    call wrtout(std_out,"Why are you using COLL? Are you sure that ALL the processors are calling abi_abort?")
  end if
 
-!Dump configuration before exiting
+ ! Dump configuration before exiting
  print_config_=.False.; if (present(print_config)) print_config_=print_config
  if (print_config_) then
    call print_kinds()

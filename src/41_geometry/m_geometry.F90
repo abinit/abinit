@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_geometry
 !! NAME
 !!  m_geometry
@@ -7,7 +6,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA, DRH)
+!! Copyright (C) 2008-2020 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -61,7 +60,7 @@ MODULE m_geometry
  public :: bonds_lgth_angles  ! Write GEO file
  public :: randomcellpos      ! Creates unit cell with random atomic positions.
  public :: ioniondist         ! Compute ion-ion distances
- public :: dist2              ! Calculates the distance of v1 and v2 in a crystal by epeating the unit cell
+ public :: dist2              ! Calculates the distance of v1 and v2 in a crystal by repeating the unit cell
  public :: shellstruct        ! Calculates shell structure (multiplicities, radii)
  public :: remove_inversion   ! Remove the inversion symmetry and improper rotations
  public :: symredcart         ! Convert a symmetry operation from reduced coordinates (integers) to cart coords (reals)
@@ -70,7 +69,9 @@ MODULE m_geometry
  public :: strconv            ! Convert from symmetric storage mode in reduced coords to cart coords.
  public :: littlegroup_pert   ! Determines the set of symmetries that leaves a perturbation invariant.
  public :: irreducible_set_pert  ! Determines a set of perturbations that form a basis
-
+ public :: wedge_basis        ! compute rprimd x gprimd vectors needed for generalized cross product
+ public :: wedge_product      ! compute wedge product given wedge basis
+ 
  interface normv
   module procedure normv_rdp_vector
   module procedure normv_int_vector
@@ -431,6 +432,122 @@ subroutine acrossb(a,b,c)
  c(3) =  a(1)*b(2) - b(1)*a(2)
 
 end subroutine acrossb
+!!***
+
+!!****f* m_geometry/wedge_basis
+!! NAME
+!! wedge_basis
+!!
+!! FUNCTION
+!! Calculates the basis vectors a ^ a* for a in rprimd and
+!! a* in gprimd, needed for some generalized cross products
+!!
+!! INPUTS
+!!   rprimd(3,3) : real(dp) matrix
+!!   gprimd(3,3) : real(dp) matrix
+!!   normalize,optional : whether to normalize the output vectors
+!!
+!! OUTPUT
+!!   wedge(3,3,3) : 9 basis vectors of rprimd ^ gprimd
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine wedge_basis(gprimd,rprimd,wedge,normalize)
+
+
+  !Arguments ---------------------------------------------
+  ! scalars
+  logical,optional,intent(in) :: normalize
+!arrays
+ real(dp),intent(in) :: gprimd(3,3),rprimd(3,3)
+ real(dp),intent(out) :: wedge(3,3,3)
+
+ ! local
+ !scalars
+ integer :: igprimd, irprimd
+ real(dp) :: nfac
+ logical :: nvec
+
+! *********************************************************************
+
+ if(present(normalize)) then
+    nvec = normalize
+ else
+    nvec = .FALSE.
+ end if
+ 
+ do irprimd = 1, 3
+    do igprimd = 1, 3
+       wedge(1,irprimd,igprimd) = rprimd(2,irprimd)*gprimd(3,igprimd) - rprimd(3,irprimd)*gprimd(2,igprimd)
+       wedge(2,irprimd,igprimd) = rprimd(3,irprimd)*gprimd(1,igprimd) - rprimd(1,irprimd)*gprimd(3,igprimd)
+       wedge(3,irprimd,igprimd) = rprimd(1,irprimd)*gprimd(2,igprimd) - rprimd(2,irprimd)*gprimd(1,igprimd)
+    end do
+ end do
+
+ if (nvec) then
+    do irprimd = 1, 3
+       do igprimd = 1, 3
+          if(any(abs(wedge(1:3,irprimd,igprimd)).GT.tol8)) then
+             nfac = SQRT(DOT_PRODUCT(wedge(1:3,irprimd,igprimd),wedge(1:3,irprimd,igprimd)))
+             wedge(1:3,irprimd,igprimd) = wedge(1:3,irprimd,igprimd)/nfac
+          end if
+       end do
+    end do
+ end if
+
+end subroutine wedge_basis
+!!***
+
+!!****f* m_geometry/wedge_product
+!! NAME
+!! wedge_product
+!!
+!! FUNCTION
+!! Calculates the wedge product u^w, given the wedge product basis a^b
+!! typically u=(u1 a + u2 b + u3 c) and w = (w1 a* + w2 b* + w3 c*)
+!!
+!! INPUTS
+!!   u(3) :: real(dp) input vector
+!!   v(3) :: real(dp) input vector
+!!   wedgebasis(3,3,3) :: real(dp) input matrix
+!!
+!! OUTPUT
+!!   produv(3) :: real(dp) output vector
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine wedge_product(produv,u,v,wedgebasis)
+
+
+!Arguments ---------------------------------------------
+!arrays
+ real(dp),intent(in) :: u(3),v(3),wedgebasis(3,3,3)
+ real(dp),intent(out) :: produv(3)
+
+ ! local
+ !scalars
+ integer :: igprimd, ii, irprimd
+
+! *********************************************************************
+
+ produv(:) = zero
+ do irprimd = 1, 3
+    do igprimd = 1, 3
+       do ii = 1, 3
+          produv(ii) = produv(ii) + u(irprimd)*v(igprimd)*wedgebasis(ii,irprimd,igprimd)
+       end do
+    end do
+ end do
+
+end subroutine wedge_product
 !!***
 
 !!****f* m_geometry/wigner_seitz
@@ -1123,7 +1240,7 @@ end subroutine fixsym
 !!      ks_ddiago,linear_optics_paw,m_ab7_symmetry,m_crystal,m_cut3d,m_ddb
 !!      m_dens,m_effective_potential,m_effective_potential_file,m_fft
 !!      m_fft_prof,m_fit_data,m_hamiltonian,m_io_kss,m_ioarr,m_mep,m_pawpwij
-!!      m_screening,m_tdep_latt,m_use_ga,m_vcoul,m_wfk,mag_constr,mag_constr_e
+!!      m_screening,m_tdep_latt,m_use_ga,m_vcoul,m_wfk,mag_penalty,mag_constr_e
 !!      memory_eval,mkcore_wvl,mlwfovlp_qp,moddiel,mpi_setup,mrgscr,newrho
 !!      newvtr,nres2vres,odamix,optic,pawgrnl,prcref,prcref_PMA,pred_bfgs
 !!      pred_delocint,pred_isothermal,pred_langevin,pred_lbfgs,pred_nose
@@ -2626,12 +2743,14 @@ end subroutine ioniondist
 !!  dist2
 !!
 !! FUNCTION
-!!  Calculates the distance of v1 and v2 in a crystal by epeating the unit cell
+!!  Calculates the distance of v1 and v2 in a crystal by repeating the unit cell
 !!
 !! INPUTS
 !!  v1,v2
 !!  rprimd: dimensions of the unit cell. if not given 1,0,0/0,1,0/0,0,1 is assumed
-!!  option: 0 v1, v2 given in cartesian coordinates (default) / 1 v1,v2 given in reduced coordinates
+!!  option: 0 v1, v2 given in cartesian coordinates (default) 
+!!          1 v1,v2 given in reduced coordinates 
+!!         -1 v1 and v2 are supposed equal, and the routine returns the length of the smallest Bravais lattice vector
 !!
 !! OUTPUT
 !!  dist2
@@ -2683,8 +2802,10 @@ function dist2(v1,v2,rprimd,option)
  end if
  if(opt==0)then
    dred(:)=gprimd(1,:)*dv(1)+gprimd(2,:)*dv(2)+gprimd(3,:)*dv(3)
- else
+ else if(opt==1)then
    dred(:)=dv(:)
+ else if(opt==-1)then
+   dred(:)=zero
  end if
 
 !Wrap in the ]-1/2,1/2] interval
@@ -2710,14 +2831,16 @@ function dist2(v1,v2,rprimd,option)
 !Use all relevant primitive real space lattice vectors to find the minimal difference vector
  min2=huge(zero)
  do i1=-limits(1),limits(1)
+   dtot(1)=dwrap(1)+i1
    do i2=-limits(2),limits(2)
+     dtot(2)=dwrap(2)+i2
      do i3=-limits(3),limits(3)
-       dtot(1)=dwrap(1)+i1
-       dtot(2)=dwrap(2)+i2
-       dtot(3)=dwrap(3)+i3
-       norm2=dtot(1)*rmet(1,1)*dtot(1)+dtot(2)*rmet(2,2)*dtot(2)+dtot(3)*rmet(3,3)*dtot(3)+&
-&       2*(dtot(1)*rmet(1,2)*dtot(2)+dtot(2)*rmet(2,3)*dtot(3)+dtot(3)*rmet(3,1)*dtot(1))
-       min2=min(norm2,min2)
+       if(opt/=-1.or.i1/=0.or.i2/=0.or.i3/=0)then
+         dtot(3)=dwrap(3)+i3
+         norm2=dtot(1)*rmet(1,1)*dtot(1)+dtot(2)*rmet(2,2)*dtot(2)+dtot(3)*rmet(3,3)*dtot(3)+&
+&         2*(dtot(1)*rmet(1,2)*dtot(2)+dtot(2)*rmet(2,3)*dtot(3)+dtot(3)*rmet(3,1)*dtot(1))
+         min2=min(norm2,min2)
+       endif
      end do
    end do
  end do
@@ -3062,6 +3185,7 @@ subroutine stresssym(gprimd,nsym,stress,sym)
  rprimdt=transpose(rprimd)
 
 !Compute stress tensor in reduced coordinates
+! strfrac =  rprimd^T * stress * rprimd
  call strconv(stress,rprimdt,strfrac)
 
 !Switch to full storage mode
@@ -3075,6 +3199,9 @@ subroutine stresssym(gprimd,nsym,stress,sym)
  tensor(1,3)=tensor(3,1)
  tensor(1,2)=tensor(2,1)
 
+! these loops are useless - trivial action:
+! tt = tensor / dble(nsym)
+! tensor = zero
  do nu=1,3
    do mu=1,3
      tt(mu,nu)=tensor(mu,nu)/dble(nsym)
@@ -3083,6 +3210,8 @@ subroutine stresssym(gprimd,nsym,stress,sym)
  end do
 
 !loop over all symmetry operations:
+! tensor =  symrec * tt * symrec^T = symrec * rprimd^T * input * rprimd symrec^T
+! TODO: this should be replaced by a little BLAS call or two
  do isym=1,nsym
    do mu=1,3
      do nu=1,3
@@ -3106,6 +3235,9 @@ subroutine stresssym(gprimd,nsym,stress,sym)
  strfrac(6)=tensor(2,1)
 
 !Convert back stress tensor (symmetrized) in cartesian coordinates
+! stress = gprimd * symrec * rprimd^T * input * rprimd symrec^T * gprimd^T
+! symrec_cart = gprimd * symrec * rprimd^T
+! sym_cart    = symrec_cart^-1 ^T = rprimd * sym * gprimd^T 
  call strconv(strfrac,gprimd,stress)
 
 end subroutine stresssym
@@ -3166,6 +3298,8 @@ subroutine strconv(frac,gprimd,cart)
  work1(3,1)=frac(5) ; work1(1,3)=frac(5)
  work1(2,1)=frac(6) ; work1(1,2)=frac(6)
 
+! TODO: these are matmuls, replace or get BLAS
+! work2 = work1 * gprimd^T
  do ii=1,3
    work2(:,ii)=zero
    do jj=1,3
@@ -3173,6 +3307,7 @@ subroutine strconv(frac,gprimd,cart)
    end do
  end do
 
+! work1 = gprimd * work2 = gprimd * input * gprimd^T
  do ii=1,3
    work1(ii,:)=zero
    do jj=1,3

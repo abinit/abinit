@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_positron
 !! NAME
 !!  m_positron
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (GJ, MT, JW)
+!!  Copyright (C) 1998-2020 ABINIT group (GJ, MT, JW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +42,8 @@ module m_positron
  use defs_abitypes, only : MPI_type
  use m_special_funcs,  only : sbf8
  use m_ioarr,    only : ioarr, read_rhor
- use m_pawang,   only : pawang_type, realgaunt
+ use m_pawang,   only : pawang_type
+ use m_paw_sphharm,     only : realgaunt
  use m_pawrad,   only : pawrad_type, simp_gen, nderiv_gen
  use m_pawtab,   only : pawtab_type
  use m_paw_ij,   only : paw_ij_type
@@ -156,7 +156,10 @@ contains
 !!  vhartr(nfftf)=array for holding Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
+!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA) derivative of XC energy density
+!!                                wrt kinetic energy density (depsxcdtau)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
+!!  xcctau3d(n3xccc*usekden)=(only for meta-GGA): 3D core electron kinetic energy density for XC core correction
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
 !!  ylmgr(mpw*mkmem,3,mpsang*mpsang*useylm)= gradients of real spherical harmonics
@@ -187,8 +190,8 @@ subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eige
 &          energies,fock,forces_needed,fred,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcut,hdr,ifirst_gs,indsym,istep,istep_mix,kg,&
 &          kxc,maxfor,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc,nattyp,nfft,ngfft,ngrvdw,nhat,nkxc,npwarr,nvresid,occ,optres,&
 &          paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
-&          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,&
-&          xccc3d,xred,ylm,ylmgr)
+&          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
+&          xccc3d,xcctau3d,xred,ylm,ylmgr)
 
 !Arguments ------------------------------------
 !scalars
@@ -215,6 +218,7 @@ type(fock_type),pointer, intent(inout) :: fock
  real(dp),intent(in) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),ph1dc(2,(3*(2*dtset%mgfft+1)*dtset%natom)*dtset%usepaw)
  real(dp),intent(in) :: rprimd(3,3),strsxc(6),vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
+ real(dp),intent(in) :: vxctau(nfft,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(inout) :: cg(2,mcg)
@@ -223,7 +227,7 @@ type(fock_type),pointer, intent(inout) :: fock
  real(dp),intent(inout) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol),fred(3,dtset%natom)
  real(dp),intent(inout) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(inout) :: rhog(2,nfft),rhor(nfft,dtset%nspden)
- real(dp),intent(inout) :: xccc3d(n3xccc),xred(3,dtset%natom)
+ real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
  type(pawcprj_type),intent(inout) :: cprj(dtset%natom,mcprj*usecprj)
  type(paw_ij_type),intent(in) :: paw_ij(my_natom*dtset%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom*dtset%usepaw)
@@ -386,7 +390,7 @@ type(fock_type),pointer, intent(inout) :: fock
 &       indsym,kg,kxc,maxfor_dum,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc0,nattyp,nfft,ngfft,&
 &       ngrvdw,nhat,nkxc,npwarr,dtset%ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
 &       pawfgrtab,pawrad,pawrhoij,pawtab,ph1dc,ph1d,psps,rhog,rhor,rprimd,optstr,strsxc,str_tmp,symrec,&
-&       synlgr_dum,ucvol,usecprj,vhartr,vpsp,vxc,wvl,xccc3d,xred,ylm,ylmgr,0.0_dp)
+&       synlgr_dum,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,0.0_dp)
        electronpositron%calctype=icalctype
        if (optfor>0) electronpositron%fred_ep(:,:)=fred_tmp(:,:)
        if (optstr>0) electronpositron%stress_ep(:)=str_tmp(:)
@@ -697,7 +701,7 @@ type(fock_type),pointer, intent(inout) :: fock
        nelect=nelect+dtset%ziontypat(dtset%typat(iatom))
      end do
      maxocc=two/real(dtset%nsppol*dtset%nspinor,dp)
-     nocc=(nelect-tol8)/maxocc + 1
+     nocc=int((nelect-tol8)/maxocc) + 1
      nocc=min(nocc,dtset%nband(1)*dtset%nsppol)
      occlast=nelect-maxocc*(nocc-1)
      ABI_ALLOCATE(scocc,(dtset%nband(1)*dtset%nsppol))
@@ -1892,7 +1896,7 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
  integer :: ylmr_normchoice,ylmr_npts,ylmr_option
  logical,parameter :: include_nhat_in_gamma=.false.,state_dependent=.true.
  logical,parameter :: kgamma_only_positron=.true.,wf_conjugate=.false.
- logical :: cprj_paral_band,ex,mykpt,mykpt_pos,usetimerev
+ logical :: cprj_paral_band,ex,mykpt,mykpt_pos,usetimerev,abinitcorewf,xmlcorewf
  real(dp) :: arg,bessarg,cpi,cpr,cp11,cp12,cp21,cp22,gammastate,intg
  real(dp) :: lambda_v1,lambda_v2,lambda_core,lambda_pw,occ_el,occ_pos
  real(dp) :: pnorm,pr,rate,rate_ipm,ratec,ratec_ipm,rate_paw,rate_paw_ipm
@@ -2099,13 +2103,19 @@ subroutine posdoppler(cg,cprj,Crystal,dimcprj,dtfil,dtset,electronpositron,&
 !  Reading of core wave functions
    if (mpi_enreg%me_cell==0) then
      do itypat=1,dtset%ntypat
-       filename=trim(filpsp(itypat))//'.corewf'
+       filename=trim(filpsp(itypat)) ; iln=len(trim(filename))
+       abinitcorewf=.false. ; if (iln>3) abinitcorewf=(filename(iln-6:iln)=='.abinit')
+       xmlcorewf=.false. ; if (iln>3) xmlcorewf=(filename(iln-3:iln)=='.xml')
+       if ((.not.xmlcorewf).and.(.not.abinitcorewf)) filename=filename(1:iln)//'.corewf'
+       if (abinitcorewf) filename=filename(1:iln-6)//'corewf.abinit'
+       if (xmlcorewf) filename=filename(1:iln-3)//'corewf.xml'
        inquire(file=filename,exist=ex)
        if (.not.ex) then
          write(unit=filename,fmt='(a,i1)') 'corewf.abinit',itypat
          inquire(file=filename,exist=ex)
          if (.not.ex) then
-           msg='Core wave-functions file is missing!'
+           write(msg,'(4a)') 'Core wave-functions file is missing!',ch10,&
+&                            'Looking for: ',trim(filename)
            MSG_ERROR(msg)
          end if
        end if

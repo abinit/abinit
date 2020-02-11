@@ -30,17 +30,14 @@ else:
     from configparser import ConfigParser, ParsingError as CPError
     from queue import Empty as EmptyQueueError
 
+from collections import OrderedDict
 from .jobrunner import TimeBomb
-from .tools import (RestrictedShell, unzip, tail_file, pprint_table, Patcher,
-                    Editor)
+from .tools import (RestrictedShell, unzip, tail_file, pprint_table, Patcher, Editor)
 from .xyaptu import xcopier
 from .devtools import NoErrorFileLock, makeunique
 from .memprof import AbimemFile
 from .termcolor import cprint
-
 from .fldiff import Differ as FlDiffer
-
-from collections import OrderedDict
 
 import logging
 logger = logging.getLogger(__name__)
@@ -53,12 +50,33 @@ __all__ = [
     "AbinitTestSuite",
 ]
 
-fldebug = ('FLDIFF_DEBUG' in os.environ and os.environ['FLDIFF_DEBUG'])
+fldebug = 'FLDIFF_DEBUG' in os.environ and os.environ['FLDIFF_DEBUG']
 
 _MY_NAME = os.path.basename(__file__)[:-3] + "-" + __version__
 
 
 # Helper functions and tools
+
+
+def my_getlogin():
+    """
+    Returns the user logged in to the controlling terminal of the process.
+
+    https://stackoverflow.com/questions/4399617/python-os-getlogin-problem
+    """
+    username = "No_username"
+    if hasattr(os, 'getlogin'):
+        try:
+            username = os.getlogin()
+        except Exception: # FileNotFoundError
+            try:
+                import pwd
+                getlogin = lambda: pwd.getpwuid(os.getuid())[0]
+                username = getlogin()
+            except Exception:
+                username = "No_username_tried_pwd"
+
+    return username
 
 
 @makeunique
@@ -115,6 +133,7 @@ def html_link(string, href=None):
 
 
 def is_string(s):
+    """True is s is a string (duck typying test)"""
     try:
         s + "hello"
         return True
@@ -366,7 +385,7 @@ class FileToTest(object):
                 self.tolnlines, self.tolabs, self.tolrel
             ), result.has_line_count_error())
 
-        if fldebug:  
+        if fldebug:
             # fail on first error and output the traceback
             (isok, status, msg), has_line_count_error = make_diff()
         else:
@@ -437,6 +456,8 @@ TESTCNF_KEYWORDS = {
     # keyword        : (parser, default, section, description)
     # [setup]
     "executable"     : (str       , None , "setup", "Name of the executable e.g. abinit"),
+    "use_files_file" : (_str2bool , "no" , "setup", "Pass files file to executable (legacy mode)"),
+    "exec_args"      : (str       , ""   , "setup", "Arguments passed to executable on the command line."),
     "test_chain"     : (_str2list , ""   , "setup", "Defines a ChainOfTest i.e. a list of tests that are connected together."),
     "need_cpp_vars"  : (_str2set  , ""   , "setup", "CPP variables that must be defined in config.h in order to enable the test."),
     "exclude_hosts"  : (_str2list , ""   , "setup", "The test is not executed if we are running on a slave that matches compiler@hostname"),
@@ -449,6 +470,7 @@ TESTCNF_KEYWORDS = {
     "system_xml"     : (str       , ""   , "setup","The system.xml file read by multibinit"),
     "coeff_xml"      : (str       , ""   , "setup","The coeff.xml file read by multibinit"),
     "md_hist"        : (str       , ""   , "setup","The hist file file read by multibinit"),
+    "test_set"        : (str       , ""   , "setup","The test set (HIST format) read by multibinit"),
     "no_check"       : (_str2bool , "no" , "setup","Explicitly do not check any files"),
     # [files]
     "files_to_test"  : (_str2filestotest, "", "files", "List with the output files that are be compared with the reference results. Format:\n" +
@@ -1010,10 +1032,8 @@ class BuildEnvironment(object):
     def __init__(self, build_dir, cygwin_instdir=None):
         """
         Args:
-            build_dir:
-                Path to the top level directory of the build.
-            cygwin_instdir:
-                Installation directory of cygwin. Defaults to '/cygwin'
+            build_dir: Path to the top level directory of the build.
+            cygwin_instdir: Installation directory of cygwin. NOT USED (will be removed soon)
         """
         # Try to figure out the top level directory of the build tree.
         try:
@@ -1023,11 +1043,7 @@ class BuildEnvironment(object):
 
         self.uname = platform.uname()
         self.hostname = gethostname().split(".")[0]
-
-        if hasattr(os, 'getlogin'):
-            self.username = os.getlogin()
-        else:
-            self.username = "No_username"
+        self.username = my_getlogin()
 
         self.build_dir = os.path.abspath(build_dir)
         self.configh_path = os.path.join(self.build_dir, "config.h")
@@ -1068,24 +1084,12 @@ class BuildEnvironment(object):
 
         return os.path.isfile(configac_path) and os.path.isfile(abinitF90_path)
 
-    def iscygwin(self):
-        """True if we are running under CYGWIN"""
-        return "CYGWIN" in self.uname[0].upper()
-
-    def _addext(self, string):
-        """Append .exe extension, needed for cygwin"""
-        if self.iscygwin():
-            string += ".exe"
-        return string
-
     def path_of_bin(self, bin_name, try_syspath=True):
         """Return the absolute path of bin_name."""
         if bin_name in self._external_bins:
             bin_path = self._external_bins[bin_name]
         else:
             bin_path = os.path.join(self.binary_dir, bin_name)  # It's in src/98_main
-
-        bin_path = self._addext(bin_path)
 
         # Handle external bins that are installed system wide (such as atompaw on woopy)
         if bin_name in self._external_bins and not os.path.isfile(bin_path):
@@ -1105,26 +1109,9 @@ class BuildEnvironment(object):
 
         return bin_path
 
-    def cygwin_path_of_bin(self, bin_name):
-        """
-        Mangle the name of the executable. Needed for Windows
-        when we have to call an executable that is not located
-        within the CYGWIN filesystem (aka $Win$ application).
-        """
-        path = self.path_of_bin(bin_name)
-        if self.iscygwin():
-            path = self._cygwin_instdir + path
-        return path
-
     def has_bin(self, bin_name, try_syspath=True):
         """True if binary bin_name is present in the build."""
         return os.path.isfile(self.path_of_bin(bin_name, try_syspath=try_syspath))
-
-    def cygwin_path(self, path):
-        apath = os.path.abspath(path)
-        if self.iscygwin():
-            apath = self._cygwin_instdir + apath
-        return apath
 
     def set_buildbot_builder(self, builder):
         """
@@ -1471,20 +1458,12 @@ class BaseTest(object):
     @property
     def full_id(self):
         """Full identifier of the test."""
-        return "[%s][%s][np=%s]" % (self.suite_name, self.id,
-                                    self.nprocs)
+        return "[%s][%s][np=%s]" % (self.suite_name, self.id, self.nprocs)
 
     @property
     def bin_path(self):
         """The absolute path of the executable needed to run the test."""
         return self.build_env.path_of_bin(self.executable)
-
-    @property
-    def cygwin_bin_path(self):
-        return self.build_env.cygwin_path_of_bin(self.executable)
-
-    def cygwin_path(self, path):
-        return self.build_env.cygwin_path(path)
 
     def cpkl_dump(self, protocol=-1):
         """Save the instance in a pickle file"""
@@ -1623,6 +1602,39 @@ class BaseTest(object):
 
         return t_stdin.getvalue()
 
+    def get_pseudo_paths(self, dir_and_names=False):
+        """
+        Return list of absolut paths for pseudos.
+        If `dir_and_names` is True, the function returns (dirname, basenames)
+        where dirname is the common directory and basenames is a list of basenames in dirname.
+        If a common directory cannot be found, dirname is set to None and basename is a list of absolute paths.
+        """
+        # Path to the pseudopotential files.
+        # 1) pp files are searched in psps_dir first then in workdir.
+        psp_paths = [os.path.join(self.abenv.psps_dir, pname) for pname in self.psp_files]
+
+        for i, psp in enumerate(psp_paths):
+            if not os.path.isfile(psp):
+                pname = os.path.join(self.workdir, os.path.basename(psp))
+                if os.path.isfile(pname):
+                    # Use local pseudo. This is needed for atompaw tests.
+                    psp_paths[i] = pname
+                else:
+                    err_msg = "Cannot find pp file %s, neither in Psps_for_tests nor in self.workdir" % pname
+                    self.exceptions.append(self.Error(err_msg))
+
+        if not dir_and_names:
+            return psp_paths
+
+        dirnames = [os.path.dirname(p) for p in psp_paths]
+        basenames = [os.path.basename(p) for p in psp_paths]
+        dirname = None
+        if all(d == dirnames[0] for d in dirnames): dirname = dirnames[0]
+        if dirname is not None:
+            return dirname, basenames
+        else:
+            return None, psp_paths
+
     def get_extra_inputs(self):
         """Copy extra inputs from inp_dir to workdir."""
         # First copy the main input file (useful for debugging the test)
@@ -1653,7 +1665,7 @@ class BaseTest(object):
     def inputs_used(self):
         """List with the input files used by the test."""
         inputs = [self.inp_fname] + [os.path.join(self.inp_dir, f) for f in self.extra_inputs]
-        #
+
         # Add files appearing in the shell sections.
         for cmd_str in (self.pre_commands + self.post_commands):
             if cmd_str.startswith("iw_"):
@@ -1677,8 +1689,7 @@ class BaseTest(object):
                     self._status = "passed"
                 else:
                     assert all_fldstats == {"succeeded"}, (
-                        "Unexpected test status: {}".format(all_fldstats)
-                    )
+                        "Unexpected test status: {}".format(all_fldstats))
                     self._status = "succeeded"
 
         return self._status
@@ -1835,8 +1846,7 @@ class BaseTest(object):
             self._print_lock = print_lock
 
         workdir = os.path.abspath(workdir)
-        if not os.path.exists(workdir):
-            os.mkdir(workdir)
+        if not os.path.exists(workdir): os.mkdir(workdir)
         self.workdir = workdir
 
         self.build_env = build_env
@@ -1913,26 +1923,38 @@ class BaseTest(object):
             self.get_extra_inputs()
 
             # Create stdin file in the workdir.
-            self.stdin_fname = os.path.join(workdir, self.id + ".stdin")
-            self.stdout_fname = os.path.join(workdir, self.id + ".stdout")
-            self.stderr_fname = os.path.join(workdir, self.id + ".stderr")
-
-            self.keep_files([self.stdin_fname, self.stdout_fname, self.stderr_fname])
-
-            # Create input file.
-            t_stdin = self.make_stdin()
-            with open(self.stdin_fname, "wt") as fh:
-                fh.writelines(t_stdin)
+            self.stdin_fname = os.path.join(self.workdir, self.id + ".stdin")
+            self.stdout_fname = os.path.join(self.workdir, self.id + ".stdout")
+            self.stderr_fname = os.path.join(self.workdir, self.id + ".stderr")
 
             # Run the code (run_etime is the wall time spent to execute the test)
-            if runner.has_mpirun:
-                bin_path = self.cygwin_bin_path
-            else:
-                bin_path = self.bin_path
+            # FIXME: Add support for more executables
+            use_files_file = self.use_files_file
+            if self.executable not in ("abinit", "anaddb"):
+                use_files_file = True
 
-            self.run_etime = runner.run(self.nprocs, bin_path,
-                                        self.stdin_fname, self.stdout_fname, self.stderr_fname,
-                                        cwd=workdir)
+            if use_files_file:
+                self.keep_files([self.stdin_fname, self.stdout_fname, self.stderr_fname])
+                # Legacy mode: create files file and invoke exec with syntax: `abinit < run.files`
+                with open(self.stdin_fname, "wt") as fh:
+                    fh.writelines(self.make_stdin())
+                stdin_fname = self.stdin_fname
+                bin_argstr = self.exec_args
+
+            else:
+                # New CLI mode: invoke exec with syntax `abinit run.abi`
+                # stdin_fname won't be created
+                self.keep_files([self.stdout_fname, self.stderr_fname])
+                stdin_fname = ""
+                self.prepare_new_cli_invokation()
+
+                path = os.path.join(self.workdir, os.path.basename(self.inp_fname))
+                bin_argstr = path + self.exec_args
+                #print("Using .abi mode with bin_argstr", bin_argstr)
+
+            self.run_etime = runner.run(self.nprocs, self.bin_path,
+                                        stdin_fname, self.stdout_fname, self.stderr_fname,
+                                        bin_argstr=bin_argstr, cwd=self.workdir)
 
             # Save exceptions (if any).
             if runner.exceptions:
@@ -1978,11 +2000,13 @@ class BaseTest(object):
                 self.had_timeout = True
                 msg = self.full_id + "test has reached timeout and has been killed (SIGTERM)."
                 self.cprint(msg, status2txtcolor["failed"])
+
             elif runner.retcode == 137:
                 self._status = "failed"
                 self.had_timeout = True
                 msg = self.full_id + "test has reached timeout and has been killed (SIGKILL)."
                 self.cprint(msg, status2txtcolor["failed"])
+
             elif runner.retcode != 0 and not self.expected_failure:
                 self._status = "failed"
                 msg = (self.full_id + "Test was not expected to fail but subprocesses returned %s" % runner.retcode)
@@ -2016,7 +2040,7 @@ class BaseTest(object):
 
             if self.status == "failed":
                 # Print the first line of the stderr if it's not empty.
-                # Look also for the MPIABORTFILE
+                # Look also for MPIABORTFILE
                 try:
                     errout = self.stderr_read()
                     if errout:
@@ -2025,18 +2049,17 @@ class BaseTest(object):
                     # Extract YAML error message from ABORTFILE or stdout.
                     abort_file = os.path.join(self.workdir, "__ABI_MPIABORTFILE__")
                     if os.path.exists(abort_file):
-                        f = open(abort_file, "rt")
-                        self.cprint(12 * "=" + " ABI_MPIABORTFILE " + 12 * "=")
-                        self.cprint(f.read(), status2txtcolor["failed"])
-                        f.close()
+                        with open(abort_file, "rt") as f:
+                            self.cprint(12 * "=" + " ABI_MPIABORTFILE " + 12 * "=")
+                            self.cprint(f.read(), status2txtcolor["failed"])
+                            f.close()
                     else:
                         yamlerr = read_yaml_errmsg(self.stdout_fname)
                         if yamlerr:
-                            self.cprint("YAML Error found in the stdout of "
-                                        + repr(self))
+                            self.cprint("YAML Error found in the stdout of: " + repr(self))
                             self.cprint(yamlerr, status2txtcolor["failed"])
                         else:
-                            self.cprint("No YAML Error found in " + repr(self))
+                            self.cprint("No YAML Error found in: " + repr(self))
 
                 except Exception as exc:
                     self.exceptions.append(exc)
@@ -2158,11 +2181,9 @@ class BaseTest(object):
         if (self.erase_files == 1 and self.isok) or self.erase_files == 2:
             entries = [os.path.join(self.workdir, e) for e in os.listdir(self.workdir)]
             for entry in entries:
-                if entry in save_files:
-                    continue
+                if entry in save_files: continue
                 _, ext = os.path.splitext(entry)
-                if ext in keep_exts:
-                    continue
+                if ext in keep_exts: continue
                 if os.path.isfile(entry):
                     try:
                         os.remove(entry)
@@ -2239,14 +2260,12 @@ class BaseTest(object):
             return
 
         # print(self._status)
-        # if self._status not in {"failed", "passed"}:
-        #     return
+        # if self._status not in {"failed", "passed"}: return
         diffpy = self.abenv.apath_of("tests", "pymods", "diff.py")
 
         for f in self.files_to_test:
             # print(f, f.fld_isok)
-            if f.fld_isok:
-                continue
+            if f.fld_isok: continue
 
             ref_fname = os.path.abspath(os.path.join(self.ref_dir, f.name))
 
@@ -2275,13 +2294,11 @@ class BaseTest(object):
                         ref_fname]
                 cmd = " ".join(args)
 
-                (p, ret_code) = self.timebomb.run(cmd, shell=True,
-                                                  cwd=self.workdir)
+                (p, ret_code) = self.timebomb.run(cmd, shell=True, cwd=self.workdir)
 
                 if ret_code != 0:
                     err_msg = "Timeout error (%s s) while executing %s, retcode = %s" % (
-                        self.timebomb.timeout, str(args), ret_code
-                    )
+                        self.timebomb.timeout, str(args), ret_code)
                     self.exceptions.append(self.Error(err_msg))
                 else:
                     self.keep_files(diff_fname)
@@ -2336,18 +2353,14 @@ class BaseTest(object):
         ##################################################
         # Document Name Space that serves as the substitution
         # namespace for instantiating a doc template.
-        if hasattr(os, 'getlogin'):
-            username = os.getlogin()
-        else:
-            username = "No_username"
+        username = my_getlogin()
 
         DNS = {
             "self": self,
             "page_title": "page_title",
             "user_name": username,
             "hostname": gethostname(),
-            "Headings": ['File_to_test', 'Status', 'fld_output', 'fld_options',
-                         'txt_diff', 'html_diff'],
+            "Headings": ['File_to_test', 'Status', 'fld_output', 'fld_options', 'txt_diff', 'html_diff'],
             "nlast": nlast,
             "stderr_text": stderr_text,
             "stdout_text": stdout_text,
@@ -2477,100 +2490,155 @@ class BaseTest(object):
 
 class AbinitTest(BaseTest):
     """
-    Class for Abinit tests. Redefine the make_stdin method of BaseTest
+    Class for Abinit tests. Redefine the make_stdin method of BaseTest,
+    provides `prepare_new_cli_invokation`
     """
     def make_stdin(self):
         t_stdin = StringIO()
 
-        inp_fname = self.cygwin_path(self.inp_fname)
         # Use the basename instead of the absolute path because the input has been already copied
         # and we might want to change it especially if we are debugging the code
-        inp_fname = os.path.basename(inp_fname)
-        t_stdin.write(inp_fname + "\n")
+        inp_fname = self.inp_fname
+        t_stdin.write(os.path.basename(inp_fname) + "\n")
+        t_stdin.write(self.id + ".out" + "\n")
 
-        out_fname = self.id + ".out"
-        t_stdin.write(out_fname + "\n")
-
-        # Prefix for input-output-temporary files
-        if self.input_prefix:
-            i_prefix = self.input_prefix
-        else:
-            i_prefix = self.id + "i"
-
-        # Prefix for input-output-temporary files
-        if self.output_prefix:
-            o_prefix = self.output_prefix
-        else:
-            o_prefix = self.id + "o"
-
-        t_prefix = self.id  # + "t"
+        # Prefix for input/output/temporary files
+        i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
+        o_prefix = self.output_prefix if self.output_prefix else self.id + "o"
+        # FIXME: Use t prefix and change iofn
+        #t_prefix = self.id  # + "t"
+        t_prefix = self.id  + "t"
 
         t_stdin.writelines(l + "\n" for l in [i_prefix, o_prefix, t_prefix])
 
         # Path to the pseudopotential files.
-        # 1) pp files are searched in pspd_dir first then in workdir.
-        psp_paths = [os.path.join(self.abenv.psps_dir, pname) for pname in self.psp_files]
-
-        for idx, psp in enumerate(psp_paths):
-            if not os.path.isfile(psp):
-                pname = os.path.join(self.workdir, os.path.basename(psp))
-                if os.path.isfile(pname):
-                    # Use local pseudo.
-                    psp_paths[idx] = pname
-                else:
-                    err_msg = "Cannot find pp file %s, neither in Psps_for_tests nor in self.workdir" % pname
-                    self.exceptions.append(self.Error(err_msg))
-
-        psp_paths = [self.cygwin_path(p) for p in psp_paths]  # Cygwin
+        # 1) pp files are searched in psps_dir first then in workdir.
+        psp_paths = self.get_pseudo_paths()
 
         t_stdin.writelines(p + "\n" for p in psp_paths)
 
         return t_stdin.getvalue()
 
+    def prepare_new_cli_invokation(self):
+        """Perform operations required to execute test with new CLI."""
+        # Need to add pseudopotential info to input.
+        with open(self.inp_fname, "rt") as fh:
+            line = fh.read()
+
+        extra = ["# Added by runtests.py"]
+        app = extra.append
+        app('output_file = "%s"' % (self.id + ".out"))
+
+        # This is needed for ATOMPAW as the pseudo will be generated at runtime.
+        #dirname, pp_names = self.get_pseudo_paths(dir_and_names=True)
+        #if dirname is not None:
+        #    app('pp_dirpath = "%s"' % (dirname))
+        #    app('pseudos = "%s"' % (",".join(pp_names)))
+        #else:
+        #    app('pseudos = "%s"' % (",\n".join(pp_names)))
+
+        # This is to check whether the parser supports "long strings"
+        #app('pseudos = "%s"' % (", ".join(self.get_pseudo_paths())))
+
+        app('pseudos = "%s"' % (",\n ".join(self.get_pseudo_paths())))
+
+        #pp_paths = self.get_pseudo_paths()
+        #app('pseudos = "%s"' % (", ".join(os.path.relpath(p, self.abenv.psps_dir) for p in pp_paths)))
+        #app('pp_dirpath = "$ABI_PSPDIR"')
+        #app('pp_dirpath = %s' % self.abenv.psps_dir)
+
+        # Prefix for input/output/temporary files
+        i_prefix = self.input_prefix if self.input_prefix else self.id + "i"
+        o_prefix = self.output_prefix if self.output_prefix else self.id + "o"
+        # FIXME: Use temp prefix and change iofn
+        t_prefix = self.id  + "t"
+
+        app('indata_prefix "%s"' % i_prefix)
+        app('outdata_prefix "%s"' % o_prefix)
+        app('tmpdata_prefix "%s"' % t_prefix)
+        app("# end runtests.py section\n\n")
+
+        path = os.path.join(self.workdir, os.path.basename(self.inp_fname))
+        with open(path, "wt") as fh:
+            fh.write("\n".join(extra) + line)
+
 
 class AnaddbTest(BaseTest):
     """
     Class for Anaddb tests. Redefine the make_stdin method of BaseTest
+    provides `prepare_new_cli_invokation`
     """
-    def make_stdin(self):
-        t_stdin = StringIO()
 
-        inp_fname = self.cygwin_path(self.inp_fname)  # cygwin
-        t_stdin.write(inp_fname + "\n")              # 1) formatted input file
-        t_stdin.write(self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
-
+    def get_ddb_path(self):
+        """Return the path to the input DDB file."""
         iddb_fname = self.id + ".ddb.in"
         if self.input_ddb:
-            iddb_fname = os.path.join(self.workdir, self.input_ddb)  # Use output DDB of a previous run.
-
+            # Use output DDB of a previous run.
+            iddb_fname = os.path.join(self.workdir, self.input_ddb)
             if not os.path.isfile(iddb_fname):
                 self.exceptions.append(self.Error("%s no such DDB file: " % iddb_fname))
+        return iddb_fname
 
-            iddb_fname = self.cygwin_path(iddb_fname)   # cygwin
-
-        t_stdin.write(iddb_fname + "\n")         # 3) input derivative database e.g. t13.ddb.in
-        t_stdin.write(self.id + ".md" + "\n")    # 4) output molecular dynamics e.g. t13.md
-
+    def get_gkk_path(self):
+        """Return the path to the input GKK file for EPH calculations."""
         input_gkk = self.id + ".gkk"
         if self.input_gkk:
             input_gkk = os.path.join(self.workdir, self.input_gkk)  # Use output GKK of a previous run.
             if not os.path.isfile(input_gkk):
                 self.exceptions.append(self.Error("%s no such GKK file: " % input_gkk))
 
-            input_gkk = self.cygwin_path(input_gkk)    # cygwin
+        if not os.path.isfile(input_gkk): input_gkk = ""
+        return input_gkk
 
-        t_stdin.write(input_gkk + "\n")         # 5) input elphon matrix elements  (GKK file) :
-        t_stdin.write(self.id + "\n")           # 6) base name for elphon output files e.g. t13
-
+    def get_ddk_path(self):
+        """Return the path to the input DKK file for EPH calculations."""
         input_ddk = self.id + ".ddk"
-        if not os.path.isfile(input_ddk):  # Try in input directory:
+        if not os.path.isfile(input_ddk):
+            # Try in input directory:
             input_ddk = os.path.join(self.inp_dir, input_ddk)
-            # FIXME: Someone has to rewrite the treatment of the anaddb files file
-            input_ddk = self.cygwin_path(input_ddk)
+        if not os.path.isfile(input_ddk): input_dkk = ""
 
-        t_stdin.write(input_ddk + "\n")   # 7) file containing ddk filenames for elphon/transport :
+        return input_ddk
+
+    def make_stdin(self):
+        t_stdin = StringIO()
+
+        t_stdin.write(self.inp_fname + "\n")         # 1) formatted input file
+        t_stdin.write(self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
+        t_stdin.write(self.get_ddb_path() + "\n")    # 3) input derivative database e.g. t13.ddb.in
+        t_stdin.write(self.id + ".md" + "\n")        # 4) output molecular dynamics e.g. t13.md
+        t_stdin.write(self.get_gkk_path() + "\n")    # 5) input elphon matrix elements  (GKK file) :
+        t_stdin.write(self.id + "\n")                # 6) base name for elphon output files e.g. t13
+        t_stdin.write(self.get_ddk_path() + "\n")    # 7) file containing ddk filenames for elphon/transport:
 
         return t_stdin.getvalue()
+
+    def prepare_new_cli_invokation(self):
+        """Perform operations required to execute test with new CLI."""
+        # Need to add extra variables depending on calculation type.
+        with open(self.inp_fname, "rt") as fh:
+            line = fh.read()
+
+        extra = ["# Added by runtests.py"]
+        app = extra.append
+        app('ddb_path = "%s"' % (self.get_ddb_path()))
+        app('output_file = "%s"' % (self.id + ".out"))
+
+        # EPH stuff
+        gkk_path = self.get_gkk_path()
+        if gkk_path: app('gkk_path = "%s"' % gkk_path)
+        ddk_path = self.get_ddk_path()
+        if ddk_path: app('ddk_path = "%s"' % ddk_path)
+
+        if gkk_path or ddk_path:
+            # EPH calculation
+            app('eph_prefix = "%s"' % self.id)
+
+        app("# end runtests.py section\n\n")
+
+        path = os.path.join(self.workdir, os.path.basename(self.inp_fname))
+        with open(path, "wt") as fh:
+            fh.write("\n".join(extra) + line)
 
 
 class MultibinitTest(BaseTest):
@@ -2580,32 +2648,28 @@ class MultibinitTest(BaseTest):
     def make_stdin(self):
         t_stdin = StringIO()
 
-        inp_fname = self.cygwin_path(self.inp_fname)  # cygwin
-        t_stdin.write(inp_fname + "\n")              # 1) formatted input file
+        t_stdin.write(self.inp_fname + "\n")         # 1) formatted input file
         t_stdin.write(self.id + ".out" + "\n")       # 2) formatted output file e.g. t13.out
 
         if self.input_ddb:
             iddb_fname = os.path.join(self.inp_dir, self.input_ddb)
             if not os.path.isfile(iddb_fname):
                 self.exceptions.append(self.Error("%s no such DDB file: " % iddb_fname))
-            iddb_fname = self.cygwin_path(iddb_fname)   # cygwin
             t_stdin.write(iddb_fname + "\n")         # 3) input derivative database e.g. ddb.in
         else:
             if self.system_xml:
                 sys_xml_fname = os.path.join(self.inp_dir, self.system_xml)
                 if not os.path.isfile(sys_xml_fname):
-                    self.exceptions.append(self.Error("%s no such xml file: " % sys_xml_fname))
-                sys_xml_fname = self.cygwin_path(sys_xml_fname)
+                    self.exceptions.append(self.Error("%s no such XML file: " % sys_xml_fname))
                 t_stdin.write(sys_xml_fname + "\n")  # 3) input for system.xml XML
             else:
-                self.exceptions.append(self.Error("%s no file avail for the system"))
+                self.exceptions.append(self.Error("%s no file available for the system"))
 
         if self.coeff_xml:
             coeffxml_fname = os.path.join(self.inp_dir, self.coeff_xml)
             if not os.path.isfile(coeffxml_fname):
-                self.exceptions.append(self.Error("%s no such xml file for coeffs: " % coeffxml_fname))
+                self.exceptions.append(self.Error("%s no such XML file for coeffs: " % coeffxml_fname))
 
-            coeffxml_fname = self.cygwin_path(coeffxml_fname)
             t_stdin.write(coeffxml_fname + "\n")  # 4) input for coefficients
         else:
             coeffxml_fname = "no"
@@ -2614,13 +2678,22 @@ class MultibinitTest(BaseTest):
         if self.md_hist:
             md_hist_fname = os.path.join(self.inp_dir, self.md_hist)
             if not os.path.isfile(md_hist_fname):
-                self.exceptions.append(self.Error("%s no such xml file for coeffs: " % md_hist_fname))
+                self.exceptions.append(self.Error("%s no such HIST file for training-set: " % md_hist_fname))
 
-            md_hist_fname = self.cygwin_path(md_hist_fname)
-            t_stdin.write(md_hist_fname + "\n")  # 5) input for coefficients
+            t_stdin.write(md_hist_fname + "\n") # 5) input for training-set
         else:
             md_hist_fname = "no"
             t_stdin.write(md_hist_fname + "\n")
+
+        if self.test_set:
+            test_set_fname =  os.path.join(self.inp_dir,self.test_set)
+            if not os.path.isfile(test_set_fname):
+                self.exceptions.append(self.Error("%s no such HIST file for test-set: " % test_set_fname))
+
+            t_stdin.write(test_set_fname + "\n") # 6) input for test-set
+        else:
+            test_set_fname = "no"
+            t_stdin.write(test_set_fname + "\n")
 
         return t_stdin.getvalue()
 
@@ -2632,15 +2705,13 @@ class TdepTest(BaseTest):
     def make_stdin(self):
         t_stdin = StringIO()
 
-        inp_fname = self.cygwin_path(self.inp_fname)  # cygwin
-        inp_fname = os.path.basename(inp_fname)
+        inp_fname = os.path.basename(self.inp_fname)
         t_stdin.write(inp_fname + "\n")              # 1) formatted input file
 
         md_hist_fname = os.path.join(self.inp_dir, self.md_hist)
         if not os.path.isfile(md_hist_fname):
             self.exceptions.append(self.Error("%s no such hist file: " % md_hist_fname))
 
-        md_hist_fname = self.cygwin_path(md_hist_fname)
         t_stdin.write(md_hist_fname + "\n")
         t_stdin.write(self.id + "\n")       # 2) formatted output file e.g. t13.out
 
@@ -2654,16 +2725,14 @@ class AimTest(BaseTest):
     def make_stdin(self):
         t_stdin = StringIO()
 
-        inp_fname = self.cygwin_path(self.inp_fname)
-        t_stdin.write(inp_fname + "\n")         # formatted input file e.g. .../Input/t57.in
+        t_stdin.write(self.inp_fname + "\n")   # formatted input file e.g. .../Input/t57.in
 
         iden_fname = self.id + "i_DEN"
-        t_stdin.write(iden_fname + "\n")        # input density  e.g. t57i_DEN
-        t_stdin.write(self.id + "\n")           # t57
+        t_stdin.write(iden_fname + "\n")  # input density  e.g. t57i_DEN
+        t_stdin.write(self.id + "\n")     # t57
 
         # Path to the pseudopotential files.
         psp_paths = [os.path.join(self.abenv.psps_dir, pname) for pname in self.psp_files]
-        psp_paths = [self.cygwin_path(p) for p in psp_paths]  # Cygwin
 
         t_stdin.writelines(p + "\n" for p in psp_paths)
 
@@ -2676,10 +2745,8 @@ class ConductiTest(BaseTest):
     """
     def make_stdin(self):
         t_stdin = StringIO()
-
-        inp_fname = self.cygwin_path(self.inp_fname)
-        t_stdin.write(inp_fname + "\n")  # formatted input file e.g. .../Input/t57.in
-        t_stdin.write(self.id + "\n")    # will be used as the prefix of the log file names e.g. t57
+        t_stdin.write(self.inp_fname + "\n")  # formatted input file e.g. .../Input/t57.in
+        t_stdin.write(self.id + "\n")         # will be used as the prefix of the log file names e.g. t57
 
         return t_stdin.getvalue()
 
@@ -2691,33 +2758,28 @@ class OpticTest(BaseTest):
     def make_stdin(self):
         t_stdin = StringIO()
 
-        inp_fname = self.cygwin_path(self.inp_fname)
-        t_stdin.write(inp_fname + "\n")   # optic input file e.g. .../Input/t57.in
-        t_stdin.write(self.id + ".out\n")  # Output. e.g t57.out
-        t_stdin.write(self.id + "\n")      # Used as suffix to diff and prefix to log file names,
-                                           # and also for roots for temporaries
+        t_stdin.write(self.inp_fname + "\n")  # optic input file e.g. .../Input/t57.in
+        t_stdin.write(self.id + ".out\n")     # Output. e.g t57.out
+        t_stdin.write(self.id + "\n")         # Used as suffix to diff and prefix to log file names,
+                                               # and also for roots for temporaries
 
         return t_stdin.getvalue()
 
 
 class Band2epsTest(BaseTest):
     """How to waste lines of code just to test a F90 code that can be implemented with a few python commands!"""
+
     def make_stdin(self):
         t_stdin = StringIO()
 
-        inp_fname = self.cygwin_path(self.inp_fname)
-        t_stdin.write(inp_fname + "\n")        # input file e.g. .../Input/t51.in
+        t_stdin.write(self.inp_fname + "\n")   # input file e.g. .../Input/t51.in
         t_stdin.write(self.id + ".out.eps\n")  # output file e.g. t51.out.eps
 
         inp_freq = os.path.join(self.inp_dir, self.id + ".in_freq")
-        inp_freq = self.cygwin_path(inp_freq)
         t_stdin.write(inp_freq + "\n")          # input freq file e.g Input/t51.in_freq
 
         inp_displ = os.path.join(self.inp_dir, self.id + ".in_displ")
-        if not os.path.isfile(inp_displ):
-            inp_displ = "no"
-        else:
-            inp_displ = self.cygwin_path(inp_displ)
+        if not os.path.isfile(inp_displ): inp_displ = "no"
         t_stdin.write(inp_displ + "\n")         # input displ file e.g Input/t51.in_displ
 
         return t_stdin.getvalue()
@@ -2765,7 +2827,7 @@ class ChainOfTests(object):
 
         self.inp_dir = tests[0].inp_dir
         self.suite_name = tests[0].suite_name
-        #
+
         # Consistency check.
         self._rid = genid()
         for t in tests:
@@ -2838,7 +2900,7 @@ class ChainOfTests(object):
     @property
     def ref_dir(self):
         ref_dirs = [test.ref_dir for test in self]
-        assert all(dir == ref_dirs[0] for dir in ref_dirs)
+        assert all(d == ref_dirs[0] for d in ref_dirs)
         return ref_dirs[0]
 
     def listoftests(self, width=100, html=True, abslink=True):
@@ -2916,8 +2978,7 @@ class ChainOfTests(object):
                     self._status = "passed"
                 elif all_fldstats != {"succeeded"}:
                     print(self)
-                    print("WARNING, expecting {'succeeded'} but got\n%s"
-                          % str(all_fldstats))
+                    print("WARNING, expecting {'succeeded'} but got\n%s" % str(all_fldstats))
                     self._status = "failed"
                 else:
                     self._status = "succeeded"
@@ -3085,10 +3146,8 @@ class AbinitTestSuite(object):
             )
 
         elif test_list is not None:
-            assert keywords is None, ("keywords argument is not expected with"
-                                      " test_list")
-            assert need_cpp_vars is None, ("need_cpp_vars argument is not"
-                                           " expected with test_list.")
+            assert keywords is None, ("keywords argument is not expected with test_list")
+            assert need_cpp_vars is None, ("need_cpp_vars argument is not expected with test_list.")
             self.tests = tuple(test_list)
 
     def __str__(self):
@@ -3105,8 +3164,9 @@ class AbinitTestSuite(object):
         for t in self.tests:
             yield t
 
-    def __getitem__(self, key):   # FIXME: this won't work for tutorial, paral and other test suites.
+    def __getitem__(self, key):
         """Called by self[key]."""
+        # FIXME: this won't work for tutorial, paral and other test suites.
         if isinstance(key, slice):
             return self.__getslice(key)
         else:
@@ -3119,8 +3179,7 @@ class AbinitTestSuite(object):
         stop = slice.stop
         if stop is None:
             stop = 10000  # Not very elegant, but cannot use len(self) since indices are not contiguous
-        assert slice.step is None, ("Slices with steps (e.g. [1:4:2]) are not"
-                                    " supported.")
+        assert slice.step is None, ("Slices with steps (e.g. [1:4:2]) are not  supported.")
 
         # Rules for the test id:
         # Simple case: t01, tgw1_1
@@ -3186,13 +3245,13 @@ class AbinitTestSuite(object):
 
     @property
     def need_cpp_vars(self):
-        vars = []
+        cpp_vars = []
         for test in self:
-            vars.extend(test.need_cpp_vars)
-        return set(vars)
+            cpp_vars.extend(test.need_cpp_vars)
+        return set(cpp_vars)
 
     def on_refslave(self):
-        """True if we are running on a reference slave e.g. testf."""
+        """True if we are running on a reference slave e.g. abiref."""
         try:
             return self._on_ref_slave
         except AttributeError:
@@ -3249,7 +3308,6 @@ class AbinitTestSuite(object):
             targz = tarfile.open(ofname, "w:gz")
 
             for test in self:
-
                 # Don't try to collect files for tests that are disabled or skipped.
                 if test.status in {"disabled", "skipped"}:
                     continue
@@ -3311,9 +3369,7 @@ class AbinitTestSuite(object):
         """
 
         def worker(qin, qout, print_lock, thread_mode=False):
-            done = {
-                'type': 'proc_done'
-            }
+            done = {'type': 'proc_done'}
             all_done = False
             try:
                 while not all_done and not (thread_mode and self._kill_me):
@@ -3324,9 +3380,7 @@ class AbinitTestSuite(object):
                         qout.put(runner(test, print_lock=print_lock))
             except EmptyQueueError:
                 # If that happen it is a probably a bug
-                done['error'] = RuntimeError(
-                    'Task queue is unexpectedly empty.'
-                )
+                done['error'] = RuntimeError('Task queue is unexpectedly empty.')
             except Exception as e:
                 # Any other error is reported
                 done['error'] = e
@@ -3341,15 +3395,15 @@ class AbinitTestSuite(object):
         task_q = Queue()
         res_q = Queue()
 
-        for test in self:  
+        for test in self:
             # fill the queue
             task_q.put(test)
 
-        for _ in range(nprocs):  
+        for _ in range(nprocs):
             # one end signal for each worker
             task_q.put(None)
 
-        for i in range(nprocs - 1):  
+        for i in range(nprocs - 1):
             # create and start subprocesses
             p = Process(target=worker, args=(task_q, res_q, print_lock))
             self._processes.append(p)
@@ -3397,6 +3451,7 @@ class AbinitTestSuite(object):
                 elif msg['type'] == 'result':
                     results[msg['id']] = msg
                     task_remaining -= 1
+
         except KeyboardInterrupt:
             self.terminate()
             raise KeyboardInterrupt()
@@ -3439,7 +3494,8 @@ class AbinitTestSuite(object):
         self.lock = NoErrorFileLock(os.path.join(workdir, "__run_tests_lock__"),
                                     timeout=3)
 
-        with self.lock as locked:  # aquire the global file lock
+        with self.lock as locked:
+            # aquire the global file lock
             if not locked:
                 msg = (
                     "Timeout occured while trying to acquire lock in:\n\t{}\n"
@@ -3585,10 +3641,7 @@ class AbinitTestSuite(object):
             with open(os.path.join(self.workdir, "results.txt"), "wt") as fh:
                 pprint_table(table, out=fh)
 
-            if hasattr(os, 'getlogin'):
-                username = os.getlogin()
-            else:
-                username = "No_username"
+            username = my_getlogin()
 
             # Create the HTML index.
             DNS = {

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_nucprop
 !! NAME
 !!  m_nucprop
@@ -8,7 +7,7 @@
 !!  electric field gradient and Fermi contact
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (MT, JWZ)
+!! Copyright (C) 1998-2020 ABINIT group (MT, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -331,7 +330,6 @@ contains
 !!***
 
 !!***
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/calc_fc
 !! NAME
 !! calc_fc

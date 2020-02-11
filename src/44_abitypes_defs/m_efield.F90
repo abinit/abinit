@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_efield
 !! NAME
 !!  m_efield
@@ -8,7 +7,7 @@
 !!  used to handle electric fields
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2019 ABINIT group (MJV)
+!! Copyright (C) 2011-2020 ABINIT group (MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

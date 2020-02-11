@@ -1,8 +1,8 @@
 
-.Version 6.10.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu4.4 computer) 
+.Version 8.11.14 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 15 Mar 2016.
-- ( at 20h45 )
+.Starting date : Sun 19 Jan 2020.
+- ( at 02h21 )
   
 - input  file    -> tmbt_4.in
 - output file    -> tmbt_4_MPI20.out
@@ -44,7 +44,7 @@ _ WF disk file :     29.555 Mbytes ; DEN or POT disk file :      0.744 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =112 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -58,7 +58,7 @@ _ WF disk file :     29.555 Mbytes ; DEN or POT disk file :      0.744 Mbytes.
           ecuteps      7.91303771E+00 Hartree
          ecutsigx      1.99927569E+01 Hartree
           ecutwfn      2.39922335E+01 Hartree
--          fftalg         112
+-          fftalg         312
          icutcoul           3
            irdscr           1
            irdwfk           1
@@ -108,7 +108,6 @@ P           mkmem           1
            symrel      1  0  0   0  1  0   0  0  1       1  0  0  -1 -1  0   0  0 -1
                        0  1  0  -1 -1  0   0  0  1       0  1  0   1  0  0   0  0 -1
                       -1 -1  0   1  0  0   0  0  1      -1 -1  0   0  1  0   0  0 -1
-         symsigma        1
            timopt          -1
             tnons      0.0000000  0.0000000  0.0000000     0.0000000 -0.0000000  0.0000000
                       -0.0000000  0.0000000 -0.3333333     0.0000000  0.0000000 -0.3333333
@@ -151,7 +150,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =   20   -> not optimal: autoparal keyword recommended in input file
+-   nproc =   20
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -184,7 +183,7 @@ P           mkmem           1
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm : epsatm=    1.43386982
+  pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -200,7 +199,7 @@ P           mkmem           1
     1  20.911  28.075    0   1.4482335        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     0.56990156784787    3.95561236318184    0.63894027514378   rchrg,fchrg,qchrg
- pspatm : epsatm=    1.57752239
+  pspatm : epsatm=    1.57752239
          --- l  ekb(1:nproj) -->
              0    5.670783
  pspatm: atomic psp has been read  and splines computed
@@ -255,9 +254,9 @@ P           mkmem           1
 
  === KS Band Gaps ===
   >>>> For spin  1
-   Minimum optical gap =   5.9799 [eV], located at k-point      :   0.0000  0.0000  0.0000
-   Fundamental gap     =   5.7134 [eV], Top of valence bands at :   0.2500  0.2500  0.0000
-                                        Bottom of conduction at :   0.0000  0.0000  0.0000
+   Minimum direct gap =   5.9799 [eV], located at k-point      :   0.0000  0.0000  0.0000
+   Fundamental gap    =   5.7134 [eV], Top of valence bands at :   0.2500  0.2500  0.0000
+                                       Bottom of conduction at :   0.0000  0.0000  0.0000
  SIGMA fundamental parameters:
  PLASMON POLE MODEL  1
  number of plane-waves for SigmaX                 3273
@@ -291,56 +290,66 @@ P           mkmem           1
 
  Perturbative Calculation
 
- k =    0.000   0.000   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-   23   1.518 -19.249 -24.827   4.468   0.811  -0.233 -20.149  -0.900   0.618
-   24   1.518 -19.249 -24.827   4.468   0.811  -0.233 -20.149  -0.900   0.618
-   25   7.498 -11.382  -6.602  -2.122   0.874  -0.144  -9.058   2.324   9.822
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    5.980
+QP_gap     :    9.204
+Delta_QP_KS:    3.224
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+       23   1.518 -19.249 -24.827   4.468   0.811  -0.233 -20.149  -0.900   0.618
+       24   1.518 -19.249 -24.827   4.468   0.811  -0.233 -20.149  -0.900   0.618
+       25   7.498 -11.382  -6.602  -2.122   0.874  -0.144  -9.058   2.324   9.822
+...
 
- E^0_gap          5.980
- E^GW_gap         9.204
- DeltaE^GW_gap    3.224
+--- !SelfEnergy_ee
+kpoint     : [   0.250,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    6.730
+QP_gap     :   10.072
+Delta_QP_KS:    3.342
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+       24   1.670 -19.561 -25.148   4.515   0.811  -0.234 -20.430  -0.869   0.801
+       25   8.400 -12.094  -7.180  -2.070   0.870  -0.150  -9.621   2.473  10.873
+...
 
+--- !SelfEnergy_ee
+kpoint     : [   0.500,    0.000,    0.000, ]
+spin       : 1
+KS_gap     :    8.032
+QP_gap     :   11.642
+Delta_QP_KS:    3.610
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+       24   1.777 -19.769 -25.354   4.542   0.810  -0.234 -20.614  -0.845   0.932
+       25   9.809 -12.688  -7.271  -2.219   0.865  -0.156  -9.923   2.765  12.574
+...
 
- k =    0.250   0.000   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-   24   1.670 -19.561 -25.148   4.515   0.811  -0.234 -20.430  -0.869   0.801
-   25   8.400 -12.094  -7.180  -2.070   0.870  -0.150  -9.621   2.473  10.873
+--- !SelfEnergy_ee
+kpoint     : [   0.250,    0.250,    0.000, ]
+spin       : 1
+KS_gap     :    7.878
+QP_gap     :   11.407
+Delta_QP_KS:    3.529
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+       24   1.785 -19.764 -25.338   4.536   0.811  -0.233 -20.606  -0.842   0.942
+       25   9.662 -12.655  -7.426  -2.122   0.865  -0.156  -9.968   2.687  12.349
+...
 
- E^0_gap          6.730
- E^GW_gap        10.072
- DeltaE^GW_gap    3.342
-
-
- k =    0.500   0.000   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-   24   1.777 -19.769 -25.354   4.542   0.810  -0.234 -20.614  -0.845   0.932
-   25   9.809 -12.688  -7.271  -2.219   0.865  -0.156  -9.923   2.765  12.574
-
- E^0_gap          8.032
- E^GW_gap        11.642
- DeltaE^GW_gap    3.610
-
-
- k =    0.250   0.250   0.000
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-   24   1.785 -19.764 -25.338   4.536   0.811  -0.233 -20.606  -0.842   0.942
-   25   9.662 -12.655  -7.426  -2.122   0.865  -0.156  -9.968   2.687  12.349
-
- E^0_gap          7.878
- E^GW_gap        11.407
- DeltaE^GW_gap    3.529
-
-
- k =    0.000   0.000   0.333
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-   24   1.746 -19.720 -25.330   4.538   0.810  -0.234 -20.588  -0.868   0.878
-   25   8.510 -12.177  -7.267  -2.056   0.869  -0.151  -9.696   2.481  10.991
-
- E^0_gap          6.764
- E^GW_gap        10.113
- DeltaE^GW_gap    3.349
-
+--- !SelfEnergy_ee
+kpoint     : [   0.000,    0.000,    0.333, ]
+spin       : 1
+KS_gap     :    6.764
+QP_gap     :   10.113
+Delta_QP_KS:    3.349
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+       24   1.746 -19.720 -25.330   4.538   0.810  -0.234 -20.588  -0.868   0.878
+       25   8.510 -12.177  -7.267  -2.056   0.869  -0.151  -9.696   2.481  10.991
+...
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -364,7 +373,7 @@ P           mkmem           1
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         112
+-          fftalg         312
          icutcoul           3
            irdscr           1
            irdwfk           1
@@ -416,7 +425,6 @@ P           mkmem           1
            symrel      1  0  0   0  1  0   0  0  1       1  0  0  -1 -1  0   0  0 -1
                        0  1  0  -1 -1  0   0  0  1       0  1  0   1  0  0   0  0 -1
                       -1 -1  0   1  0  0   0  0  1      -1 -1  0   0  1  0   0  0 -1
-         symsigma        1
            timopt          -1
             tnons      0.0000000  0.0000000  0.0000000     0.0000000 -0.0000000  0.0000000
                       -0.0000000  0.0000000 -0.3333333     0.0000000  0.0000000 -0.3333333
@@ -457,135 +465,121 @@ P           mkmem           1
 
  Test the timer : 
   a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
-- CPU time =    8.6339E-07 sec,    Wall time =    8.6462E-07 sec
+- CPU time =    1.8293E-06 sec,    Wall time =    1.8421E-06 sec
 
-- Total cpu        time (s,m,h):       1159.4       19.32      0.322
-- Total wall clock time (s,m,h):       1160.0       19.33      0.322
+- Total cpu        time (s,m,h):       1205.7       20.10      0.335
+- Total wall clock time (s,m,h):       1228.2       20.47      0.341
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 20, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           58.0, wall_time =           58.0
+- cpu_time =           59.2, wall_time =           61.5
 -
-- routine                        cpu     %       wall     %      number of calls  Gflops 
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- sigma/=fourdp                 57.608   5.0     57.636   5.0              1      -1.00    
-- pspini                         0.792   0.1      0.790   0.1              1      -1.00    
-- invars2                        0.120   0.0      0.119   0.0              1      -1.00    
-- timing timab                   0.112   0.0      0.112   0.0             13      -1.00    
-- ewald                          0.036   0.0      0.036   0.0              1      -1.00    
-- abinit(2)                      0.028   0.0      0.029   0.0              1      -1.00    
-- xc:pot/=fourdp                 0.024   0.0      0.016   0.0              2      -1.00    
-- fourdp                         0.008   0.0      0.015   0.0              5      -1.00    
-- mkcore                         0.008   0.0      0.007   0.0              1      -1.00    
-- symrhg(no FFT)                 0.008   0.0      0.006   0.0              1      -1.00    
-- kpgsph                         0.000   0.0      0.003   0.0             58      -1.00    
-- status                         0.000   0.0      0.000   0.0             18      -1.00    
-- getghc-other                   0.000   0.0      0.000   0.0             -1      -1.00    
-- dfpt_vtowfk(contrib)           0.000   0.0      0.000   0.0             -1      -1.00    
-- dfpt_cgwf-O(npw)               0.000   0.0      0.000   0.0             -1      -1.00    
-- vtowfk(ssdiag)                 0.000   0.0      0.000   0.0             -1      -1.00    
-- newkpt(excl. rwwf   )          0.000   0.0      0.000   0.0             -1      -1.00    
-- others (95)                    0.000   0.0      0.000   0.0             -1      -1.00    
+- sigma/=fourdp                 58.937   4.9     61.086   5.0              1      -1.00        0.96       0.96
+- ewald                          0.998   0.1      0.998   0.1              1      -1.00        1.00       1.00
+- pspini                         0.776   0.1      0.780   0.1              1      -1.00        1.00       1.00
+- timing timab                   0.105   0.0      0.106   0.0             11      -1.00        0.99       0.99
+- invars2                        0.074   0.0      0.075   0.0              1      -1.00        0.98       0.98
+- abinit(2)                      0.023   0.0      0.024   0.0              1      -1.00        0.95       0.95
+- fourdp                         0.015   0.0      0.015   0.0              5      -1.00        1.00       1.00
+- xc:pot/=fourdp                 0.014   0.0      0.014   0.0              2      -1.00        1.00       1.00
+- mkcore                         0.007   0.0      0.007   0.0              1      -1.00        1.00       1.00
+- symrhg(no FFT)                 0.005   0.0      0.005   0.0              1      -1.00        1.00       1.00
+- kpgsph                         0.004   0.0      0.004   0.0             58      -1.00        0.94       0.94
+- others (123)                   0.000   0.0      0.000   0.0             -1      -1.00        0.00       0.00
 -<END_TIMER>
 -
-- subtotal                      58.744   5.1     58.769   5.1
+- subtotal                      60.959   5.1     63.116   5.1                                  0.97       0.97
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 20, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =        1159.4, wall_time =        1160.0
+- cpu_time =        1205.7, wall_time =        1228.2
 -
-- routine                         cpu     %       wall     %      number of calls Gflops 
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- sigma/=fourdp               1152.244  99.4   1152.752  99.4             20      -1.00    
-- pspini                        15.476   1.3     15.481   1.3             20      -1.00    
-- invars2                        2.444   0.2      2.454   0.2             20      -1.00    
-- timing timab                   2.404   0.2      2.402   0.2            278      -1.00    
-- abinit(2)                      0.764   0.1      0.753   0.1             20      -1.00    
-- ewald                          0.736   0.1      0.728   0.1             20      -1.00    
-- xc:pot/=fourdp                 0.364   0.0      0.341   0.0             40      -1.00    
-- fourdp                         0.256   0.0      0.295   0.0            100      -1.00    
-- mkcore                         0.148   0.0      0.133   0.0             20      -1.00    
-- symrhg(no FFT)                 0.136   0.0      0.111   0.0             20      -1.00    
-- kpgsph                         0.024   0.0      0.065   0.0           1160      -1.00    
-- status                         0.000   0.0      0.000   0.0             18      -1.00    
-- getghc-other                   0.000   0.0      0.000   0.0            -20      -1.00    
-- dfpt_vtowfk(contrib)           0.000   0.0      0.000   0.0            -20      -1.00    
-- dfpt_cgwf-O(npw)               0.000   0.0      0.000   0.0            -20      -1.00    
-- vtowfk(ssdiag)                 0.000   0.0      0.000   0.0            -20      -1.00    
-- newkpt(excl. rwwf   )          0.000   0.0      0.000   0.0            -20      -1.00    
-- others (95)                    0.000   0.0      0.000   0.0             -1      -1.00    
+- sigma/=fourdp               1199.784  99.5   1221.807  99.5             20      -1.00        0.98       0.98
+- ewald                         19.959   1.7     19.964   1.6             20      -1.00        1.00       1.00
+- pspini                        15.613   1.3     15.668   1.3             20      -1.00        1.00       1.00
+- timing timab                   2.245   0.2      2.286   0.2            220      -1.00        0.98       0.98
+- invars2                        1.316   0.1      1.371   0.1             20      -1.00        0.96       0.96
+- abinit(2)                      0.354   0.0      0.376   0.0             20      -1.00        0.94       0.94
+- fourdp                         0.309   0.0      0.309   0.0            100      -1.00        1.00       1.00
+- xc:pot/=fourdp                 0.294   0.0      0.294   0.0             40      -1.00        1.00       1.00
+- mkcore                         0.136   0.0      0.136   0.0             20      -1.00        1.00       1.00
+- symrhg(no FFT)                 0.109   0.0      0.109   0.0             20      -1.00        1.00       1.00
+- kpgsph                         0.081   0.0      0.081   0.0           1160      -1.00        0.99       0.99
+- others (123)                   0.000   0.0      0.000   0.0             -1      -1.00        0.00       0.00
 -<END_TIMER>
 
-- subtotal                    1174.996 101.3   1175.515 101.3
+- subtotal                    1240.198 102.9   1262.401 102.8                                  0.98       0.98
 
  Partitioning of abinit
-- abinit                      1159.420 100.0   1159.953 100.0             20
+- abinit                      1205.750 100.0   1228.153 100.0             20                   0.98       0.98
  
-- abinit(1)                      0.356   0.0      0.359   0.0             20
-- abinit(2)                      0.764   0.1      0.753   0.1             20
-- indefo+macroin+invars2m        2.628   0.2      2.647   0.2             20
-- abinit(4)                      0.244   0.0      0.248   0.0             20
-- abinit(5)                      0.668   0.1      0.671   0.1             20
-- driver                      1152.348  99.4   1152.865  99.4             20
-- timing timab                   2.404   0.2      2.402   0.2            278
+- abinit(1)                      0.267   0.0      0.303   0.0             20                   0.88       0.88
+- abinit(2)                      0.354   0.0      0.376   0.0             20                   0.94       0.94
+- indefo+macroin+invars2m        1.556   0.1      1.630   0.1             20                   0.95       0.95
+- abinit(4)                      2.363   0.2      2.537   0.2             20                   0.93       0.93
+- abinit(5)                      1.226   0.1      1.284   0.1             20                   0.95       0.95
+- driver                      1199.892  99.5   1221.936  99.5             20                   0.98       0.98
+- timing timab                   2.245   0.2      2.286   0.2            220                   0.98       0.98
 
-- subtotal                    1159.420 100.0   1159.953 100.0
+- subtotal                    1205.750 100.0   1228.153 100.0                                  0.98       0.98
 
  Partitioning of driver
-- driver                      1152.348  99.4   1152.865  99.4             20
+- driver                      1199.892  99.5   1221.936  99.5             20                   0.98       0.98
  
-- sigma                       1152.288  99.4   1152.802  99.4             20
+- sigma                       1199.826  99.5   1221.849  99.5             20                   0.98       0.98
 
-- subtotal                    1152.348  99.4   1152.865  99.4
+- subtotal                    1199.892  99.5   1221.936  99.5                                  0.98       0.98
 
  Partitioning of sigma
-- sigma                       1152.288  99.4   1152.802  99.4             20
+- sigma                       1199.826  99.5   1221.849  99.5             20                   0.98       0.98
  
-- sigma(Init1)                  16.152   1.4     16.150   1.4             40
-- setup_sigma                    2.408   0.2      2.419   0.2             20
-- sigma(rdkss)                   2.632   0.2      2.637   0.2             20
-- sigma(make_vhxc)               5.128   0.4      5.120   0.4             20
-- sigma(vHxc_me)                 0.448   0.0      0.454   0.0             20
-- sigma(getW)                   13.336   1.2     13.349   1.2             20
-- sigma(calc_sigx_me)           27.384   2.4     27.379   2.4             20
-- sigma(calc_sigc_me)         1084.552  93.5   1085.039  93.5            100
+- sigma(Init1)                  16.021   1.3     16.082   1.3             40                   1.00       1.00
+- setup_sigma                   15.687   1.3     16.429   1.3             20                   0.95       0.95
+- sigma(rdkss)                   9.196   0.8      9.555   0.8             20                   0.96       0.96
+- sigma(make_vhxc)              24.026   2.0     24.041   2.0             20                   1.00       1.00
+- sigma(vHxc_me)                 0.415   0.0      0.415   0.0             20                   1.00       1.00
+- sigma(getW)                   19.975   1.7     39.586   3.2             20                   0.50       0.50
+- sigma(calc_sigx_me)           26.003   2.2     26.022   2.1             20                   1.00       1.00
+- sigma(calc_sigc_me)         1085.989  90.1   1086.491  88.5            100                   1.00       1.00
 
-- subtotal                    1152.084  99.4   1152.591  99.4
+- subtotal                    1197.348  99.3   1218.660  99.2                                  0.98       0.98
 
  Partitioning of calc_sigc_me
-- calc_sigc_me                1084.548  93.5   1085.039  93.5            100
+- calc_sigc_me                1085.988  90.1   1086.490  88.5            100                   1.00       1.00
  
-- calc_sigc_me(Init)             2.000   0.2      1.992   0.2            100
-- calc_sigc_me(Init q)          22.708   2.0     22.793   2.0           1940
-- calc_sigc_me(loop)           862.260  74.4    862.589  74.4           1940
-- calc_sigc_me(xmpi_sum)       197.044  17.0    197.084  17.0            100
+- calc_sigc_me(Init)             1.935   0.2      1.940   0.2            100                   1.00       1.00
+- calc_sigc_me(Init q)          22.566   1.9     22.586   1.8           1940                   1.00       1.00
+- calc_sigc_me(loop)           864.315  71.7    864.715  70.4           1940                   1.00       1.00
+- calc_sigc_me(xmpi_sum)       196.679  16.3    196.759  16.0            100                   1.00       1.00
 
-- subtotal                    1084.184  93.5   1084.688  93.5
+- subtotal                    1085.708  90.0   1086.214  88.4                                  1.00       1.00
 
  Partitioning of  fourdp (upwards partitioning)
-- fourdp                         0.256   0.0      0.295   0.0            100
+- fourdp                         0.309   0.0      0.309   0.0            100                   1.00       1.00
  
-- fourdp%(other)                 0.212   0.0      0.245   0.0             80
+- fourdp%(other)                 0.267   0.0      0.267   0.0             80                   1.00       1.00
 
-- subtotal                       0.256   0.0      0.295   0.0
+- subtotal                       0.309   0.0      0.309   0.0                                  1.00       1.00
 -
 -Synchronisation (=leave_test) and MPI calls 
-- communic.MPI                   0.016   0.0      0.013   0.0             20
+- communic.MPI                   0.032   0.0      0.032   0.0             20                   1.00       1.00
 -
--
-- subtotal                       0.000   0.0      0.000   0.0
+- subtotal                       0.000   0.0      0.000   0.0                                  0.00       0.00
 
  Additional information
-- timana(1)                      0.000   0.0      0.001   0.0             20
-- total timab                    2.428   0.2      2.427   0.2        3799756
-- status                         0.000   0.0      0.000   0.0             18
-- calc_sigc_me(1)                1.120   0.1      1.105   0.1           4850
-- calc_sigc_me(rho_tw_g)         6.952   0.6      7.149   0.6           4850
-- calc_sigc_me(2)              853.720  73.6    854.013  73.6          10150
-- calc_sigc_me(sigma_me)         0.356   0.0      0.269   0.0          10150
+- timana(1)                      0.002   0.0      0.002   0.0             20                   0.99       0.99
+- total timab                    2.317   0.2      2.360   0.2        1190140                   0.98       0.98
+- calc_sigc_me(1)                1.078   0.1      1.080   0.1           4850                   1.00       1.00
+- calc_sigc_me(rho_tw_g)         6.617   0.5      6.628   0.5           4850                   1.00       1.00
+- calc_sigc_me(2)              856.186  71.0    856.621  69.7          10150                   1.00       1.00
+- calc_sigc_me(sigma_me)         0.257   0.0      0.259   0.0          10150                   0.99       0.99
 
 
  Detailed analysis of some time consuming routines 
@@ -593,12 +587,12 @@ P           mkmem           1
                                  (sec)                (msec)              (microsec)
 - fourwf%(pot)                   0.000         0
 - fourwf%(den)                   0.000         0
-- fourdp                         0.256       100       2.560     97200       0.026
+- fourdp                         0.309       100       3.091     97200       0.032
 - nonlop(apply)                  0.000         0
 - nonlop(forces)                 0.000         0
 - nonlop(forstr)                 0.000         0
 - projbd                         0.000         0
-- xc:pot/=fourdp                 0.364        40       9.100     97200       0.094
+- xc:pot/=fourdp                 0.294        40       7.351     97200       0.076
 
 ================================================================================
 
@@ -615,46 +609,73 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] ABINIT : First-principles approach of materials and nanosystem properties.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
--
-- [2] A brief introduction to the ABINIT software package.
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - And optionally:
 -
-- [3] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
+- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
+- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
+- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
+- should be cited especially if you are using the GW part of ABINIT, as several authors
+- of this part are not in the list of authors of the first or third paper.
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
+- the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- [4] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=         58.0  wall=         58.0
+- Proc.   0 individual time (sec): cpu=         59.4  wall=         61.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       1159.5  wall=       1160.1
++Overall time at end (sec) : cpu=       1207.2  wall=       1229.6
