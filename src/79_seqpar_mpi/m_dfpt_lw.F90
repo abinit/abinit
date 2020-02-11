@@ -214,7 +214,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  integer,parameter :: re=1,im=2
  real(dp) :: boxcut,doti,dotr,dum_scl,ecut_eff,ecut,etotal,fermie,gsqcut,residm
  real(dp) :: vres2, wtk_k
- logical :: non_magnetic_xc,t_exist 
+ logical :: non_magnetic_xc
  character(len=500) :: msg                   
  character(len=fnlen) :: fi1o,fiwfatdis,fiwfefield,fiwfddk,fiwfdkdk
  type(ebands_t) :: bs_rbz
@@ -754,17 +754,23 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    !The value 20 is taken arbitrarily I would say
    forunit=20+pertcase
 
-   !Check that file exists and open it
-   t_exist=file_exists(fiwfatdis)
-   if (.not. t_exist) then
-     write(msg,"(3a)")"- File: ",trim(fiwfatdis)," does not exist."
-     MSG_BUG(msg)
-   else
-     write(msg, '(a,a)') '-open atomic displacement wf1 file :',trim(fiwfatdis)
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     call wfk_open_read(wfk_t_atdis(iatpert),fiwfatdis,formeig1,dtset%iomode,forunit,spaceworld)
+   !Check that atdis file exists and open it
+   if (.not. file_exists(fiwfatdis)) then
+     ! Trick needed to run Abinit test suite in netcdf mode.
+     if (file_exists(nctk_ncify(fiwfatdis))) then
+       write(msg,"(3a)")"- File: ",trim(fiwfatdis),&
+       " does not exist but found netcdf file with similar name."
+       call wrtout(std_out,msg,'COLL')
+       fiwfatdis = nctk_ncify(fiwfatdis)
+     end if
+     if (.not. file_exists(fiwfatdis)) then
+       MSG_ERROR('Missing file: '//TRIM(fiwfatdis))
+     end if
    end if
+   write(msg,'(a,a)')'-open atomic displacement wf1 file :',trim(fiwfatdis)
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wfk_open_read(wfk_t_atdis(iatpert),fiwfatdis,formeig1,dtset%iomode,forunit,spaceworld)
 
  end do 
 
@@ -780,16 +786,22 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    forunit=20+pertcase
 
    !Check that ddk file exists and open it
-   t_exist=file_exists(fiwfddk)
-   if (.not. t_exist) then
-     write(msg,"(3a)")"- File: ",trim(fiwfddk)," does not exist."
-     MSG_BUG(msg)
-   else
-     write(msg, '(a,a)') '-open ddk wf1 file :',trim(fiwfddk)
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     call wfk_open_read(wfk_t_ddk(iq1grad),fiwfddk,formeig1,dtset%iomode,forunit,spaceworld)
+   if (.not. file_exists(fiwfddk)) then
+     ! Trick needed to run Abinit test suite in netcdf mode.
+     if (file_exists(nctk_ncify(fiwfddk))) then
+       write(msg,"(3a)")"- File: ",trim(fiwfddk),&
+       " does not exist but found netcdf file with similar name."
+       call wrtout(std_out,msg,'COLL')
+       fiwfddk = nctk_ncify(fiwfddk)
+     end if
+     if (.not. file_exists(fiwfddk)) then
+       MSG_ERROR('Missing file: '//TRIM(fiwfddk))
+     end if
    end if
+   write(msg, '(a,a)') '-open ddk wf1 file :',trim(fiwfddk)
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wfk_open_read(wfk_t_ddk(iq1grad),fiwfddk,formeig1,dtset%iomode,forunit,spaceworld)
 
  end do 
 
@@ -803,17 +815,23 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    !The value 20 is taken arbitrarily I would say
    forunit=20+pertcase
 
-   !Check that file exists and open it
-   t_exist=file_exists(fiwfefield)
-   if (.not. t_exist) then
-     write(msg,"(3a)")"- File: ",trim(fiwfefield)," does not exist."
-     MSG_BUG(msg)
-   else
-     write(msg, '(a,a)') '-open electric field wf1 file :',trim(fiwfefield)
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-     call wfk_open_read(wfk_t_efield(iq2grad),fiwfefield,formeig1,dtset%iomode,forunit,spaceworld)
+   !Check that efield file exists and open it
+   if (.not. file_exists(fiwfefield)) then
+     ! Trick needed to run Abinit test suite in netcdf mode.
+     if (file_exists(nctk_ncify(fiwfefield))) then
+       write(msg,"(3a)")"- File: ",trim(fiwfefield),&
+       " does not exist but found netcdf file with similar name."
+       call wrtout(std_out,msg,'COLL')
+       fiwfefield = nctk_ncify(fiwfefield)
+     end if
+     if (.not. file_exists(fiwfefield)) then
+       MSG_ERROR('Missing file: '//TRIM(fiwfefield))
+     end if
    end if
+   write(msg, '(a,a)') '-open electric field wf1 file :',trim(fiwfefield)
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   call wfk_open_read(wfk_t_efield(iq2grad),fiwfefield,formeig1,dtset%iomode,forunit,spaceworld)
 
  end do
 
@@ -828,19 +846,41 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    forunit=20+pertcase
 
    !Check that file exists and open it
-   t_exist=file_exists(fiwfdkdk)
-   if (.not. t_exist) then
-     write(msg,"(3a)")"- File: ",trim(fiwfdkdk)," does not exist."
-     MSG_BUG(msg)
-   else
-     if (iq1q2grad <= 6) then
-       write(msg, '(a,a)') '-open d2_dkdk wf2 file :',trim(fiwfdkdk)
+!   t_exist=file_exists(fiwfdkdk)
+!   if (.not. t_exist) then
+!     write(msg,"(3a)")"- File: ",trim(fiwfdkdk)," does not exist."
+!     MSG_BUG(msg)
+!   else
+!     if (iq1q2grad <= 6) then
+!       write(msg, '(a,a)') '-open d2_dkdk wf2 file :',trim(fiwfdkdk)
+!       call wrtout(std_out,msg,'COLL')
+!       call wrtout(ab_out,msg,'COLL')
+!       call wfk_open_read(wfk_t_dkdk(iq1q2grad),fiwfdkdk,formeig1,dtset%iomode,forunit,spaceworld)
+!     else
+!       wfk_t_dkdk(iq1q2grad)=wfk_t_dkdk(iq1q2grad-3)
+!     end if
+!   end if
+
+   !Check that d2_ddk file exists and open it
+   if (.not. file_exists(fiwfdkdk)) then
+     ! Trick needed to run Abinit test suite in netcdf mode.
+     if (file_exists(nctk_ncify(fiwfdkdk))) then
+       write(msg,"(3a)")"- File: ",trim(fiwfdkdk),&
+       " does not exist but found netcdf file with similar name."
        call wrtout(std_out,msg,'COLL')
-       call wrtout(ab_out,msg,'COLL')
-       call wfk_open_read(wfk_t_dkdk(iq1q2grad),fiwfdkdk,formeig1,dtset%iomode,forunit,spaceworld)
-     else
-       wfk_t_dkdk(iq1q2grad)=wfk_t_dkdk(iq1q2grad-3)
+       fiwfdkdk = nctk_ncify(fiwfdkdk)
      end if
+     if (.not. file_exists(fiwfdkdk)) then
+       MSG_ERROR('Missing file: '//TRIM(fiwfdkdk))
+     end if
+   end if
+   if (iq1q2grad <= 6) then
+     write(msg, '(a,a)') '-open d2_dkdk wf2 file :',trim(fiwfdkdk)
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     call wfk_open_read(wfk_t_dkdk(iq1q2grad),fiwfdkdk,formeig1,dtset%iomode,forunit,spaceworld)
+   else
+     wfk_t_dkdk(iq1q2grad)=wfk_t_dkdk(iq1q2grad-3)
    end if
 
  end do
