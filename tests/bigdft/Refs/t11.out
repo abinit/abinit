@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 03h12 )
+- ( at 15h14 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t11/t11.in
 - output file    -> t11.out
@@ -145,8 +145,8 @@ natom     :        1
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  4.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   4.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [  18.00000,   18.00000,   18.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  -1.0, "pawecutdg":  -1.0, }
@@ -154,9 +154,9 @@ convergence: {
     "deltae": -8.09E-08, "res2":  1.04E-06, 
     "residm":  6.06E-05, "diffor":  0.00E+00, 
 }
-etotal    : -3.745592595084081E+000
-entropy   :  0.000000000000000E+000
-fermie    :  0.000000000000000E+000
+etotal    :  -3.74559260E+00
+entropy   :   0.00000000E+00
+fermie    :   0.00000000E+00
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
@@ -199,11 +199,11 @@ total_energy        : -3.74559259893037E+00
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.094967863543717E+000
-'Ion-ion energy'    :  0.000000000000000E+000
-psp_core            :  0.000000000000000E+000
-xc_dc               : -2.650617814414679E+000
-total_energy_dc     : -3.745585677958395E+000
+band_energy         : -1.09496786354372E+00
+'Ion-ion energy'    :  0.00000000000000E+00
+psp_core            :  0.00000000000000E+00
+xc_dc               : -2.65061781441468E+00
+total_energy_dc     : -3.74558567795839E+00
 ...
 
 
@@ -339,10 +339,10 @@ total_energy_dc     : -3.745585677958395E+000
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          9.0  wall=          9.1
+- Proc.   0 individual time (sec): cpu=          9.1  wall=          9.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.0  wall=          9.1
++Overall time at end (sec) : cpu=          9.1  wall=          9.2

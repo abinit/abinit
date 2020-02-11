@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 03h12 )
+- ( at 15h14 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t04/t04.in
 - output file    -> t04.out
@@ -195,8 +195,8 @@ natom     :        5
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  8.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   8.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [  20.50000,   20.50000,   20.50000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
@@ -204,18 +204,18 @@ convergence: {
     "deltae": -3.96E-07, "res2":  9.06E-07, 
     "residm":  2.67E-04, "diffor": undef, 
 }
-etotal    : -6.232100164938299E+000
-entropy   :  0.000000000000000E+000
-fermie    :  0.000000000000000E+000
+etotal    :  -6.23210016E+00
+entropy   :   0.00000000E+00
+fermie    :   0.00000000E+00
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces:
-- [-2.553518022450900E-006, -2.553518021411209E-006, -2.553518031689723E-006, ]
-- [-1.537302016813824E-004, -1.537302016842960E-004, -1.537302016842393E-004, ]
-- [ 1.552810254296697E-004,  1.552810254316519E-004, -1.542783311559368E-004, ]
-- [ 1.552810254307095E-004, -1.542783311584631E-004,  1.552810254345682E-004, ]
-- [-1.542783311565460E-004,  1.552810254325184E-004,  1.552810254372977E-004, ]
-force_length_stats: {"min":  4.422822957661535E-006, "max":  2.683769684318719E-004, "mean":  2.151644496439570E-004, }
+- [ -2.55351802E-06,  -2.55351802E-06,  -2.55351803E-06, ]
+- [ -1.53730202E-04,  -1.53730202E-04,  -1.53730202E-04, ]
+- [  1.55281025E-04,   1.55281025E-04,  -1.54278331E-04, ]
+- [  1.55281025E-04,  -1.54278331E-04,   1.55281025E-04, ]
+- [ -1.54278331E-04,   1.55281025E-04,   1.55281025E-04, ]
+force_length_stats: {"min":   4.42282296E-06, "max":   2.68376968E-04, "mean":   2.15164450E-04, }
 ...
 
 ================================================================================
@@ -282,11 +282,11 @@ total_energy        : -6.23210036072892E+00
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -2.872014679102924E+000
-'Ion-ion energy'    :  7.011681883082505E+000
-psp_core            :  0.000000000000000E+000
-xc_dc               : -1.037179653338375E+001
-total_energy_dc     : -6.232129329404171E+000
+band_energy         : -2.87201467910292E+00
+'Ion-ion energy'    :  7.01168188308251E+00
+psp_core            :  0.00000000000000E+00
+xc_dc               : -1.03717965333838E+01
+total_energy_dc     : -6.23212932940417E+00
 ...
 
 
@@ -436,10 +436,10 @@ total_energy_dc     : -6.232129329404171E+000
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         19.5  wall=         19.7
+- Proc.   0 individual time (sec): cpu=         20.0  wall=         20.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.5  wall=         19.7
++Overall time at end (sec) : cpu=         20.0  wall=         20.2

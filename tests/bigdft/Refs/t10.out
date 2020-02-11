@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 03h12 )
+- ( at 15h14 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t10/t10.in
 - output file    -> t10.out
@@ -161,8 +161,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  2.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   2.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [  17.00000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
@@ -170,15 +170,15 @@ convergence: {
     "deltae": -2.64E-08, "res2":  1.55E-06, 
     "residm":  8.32E-05, "diffor": undef, 
 }
-etotal    : -1.079739562993745E+000
-entropy   :  0.000000000000000E+000
-fermie    :  0.000000000000000E+000
+etotal    :  -1.07973956E+00
+entropy   :   0.00000000E+00
+fermie    :   0.00000000E+00
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces:
-- [-3.456990078982819E-001, -1.134588625052875E-007, -1.134588612661558E-007, ]
-- [ 3.456990078982819E-001,  1.134588625052872E-007,  1.134588612661558E-007, ]
-force_length_stats: {"min":  3.456990078983191E-001, "max":  3.456990078983191E-001, "mean":  3.456990078983191E-001, }
+- [ -3.45699008E-01,  -1.13458863E-07,  -1.13458861E-07, ]
+- [  3.45699008E-01,   1.13458863E-07,   1.13458861E-07, ]
+force_length_stats: {"min":   3.45699008E-01, "max":   3.45699008E-01, "mean":   3.45699008E-01, }
 ...
 
 
@@ -221,8 +221,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  2.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   2.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [  18.00000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
@@ -230,15 +230,15 @@ convergence: {
     "deltae": -1.76E-08, "res2":  1.04E-06, 
     "residm":  6.53E-05, "diffor": undef, 
 }
-etotal    : -1.129488627788018E+000
-entropy   :  0.000000000000000E+000
-fermie    :  0.000000000000000E+000
+etotal    :  -1.12948863E+00
+entropy   :   0.00000000E+00
+fermie    :   0.00000000E+00
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces:
-- [ 5.786606615065785E-002,  1.019875314526991E-008,  1.019875362713933E-008, ]
-- [-5.786606615065785E-002, -1.019875314527076E-008, -1.019875362713933E-008, ]
-force_length_stats: {"min":  5.786606615065965E-002, "max":  5.786606615065965E-002, "mean":  5.786606615065965E-002, }
+- [  5.78660662E-02,   1.01987531E-08,   1.01987536E-08, ]
+- [ -5.78660662E-02,  -1.01987531E-08,  -1.01987536E-08, ]
+force_length_stats: {"min":   5.78660662E-02, "max":   5.78660662E-02, "mean":   5.78660662E-02, }
 ...
 
 
@@ -284,8 +284,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  2.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   2.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
@@ -293,15 +293,15 @@ convergence: {
     "deltae": -3.63E-09, "res2":  2.05E-07, 
     "residm":  3.00E-05, "diffor": undef, 
 }
-etotal    : -1.134304402954460E+000
-entropy   :  0.000000000000000E+000
-fermie    :  0.000000000000000E+000
+etotal    :  -1.13430440E+00
+entropy   :   0.00000000E+00
+fermie    :   0.00000000E+00
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces:
-- [ 4.174920705387911E-002,  1.072648214039381E-007,  1.072648191806156E-007, ]
-- [-4.174920705387911E-002, -1.072648214039381E-007, -1.072648191806147E-007, ]
-force_length_stats: {"min":  4.174920705415471E-002, "max":  4.174920705415471E-002, "mean":  4.174920705415471E-002, }
+- [  4.17492071E-02,   1.07264821E-07,   1.07264819E-07, ]
+- [ -4.17492071E-02,  -1.07264821E-07,  -1.07264819E-07, ]
+force_length_stats: {"min":   4.17492071E-02, "max":   4.17492071E-02, "mean":   4.17492071E-02, }
 ...
 
 
@@ -347,8 +347,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  2.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   2.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
@@ -356,15 +356,15 @@ convergence: {
     "deltae": -5.05E-09, "res2":  2.88E-07, 
     "residm":  3.53E-05, "diffor": undef, 
 }
-etotal    : -1.137374740660535E+000
-entropy   :  0.000000000000000E+000
-fermie    :  0.000000000000000E+000
+etotal    :  -1.13737474E+00
+entropy   :   0.00000000E+00
+fermie    :   0.00000000E+00
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces:
-- [ 1.032763097575738E-002, -2.880309111928080E-008, -2.880309057387121E-008, ]
-- [-1.032763097575738E-002,  2.880309111927996E-008,  2.880309057387205E-008, ]
-force_length_stats: {"min":  1.032763097583771E-002, "max":  1.032763097583771E-002, "mean":  1.032763097583771E-002, }
+- [  1.03276310E-02,  -2.88030911E-08,  -2.88030906E-08, ]
+- [ -1.03276310E-02,   2.88030911E-08,   2.88030906E-08, ]
+force_length_stats: {"min":   1.03276310E-02, "max":   1.03276310E-02, "mean":   1.03276310E-02, }
 ...
 
 
@@ -409,8 +409,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  2.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   2.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
@@ -418,15 +418,15 @@ convergence: {
     "deltae": -1.60E-08, "res2":  3.78E-07, 
     "residm":  5.80E-05, "diffor": undef, 
 }
-etotal    : -1.137523412081220E+000
-entropy   :  0.000000000000000E+000
-fermie    :  0.000000000000000E+000
+etotal    :  -1.13752341E+00
+entropy   :   0.00000000E+00
+fermie    :   0.00000000E+00
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces:
-- [-2.509548193287309E-003, -4.851591882929182E-008, -4.851591807727479E-008, ]
-- [ 2.509548193287309E-003,  4.851591882929267E-008,  4.851591807727479E-008, ]
-force_length_stats: {"min":  2.509548194225245E-003, "max":  2.509548194225245E-003, "mean":  2.509548194225245E-003, }
+- [ -2.50954819E-03,  -4.85159188E-08,  -4.85159181E-08, ]
+- [  2.50954819E-03,   4.85159188E-08,   4.85159181E-08, ]
+force_length_stats: {"min":   2.50954819E-03, "max":   2.50954819E-03, "mean":   2.50954819E-03, }
 ...
 
 
@@ -470,8 +470,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  2.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   2.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
@@ -479,15 +479,15 @@ convergence: {
     "deltae": -1.59E-08, "res2":  1.87E-07, 
     "residm":  8.13E-05, "diffor": undef, 
 }
-etotal    : -1.137532227757771E+000
-entropy   :  0.000000000000000E+000
-fermie    :  0.000000000000000E+000
+etotal    :  -1.13753223E+00
+entropy   :   0.00000000E+00
+fermie    :   0.00000000E+00
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces:
-- [ 8.341052286868131E-005, -6.130841991351476E-009, -6.130839285239604E-009, ]
-- [-8.341052286868131E-005,  6.130841991351476E-009,  6.130839285240451E-009, ]
-force_length_stats: {"min":  8.341052331931039E-005, "max":  8.341052331931039E-005, "mean":  8.341052331931039E-005, }
+- [  8.34105229E-05,  -6.13084199E-09,  -6.13083929E-09, ]
+- [ -8.34105229E-05,   6.13084199E-09,   6.13083929E-09, ]
+force_length_stats: {"min":   8.34105233E-05, "max":   8.34105233E-05, "mean":   8.34105233E-05, }
 ...
 
 
@@ -529,8 +529,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  2.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   2.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
@@ -538,15 +538,15 @@ convergence: {
     "deltae": -2.13E-08, "res2":  2.72E-07, 
     "residm":  6.72E-05, "diffor": undef, 
 }
-etotal    : -1.137532236687753E+000
-entropy   :  0.000000000000000E+000
-fermie    :  0.000000000000000E+000
+etotal    :  -1.13753224E+00
+entropy   :   0.00000000E+00
+fermie    :   0.00000000E+00
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces:
-- [-7.532092109637945E-007, -9.303240750199252E-009, -9.303243100232872E-009, ]
-- [ 7.532092109637947E-007,  9.303240750199252E-009,  9.303243100232025E-009, ]
-force_length_stats: {"min":  7.533241109252644E-007, "max":  7.533241109252647E-007, "mean":  7.533241109252645E-007, }
+- [ -7.53209211E-07,  -9.30324075E-09,  -9.30324310E-09, ]
+- [  7.53209211E-07,   9.30324075E-09,   9.30324310E-09, ]
+force_length_stats: {"min":   7.53324111E-07, "max":   7.53324111E-07, "mean":   7.53324111E-07, }
 ...
 
 
@@ -622,11 +622,11 @@ total_energy        : -1.13753223817299E+00
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -7.446137836602902E-001
-'Ion-ion energy'    :  6.884259335247153E-001
-psp_core            :  0.000000000000000E+000
-xc_dc               : -1.081360427930538E+000
-total_energy_dc     : -1.137548278066113E+000
+band_energy         : -7.44613783660290E-01
+'Ion-ion energy'    :  6.88425933524715E-01
+psp_core            :  0.00000000000000E+00
+xc_dc               : -1.08136042793054E+00
+total_energy_dc     : -1.13754827806611E+00
 ...
 
  rms coord change=  6.9806E-03   atom, delta coord (reduced):
@@ -774,10 +774,10 @@ total_energy_dc     : -1.137548278066113E+000
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         18.5  wall=         18.8
+- Proc.   0 individual time (sec): cpu=         19.2  wall=         20.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.5  wall=         18.8
++Overall time at end (sec) : cpu=         19.2  wall=         20.5

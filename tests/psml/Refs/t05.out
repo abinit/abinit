@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 03h19 )
+- ( at 15h15 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/psml_t05/t05.in
 - output file    -> t05.out
@@ -240,8 +240,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  8.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   8.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
@@ -249,18 +249,18 @@ convergence: {
     "deltae":  1.78E-15, "res2":  5.82E-28, 
     "residm":  9.92E-14, "diffor": undef, 
 }
-etotal    : -8.418357046809909E+000
-entropy   :  0.000000000000000E+000
-fermie    :  1.617592811343273E-001
+etotal    :  -8.41835705E+00
+entropy   :   0.00000000E+00
+fermie    :   1.61759281E-01
 cartesian_stress_tensor:
-- [ 2.047407812297898E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  2.047407812297911E-004,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  2.047407812297915E-004, ]
-pressure_GPa: -6.023680736416241E+000
+- [  2.04740781E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.04740781E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.04740781E-04, ]
+pressure_GPa:  -6.0237E+00
 cartesian_forces:
-- [ 2.350759292209020E-026, -1.007468268089580E-026, -3.358227560298600E-027, ]
-- [-2.350759292209020E-026,  1.007468268089580E-026,  3.358227560298600E-027, ]
-force_length_stats: {"min":  2.579503534516275E-026, "max":  2.579503534516275E-026, "mean":  2.579503534516275E-026, }
+- [  2.35075929E-26,  -1.00746827E-26,  -3.35822756E-27, ]
+- [ -2.35075929E-26,   1.00746827E-26,   3.35822756E-27, ]
+force_length_stats: {"min":   2.57950353E-26, "max":   2.57950353E-26, "mean":   2.57950353E-26, }
 ...
 
  Integrated electronic density in atomic spheres:

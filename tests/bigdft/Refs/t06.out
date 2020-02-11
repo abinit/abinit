@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 03h12 )
+- ( at 15h14 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t06/t06.in
 - output file    -> t06.out
@@ -178,8 +178,8 @@ natom     :        3
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  8.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   8.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [   5.66918,   14.35000,    5.66918, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  -1.0, "pawecutdg":  -1.0, }
@@ -187,16 +187,16 @@ convergence: {
     "deltae": -4.25E-08, "res2":  1.07E-05, 
     "residm":  6.61E-05, "diffor": undef, 
 }
-etotal    : -1.718347814503169E+001
-entropy   :  0.000000000000000E+000
-fermie    :  0.000000000000000E+000
+etotal    :  -1.71834781E+01
+entropy   :   0.00000000E+00
+fermie    :   0.00000000E+00
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces:
-- [ 4.793804305108531E-002, -2.189375494970427E-002, -1.216878437657487E-007, ]
-- [-4.793811347119010E-002, -2.189374382897169E-002, -1.386317192618646E-007, ]
-- [ 7.042010478721471E-008,  4.378749877867596E-002,  2.603195630276132E-007, ]
-force_length_stats: {"min":  4.378749877950639E-002, "max":  5.270103169810390E-002, "mean":  4.972983424660041E-002, }
+- [  4.79380431E-02,  -2.18937549E-02,  -1.21687844E-07, ]
+- [ -4.79381135E-02,  -2.18937438E-02,  -1.38631719E-07, ]
+- [  7.04201048E-08,   4.37874988E-02,   2.60319563E-07, ]
+force_length_stats: {"min":   4.37874988E-02, "max":   5.27010317E-02, "mean":   4.97298342E-02, }
 ...
 
 ================================================================================
@@ -254,11 +254,11 @@ total_energy        : -1.71834781533207E+01
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -3.992831789673521E+000
-Ewald energy        : -1.521589032005192E+001
-psp_core            :  0.000000000000000E+000
-xc_dc               :  2.025386277516137E+000
-total_energy_dc     : -1.718333583220930E+001
+band_energy         : -3.99283178967352E+00
+Ewald energy        : -1.52158903200519E+01
+psp_core            :  0.00000000000000E+00
+xc_dc               :  2.02538627751614E+00
+total_energy_dc     : -1.71833358322093E+01
 ...
 
 
@@ -400,10 +400,10 @@ total_energy_dc     : -1.718333583220930E+001
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          7.8  wall=          8.0
+- Proc.   0 individual time (sec): cpu=          7.9  wall=          8.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.8  wall=          8.0
++Overall time at end (sec) : cpu=          7.9  wall=          8.0

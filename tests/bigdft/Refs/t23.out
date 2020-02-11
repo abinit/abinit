@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 03h12 )
+- ( at 15h14 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t23/t23.in
 - output file    -> t23.out
@@ -185,8 +185,8 @@ natom     :        1
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  1.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   1.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [   7.00000,    7.00000,    7.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  10.0, "pawecutdg":  20.0, }
@@ -194,9 +194,9 @@ convergence: {
     "deltae": -1.08E-04, "res2":  5.75E-05, 
     "residm":  4.82E-09, "diffor":  0.00E+00, 
 }
-etotal    : -4.764234993572253E-001
-entropy   :  0.000000000000000E+000
-fermie    : -2.940175645782249E-001
+etotal    :  -4.76423499E-01
+entropy   :   0.00000000E+00
+fermie    :  -2.94017565E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
@@ -261,13 +261,13 @@ total_energy_eV     : -1.29923154963701E+01
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -2.940175645782249E-001
-'Ion-ion energy'    :  0.000000000000000E+000
-psp_core            :  0.000000000000000E+000
-xc_dc               : -1.823814846775577E-001
-spherical_terms     : -2.445010144266901E-005
-total_energy_dc     : -4.764234993572253E-001
-total_energy_dc_eV  : -1.299231549637008E+001
+band_energy         : -2.94017564578225E-01
+'Ion-ion energy'    :  0.00000000000000E+00
+psp_core            :  0.00000000000000E+00
+xc_dc               : -1.82381484677558E-01
+spherical_terms     : -2.44501014426690E-05
+total_energy_dc     : -4.76423499357225E-01
+total_energy_dc_eV  : -1.29923154963701E+01
 ...
 
 

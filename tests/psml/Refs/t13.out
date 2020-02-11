@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 03h19 )
+- ( at 15h15 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/psml_t13/t13.in
 - output file    -> t13.out
@@ -368,8 +368,8 @@ natom     :        1
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  1.900000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   1.90000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [   5.45185,    5.45185,    5.45185, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":   9.0, "pawecutdg":  -1.0, }
@@ -377,17 +377,17 @@ convergence: {
     "deltae": -2.83E-08, "res2":  6.65E-08, 
     "residm":  1.79E-06, "diffor": undef, 
 }
-etotal    : -1.454623141148916E+002
-entropy   :  0.000000000000000E+000
-fermie    :  5.213409150375744E-001
+etotal    :  -1.45462314E+02
+entropy   :   0.00000000E+00
+fermie    :   5.21340915E-01
 cartesian_stress_tensor:
-- [-3.219525836877790E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000, -3.219525836877790E-004,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000, -3.219525836877790E-004, ]
-pressure_GPa:  9.472170442794662E+000
+- [ -3.21952584E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -3.21952584E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -3.21952584E-04, ]
+pressure_GPa:   9.4722E+00
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -773,10 +773,10 @@ P           mkmem         110
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         21.9  wall=         22.2
+- Proc.   0 individual time (sec): cpu=         21.3  wall=         21.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         21.9  wall=         22.2
++Overall time at end (sec) : cpu=         21.3  wall=         21.5
