@@ -2919,8 +2919,8 @@ subroutine qmatrix(cg,dtefield,qmat,mpi_enreg,mpw,mpw1,mkmem,mband,mband_mem,npw
          jband_me = 0
          do jband = 1, dtefield%nband_occ(isppol)
            if (band_procs(jband) == me_band) then
-             vect2(:,1:npw_k2) = cg(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
              jband_me = jband_me + 1
+             vect2(:,1:npw_k2) = cg(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
            end if
            call xmpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
 
