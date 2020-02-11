@@ -64,7 +64,7 @@ rprim3     0.                     0.70710678118654757    0.70710678118654757
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tffield_4.out, tolnlines=  0, tolabs=  0.000e+00, tolrel=  0.000e+00
+#%%   tffield_4.out, tolnlines=  3, tolabs=  0.000e+00, tolrel=  0.000e+00
 #%% psp_files =  13al.pspnc, 33as.pspnc
 #%% [paral_info]
 #%% max_nprocs = 2

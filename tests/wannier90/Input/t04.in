@@ -54,7 +54,7 @@ shiftk
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = t04.out, tolnlines=   250,   tolabs=  0.20,   tolrel=  2.00
+#%% files_to_test = t04.out, tolnlines=   260,   tolabs=  0.20,   tolrel=  2.00
 #%% psp_files= Fe.GGA_PBE-JTH.xml
 #%% extra_inputs = t04o_w90_up.win, t04o_w90_down.win
 #%% [paral_info]
