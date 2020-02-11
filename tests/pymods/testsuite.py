@@ -1990,6 +1990,14 @@ class BaseTest(object):
                 self.cprint(self.full_id + "[run_etime: %s s]: " % sec2str(self.run_etime) + msg,
                             status2txtcolor[status])
 
+                # Print message for users running the test suite on their machine
+                # if the test failed and we have exclusion rules on the ABINIT testfarm.
+                if status == "failed" and (self.exclude_hosts or self.exclude_builders):
+                    print("\tTest %s failed but note that the feature being tested is not portable" % self.full_id)
+                    print("\tas this test is partly disabled on the Abinit testfarm.")
+                    if self.exclude_hosts: print("\texclude_hosts:", self.exclude_hosts)
+                    if self.exclude_builders: print("\texclude_builder:", self.exclude_builders)
+
             # Check if the test is expected to fail.
             if runner.retcode == 124:
                 self._status = "failed"

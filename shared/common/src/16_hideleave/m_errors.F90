@@ -1502,7 +1502,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
        '   As a help for debugging, you might set call abimem_init(2) in the main program,', ch10, &
        '   or use the command line option `abinit --abimem-level 2`', ch10, &
        '   then use tests/Scripts/abimem.py to analyse the file abimem_rank[num].mocc that has been created,',ch10, &
-       '   e.g. from tests/Scripts issue the command: ./abimem.py leaks ../<dir>/<subdir>/abimem_rank0.mocc .',ch10, &
+       '   e.g. from tests/Scripts issue the command: ./abimem.py leaks ../<dir>/<subdir>/abimem_rank0.mocc',ch10, &
        '   Note that abimem files can easily be multiple GB in size so do not use this option normally!'
      ! And this will make the code call mpi_abort if the leak occurs on my_rank != master
      ierr = ierr + 1
