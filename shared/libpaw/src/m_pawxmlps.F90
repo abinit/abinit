@@ -2679,6 +2679,7 @@ end subroutine paw_setup_copy
      end if
      cycle
    end if
+
 !  --Read the Atompaw input file
    ir=0
    if ((line(1:13)=='<!-- Program:').and.(ir==1)) then
