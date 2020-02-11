@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h13 )
+- ( at 14h32 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t17/t17.in
 - output file    -> t17.out
@@ -471,8 +471,8 @@ natom     :        1
 nsppol    :        2
 nspinor   :        1
 nspden    :        2
-nelect    :  5.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   5.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":   8.0, "pawecutdg":  -1.0, }
@@ -480,17 +480,17 @@ convergence: {
     "deltae": -1.99E-11, "res2":  2.14E-07, 
     "residm":  1.54E-13, "diffor": undef, 
 }
-etotal    : -5.466896164636947E+000
-entropy   :  0.000000000000000E+000
-fermie    :  7.516173729960637E-002
+etotal    :  -5.46689616E+00
+entropy   :   0.00000000E+00
+fermie    :   7.51617373E-02
 cartesian_stress_tensor:
-- [-4.690532318722503E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000, -4.690532318722503E-005,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000, -4.690532318722508E-005, ]
-pressure_GPa:  1.380002020218697E+000
+- [ -4.69053232E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -4.69053232E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -4.69053232E-05, ]
+pressure_GPa:   1.3800E+00
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -631,8 +631,8 @@ natom     :        1
 nsppol    :        2
 nspinor   :        1
 nspden    :        2
-nelect    :  5.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   5.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":   8.0, "pawecutdg":  -1.0, }
@@ -640,17 +640,17 @@ convergence: {
     "deltae": -1.87E-13, "res2":  5.55E-11, 
     "residm":  6.09E-17, "diffor": undef, 
 }
-etotal    : -5.466896164649366E+000
-entropy   :  0.000000000000000E+000
-fermie    :  2.509980066417014E-001
+etotal    :  -5.46689616E+00
+entropy   :   0.00000000E+00
+fermie    :   2.50998007E-01
 cartesian_stress_tensor:
-- [-4.690200170123481E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000, -4.690200170123481E-005,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000, -4.690200170123481E-005, ]
-pressure_GPa:  1.379904298743496E+000
+- [ -4.69020017E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -4.69020017E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -4.69020017E-05, ]
+pressure_GPa:   1.3799E+00
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -805,8 +805,8 @@ natom     :        1
 nsppol    :        1
 nspinor   :        2
 nspden    :        4
-nelect    :  5.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   5.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":   8.0, "pawecutdg":  -1.0, }
@@ -814,17 +814,17 @@ convergence: {
     "deltae": -3.38E-10, "res2":  1.15E-06, 
     "residm":  2.26E-05, "diffor": undef, 
 }
-etotal    : -5.064679187258490E+000
-entropy   :  0.000000000000000E+000
-fermie    : -5.574100586688975E-001
+etotal    :  -5.06467919E+00
+entropy   :   0.00000000E+00
+fermie    :  -5.57410059E-01
 cartesian_stress_tensor:
-- [-1.511509608417253E-005,  8.221779186854083E-011, -5.130780836071959E-010, ]
-- [ 8.221779186854083E-011, -1.511518533763056E-005, -3.576573267160147E-010, ]
-- [-5.130780836071959E-010, -3.576573267160147E-010, -1.511488799400427E-005, ]
-pressure_GPa:  4.447002397517240E-001
+- [ -1.51150961E-05,   8.22177919E-11,  -5.13078084E-10, ]
+- [  8.22177919E-11,  -1.51151853E-05,  -3.57657327E-10, ]
+- [ -5.13078084E-10,  -3.57657327E-10,  -1.51148880E-05, ]
+pressure_GPa:   4.4470E-01
 cartesian_forces:
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -965,8 +965,8 @@ natom     :        1
 nsppol    :        1
 nspinor   :        2
 nspden    :        4
-nelect    :  5.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   5.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":   8.0, "pawecutdg":  -1.0, }
@@ -974,17 +974,17 @@ convergence: {
     "deltae": -3.11E-13, "res2":  4.07E-10, 
     "residm":  2.36E-07, "diffor": undef, 
 }
-etotal    : -5.064681171183913E+000
-entropy   :  0.000000000000000E+000
-fermie    : -5.086343805482463E-001
+etotal    :  -5.06468117E+00
+entropy   :   0.00000000E+00
+fermie    :  -5.08634381E-01
 cartesian_stress_tensor:
-- [-1.513025823309791E-005, -5.447167883036703E-012,  9.947947265699892E-012, ]
-- [-5.447167883036703E-012, -1.513025819455555E-005,  1.140488523726114E-011, ]
-- [ 9.947947265699892E-012,  1.140488523726114E-011, -1.513025949215907E-005, ]
-pressure_GPa:  4.451475029007347E-001
+- [ -1.51302582E-05,  -5.44716788E-12,   9.94794727E-12, ]
+- [ -5.44716788E-12,  -1.51302582E-05,   1.14048852E-11, ]
+- [  9.94794727E-12,   1.14048852E-11,  -1.51302595E-05, ]
+pressure_GPa:   4.4515E-01
 cartesian_forces:
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -1131,8 +1131,8 @@ natom     :        1
 nsppol    :        1
 nspinor   :        2
 nspden    :        4
-nelect    :  5.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   5.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":   8.0, "pawecutdg":  -1.0, }
@@ -1140,17 +1140,17 @@ convergence: {
     "deltae": -3.38E-10, "res2":  1.15E-06, 
     "residm":  2.26E-05, "diffor": undef, 
 }
-etotal    : -5.064679187258490E+000
-entropy   :  0.000000000000000E+000
-fermie    : -5.574100586688975E-001
+etotal    :  -5.06467919E+00
+entropy   :   0.00000000E+00
+fermie    :  -5.57410059E-01
 cartesian_stress_tensor:
-- [-1.511509608417253E-005,  8.221779186854083E-011, -5.130780836071959E-010, ]
-- [ 8.221779186854083E-011, -1.511518533763056E-005, -3.576573267160147E-010, ]
-- [-5.130780836071959E-010, -3.576573267160147E-010, -1.511488799400427E-005, ]
-pressure_GPa:  4.447002397517240E-001
+- [ -1.51150961E-05,   8.22177919E-11,  -5.13078084E-10, ]
+- [  8.22177919E-11,  -1.51151853E-05,  -3.57657327E-10, ]
+- [ -5.13078084E-10,  -3.57657327E-10,  -1.51148880E-05, ]
+pressure_GPa:   4.4470E-01
 cartesian_forces:
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -1291,8 +1291,8 @@ natom     :        1
 nsppol    :        1
 nspinor   :        2
 nspden    :        4
-nelect    :  5.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   5.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":   8.0, "pawecutdg":  -1.0, }
@@ -1300,17 +1300,17 @@ convergence: {
     "deltae": -3.11E-13, "res2":  4.07E-10, 
     "residm":  2.36E-07, "diffor": undef, 
 }
-etotal    : -5.064681171183913E+000
-entropy   :  0.000000000000000E+000
-fermie    : -5.086343805482463E-001
+etotal    :  -5.06468117E+00
+entropy   :   0.00000000E+00
+fermie    :  -5.08634381E-01
 cartesian_stress_tensor:
-- [-1.513025823309791E-005, -5.447167883036703E-012,  9.947947265699892E-012, ]
-- [-5.447167883036703E-012, -1.513025819455555E-005,  1.140488523726114E-011, ]
-- [ 9.947947265699892E-012,  1.140488523726114E-011, -1.513025949215907E-005, ]
-pressure_GPa:  4.451475029007347E-001
+- [ -1.51302582E-05,  -5.44716788E-12,   9.94794727E-12, ]
+- [ -5.44716788E-12,  -1.51302582E-05,   1.14048852E-11, ]
+- [  9.94794727E-12,   1.14048852E-11,  -1.51302595E-05, ]
+pressure_GPa:   4.4515E-01
 cartesian_forces:
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -1710,10 +1710,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          7.6  wall=          7.8
+- Proc.   0 individual time (sec): cpu=          9.3  wall=         10.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.6  wall=          7.8
++Overall time at end (sec) : cpu=          9.3  wall=         10.9

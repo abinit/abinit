@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h13 )
+- ( at 14h33 )
   
  ECHO of the INPUT
  ************************
@@ -417,8 +417,8 @@ Volume of the Bader atom:      1     15.92950636
 
  Time needed (seconds) - total, CP analyse, SURF determination:
 
--               8.68153564      3.96945475      4.69082975
+-              11.64481068      4.95825100      6.66157532
 
-+Total cpu time      8.682  and wall time      8.712 sec
++Total cpu time     11.645  and wall time     11.888 sec
 
  aim : the run completed succesfully.

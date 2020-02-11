@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h41 )
+- ( at 14h44 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/fast_t26/t26.in
 - output file    -> t26.out
@@ -193,8 +193,8 @@ natom     :        1
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  1.600000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   1.60000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [   7.32421,    7.32421,    7.32421, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
@@ -202,17 +202,17 @@ convergence: {
     "deltae": -1.09E-12, "res2":  8.69E-12, 
     "residm":  1.13E-13, "diffor": undef, 
 }
-etotal    : -7.110060532654526E+001
-entropy   :  0.000000000000000E+000
-fermie    :  2.269968413644491E-002
+etotal    :  -7.11006053E+01
+entropy   :   0.00000000E+00
+fermie    :   2.26996841E-02
 cartesian_stress_tensor:
-- [ 1.443250203362348E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  1.443250203362337E-003,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.443250203362341E-003, ]
-pressure_GPa: -4.246187982483673E+001
+- [  1.44325020E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.44325020E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.44325020E-03, ]
+pressure_GPa:  -4.2462E+01
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:

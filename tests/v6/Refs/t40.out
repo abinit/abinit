@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h13 )
+- ( at 14h33 )
   
 
 ================================================================================
@@ -186,10 +186,10 @@
      7        1.453568E-02        1.763504E-05
      8        4.291346E-03        6.245259E-06
 -
-- Proc.   0 individual time (sec): cpu=          0.1  wall=          0.1
+- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
 
 ================================================================================
 
-+Total cpu time      0.130  and wall time      0.133 sec
++Total cpu time      0.173  and wall time      0.179 sec
 
  anaddb : the run completed succesfully.

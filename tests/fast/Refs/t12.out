@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h41 )
+- ( at 14h44 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/fast_t03-t05-t06-t07-t08-t09-t11-t12-t14-t16/t12.in
 - output file    -> t12.out
@@ -156,8 +156,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  8.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   8.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":   5.8, "pawecutdg":  -1.0, }
@@ -165,9 +165,9 @@ convergence: {
     "deltae":  0.00E+00, "res2":  0.00E+00, 
     "residm":  8.29E-13, "diffor":  0.00E+00, 
 }
-etotal    : -8.858247941756590E+000
-entropy   :  0.000000000000000E+000
-fermie    :  0.000000000000000E+000
+etotal    :  -8.85824794E+00
+entropy   :   0.00000000E+00
+fermie    :   0.00000000E+00
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null

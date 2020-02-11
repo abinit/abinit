@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h12 )
+- ( at 14h32 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t72/t72.in
 - output file    -> t72.out
@@ -339,8 +339,8 @@ natom     :        1
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  1.100000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   1.10000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [   5.45179,    5.45179,    5.45179, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
@@ -348,17 +348,17 @@ convergence: {
     "deltae": -1.98E-06, "res2":  6.43E-06, 
     "residm":  3.09E-08, "diffor": undef, 
 }
-etotal    : -3.538026142361647E+001
-entropy   :  0.000000000000000E+000
-fermie    :  3.346762452432450E-002
+etotal    :  -3.53802614E+01
+entropy   :   0.00000000E+00
+fermie    :   3.34676245E-02
 cartesian_stress_tensor:
-- [ 3.035245985389633E-002,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  3.035245985389633E-002,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.035245985389633E-002, ]
-pressure_GPa: -8.930000492650238E+002
+- [  3.03524599E-02,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.03524599E-02,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.03524599E-02, ]
+pressure_GPa:  -8.9300E+02
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -471,8 +471,8 @@ natom     :        1
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  1.100000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   1.10000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [   5.45179,    5.45179,    5.45179, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
@@ -480,9 +480,9 @@ convergence: {
     "deltae":  0.00E+00, "res2":  0.00E+00, 
     "residm":  5.78E-06, "diffor":  0.00E+00, 
 }
-etotal    : -3.538026142361647E+001
-entropy   :  0.000000000000000E+000
-fermie    :  3.346762452432450E-002
+etotal    :  -3.53802614E+01
+entropy   :   0.00000000E+00
+fermie    :   3.34676245E-02
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
@@ -1060,10 +1060,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          4.9
+- Proc.   0 individual time (sec): cpu=          1.9  wall=          6.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.7  wall=          4.9
++Overall time at end (sec) : cpu=          1.9  wall=          6.7

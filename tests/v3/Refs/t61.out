@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h07 )
+- ( at 14h27 )
   
 
   What is the name of the 3D function (density, potential or wavef) file ?
@@ -200,7 +200,7 @@
    Spin-component number     1
       Dot product of values, mean, mean times cell volume=    1.598621E+02    3.426400E-03    9.831462E-01
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.2
+- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.3
 
   Thank you for using me
 

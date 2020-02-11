@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h06 )
+- ( at 14h27 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v3_t45/t45.in
 - output file    -> t45.out
@@ -377,8 +377,8 @@ natom     :        9
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  3.400000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   3.40000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
@@ -386,25 +386,25 @@ convergence: {
     "deltae":  7.11E-14, "res2":  1.08E-16, 
     "residm":  9.88E-14, "diffor": undef, 
 }
-etotal    : -3.619175487761373E+001
-entropy   :  0.000000000000000E+000
-fermie    :  2.786348797984822E-001
+etotal    :  -3.61917549E+01
+entropy   :   0.00000000E+00
+fermie    :   2.78634880E-01
 cartesian_stress_tensor:
-- [ 7.210036178712025E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  7.210036178712030E-005,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  7.210036178712030E-005, ]
-pressure_GPa: -2.121265523053128E+000
+- [  7.21003618E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   7.21003618E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   7.21003618E-05, ]
+pressure_GPa:  -2.1213E+00
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000,  3.764590876685779E-022, ]
-- [ 5.481404734828244E-006,  5.481404734828243E-006,  5.481404734828244E-006, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000,  3.764590876685779E-022, ]
-- [ 5.481404734828244E-006, -5.481404734828244E-006, -5.481404734828246E-006, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000,  3.764590876685779E-022, ]
-- [-5.481404734828244E-006,  5.481404734828244E-006, -5.481404734828246E-006, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000,  3.764590876685779E-022, ]
-- [-5.481404734828244E-006, -5.481404734828243E-006,  5.481404734828244E-006, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000,  3.764590876685779E-022, ]
-force_length_stats: {"min":  3.764590876685779E-022, "max":  9.494071497571129E-006, "mean":  4.219587332253835E-006, }
+- [ -0.00000000E+00,  -0.00000000E+00,   3.76459088E-22, ]
+- [  5.48140473E-06,   5.48140473E-06,   5.48140473E-06, ]
+- [ -0.00000000E+00,  -0.00000000E+00,   3.76459088E-22, ]
+- [  5.48140473E-06,  -5.48140473E-06,  -5.48140473E-06, ]
+- [ -0.00000000E+00,  -0.00000000E+00,   3.76459088E-22, ]
+- [ -5.48140473E-06,   5.48140473E-06,  -5.48140473E-06, ]
+- [ -0.00000000E+00,  -0.00000000E+00,   3.76459088E-22, ]
+- [ -5.48140473E-06,  -5.48140473E-06,   5.48140473E-06, ]
+- [ -0.00000000E+00,  -0.00000000E+00,   3.76459088E-22, ]
+force_length_stats: {"min":   3.76459088E-22, "max":   9.49407150E-06, "mean":   4.21958733E-06, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -585,8 +585,8 @@ natom     :        9
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  3.400000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   3.40000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
@@ -594,9 +594,9 @@ convergence: {
     "deltae":  0.00E+00, "res2":  0.00E+00, 
     "residm":  9.30E-12, "diffor":  0.00E+00, 
 }
-etotal    : -3.619175487761373E+001
-entropy   :  0.000000000000000E+000
-fermie    :  2.786348797984822E-001
+etotal    :  -3.61917549E+01
+entropy   :   0.00000000E+00
+fermie    :   2.78634880E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
@@ -726,8 +726,8 @@ natom     :        9
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  3.400000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   3.40000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
@@ -735,9 +735,9 @@ convergence: {
     "deltae":  0.00E+00, "res2":  0.00E+00, 
     "residm":  4.35E-06, "diffor":  0.00E+00, 
 }
-etotal    : -3.619175487761373E+001
-entropy   :  0.000000000000000E+000
-fermie    :  2.786348797984822E-001
+etotal    :  -3.61917549E+01
+entropy   :   0.00000000E+00
+fermie    :   2.78634880E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
@@ -857,8 +857,8 @@ natom     :        9
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  3.400000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   3.40000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
@@ -866,9 +866,9 @@ convergence: {
     "deltae":  0.00E+00, "res2":  0.00E+00, 
     "residm":  8.72E-11, "diffor":  0.00E+00, 
 }
-etotal    : -3.619175487761373E+001
-entropy   :  0.000000000000000E+000
-fermie    :  2.786348797984822E-001
+etotal    :  -3.61917549E+01
+entropy   :   0.00000000E+00
+fermie    :   2.78634880E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
@@ -1169,10 +1169,10 @@ P           mkmem4          1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          9.2  wall=         12.1
+- Proc.   0 individual time (sec): cpu=         10.9  wall=         11.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.2  wall=         12.1
++Overall time at end (sec) : cpu=         10.9  wall=         11.5

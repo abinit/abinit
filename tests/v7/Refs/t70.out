@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h16 )
+- ( at 14h35 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t70/t70.in
 - output file    -> t70.out
@@ -459,8 +459,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  8.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   8.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":  10.0, "pawecutdg":  12.0, }
@@ -468,18 +468,18 @@ convergence: {
     "deltae":  2.08E-12, "res2":  5.33E-15, 
     "residm":  2.82E-07, "diffor": undef, 
 }
-etotal    : -1.145532517665061E+001
-entropy   :  0.000000000000000E+000
-fermie    :  3.769806779935053E-001
+etotal    :  -1.14553252E+01
+entropy   :   0.00000000E+00
+fermie    :   3.76980678E-01
 cartesian_stress_tensor:
-- [-9.647243345402810E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000, -9.647243345403504E-005,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000, -9.647243345403678E-005, ]
-pressure_GPa:  2.838316506861617E+000
+- [ -9.64724335E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -9.64724335E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -9.64724335E-05, ]
+pressure_GPa:   2.8383E+00
 cartesian_forces:
-- [-4.793562966449136E-028,  1.597854322149712E-028,  1.597854322149712E-028, ]
-- [ 4.793562966449136E-028, -1.597854322149712E-028, -1.597854322149712E-028, ]
-force_length_stats: {"min":  5.299483256218258E-028, "max":  5.299483256218258E-028, "mean":  5.299483256218258E-028, }
+- [ -4.79356297E-28,   1.59785432E-28,   1.59785432E-28, ]
+- [  4.79356297E-28,  -1.59785432E-28,  -1.59785432E-28, ]
+force_length_stats: {"min":   5.29948326E-28, "max":   5.29948326E-28, "mean":   5.29948326E-28, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -609,13 +609,13 @@ total_energy_eV     : -3.11715246144909E+02
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  3.916475344222928E-001
-Ewald energy        : -1.278641309796663E+001
-psp_core            :  9.331645155830498E-001
-xc_dc               : -8.817626730311039E-001
-spherical_terms     :  8.880385443417809E-001
-total_energy_dc     : -1.145532517665061E+001
-total_energy_dc_eV  : -3.117152461449088E+002
+band_energy         :  3.91647534422293E-01
+Ewald energy        : -1.27864130979666E+01
+psp_core            :  9.33164515583050E-01
+xc_dc               : -8.81762673031104E-01
+spherical_terms     :  8.88038544341781E-01
+total_energy_dc     : -1.14553251766506E+01
+total_energy_dc_eV  : -3.11715246144909E+02
 ...
 
 
@@ -738,8 +738,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  8.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   8.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":  10.0, "pawecutdg":  12.0, }
@@ -747,18 +747,18 @@ convergence: {
     "deltae": -1.10E+01, "res2":  8.87E-02, 
     "residm":  1.27E-06, "diffor": undef, 
 }
-etotal    : -1.104549696726539E+001
-entropy   :  0.000000000000000E+000
-fermie    :  2.603996646438636E-001
+etotal    :  -1.10454970E+01
+entropy   :   0.00000000E+00
+fermie    :   2.60399665E-01
 cartesian_stress_tensor:
-- [ 2.846952780625189E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  2.846952780625224E-004,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  2.846952780625224E-004, ]
-pressure_GPa: -8.376022851496019E+000
+- [  2.84695278E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.84695278E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.84695278E-04, ]
+pressure_GPa:  -8.3760E+00
 cartesian_forces:
-- [-1.393992449160444E-019,  9.793132049690857E-020, -5.219094325883151E-020, ]
-- [ 1.393992449160444E-019, -9.793132049690857E-020,  5.219094325883151E-020, ]
-force_length_stats: {"min":  1.781757210611988E-019, "max":  1.781757210611988E-019, "mean":  1.781757210611988E-019, }
+- [ -1.39399245E-19,   9.79313205E-20,  -5.21909433E-20, ]
+- [  1.39399245E-19,  -9.79313205E-20,   5.21909433E-20, ]
+force_length_stats: {"min":   1.78175721E-19, "max":   1.78175721E-19, "mean":   1.78175721E-19, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -888,13 +888,13 @@ total_energy_eV     : -3.00569398157491E+02
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -1.391769064641003E+000
-Ewald energy        : -1.278641309796663E+001
-psp_core            :  9.331645155830498E-001
-xc_dc               :  2.177238843140946E+000
-spherical_terms     :  2.228183661825353E-002
-total_energy_dc     : -1.104549696726539E+001
-total_energy_dc_eV  : -3.005693981574911E+002
+band_energy         : -1.39176906464100E+00
+Ewald energy        : -1.27864130979666E+01
+psp_core            :  9.33164515583050E-01
+xc_dc               :  2.17723884314095E+00
+spherical_terms     :  2.22818366182535E-02
+total_energy_dc     : -1.10454969672654E+01
+total_energy_dc_eV  : -3.00569398157491E+02
 ...
 
 
@@ -1156,10 +1156,10 @@ P           mkmem           4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         17.4  wall=         17.6
+- Proc.   0 individual time (sec): cpu=         22.9  wall=         23.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.4  wall=         17.6
++Overall time at end (sec) : cpu=         22.9  wall=         23.8

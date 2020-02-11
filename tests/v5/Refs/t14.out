@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h11 )
+- ( at 14h32 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t14/t14.in
 - output file    -> t14.out
@@ -269,8 +269,8 @@ natom     :        1
 nsppol    :        2
 nspinor   :        1
 nspden    :        2
-nelect    :  1.800000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   1.80000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [  10.00000,   10.00100,   10.00200, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  12.0, "pawecutdg":  24.0, }
@@ -278,17 +278,17 @@ convergence: {
     "deltae":  2.76E-12, "res2":  8.20E-14, 
     "residm":  2.93E-15, "diffor": undef, 
 }
-etotal    : -1.701110233532403E+002
-entropy   :  0.000000000000000E+000
-fermie    : -1.879143926061235E-001
+etotal    :  -1.70111023E+02
+entropy   :   0.00000000E+00
+fermie    :  -1.87914393E-01
 cartesian_stress_tensor:
-- [ 6.590189034686593E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  6.592996223636910E-004,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  6.595803994626134E-004, ]
-pressure_GPa: -1.939726188291025E+001
+- [  6.59018903E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.59299622E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.59580399E-04, ]
+pressure_GPa:  -1.9397E+01
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -462,13 +462,13 @@ total_energy_eV     : -4.62895635983141E+03
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -2.569260562565167E+001
-Ewald energy        : -4.595962289191489E+001
-psp_core            :  9.048801503145931E-001
-xc_dc               : -6.366787347271872E+001
-spherical_terms     : -3.569580151326961E+001
-total_energy_dc     : -1.701110233532403E+002
-total_energy_dc_eV  : -4.628956359831406E+003
+band_energy         : -2.56926056256517E+01
+Ewald energy        : -4.59596228919149E+01
+psp_core            :  9.04880150314593E-01
+xc_dc               : -6.36678734727187E+01
+spherical_terms     : -3.56958015132696E+01
+total_energy_dc     : -1.70111023353240E+02
+total_energy_dc_eV  : -4.62895635983141E+03
 ...
 
 
@@ -550,8 +550,8 @@ natom     :        1
 nsppol    :        2
 nspinor   :        1
 nspden    :        2
-nelect    :  1.800000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   1.80000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [  10.00000,   10.00100,   10.00200, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  12.0, "pawecutdg":  24.0, }
@@ -559,17 +559,17 @@ convergence: {
     "deltae": -7.39E-13, "res2":  2.12E-11, 
     "residm":  7.45E-15, "diffor": undef, 
 }
-etotal    : -1.697355793005057E+002
-entropy   :  0.000000000000000E+000
-fermie    : -1.903381739453579E-001
+etotal    :  -1.69735579E+02
+entropy   :   0.00000000E+00
+fermie    :  -1.90338174E-01
 cartesian_stress_tensor:
-- [ 6.509294971520869E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  6.512072871000108E-004,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  6.514850398794679E-004, ]
-pressure_GPa: -1.915917626437738E+001
+- [  6.50929497E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.51207287E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.51485040E-04, ]
+pressure_GPa:  -1.9159E+01
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -743,13 +743,13 @@ total_energy_eV     : -4.62891689790241E+03
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -2.572905010212721E+001
-Ewald energy        : -4.595962289191489E+001
-psp_core            :  9.048801503145931E-001
-xc_dc               : -6.347625251316245E+001
-spherical_terms     : -3.547553394361574E+001
-total_energy_dc     : -1.697355793005057E+002
-total_energy_dc_eV  : -4.628916897902409E+003
+band_energy         : -2.57290501021272E+01
+Ewald energy        : -4.59596228919149E+01
+psp_core            :  9.04880150314593E-01
+xc_dc               : -6.34762525131624E+01
+spherical_terms     : -3.54755339436157E+01
+total_energy_dc     : -1.69735579300506E+02
+total_energy_dc_eV  : -4.62891689790241E+03
 ...
 
 
@@ -829,8 +829,8 @@ natom     :        1
 nsppol    :        2
 nspinor   :        1
 nspden    :        2
-nelect    :  1.800000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   1.80000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [  10.00000,   10.00100,   10.00200, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  12.0, "pawecutdg":  24.0, }
@@ -838,17 +838,17 @@ convergence: {
     "deltae": -3.98E-13, "res2":  4.83E-14, 
     "residm":  9.92E-15, "diffor": undef, 
 }
-etotal    : -1.699236571990305E+002
-entropy   :  0.000000000000000E+000
-fermie    : -1.886234242191444E-001
+etotal    :  -1.69923657E+02
+entropy   :   0.00000000E+00
+fermie    :  -1.88623424E-01
 cartesian_stress_tensor:
-- [ 6.551785118160174E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  6.554579077863088E-004,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  6.557372669856891E-004, ]
-pressure_GPa: -1.928423382540807E+001
+- [  6.55178512E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.55457908E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.55737267E-04, ]
+pressure_GPa:  -1.9284E+01
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -1022,13 +1022,13 @@ total_energy_eV     : -4.62892625880832E+03
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 3, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -2.571943345188571E+001
-Ewald energy        : -4.595962289191489E+001
-psp_core            :  9.048801503145931E-001
-xc_dc               : -6.356761976585530E+001
-spherical_terms     : -3.558186123968914E+001
-total_energy_dc     : -1.699236571990305E+002
-total_energy_dc_eV  : -4.628926258808325E+003
+band_energy         : -2.57194334518857E+01
+Ewald energy        : -4.59596228919149E+01
+psp_core            :  9.04880150314593E-01
+xc_dc               : -6.35676197658553E+01
+spherical_terms     : -3.55818612396891E+01
+total_energy_dc     : -1.69923657199030E+02
+total_energy_dc_eV  : -4.62892625880832E+03
 ...
 
 
@@ -1108,8 +1108,8 @@ natom     :        1
 nsppol    :        2
 nspinor   :        1
 nspden    :        2
-nelect    :  1.800000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   1.80000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [  10.00000,   10.00100,   10.00200, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  12.0, "pawecutdg":  24.0, }
@@ -1117,17 +1117,17 @@ convergence: {
     "deltae":  1.56E-12, "res2":  8.40E-12, 
     "residm":  9.31E-15, "diffor": undef, 
 }
-etotal    : -1.700736949036506E+002
-entropy   :  0.000000000000000E+000
-fermie    : -1.881069061006186E-001
+etotal    :  -1.70073695E+02
+entropy   :   0.00000000E+00
+fermie    :  -1.88106906E-01
 cartesian_stress_tensor:
-- [ 6.591979270663826E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  6.594787096582314E-004,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  6.583135553200600E-004, ]
-pressure_GPa: -1.938834993265225E+001
+- [  6.59197927E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.59478710E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.58313555E-04, ]
+pressure_GPa:  -1.9388E+01
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -1301,13 +1301,13 @@ total_energy_eV     : -4.62894822674286E+03
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 4, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -2.570421029804661E+001
-Ewald energy        : -4.595962289191489E+001
-psp_core            :  9.048801503145931E-001
-xc_dc               : -6.364420900278417E+001
-spherical_terms     : -3.567053286121952E+001
-total_energy_dc     : -1.700736949036506E+002
-total_energy_dc_eV  : -4.628948226742858E+003
+band_energy         : -2.57042102980466E+01
+Ewald energy        : -4.59596228919149E+01
+psp_core            :  9.04880150314593E-01
+xc_dc               : -6.36442090027842E+01
+spherical_terms     : -3.56705328612195E+01
+total_energy_dc     : -1.70073694903651E+02
+total_energy_dc_eV  : -4.62894822674286E+03
 ...
 
 
@@ -1474,10 +1474,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         10.2  wall=         11.5
+- Proc.   0 individual time (sec): cpu=         14.1  wall=         15.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  15 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.2  wall=         11.5
++Overall time at end (sec) : cpu=         14.1  wall=         15.7

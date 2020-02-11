@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h00 )
+- ( at 14h26 )
   
 - input  file    -> t01.in
 - output file    -> t01.out
@@ -346,8 +346,8 @@ natom     :        1
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  3.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   3.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
@@ -355,17 +355,17 @@ convergence: {
     "deltae":  4.44E-15, "res2":  6.05E-16, 
     "residm":  6.63E-13, "diffor": undef, 
 }
-etotal    : -2.093088352260984E+000
-entropy   :  0.000000000000000E+000
-fermie    :  3.323156847489047E-001
+etotal    :  -2.09308835E+00
+entropy   :   0.00000000E+00
+fermie    :   3.32315685E-01
 cartesian_stress_tensor:
-- [-1.423983493674071E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000, -1.423983493674093E-005,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000, -1.423983493674071E-005, ]
-pressure_GPa:  4.189503375095631E-001
+- [ -1.42398349E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -1.42398349E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.42398349E-05, ]
+pressure_GPa:   4.1895E-01
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:

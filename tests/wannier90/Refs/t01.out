@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h42 )
+- ( at 14h44 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/wannier90_t01/t01.in
 - output file    -> t01.out
@@ -194,8 +194,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  8.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   8.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [   7.49533,    7.49533,    7.49533, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":  20.0, "pawecutdg":  -1.0, }
@@ -203,18 +203,18 @@ convergence: {
     "deltae":  1.07E-13, "res2":  9.79E-17, 
     "residm":  9.83E-11, "diffor": undef, 
 }
-etotal    : -1.065048011358528E+001
-entropy   :  0.000000000000000E+000
-fermie    :  2.642803505876747E-003
+etotal    :  -1.06504801E+01
+entropy   :   0.00000000E+00
+fermie    :   2.64280351E-03
 cartesian_stress_tensor:
-- [-8.060553504746215E-006,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000, -8.060553504747950E-006,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000, -8.060553504746215E-006, ]
-pressure_GPa:  2.371496317428861E-001
+- [ -8.06055350E-06,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -8.06055350E-06,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -8.06055350E-06, ]
+pressure_GPa:   2.3715E-01
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
 
@@ -484,10 +484,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          6.6  wall=          6.7
+- Proc.   0 individual time (sec): cpu=          6.7  wall=          6.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.6  wall=          6.7
++Overall time at end (sec) : cpu=          6.7  wall=          6.9

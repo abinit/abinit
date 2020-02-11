@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h15 )
+- ( at 14h34 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t45/t45.in
 - output file    -> t45.out
@@ -297,8 +297,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  8.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   8.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [   7.50240,    7.50240,    7.50240, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
@@ -306,18 +306,18 @@ convergence: {
     "deltae": -4.26E-13, "res2":  3.40E-11, 
     "residm":  1.47E-15, "diffor": undef, 
 }
-etotal    : -1.246114732965616E+001
-entropy   :  0.000000000000000E+000
-fermie    :  1.399647897174905E-001
+etotal    :  -1.24611473E+01
+entropy   :   0.00000000E+00
+fermie    :   1.39964790E-01
 cartesian_stress_tensor:
-- [ 3.337043143356727E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  3.337043143356749E-005,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.337043143356727E-005, ]
-pressure_GPa: -9.817918237142601E-001
+- [  3.33704314E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.33704314E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.33704314E-05, ]
+pressure_GPa:  -9.8179E-01
 cartesian_forces:
-- [ 5.710133602353789E-029,  5.710133602353790E-029, -1.713040080706137E-028, ]
-- [-5.710133602353789E-029, -5.710133602353790E-029,  1.713040080706137E-028, ]
-force_length_stats: {"min":  1.893837066180796E-028, "max":  1.893837066180796E-028, "mean":  1.893837066180796E-028, }
+- [  5.71013360E-29,   5.71013360E-29,  -1.71304008E-28, ]
+- [ -5.71013360E-29,  -5.71013360E-29,   1.71304008E-28, ]
+force_length_stats: {"min":   1.89383707E-28, "max":   1.89383707E-28, "mean":   1.89383707E-28, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -919,10 +919,10 @@ P          mk1mem2        128
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         12.8  wall=         13.3
+- Proc.   0 individual time (sec): cpu=         17.5  wall=         19.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.8  wall=         13.3
++Overall time at end (sec) : cpu=         17.5  wall=         19.5

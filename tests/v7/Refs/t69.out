@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h16 )
+- ( at 14h35 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t69/t69.in
 - output file    -> t69.out
@@ -280,8 +280,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  8.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   8.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
@@ -289,18 +289,18 @@ convergence: {
     "deltae": -1.78E-15, "res2":  9.24E-26, 
     "residm":  7.60E-19, "diffor": undef, 
 }
-etotal    : -7.867332645307621E+000
-entropy   :  0.000000000000000E+000
-fermie    :  2.668426247961865E-001
+etotal    :  -7.86733265E+00
+entropy   :   0.00000000E+00
+fermie    :   2.66842625E-01
 cartesian_stress_tensor:
-- [ 1.126902069248757E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  1.126902069248756E-004,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.126902069248761E-004, ]
-pressure_GPa: -3.315459795351042E+000
+- [  1.12690207E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.12690207E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.12690207E-04, ]
+pressure_GPa:  -3.3155E+00
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -498,8 +498,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  8.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   8.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
@@ -507,18 +507,18 @@ convergence: {
     "deltae": -2.61E-12, "res2":  9.16E-11, 
     "residm":  8.22E-14, "diffor": undef, 
 }
-etotal    : -7.624219943285190E+000
-entropy   :  0.000000000000000E+000
-fermie    :  1.764823018566757E-001
+etotal    :  -7.62421994E+00
+entropy   :   0.00000000E+00
+fermie    :   1.76482302E-01
 cartesian_stress_tensor:
-- [ 7.475449501886402E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  7.475449501886391E-005,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  7.475449501886347E-005, ]
-pressure_GPa: -2.199352805537373E+000
+- [  7.47544950E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   7.47544950E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   7.47544950E-05, ]
+pressure_GPa:  -2.1994E+00
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -578,11 +578,11 @@ total_energy        : -7.62421994328519E+00
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -5.096608737577102E-001
-Ewald energy        : -8.435819585618992E+000
-psp_core            : -2.646193226530269E-001
-xc_dc               :  1.585878977497169E+000
-total_energy_dc     : -7.624220804532560E+000
+band_energy         : -5.09660873757710E-01
+Ewald energy        : -8.43581958561899E+00
+psp_core            : -2.64619322653027E-01
+xc_dc               :  1.58587897749717E+00
+total_energy_dc     : -7.62422080453256E+00
 ...
 
 
@@ -824,10 +824,10 @@ P           mkmem           4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          8.7  wall=          8.9
+- Proc.   0 individual time (sec): cpu=         11.0  wall=         11.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  44 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.7  wall=          8.9
++Overall time at end (sec) : cpu=         11.0  wall=         11.4
