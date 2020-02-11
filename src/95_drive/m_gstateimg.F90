@@ -46,7 +46,7 @@ module m_gstateimg
  use m_dtfil
 
  use defs_datatypes, only : pseudopotential_type
- use defs_abitypes, only : MPI_type
+ use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
  use m_geometry,     only : mkradim, mkrdim, fcart2fred, xred2xcart, metric
  use m_specialmsg,   only : specialmsg_mpisum
@@ -503,8 +503,9 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      end if
      call wrtout(ab_out ,msg,'COLL')
      call wrtout(std_out,msg,'PERS')
+
+     call yaml_iterstart('timimage', itimimage, ab_out, 1)
    end if
-   call yaml_iterstart('timimage', itimimage, ab_out, 0)
 
    call timab(704,2,tsec)
 
@@ -527,6 +528,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          if (itimimage>1) then
            dtfil%ireadwf=0;dtfil%ireadden=0;dtfil%ireadkden=0
          end if
+         call yaml_iterstart('image', iimage, ab_out, 1)
        end if
 
 !      Redefine output units
@@ -543,7 +545,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          if (dtset%prtvolimg==0) call wrtout(ab_out ,msg,'COLL')
          if (do_write_log) call wrtout(std_out,msg,'PERS')
        end if
-       call yaml_iterstart('image', iimage, ab_out, 0)
 
        acell(:)     =res_img(iimage)%acell(:)
        rprim(:,:)   =res_img(iimage)%rprim(:,:)

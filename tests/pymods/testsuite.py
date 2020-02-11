@@ -371,9 +371,11 @@ class FileToTest(object):
         elif self.use_yaml == 'only':
             opts['use_yaml'] = True
             opts['use_fl'] = False
-        else:  # self.use_yaml == 'no':
+        elif self.use_yaml == 'no':
             opts['use_yaml'] = False
             opts['use_fl'] = True
+        else:
+            raise ValueError("Invalid value for use_yaml: %s", self.use_yaml)
 
         differ = FlDiffer(yaml_test=yaml_test, **opts)
 
@@ -393,8 +395,8 @@ class FileToTest(object):
                 (isok, status, msg), has_line_count_error = make_diff()
             except Exception as e:
                 warnings.warn(('[{}] Something went wrong with this test:\n'
-                               '{}: {}\n').format(self.name, type(e).__name__,
-                                                  str(e)))
+                               '{}: {}\n').format(self.name, type(e).__name__, str(e)))
+
                 isok, status = False, 'failed'
                 msg = 'internal error:\n{}: {}'.format(type(e).__name__,
                                                        str(e))
@@ -3567,14 +3569,13 @@ class AbinitTestSuite(object):
                     print("WARNING: wait_loop returned None instead of results. Will try to continue execution!")
 
                 else:
-                    # update local tests instances with the results of their running in
-                    # a remote process
+                    # update local tests instances with the results of their running in a remote process
                     for test in self.tests:
                         if test._rid not in results:
                             # This error will only happen if there is a bug
                             raise RuntimeError((
-                                "I did not get the results of the test {}. It"
-                                " means that something fishy happen in the worker."
+                                "I did not get results for test {}. "
+                                "It means that some error occurred in the worker."
                             ).format(test.full_id))
                         test.results_load(results[test._rid])
 

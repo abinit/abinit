@@ -58,8 +58,7 @@ float_re = re.compile(r'([+-]?[0-9]*\.[0-9]+(?:[eEdDfF][+-]?[0-9]+)?)')
 
 def norm_spaces(s):
     r"""Normalize all blanks ( \\n\\r\\t)."""
-    # the join/split technique remove all blanks and put one space between
-    # non-blanks words
+    # the join/split technique remove all blanks and put one space between non-blanks words
     return ' '.join(s.split())
 
 
@@ -97,15 +96,14 @@ class NotDriverConf(object):
 
     def extra_info(self):
         if self.has_yaml:
-            return ('# YAML support is available, but is disabled for this'
-                    ' test.',)
+            return ('# YAML support is available, but is disabled for this test.',)
         else:
-            return ('# YAML support is not available, YAML based tests will'
-                    ' be ignored.',)
+            return ('# YAML support is not available, YAML based tests will be ignored.',)
 
 
 class LineDifference(object):
-    """Base class for representing a difference."""
+    """Base class representing a difference."""
+
     def __init__(self, p1, p2, l1, l2):
         self.lines = (p1 + 1, p2 + 1)
         if l1 == '' or l1[-1] not in '\n\r':
@@ -129,14 +127,14 @@ class LineDifference(object):
 
 
 class LineCountDifference(LineDifference):
-    """Represent a difference between line counts."""
+    """Represents a difference between line counts."""
 
     def __init__(self, more, less, line_count=(0, 0)):
-        '''
+        """
         Args:
             more: the name of the file with more lines
             less: the name of the file with less lines
-        '''
+        """
         LineDifference.__init__(self, 0, 0, '', '')
         self.more = more
         self.less = less
@@ -158,8 +156,7 @@ class MetaCharDifference(LineDifference):
 
     def __repr__(self):
         return ('At line {} (in file 1), line {} (in file 2), different'
-                ' leading characters: {} and {}.\n').format(
-                    *(self.lines + self.metas))
+                ' leading characters: {} and {}.\n').format(*(self.lines + self.metas))
 
 
 class FloatDifference(LineDifference):
@@ -178,17 +175,16 @@ class TextDifference(LineDifference):
 
 
 class ForcedDifference(LineDifference):
-    """A difference is arbitrarly declared."""
+    """A difference that is arbitrarly declared."""
 
 
 class Result(object):
     """Analyse and summarize the set of differences found by a diff."""
 
-    def __init__(self, fl_diff, yaml_diff, extra_info=[], label=None,
-                 verbose=False):
-        '''
+    def __init__(self, fl_diff, yaml_diff, extra_info=[], label=None, verbose=False):
+        """
         differences is expected to be a list of Difference instances
-        '''
+        """
         self.fl_diff = fl_diff
         self.yaml_diff = yaml_diff
         self.extra_info = extra_info
@@ -206,25 +202,25 @@ class Result(object):
         self.details = self._analyse()
 
     def _analyse(self):
-        '''
-            Analyse a difference list and extract summary information and
-            details.  Summary information is
+        """
+        Analyse a difference list and extract summary information and
+        details.  Summary information is
 
-            - self.max_abs_err: maximum absolute difference
-            - self.max_rel_err: maximum relative difference
-            - self.max_abs_ln: line number where the maximum absolute
-              difference is reached for the first time
-            - self.max_rel_ln: line number where the maximum relative
-              difference is reached for the first time
-            - self.ndiff_lines: number of lines flagged as different (excluding
-              "silent" differences: line starting with '.' '+' and depending of
-              Diff options ',' and 'P')
-        '''
+        - self.max_abs_err: maximum absolute difference
+        - self.max_rel_err: maximum relative difference
+        - self.max_abs_ln: line number where the maximum absolute
+          difference is reached for the first time
+        - self.max_rel_ln: line number where the maximum relative
+          difference is reached for the first time
+        - self.ndiff_lines: number of lines flagged as different (excluding
+          "silent" differences: line starting with '.' '+' and depending of Diff options ',' and 'P')
+        """
         details = []
         error_lines = set()
 
         if self.yaml_diff:
             details.append('# Start YAML based comparison report\n')
+
         for diff in self.yaml_diff:
             if diff.is_fail():
                 self.success = False
@@ -368,22 +364,23 @@ class Result(object):
 
 
 class Differ(object):
+
     def __init__(self, yaml_test=None, **options):
-        '''
-            Init a differ with some parameters.
-            Known parameters are:
-                - ignore: bool (default True)
-                - ignoreP: bool (default True)
-                - tolerance: float (tolerance for both relative and absolute
-                  difference)
-                - tolerance_abs: float (default 1.01e-10)
-                - tolerance_rel: float (default 1.01e-10)
-                - label: str (default None)
-                - use_yaml: bool (default True)
-                - use_fl: bool (default True)
-                - verbose: bool (default False) enable report of successful
-                           yaml tests too
-        '''
+        """
+        Init a differ with some parameters.
+        Known parameters are:
+            - ignore: bool (default True)
+            - ignoreP: bool (default True)
+            - tolerance: float (tolerance for both relative and absolute
+              difference)
+            - tolerance_abs: float (default 1.01e-10)
+            - tolerance_rel: float (default 1.01e-10)
+            - label: str (default None)
+            - use_yaml: bool (default True)
+            - use_fl: bool (default True)
+            - verbose: bool (default False) enable report of successful
+                       yaml tests too
+        """
         self.xml_mode = False  # this is the first dirty fix.
 
         self.options = {
@@ -497,11 +494,11 @@ class Differ(object):
         """
         differences = []
         if len(lines1) > len(lines2):
-            return [LineCountDifference('file 1', 'file 2',
-                                        (len(lines1), len(lines2)))]
+            return [LineCountDifference('file 1', 'file 2', (len(lines1), len(lines2)))]
+
         elif len(lines1) < len(lines2):
-            return [LineCountDifference('file 2', 'file 1',
-                                        (len(lines2), len(lines1)))]
+            return [LineCountDifference('file 2', 'file 1', (len(lines2), len(lines1)))]
+
         else:
             for (i1, meta1, line1), (i2, meta2, line2) in zip(lines1, lines2):
                 if meta1 != meta2:
@@ -528,8 +525,7 @@ class Differ(object):
 
                         # not the same number of floats on the line
                         if len(splitted1) != len(splitted2):
-                            differences.append(TextDifference(i1, i2,
-                                                              line1, line2))
+                            differences.append(TextDifference(i1, i2, line1, line2))
                         else:
                             if meta1 == '%':  # force tolerance
                                 tol = 1.01e-2
@@ -539,8 +535,7 @@ class Differ(object):
                                 tolrel = self.options['tolerance_rel']
 
                             def to_float(f):
-                                return float(f.lower().replace('d', 'e')
-                                             .replace('f', 'e'))
+                                return float(f.lower().replace('d', 'e').replace('f', 'e'))
 
                             def pairs(seq1, seq2):
                                 i = 0

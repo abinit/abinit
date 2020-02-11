@@ -208,7 +208,6 @@ P           mkmem2          5
           usepawu1          1
           usepawu2         10
            useylm           1
-         use_yaml           1
          wfoptalg1         10
          wfoptalg2        114
               wtk        0.18750    0.50000    0.18750    0.06250    0.06250
@@ -239,10 +238,22 @@ P           mkmem2          5
 == DATASET  1 ==================================================================
 -   nproc =    4   -> not optimal: autoparal keyword recommended in input file
 
+--- !IterStart
+dtset:     1
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+--- !IterStart
+timimage:     1
+...
+
+--- !IterStart
+image:     1
+...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.2605000  0.0000000  0.0000000  G(1)=  0.1377316  0.0000000  0.0000000
@@ -380,6 +391,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     753.188     753.111
 
 
 --- !ResultsGS
+iteration_state: {"jdtset": 1, "timimage": 1, "image": 1, }
 comment   : Summary of ground state results
 natom     :        5
 nsppol    :        1
@@ -387,8 +399,8 @@ nspinor   :        1
 nspden    :        1
 nelect    :  4.100000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+abc       : [     7.261,      7.261,      7.261, ]
+alpha_beta_gamma_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg":  2.000000000000000E+001, }
 convergence: {
     "deltae":  2.372530616412405E-009, "res2":  1.415207732499787E-008, 
@@ -397,11 +409,12 @@ convergence: {
 etotal    : -1.515077117076600E+002
 entropy   :  0.000000000000000E+000
 fermie    :  3.096581457764690E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 3.564839961176000E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  3.564839961175990E-003,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  3.564839961176011E-003, ]
-cartesian_forces: !CartForces
+pressure_GPa: -1.048811950617810E+002
+cartesian_forces:
 - [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
 - [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
 - [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
@@ -634,6 +647,7 @@ cartesian_forces: !CartForces
    Integrated=    4.1000E+01
 
 --- !EnergyTerms
+iteration_state     : {"jdtset": 1, "timimage": 1, "image": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.32382506745724E+01
 hartree             :  3.13399455339874E+01
@@ -650,6 +664,7 @@ total_energy_eV     : -4.12273389925231E+03
 
 
 --- !EnergyTermsDC
+iteration_state     : {"jdtset": 1, "timimage": 1, "image": 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -1.473142750982097E+001
 Ewald energy        : -1.142203169790576E+002
@@ -677,12 +692,24 @@ total_energy_dc_eV  : -4.122733899252305E+003
 == DATASET  2 ==================================================================
 -   nproc =    4
 
+--- !IterStart
+dtset:     2
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
   J.P.Perdew and Y.Wang, PRB 45, 13244 (1992)
+
+--- !IterStart
+timimage:     1
+...
+
+--- !IterStart
+image:     1
+...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.2605000  0.0000000  0.0000000  G(1)=  0.1377316  0.0000000  0.0000000
@@ -862,6 +889,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.438     188.419
 
 
 --- !ResultsGS
+iteration_state: {"jdtset": 2, "timimage": 1, "image": 1, }
 comment   : Summary of ground state results
 natom     :        5
 nsppol    :        1
@@ -869,8 +897,8 @@ nspinor   :        1
 nspden    :        1
 nelect    :  4.100000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
+abc       : [     7.261,      7.261,      7.261, ]
+alpha_beta_gamma_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg":  2.000000000000000E+001, }
 convergence: {
     "deltae":  1.167867470144301E-004, "res2":  1.550896521691849E-001, 
@@ -879,16 +907,12 @@ convergence: {
 etotal    : -1.514750399546676E+002
 entropy   :  0.000000000000000E+000
 fermie    :  3.040970759545259E-001
-stress_tensor: !CartTensor
+cartesian_stress_tensor:
 - [ 4.022240480478719E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  4.022240480478716E-003,  0.000000000000000E+000, ]
 - [ 0.000000000000000E+000,  0.000000000000000E+000,  4.022240480478723E-003, ]
-cartesian_forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
+pressure_GPa: -1.183383869804075E+002
+cartesian_forces: null
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1102,6 +1126,7 @@ cartesian_forces: !CartForces
    Integrated=    4.1000E+01
 
 --- !EnergyTerms
+iteration_state     : {"jdtset": 2, "timimage": 1, "image": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.31183660434428E+01
 hartree             :  3.13028991812723E+01
@@ -1117,6 +1142,7 @@ total_energy_eV     : -4.12649332004448E+03
 
 
 --- !EnergyTermsDC
+iteration_state     : {"jdtset": 2, "timimage": 1, "image": 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -1.468734664284815E+001
 Ewald energy        : -1.142203169790576E+002

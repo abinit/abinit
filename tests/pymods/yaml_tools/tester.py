@@ -7,9 +7,9 @@ from .common import BaseDictWrapper, string, basestring
 
 
 def short_repr(thing):
-    '''
+    """
     Shorten representation of things when the default one is too long.
-    '''
+    """
     s = str(thing)
     if len(s) > 30:
         if hasattr(thing, 'short_str'):
@@ -21,9 +21,9 @@ def short_repr(thing):
 
 
 class Issue(object):
-    '''
-        Represent the result of a test.
-    '''
+    """
+    Represent the result of a test.
+    """
     def __init__(self, conf, msg):
         self.path = conf.path if conf.path else ('top level',)
         self.state = conf.current_state
@@ -39,9 +39,9 @@ class Issue(object):
 
 
 class Failure(Issue):
-    '''
-        Represent the fail of a test.
-    '''
+    """
+    Represent the fail of a test.
+    """
     def __init__(self, conf, msg, ref=None, tested=None):
         self.ref = ref
         self.tested = tested
@@ -60,9 +60,9 @@ class Failure(Issue):
 
 
 class DetailedFailure(Failure):
-    '''
-        Represent the fail of a test when more info are available.
-    '''
+    """
+    Represent the fail of a test when more info are available.
+    """
     def __init__(self, conf, msg, details):
         self.details = details
         Issue.__init__(self, conf, msg)
@@ -72,13 +72,13 @@ class DetailedFailure(Failure):
 
 
 class Success(Issue):
-    'Represent the success of a test.'
+    """Represent the success of a test."""
 
 
 class Tester(object):
-    '''
-        Drive the testing process.
-    '''
+    """
+    Drive the testing process.
+    """
     def __init__(self, reference_docs, tested_docs, config):
         self.ref = reference_docs
         self.tested = tested_docs
@@ -86,24 +86,31 @@ class Tester(object):
         self.issues = []
 
     def check_this(self, name, ref, tested):
-        '''
-            Check constraints applying to the 'tested' node of name 'name'
-            against 'ref' and recursively apply on children.
-        '''
+        """
+        Check constraints applying to the 'tested' node of name 'name'
+        against 'ref' and recursively apply on children.
+        """
+        #print("name:", name, "\nref:", ref, "\ntested:",tested)
+
+        if ref is None or tested is None:
+            if ref is not tested:
+                msg = 'Expecting two None objects but got {} and {}'.format(repr(ref), repr(tested))
+                self.issues.append(Failure(self.conf, msg, ref, tested))
+            else:
+                #print("Got None None for name:", name)
+                return
 
         def analyze(success, cons):
-            'Analyse the result of a constraint check.'
+            """Analyse the result of a constraint check."""
             if success:
                 msg = '{} ok'.format(cons.name)
                 self.issues.append(Success(self.conf, msg))
             elif hasattr(success, 'details'):
                 msg = '{} ({}) failed'.format(cons.name, short_repr(cons.value))
-                self.issues.append(DetailedFailure(self.conf, msg,
-                                                   success.details))
+                self.issues.append(DetailedFailure(self.conf, msg, success.details))
             else:
                 msg = '{} ({}) failed'.format(cons.name, short_repr(cons.value))
-                self.issues.append(Failure(self.conf, msg,
-                                           ref, tested))
+                self.issues.append(Failure(self.conf, msg, ref, tested))
 
         # we want to detect only dictionaries, not classes that inherit from it
         if type(ref) is dict:
@@ -166,22 +173,20 @@ class Tester(object):
                     self.check_this(string(index), vref, vtest)
 
     def run(self):
-        '''
-            Main entry point for testing.
-        '''
+        """
+        Main entry point for testing.
+        """
         top_cons = self.conf.get_top_level_constraints()
         for cons in top_cons:
             if top_cons[cons].apply_to('this'):
                 # FIXME How to define and use top level constraints applying on
                 # this like equations ? Is it worth it ?
-                raise NotImplementedError('Top level constraints are not yet'
-                                          ' implemented')
+                raise NotImplementedError('Top level constraints are not yet implemented')
 
         # browse document from the reference file
         for doc_id, ref_doc in self.ref.items():
             if doc_id not in self.tested:
-                msg = ('Document ({}) is not present in the tested file.'
-                       .format(doc_id))
+                msg = 'Document ({}) is not present in the tested file.'.format(doc_id)
                 self.issues.append(Failure(self.conf, msg))
 
             # enter filters and start checking the docuement

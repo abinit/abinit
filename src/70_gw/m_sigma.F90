@@ -457,9 +457,8 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
      '    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago'
    end if
    call wrtout(std_out,msg,'COLL')
-   !call wrtout(ab_out,msg,'COLL')
 
-   ydoc = yamldoc_open('SelfEnergy_ee', "", width=11, real_fmt='(3f8.3)')
+   ydoc = yamldoc_open('SelfEnergy_ee', comment="", width=11, real_fmt='(3f8.3)')
    call ydoc%add_real1d('kpoint', Sigp%kptgw(:,ikcalc))
    call ydoc%add_int('spin', is, int_fmt="(i1)")
    call ydoc%add_real('KS_gap', Sr%e0gap(ikibz,is)*Ha_eV)
@@ -514,13 +513,10 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
      ! If all the gaps are zero, this means that it could not be computed in the calling routine
      write(msg,'(2a,f8.3)')ch10,' E^0_gap       ',Sr%e0gap(ikibz,is)*Ha_eV
      call wrtout(std_out,msg,'COLL')
-     !call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,f8.3)')      ' E^GW_gap      ',Sr%egwgap(ikibz,is)*Ha_eV
      call wrtout(std_out,msg,'COLL')
-     !call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,f8.3,a)')    ' DeltaE^GW_gap ',Sr%degwgap(ikibz,is)*Ha_eV,ch10
      call wrtout(std_out,msg,'COLL')
-     !call wrtout(ab_out,msg,'COLL')
    end if
 
    call ydoc%write_and_free(ab_out)

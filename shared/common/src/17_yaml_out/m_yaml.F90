@@ -39,6 +39,8 @@ module m_yaml
  use m_pair_list
  use m_stream_string
 
+ use m_fstrings, only : sjoin
+
  implicit none
 
  private
@@ -145,6 +147,10 @@ module m_yaml
    "tol_abs", "tol_rel", "tol_vec", "tol_eq", "ignore", &
    "ceil", "equation", "equations", "callback", "callbacks"]
 
+ integer,save,protected :: DTSET_IDX = -1
+ integer,save,protected :: TIMIMAGE_IDX = -1
+ integer,save,protected :: IMAGE_IDX = -1
+
 contains
 
 !!****f* m_yaml/yaml_iterstart
@@ -167,6 +173,7 @@ contains
 
 subroutine yaml_iterstart(label, val, unit, use_yaml, newline)
 
+!Arguments ------------------------------------
  integer,intent(in) :: val, unit, use_yaml
  character(len=*),intent(in) :: label
  logical,intent(in),optional :: newline
@@ -177,14 +184,24 @@ subroutine yaml_iterstart(label, val, unit, use_yaml, newline)
  type(stream_string) :: stream
 ! *************************************************************************
 
- SET_DEFAULT(nl, newline, .true.)
- write(tmp_i, '(I6)') val
+ select case (label)
+ case ("dtset")
+   DTSET_IDX = val
+ case ("timimage")
+   TIMIMAGE_IDX = val
+ case ("image")
+   IMAGE_IDX = val
+ case default
+   MSG_ERROR(sjoin("Invalid value for label:", label))
+ end select
 
- if (use_yaml == 1) then
-   call stream%push('--- !IterStart'//eol//label//':'//tmp_i//eol//'...')
-   if (nl) call stream%push(eol)
-   call stream%flush(unit)
- end if
+ !SET_DEFAULT(nl, newline, .true.)
+ !if (use_yaml == 1) then
+ !  write(tmp_i, '(I6)') val
+ !  call stream%push('--- !IterStart'//eol//label//':'//tmp_i//eol//'...')
+ !  if (nl) call stream%push(eol)
+ !  call stream%flush(unit)
+ !end if
 
 end subroutine yaml_iterstart
 !!***
@@ -220,21 +237,33 @@ type(yamldoc_t) function yamldoc_open(tag, comment, newline, width, int_fmt, rea
 
 !Local variables-------------------------------
  logical :: nl
+ type(pair_list) :: dict
 ! *************************************************************************
 
- SET_DEFAULT(nl, newline, .true.)
+ SET_DEFAULT(nl, newline, .False.)
 
  if (present(width)) new%default_width = width
  if (present(int_fmt)) new%default_ifmt = int_fmt
  if (present(real_fmt)) new%default_rfmt = real_fmt
  !new%open_count = 1
 
- call new%stream%push('---'//' !'//trim(tag))
+ call new%stream%push('---'//' !'//trim(tag)//ch10)
+
+ ! Write dictionary with iteration state.
+ call dict%set('dtset', i=DTSET_IDX)
+ if (TIMIMAGE_IDX /= -1) call dict%set("timimage", i=TIMIMAGE_IDX)
+ if (IMAGE_IDX /= -1) call dict%set("image", i=IMAGE_IDX)
+ !call new%stream%push(eol)
+ call new%add_dict('iteration_state', dict, int_fmt="(I0)")
+ call dict%free()
+
  if (comment /= '') then
-   call new%stream%push(eol//'comment')
+   !call new%stream%push(eol//'comment')
+   call new%stream%push('comment')
    if (new%default_width > 7) call new%stream%push(repeat(' ', new%default_width - 7))
    call new%stream%push(': ')
    call yaml_print_string(new%stream, comment)
+   call new%stream%push(eol)
  end if
  if (nl) call new%stream%push(eol)
 

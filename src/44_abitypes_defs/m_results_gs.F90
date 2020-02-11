@@ -142,9 +142,10 @@ MODULE m_results_gs
    ! gaps(3,nsppol)
    ! gaps(1,:) : fundamental gap
    ! gaps(2,:) : optical gap
-   ! gaps(3,:) : "status" for each channel : 0.0dp if the gap was not computed
-   !   (because there are only valence bands) ; -1.0dp if the system (or spin-channel) is metallic ; 1.0dp if the
-   !   gap was computed
+   ! gaps(3,:) : "status" for each channel:
+   !   0.0dp if the gap was not computed (because there are only valence bands);
+   !   -1.0dp if the system (or spin-channel) is metallic;
+   !   1.0dp if the gap was computed
 
   real(dp), allocatable :: grchempottn(:,:)
    ! grchempottn(3,natom)
@@ -812,12 +813,12 @@ end function results_gs_ncwrite
 !!
 !! SOURCE
 
-subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
+subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
 
  class(results_gs_type),intent(in) :: results
  type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
- integer,intent(in) :: iout
+ integer,intent(in) :: unit
  character(len=*),intent(in),optional :: comment
 
 !Local variables-------------------------------
@@ -825,7 +826,7 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
  integer :: ii
  type(yamldoc_t) :: ydoc
  type(pair_list) :: dict
- real(dp) :: strten(3,3), abc(3)
+ real(dp) :: strten(3,3), abc(3), fnorms(results%natom)
 
 !************************************************************************
 
@@ -843,15 +844,15 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
  call ydoc%add_real("nelect", dtset%nelect)
  call ydoc%add_real("charge", dtset%charge)
 
- ! Write lattice
- abc(:) = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
- call ydoc%add_real1d('abc', cryst%angdeg)
- call ydoc%add_real1d('alpha_beta_gamma_angles', cryst%angdeg)
+ ! Write lattice parameters
+ abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
+ call ydoc%add_real1d('lattice_lengths', abc, real_fmt="(f10.5)")
+ call ydoc%add_real1d('lattice_angles', cryst%angdeg, real_fmt="(f7.3)")
 
  ! Write cutoff energies
  call dict%set('ecut', r=dtset%ecut)
  call dict%set('pawecutdg', r=dtset%pawecutdg)
- call ydoc%add_dict('cutoff_energies', dict)
+ call ydoc%add_dict('cutoff_energies', dict, real_fmt="(f5.1)")
  call dict%free()
 
  ! Write convergence degree.
@@ -859,7 +860,7 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
  call dict%set('res2', r=results%res2)
  call dict%set('residm', r=results%residm)
  call dict%set('diffor', r=results%diffor)
- call ydoc%add_dict('convergence', dict, multiline_trig=2) !, real_fmt="(es9.2)"
+ call ydoc%add_dict('convergence', dict, multiline_trig=2, real_fmt="(es9.2)")
  call dict%free()
 
  ! Write energies.
@@ -867,7 +868,16 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
  call ydoc%add_real('entropy', results%entropy)
  call ydoc%add_real('fermie', results%fermie)
 
- ! Stress tensor and forces.
+ ! TODO: Add gaps
+ !do spin=1,results%nsppol
+ !  if (results%gaps(3, spin) == one) then
+ !    call dict%set('fundamental_gap', r=results%gaps(1, spin))
+ !    call dict%set('optical_gap', r=results%gaps(2, spin))
+ !    call dict%free()
+ !  end do
+ !end do
+
+ ! Cartesian stress tensor and forces.
  strten(1,1) = results%strten(1)
  strten(2,2) = results%strten(2)
  strten(3,3) = results%strten(3)
@@ -878,14 +888,32 @@ subroutine results_gs_yaml_write(results, iout, dtset, cryst, comment)
  strten(1,2) = results%strten(6)
  strten(2,1) = results%strten(6)
 
- call ydoc%add_real2d('stress_tensor', strten, tag='CartTensor')
- ! Add results in GPa as well
- !strten = strten * HaBohr3_GPa
- !call ydoc%add_real2d('stress_tensor_GPa', strten, tag='CartTensor')
- !call ydoc%add_real('pressure_GPa', get_trace(strten) / three)
+ if (strten(1,1) /= MAGIC_UNDEF) then
+   call ydoc%add_real2d('cartesian_stress_tensor', strten)
+   call ydoc%add_real('pressure_GPa', - get_trace(strten) * HaBohr3_GPa / three)
+ else
+   call ydoc%add_string('cartesian_stress_tensor', "null")
+   call ydoc%add_string('pressure_GPa', "null")
+ end if
 
- call ydoc%add_real2d('cartesian_forces', results%fcart, tag='CartForces')
- call ydoc%write_and_free(iout)
+ if (results%fcart(1,1) /= MAGIC_UNDEF) then
+   call ydoc%add_real2d('cartesian_forces', results%fcart)
+   fnorms = [(sqrt(sum(results%fcart(:, ii) ** 2)), ii=1,results%natom)]
+   ! Write Force statistics
+   call dict%set('min', r=minval(fnorms))
+   call dict%set('max', r=maxval(fnorms))
+   call dict%set('mean', r=sum(fnorms) / results%natom)
+ else
+   call ydoc%add_string('cartesian_forces', "null")
+   call dict%set('min', s="null")
+   call dict%set('max', s="null")
+   call dict%set('mean', s="null")
+ end if
+
+ call ydoc%add_dict('force_length_stats', dict)
+ call dict%free()
+
+ call ydoc%write_and_free(unit)
 
 end subroutine results_gs_yaml_write
 !!***

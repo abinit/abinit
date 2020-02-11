@@ -946,10 +946,11 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero)
  end if
 
+ ! Init values with MAGIC_UNDEF if not computed.
  if (optfor==1) computed_forces=1
- if (optfor==1) diffor=9.9999999999D99
- if (stress_needed==0) strten(:)=9.9999999999D99
- if (computed_forces==0) fcart(:,:)=9.9999999999D99
+ if (optfor==1) diffor = MAGIC_UNDEF
+ if (stress_needed==0) strten = MAGIC_UNDEF
+ if (computed_forces==0) fcart = MAGIC_UNDEF
  if (dtset%prtstm/=0) strten(:)=zero
 
  call timab(256,2,tsec)
