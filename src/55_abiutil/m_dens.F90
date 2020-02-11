@@ -568,7 +568,7 @@ subroutine add_atomic_fcts(natom,nspden,rprimd,mpi_enreg,nfft,ngfft,ntypat,optio
          do i1=n1a,n1b
            r2=(difx(i1)*r2_11+r2_123)*difx(i1)+r2_23
            if (r2 > r2atsph) cycle
-           fsm = radsmear(r2, r2atsph, ratsm2)
+           call radsmear(dfsm,fsm,r2,r2atsph,ratsm2)
            ix=mod(i1+ishift*n1,n1)
 !          Identify the fft indexes of the rectangular grid around the atom
            ifft_local=1+ix+n1*(iy+n2*izloc)
@@ -1533,7 +1533,7 @@ subroutine calcdenmagsph(gmet,gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypa
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  integer :: overlap_ij(natom,natom)
  real(dp) :: gr_intg(3,4),intg(4),rhomag_(2,nspden),tsec(2)
- real(dp) :: dist_ij(natom,natom),gr_intgden_(ndir,nspden,natom),intgden_(nspden,natom)
+ real(dp) :: dist_ij(natom,natom),intgden_(nspden,natom)
  real(dp) :: my_xred(3, natom), xshift(3, natom)
  real(dp), allocatable :: fsm_atom(:,:)
 
@@ -1643,7 +1643,7 @@ subroutine calcdenmagsph(gmet,gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypa
              cycle
            end if
 
-           fsm = radsmear(r2, r2atsph, ratsm2)
+           call radsmear(dfsm,fsm,r2,r2atsph,ratsm2)
 
            ifft_local=1+ix+n1*(iy+n2*izloc)
 
@@ -2113,28 +2113,31 @@ end subroutine prtdenmagsph
 !!
 !! SOURCE
 
-function radsmear(r, rsph, rsm)
+subroutine radsmear(dfsm,fsm,r2,r2sph,rsm2)
 
 !Arguments ------------------------------------
 !scalars
- real(dp) :: radsmear
- real(dp), intent(in) :: r, rsph, rsm
+ real(dp), intent(out) :: dfsm,fsm
+ real(dp), intent(in) :: r2, r2sph, rsm2
 
 !Local variables ------------------------------
 !scalars
- real(dp) :: xx
+ real(dp) :: rsm2inv,xx
 
 !******************************************************************
 
- radsmear = zero
- if (r < rsph - rsm - tol12) then
-   radsmear = one
- else if (r < rsph - tol12) then
-   xx = (rsph - r) / rsm
-   radsmear = xx**2*(3+xx*(1+xx*(-6+3*xx)))
+ fsm = zero
+ dfsm=zero
+ if (r2 < r2sph - rsm2 - tol12) then
+   fsm = one
+ else if (r2 < r2sph - tol12) then
+   rsm2inv=one/rsm2
+   xx = (r2sph - r2) * rsm2inv
+   fsm = xx**2*(3+xx*(1+xx*(-6+3*xx)))
+   dfsm = -(xx*(6+xx*(3+xx*(-24+15*xx))))*rsm2inv
  end if
 
-end function radsmear
+end subroutine radsmear
 !!***
 
 !!****f* ABINIT/printmagvtk
