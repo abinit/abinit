@@ -383,9 +383,7 @@ class FileToTest(object):
             result = differ.diff(ref_fname, out_fname)
             result.dump_details(outf)
 
-            return (result.passed_within_tols(
-                self.tolnlines, self.tolabs, self.tolrel
-            ), result.has_line_count_error())
+            return (result.passed_within_tols(self.tolnlines, self.tolabs, self.tolrel), result.has_line_count_error())
 
         if fldebug:
             # fail on first error and output the traceback
@@ -398,9 +396,9 @@ class FileToTest(object):
                                '{}: {}\n').format(self.name, type(e).__name__, str(e)))
 
                 isok, status = False, 'failed'
-                msg = 'internal error:\n{}: {}'.format(type(e).__name__,
-                                                       str(e))
+                msg = 'Internal error:\n{}: {}'.format(type(e).__name__, str(e))
                 has_line_count_error = False
+
         msg += ' [file={}]'.format(os.path.basename(ref_fname))
 
         # Save comparison results.
@@ -755,8 +753,7 @@ class AbinitTestInfoParser(object):
 
             ncpu_section = "NCPU_" + str(nprocs)
             if not self.parser.has_section(ncpu_section):
-                err_msg = "Cannot find section %s in %s" % (ncpu_section, self.inp_fname)
-                raise self.Error(err_msg)
+                raise self.Error("Cannot find section %s in %s" % (ncpu_section, self.inp_fname))
 
             for key in self.parser.options(ncpu_section):
                 if key in self.parser.defaults():
@@ -771,8 +768,7 @@ class AbinitTestInfoParser(object):
                 except Exception as exc:
                     err_msg = ("In file: %s\nWrong line:\n"
                                " key = %s, d[key] = %s\n %s: %s") % (
-                                   self.inp_fname, key, d[key],
-                                   type(exc).__name__, str(exc)
+                                   self.inp_fname, key, d[key], type(exc).__name__, str(exc)
                     )
                     raise self.Error(err_msg)
 
@@ -1814,8 +1810,7 @@ class BaseTest(object):
                     return True
         return False
 
-    def run(self, build_env, runner, workdir, print_lock=None, nprocs=1,
-            runmode="static", **kwargs):
+    def run(self, build_env, runner, workdir, print_lock=None, nprocs=1, runmode="static", **kwargs):
         """
         Run the test with nprocs MPI nodes in the build environment build_env using the `JobRunner` runner.
         Results are produced in directory workdir. kwargs is used to pass additional options
@@ -1982,7 +1977,7 @@ class BaseTest(object):
                 fldiff_fname = os.path.join(self.workdir, f.name + ".fldiff")
                 self.keep_files(fldiff_fname)
 
-                with open(fldiff_fname, "w") as fh:
+                with open(fldiff_fname, "wt") as fh:
                     f.fldiff_fname = fldiff_fname
 
                     isok, status, msg = f.compare(self.abenv.fldiff_path, self.ref_dir, self.workdir,
@@ -1990,28 +1985,27 @@ class BaseTest(object):
                 self.keep_files(os.path.join(self.workdir, f.name))
                 self.fld_isok = self.fld_isok and isok
 
-                if not self.exec_error and f.has_line_count_error:
-                    f.do_html_diff = True
+                if not self.exec_error and f.has_line_count_error: f.do_html_diff = True
 
-                msg = ": ".join([self.full_id, msg])
-                self.cprint(msg, status2txtcolor[status])
+                self.cprint(self.full_id + "[run_etime: %s s]: " % sec2str(self.run_etime) + msg,
+                            status2txtcolor[status])
 
             # Check if the test is expected to fail.
             if runner.retcode == 124:
                 self._status = "failed"
                 self.had_timeout = True
-                msg = self.full_id + "test has reached timeout and has been killed (SIGTERM)."
+                msg = self.full_id + "Test has reached timeout and has been killed by SIGTERM"
                 self.cprint(msg, status2txtcolor["failed"])
 
             elif runner.retcode == 137:
                 self._status = "failed"
                 self.had_timeout = True
-                msg = self.full_id + "test has reached timeout and has been killed (SIGKILL)."
+                msg = self.full_id + "Test has reached timeout and has been killed by SIGKILL"
                 self.cprint(msg, status2txtcolor["failed"])
 
             elif runner.retcode != 0 and not self.expected_failure:
                 self._status = "failed"
-                msg = (self.full_id + "Test was not expected to fail but subprocesses returned %s" % runner.retcode)
+                msg = (self.full_id + "Test was not expected to fail but subprocesses returned retcode: %s" % runner.retcode)
                 self.cprint(msg, status2txtcolor["failed"])
 
             # If pedantic, stderr must be empty unless the test is expected to fail!

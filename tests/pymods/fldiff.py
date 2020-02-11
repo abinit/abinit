@@ -156,7 +156,7 @@ class MetaCharDifference(LineDifference):
 
     def __repr__(self):
         return ('At line {} (in file 1), line {} (in file 2), different'
-                ' leading characters: {} and {}.\n').format(*(self.lines + self.metas))
+                ' leading characters: `{}` and `{}`.\n').format(*(self.lines + self.metas))
 
 
 class FloatDifference(LineDifference):

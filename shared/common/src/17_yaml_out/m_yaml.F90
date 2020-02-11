@@ -195,13 +195,13 @@ subroutine yaml_iterstart(label, val, unit, use_yaml, newline)
    MSG_ERROR(sjoin("Invalid value for label:", label))
  end select
 
- !SET_DEFAULT(nl, newline, .true.)
- !if (use_yaml == 1) then
- !  write(tmp_i, '(I6)') val
- !  call stream%push('--- !IterStart'//eol//label//':'//tmp_i//eol//'...')
- !  if (nl) call stream%push(eol)
- !  call stream%flush(unit)
- !end if
+ if (use_yaml == 1) then
+   SET_DEFAULT(nl, newline, .true.)
+   write(tmp_i, '(I6)') val
+   call stream%push('--- !IterStart'//eol//label//':'//tmp_i//eol//'...')
+   if (nl) call stream%push(eol)
+   call stream%flush(unit)
+ end if
 
 end subroutine yaml_iterstart
 !!***

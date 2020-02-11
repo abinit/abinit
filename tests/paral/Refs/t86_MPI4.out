@@ -205,6 +205,7 @@ P           mkmem2          5
             upawu2     1.15147886E-01  0.00000000E+00  0.00000000E+00 Hartree
           usedmft1          0
           usedmft2          1
+         use_yaml           1
           usepawu1          1
           usepawu2         10
            useylm           1
@@ -391,7 +392,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     753.188     753.111
 
 
 --- !ResultsGS
-iteration_state: {"jdtset": 1, "timimage": 1, "image": 1, }
+iteration_state: {"dtset": 1, "timimage": 1, "image": 1, }
 comment   : Summary of ground state results
 natom     :        5
 nsppol    :        1
@@ -399,20 +400,20 @@ nspinor   :        1
 nspden    :        1
 nelect    :  4.100000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [     7.261,      7.261,      7.261, ]
-alpha_beta_gamma_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg":  2.000000000000000E+001, }
+lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  12.0, "pawecutdg":  20.0, }
 convergence: {
-    "deltae":  2.372530616412405E-009, "res2":  1.415207732499787E-008, 
-    "residm":  2.602548421348498E-007, "diffor": undef, 
+    "deltae":  2.38E-09, "res2":  1.42E-08, 
+    "residm":  2.60E-07, "diffor": undef, 
 }
-etotal    : -1.515077117076600E+002
+etotal    : -1.515077117076573E+002
 entropy   :  0.000000000000000E+000
-fermie    :  3.096581457764690E-001
+fermie    :  3.096581457393325E-001
 cartesian_stress_tensor:
-- [ 3.564839961176000E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  3.564839961175990E-003,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.564839961176011E-003, ]
+- [ 3.564839962955708E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  3.564839962955715E-003,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  3.564839962955712E-003, ]
 pressure_GPa: -1.048811950617810E+002
 cartesian_forces:
 - [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
@@ -420,6 +421,7 @@ cartesian_forces:
 - [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
 - [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
 - [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
+force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -647,7 +649,7 @@ cartesian_forces:
    Integrated=    4.1000E+01
 
 --- !EnergyTerms
-iteration_state     : {"jdtset": 1, "timimage": 1, "image": 1, }
+iteration_state     : {"dtset": 1, "timimage": 1, "image": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.32382506745724E+01
 hartree             :  3.13399455339874E+01
@@ -664,7 +666,7 @@ total_energy_eV     : -4.12273389925231E+03
 
 
 --- !EnergyTermsDC
-iteration_state     : {"jdtset": 1, "timimage": 1, "image": 1, }
+iteration_state     : {"dtset": 1, "timimage": 1, "image": 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -1.473142750982097E+001
 Ewald energy        : -1.142203169790576E+002
@@ -889,7 +891,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     188.438     188.419
 
 
 --- !ResultsGS
-iteration_state: {"jdtset": 2, "timimage": 1, "image": 1, }
+iteration_state: {"dtset": 2, "timimage": 1, "image": 1, }
 comment   : Summary of ground state results
 natom     :        5
 nsppol    :        1
@@ -897,22 +899,23 @@ nspinor   :        1
 nspden    :        1
 nelect    :  4.100000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [     7.261,      7.261,      7.261, ]
-alpha_beta_gamma_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg":  2.000000000000000E+001, }
+lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  12.0, "pawecutdg":  20.0, }
 convergence: {
-    "deltae":  1.167867470144301E-004, "res2":  1.550896521691849E-001, 
-    "residm":  5.751092190836420E-013, "diffor":  0.000000000000000E+000, 
+    "deltae":  1.17E-04, "res2":  1.55E-01, 
+    "residm":  5.75E-13, "diffor":  0.00E+00, 
 }
-etotal    : -1.514750399546676E+002
+etotal    : -1.514750399538910E+002
 entropy   :  0.000000000000000E+000
-fermie    :  3.040970759545259E-001
+fermie    :  3.040970732778852E-001
 cartesian_stress_tensor:
-- [ 4.022240480478719E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  4.022240480478716E-003,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.022240480478723E-003, ]
+- [ 4.022240696351494E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  4.022240696351497E-003,  0.000000000000000E+000, ]
+- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.022240696351490E-003, ]
 pressure_GPa: -1.183383869804075E+002
 cartesian_forces: null
+force_length_stats: {"min": null, "max": null, "mean": null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1126,7 +1129,7 @@ cartesian_forces: null
    Integrated=    4.1000E+01
 
 --- !EnergyTerms
-iteration_state     : {"jdtset": 2, "timimage": 1, "image": 1, }
+iteration_state     : {"dtset": 2, "timimage": 1, "image": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.31183660434428E+01
 hartree             :  3.13028991812723E+01
@@ -1142,7 +1145,7 @@ total_energy_eV     : -4.12649332004448E+03
 
 
 --- !EnergyTermsDC
-iteration_state     : {"jdtset": 2, "timimage": 1, "image": 1, }
+iteration_state     : {"dtset": 2, "timimage": 1, "image": 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -1.468734664284815E+001
 Ewald energy        : -1.142203169790576E+002
@@ -1348,6 +1351,7 @@ P           mkmem2          5
             upawu2     1.15147886E-01  0.00000000E+00  0.00000000E+00 Hartree
           usedmft1          0
           usedmft2          1
+         use_yaml           1
           usepawu1          1
           usepawu2         10
            useylm           1

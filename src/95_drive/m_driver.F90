@@ -289,7 +289,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    write(msg,'(3a)') trim(msg),ch10,' '
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,msg,'PERS')     ! PERS is choosen to make debugging easier
-   call yaml_iterstart('dtset', jdtset, ab_out, 1)
+   call yaml_iterstart('dtset', jdtset, ab_out, dtset%use_yaml)
 
    if ( dtset%np_slk == 0 ) then
      call xgScalapack_config(SLK_DISABLED,dtset%slk_rankpp)

@@ -504,8 +504,10 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      call wrtout(ab_out ,msg,'COLL')
      call wrtout(std_out,msg,'PERS')
 
-     call yaml_iterstart('timimage', itimimage, ab_out, 1)
+     call yaml_iterstart('timimage', itimimage, ab_out, 0)
    end if
+
+   if (dtset%use_yaml == 1) call yaml_iterstart('timimage', itimimage, ab_out, dtset%use_yaml)
 
    call timab(704,2,tsec)
 
@@ -528,8 +530,10 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          if (itimimage>1) then
            dtfil%ireadwf=0;dtfil%ireadden=0;dtfil%ireadkden=0
          end if
-         call yaml_iterstart('image', iimage, ab_out, 1)
+         call yaml_iterstart('image', iimage, ab_out, 0)
        end if
+
+       if (dtset%use_yaml == 1) call yaml_iterstart('image', iimage, ab_out, dtset%use_yaml)
 
 !      Redefine output units
        call localwrfile(mpi_enreg%comm_cell,ii,dtset%nimage,mpi_enreg%paral_img,dtset%prtvolimg)
