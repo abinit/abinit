@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 03h19 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 03h12 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t05/t05.in
 - output file    -> t05.out
@@ -217,6 +217,7 @@
   for the second time, diff in etot=  3.672E-07 < toldfe=  1.000E-06
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        8
 nsppol    :        1
@@ -224,29 +225,20 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.200000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  21.00000,   20.00000,   20.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -3.672135520105257E-007, "res2":  1.697032774627948E-006, 
-    "residm":  1.684767913409655E-004, "diffor":  0.000000000000000E+000, 
+    "deltae": -3.67E-07, "res2":  1.70E-06, 
+    "residm":  1.68E-04, "diffor":  0.00E+00, 
 }
 etotal    : -5.393401765660483E+000
 entropy   :  0.000000000000000E+000
 fermie    :  0.000000000000000E+000
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {"min": null, "max": null, "mean": null, }
 ...
 
 ================================================================================
@@ -290,6 +282,7 @@ cartesian_forces: !CartForces
   -0.80028   -0.54123   -0.48509   -0.44243   -0.33200   -0.24024
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.21902924617502E+01
 hartree             :  3.21003335493134E+01
@@ -303,6 +296,7 @@ total_energy        : -5.39340191680587E+00
 
 
 --- !EnergyTermsDC
+iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -5.682522319804816E+000
 'Ion-ion energy'    :  3.079115850080089E+001
@@ -471,10 +465,10 @@ total_energy_dc     : -5.393372901989551E+000
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         22.4  wall=         22.6
+- Proc.   0 individual time (sec): cpu=         22.7  wall=         22.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.4  wall=         22.6
++Overall time at end (sec) : cpu=         22.7  wall=         22.8

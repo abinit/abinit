@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 03h18 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 03h15 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_paral_t01_MPI4/t01.in
 - output file    -> t01_MPI4.out
@@ -168,6 +168,7 @@
  At SCF step    8       nres2   =  6.84E-07 < tolvrs=  1.00E-06 =>converged.
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -175,23 +176,22 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.200000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut": -1.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   8.80000,    6.80000,    6.80000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  -1.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  7.927759781978239E-009, "res2":  6.839108263156317E-007, 
-    "residm":  3.375638451624021E-005, "diffor": undef, 
+    "deltae":  7.93E-09, "res2":  6.84E-07, 
+    "residm":  3.38E-05, "diffor": undef, 
 }
 etotal    : -3.126198999689789E+001
 entropy   :  0.000000000000000E+000
 fermie    :  0.000000000000000E+000
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces:
 - [-4.276219004669002E-002,  1.593336241427427E-003,  1.593336840047914E-003, ]
 - [ 4.276219004669003E-002, -1.593336241427420E-003, -1.593336840047907E-003, ]
+force_length_stats: {"min":  4.282151725772144E-002, "max":  4.282151725772144E-002, "mean":  4.282151725772144E-002, }
 ...
 
 ================================================================================
@@ -227,6 +227,7 @@ cartesian_forces: !CartForces
   -1.10798   -0.62651   -0.40309   -0.40307   -0.36404   -0.14444   -0.14437
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.37092493227969E+01
 hartree             :  4.29974734941007E+01
@@ -240,6 +241,7 @@ total_energy        : -3.12619914740849E+01
 
 
 --- !EnergyTermsDC
+iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -6.098187101814900E+000
 'Ion-ion energy'    :  1.574411529683492E+001
@@ -287,6 +289,7 @@ total_energy_dc     : -3.126198999689789E+001
  At SCF step   12       vres2   =  2.46E-07 < tolvrs=  1.00E-06 =>converged.
 
 --- !ResultsGS
+iteration_state: {"dtset": 2, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -294,23 +297,22 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.200000000000000E+001
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut": -1.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [   8.80000,    6.80000,    6.80000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  -1.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  1.443832722713978E-006, "res2":  2.458285145400977E-007, 
-    "residm":  6.627762843883965E-007, "diffor": undef, 
+    "deltae":  1.44E-06, "res2":  2.46E-07, 
+    "residm":  6.63E-07, "diffor": undef, 
 }
 etotal    : -3.126198991507770E+001
 entropy   :  0.000000000000000E+000
 fermie    :  0.000000000000000E+000
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces:
 - [-4.281789200146294E-002,  1.593271525401091E-003,  1.597048411808945E-003, ]
 - [ 4.281789200146294E-002, -1.593271525401084E-003, -1.597048411808945E-003, ]
+force_length_stats: {"min":  4.287727781975272E-002, "max":  4.287727781975272E-002, "mean":  4.287727781975272E-002, }
 ...
 
 ================================================================================
@@ -346,6 +348,7 @@ cartesian_forces: !CartForces
   -1.10797   -0.62651   -0.40309   -0.40307   -0.36404   -0.14443   -0.14436
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.37092743404434E+01
 hartree             :  4.29975072729516E+01
@@ -359,6 +362,7 @@ total_energy        : -3.12619899150777E+01
 
 
 --- !EnergyTermsDC
+iteration_state     : {"dtset": 2, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -6.098160559945057E+000
 'Ion-ion energy'    :  1.574411529683492E+001
@@ -520,10 +524,10 @@ total_energy_dc     : -3.126199642427962E+001
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.9  wall=          3.1
+- Proc.   0 individual time (sec): cpu=          2.9  wall=          3.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.7  wall=         11.9
++Overall time at end (sec) : cpu=         11.8  wall=         11.8

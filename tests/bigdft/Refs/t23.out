@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 03h19 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 03h12 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t23/t23.in
 - output file    -> t23.out
@@ -179,6 +179,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     485.000     485.000
  At SCF step    4       nres2   =  5.75E-05 < tolvrs=  1.00E-04 =>converged.
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        1
 nsppol    :        1
@@ -186,22 +187,20 @@ nspinor   :        1
 nspden    :        1
 nelect    :  1.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg":  2.000000000000000E+001, }
+lattice_lengths: [   7.00000,    7.00000,    7.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  20.0, }
 convergence: {
-    "deltae": -1.082064877057087E-004, "res2":  5.748926812213917E-005, 
-    "residm":  4.817813934377418E-009, "diffor":  0.000000000000000E+000, 
+    "deltae": -1.08E-04, "res2":  5.75E-05, 
+    "residm":  4.82E-09, "diffor":  0.00E+00, 
 }
 etotal    : -4.764234993572253E-001
 entropy   :  0.000000000000000E+000
 fermie    : -2.940175645782249E-001
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
-- [undef, undef, undef, ]
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {"min": null, "max": null, "mean": null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -245,6 +244,7 @@ cartesian_forces: !CartForces
   -0.29402
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.66502094285387E-01
 hartree             :  2.44646414755950E-01
@@ -259,6 +259,7 @@ total_energy_eV     : -1.29923154963701E+01
 
 
 --- !EnergyTermsDC
+iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -2.940175645782249E-001
 'Ion-ion energy'    :  0.000000000000000E+000

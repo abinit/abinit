@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 10 Feb 2020.
-- ( at 03h19 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 03h12 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t10/t10.in
 - output file    -> t10.out
@@ -155,6 +155,7 @@
  At SCF step    6   max grdnorm=  8.32E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -162,23 +163,22 @@ nspinor   :        1
 nspden    :        1
 nelect    :  2.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  17.00000,   16.00000,   16.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -2.638304241742162E-008, "res2":  1.554609086653804E-006, 
-    "residm":  8.319255845640910E-005, "diffor": undef, 
+    "deltae": -2.64E-08, "res2":  1.55E-06, 
+    "residm":  8.32E-05, "diffor": undef, 
 }
 etotal    : -1.079739562993745E+000
 entropy   :  0.000000000000000E+000
 fermie    :  0.000000000000000E+000
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces:
 - [-3.456990078982819E-001, -1.134588625052875E-007, -1.134588612661558E-007, ]
 - [ 3.456990078982819E-001,  1.134588625052872E-007,  1.134588612661558E-007, ]
+force_length_stats: {"min":  3.456990078983191E-001, "max":  3.456990078983191E-001, "mean":  3.456990078983191E-001, }
 ...
 
 
@@ -215,6 +215,7 @@ cartesian_forces: !CartForces
  At SCF step    7   max grdnorm=  6.53E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -222,23 +223,22 @@ nspinor   :        1
 nspden    :        1
 nelect    :  2.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  18.00000,   16.00000,   16.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.761504986319551E-008, "res2":  1.038291210624759E-006, 
-    "residm":  6.530128512359176E-005, "diffor": undef, 
+    "deltae": -1.76E-08, "res2":  1.04E-06, 
+    "residm":  6.53E-05, "diffor": undef, 
 }
 etotal    : -1.129488627788018E+000
 entropy   :  0.000000000000000E+000
 fermie    :  0.000000000000000E+000
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces:
 - [ 5.786606615065785E-002,  1.019875314526991E-008,  1.019875362713933E-008, ]
 - [-5.786606615065785E-002, -1.019875314527076E-008, -1.019875362713933E-008, ]
+force_length_stats: {"min":  5.786606615065965E-002, "max":  5.786606615065965E-002, "mean":  5.786606615065965E-002, }
 ...
 
 
@@ -278,6 +278,7 @@ cartesian_forces: !CartForces
  At SCF step    6   max grdnorm=  3.00E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -285,23 +286,22 @@ nspinor   :        1
 nspden    :        1
 nelect    :  2.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -3.625548750108010E-009, "res2":  2.047619281977520E-007, 
-    "residm":  2.996318507424911E-005, "diffor": undef, 
+    "deltae": -3.63E-09, "res2":  2.05E-07, 
+    "residm":  3.00E-05, "diffor": undef, 
 }
 etotal    : -1.134304402954460E+000
 entropy   :  0.000000000000000E+000
 fermie    :  0.000000000000000E+000
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces:
 - [ 4.174920705387911E-002,  1.072648214039381E-007,  1.072648191806156E-007, ]
 - [-4.174920705387911E-002, -1.072648214039381E-007, -1.072648191806147E-007, ]
+force_length_stats: {"min":  4.174920705415471E-002, "max":  4.174920705415471E-002, "mean":  4.174920705415471E-002, }
 ...
 
 
@@ -341,6 +341,7 @@ cartesian_forces: !CartForces
  At SCF step    6   max grdnorm=  3.53E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -348,23 +349,22 @@ nspinor   :        1
 nspden    :        1
 nelect    :  2.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -5.051451257287454E-009, "res2":  2.877080171062268E-007, 
-    "residm":  3.528629036257684E-005, "diffor": undef, 
+    "deltae": -5.05E-09, "res2":  2.88E-07, 
+    "residm":  3.53E-05, "diffor": undef, 
 }
 etotal    : -1.137374740660535E+000
 entropy   :  0.000000000000000E+000
 fermie    :  0.000000000000000E+000
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces:
 - [ 1.032763097575738E-002, -2.880309111928080E-008, -2.880309057387121E-008, ]
 - [-1.032763097575738E-002,  2.880309111927996E-008,  2.880309057387205E-008, ]
+force_length_stats: {"min":  1.032763097583771E-002, "max":  1.032763097583771E-002, "mean":  1.032763097583771E-002, }
 ...
 
 
@@ -403,6 +403,7 @@ cartesian_forces: !CartForces
  At SCF step    5   max grdnorm=  5.80E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -410,23 +411,22 @@ nspinor   :        1
 nspden    :        1
 nelect    :  2.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.604216492978594E-008, "res2":  3.778674986834519E-007, 
-    "residm":  5.795186650169697E-005, "diffor": undef, 
+    "deltae": -1.60E-08, "res2":  3.78E-07, 
+    "residm":  5.80E-05, "diffor": undef, 
 }
 etotal    : -1.137523412081220E+000
 entropy   :  0.000000000000000E+000
 fermie    :  0.000000000000000E+000
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces:
 - [-2.509548193287309E-003, -4.851591882929182E-008, -4.851591807727479E-008, ]
 - [ 2.509548193287309E-003,  4.851591882929267E-008,  4.851591807727479E-008, ]
+force_length_stats: {"min":  2.509548194225245E-003, "max":  2.509548194225245E-003, "mean":  2.509548194225245E-003, }
 ...
 
 
@@ -464,6 +464,7 @@ cartesian_forces: !CartForces
  At SCF step    4   max grdnorm=  8.13E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -471,23 +472,22 @@ nspinor   :        1
 nspden    :        1
 nelect    :  2.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.588629894300198E-008, "res2":  1.865125268946677E-007, 
-    "residm":  8.129105442236885E-005, "diffor": undef, 
+    "deltae": -1.59E-08, "res2":  1.87E-07, 
+    "residm":  8.13E-05, "diffor": undef, 
 }
 etotal    : -1.137532227757771E+000
 entropy   :  0.000000000000000E+000
 fermie    :  0.000000000000000E+000
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces:
 - [ 8.341052286868131E-005, -6.130841991351476E-009, -6.130839285239604E-009, ]
 - [-8.341052286868131E-005,  6.130841991351476E-009,  6.130839285240451E-009, ]
+force_length_stats: {"min":  8.341052331931039E-005, "max":  8.341052331931039E-005, "mean":  8.341052331931039E-005, }
 ...
 
 
@@ -523,6 +523,7 @@ cartesian_forces: !CartForces
  At SCF step    2   max grdnorm=  6.72E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        2
 nsppol    :        1
@@ -530,23 +531,22 @@ nspinor   :        1
 nspden    :        1
 nelect    :  2.000000000000000E+000
 charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  1.000000000000000E+001, "pawecutdg": -1.000000000000000E+000, }
+lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -2.131848564346228E-008, "res2":  2.718613391897078E-007, 
-    "residm":  6.721042662709899E-005, "diffor": undef, 
+    "deltae": -2.13E-08, "res2":  2.72E-07, 
+    "residm":  6.72E-05, "diffor": undef, 
 }
 etotal    : -1.137532236687753E+000
 entropy   :  0.000000000000000E+000
 fermie    :  0.000000000000000E+000
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces:
 - [-7.532092109637945E-007, -9.303240750199252E-009, -9.303243100232872E-009, ]
 - [ 7.532092109637947E-007,  9.303240750199252E-009,  9.303243100232025E-009, ]
+force_length_stats: {"min":  7.533241109252644E-007, "max":  7.533241109252647E-007, "mean":  7.533241109252645E-007, }
 ...
 
 
@@ -606,6 +606,7 @@ cartesian_forces: !CartForces
   -0.37230
 
 --- !EnergyTerms
+iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.07696772694977E+00
 hartree             :  1.27853318441885E+00
@@ -619,6 +620,7 @@ total_energy        : -1.13753223817299E+00
 
 
 --- !EnergyTermsDC
+iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -7.446137836602902E-001
 'Ion-ion energy'    :  6.884259335247153E-001
@@ -772,10 +774,10 @@ total_energy_dc     : -1.137548278066113E+000
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         18.9  wall=         19.2
+- Proc.   0 individual time (sec): cpu=         18.5  wall=         18.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.9  wall=         19.2
++Overall time at end (sec) : cpu=         18.5  wall=         18.8
