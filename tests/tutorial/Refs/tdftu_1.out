@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h34 )
+- ( at 16h42 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tdftu_1/tdftu_1.in
 - output file    -> tdftu_1.out
@@ -271,8 +271,8 @@ natom     :        4
 nsppol    :        1
 nspinor   :        1
 nspden    :        2
-nelect    :  4.800000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   4.80000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [   5.60029,    5.60029,   11.20057, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":  15.0, "pawecutdg":  30.0, }
@@ -280,20 +280,20 @@ convergence: {
     "deltae":  6.42E-10, "res2":  9.25E-09, 
     "residm":  2.23E-06, "diffor": undef, 
 }
-etotal    : -3.730473718799783E+002
-entropy   :  0.000000000000000E+000
-fermie    :  2.234655801647662E-001
+etotal    :  -3.73047372E+02
+entropy   :   0.00000000E+00
+fermie    :   2.23465580E-01
 cartesian_stress_tensor:
-- [ 1.094528992114221E-003, -3.854559322968614E-005,  3.854559322967970E-005, ]
-- [-3.854559322968614E-005,  1.094528992114152E-003,  3.854559322973084E-005, ]
-- [ 3.854559322967970E-005,  3.854559322973084E-005,  1.094528992114235E-003, ]
-pressure_GPa: -3.220214930140201E+001
+- [  1.09452899E-03,  -3.85455932E-05,   3.85455932E-05, ]
+- [ -3.85455932E-05,   1.09452899E-03,   3.85455932E-05, ]
+- [  3.85455932E-05,   3.85455932E-05,   1.09452899E-03, ]
+pressure_GPa:  -3.2202E+01
 cartesian_forces:
-- [-8.300304137426472E-032, -8.300304137426472E-032,  8.300304137426472E-032, ]
-- [-1.660060827485294E-032, -1.660060827485294E-032,  1.660060827485294E-032, ]
-- [ 4.980182482455883E-032,  4.980182482455883E-032, -4.980182482455883E-032, ]
-- [ 4.980182482455883E-032,  4.980182482455883E-032, -4.980182482455883E-032, ]
-force_length_stats: {"min":  2.875309696859363E-032, "max":  1.437654848429681E-031, "mean":  8.625929090578087E-032, }
+- [ -8.30030414E-32,  -8.30030414E-32,   8.30030414E-32, ]
+- [ -1.66006083E-32,  -1.66006083E-32,   1.66006083E-32, ]
+- [  4.98018248E-32,   4.98018248E-32,  -4.98018248E-32, ]
+- [  4.98018248E-32,   4.98018248E-32,  -4.98018248E-32, ]
+force_length_stats: {"min":   2.87530970E-32, "max":   1.43765485E-31, "mean":   8.62592909E-32, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -510,15 +510,15 @@ total_energy_eV     : -1.01511360052090E+04
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -3.721117888808775E+001
-Ewald energy        : -2.381228093191938E+002
-psp_core            :  2.144770517593746E+001
-xc_dc               : -4.615036773763326E+001
-spherical_terms     : -7.300443719535028E+001
-internal            : -3.730410879643277E+002
-'-kT*entropy'       : -6.283915650622147E-003
-total_energy_dc     : -3.730473718799783E+002
-total_energy_dc_eV  : -1.015113600520897E+004
+band_energy         : -3.72111788880878E+01
+Ewald energy        : -2.38122809319194E+02
+psp_core            :  2.14477051759375E+01
+xc_dc               : -4.61503677376333E+01
+spherical_terms     : -7.30044371953503E+01
+internal            : -3.73041087964328E+02
+'-kT*entropy'       : -6.28391565062215E-03
+total_energy_dc     : -3.73047371879978E+02
+total_energy_dc_eV  : -1.01511360052090E+04
 ...
 
 
@@ -732,10 +732,10 @@ P           mkmem           3
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         13.8  wall=         13.9
+- Proc.   0 individual time (sec): cpu=         13.9  wall=         14.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.8  wall=         13.9
++Overall time at end (sec) : cpu=         13.9  wall=         14.0

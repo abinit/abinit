@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h34 )
+- ( at 16h42 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tdftu_2/tdftu_2.in
 - output file    -> tdftu_2.out
@@ -276,8 +276,8 @@ natom     :        4
 nsppol    :        1
 nspinor   :        1
 nspden    :        2
-nelect    :  4.800000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   4.80000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [   5.60029,    5.60029,   11.20057, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":  15.0, "pawecutdg":  30.0, }
@@ -285,20 +285,20 @@ convergence: {
     "deltae": -3.26E-09, "res2":  4.18E-08, 
     "residm":  3.39E-06, "diffor": undef, 
 }
-etotal    : -3.729089365686527E+002
-entropy   :  0.000000000000000E+000
-fermie    :  2.530882210465199E-001
+etotal    :  -3.72908937E+02
+entropy   :   0.00000000E+00
+fermie    :   2.53088221E-01
 cartesian_stress_tensor:
-- [ 9.020027900157324E-004, -3.507412053366215E-005,  3.507412053369573E-005, ]
-- [-3.507412053366215E-005,  9.020027900157046E-004,  3.507412053367974E-005, ]
-- [ 3.507412053369573E-005,  3.507412053367974E-005,  9.020027900157740E-004, ]
-pressure_GPa: -2.653783382956496E+001
+- [  9.02002790E-04,  -3.50741205E-05,   3.50741205E-05, ]
+- [ -3.50741205E-05,   9.02002790E-04,   3.50741205E-05, ]
+- [  3.50741205E-05,   3.50741205E-05,   9.02002790E-04, ]
+pressure_GPa:  -2.6538E+01
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -591,15 +591,15 @@ total_energy_eV     : -1.01473670541623E+04
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -3.897567015808325E+001
-Ewald energy        : -2.381228093191938E+002
-psp_core            :  2.144770517593746E+001
-xc_dc               : -4.629310074182654E+001
-spherical_terms     : -7.096506152548655E+001
-internal            : -3.729089365686527E+002
-'-kT*entropy'       : -6.800729642732396E-017
-total_energy_dc     : -3.729089365686527E+002
-total_energy_dc_eV  : -1.014736705416229E+004
+band_energy         : -3.89756701580833E+01
+Ewald energy        : -2.38122809319194E+02
+psp_core            :  2.14477051759375E+01
+xc_dc               : -4.62931007418265E+01
+spherical_terms     : -7.09650615254865E+01
+internal            : -3.72908936568653E+02
+'-kT*entropy'       : -6.80072964273240E-17
+total_energy_dc     : -3.72908936568653E+02
+total_energy_dc_eV  : -1.01473670541623E+04
 ...
 
 
@@ -807,10 +807,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         11.4  wall=         11.5
+- Proc.   0 individual time (sec): cpu=         11.5  wall=         11.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.4  wall=         11.5
++Overall time at end (sec) : cpu=         11.5  wall=         11.6

@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 14h44 )
+- ( at 16h40 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t18/t18.in
 - output file    -> t18.out
@@ -3307,10 +3307,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          5.0  wall=          5.1
+- Proc.   0 individual time (sec): cpu=          4.8  wall=          4.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  43 WARNINGs and  34 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.0  wall=          5.1
++Overall time at end (sec) : cpu=          4.8  wall=          4.9

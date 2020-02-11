@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h34 )
+- ( at 16h42 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpaw1_4/tpaw1_4.in
 - output file    -> tpaw1_4.out
@@ -346,8 +346,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  8.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   8.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":  12.0, "pawecutdg":  24.0, }
@@ -355,18 +355,18 @@ convergence: {
     "deltae": -1.36E-12, "res2":  1.39E-10, 
     "residm":  9.69E-13, "diffor": undef, 
 }
-etotal    : -1.152458451545678E+001
-entropy   :  0.000000000000000E+000
-fermie    :  4.946388620545361E-001
+etotal    :  -1.15245845E+01
+entropy   :   0.00000000E+00
+fermie    :   4.94638862E-01
 cartesian_stress_tensor:
-- [ 4.150469799318246E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  4.150469799318306E-004,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  4.150469799318289E-004, ]
-pressure_GPa: -1.221110168040774E+001
+- [  4.15046980E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.15046980E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.15046980E-04, ]
+pressure_GPa:  -1.2211E+01
 cartesian_forces:
-- [-8.363768078489136E-029, -9.112762234771746E-029,  1.560404492255436E-028, ]
-- [ 8.363768078489136E-029,  9.112762234771746E-029, -1.560404492255436E-028, ]
-force_length_stats: {"min":  1.991183743312833E-028, "max":  1.991183743312833E-028, "mean":  1.991183743312833E-028, }
+- [ -8.36376808E-29,  -9.11276223E-29,   1.56040449E-28, ]
+- [  8.36376808E-29,   9.11276223E-29,  -1.56040449E-28, ]
+force_length_stats: {"min":   1.99118374E-28, "max":   1.99118374E-28, "mean":   1.99118374E-28, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -481,15 +481,15 @@ total_energy_eV     : -3.13600170113691E+02
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  6.879756619302260E-001
-Ewald energy        : -1.278641212105207E+001
-psp_core            :  5.410179187970172E-001
-xc_dc               :  1.221367249673175E-001
-spherical_terms     : -8.930270009927188E-002
-internal            : -1.152458451545678E+001
-'-kT*entropy'       : -3.776309403980751E-018
-total_energy_dc     : -1.152458451545678E+001
-total_energy_dc_eV  : -3.136001701136911E+002
+band_energy         :  6.87975661930226E-01
+Ewald energy        : -1.27864121210521E+01
+psp_core            :  5.41017918797017E-01
+xc_dc               :  1.22136724967318E-01
+spherical_terms     : -8.93027000992719E-02
+internal            : -1.15245845154568E+01
+'-kT*entropy'       : -3.77630940398075E-18
+total_energy_dc     : -1.15245845154568E+01
+total_energy_dc_eV  : -3.13600170113691E+02
 ...
 
 
@@ -803,10 +803,10 @@ P           mkmem         110
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         17.5  wall=         17.6
+- Proc.   0 individual time (sec): cpu=         17.8  wall=         17.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.5  wall=         17.6
++Overall time at end (sec) : cpu=         17.8  wall=         17.9

@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h35 )
+- ( at 16h43 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpositron_6/tpositron_6.in
 - output file    -> tpositron_6.out
@@ -272,8 +272,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  2.400000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   2.40000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [   7.25577,    7.25577,    7.25577, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":   8.0, "pawecutdg":  15.0, }
@@ -281,9 +281,9 @@ convergence: {
     "deltae":  5.78E-11, "res2":  8.83E-11, 
     "residm":  1.20E-05, "diffor":  0.00E+00, 
 }
-etotal    : -2.036424334888988E+002
-entropy   :  0.000000000000000E+000
-fermie    :  2.149097708746149E-001
+etotal    :  -2.03642433E+02
+entropy   :   0.00000000E+00
+fermie    :   2.14909771E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
@@ -405,13 +405,13 @@ total_energy_eV     : -5.54139220335447E+03
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -5.614296575491219E+001
-Ewald energy        : -7.559524646816489E+001
-psp_core            :  1.706910392624777E+000
-xc_dc               : -5.682341299511823E+001
-spherical_terms     : -1.678771866332829E+001
-total_energy_dc     : -2.036424334888988E+002
-total_energy_dc_eV  : -5.541392203354472E+003
+band_energy         : -5.61429657549122E+01
+Ewald energy        : -7.55952464681649E+01
+psp_core            :  1.70691039262478E+00
+xc_dc               : -5.68234129951182E+01
+spherical_terms     : -1.67877186633283E+01
+total_energy_dc     : -2.03642433488899E+02
+total_energy_dc_eV  : -5.54139220335447E+03
 ...
 
 
@@ -492,8 +492,8 @@ natom     :        2
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  1.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   1.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [   7.25577,    7.25577,    7.25577, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":   8.0, "pawecutdg":  15.0, }
@@ -501,9 +501,9 @@ convergence: {
     "deltae": -6.72E-08, "res2":  2.17E-09, 
     "residm":  7.87E-04, "diffor":  0.00E+00, 
 }
-etotal    : -2.041174237125817E+002
-entropy   :  0.000000000000000E+000
-fermie    : -4.749902236826901E-001
+etotal    :  -2.04117424E+02
+entropy   :   0.00000000E+00
+fermie    :  -4.74990224E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
@@ -684,14 +684,14 @@ total_energy_eV     : -5.55431699467734E+03
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 2, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -4.749902236826901E-001
-spherical_terms     :  0.000000000000000E+000
-electron_positron_dc: -4.757155681649117E-001
-positronic          : -9.507057918476109E-001
-electronic          : -2.036424334888988E+002
-electron_positron_interaction:  4.757155681647592E-001
-total_energy_dc     : -2.041174237125817E+002
-total_energy_dc_eV  : -5.554316994677338E+003
+band_energy         : -4.74990223682690E-01
+spherical_terms     :  0.00000000000000E+00
+electron_positron_dc: -4.75715568164912E-01
+positronic          : -9.50705791847611E-01
+electronic          : -2.03642433488899E+02
+electron_positron_interaction:  4.75715568164759E-01
+total_energy_dc     : -2.04117423712582E+02
+total_energy_dc_eV  : -5.55431699467734E+03
 ...
 
 
@@ -909,10 +909,10 @@ P           mkmem2          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.0  wall=          5.1
+- Proc.   0 individual time (sec): cpu=          5.1  wall=          5.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.0  wall=          5.1
++Overall time at end (sec) : cpu=          5.1  wall=          5.1

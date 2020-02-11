@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h35 )
+- ( at 16h43 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tspin_1/tspin_1.in
 - output file    -> tspin_1.out
@@ -249,8 +249,8 @@ natom     :        1
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  8.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   8.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [   4.69386,    4.69386,    4.69386, ]
 lattice_angles: [109.471, 109.471, 109.471, ]
 cutoff_energies: {"ecut":  18.0, "pawecutdg":  -1.0, }
@@ -258,17 +258,17 @@ convergence: {
     "deltae": -8.88E-14, "res2":  1.19E-13, 
     "residm":  2.16E-06, "diffor": undef, 
 }
-etotal    : -2.466170726754207E+001
-entropy   :  0.000000000000000E+000
-fermie    : -2.584314103353506E-001
+etotal    :  -2.46617073E+01
+entropy   :   0.00000000E+00
+fermie    :  -2.58431410E-01
 cartesian_stress_tensor:
-- [ 1.889525778668219E-002,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  1.889525778668220E-002,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.889525778668219E-002, ]
-pressure_GPa: -5.559175834711297E+002
+- [  1.88952578E-02,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.88952578E-02,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.88952578E-02, ]
+pressure_GPa:  -5.5592E+02
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -388,8 +388,8 @@ natom     :        1
 nsppol    :        2
 nspinor   :        1
 nspden    :        2
-nelect    :  8.000000000000000E+000
-charge    :  0.000000000000000E+000
+nelect    :   8.00000000E+00
+charge    :   0.00000000E+00
 lattice_lengths: [   4.69386,    4.69386,    4.69386, ]
 lattice_angles: [109.471, 109.471, 109.471, ]
 cutoff_energies: {"ecut":  18.0, "pawecutdg":  -1.0, }
@@ -397,17 +397,17 @@ convergence: {
     "deltae": -8.35E-13, "res2":  5.01E-14, 
     "residm":  2.25E-06, "diffor": undef, 
 }
-etotal    : -2.467079286776488E+001
-entropy   :  0.000000000000000E+000
-fermie    : -2.647053425467625E-001
+etotal    :  -2.46707929E+01
+entropy   :   0.00000000E+00
+fermie    :  -2.64705343E-01
 cartesian_stress_tensor:
-- [ 1.862613557095809E-002,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  1.862613557095805E-002,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.862613557095807E-002, ]
-pressure_GPa: -5.479997358549305E+002
+- [  1.86261356E-02,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.86261356E-02,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.86261356E-02, ]
+pressure_GPa:  -5.4800E+02
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -688,10 +688,10 @@ P           mkmem           6
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          9.9  wall=         10.2
+- Proc.   0 individual time (sec): cpu=          9.9  wall=         10.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.9  wall=         10.2
++Overall time at end (sec) : cpu=          9.9  wall=         10.0

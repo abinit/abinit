@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h35 )
+- ( at 16h43 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpositron_3/tpositron_3.in
 - output file    -> tpositron_3.out
@@ -448,8 +448,8 @@ natom     :       15
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  6.000000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   6.00000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":   8.0, "pawecutdg":  15.0, }
@@ -457,9 +457,9 @@ convergence: {
     "deltae":  8.52E-10, "res2":  3.93E-09, 
     "residm":  7.60E-09, "diffor":  0.00E+00, 
 }
-etotal    : -6.058808197408722E+001
-entropy   :  0.000000000000000E+000
-fermie    :  2.040757789566899E-001
+etotal    :  -6.05880820E+01
+entropy   :   0.00000000E+00
+fermie    :   2.04075779E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
@@ -685,17 +685,17 @@ total_energy_eV     : -1.64868619721057E+03
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -4.764987074453140E-001
-Ewald energy        : -6.058356211918016E+001
-psp_core            :  1.632763225477833E+000
-xc_dc               : -1.474689404218516E+001
-spherical_terms     :  1.446215179698237E+001
-electron_positron_dc: -3.995479551263276E-001
-electronic          : -6.011158780147677E+001
-positronic          : -6.290449811177012E-001
-electron_positron_interaction:  1.525508085072447E-001
-total_energy_dc     : -6.058808197408722E+001
-total_energy_dc_eV  : -1.648686197210567E+003
+band_energy         : -4.76498707445314E-01
+Ewald energy        : -6.05835621191802E+01
+psp_core            :  1.63276322547783E+00
+xc_dc               : -1.47468940421852E+01
+spherical_terms     :  1.44621517969824E+01
+electron_positron_dc: -3.99547955126328E-01
+electronic          : -6.01115878014768E+01
+positronic          : -6.29044981117701E-01
+electron_positron_interaction:  1.52550808507245E-01
+total_energy_dc     : -6.05880819740872E+01
+total_energy_dc_eV  : -1.64868619721057E+03
 ...
 
 
@@ -916,10 +916,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        151.1  wall=        151.3
+- Proc.   0 individual time (sec): cpu=        151.4  wall=        151.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered 228 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        151.1  wall=        151.3
++Overall time at end (sec) : cpu=        151.4  wall=        151.7

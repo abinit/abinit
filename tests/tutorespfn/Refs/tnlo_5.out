@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 02h35 )
+- ( at 16h43 )
   
 
 ================================================================================
@@ -555,6 +555,6 @@ Mode  6   ( 369.44 cm-1)
 
 ================================================================================
 
-+Total cpu time      0.124  and wall time      0.125 sec
++Total cpu time      0.115  and wall time      0.117 sec
 
  anaddb : the run completed succesfully.

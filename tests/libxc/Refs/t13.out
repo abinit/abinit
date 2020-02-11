@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 14h44 )
+- ( at 16h40 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t13/t13.in
 - output file    -> t13.out
@@ -964,10 +964,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         10.2  wall=         11.6
+- Proc.   0 individual time (sec): cpu=          9.6  wall=         10.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.2  wall=         11.6
++Overall time at end (sec) : cpu=          9.6  wall=         10.5
