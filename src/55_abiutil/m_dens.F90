@@ -1790,11 +1790,6 @@ subroutine calcdenmagsph(gmet,gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypa
  endif
 !ENDDEBUG
 
-!DEBUG
- write(std_out,*)' calcdenmagsph : exit '
- call flush(std_out)
-!ENDDEBUG
-
 end subroutine calcdenmagsph
 !!***
 
