@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Tue 11 Feb 2020.
-- ( at 11h58 )
+- ( at 16h19 )
   
 - input  file    -> /home/buildbot/miniconda3/envs/bb/ABINIT/buda2_gnu_8.3_cuda/gmatteo_phdos/tests/Test_suite/gpu_t05_MPI4/t05.in
 - output file    -> t05_MPI4.out
@@ -339,8 +339,8 @@ natom     :        4
 nsppol    :        1
 nspinor   :        1
 nspden    :        2
-nelect    :  4.800000000000000E+001
-charge    :  0.000000000000000E+000
+nelect    :   4.80000000E+01
+charge    :   0.00000000E+00
 lattice_lengths: [   5.60029,    5.60029,   11.20057, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 cutoff_energies: {"ecut":   8.0, "pawecutdg":  10.0, }
@@ -348,20 +348,20 @@ convergence: {
     "deltae": -1.00E-08, "res2":  1.29E-08, 
     "residm":  1.53E-11, "diffor": undef, 
 }
-etotal    : -3.704663326130981E+002
-entropy   :  0.000000000000000E+000
-fermie    :  1.906268631919458E-001
+etotal    :  -3.70466333E+02
+entropy   :   0.00000000E+00
+fermie    :   1.90626863E-01
 cartesian_stress_tensor:
-- [ 2.695733833818173E-002,  8.822007583312342E-005, -8.822007583309320E-005, ]
-- [ 8.822007583312342E-005,  2.695733833818170E-002, -8.822007583316609E-005, ]
-- [-8.822007583309320E-005, -8.822007583316609E-005,  2.695733833818165E-002, ]
-pressure_GPa: -7.931121424730241E+002
+- [  2.69573383E-02,   8.82200758E-05,  -8.82200758E-05, ]
+- [  8.82200758E-05,   2.69573383E-02,  -8.82200758E-05, ]
+- [ -8.82200758E-05,  -8.82200758E-05,   2.69573383E-02, ]
+pressure_GPa:  -7.9311E+02
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -651,15 +651,15 @@ total_energy_eV     : -1.00809019177211E+04
 --- !EnergyTermsDC
 iteration_state     : {"dtset": 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -4.236176745256273E+001
-Ewald energy        : -2.381228093191938E+002
-psp_core            :  2.144770517593746E+001
-xc_dc               : -4.407421524340249E+001
-spherical_terms     : -6.735523952730679E+001
-internal            : -3.704663263665284E+002
-'-kT*entropy'       : -6.246569610963244E-006
-total_energy_dc     : -3.704663326130980E+002
-total_energy_dc_eV  : -1.008090191772109E+004
+band_energy         : -4.23617674525627E+01
+Ewald energy        : -2.38122809319194E+02
+psp_core            :  2.14477051759375E+01
+xc_dc               : -4.40742152434025E+01
+spherical_terms     : -6.73552395273068E+01
+internal            : -3.70466326366528E+02
+'-kT*entropy'       : -6.24656961096324E-06
+total_energy_dc     : -3.70466332613098E+02
+total_energy_dc_eV  : -1.00809019177211E+04
 ...
 
 
@@ -924,10 +924,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         48.3  wall=         48.8
+- Proc.   0 individual time (sec): cpu=         47.9  wall=         48.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        193.4  wall=        195.2
++Overall time at end (sec) : cpu=        191.7  wall=        193.5
