@@ -668,6 +668,7 @@ end subroutine symkpt_new
 !! given 2 input sets of kpts (1 and 2) find the symmetry operations that yield points in list 2 from a minimal set from list 1
 !! typical usage is to find k in a list from disk, to initialize the wfk in memory
 !! kin can be overcomplete etc... we just need to find _a_ solution
+!! bz2kin_smap follows the listkk convention with ik, isym, g0(1:3), itimrev
 !!
 !! INPUTS
 !!
@@ -693,7 +694,7 @@ subroutine mapkptsets(chksymbreak,gmet,iout,k_in,nk_in,&
  integer,intent(in) :: symrec(3,3,nsym)
  real(dp),intent(in) :: gmet(3,3),kbz(3,nkbz)
  real(dp),intent(in) :: k_in(3,nk_in)
- integer,intent(out) :: bz2kin_smap(6,nkbz)
+ integer,intent(out) :: bz2kin_smap(nkbz,6)
 
 !Local variables -------------------------
 !scalars
@@ -738,9 +739,9 @@ subroutine mapkptsets(chksymbreak,gmet,iout,k_in,nk_in,&
  ! Initialize
  bz2kin_smap = 0
  do ikpt=1,nkbz
-   bz2kin_smap(1, ikpt) = ikpt
-   bz2kin_smap(2, ikpt) = 1
-   bz2kin_smap(4, ikpt) = 1 ! We will use this as wtk_folded
+   bz2kin_smap(ikpt, 1) = ikpt
+   bz2kin_smap(ikpt, 2) = 1
+   bz2kin_smap(ikpt, 3) = 1 ! We will use this as wtk_folded
  end do
 
  ! Start krank
@@ -821,12 +822,14 @@ print *, 'kbz ', kbz
 
        if (ikpt_found < 0) cycle
        ! if we already filled it, ignore new symmetric pre-image
-       if (bz2kin_smap(1, ikpt_found) /= 0) cycle
+       if (bz2kin_smap(ikpt_found, 1) /= 0) cycle
 
-       bz2kin_smap(1:3, ikpt_found) = [ik_in,isym,itim]
-       bz2kin_smap(4:6, ikpt_found) = nint(kbz(:,ikpt_found)-ksym)
-print *, 'bz2kin_smap(1:3, ikpt_found= ', ikpt_found, ' : ik_in,isym,itim  ', bz2kin_smap(1:3, ikpt_found)
-print *, ' g0 calculation ', kbz(:,ikpt_found)-ksym, '   ', bz2kin_smap(4:6, ikpt_found)
+       bz2kin_smap(ikpt_found,   1) = ik_in
+       bz2kin_smap(ikpt_found,   2) = isym
+       bz2kin_smap(ikpt_found, 3:5) = nint(kbz(:,ikpt_found)-ksym)
+       bz2kin_smap(ikpt_found,   6) = itim
+print *, 'bz2kin_smap(1,2,6, ikpt_found= ', ikpt_found, ' : ik_in,isym,itim  ', bz2kin_smap(ikpt_found,1), bz2kin_smap(ikpt_found,2),bz2kin_smap(ikpt_found,6)
+print *, ' g0 calculation ', kbz(:,ikpt_found)-ksym, '   ', bz2kin_smap(ikpt_found, 3:5)
      end do
 
    end do
@@ -836,7 +839,7 @@ print *, ' g0 calculation ', kbz(:,ikpt_found)-ksym, '   ', bz2kin_smap(4:6, ikp
  nkirred = 0
  do ik_in=1,nk_in
    ! did I end up using this ik_in?
-   if (any(bz2kin_smap(1,:) == ik_in)) then
+   if (any(bz2kin_smap(:,1) == ik_in)) then
      nkirred = nkirred + 1
    end if
  end do
@@ -845,10 +848,10 @@ print *, ' g0 calculation ', kbz(:,ikpt_found)-ksym, '   ', bz2kin_smap(4:6, ikp
 
  !Here I make a check if the mapping was sucessfull
  !might exit less brutally and allow for error catching by the caller...
- if (any(bz2kin_smap(1, :) == 0)) then
+ if (any(bz2kin_smap(:,1) == 0)) then
 !print *, 'nkirred ', nkirred
 !do ikpt_found=1, nkbz
-!print *, bz2kin_smap(:,ikpt_found), kbz(:,ikpt_found)
+!print *, bz2kin_smap(ikpt_found,:), kbz(:,ikpt_found)
 !end do
 !print *, 'k_in = '
 !do ik_in=1, nk_in
@@ -858,7 +861,7 @@ print *, ' g0 calculation ', kbz(:,ikpt_found)-ksym, '   ', bz2kin_smap(4:6, ikp
  end if
 
  !do ikpt=1,nkbz
- !  write(*,*) ikpt, ibz2bz(ikpt), bz2kin_smap(1,ikpt)
+ !  write(*,*) ikpt, ibz2bz(ikpt), bz2kin_smap(ikpt,1)
  !end do
 
 end subroutine mapkptsets

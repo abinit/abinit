@@ -3130,10 +3130,11 @@ print *, 'itimrev,dtset%kptopt ', itimrev, dtset%kptopt
 #endif
  cryst = wfk_disk%hdr%get_crystal(itimrev + 1)
 
+ sppoldbl = 1
+ ABI_ALLOCATE (rbz2disk, (sppoldbl*nkpt_in, 6))
 
  chksymbreak = 0
  iout = 0
-! ABI_ALLOCATE (rbz2disk, (6,nkpt_in))
  ABI_ALLOCATE (symrelT, (3,3,cryst%nsym))
 ! TODO: from Matteo, this should be symrel straight, not transposed. Perhaps the logic in mapkptsets is transposed?
  do isym=1,cryst%nsym
@@ -3142,20 +3143,25 @@ print *, 'itimrev,dtset%kptopt ', itimrev, dtset%kptopt
 #ifdef DEV_MJV
 print *, 'wfk_disk%hdr%nkpt cryst%timrev ', wfk_disk%hdr%nkpt, cryst%timrev
 #endif
-! call mapkptsets(chksymbreak, cryst%gmet, iout, wfk_disk%hdr%kptns, wfk_disk%hdr%nkpt, kptns_in, nkpt_in, &
-!&     nkirred_disk, cryst%nsym, symrelT, cryst%timrev-1, rbz2disk, xmpi_comm_self)
+ call mapkptsets(chksymbreak, cryst%gmet, iout, wfk_disk%hdr%kptns, wfk_disk%hdr%nkpt, kptns_in, nkpt_in, &
+&     nkirred_disk, cryst%nsym, symrelT, cryst%timrev-1, rbz2disk, xmpi_comm_self)
 
+write(201, *) 'rbz2disk mapkptsets'
+write(201, *) rbz2disk
+
+rbz2disk = 0
  ask_accurate=1
  if (present(ask_accurate_)) ask_accurate=ask_accurate_
- sppoldbl = 1
- ABI_ALLOCATE (rbz2disk, (nkpt_in, 6))
  dksqmax = zero
  call listkk(dksqmax, cryst%gmet, rbz2disk, wfk_disk%hdr%kptns, kptns_in, wfk_disk%hdr%nkpt, nkpt_in, cryst%nsym, &
    sppoldbl, cryst%symafm, cryst%symrel, cryst%timrev-1, xmpi_comm_self, use_symrec=.False.)
+   !sppoldbl, cryst%symafm, cryst%symrec, cryst%timrev-1, xmpi_comm_self, use_symrec=.True.)
 
+write(202, *) 'rbz2disk listkk'
+write(202, *) rbz2disk
  if (ask_accurate == 1) then
 print *, ' dksqmax ', dksqmax
-   ABI_CHECK(dksqmax < tol12, " WF file read but k-points too far from requested set")
+   ABI_CHECK(dksqmax < tol8, " WF file read but k-points too far from requested set")
  end if
 
 
@@ -3195,7 +3201,6 @@ print *, 'rbz2disk_sort ', rbz2disk_sort
    jj = 0
    do ikpt=1,nkpt_in
      ik_disk = rbz2disk(ikpt,1)
-     !ik_disk = rbz2disk(1,ikpt)
 
      ! conversion of single spin AFM wfk file to full 2 component one in memory
      spin_sym=spin
@@ -3210,9 +3215,9 @@ print *, 'rbz2disk_sort ', rbz2disk_sort
      ll = ll+nband_k
 
      if (.not. any(distrb_flags(ikpt,:,spin))) cycle
-     icg(ikpt,spin) = ii
-!print *, 'icg counts ikpt, spin ', icg(ikpt,spin),ikpt,spin
+print *, 'icg counts ikpt, spin ', icg(ikpt,spin),ikpt,spin
 ! TODO: this does not take into account variable nband(ik)
+     icg(ikpt,spin) = ii
      ii = ii+dtset%mband_mem*npwarr(ikpt)*dtset%nspinor
    end do
  end do
@@ -3268,7 +3273,6 @@ print *, ' spin, ik_disk, nqst, needthisk ', spin, ik_disk, nqst, needthisk
      do jj=0,nqst-1
        ikf = iperm(iqst+jj)
        ABI_CHECK(ik_disk == rbz2disk(ikf,1), "ik_disk !/ ind qq(1)")
-       !ABI_CHECK(ik_disk == rbz2disk(1,ikf), "ik_disk !/ ind qq(1)")
 
        kf = kptns_in(:,ikf)
 #ifdef DEV_MJV
@@ -3296,12 +3300,19 @@ print *, 'spin_sym, spin,  nsppol, wfk_disk%nsppol ', spin_sym, spin, nsppol, wf
          if (.not. distrb_flags(ikf,iband+nband_me-1,spin_sym)) then
            stop "wfk_read_my_kptbands: bands not contiguous in distrb_flags"
          end if
+
 ! if nband_me goes beyond the end of the bands on disk, just read those we have
-         nband_me_disk = min(mband,iband+nband_me)-iband
+         nband_me_disk = min(mband,nband_me)
+! TODO : in parallel, iband+nband_me-1 could be larger than mband_disk
+!   we want to limit nband_me_disk in that case too, just for the last band procs
+         if (iband+nband_me-1 > mband) then
+           nband_me_disk = mband+1-iband
+         end if
 
 ! may need to re-read if for a different equivalent k if I need other bands
          if (iband /= iband_saved .or. nband_me_disk /= nband_me_saved .or. spin /= spin_saved) then
 #ifdef DEV_MJV
+print *, 'nband_me, nband_me_disk ', nband_me, nband_me_disk 
 print *, 'reading from file for iband, ik_disk, spin, formeig ', iband, ik_disk, spin, formeig
 #endif
            if (formeig > 0) then
@@ -3322,13 +3333,10 @@ print *, 'reading from file for iband, ik_disk, spin, formeig ', iband, ik_disk,
        
          ! reset isym for each spin_sym
          isym = rbz2disk(ikf,2)
-         !isym = rbz2disk(2,ikf)
          ! there is a first time reversal possible from the irred set found above to the kptns in input.
          ! a second possible time reversal if the irred k is not explicitly in the disk file, but only it's time reversed image
-         itimrev = rbz2disk(ikf,3)
-         !itimrev = rbz2disk(3,ikf)
-         g0 = rbz2disk(ikf,4:6) ! IS(k_disk) + g0 = k_bz
-         !g0 = rbz2disk(4:6,ikf) ! IS(k_disk) + g0 = k_bz
+         itimrev = rbz2disk(ikf,6)
+         g0 = rbz2disk(ikf,3:5) ! IS(k_disk) + g0 = k_bz
 
          ! complete the spin down wfk with an AFM symop
          if (spin_sym /= spin) then
@@ -3385,7 +3393,9 @@ print *, 'npwarr change or need to convert the wf by symmetry, or complete it'
 #ifdef DEV_MJV
 print *, ' npw_kf == npwarr(ikf), istwf_kf, ecut_eff ecut ', npw_kf,npwarr(ikf),istwf_kf, ecut_eff, wfk_disk%hdr%ecut
 #endif
+           ! npw found for the present sphere must be equal to size of array for output
            ABI_CHECK(npw_kf == npwarr(ikf), "Wrong npw_kf")
+
            if (present(kg)) then
              kg(:,ikg(ikf)+1:ikg(ikf)+npw_kf) = kg_kf (:,1:npw_kf)
            end if
@@ -3416,13 +3426,10 @@ print *, ' npw_kf == npwarr(ikf), istwf_kf, ecut_eff ecut ', npw_kf,npwarr(ikf),
 
  if(present(eigen)) then
    call xmpi_sum(eigen,comm,ierr)
-   !call xmpi_sum(eigen,dtset%mband*(2*dtset%mband)**formeig*nkpt_in*dtset%nsppol,comm,ierr)
  end if
  if(present(occ)) then
    call xmpi_sum(occ,comm,ierr)
-   !call xmpi_sum(occ,dtset%mband*nkpt_in*dtset%nsppol,comm,ierr)
  end if
-!TODO: optimize the xmpi_sum below with a single buffer (no interface for a 2D array xmpi_sum???)
  if(present(kg)) then
    call xmpi_sum(kg,comm,ierr)
  end if

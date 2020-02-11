@@ -1167,6 +1167,8 @@ if (sum(abs(cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol6) then
 print *, 'is ik ib cg ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
 print *, ' diff in cg ', isppol, ikpt, ' / ', nkpt_rbz
 print *, cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+print *, ' bare    cg '
+print *, cg(:,icg+1:icg+npw)
 end if 
 
          !cg(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
