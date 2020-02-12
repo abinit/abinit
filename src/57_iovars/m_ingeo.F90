@@ -200,7 +200,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  ABI_ALLOCATE(intarr,(marr))
  ABI_ALLOCATE(dprarr,(marr))
 
-!1) set up unit cell: acell, rprim and rprimd ---------------------
+ ! 1) set up unit cell: acell, rprim and rprimd ---------------------
  acell(1:3)=one
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'acell',tacell,'LEN')
  if(tacell==1) acell(1:3)=dprarr(1:3)
@@ -211,7 +211,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  if(tscalecart==1) scalecart(1:3)=dprarr(1:3)
  call intagm_img(scalecart,iimage,jdtset,lenstr,nimage,3,string,"scalecart",tscalecart,'LEN')
 
-!Check that input length scales acell(3) are > 0
+ ! Check that input length scales acell(3) are > 0
  do mu=1,3
    if(acell(mu)<=zero) then
      write(message, '(a,i0,a, 1p,e14.6,a,a,a,a)' )&
@@ -222,13 +222,13 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    end if
  end do
 
-!Initialize rprim, or read the angles
+ ! Initialize rprim, or read the angles
  tread=0
  call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'rprim',trprim,'DPR')
  if(trprim==1)rprim(:,:)=reshape( dprarr(1:9) , (/3,3/) )
  call intagm_img(rprim,iimage,jdtset,lenstr,nimage,3,3,string,"rprim",trprim,'DPR')
 
-!If none of the rprim were read ...
+ ! If none of the rprim were read ...
  if(trprim==0)then
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'angdeg',tangdeg,'DPR')
    angdeg(:)=dprarr(1:3)
@@ -237,7 +237,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    if(tangdeg==1)then
      call wrtout(std_out,' ingeo: use angdeg to generate rprim.',"COLL")
 
-!    Check that input angles are positive
+     ! Check that input angles are positive
      do mu=1,3
        if(angdeg(mu)<=0.0_dp) then
          write(message, '(a,i0,a,1p,e14.6,a,a,a,a)' )&
@@ -248,7 +248,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        end if
      end do
 
-!    Check that the sum of angles is smaller than 360 degrees
+     ! Check that the sum of angles is smaller than 360 degrees
      if(angdeg(1)+angdeg(2)+angdeg(3)>=360.0_dp) then
        write(message, '(a,a,a,es14.4,a,a,a)' )&
         'The sum of input angles (angdeg(1:3)) must be lower than 360 degrees',ch10,&
@@ -260,8 +260,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      if( abs(angdeg(1)-angdeg(2))<tol12 .and. &
          abs(angdeg(2)-angdeg(3))<tol12 .and. &
          abs(angdeg(1)-90._dp)+abs(angdeg(2)-90._dp)+abs(angdeg(3)-90._dp)>tol12 )then
-!      Treat the case of equal angles (except all right angles):
-!      generates trigonal symmetry wrt third axis
+       ! Treat the case of equal angles (except all right angles):
+       ! generates trigonal symmetry wrt third axis
        cosang=cos(pi*angdeg(1)/180.0_dp)
        a2=2.0_dp/3.0_dp*(1.0_dp-cosang)
        aa=sqrt(a2)
@@ -269,9 +269,9 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        rprim(1,1)=aa        ; rprim(2,1)=0.0_dp                 ; rprim(3,1)=cc
        rprim(1,2)=-0.5_dp*aa ; rprim(2,2)= sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,2)=cc
        rprim(1,3)=-0.5_dp*aa ; rprim(2,3)=-sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,3)=cc
-!      write(std_out,*)' ingeo: angdeg=',angdeg(1:3), aa,cc=',aa,cc
+       ! write(std_out,*)' ingeo: angdeg=',angdeg(1:3), aa,cc=',aa,cc
      else
-!      Treat all the other cases
+       ! Treat all the other cases
        rprim(:,:)=0.0_dp
        rprim(1,1)=1.0_dp
        rprim(1,2)=cos(pi*angdeg(3)/180.0_dp)
@@ -282,36 +282,37 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      end if
 
    end if
-!  No problem if neither rprim nor angdeg are defined: use default rprim
- end if
+ end if ! No problem if neither rprim nor angdeg are defined: use default rprim
 
-!Rescale rprim using scalecart (and set scalecart to one)
+ ! Rescale rprim using scalecart (and set scalecart to one)
  rprim(:,1)=scalecart(:)*rprim(:,1)
  rprim(:,2)=scalecart(:)*rprim(:,2)
  rprim(:,3)=scalecart(:)*rprim(:,3)
  scalecart(:)=one
 
-!Compute the multiplicity of the supercell
+ ! Compute the multiplicity of the supercell
  call mati3det(supercell_lattice,multiplicity)
-!Get the number of atom in the unit cell
-!Read natom from string
+
+ ! Get the number of atom in the unit cell
+ ! Read natom from string
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natom',tread,'INT')
-!Might initialize natom from XYZ file
+
+ ! Might initialize natom from XYZ file
  if(tread==0)then
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'_natom',tread,'INT')
  end if
  if(tread==1)natom_uc=intarr(1)
 
-!Store the rprimd of the unit cell
+ ! Store the rprimd of the unit cell
  call mkrdim(acell,rprim,rprimd_read)
-!Multiply the rprim to get the rprim of the supercell
+ ! Multiply the rprim to get the rprim of the supercell
  if(multiplicity > 1)then
    rprim(:,1) = rprim(:,1) * supercell_lattice(1,1)
    rprim(:,2) = rprim(:,2) * supercell_lattice(2,2)
    rprim(:,3) = rprim(:,3) * supercell_lattice(3,3)
  end if
 
-!Compute different matrices in real and reciprocal space, also checks whether ucvol is positive.
+ ! Compute different matrices in real and reciprocal space, also checks whether ucvol is positive.
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
@@ -319,13 +320,13 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolsym',tread,'DPR')
  if(tread==1) tolsym=dprarr(1)
 
-!Find a tentative Bravais lattice and its point symmetries (might not use them)
-!Note that the Bravais lattice might not be the correct one yet (because the
-!actual atomic locations might lower the symattry obtained from the lattice parameters only)
+ ! Find a tentative Bravais lattice and its point symmetries (might not use them)
+ ! Note that the Bravais lattice might not be the correct one yet (because the
+ ! actual atomic locations might lower the symattry obtained from the lattice parameters only)
  ABI_ALLOCATE(ptsymrel,(3,3,msym))
  call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tolsym)
 
-!3) Possibly, initialize a jellium slab
+ ! 3) Possibly, initialize a jellium slab
  jellslab=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'jellslab',tread,'INT')
  if(tread==1) jellslab=intarr(1)
@@ -340,9 +341,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    if(tread==1) slabzend=dprarr(1)
  end if
 
-!4) Set up the number of atoms in the primitive set, to be read.
-
-!This is the default
+ ! 4) Set up the number of atoms in the primitive set, to be read.
+ ! This is the default
  natrd=natom
  if(multiplicity > 1) natrd = natom_uc
 
@@ -372,13 +372,13 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    end if
  end if
 
-!5) Read the type and initial spin of each atom in the primitive set--------
+ ! 5) Read the type and initial spin of each atom in the primitive set--------
  ABI_ALLOCATE(typat_read,(natrd))
  typat_read(1)=1
 
  call intagm(dprarr,intarr,jdtset,marr,natrd,string(1:lenstr),'typat',tread,'INT')
 
-!If not read, try the XYZ data
+ ! If not read, try the XYZ data
  if(tread==0)then
    call intagm(dprarr,intarr,jdtset,marr,natrd,string(1:lenstr),'_typat',tread,'INT')
  end if
@@ -394,8 +394,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    end if
  end do
 
-!6) Read coordinates for each atom in the primitive set--------
-
+ ! 6) Read coordinates for each atom in the primitive set--------
  ABI_ALLOCATE(xangst_read,(3,natrd))
  ABI_ALLOCATE(xcart_read,(3,natrd))
  ABI_ALLOCATE(xred_read,(3,natrd))
@@ -409,32 +408,33 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
     'Action: define one of these in your input file.'
    MSG_ERROR(message)
  end if
-!if(nimage/=1 .and. iimage/=1)then
-!FIXME: should this be called outside the above end if?
+
+ !if(nimage/=1 .and. iimage/=1)then
+ !FIXME: should this be called outside the above end if?
  call randomcellpos(natom,npsp,ntypat,random_atpos,ratsph,rprim,rprimd_read,typat_read,&
                     xred_read(:,1:natrd),znucl,acell)
-!This should not be printed if randomcellpos did nothing - it contains garbage. Spurious output anyway
-!end if
+ !This should not be printed if randomcellpos did nothing - it contains garbage. Spurious output anyway
+ !end if
 
  call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xred',txred,'DPR')
- if(txred==1 .and. txrandom == 0) xred_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , (/3,natrd/) )
+ if(txred==1 .and. txrandom == 0) xred_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
  call intagm_img(xred_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xred",txred,'DPR')
 
  call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xangst',txangst,'DPR')
- if(txangst==1 .and. txrandom==0) xangst_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , (/3,natrd/) )
+ if(txangst==1 .and. txrandom==0) xangst_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
  call intagm_img(xangst_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xangst",txangst,'DPR')
 
  call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xcart',txcart,'LEN')
- if(txcart==1 .and. txrandom==0)xcart_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , (/3,natrd/) )
+ if(txcart==1 .and. txrandom==0)xcart_read(:,1:natrd) = reshape( dprarr(1:3*natrd), [3, natrd])
  call intagm_img(xcart_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xcart",txcart,'LEN')
 
-!Might initialize xred from XYZ file
+ ! Might initialize xred from XYZ file
  if(txred+txcart+txangst+txrandom==0)then
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xred',txred,'DPR')
-   if(txred==1 .and. txrandom==0) xred_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , (/3,natrd/) )
+   if(txred==1 .and. txrandom==0) xred_read(:,1:natrd) = reshape( dprarr(1:3*natrd), [3, natrd])
 
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xangst',txangst,'DPR')
-   if(txangst==1 .and. txrandom==0) xangst_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , (/3,natrd/) )
+   if(txangst==1 .and. txrandom==0) xangst_read(:,1:natrd) = reshape( dprarr(1:3*natrd), [3, natrd])
  end if
 
  if (txred+txcart+txangst+txrandom==0) then
@@ -449,7 +449,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  if (txcart ==1) write(message, '(a)' ) '  xcart  is defined in input file'
  if (txrandom ==1) write(message, '(a)' ) '  xred  as random positions in the unit cell'
  if (txrandom ==1) write(message, '(a)' ) '  xcart  are defined from a random distribution '
- call wrtout(std_out,message,'COLL')
+ call wrtout(std_out,message)
 
  if (txred+txcart+txangst+txrandom>1)then
    write(message, '(3a)' )&
@@ -459,30 +459,30 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  end if
 
  if(txred==1 .or. txrandom /=0 )then
-   call wrtout(std_out,' ingeo: takes atomic coordinates from input array xred ','COLL')
+   call wrtout(std_out,' ingeo: takes atomic coordinates from input array xred ')
    call xred2xcart(natrd,rprimd_read,xcart_read,xred_read)
  else
    if(txangst==1)then
-     call wrtout(std_out,' ingeo: takes atomic coordinates from input array xangst','COLL')
+     call wrtout(std_out,' ingeo: takes atomic coordinates from input array xangst')
      xcart_read(:,:)=xangst_read(:,:)/Bohr_Ang
    else
-     call wrtout(std_out,' ingeo: takes atomic coordinates from input array xcart','COLL')
+     call wrtout(std_out,' ingeo: takes atomic coordinates from input array xcart')
    end if
    txred=1
  end if
-!At this stage, the cartesian coordinates are known, for the atoms whose coordinates where read.
 
-!Here, allocate the variable that will contain the completed
-!sets of xcart, after the use of the geometry builder or the symmetry builder
+ !At this stage, the cartesian coordinates are known, for the atoms whose coordinates where read.
+
+ ! Here, allocate the variable that will contain the completed
+ ! sets of xcart, after the use of the geometry builder or the symmetry builder
  ABI_ALLOCATE(xcart,(3,natom))
 
-!7) Eventually read the symmetries
-
-!Take care of the symmetries
+ !7) Eventually read the symmetries
+ !Take care of the symmetries
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nsym',tread,'INT')
  if(tread==1) nsym=intarr(1)
 
-!Check that nsym is not negative
+ ! Check that nsym is not negative
  if (nsym<0) then
    write(message, '(a,i0,a,a,a,a)' )&
     'Input nsym must be positive or 0, but was ',nsym,ch10,&
@@ -490,7 +490,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
     'Action: correct nsym in your input file.'
    MSG_ERROR(message)
  end if
-!Check that nsym is not bigger than msym
+ ! Check that nsym is not bigger than msym
  if (nsym>msym) then
    write(message, '(2(a,i0),5a)')&
     'Input nsym = ',nsym,' exceeds msym = ',msym,'.',ch10,&
@@ -503,11 +503,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    MSG_WARNING('Input nsym is now set to one due to the supercell_latt input')
  end if
 
-!Read symmorphi
+ ! Read symmorphi
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'symmorphi',tread,'INT')
  if(tread==1) symmorphi=intarr(1)
 
-!Now, read the symmetry operations
+ ! Now, read the symmetry operations
  if(nsym>0)then
    call intagm(dprarr,intarr,jdtset,marr,9*nsym,string(1:lenstr),'symrel',tread,'INT')
    if(nsym>1 .and. tread==0)then
@@ -516,12 +516,12 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        'Action: either change nsym, or define symrel in your input file.'
      MSG_ERROR(message)
    end if
-   if(tread==1) symrel(:,:,1:nsym)=reshape( intarr(1:9*nsym) , (/3,3,nsym/) )
+   if(tread==1) symrel(:,:,1:nsym)=reshape( intarr(1:9*nsym) , [3, 3, nsym])
 
-!  Take care of tnons
+   ! Take care of tnons
    tnons(:,1:nsym)=zero
    call intagm(dprarr,intarr,jdtset,marr,3*nsym,string(1:lenstr),'tnons',tread,'DPR')
-   if(tread==1) tnons(:,1:nsym)=reshape( dprarr(1:3*nsym) , (/3,nsym/) )
+   if(tread==1) tnons(:,1:nsym)=reshape( dprarr(1:3*nsym), [3, nsym])
 
    if(symmorphi==0)then
      do isym=1,nsym
@@ -536,17 +536,17 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      end do
    end if
 
-!  Take care of symafm
+   ! Take care of symafm
    call intagm(dprarr,intarr,jdtset,marr,nsym,string(1:lenstr),'symafm',tread,'INT')
    if(tread==1) symafm(1:nsym)=intarr(1:nsym)
  end if
 
 
-!8) Checks whether the geometry builder must be used, and call it if needed.
-!Call the symmetry builder and analyzer if needed.
+ !8) Checks whether the geometry builder must be used, and call it if needed.
+ !Call the symmetry builder and analyzer if needed.
 
-!At this stage, nsym might still contain the default 0, msym contains the default dtset%maxnsym.
-!The cartesian coordinates of the atoms of the primitive set are contained in xcart_read.
+ ! At this stage, nsym might still contain the default 0, msym contains the default dtset%maxnsym.
+ ! The cartesian coordinates of the atoms of the primitive set are contained in xcart_read.
 
  nobj=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nobj',tread,'INT')
@@ -558,24 +558,24 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    MSG_ERROR(message)
  end if
 
-!If there are objects, chkprim will not be used immediately
-!But, if there are no objects, but a space group, it will be used directly.
+ ! If there are objects, chkprim will not be used immediately
+ ! But, if there are no objects, but a space group, it will be used directly.
  chkprim=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'chkprim',tread,'INT')
  if(tread==1) chkprim=intarr(1)
 
  if(nobj/=0)then
 
-!  chrgat is read for each atom, from 1 to natom
+   ! chrgat is read for each atom, from 1 to natom
    call intagm(dprarr,intarr,jdtset,marr,natom,string(1:lenstr),'chrgat',tread,'DPR')
    if(tread==1) then
      chrgat(1:natom) = dprarr(1:natom)
    end if
 
-!  Spinat is read for each atom, from 1 to natom
+   ! Spinat is read for each atom, from 1 to natom
    call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'spinat',tread,'DPR')
    if(tread==1) then
-     spinat(1:3,1:natom) = reshape( dprarr(1:3*natom) , (/3,natom/) )
+     spinat(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
    else if (nspden==4.or.(nspden==2.and.nsppol==1)) then
      write(message, '(5a)' )&
       'When nspden=4 or (nspden==2 and nsppol==1), the input variable spinat must be',ch10,&
@@ -584,13 +584,13 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      MSG_ERROR(message)
    end if
 
-!  nucdipmom is read for each atom, from 1 to natom
+   ! nucdipmom is read for each atom, from 1 to natom
    call intagm(dprarr,intarr,jdtset,marr,3*natom,string(1:lenstr),'nucdipmom',tread,'DPR')
    if(tread==1) then
-     nucdipmom(1:3,1:natom) = reshape( dprarr(1:3*natom) , (/3,natom/) )
+     nucdipmom(1:3,1:natom) = reshape( dprarr(1:3*natom), [3, natom])
    end if
 
-!  Will use the geometry builder
+   ! Will use the geometry builder
    if(tnatrd/=1 .and. nobj/=0)then
      write(message, '(a,a,a,i0,a,a,a,a,a)' )&
       'The number of atoms to be read (natrd) must be initialized',ch10,&
@@ -609,24 +609,24 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
    call ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read,xcart,xcart_read)
 
-!  Finalize the computation of coordinates: produce xred.
+   ! Finalize the computation of coordinates: produce xred.
    call xcart2xred(natom,rprimd,xcart,xred)
 
  else ! nobj==0
 
-!  chrgat is read for each irreducible atom, from 1 to natrd
+   ! chrgat is read for each irreducible atom, from 1 to natrd
    call intagm(dprarr,intarr,jdtset,marr,natrd,string(1:lenstr),'chrgat',tread,'DPR')
    if(tread==1)chrgat(1:natrd) = dprarr(1:natrd)
 
-!  Spinat is read for each irreducible atom, from 1 to natrd
+   ! Spinat is read for each irreducible atom, from 1 to natrd
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'spinat',tread,'DPR')
-   if(tread==1)spinat(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , (/3,natrd/) )
+   if(tread==1)spinat(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
 
-!  nucdipmom is read for each irreducible atom, from 1 to natrd
+   ! nucdipmom is read for each irreducible atom, from 1 to natrd
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'nucdipmom',tread,'DPR')
-   if(tread==1)nucdipmom(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , (/3,natrd/) )
+   if(tread==1)nucdipmom(1:3,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
 
-!  Compute xred/typat and spinat for the supercell
+   ! Compute xred/typat and spinat for the supercell
    if(multiplicity > 1)then
      iatom_supercell = 0
      do i1 = 1, supercell_lattice(1,1)
@@ -644,7 +644,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      end do
      call xcart2xred(natom,rprimd,xcart,xred)
    else
-!    No supercell
+     ! No supercell
      call xcart2xred(natrd,rprimd,xcart_read,xred)
    end if
 
@@ -688,8 +688,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
      if(spgroup/=0)then
 
-!      Will generate the spatial group using spgroup
-!      Assign default values
+       ! Will generate the spatial group using spgroup
+       ! Assign default values
        spgaxor=1
        spgorig=1
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'brvltt',tread,'INT')
@@ -699,7 +699,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spgorig',tread,'INT')
        if(tread==1) spgorig=intarr(1)
 
-!      Treat the case of magnetic groups
+       ! Treat the case of magnetic groups
        call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'spgroupma',tspgroupma,'INT')
        if(tspgroupma==1) spgroupma=intarr(1)
        call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'genafm',tgenafm,'DPR')
@@ -715,11 +715,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          MSG_ERROR(message)
        end if
 
-!      TODO: all the symmetry generation operations should be in one big routine
+       ! TODO: all the symmetry generation operations should be in one big routine
 
-!      If spgroupma is defined, check whether it is consistent
-!      with spgroup, determine the Shubnikov type,
-!      and, for type IV, find the corresponding genafm
+       ! If spgroupma is defined, check whether it is consistent
+       ! with spgroup, determine the Shubnikov type,
+       ! and, for type IV, find the corresponding genafm
        shubnikov=1
        if(tspgroupma==1)then
          call gensymshub(genafm,spgroup,spgroupma,shubnikov)
@@ -727,32 +727,30 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          shubnikov=4
        end if
 
-!      Generate the spatial group of symmetries in a conventional cell
-!      In case of Shubnikov space group type IV, only generate the
-!      Fedorov (non-magnetic) group. For Shubnikov type III space group,
-!      the magnetic part is generated here.
+       ! Generate the spatial group of symmetries in a conventional cell
+       ! In case of Shubnikov space group type IV, only generate the
+       ! Fedorov (non-magnetic) group. For Shubnikov type III space group,
+       ! the magnetic part is generated here.
        bckbrvltt=brvltt
        if(brvltt==-1)brvltt=0
        call gensymspgr(brvltt,msym,nsym,shubnikov,spgaxor,spgorig,spgroup,spgroupma,symafm,symrel,tnons)
 
-!      For shubnikov type IV groups,
-!      double the space group, using the antiferromagnetic translation generator
+       ! For shubnikov type IV groups,
+       ! double the space group, using the antiferromagnetic translation generator
        if(shubnikov==4)then
          call gensymshub4(genafm,msym,nsym,symafm,symrel,tnons)
        end if
 
-!      DEBUG
-!      write(std_out,*)' after gensymshub4, nsym =',nsym
-!      write(std_out,*)' Describe the different symmetry operations (index,symrel,tnons,symafm)'
-!      do ii=1,nsym
-!      write(std_out,'(i3,2x,9i3,3es12.2,i3)')ii,symrel(:,:,ii),tnons(:,ii),symafm(ii)
-!      end do
-!      ENDDEBUG
+       !write(std_out,*)' after gensymshub4, nsym =',nsym
+       !write(std_out,*)' Describe the different symmetry operations (index,symrel,tnons,symafm)'
+       !do ii=1,nsym
+       !write(std_out,'(i3,2x,9i3,3es12.2,i3)')ii,symrel(:,:,ii),tnons(:,ii),symafm(ii)
+       !end do
 
-!      If brvltt was -1 at input, one should now change the conventional cell
-!      to a primitive one, if brvltt/=1
+       ! If brvltt was -1 at input, one should now change the conventional cell
+       ! to a primitive one, if brvltt/=1
        if(bckbrvltt==-1 .and. brvltt/=1)then
-!        Will work with rprim only
+         ! Will work with rprim only
          rprim(:,:)=rprimd(:,:)
          rprimd_new(:,:)=rprimd(:,:)
          acell(:)=1.0_dp
@@ -789,16 +787,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          call xcart2xred(nsym,rprimd_new,tnons_cart,tnons)
          ABI_DEALLOCATE(tnons_cart)
 
-!        DEBUG
-!        write(std_out,*)' after change of coordinates, nsym =',nsym
-!        write(std_out,*)' Describe the different symmetry operations (index,symrel,tnons,symafm)'
-!        do ii=1,nsym
-!        write(std_out,'(i3,2x,9i3,3es12.2,i3)')ii,symrel(:,:,ii),tnons(:,ii),symafm(ii)
-!        end do
-!        ENDDEBUG
+         ! write(std_out,*)' after change of coordinates, nsym =',nsym
+         ! write(std_out,*)' Describe the different symmetry operations (index,symrel,tnons,symafm)'
+         ! do ii=1,nsym
+         ! write(std_out,'(i3,2x,9i3,3es12.2,i3)')ii,symrel(:,:,ii),tnons(:,ii),symafm(ii)
+         ! end do
 
-!        Prune the symmetry operations: suppress those with
-!        exactly the same point and magnetic part
+         ! Prune the symmetry operations: suppress those with
+         ! exactly the same point and magnetic part
          nsym_now=1
          do isym=2,nsym
            irreducible=1
@@ -819,16 +815,16 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 !        Translate tnons in the ]-0.5,0.5] interval
          tnons(:,1:nsym)=tnons(:,1:nsym)-nint(tnons(:,1:nsym)-1.0d-8)
 
-!        DEBUG
-!        write(std_out,*)' after reduction, nsym =',nsym
-!        write(std_out,*)' Describe the different symmetry operations (index,symrel,tnons,symafm)'
-!        do ii=1,nsym
-!        write(std_out,'(i3,2x,9i3,3es12.2,i3)')ii,symrel(:,:,ii),tnons(:,ii),symafm(ii)
-!        end do
-!        ENDDEBUG
+         ! DEBUG
+         ! write(std_out,*)' after reduction, nsym =',nsym
+         ! write(std_out,*)' Describe the different symmetry operations (index,symrel,tnons,symafm)'
+         ! do ii=1,nsym
+         ! write(std_out,'(i3,2x,9i3,3es12.2,i3)')ii,symrel(:,:,ii),tnons(:,ii),symafm(ii)
+         ! end do
+         ! ENDDEBUG
 
-!        Now that symrel, tnons and xred are expressed in the primitive
-!        axis system, update the geometric quantities
+         ! Now that symrel, tnons and xred are expressed in the primitive
+         ! axis system, update the geometric quantities
          rprimd(:,:)=rprimd_new(:,:)
          rprim(:,:)=rprimd_new(:,:)
          call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -838,21 +834,21 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      end if
 
      if(natom/=natrd.and.multiplicity == 1)then
-!      Generate the full set of atoms from its knowledge in the irreducible part.
+       ! Generate the full set of atoms from its knowledge in the irreducible part.
        call fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons,tolsym,typat,xred)
      end if
 
-!    Check whether the symmetry operations are consistent with the lattice vectors
+     ! Check whether the symmetry operations are consistent with the lattice vectors
      iexit=0
 
      call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
 
    else ! spgroup==0 and nsym==0
 
-!    Here, spgroup==0 as well as nsym==0, so must generate
-!    the spatial group of symmetry. However, all the atom
-!    positions must be known, so the number
-!    of atoms to be read must equal the total number of atoms.
+     ! Here, spgroup==0 as well as nsym==0, so must generate
+     ! the spatial group of symmetry. However, all the atom
+     ! positions must be known, so the number
+     ! of atoms to be read must equal the total number of atoms.
      if(natrd/=natom .and. multiplicity== 1)then
        write(message, '(a,i0,a,a,i0,a,a,a,a,a,a,a,a,a)' )&
          'The number of atoms to be read (natrd)= ',natrd,ch10,&
@@ -866,8 +862,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      else
 
        if (multiplicity==1) typat(:)=typat_read(:)
-!      Find the symmetry operations: nsym, symafm, symrel and tnons.
-!      Use nptsym and ptsymrel, as determined by symlatt
+       ! Find the symmetry operations: nsym, symafm, symrel and tnons.
+       ! Use nptsym and ptsymrel, as determined by symlatt
        noncoll=0;if (nspden==4) noncoll=1
        use_inversion=1
        if (dtset%usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
@@ -1055,8 +1051,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    natfix=0
    if(tread==1) natfix=intarr(1)
 
-
-!  Checks the validity of natfix
+   ! Checks the validity of natfix
    if (natfix<0 .or. natfix>natom) then
      write(message, '(a,a,a,i0,a,i4,a,a,a)' )&
        'The input variables natfix, natfixx, natfixy and natfixz must be',ch10,&
@@ -1065,7 +1060,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      MSG_ERROR(message)
    end if
 
-!  Read iatfix
+   ! Read iatfix
    if(idir==0)then
      call intagm(dprarr,intarr,jdtset,marr,natfix,string(1:lenstr),'iatfix',tread,'INT')
    else if(idir==1)then
@@ -1076,7 +1071,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      call intagm(dprarr,intarr,jdtset,marr,natfix,string(1:lenstr),'iatfixz',tread,'INT')
    end if
 
-!  If some iatfix was read, natfix must vanish
+   ! If some iatfix was read, natfix must vanish
    if (natfix==0 .and. tread==1)then
      write(message, '(a,i1,5a)' )&
        'For direction ',idir,' the corresponding natfix is zero,',ch10,&
@@ -1085,7 +1080,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      MSG_ERROR(message)
    end if
 
-!  If natfix is non-zero, iatfix must be defined
+   ! If natfix is non-zero, iatfix must be defined
    if (natfix>0 .and. tread==0)then
      write(message, '(a,i1,3a,i0,3a)' )&
        'For direction ',idir,' no iatfix has been specified,',ch10,&
@@ -1096,7 +1091,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
    if(tread==1)then
      do ii=1,natfix
-!      Checks the validity of the input iatfix
+       ! Checks the validity of the input iatfix
        if (intarr(ii)<1 .or. intarr(ii)>natom) then
          write(message, '(a,a,a,i0,a,a,a)' )&
            'The input variables iatfix, iatfixx, iatfixy and iatfixz must be',ch10,&
@@ -1104,7 +1099,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
            'Action: correct that occurence in your input file.'
          MSG_ERROR(message)
        end if
-!      Finally set the value of the internal iatfix array
+       ! Finally set the value of the internal iatfix array
        do iatom=1,natom
          if(intarr(ii)==iatom)then
            if(idir==0)iatfix(1:3,iatom)=1
@@ -1143,20 +1138,20 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    call intagm_img(mixalch,iimage,jdtset,lenstr,nimage,npspalch,ntypalch,string,"mixalch",tread,'DPR')
  end if
 
-!amu (needs mixalch to be initialized ...)
-!Find the default mass
+ ! amu (needs mixalch to be initialized ...)
+ ! Find the default mass
  ABI_ALLOCATE(mass_psp,(npsp))
  do ipsp=1,npsp
    call atomdata_from_znucl(atom,znucl(ipsp))
    amu_default = atom%amu
    mass_psp(ipsp)=amu_default
  end do
-!When the pseudo-atom is pure, simple copy
+ ! When the pseudo-atom is pure, simple copy
  ntyppure=ntypat-ntypalch
  if(ntyppure>0)then
    amu(1:ntyppure)=mass_psp(1:ntyppure)
  end if
-!When the pseudo-atom is alchemical, must make mixing
+ ! When the pseudo-atom is alchemical, must make mixing
  if(ntypalch>0)then
    do itypat=ntyppure+1,ntypat
      amu(itypat)=zero
@@ -1171,7 +1166,6 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  if(tread==1)amu(:)=dprarr(1:ntypat)
  call intagm_img(amu,iimage,jdtset,lenstr,nimage,ntypat,string,"amu",tread,'DPR')
 
-
  ABI_DEALLOCATE(intarr)
  ABI_DEALLOCATE(dprarr)
 
@@ -1179,7 +1173,6 @@ end subroutine ingeo
 !!***
 
 !!****f* m_ingeo/ingeobld
-!!
 !! NAME
 !! ingeobld
 !!

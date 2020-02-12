@@ -77,7 +77,7 @@ nshiftk   1              # Use one copy of grid only (default)
 #%% test_chain = tfold2bloch_1.in, tfold2bloch_2.in
 #%% [files]
 #%% files_to_test = 
-#%%   tfold2bloch_1.out, tolnlines=38, tolabs=1.0e-5, tolrel=2.0e-02
+#%%   tfold2bloch_1.out, tolnlines=38, tolabs=2.0e-4, tolrel=2.0e-02
 #%% psp_files = H-LDA-uspp.paw 
 #%% [paral_info]
 #%% max_nprocs = 2

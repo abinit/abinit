@@ -792,8 +792,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    else if(ios==0)then
      write(message, '(a,a,i4,a)' )ch10,&
 &     ' gstate : reading',ab_xfh%nxfh,' (x,f) history pairs from input wf file.'
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
+     call wrtout([std_out, ab_out], message)
    end if
 !  WARNING : should check that restartxf is not negative
 !  WARNING : should check that restartxf /= only when dtfil%ireadwf is activated
@@ -1283,8 +1282,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call dtfil_init_time(dtfil,0)
 
    write(message,'(a,80a)')ch10,('=',mu=1,80)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
 
    if (dtset%ionmov==0 .or. dtset%imgmov==6) then
 
@@ -1337,8 +1335,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  write(message, '(80a,a,a,a,a)' ) ('=',mu=1,80),ch10,ch10,&
 & ' ----iterations are completed or convergence reached----',ch10
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,  message,'COLL')
+ call wrtout([std_out, ab_out], message)
 
 !Mark this GS computation as done
  initialized=1
@@ -1449,10 +1446,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      write(message,'(a,a)')   ch10, 'Constant reduced ebar and d calculation  - final values:'
    end if
 
-   call wrtout(ab_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
    call prtefield(dtset,dtefield,ab_out,rprimd)
-
-   call wrtout(std_out,message,'COLL')
    call prtefield(dtset,dtefield,std_out,rprimd)
 
 !  To check if the final electric field is below the critical field
@@ -1466,13 +1461,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   '  As a rough estimate,',ch10,&
 &   '  to be below the critical field, the bandgap of your system',ch10,&
 &   '  should be larger than ',maxval(efield_band)*Ha_eV,' eV.',ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
 
    write(message,'(a)')  '--------------------------------------------------------------------------------'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
-
+   call wrtout([std_out, ab_out], message)
  end if
 
 !Open the formatted derivative database file, and write the preliminary information
@@ -1718,6 +1710,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call timab(32,2,tsec)
 
  DBG_EXIT("COLL")
+
 end subroutine gstate
 !!***
 
@@ -1803,17 +1796,14 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 
 !  Ensure portability of output thanks to tol8
      if (dtset%usewvl == 0) then
-       write(message, '(a,2f12.3)' ) &
-&       '_setup2: Arith. and geom. avg. npw (full set) are',arith+tol8,geom
+       write(message, '(a,2f12.3)' ) '_setup2: Arith. and geom. avg. npw (full set) are',arith+tol8,geom
      else
 #if defined HAVE_BIGDFT
        write(message, '(a,2I8)' ) ' setup2: nwvl coarse and fine are', &
 &       wfs%ks%lzd%Glr%wfd%nvctr_c, wfs%ks%lzd%Glr%wfd%nvctr_f
 #endif
      end if
-     call wrtout(ab_out,  message,'COLL')
-     call wrtout(std_out, message,'COLL')
-
+     call wrtout([std_out, ab_out], message)
    end if
 
 #if !defined HAVE_BIGDFT

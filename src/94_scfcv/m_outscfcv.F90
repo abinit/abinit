@@ -336,9 +336,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  timrev = 2; if (any(dtset%kptopt == [3, 4])) timrev= 1
  call crystal_init(dtset%amu_orig(:,1),crystal,dtset%spgroup,natom,dtset%npsp,ntypat, &
-& dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,timrev,&
-& dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
-& dtset%symrel,dtset%tnons,dtset%symafm)
+   dtset%nsym,rprimd,dtset%typat,xred,dtset%ziontypat,dtset%znucl,timrev,&
+   dtset%nspden==2.and.dtset%nsppol==1,remove_inv,hdr%title,&
+   dtset%symrel,dtset%tnons,dtset%symafm)
 
 !Electron band energies.
  bantot= dtset%mband*dtset%nkpt*dtset%nsppol
@@ -346,9 +346,9 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  doccde=zero
 
  call ebands_init(bantot,ebands,dtset%nelect,doccde,eigen,hdr%istwfk,hdr%kptns,hdr%nband,&
-& hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
-& hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
-& hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
+   hdr%nkpt,hdr%npwarr,hdr%nsppol,hdr%nspinor,hdr%tphysel,hdr%tsmear,hdr%occopt,hdr%occ,hdr%wtk,&
+   hdr%charge, hdr%kptopt, hdr%kptrlatt_orig, hdr%nshiftk_orig, hdr%shiftk_orig, &
+   hdr%kptrlatt, hdr%nshiftk, hdr%shiftk)
 
  ABI_FREE(doccde)
 
@@ -981,8 +981,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 &         ' Compensation charge over fft grid         = ',compch_fft
        end if
      end if
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,message,'COLL')
+     call wrtout([std_out, ab_out], message)
    end if
 !  Output of pseudopotential strength Dij and augmentation occupancies Rhoij
    call pawprt(dtset,my_natom,paw_ij,pawrhoij,pawtab,&
@@ -1066,12 +1065,10 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if(dtset%plowan_compute>0) then
    write(message,'(2a,i3)') ch10,&
 &   ' ====================================================================================== '
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
    write(message,'(2a,i3)') ch10,&
 &   ' == Start computation of Projected Local Orbitals Wannier functions == ',dtset%nbandkss
-   call wrtout(std_out,message,'COLL')
-   call wrtout(ab_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
 
 !  ==  compute psichi
 
@@ -1231,8 +1228,8 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  if (me == master .and. dtset%prtnest>0 .and. dtset%ph_nqpath > 0) then
    call timab(968,1,tsec)
    ierr = ebands_write_nesting(ebands,crystal,dtfil%fnameabo_app_nesting,dtset%prtnest,&
-&   dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),message)
-   if (ierr /=0) then
+     dtset%tsmear,dtset%fermie_nest,dtset%ph_qpath(:,1:dtset%ph_nqpath),message)
+   if (ierr /= 0) then
      MSG_WARNING(message)
      call wrtout(ab_out,message,'COLL')
    end if
@@ -1243,30 +1240,20 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  if (dtset%prtdipole == 1) then
    call multipoles_out(rhor,mpi_enreg,natom,nfft,ngfft,dtset%nspden,dtset%ntypat,rprimd,&
-&   dtset%typat,ucvol,ab_out,xred,dtset%ziontypat)
+     dtset%typat,ucvol,ab_out,xred,dtset%ziontypat)
  end if
 
  ! BoltzTraP output files in GENEric format
- if (dtset%prtbltztrp == 1 .and. me==master) then
-   call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
- end if
+ if (dtset%prtbltztrp == 1 .and. me==master) call ebands_prtbltztrp(ebands, crystal, dtfil%filnam_ds(4))
 
  ! Band structure interpolation from eigenvalues computed on the k-mesh.
  if (nint(dtset%einterp(1)) /= 0) then
    call ebands_interpolate_kpath(ebands, dtset, crystal, [0, 0], dtfil%filnam_ds(4), spacecomm)
  end if
 
- if(associated(elfr))then
-   ABI_DEALLOCATE(elfr)
- end if
-
- if(associated(grhor))then
-   ABI_DEALLOCATE(grhor)
- end if
-
- if(associated(lrhor))then
-   ABI_DEALLOCATE(lrhor)
- end if
+ ABI_SFREE_PTR(elfr)
+ ABI_SFREE_PTR(grhor)
+ ABI_SFREE_PTR(lrhor)
 
  call crystal%free()
  call ebands_free(ebands)

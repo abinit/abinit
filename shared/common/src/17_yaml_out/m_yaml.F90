@@ -62,8 +62,6 @@ module m_yaml
    integer :: use_yaml = 1
    ! Temporary flag used to deactivate Yaml output
 
-   !integer :: open_count = 0
-
    integer :: default_keysize = 30
    ! Default key size
 
@@ -73,11 +71,11 @@ module m_yaml
    integer :: default_width = 0
    ! impose a minimum width of the field name side of the column (padding with spaces)
 
+   !character(len=20) :: default_ifmt = '(I0)'
    character(len=20) :: default_ifmt = '(I8)'
    ! Default format for integer
 
-   !character(len=20) :: default_rfmt = '(ES23.15E3)'
-   character(len=20) :: default_rfmt = '(ES16.8)'
+   character(len=20) :: default_rfmt = '(ES16.8)' ! '(ES23.15E3)'
    ! Default format for real
 
    character(len=20) :: default_kfmt = "(A)"
@@ -134,12 +132,13 @@ module m_yaml
 !!***
 
  public :: yamldoc_open
- ! Open a yaml document
+  ! Open a yaml document
 
  public :: yaml_single_dict
- ! Create a full document from a single dictionary
+  ! Create a full document from a single dictionary
 
  public :: yaml_iterstart
+  ! Set the value of the iteration indices used to build the iteration_state dict in the Yaml documents
 
  character(len=1),parameter :: eol = char(10)
 
@@ -151,6 +150,8 @@ module m_yaml
  integer,save,protected :: DTSET_IDX = -1
  integer,save,protected :: TIMIMAGE_IDX = -1
  integer,save,protected :: IMAGE_IDX = -1
+ integer,save,protected :: ITIME_IDX = -1
+ integer,save,protected :: ICYCLE_IDX = -1
 
 contains
 
@@ -192,6 +193,10 @@ subroutine yaml_iterstart(label, val, unit, use_yaml, newline)
    TIMIMAGE_IDX = val
  case ("image")
    IMAGE_IDX = val
+ case ("itime")
+   ITIME_IDX = val
+ case ("icycle")
+   ICYCLE_IDX = val
  case default
    MSG_ERROR(sjoin("Invalid value for label:", label))
  end select
@@ -246,7 +251,6 @@ type(yamldoc_t) function yamldoc_open(tag, comment, newline, width, int_fmt, rea
  if (present(width)) new%default_width = width
  if (present(int_fmt)) new%default_ifmt = int_fmt
  if (present(real_fmt)) new%default_rfmt = real_fmt
- !new%open_count = 1
 
  call new%stream%push('---'//' !'//trim(tag)//ch10)
 
@@ -254,12 +258,12 @@ type(yamldoc_t) function yamldoc_open(tag, comment, newline, width, int_fmt, rea
  call dict%set('dtset', i=DTSET_IDX)
  if (TIMIMAGE_IDX /= -1) call dict%set("timimage", i=TIMIMAGE_IDX)
  if (IMAGE_IDX /= -1) call dict%set("image", i=IMAGE_IDX)
- !call new%stream%push(eol)
+ if (ITIME_IDX /= -1) call dict%set("itime", i=ITIME_IDX)
+ if (ICYCLE_IDX /= -1) call dict%set("icycle", i=ICYCLE_IDX)
  call new%add_dict('iteration_state', dict, int_fmt="(I0)")
  call dict%free()
 
  if (comment /= '') then
-   !call new%stream%push(eol//'comment')
    call new%stream%push('comment')
    if (new%default_width > 7) call new%stream%push(repeat(' ', new%default_width - 7))
    call new%stream%push(': ')
@@ -1117,10 +1121,6 @@ subroutine yamldoc_write_and_free(self, unit, newline)
 
  if (self%stream%length == 0) return
  SET_DEFAULT(nl, newline, .true.)
-
- !if new%open_count /= 1
- !MSG_ERROR("Document should be created by calling yamldoc_open")
- !end if
 
  call self%stream%push('...')
 

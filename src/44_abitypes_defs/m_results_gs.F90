@@ -296,7 +296,6 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
  results_gs%intgres=zero
 
  if (full_init) then
-
    results_gs%pel=zero
    results_gs%pion=zero
 
@@ -314,7 +313,6 @@ subroutine init_results_gs(natom,nspden,nsppol,results_gs,only_part)
    results_gs%grxc  =zero
    ABI_ALLOCATE(results_gs%synlgr,(3,natom))
    results_gs%synlgr=zero
-
  end if
 
 end subroutine init_results_gs
@@ -844,16 +842,23 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
  call ydoc%add_real("nelect", dtset%nelect)
  call ydoc%add_real("charge", dtset%charge)
 
+ !call ydoc%add_dict_of_ints("dimensions", &
+ !  "natom, nsppol, nspinor, nspden", &
+ !  [results%natom, results%nsppol, results%nspinor, results%nspden])
+
  ! Write lattice parameters
  abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
  call ydoc%add_real1d('lattice_lengths', abc, real_fmt="(f10.5)")
  call ydoc%add_real1d('lattice_angles', cryst%angdeg, real_fmt="(f7.3)")
+ !call ydoc%add_real1d('lattice_volume', cryst%ucvol, real_fmt="(f7.3)")
 
  ! Write cutoff energies
  call dict%set('ecut', r=dtset%ecut)
  call dict%set('pawecutdg', r=dtset%pawecutdg)
  call ydoc%add_dict('cutoff_energies', dict, real_fmt="(f5.1)")
  call dict%free()
+ !call ydoc%add_dict_of_reals("cutoff_energies", &
+ !  "ecut, pawecutdg", [dtset%ecut, dtset%pawecutdg], real_fmt="(f5.1)")
 
  ! Write convergence degree.
  ! It seems there's a portability problem on for residm computed with nstep = 0
@@ -865,11 +870,19 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
  call dict%set('diffor', r=results%diffor)
  call ydoc%add_dict('convergence', dict, multiline_trig=2, real_fmt="(es9.2)")
  call dict%free()
+ !call ydoc%add_dict_of_reals("convergence",
+ !  "deltae, res2, residm, diffor", &
+ !  [results%deltae, results%res, merge(results%residm, zero, results%residm > tol30)), results%diffor], &
+ !  multiline_trig=2, real_fmt="(es9.2)")
 
  ! Write energies.
  call ydoc%add_real('etotal', results%etotal)
  call ydoc%add_real('entropy', results%entropy)
  call ydoc%add_real('fermie', results%fermie)
+
+ !call ydoc%add_dict_of_reals("energies",
+ !  "etotal, entropy, fermie", &
+ !  [results%etotal, results%entropy, results%fermie])
 
  ! TODO: Add gaps
  !do spin=1,results%nsppol
