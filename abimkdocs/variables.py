@@ -543,7 +543,7 @@ class Variable(object):
 
     def to_abimarkdown(self, with_hr=True):
         """
-        Return markdown string Can use Abinit markdown extensions.
+        Return markdown string. Can use Abinit markdown extensions.
         """
         lines = []; app = lines.append
 
@@ -603,7 +603,9 @@ class Variable(object):
 
         # Add text with description.
         app(2 * "\n")
-        app(self.text)
+        # Replace all occurrences of [[name]] with **name** to reduce number of html links in docs
+        new_text = self.text.replace("[[%s]]" % self.name, " **%s** " % self.name)
+        app(new_text)
         if with_hr: app("* * *" + 2*"\n")
 
         return "\n".join(lines)
@@ -665,6 +667,7 @@ class Variable(object):
         if errors:
             raise ValueError("\n".join(errors))
 
+
 class ValueWithUnit(object):
     """
     This type allows to specify values with units:
@@ -678,6 +681,7 @@ class ValueWithUnit(object):
 
     def __repr__(self):
         return str(self)
+
 
 class Range(object):
     """
@@ -749,6 +753,7 @@ class MultipleValue(object):
             return "*" + str(self.value)
         else:
             return str(self.number) + " * " + str(self.value)
+
 
 def my_unicode(s):
     """Convert string to unicode (needed for py2.7 DOH!)"""
