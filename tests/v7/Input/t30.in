@@ -84,7 +84,7 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%% test_chain = t30.in, t31.in
 #%% [files]
 #%% files_to_test =
-#%%                  t30.out,  tolnlines =120, tolabs =2.34e-03, tolrel = 3.5e-01, fld_options=-medium ;
+#%%                  t30.out,  tolnlines =120, tolabs =0.005, tolrel = 3.5e-01, fld_options=-medium ;
 #%% psp_files =  23v.paw, 38sr.paw, 8o.2.paw
 #%% [shell] 
 #%% post_commands = 

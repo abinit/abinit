@@ -80,7 +80,7 @@ xred 3*0
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t04.out, tolnlines = 33, tolabs = 1.1e-2, tolrel = 3.0e-6, fld_options = -medium
+#%%   t04.out, tolnlines = 38, tolabs = 1.1e-2, tolrel = 3.0e-6, fld_options = -medium
 #%% psp_files = 02he.bare
 #%% [paral_info]
 #%% max_nprocs = 1
