@@ -33,6 +33,7 @@ eph_extrael 1e-6
 occopt 3
 
 gw_qprange 2
+eph_intmeth 1
 
 ###########
 # Use of the two-grids technique

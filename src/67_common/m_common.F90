@@ -1873,7 +1873,7 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
 
       ! Finish to read the "file" file completely, as npsp is known,
       do ipsp=1,npsp
-        write(std_out,'(/,a)' )' Please give name of formatted atomic psp file'
+        write(std_out,'(/,a)' )' Please give name of formatted atomic psp file (and finish with a newline character)'
         read (std_in, '(a)' , iostat=ios ) filpsp
         ! It might be that a file name is missing
         if (ios /= 0) then
