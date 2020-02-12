@@ -8600,11 +8600,11 @@ A global additional shift can be provided by [[qptn]]
   * 2 --> rely on [[ngkpt]] or [[kptrlatt]], as well as on [[nshiftk]] and [[shiftk]] to set up the k points.
     Take into account only the time-reversal symmetry: k points will be generated in half the Brillouin zone,
     with the appropriate weights.
-    (This is to be used when preparing or executing a RF calculation at q=(0 0 0))
+    (This is the usual mode when preparing or executing a RF calculation at q=(0 0 0) without non-collinear magnetism)
 
   * 3 --> rely on [[ngkpt]] or [[kptrlatt]], as well as on [[nshiftk]] and [[shiftk]] to set up the k points.
     Do not take into account any symmetry: k points will be generated in the full Brillouin zone, with the appropriate weights.
-    (This is to be used when preparing or executing a RF calculation at non-zero q)
+    (This is the usual mode when preparing or executing a RF calculation at non-zero q, or with non-collinear magnetism)
 
   * 4 --> rely on [[ngkpt]] or [[kptrlatt]], as well as on [[nshiftk]] and [[shiftk]] to set up the k points.
    Take into account all the symmetries EXCEPT the time-reversal symmetry to generate the k points
