@@ -868,7 +868,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    end if
 
  end do
- 
+
 !Allocate the quadrupole tensor part depending on the wave functions
  ABI_ALLOCATE(qdrpwf,(2,natpert,nq2grad,nq1grad))
  ABI_ALLOCATE(qdrpwf_k,(2,natpert,nq2grad,nq1grad))
@@ -984,7 +984,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
    call wfk_t_efield(iq2grad)%close()
  end do
  do iq1q2grad=1,nq1q2grad
-   call wfk_t_dkdk(iq1q2grad)%close()
+   if (iq1q2grad <= 6) call wfk_t_dkdk(iq1q2grad)%close()
  end do
 
 !=== MPI communications ==================
@@ -2802,9 +2802,11 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end if
  if (lw_flexo==1.or.lw_flexo==2.or.lw_flexo==4) then
    do istrpert=1,nstrpert
-     ka=pert_strain(3,istrpert)
-     kb=pert_strain(4,istrpert)
-     call wfk_t_strain(ka,kb)%close()
+     if (istrpert <= 6) then
+       ka=pert_strain(3,istrpert)
+       kb=pert_strain(4,istrpert)
+       call wfk_t_strain(ka,kb)%close()
+     end if
    end do
  end if
  do iq1grad=1,nq1grad
@@ -2815,7 +2817,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
      call wfk_t_efield(iefipert)%close()
    end do
    do iq1q2grad=1,nq1q2grad
-     call wfk_t_dkdk(iq1q2grad)%close()
+     if (iq1q2grad <= 6) call wfk_t_dkdk(iq1q2grad)%close()
    end do
  end if
 
