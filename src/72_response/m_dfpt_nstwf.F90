@@ -107,7 +107,7 @@ contains
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)=planewave coefficients of wavefunctions at k
+!!  cg (2,mpw *nspinor*mband_mem*mkmem*nsppol)=planewave coefficients of wavefunctions at k
 !!  cgq(2,mpw1*nspinor*mband_mem*mkqmem*nsppol)=pw coefficients of GS wavefunctions at k+q.
 !!  cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
 !!  cplex=if 1, real space 1-order functions on FFT grid are REAL, if 2, COMPLEX
@@ -1755,8 +1755,8 @@ end subroutine dfpt_nstpaw
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=planewave coefficients of wavefunctions at k
-!!  cg1(2,mpw1*nspinor*mband*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
+!!  cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)=planewave coefficients of wavefunctions at k
+!!  cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)=pw coefficients of RF wavefunctions at k,q.
 !!  ddkfil(3)=unit numbers for the three possible ddk files for ipert1
 !!       equal to 0 if no dot file is available for this direction
 !!  dtset <type(dataset_type)>=all input variables for this dataset
@@ -2060,6 +2060,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
 !              In case of band-by-band,
 !              construct the first-order wavefunctions in the diagonal gauge
                if (((ipert <= dtset%natom).or.(ipert == dtset%natom + 2)).and.(dtset%prtbbb==1)) then
+!TODO: check if this is still correct in the bandparal case
                  call gaugetransfo(cg_k,gvnlx1,cwavef_da,mpi_enreg%comm_band,distrb_cycle,eig_k,eig2_k,iband,nband_k, &
 &                  dtset%mband,dtset%mband_mem,npw_k,npw1_k,dtset%nspinor,nsppol,mpi_enreg%nproc_band,occ_k)
                  gvnlx1(:,:) = cwavef_da(:,:)
@@ -2088,6 +2089,8 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
              d2nl_k(1,idir1,ipert1)=d2nl_k(1,idir1,ipert1)+wtk_k*occ_k(iband)*two*dotr
              d2nl_k(2,idir1,ipert1)=d2nl_k(2,idir1,ipert1)-wtk_k*occ_k(iband)*two*doti
 
+!TODO : need an mpi_reduce here somewhere to collect terms?
+!   or if there is no sub-loop over jband there is no need to distribute and everyone works on their own iband???
 !            Band by band decomposition of the Born effective charges
 !            calculated from a phonon perturbation
 !            d2bbb_k will be mpisummed below so only keep my iband indices on the diagonal
@@ -2100,7 +2103,7 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
          end do ! idir
 
          call rf_hamkq%free()
-       end if   
+       end if     ! ipert1<=dtset%natom .or. ipert1==dtset%natom+2 
      end do     ! ipert1
    end if     ! ipert /= natom +1
 
