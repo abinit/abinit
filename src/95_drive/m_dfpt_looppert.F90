@@ -1116,9 +1116,9 @@ print *, 'istwfk_rbz ', istwfk_rbz
 &            formeig, istwfk_rbz, kpt_rbz, nkpt_rbz, npwarr, &
 &            cg, eigen=eigen0, occ=occ_disk)
 ! if the occ are not fixed by the input file, read in from GS file
-   if (dtset%occopt /= 2) then
-     occ_rbz = occ_disk
-   end if 
+!   if (dtset%occopt /= 2) then
+!     occ_rbz = occ_disk
+!   end if 
 print *, 'eigen0 1111 ', eigen0
 print *, " occ_rbz 1111 ", occ_rbz
   
@@ -1182,13 +1182,13 @@ print *, ' diff in eigen0 ', eigen0(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*
 else
 write (301, *) 'is ik ib ', isppol, ikpt, iband, kpt_rbz(:,ikpt)
 end if
-!if (sum(abs(occ_rbz(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
-!&           occ_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))))) > tol6) then
-!print *, ' diff in occ ', occ_rbz(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
-!&                         occ_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1)))
-!else
-!write (302, *) 'is ik ib ', isppol, ikpt, iband, kpt_rbz(:,ikpt)
-!end if
+if (sum(abs(occ_rbz(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
+&           occ_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))))) > tol6) then
+print *, ' diff in occ ', occ_rbz(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
+&                         occ_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1)))
+else
+write (302, *) 'is ik ib ', isppol, ikpt, iband, kpt_rbz(:,ikpt)
+end if
        ibdoffst = ibdoffst + nband_rbz(ikpt+nkpt_rbz*(isppol-1))
      end do
    end do

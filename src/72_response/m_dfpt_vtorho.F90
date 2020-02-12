@@ -549,6 +549,10 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !    For each pair of active bands (m,n), generates the ratios
 !    rocceig(m,n)=(occ_kq(m)-occ_k(n))/(eig0_kq(m)-eig0_k(n))
 !    and decide to which band to attribute it.
+print *, doccde_k
+print *, doccde_kq
+print *, occ_k
+print *, occ_kq
      call occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,dtset%occopt,occ_k,occ_kq,rocceig)
 
      ! These arrays are not needed anymore.
@@ -611,7 +615,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !    Compute the eigenvalues, wavefunction, residuals,
 !    contributions to kinetic energy, nonlocal energy, forces,
 !    and update of 1st-order density to this k-point and this spin polarization.
-     nband_kq = nband_k  !Note that the calculation only works for same number of bandes on all K points.
+     nband_kq = nband_k  !Note that the calculation only works for same number of bands on all K points.
 !    Note that dfpt_vtowfk is called with kpoint, while kpt is used inside vtowfk3
      call dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dim_eig2rf,dtfil,&
 &     dtset,edocc_k,eeig0_k,eig0_k,eig0_kq,eig1_k,ek0_k,ek1_k,eloc0_k,enl0_k,enl1_k,fermie1,&
