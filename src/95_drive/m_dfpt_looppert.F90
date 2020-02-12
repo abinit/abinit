@@ -1128,6 +1128,7 @@ print *, " occ_rbz 1111 ", occ_rbz
    ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
    ABI_ALLOCATE(eigen_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
    ABI_ALLOCATE(occ_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
+   occ_tmp = zero
    call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen_tmp,dtset%exchn2n3d,&
 &   formeig,hdr0,ireadwf0,istwfk_rbz,kg,&
 &   kpt_rbz,dtset%localrdwf,dtset%mband,mcg_tmp,&
