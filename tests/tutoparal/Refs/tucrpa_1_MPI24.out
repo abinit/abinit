@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun  9 Feb 2020.
-- ( at 23h18 )
+.Starting date : Wed 12 Feb 2020.
+- ( at 03h40 )
   
 - input  file    -> tucrpa_1.in
 - output file    -> tucrpa_1_MPI24.out
@@ -554,34 +554,38 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   nstep=   40 was not enough SCF cycles to converge;
   maximum residual=  3.735E-07 exceeds tolwfr=  1.000E-15
 
+
 --- !ResultsGS
+iteration_state: {"dtset": 1, }
 comment   : Summary of ground state results
 natom     :        5
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  4.100000000000000E+001
-charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg":  2.000000000000000E+001, }
+nelect    :   4.10000000E+01
+charge    :   0.00000000E+00
+lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  12.0, "pawecutdg":  20.0, }
 convergence: {
-    "deltae": -3.694822225952521E-013, "res2":  3.608514150897316E-020, 
-    "residm":  3.735276778891803E-007, "diffor": undef, 
+    "deltae": -3.69E-13, "res2":  3.61E-20, 
+    "residm":  3.74E-07, "diffor": undef, 
 }
-etotal    : -1.519285250784780E+002
-entropy   :  0.000000000000000E+000
-fermie    :  2.855067148157411E-001
-stress_tensor: !CartTensor
-- [ 2.090255056811586E-003,  3.419802210363292E-012,  2.240495854019637E-012, ]
-- [ 3.419802210363292E-012,  2.090255008636358E-003, -4.162370436599894E-012, ]
-- [ 2.240495854019637E-012, -4.162370436599894E-012,  2.090254986917572E-003, ]
-cartesian_forces: !CartForces
-- [-7.793184973714244E-010,  2.345479170492861E-009,  1.330429086921814E-009, ]
-- [ 1.556100965945185E-010, -6.738920194290629E-010, -1.573412960460868E-010, ]
-- [ 7.448847139637775E-011, -9.557278556619298E-010, -5.493287892806928E-010, ]
-- [ 1.139609236410768E-010, -2.389876415078818E-010, -3.540443668255007E-010, ]
-- [ 4.352590057394514E-010, -4.768716538939855E-010, -2.697146347695334E-010, ]
+etotal    :  -1.51928525E+02
+entropy   :   0.00000000E+00
+fermie    :   2.85506715E-01
+cartesian_stress_tensor:
+- [  2.09025506E-03,   3.41980221E-12,   2.24049585E-12, ]
+- [  3.41980221E-12,   2.09025501E-03,  -4.16237044E-12, ]
+- [  2.24049585E-12,  -4.16237044E-12,   2.09025499E-03, ]
+pressure_GPa:  -6.1497E+01
+cartesian_forces:
+- [ -7.79318497E-10,   2.34547917E-09,   1.33042909E-09, ]
+- [  1.55610097E-10,  -6.73892019E-10,  -1.57341296E-10, ]
+- [  7.44884714E-11,  -9.55727856E-10,  -5.49328789E-10, ]
+- [  1.13960924E-10,  -2.38987642E-10,  -3.54044367E-10, ]
+- [  4.35259006E-10,  -4.76871654E-10,  -2.69714635E-10, ]
+force_length_stats: {"min":   4.42096820E-10, "max":   2.80689355E-09, "mean":   1.15257358E-09, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -711,36 +715,36 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {"dtset": 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  4.22101241859796E+01
+hartree             :  3.42935069756873E+01
+xc                  : -1.94923332649580E+01
+Ewald energy        : -1.14220316979058E+02
+psp_core            :  6.33972391350157E+00
+local_psp           : -1.09494361865327E+02
+spherical_terms     :  8.43865527676179E+00
+internal            : -1.51925001757412E+02
+'-kT*entropy'       : -3.52332107437964E-03
+total_energy        : -1.51928525078487E+02
+total_energy_eV     : -4.13418541519434E+03
+...
 
-    Kinetic energy  =  4.22101241859796E+01
-    Hartree energy  =  3.42935069756873E+01
-    XC energy       = -1.94923332649580E+01
-    Ewald energy    = -1.14220316979058E+02
-    PspCore energy  =  6.33972391350157E+00
-    Loc. psp. energy= -1.09494361865327E+02
-    Spherical terms =  8.43865527676179E+00
-    >>>>> Internal E= -1.51925001757412E+02
 
-    -kT*entropy     = -3.52332107437964E-03
-    >>>>>>>>> Etotal= -1.51928525078487E+02
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -1.47235259001391E+01
-    Ewald energy    =-1.14220316979058E+02
-    PspCore energy  =  6.33972391350157E+00
-    Dble-C XC-energy= -3.05330261649364E+01
-    Spherical terms =  1.21214337322791E+00
-    >>>>> Internal E= -1.51925001757404E+02
-
-    -kT*entropy     = -3.52332107437964E-03
-    >>>> Etotal (DC)= -1.51928525078478E+02
-
-  >Total energy in eV           = -4.13418541519434E+03
-  >Total DC energy in eV        = -4.13418541519410E+03
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+iteration_state     : {"dtset": 1, }
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -1.47235259001391E+01
+Ewald energy        : -1.14220316979058E+02
+psp_core            :  6.33972391350157E+00
+xc_dc               : -3.05330261649364E+01
+spherical_terms     :  1.21214337322791E+00
+internal            : -1.51925001757404E+02
+'-kT*entropy'       : -3.52332107437964E-03
+total_energy_dc     : -1.51928525078478E+02
+total_energy_dc_eV  : -4.13418541519434E+03
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1740,34 +1744,30 @@ cartesian_forces: !CartForces
   nstep=   40 was not enough non-SCF iterations to converge;
   maximum residual=  1.282E-15 exceeds tolwfr=  1.000E-15
 
+
 --- !ResultsGS
+iteration_state: {"dtset": 2, }
 comment   : Summary of ground state results
 natom     :        5
 nsppol    :        1
 nspinor   :        1
 nspden    :        1
-nelect    :  4.100000000000000E+001
-charge    :  0.000000000000000E+000
-abc       : [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-alpha_beta_gamma_angles: [ 9.000000000000000E+001,  9.000000000000000E+001,  9.000000000000000E+001, ]
-cutoff_energies: {"ecut":  1.200000000000000E+001, "pawecutdg":  2.000000000000000E+001, }
+nelect    :   4.10000000E+01
+charge    :   0.00000000E+00
+lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+cutoff_energies: {"ecut":  12.0, "pawecutdg":  20.0, }
 convergence: {
-    "deltae":  0.000000000000000E+000, "res2":  0.000000000000000E+000, 
-    "residm":  1.282212121404575E-015, "diffor":  0.000000000000000E+000, 
+    "deltae":  0.00E+00, "res2":  0.00E+00, 
+    "residm":  1.28E-15, "diffor":  0.00E+00, 
 }
-etotal    : -1.519285250784780E+002
-entropy   :  0.000000000000000E+000
-fermie    :  2.855067148157411E-001
-stress_tensor: !CartTensor
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-cartesian_forces: !CartForces
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
-- [undef, undef, undef, ]
+etotal    :  -1.51928525E+02
+entropy   :   0.00000000E+00
+fermie    :   2.85506715E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {"min": null, "max": null, "mean": null, }
 ...
 
 
