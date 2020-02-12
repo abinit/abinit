@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 17h30 )
+.Starting date : Wed 12 Feb 2020.
+- ( at 06h41 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Test_suite/v9_t02/t02.in
 - output file    -> t02.out
@@ -161,7 +161,11 @@ P           mkmem           4
              nkpt           4
            nspden           2
            nsppol           2
-            nstep          50
+            nstep1         50
+            nstep2         50
+            nstep3         24
+            nstep4         50
+            nstep5         48
              nsym1         96
              nsym2         96
              nsym3         48
@@ -1312,23 +1316,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     239.250     239.233
  ETOT 22  -248.85296334282    -1.25E-08 2.55E-10 2.53E-07 4.427
  ETOT 23  -248.85296334264     1.86E-10 1.59E-12 5.71E-07 4.427
  ETOT 24  -248.85296334275    -1.17E-10 3.10E-12 1.81E-09 4.427
- ETOT 25  -248.85296334276    -3.44E-12 3.67E-14 1.98E-10 4.427
-
- At SCF step   25       vres2   =  1.98E-10 < tolvrs=  1.00E-09 =>converged.
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.38354917E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.38354917E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.38354917E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.38354546E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.38354546E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.38354546E-03  sigma(2 1)=  0.00000000E+00
+
+
+ scprqt:  WARNING -
+  nstep=   24 was not enough SCF cycles to converge;
+  potential residual=  1.812E-09 exceeds tolvrs=  1.000E-09
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)   Atomic charge
-    1   2.10000     8.282780     6.032780     14.315560     2.250000      1.684440
-    2   2.10000     8.306072     6.006072     14.312144     2.300000      1.687856
+    1   2.10000     8.282781     6.032780     14.315561     2.250001      1.684439
+    2   2.10000     8.306072     6.006072     14.312143     2.300000      1.687857
  ---------------------------------------------------------------------
-  Sum:             16.588852    12.038851     28.627704     4.550001
+  Sum:             16.588852    12.038852     28.627704     4.550001
  Total magnetization (from the atomic spheres):             4.550001
  Total magnetization (exact up - dn):                       4.427151
 
@@ -1344,8 +1350,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     239.250     239.233
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     19.248155433245824
- Compensation charge over fine fft grid    =     19.248176357210330
+ Compensation charge over spherical meshes =     19.248156099754894
+ Compensation charge over fine fft grid    =     19.248177023720078
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -1471,7 +1477,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     239.250     239.233
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   90.577E-16; max=  36.742E-15
+ Mean square residual over all n,k,spin=   11.336E-13; max=  31.001E-13
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -1496,8 +1502,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     239.250     239.233
               =  2.868140470558  2.868140470558  2.868140470558 angstroms
  prteigrs : about to open file t02o_DS3_EIG
  Fermi (or HOMO) energy (hartree) =   0.25520   Average Vxc (hartree)=  -0.50720
- Magnetization (Bohr magneton)=  4.42714565E+00
- Total spin up =  1.82135728E+01   Total spin down =  1.37864272E+01
+ Magnetization (Bohr magneton)=  4.42714522E+00
+ Total spin up =  1.82135726E+01   Total spin down =  1.37864274E+01
  Eigenvalues (hartree) for nkpt=   4  k points, SPIN UP:
  kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.1250  0.1250  0.1250 (reduced coord)
   -2.97931   -2.97506   -1.73238   -1.73238   -1.72983   -1.72489   -1.72276   -1.72276
@@ -1524,44 +1530,44 @@ _setup2: Arith. and geom. avg. npw (full set) are     239.250     239.233
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  1.82225340067907E+01
-    Hartree energy  =  4.68910337076389E+01
-    XC energy       = -2.34856134243640E+01
+    Kinetic energy  =  1.82225338531467E+01
+    Hartree energy  =  4.68910368354467E+01
+    XC energy       = -2.34856139205695E+01
     Ewald energy    = -1.71889993187126E+02
     PspCore energy  =  1.45811374803459E+01
-    Loc. psp. energy= -1.18785013969601E+02
-    Spherical terms = -1.43845780391238E+01
-    >>>>> Internal E= -2.48850493425357E+02
+    Loc. psp. energy= -1.18785017929879E+02
+    Spherical terms = -1.43845765576303E+01
+    >>>>> Internal E= -2.48850493425787E+02
 
-    -kT*entropy     = -2.46991739975132E-03
-    >>>>>>>>> Etotal= -2.48852963342757E+02
+    -kT*entropy     = -2.46991696636218E-03
+    >>>>>>>>> Etotal= -2.48852963342753E+02
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -2.89717351681512E+01
+    Band energy     = -2.89717362543479E+01
     Ewald energy    =-1.71889993187126E+02
     PspCore energy  =  1.45811374803459E+01
-    Dble-C XC-energy= -3.97162546865038E+01
-    Spherical terms = -2.28527314881719E+01
-    >>>>> Internal E= -2.48849577049524E+02
+    Dble-C XC-energy= -3.97162576656336E+01
+    Spherical terms = -2.28527330830822E+01
+    >>>>> Internal E= -2.48849582709365E+02
 
-    -kT*entropy     = -2.46991739975132E-03
-    >>>> Etotal (DC)= -2.48852046966924E+02
+    -kT*entropy     = -2.46991696636218E-03
+    >>>> Etotal (DC)= -2.48852052626332E+02
 
-  >Total energy in eV           = -6.77163351021827E+03
-  >Total DC energy in eV        = -6.77160857436372E+03
+  >Total energy in eV           = -6.77163351021817E+03
+  >Total DC energy in eV        = -6.77160872836403E+03
 --------------------------------------------------------------------------------
 
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.38354917E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.38354917E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.38354917E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.38354546E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.38354546E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.38354546E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -4.0705E+01 GPa]
-- sigma(1 1)=  4.07054150E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  4.07054150E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  4.07054150E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  4.07053059E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  4.07053059E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  4.07053059E+01  sigma(2 1)=  0.00000000E+00
 
 ================================================================================
 == DATASET  4 ==================================================================
@@ -1981,44 +1987,42 @@ _setup2: Arith. and geom. avg. npw (full set) are     239.250     239.233
  ETOT 46  -248.84889719541     2.22E-11 3.64E-13 1.79E-08 4.422
  ETOT 47  -248.84889719540     5.06E-12 1.78E-14 2.17E-09 4.422
  ETOT 48  -248.84889719540     2.76E-12 1.03E-14 3.73E-09 4.422
- ETOT 49  -248.84889719540    -4.32E-12 9.87E-15 4.13E-09 4.422
- ETOT 50  -248.84889719540     2.36E-12 8.11E-15 3.91E-09 4.422
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.95248094E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.95248094E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.95248094E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.95247794E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.95247794E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.95247794E-03  sigma(2 1)=  0.00000000E+00
 
 
  scprqt:  WARNING -
-  nstep=   50 was not enough SCF cycles to converge;
-  potential residual=  3.908E-09 exceeds tolvrs=  1.000E-09
+  nstep=   48 was not enough SCF cycles to converge;
+  potential residual=  3.731E-09 exceeds tolvrs=  1.000E-09
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)   Atomic charge
-    1   2.10000     8.285001     6.035001     14.320002     2.250000      1.679998
-    2   2.10000     8.250000     5.950000     14.200001     2.300000      1.799999
+    1   2.10000     8.285001     6.035000     14.320001     2.250000      1.679999
+    2   2.10000     8.250001     5.950002     14.200003     2.300000      1.799997
  ---------------------------------------------------------------------
-  Sum:             16.535001    11.985002     28.520003     4.550000
+  Sum:             16.535002    11.985002     28.520004     4.550000
  Total magnetization (from the atomic spheres):             4.550000
- Total magnetization (exact up - dn):                       4.422047
+ Total magnetization (exact up - dn):                       4.422048
 
  Integrated potential residual in atomic spheres (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
  Atom    Radius     Potential       B(z)        up pot      down pot
     1   2.10000    -0.024916     0.001315     -0.023601    -0.026231
-    2   2.10000    -0.073446    -0.001120     -0.074566    -0.072327
+    2   2.10000    -0.073446    -0.001120     -0.074565    -0.072326
  ---------------------------------------------------------------------
-  Sum:             -0.098362     0.000195     -0.098167    -0.098557
+  Sum:             -0.098361     0.000195     -0.098166    -0.098557
 
  PAW TEST:
  ==== Compensation charge inside spheres ============
  The following values must be close to each other ...
- Compensation charge over spherical meshes =     19.180828262631458
- Compensation charge over fine fft grid    =     19.180849108267495
+ Compensation charge over spherical meshes =     19.180828640401050
+ Compensation charge over fine fft grid    =     19.180849486037715
 
  ==== Results concerning PAW augmentation regions ====
 
@@ -2144,7 +2148,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     239.250     239.233
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   33.994E-16; max=  81.094E-16
+ Mean square residual over all n,k,spin=   38.029E-16; max=  10.329E-15
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -2169,8 +2173,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     239.250     239.233
               =  2.868140470558  2.868140470558  2.868140470558 angstroms
  prteigrs : about to open file t02o_DS5_EIG
  Fermi (or HOMO) energy (hartree) =   0.28345   Average Vxc (hartree)=  -0.50920
- Magnetization (Bohr magneton)=  4.42204190E+00
- Total spin up =  1.82110210E+01   Total spin down =  1.37889790E+01
+ Magnetization (Bohr magneton)=  4.42204218E+00
+ Total spin up =  1.82110211E+01   Total spin down =  1.37889789E+01
  Eigenvalues (hartree) for nkpt=   4  k points, SPIN UP:
  kpt#   1, nband= 24, wtk=  0.12500, kpt=  0.1250  0.1250  0.1250 (reduced coord)
   -2.95285   -2.94937   -1.70515   -1.70515   -1.70242   -1.69823   -1.69593   -1.69593
@@ -2197,44 +2201,44 @@ _setup2: Arith. and geom. avg. npw (full set) are     239.250     239.233
 --------------------------------------------------------------------------------
  Components of total free energy (in Hartree) :
 
-    Kinetic energy  =  1.81519145206589E+01
-    Hartree energy  =  4.64305614864476E+01
-    XC energy       = -2.34178473524740E+01
+    Kinetic energy  =  1.81519146368670E+01
+    Hartree energy  =  4.64305635242945E+01
+    XC energy       = -2.34178476754984E+01
     Ewald energy    = -1.71889993187126E+02
     PspCore energy  =  1.45811374803459E+01
-    Loc. psp. energy= -1.18198641319001E+02
-    Spherical terms = -1.45035427901756E+01
-    >>>>> Internal E= -2.48846411034430E+02
+    Loc. psp. energy= -1.18198644003169E+02
+    Spherical terms = -1.45035420321404E+01
+    >>>>> Internal E= -2.48846411034222E+02
 
-    -kT*entropy     = -2.48616097107208E-03
-    >>>>>>>>> Etotal= -2.48848897195401E+02
+    -kT*entropy     = -2.48616117684157E-03
+    >>>>>>>>> Etotal= -2.48848897195399E+02
 
  "Double-counting" decomposition of free energy:
-    Band energy     = -2.81202373144339E+01
+    Band energy     = -2.81202464144803E+01
     Ewald energy    =-1.71889993187126E+02
     PspCore energy  =  1.45811374803459E+01
-    Dble-C XC-energy= -3.92764531772765E+01
-    Spherical terms = -2.27415144814294E+01
-    >>>>> Internal E= -2.47447060553026E+02
+    Dble-C XC-energy= -3.92764551173318E+01
+    Spherical terms = -2.27415152502732E+01
+    >>>>> Internal E= -2.47447072266661E+02
 
-    -kT*entropy     = -2.48616097107208E-03
-    >>>> Etotal (DC)= -2.47449546713997E+02
+    -kT*entropy     = -2.48616117684157E-03
+    >>>> Etotal (DC)= -2.47449558427838E+02
 
-  >Total energy in eV           = -6.77152286472174E+03
-  >Total DC energy in eV        = -6.73344460161757E+03
+  >Total energy in eV           = -6.77152286472168E+03
+  >Total DC energy in eV        = -6.73344492036740E+03
 --------------------------------------------------------------------------------
 
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
-  sigma(1 1)=  1.95248094E-03  sigma(3 2)=  0.00000000E+00
-  sigma(2 2)=  1.95248094E-03  sigma(3 1)=  0.00000000E+00
-  sigma(3 3)=  1.95248094E-03  sigma(2 1)=  0.00000000E+00
+  sigma(1 1)=  1.95247794E-03  sigma(3 2)=  0.00000000E+00
+  sigma(2 2)=  1.95247794E-03  sigma(3 1)=  0.00000000E+00
+  sigma(3 3)=  1.95247794E-03  sigma(2 1)=  0.00000000E+00
 
 -Cartesian components of stress tensor (GPa)         [Pressure= -5.7444E+01 GPa]
-- sigma(1 1)=  5.74439630E+01  sigma(3 2)=  0.00000000E+00
-- sigma(2 2)=  5.74439630E+01  sigma(3 1)=  0.00000000E+00
-- sigma(3 3)=  5.74439630E+01  sigma(2 1)=  0.00000000E+00
+- sigma(1 1)=  5.74438744E+01  sigma(3 2)=  0.00000000E+00
+- sigma(2 2)=  5.74438744E+01  sigma(3 1)=  0.00000000E+00
+- sigma(3 3)=  5.74438744E+01  sigma(2 1)=  0.00000000E+00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -2273,17 +2277,17 @@ _setup2: Arith. and geom. avg. npw (full set) are     239.250     239.233
            grchrg2     0.0000000000E+00  0.0000000000E+00
            grchrg3     0.0000000000E+00  0.0000000000E+00
            grchrg4    -2.6988443101E-02 -7.1332290036E-02
-           grchrg5    -2.4915798555E-02 -7.3446333241E-02
+           grchrg5    -2.4915872959E-02 -7.3445515333E-02
            grspin1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            grspin2     0.0000000000E+00  0.0000000000E+00 -1.4818931860E-04
                        0.0000000000E+00  0.0000000000E+00 -1.4818931858E-04
-           grspin3     0.0000000000E+00  0.0000000000E+00 -5.7904517276E-04
-                       0.0000000000E+00  0.0000000000E+00  1.6925266487E-04
+           grspin3     0.0000000000E+00  0.0000000000E+00 -5.7901420889E-04
+                       0.0000000000E+00  0.0000000000E+00  1.6920666419E-04
            grspin4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           grspin5     0.0000000000E+00  0.0000000000E+00  1.3148628014E-03
-                       0.0000000000E+00  0.0000000000E+00 -1.1196604268E-03
+           grspin5     0.0000000000E+00  0.0000000000E+00  1.3148426029E-03
+                       0.0000000000E+00  0.0000000000E+00 -1.1196415366E-03
              iscf           7
               ixc          11
            jdtset        1    2    3    4    5
@@ -2303,7 +2307,11 @@ P           mkmem           4
              nkpt           4
            nspden           2
            nsppol           2
-            nstep          50
+            nstep1         50
+            nstep2         50
+            nstep3         24
+            nstep4         50
+            nstep5         48
              nsym1         96
              nsym2         96
              nsym3         48
@@ -2384,7 +2392,7 @@ P           mkmem           4
                        0.894827  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
-                       1.000000  1.000000  1.000000  1.000000  1.000000  0.585584
+                       1.000000  1.000000  1.000000  1.000000  1.000000  0.585583
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
@@ -2396,7 +2404,7 @@ P           mkmem           4
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  0.999977
-                       0.999687  0.773914  0.000000  0.000000  0.000000  0.000000
+                       0.999687  0.773915  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
                        1.000000  1.000000  1.000000  1.000000  1.000000  1.000000
@@ -2494,11 +2502,11 @@ P           mkmem           4
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten2     1.3798647369E-03  1.3798647369E-03  1.3798647369E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten3     1.3835491680E-03  1.3835491680E-03  1.3835491680E-03
+           strten3     1.3835454598E-03  1.3835454598E-03  1.3835454598E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            strten4     1.9576187035E-03  1.9576187035E-03  1.9576187035E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
-           strten5     1.9524809446E-03  1.9524809446E-03  1.9524809446E-03
+           strten5     1.9524779354E-03  1.9524779354E-03  1.9524779354E-03
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            symafm1       1    1    1    1    1    1    1    1    1    1
                          1    1    1    1    1    1    1    1    1    1
@@ -2974,10 +2982,10 @@ P           mkmem           4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         53.1  wall=         57.8
+- Proc.   0 individual time (sec): cpu=         46.9  wall=         47.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered   1 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         53.1  wall=         57.8
+.Delivered   2 WARNINGs and  17 COMMENTs to log file.
++Overall time at end (sec) : cpu=         46.9  wall=         47.2
