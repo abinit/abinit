@@ -115,7 +115,7 @@ vel
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t22.out, tolnlines = 3, tolabs = 0.000e+00, tolrel = 0.000e+00
+#%%   t22.out, tolnlines = 3, tolabs = 1e-08, tolrel = 0.002
 #%% psp_files = 05b.soft_tm
 #%% [paral_info]
 #%% max_nprocs = 1

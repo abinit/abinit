@@ -48,7 +48,7 @@ ixc -101130
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%  t12.out, tolnlines = 3, tolabs = 1.1e-06, tolrel = 0.00e+00
+#%%  t12.out, tolnlines = 3, tolabs = 1.1e-06, tolrel = 0.002
 #%% psp_files = 13_Al_atom.psml
 #%% [paral_info]
 #%% max_nprocs = 8
