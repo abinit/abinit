@@ -1050,6 +1050,8 @@ end subroutine constrained_dft_free
    grcondft(3,iatom)=grcondft(3,iatom)+sum(gr_intgden(3,:,iatom)*intgres(:,iatom))
  enddo
 
+ ABI_DEALLOCATE(gr_intgden)
+
  ABI_ALLOCATE(coeffs_constr_dft,(nspden,natom))
  coeffs_constr_dft=zero
 

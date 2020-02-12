@@ -65,6 +65,8 @@
     pawecutdg 30.
     tolvrs 1.d-9
     nstep 50
+    nstep3 24 # For portability reasons
+    nstep5 48 # For portability reasons
 
 
 #%%<BEGIN TEST_INFO>
