@@ -254,14 +254,16 @@ type(yamldoc_t) function yamldoc_open(tag, comment, newline, width, int_fmt, rea
 
  call new%stream%push('---'//' !'//trim(tag)//ch10)
 
- ! Write dictionary with iteration state.
- call dict%set('dtset', i=DTSET_IDX)
- if (TIMIMAGE_IDX /= -1) call dict%set("timimage", i=TIMIMAGE_IDX)
- if (IMAGE_IDX /= -1) call dict%set("image", i=IMAGE_IDX)
- if (ITIME_IDX /= -1) call dict%set("itime", i=ITIME_IDX)
- if (ICYCLE_IDX /= -1) call dict%set("icycle", i=ICYCLE_IDX)
- call new%add_dict('iteration_state', dict, int_fmt="(I0)")
- call dict%free()
+ if (DTSET_IDX /= -1) then
+   ! Write dictionary with iteration state.
+   call dict%set('dtset', i=DTSET_IDX)
+   if (TIMIMAGE_IDX /= -1) call dict%set("timimage", i=TIMIMAGE_IDX)
+   if (IMAGE_IDX /= -1) call dict%set("image", i=IMAGE_IDX)
+   if (ITIME_IDX /= -1) call dict%set("itime", i=ITIME_IDX)
+   if (ICYCLE_IDX /= -1) call dict%set("icycle", i=ICYCLE_IDX)
+   call new%add_dict('iteration_state', dict, int_fmt="(i0)")
+   call dict%free()
+ end if
 
  if (comment /= '') then
    call new%stream%push('comment')

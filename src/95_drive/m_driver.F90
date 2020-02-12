@@ -180,7 +180,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  integer,save :: paw_size_old=-1
  integer :: idtset,ierr,iexit,iget_cell,iget_occ,iget_vel,iget_xcart,iget_xred
  integer :: ii,iimage,iimage_get,jdtset,jdtset_status,jj,kk,linalg_max_size
- integer :: mtypalch,mu,mxnimage,nimage,openexit,paw_size,prtvol
+ integer :: mtypalch,mu,mxnimage,nimage,openexit,paw_size,prtvol, omp_nthreads
  real(dp) :: etotal
  character(len=500) :: msg, dilatmx_errmsg
  logical :: converged,results_gathered,test_img,use_results_all
@@ -278,17 +278,25 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    else
      write(msg,'(2a,i2,67a)') trim(msg),' ',jdtset,' ',('=',mu=1,66)
    end if
-   write(msg,'(3a,i5)') trim(msg),ch10,'-   nproc =',mpi_enregs(idtset)%nproc
+
+#ifdef HAVE_OPENMP
+   omp_nthreads = xomp_get_num_threads(open_parallel=.True.)
+#else
+   omp_nthreads = -1
+#endif
+   write(msg,'(2a,2(a, i0), a)') trim(msg),ch10,&
+     '-   mpi_nproc: ',mpi_enregs(idtset)%nproc, ", omp_nthreads: ", omp_nthreads, " (-1 if OMP is not activated)"
 
    if (dtset%optdriver == RUNL_GSTATE) then
      if (.not. mpi_distrib_is_ok(mpi_enregs(idtset),dtset%mband,dtset%nkpt,dtset%mkmem,dtset%nsppol)) then
-       write(msg,'(2a)') trim(msg),'   -> not optimal: autoparal keyword recommended in input file'
+       write(msg,'(3a)') trim(msg),ch10,'-    --> not optimal distribution: autoparal keyword recommended in input file <--'
      end if
    end if
 
    write(msg,'(3a)') trim(msg),ch10,' '
    call wrtout(ab_out,msg,'COLL')
    call wrtout(std_out,msg,'PERS')     ! PERS is choosen to make debugging easier
+
    call yaml_iterstart('dtset', jdtset, ab_out, dtset%use_yaml)
 
    if ( dtset%np_slk == 0 ) then
