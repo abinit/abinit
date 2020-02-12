@@ -1294,7 +1294,7 @@ The bibtex file is available [here](../abiref.bib).
         return a
 
     def build_varsearch_html(self, page_rpath):
-        # Build single dictionary mapping varname --> var. Add @code if not abinit.
+        """Build single dictionary mapping varname --> var. Add @code if not abinit."""
         allvars = {}
         for code, vd in self.codevars.items():
             allvars.update({v.abivarname: v for v in vd.values()})
