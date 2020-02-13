@@ -858,7 +858,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 
        write(message, '(2a,I0,a,ES24.16)' )' Standard deviation of the energy for',&
 &                                        ' the iteration ',icycle_tmp,' (meV^2/atm): ',&
-&                         mingf(4) 
+&                         mingf(4)* factor * (Ha_eV *1000)**2
        call wrtout(std_out,message,'COLL')
 
        write (i_char, '(i3)') icycle
