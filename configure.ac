@@ -922,7 +922,7 @@ if test "${sd_linalg_enable}" != "yes"; then
 fi
 
 # Check NetCDF
-if test "${sd_netcdf_enable}" = "no"; then
+if test "${sd_netcdf_enable}" == "no"; then
       ABI_MSG_NOTICE_S([CAUTION : NetCDF is MANDATORY !],
 		       [   suggestion : use 'with_netcdf' in the ac file])
       status="#"
@@ -934,7 +934,7 @@ else
 fi
 
 # Check NetCDF_fortran
-if test "${sd_netcdf_fortran_enable}" = "no"; then
+if test "${sd_netcdf_fortran_enable}" == "no"; then
       ABI_MSG_NOTICE_S([CAUTION : NetCDF Fortran is MANDATORY !],
 		       [   suggestion : use 'with_netcdf_fortran' in the ac file])
       status="#"
@@ -946,7 +946,7 @@ else
 fi
 
 # Check LibXC
-if test "${sd_libxc_enable}" = "no"; then
+if test "${sd_libxc_enable}" == "no"; then
       ABI_MSG_NOTICE_S([CAUTION : LibXC is MANDATORY !],
 		       [   suggestion : use 'with_libxc' in the ac file])
       status="#"
@@ -958,7 +958,7 @@ else
 fi
 
 # Check Wannier90
-if test "${sd_wannier90_ok}" != "yes"; then
+if test "${sd_wannier90_enable}" == "yes" -a "${sd_wannier90_ok}" != "yes"; then
       ABI_MSG_NOTICE_S([CAUTION : Wannier90 does not WORKING !],
                        [   action : check your Wannier90 installation])
       status="#"
