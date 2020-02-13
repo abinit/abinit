@@ -936,7 +936,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 
    call forstr(atindx1,cg,cprj,diffor,dtefield,dtset,&
 &   eigen,electronpositron,energies,favg,fcart,fock,&
-&   forold,fred,grchempottn,gresid,grewtn,&
+&   forold,fred,grchempottn,grcondft,gresid,grewtn,&
 &   grhf,grvdw,grxc,gsqcut,indsym,&
 &   kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,&
 &   n3xccc,nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,&
