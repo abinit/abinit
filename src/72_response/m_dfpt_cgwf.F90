@@ -717,8 +717,6 @@ print *, ' band_procs(iband), mpi_enreg%comm_band ', band_procs(iband), mpi_enre
      call pawcprj_set_zero(cwaveprj)
    end if
    if (usedcwavef==2) dcwavef=zero
-   ! A small negative residual will be associated with these
-   resid=-0.1_dp
    ! Number of one-way 3D ffts skipped
    nskip=nskip+nline
 
@@ -1428,6 +1426,11 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
  end if
  ABI_DATATYPE_DEALLOCATE(conjgrprj)
 
+ if(band>max(1,nband-nbdbuf))then
+   ! A small negative residual will be associated with these
+   ! in the present algorithm all bands need to be in the loops over cgq etc... for the parallelization
+   resid=-0.1_dp
+ end if
 
  ! At the end of the treatment of a set of bands, write the number of one-way 3D ffts skipped
  if (xmpi_paral==1 .and. band==nband .and. prtvol>=10) then
