@@ -917,6 +917,7 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,e
 
  if (usepaw==1) then
    call pawcprj_copy(cwaveprj,cwaveprj1)
+   call pawcprj_alloc(cwaveprj1_corr, cwaveprj1(1,1)%ncpgr, cwaveprj1(:,1)%nlmn)
  end if
 
  edocc(iband)=zero
@@ -929,7 +930,9 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,e
 print *, 'iband_ ', iband_ 
 
    cwcorr = zero
-   call pawcprj_set_zero(cwaveprj1_corr)
+   if (usepaw==1) then
+     call pawcprj_set_zero(cwaveprj1_corr)
+   end if
    edocc_tmp = zero
 
 !Correct WF only for occupied states
@@ -1016,6 +1019,9 @@ print *, 'factr, facti ', factr, facti
  end if
 
  ABI_DEALLOCATE(cwcorr)
+ if (usepaw==1) then
+   call pawcprj_free(cwaveprj1_corr)
+ end if
 
  call timab(214+timcount,2,tsec)
 
