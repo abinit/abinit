@@ -373,6 +373,7 @@ ecore=zero
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
  end if ! getden
+ ABI_DEALLOCATE(cg)
 
 !Pseudo core electron density by method 2
 !TODO: The code is not still adapted to consider n3xccc in the long-wave
@@ -544,6 +545,7 @@ ecore=zero
 !Deallocate arrays
  ABI_DEALLOCATE(atindx)
  ABI_DEALLOCATE(atindx1)
+ ABI_DEALLOCATE(blkflg)
  ABI_DEALLOCATE(doccde)
  ABI_DEALLOCATE(eigen0)
  ABI_DEALLOCATE(indsym)
@@ -558,6 +560,7 @@ ecore=zero
  ABI_DEALLOCATE(symrec)
  ABI_DEALLOCATE(vxc)
  ABI_DEALLOCATE(d3etot)
+ ABI_DEALLOCATE(pertsy)
  if (dtset%lw_flexo/=0) then
    ABI_DEALLOCATE(dyewdq)
    ABI_DEALLOCATE(dyewdqdq)

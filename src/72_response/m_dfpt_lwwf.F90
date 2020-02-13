@@ -1330,6 +1330,7 @@ subroutine dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2
    ABI_DEALLOCATE(kinpw1)
    ABI_DEALLOCATE(ffnlk)
    ABI_DEALLOCATE(ffnl1)
+   ABI_DEALLOCATE(ph3d)
 
  end do !istrpert
 !End loop over strain perturbations
@@ -2798,6 +2799,7 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
    ABI_DEALLOCATE(kinpw1)
    ABI_DEALLOCATE(ffnlk)
    ABI_DEALLOCATE(ffnl1)
+   ABI_DEALLOCATE(ph3d)
 
  end do !istrpert
 
@@ -3386,6 +3388,8 @@ c0_HatdisdagdQ_c1strain_bks=zero
  end do !iatpert
 
 !Deallocations
+ ABI_DEALLOCATE(cg1_strain)
+ ABI_DEALLOCATE(cg1_strain_ar)
  ABI_DEALLOCATE(part_ylmgr_k)
  ABI_DEALLOCATE(dum_cwaveprj)
  ABI_DEALLOCATE(gh1dqc)
@@ -3483,6 +3487,7 @@ end do
  ABI_DEALLOCATE(c0_HatdisdagdQ_c1strain_bks)
  ABI_DEALLOCATE(c1atdis_Hmetricdqdq_c0_bks)
  ABI_DEALLOCATE(c0_Hatdisdqdag_c1strain_bks)
+ ABI_DEALLOCATE(cwave0i)
 
  DBG_EXIT("COLL")
 
@@ -3619,7 +3624,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
  real(dp),allocatable :: c0_ghatdisdqdq_pk_c0(:,:,:,:,:,:)
  real(dp),allocatable :: kinpw1(:),kpg_k(:,:),kpg1_k(:,:),kpg_pk(:,:),ph3d(:,:,:),ph3d1(:,:,:)
  real(dp),allocatable :: dum_vlocal(:,:,:,:),vlocal1dq(:,:,:,:), dum_vpsp(:)
- real(dp),allocatable :: vpsp1(:),vpsp1dq(:),part_ylmgr_k(:,:,:)
+ real(dp),allocatable :: vpsp1dq(:),part_ylmgr_k(:,:,:)
  type(pawcprj_type),allocatable :: dum_cwaveprj(:,:)
 
 
@@ -3632,7 +3637,6 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
  ABI_ALLOCATE(cwave0i,(2,npw_k*dtset%nspinor))
  ABI_ALLOCATE(dum_vpsp,(nfft))
  ABI_ALLOCATE(dum_vlocal,(ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))
- ABI_ALLOCATE(vpsp1,(cplex*nfft))
  ABI_DATATYPE_ALLOCATE(dum_cwaveprj,(0,0))
  ABI_ALLOCATE(vpsp1dq,(2*nfft))
  ABI_ALLOCATE(vlocal1dq,(2*ngfft(4),ngfft(5),ngfft(6),gs_hamkq%nvloc))

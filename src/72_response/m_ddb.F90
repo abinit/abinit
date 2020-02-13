@@ -4241,7 +4241,7 @@ subroutine dfpt_lw_doutput(blkflg,d3,mpert,natom,ntypat,unddb)
 !*************************************************************************
 
  msize = 27*mpert*mpert*mpert
- call ddb_malloc(ddb,msize,1,natom,ntypat)
+ call ddb%malloc(msize,1,natom,ntypat)
 
  ddb%nrm = one
  ddb%qpt = zero  
@@ -4300,6 +4300,8 @@ subroutine dfpt_lw_doutput(blkflg,d3,mpert,natom,ntypat,unddb)
      end do
    end do
  end do
+
+ call ddb_free(ddb)
 
 end subroutine dfpt_lw_doutput
 !!***

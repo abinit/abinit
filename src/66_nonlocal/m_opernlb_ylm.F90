@@ -1417,7 +1417,7 @@ if (choice==33) two_piinv=1.0_dp/two_pi
    if (choice>1) then
      ABI_DEALLOCATE(dgxdtfac_)
    end if
-   if (choice==54.or.choice==8.or.choice==81) then
+   if (choice==54.or.choice==8.or.choice==81.or.choice==33) then
      ABI_DEALLOCATE(d2gxdtfac_)
    end if
  end if

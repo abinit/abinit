@@ -974,6 +974,8 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end do
 !END LOOP OVER SPINS
 
+!Memory cleaning
+call gs_hamkq%free()
 
 !Close response function files
  do iatpert=1,natpert
@@ -1028,6 +1030,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ABI_DEALLOCATE(occ_rbz)
  ABI_DEALLOCATE(ph1d)
  ABI_DEALLOCATE(pert_atdis)
+ ABI_DEALLOCATE(irrzon1)
  ABI_DEALLOCATE(phnons1)
  ABI_DEALLOCATE(qdrflg)
  ABI_DEALLOCATE(qdrpwf)
@@ -1045,6 +1048,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ABI_DEALLOCATE(q1grad)
  ABI_DEALLOCATE(q1q2grad)
  ABI_DEALLOCATE(q2grad)
+ ABI_DEALLOCATE(symrc1)
  ABI_DEALLOCATE(vhxc1_atdis)
  ABI_DEALLOCATE(vhxc1_efield)
  ABI_DEALLOCATE(vqgradhart)
@@ -2800,6 +2804,9 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  end do
 !END LOOP OVER SPINS
 
+!Memory cleaning
+call gs_hamkq%free()
+
 !Close response function files
  if (lw_flexo==1.or.lw_flexo==3.or.lw_flexo==4) then
    do iatpert=1,natpert
@@ -3008,6 +3015,9 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ABI_DEALLOCATE(npwarr)
  !ABI_DEALLOCATE(mpi_enreg%my_kpttab)
  !ABI_DEALLOCATE(mpi_enreg%proc_distrb)
+ ABI_DEALLOCATE(irrzon1)
+ ABI_DEALLOCATE(phnons1)
+ ABI_DEALLOCATE(symrc1)
  ABI_DEALLOCATE(ylm)
  ABI_DEALLOCATE(ylmgr)
  ABI_DEALLOCATE(wfk_t_ddk)
@@ -3949,6 +3959,7 @@ end subroutine dfpt_ciflexoout
  write(ab_out,'(80a)')('=',ii=1,80)
 
  ABI_DEALLOCATE(ddmdq_cart)
+ ABI_DEALLOCATE(ddmdq_cartflg)
  ABI_DEALLOCATE(cartflg)
 
 
