@@ -718,17 +718,12 @@ SD_LINALG_DETECT
 
 ABI_MSG_SECTION([Optimized FFT support])
 
-echo "${sd_linalg_enable}"
-echo "${sd_linalg_init}"
-echo "${sd_linalg_ok}"
-echo "${abi_fbk_linalg_ok}"
-
-if test "${sd_linalg_ok}" = "yes"; then
+if test "${sd_linalg_enable}" == "yes"; then
   SD_FFT_INIT
 
   SD_FFT_DETECT
 else
-  echo "Skip FFT setting : linalg not available..."
+  echo "Skip FFT setting : linalg not enabled..."
 fi
 
 # ---------------------------------------------------------------------------- #
@@ -920,7 +915,7 @@ ABI_TRIGGERS_SUMMARY
 status=""
 
 # Check LinAlg
-if test "${sd_linalg_ok}" != "yes"; then
+if test "${sd_linalg_enable}" != "yes"; then
       ABI_MSG_NOTICE_S([CAUTION : LinAlg is MANDATORY !],
 		       [   suggestion : use 'with_linalg_flavor' in the ac file])
       status="#"
@@ -962,12 +957,20 @@ else
   fi
 fi
 
+# Check Wannier90
+if test "${sd_wannier90_ok}" != "yes"; then
+      ABI_MSG_NOTICE_S([CAUTION : Wannier90 does not WORKING !],
+                       [   action : check your Wannier90 installation])
+      status="#"
+fi
+
 if test ! -z "${status}"; then
       ABI_MSG_NOTICE_S([***  Problems must be solved before continuing  ***])
 fi
 
 # Always generate a build script for required fallbacks
 AC_OUTPUT([fallbacks/build-abinit-fallbacks.sh])
+chmod +x fallbacks/build-abinit-fallbacks.sh
 
 # Check that we have all required fallbacks
 #ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])

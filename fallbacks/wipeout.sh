@@ -41,3 +41,4 @@ find . -name Makefile -exec rm {} \;
 find . -name Makefile.in -exec rm {} \;
 find . -name Makefile.am -exec rm {} \;
 find . -name build-abinit-fallbacks.sh -exec rm {} \;
+find . -type d -name "install" -prune -exec rm -rf {} \;

@@ -3,41 +3,34 @@
 # Init
 fallbacks_prefix="@abinit_builddir@/fallbacks/install/@abi_fc_vendor@/@abi_fc_version@"
 
-# Find and Unpack tarball 
+# Find and Unpack tarball
 cd @abinit_builddir@/fallbacks
 tarfile=$(ls *.tar.gz)
-tar xzf $tarfile
 source=${tarfile%.tar.gz}
+if [ ! -d "$source" ]; then
+    tar xzf $tarfile
+cd $source
+make clean
+
 cd $source
 
 # Configure
 ./configure \
   --prefix="${fallbacks_prefix}" \
-  --srcdir="@abinit_srcdir@/fallbacks" \
-  --enable-atompaw="" \
-  --enable-bigdft="yes" \
-  --enable-libxc="yes" \
-  --enable-linalg="yes" \
-  --enable-netcdf="yes" \
-  --enable-wannier90="yes" \
   --with-tardir="${HOME}/.abinit/tarballs" \
-  --with-libxc-incs="@sd_libxc_cppflags@" \
-  --with-libxc-libs="@sd_libxc_libs@" \
   --with-linalg-incs="@sd_linalg_fcflags@" \
   --with-linalg-libs="@sd_linalg_libs@" \
-  --with-netcdf4-incs="@sd_netcdf_cppflags@" \
-  --with-netcdf4-libs="@sd_netcdf_libs@" \
-  --with-netcdf4-fortran-incs="@sd_netcdf_fortran_cppflags@" \
-  --with-netcdf4-fortran-libs="@sd_netcdf_fortran_libs@" \
   --with-fc-vendor="@abi_fc_vendor@" \
   --with-fc-version="@abi_fc_version@" \
+  --disable-hdf5 \
+  --disable-bigdft \
+  --disable-atompaw \
+  --disable-wannier90 \
+  --disbale-xmlf90 --disable-libpsml \
   CC="@CC@" \
   CXX="@CXX@" \
   FC="@FC@"
 
-
-make -j 8
-make install
+make -j 4 install
 
 exit
-
