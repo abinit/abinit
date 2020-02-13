@@ -412,16 +412,16 @@ force_length_stats: {"min":   9.25282335E-02, "max":   9.25282335E-02, "mean":  
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom  Sphere_radius  Integrated_density
-    1        1.00000          0.50000596
-    2        1.00000          0.24061675
+ Atom  Sphere_radius  Integrated_density       Atomic charge
+    1        1.00000          0.50000596          0.49999404
+    2        1.00000          0.24061675          0.75938325
 
  Integrated potential residual in atomic spheres:
  ------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
  Atom  Sphere_radius  Integrated_potresid
     1        1.00000          0.56241777
-    2        1.00000          0.00000592
+    2        1.00000          0.00000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -565,9 +565,9 @@ force_length_stats: {"min":   6.33123767E-02, "max":   6.33123767E-02, "mean":  
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom  Sphere_radius  Integrated_density
-    1        2.00000          0.99999976
-    2        2.00000          0.99999964
+ Atom  Sphere_radius  Integrated_density       Atomic charge
+    1        2.00000          0.99999976          0.00000024
+    2        2.00000          0.99999964          0.00000036
 
  Integrated potential residual in atomic spheres:
  ------------------------------------------------
@@ -717,9 +717,9 @@ force_length_stats: {"min":   6.02697913E-02, "max":   6.02697913E-02, "mean":  
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom  Sphere_radius  Integrated_density
-    1        2.00000          1.09999852
-    2        2.00000          0.89999922
+ Atom  Sphere_radius  Integrated_density       Atomic charge
+    1        2.00000          1.09999852         -0.09999852
+    2        2.00000          0.89999922          0.10000078
 
  Integrated potential residual in atomic spheres:
  ------------------------------------------------
@@ -815,7 +815,7 @@ band_energy         : -5.94954518005468E-01
                       -6.0269791323E-02 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
            grchrg1     0.0000000000E+00  0.0000000000E+00
-           grchrg2     5.6241776940E-01  5.9206933333E-06
+           grchrg2     5.6241776940E-01  0.0000000000E+00
            grchrg3    -1.9373004004E-02 -1.9373096148E-02
            grchrg4     6.1182533276E-02 -1.0095431668E-01
            istwfk        2

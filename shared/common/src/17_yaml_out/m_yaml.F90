@@ -298,7 +298,7 @@ end function yamldoc_open
 !!  label = key name
 !!  val = value
 !!  [tag] = optional, add a tag to the field
-!!  [real_fmt] = override the default formating
+!!  [real_fmt] = override the default formatting
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!
@@ -353,7 +353,7 @@ end subroutine yamldoc_add_real
 !! INPUTS
 !!  keylist = List of comma-separated keywords
 !!  values = List of values
-!!  [real_fmt] = override the default formating
+!!  [real_fmt] = override the default formatting
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!
 !! PARENTS
@@ -634,10 +634,10 @@ end subroutine yamldoc_add_int1d
 !!  key_size <integer>=optional maximum storage size for keys of a pair_list
 !!  multiline_trig <integer>=optional minimum number of elements before switching to multiline representation
 !!  tag <character(len=*)>=optional  add a tag to the field
-!!  key_fmt <character(len=*)>=optional  override the default formating
-!!  int_fmt <character(len=*)>=optional  override the default formating
-!!  real_fmt <character(len=*)>=optional  override the default formating
-!!  string_fmt <character(len=*)>=optional  override the default formating
+!!  key_fmt <character(len=*)>=optional  override the default formatting
+!!  int_fmt <character(len=*)>=optional  override the default formatting
+!!  real_fmt <character(len=*)>=optional  override the default formatting
+!!  string_fmt <character(len=*)>=optional  override the default formatting
 !!  newline <logical>=optional  set to false to prevent adding newlines after fields
 !!  width <integer>=optional impose a minimum width of the field name side of the column (padding with spaces)
 !!
@@ -702,7 +702,7 @@ end subroutine yamldoc_add_dict
 !!  label = key name
 !!  arr(:, :) = input array.
 !!  [tag]= add a tag to the field
-!!  [real_fmt]= override the default formating
+!!  [real_fmt]= override the default formatting
 !!  [multiline_trig]: optional minimum number of elements before switching to multiline representation
 !!  [newline]: set to false to prevent adding newlines after fields
 !!  [width]: impose a minimum width of the field name side of the column (padding with spaces)
@@ -784,7 +784,7 @@ end subroutine yamldoc_add_real2d
 !!  label = key name
 !!  arr1(:,:), arr2(:,:) = input arrays.
 !!  [tag]= add a tag to the field
-!!  [real_fmt]= override the default formating
+!!  [real_fmt]= override the default formatting
 !!  [multiline_trig]: optional minimum number of elements before switching to multiline representation
 !!  [newline]: set to false to prevent adding newlines after fields
 !!  [width]: impose a minimum width of the field name side of the column (padding with spaces)
@@ -875,7 +875,7 @@ end subroutine yamldoc_add_paired_real2d
 !!  label = key name
 !!  arr(:, :) <integer>=
 !!  [tag]= add a tag to the field
-!!  [int_fmt]: override the default formating
+!!  [int_fmt]: override the default formatting
 !!  multiline_trig <integer>=optional minimum number of elements before switching to multiline representation
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
@@ -956,10 +956,10 @@ end subroutine yamldoc_add_int2d
 !!  string_size <integer>=optional maximum storage size for strings of a pair_list
 !!  multiline_trig <integer>=optional minimum number of elements before switching to multiline representation
 !!  [tag]= add a tag to the field
-!!  key_fmt <character(len=*)>=optional  override the default formating
-!!  int_fmt <character(len=*)>=optional  override the default formating
-!!  real_fmt <character(len=*)>=optional  override the default formating
-!!  string_fmt <character(len=*)>=optional  override the default formating
+!!  key_fmt <character(len=*)>=optional  override the default formatting
+!!  int_fmt <character(len=*)>=optional  override the default formatting
+!!  real_fmt <character(len=*)>=optional  override the default formatting
+!!  string_fmt <character(len=*)>=optional  override the default formatting
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!
@@ -1171,9 +1171,9 @@ end subroutine yamldoc_add_tabular_line
 !!  key_size <integer>=maximum storage size for the keys of pl
 !!  string_size <integer>=maximum storage size for the strings found in pl
 !!  tag <character(len=*)>=optional  add a tag to the field
-!!  int_fmt <character(len=*)>=optional  override the default formating
-!!  real_fmt <character(len=*)>=optional  override the default formating
-!!  string_fmt <character(len=*)>=optional  override the default formating
+!!  int_fmt <character(len=*)>=optional  override the default formatting
+!!  real_fmt <character(len=*)>=optional  override the default formatting
+!!  string_fmt <character(len=*)>=optional  override the default formatting
 !!  width <integer>=optional impose a minimum width of the field name side of the column (padding with spaces)
 !!  newline <logical>=optional  set to false to prevent adding newlines after fields
 !!

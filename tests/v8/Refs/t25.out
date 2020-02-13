@@ -436,22 +436,22 @@ force_length_stats: {"min":   6.84940691E-02, "max":   6.84940691E-02, "mean":  
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.00000     0.195243     0.115243      0.310486     0.080000
-    2   1.00000     0.115243     0.195243      0.310486    -0.080000
+ Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)   Atomic charge
+    1   1.00000     0.195243     0.115243      0.310486     0.080000      0.689514
+    2   1.00000     0.115243     0.195243      0.310486    -0.080000      0.689514
  ---------------------------------------------------------------------
   Sum:              0.310486     0.310486      0.620973    -0.000000
  Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                       0.000000
 
- Integrated potential residual in atomic spheres:
+ Integrated potential residual in atomic spheres (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius    up_potential dn_potential  Sum(up+dn)  Diff(up-dn)
+ Atom    Radius     Potential       B(z)        up pot      down pot
     1   1.00000     0.000000     0.062628      0.062628    -0.062628
     2   1.00000     0.000000    -0.062628     -0.062628     0.062628
  ---------------------------------------------------------------------
-  Sum:              0.000000     0.000000      0.000000     0.000000
+  Sum:              0.000000     0.000000      0.000000    -0.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -594,18 +594,18 @@ force_length_stats: {"min":   6.82630236E-02, "max":   6.82630236E-02, "mean":  
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.00000     0.195000     0.115000      0.310000     0.080000
-    2   1.00000     0.115000     0.195000      0.310000    -0.080000
+ Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)   Atomic charge
+    1   1.00000     0.195000     0.115000      0.310000     0.080000      0.690000
+    2   1.00000     0.115000     0.195000      0.310000    -0.080000      0.690000
  ---------------------------------------------------------------------
   Sum:              0.310000     0.310000      0.620000    -0.000000
  Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                       0.000000
 
- Integrated potential residual in atomic spheres:
+ Integrated potential residual in atomic spheres (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius    up_potential dn_potential  Sum(up+dn)  Diff(up-dn)
+ Atom    Radius     Potential       B(z)        up pot      down pot
     1   1.00000    -0.002588     0.062871      0.060282    -0.065459
     2   1.00000    -0.002588    -0.062871     -0.065459     0.060282
  ---------------------------------------------------------------------
@@ -749,22 +749,22 @@ force_length_stats: {"min":   6.84940691E-02, "max":   6.84940691E-02, "mean":  
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.00000     0.195243     0.115243      0.310486     0.080000
-    2   1.00000     0.115243     0.195243      0.310486    -0.080000
+ Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)   Atomic charge
+    1   1.00000     0.195243     0.115243      0.310486     0.080000      0.689514
+    2   1.00000     0.115243     0.195243      0.310486    -0.080000      0.689514
  ---------------------------------------------------------------------
   Sum:              0.310486     0.310486      0.620973    -0.000000
  Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                       0.000000
 
- Integrated potential residual in atomic spheres:
+ Integrated potential residual in atomic spheres (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius    up_potential dn_potential  Sum(up+dn)  Diff(up-dn)
+ Atom    Radius     Potential       B(z)        up pot      down pot
     1   1.00000     0.000000     0.062628      0.062628    -0.062628
     2   1.00000     0.000000    -0.062628     -0.062628     0.062628
  ---------------------------------------------------------------------
-  Sum:              0.000000     0.000000      0.000000     0.000000
+  Sum:              0.000000     0.000000      0.000000    -0.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -906,22 +906,22 @@ force_length_stats: {"min":   7.27856721E-02, "max":   7.27856721E-02, "mean":  
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. Diff(up-dn)=approximate z local magnetic moment.
- Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
-    1   1.00000     0.153418     0.153416      0.306833     0.000002
-    2   1.00000     0.153416     0.153418      0.306833    -0.000002
+ Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)   Atomic charge
+    1   1.00000     0.153418     0.153416      0.306833     0.000002      0.693167
+    2   1.00000     0.153416     0.153418      0.306833    -0.000002      0.693167
  ---------------------------------------------------------------------
   Sum:              0.306833     0.306833      0.613667    -0.000000
  Total magnetization (from the atomic spheres):            -0.000000
  Total magnetization (exact up - dn):                      -0.000000
 
- Integrated potential residual in atomic spheres:
+ Integrated potential residual in atomic spheres (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom    Radius    up_potential dn_potential  Sum(up+dn)  Diff(up-dn)
+ Atom    Radius     Potential       B(z)        up pot      down pot
     1   1.00000     0.000000     0.000001      0.000001    -0.000001
     2   1.00000     0.000000    -0.000001     -0.000001     0.000001
  ---------------------------------------------------------------------
-  Sum:              0.000000     0.000000      0.000000     0.000000
+  Sum:              0.000000     0.000000      0.000000    -0.000000
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1011,10 +1011,10 @@ band_energy         : -6.19509458433385E-01
                       -7.2785672130E-02 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
            grchrg1     0.0000000000E+00  0.0000000000E+00
-           grchrg2     2.2783108365E-08  2.2783108352E-08
+           grchrg2     0.0000000000E+00  0.0000000000E+00
            grchrg3    -2.5882190697E-03 -2.5882190697E-03
-           grchrg4     2.2782862254E-08  2.2782862207E-08
-           grchrg5     2.3915943463E-09  2.3915943315E-09
+           grchrg4     0.0000000000E+00  0.0000000000E+00
+           grchrg5     0.0000000000E+00  0.0000000000E+00
            grspin1     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
            grspin2     0.0000000000E+00  0.0000000000E+00  6.2628255824E-02

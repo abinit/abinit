@@ -355,19 +355,19 @@ force_length_stats: {"min":   6.84940304E-02, "max":   6.84940304E-02, "mean":  
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
- Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
-    1   1.00000        0.310486      0.000000   -0.000000    0.080000
-    2   1.00000        0.310486     -0.000000   -0.000000   -0.080000
+ Atom    Radius     Total density     mag(x)      mag(y)      mag(z)   Atomic charge
+    1   1.00000        0.310486      0.000000   -0.000000    0.080000      0.689514
+    2   1.00000        0.310486     -0.000000   -0.000000   -0.080000      0.689514
  ---------------------------------------------------------------------
  Total magnetization (spheres)      -0.000000   -0.000000   -0.000000
  Total magnetization (exact)        -0.000000   -0.000000   -0.000000
 
- Integrated potential residual in atomic spheres:
+ Integrated potential residual in atomic spheres (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom   Radius        Potential         B(x)        B(y)        B(z)
-    1   1.00000       -0.000000     -0.000000   -0.062628   -0.000000
-    2   1.00000       -0.000000      0.000000    0.062628   -0.000000
+ Atom    Radius       Potential       B(x)        B(y)        B(z)
+    1   1.00000        0.000000      0.000000   -0.000000    0.062628
+    2   1.00000        0.000000     -0.000000    0.000000   -0.062628
  ---------------------------------------------------------------------
 ================================================================================
 
@@ -512,19 +512,19 @@ force_length_stats: {"min":   6.82631648E-02, "max":   6.82631648E-02, "mean":  
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
- Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
-    1   1.00000        0.310000     -0.000000   -0.000000    0.080000
-    2   1.00000        0.310000     -0.000000    0.000000   -0.080000
+ Atom    Radius     Total density     mag(x)      mag(y)      mag(z)   Atomic charge
+    1   1.00000        0.310000     -0.000000   -0.000000    0.080000      0.690000
+    2   1.00000        0.310000     -0.000000    0.000000   -0.080000      0.690000
  ---------------------------------------------------------------------
  Total magnetization (spheres)      -0.000000   -0.000000   -0.000000
  Total magnetization (exact)         0.000000   -0.000000    0.000000
 
- Integrated potential residual in atomic spheres:
+ Integrated potential residual in atomic spheres (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom   Radius        Potential         B(x)        B(y)        B(z)
-    1   1.00000       -0.001293     -0.000000   -0.062871   -0.001293
-    2   1.00000       -0.001293      0.000000    0.062871   -0.001293
+ Atom    Radius       Potential       B(x)        B(y)        B(z)
+    1   1.00000       -0.002587     -0.000000   -0.000000    0.062871
+    2   1.00000       -0.002587     -0.000000    0.000000   -0.062871
  ---------------------------------------------------------------------
 ================================================================================
 
@@ -669,19 +669,19 @@ force_length_stats: {"min":   6.57880465E-02, "max":   6.57880465E-02, "mean":  
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
- Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
-    1   1.00000        0.306148      0.000000   -0.000000    0.080000
-    2   1.00000        0.315463      0.080000    0.000000   -0.080000
+ Atom    Radius     Total density     mag(x)      mag(y)      mag(z)   Atomic charge
+    1   1.00000        0.306148      0.000000   -0.000000    0.080000      0.693852
+    2   1.00000        0.315463      0.080000    0.000000   -0.080000      0.684537
  ---------------------------------------------------------------------
  Total magnetization (spheres)       0.080000   -0.000000    0.000000
  Total magnetization (exact)         0.029869   -0.000000    0.014566
 
- Integrated potential residual in atomic spheres:
+ Integrated potential residual in atomic spheres (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom   Radius        Potential         B(x)        B(y)        B(z)
-    1   1.00000        0.050827     -0.000000   -0.048608   -0.050827
-    2   1.00000        0.083379      0.000000    0.065103   -0.083379
+ Atom    Radius       Potential       B(x)        B(y)        B(z)
+    1   1.00000        0.000000      0.101655   -0.000000    0.048608
+    2   1.00000        0.000000      0.166758    0.000000   -0.065103
  ---------------------------------------------------------------------
 ================================================================================
 
@@ -828,19 +828,19 @@ force_length_stats: {"min":   6.53592984E-02, "max":   6.53592984E-02, "mean":  
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
- Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
-    1   1.00000        0.310000     -0.000000   -0.000000    0.080000
-    2   1.00000        0.310000      0.080000   -0.000000   -0.080000
+ Atom    Radius     Total density     mag(x)      mag(y)      mag(z)   Atomic charge
+    1   1.00000        0.310000     -0.000000   -0.000000    0.080000      0.690000
+    2   1.00000        0.310000      0.080000   -0.000000   -0.080000      0.690000
  ---------------------------------------------------------------------
  Total magnetization (spheres)       0.080000   -0.000000    0.000000
  Total magnetization (exact)         0.029896   -0.000000    0.014634
 
- Integrated potential residual in atomic spheres:
+ Integrated potential residual in atomic spheres (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom   Radius        Potential         B(x)        B(y)        B(z)
-    1   1.00000        0.054770     -0.000000   -0.046159   -0.046541
-    2   1.00000        0.076124      0.000000    0.068628   -0.093815
+ Atom    Radius       Potential       B(x)        B(y)        B(z)
+    1   1.00000        0.008229      0.101311   -0.000000    0.046159
+    2   1.00000       -0.017692      0.169939    0.000000   -0.068628
  ---------------------------------------------------------------------
 ================================================================================
 
@@ -985,19 +985,19 @@ force_length_stats: {"min":   6.57880416E-02, "max":   6.57880416E-02, "mean":  
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
- Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
-    1   1.00000        0.306148     -0.000000    0.000000    0.080000
-    2   1.00000        0.315463     -0.000000    0.080000   -0.080000
+ Atom    Radius     Total density     mag(x)      mag(y)      mag(z)   Atomic charge
+    1   1.00000        0.306148     -0.000000    0.000000    0.080000      0.693852
+    2   1.00000        0.315463     -0.000000    0.080000   -0.080000      0.684537
  ---------------------------------------------------------------------
  Total magnetization (spheres)      -0.000000    0.080000    0.000000
  Total magnetization (exact)        -0.000000    0.029869    0.014566
 
- Integrated potential residual in atomic spheres:
+ Integrated potential residual in atomic spheres (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom   Radius        Potential         B(x)        B(y)        B(z)
-    1   1.00000       -0.000000      0.101655   -0.048608   -0.000000
-    2   1.00000       -0.000000      0.166758    0.065102   -0.000000
+ Atom    Radius       Potential       B(x)        B(y)        B(z)
+    1   1.00000        0.000000      0.000000    0.101655    0.048608
+    2   1.00000        0.000000      0.000000    0.166758   -0.065102
  ---------------------------------------------------------------------
 ================================================================================
 
@@ -1144,19 +1144,19 @@ force_length_stats: {"min":   6.53591616E-02, "max":   6.53591616E-02, "mean":  
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500. mag(i)=approximate local magnetic moment.
- Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
-    1   1.00000        0.310000      0.000000   -0.000000    0.080000
-    2   1.00000        0.310000      0.000000    0.080000   -0.080000
+ Atom    Radius     Total density     mag(x)      mag(y)      mag(z)   Atomic charge
+    1   1.00000        0.310000      0.000000   -0.000000    0.080000      0.690000
+    2   1.00000        0.310000      0.000000    0.080000   -0.080000      0.690000
  ---------------------------------------------------------------------
  Total magnetization (spheres)       0.000000    0.080000    0.000000
  Total magnetization (exact)         0.000000    0.029896    0.014634
 
- Integrated potential residual in atomic spheres:
+ Integrated potential residual in atomic spheres (scalar + magnetic field):
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0500.
- Atom   Radius        Potential         B(x)        B(y)        B(z)
-    1   1.00000        0.004114      0.101311   -0.046159    0.004114
-    2   1.00000       -0.008846      0.169939    0.068628   -0.008846
+ Atom    Radius       Potential       B(x)        B(y)        B(z)
+    1   1.00000        0.008228      0.000000    0.101311    0.046159
+    2   1.00000       -0.017693      0.000000    0.169939   -0.068628
  ---------------------------------------------------------------------
 ================================================================================
 
@@ -1250,11 +1250,11 @@ band_energy         : -6.32416126747897E-01
             fcart32    6.5359161586E-02 -0.0000000000E+00 -0.0000000000E+00
                       -6.5359161586E-02 -0.0000000000E+00 -0.0000000000E+00
 -          fftalg         312
-           grchrg11   -3.2854579232E-08 -3.2854579305E-08
+           grchrg11    0.0000000000E+00  0.0000000000E+00
            grchrg12   -2.5868588086E-03 -2.5868588087E-03
-           grchrg21   -1.3609987830E-07 -2.7360176858E-07
+           grchrg21    0.0000000000E+00  0.0000000000E+00
            grchrg22    8.2288849530E-03 -1.7691701368E-02
-           grchrg31   -2.4679692335E-07 -4.4061345713E-07
+           grchrg31    0.0000000000E+00  0.0000000000E+00
            grchrg32    8.2275443104E-03 -1.7692817083E-02
            grspin11    3.5329271268E-21 -4.9051684033E-22  6.2628446974E-02
                       -1.8424330121E-21  1.4722251998E-21 -6.2628446974E-02
