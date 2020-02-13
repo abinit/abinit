@@ -144,10 +144,11 @@ subroutine outresid(dtset,kptns,mband,&
 !  Give (squared) residuals for all bands at each k
    do ikpt=1,nkpt
      nband_k=nband(ikpt+(spin-1)*nkpt)
+     nband_eff=max(1,nband_k-dtset%nbdbuf)
 !    Will not print all residuals when prtvol=0 or 1
      if(ikpt<=nkpt_eff)then
 !      Find largest residual over all bands for given k point
-       residk=maxval(resid(1+band_index:nband_k+band_index))
+       residk=maxval(resid(1+band_index:nband_eff+band_index))
        write(msg,'(1x,3f8.4,3x,i2,1p,e13.5,a)')kptns(1:3,ikpt),spin,residk,' kpt; spin; max resid(k); each band:'
        if(dtset%prtvol>=2) call wrtout(ab_out,msg,'COLL')
        call wrtout(std_out,msg,'COLL')
