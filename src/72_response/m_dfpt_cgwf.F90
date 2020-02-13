@@ -847,6 +847,15 @@ print *, 'skipping for buffer band'
    d2te=two*(-prod1+prod2)
    ! write(std_out,'(a,f14.6,a,f14.6)') 'prod1 = ',prod1,' prod2 = ',prod2 ! Keep this debugging feature!
 
+   ! Compute residual (squared) norm
+   call sqnorm_g(resid,istwf_k,npw1*nspinor,gresid,me_g0,comm_fft)
+   if (prtvol==-level.or.prtvol==-19)then
+     write(msg,'(a,a,i3,f14.6,a,a,4es12.4)') ch10,&
+      ' dfpt_cgwf : iline,eshift     =',iline,eshift,ch10,&
+      '         resid,prod1,prod2,d2te=',resid,prod1,prod2,d2te
+     call wrtout(std_out,msg)
+   end if
+
    ! Compute <u_m(1)|H(0)-e_m(0)|u_m(1)>
    ! (<u_m(1)|H(0)-e_m(0).S|u_m(1)> if gen. eigenPb),
    ! that should be positive,
@@ -861,7 +870,7 @@ print *, 'skipping for buffer band'
    u1h0me0u1=-prod1-prod2
 
    ! Some tolerance is allowed, to account for very small numerical inaccuracies and cancellations.
-   if(u1h0me0u1<-tol_restart)then
+   if(u1h0me0u1<-tol_restart .and. skipme == 0)then
      if (prtvol==-level.or.prtvol==-19) then
        write(msg,'(a,es22.13e3)') '  cgwf3: u1h0me0u1 = ',u1h0me0u1
        call wrtout(std_out,msg)
@@ -884,17 +893,8 @@ print *, 'skipping for buffer band'
 print *, 'skipping for u1h0me0u1'
    end if
 
-   ! Compute residual (squared) norm
-   call sqnorm_g(resid,istwf_k,npw1*nspinor,gresid,me_g0,comm_fft)
-   if (prtvol==-level.or.prtvol==-19)then
-     write(msg,'(a,a,i3,f14.6,a,a,4es12.4)') ch10,&
-      ' dfpt_cgwf : iline,eshift     =',iline,eshift,ch10,&
-      '         resid,prod1,prod2,d2te=',resid,prod1,prod2,d2te
-     call wrtout(std_out,msg)
-   end if
-
    ! If residual sufficiently small stop line minimizations
-   if (resid<tolwfr) then
+   if (resid<tolwfr .and. skipme == 0) then
      if(prtvol>=10)then
        write(msg,'(a,i4,a,i2,a,es12.4)')' dfpt_cgwf: band',band,' converged after ',iline,' line minimizations: resid = ',resid
        call wrtout(std_out,msg)
@@ -1069,7 +1069,7 @@ print *, 'skipping for resid'
 
    ! see Eq.(31) of PRB55, 10337 (1997) [[cite:Gonze1997]]
    !
-   if(d2edt2<-tol_restart)then
+   if(d2edt2<-tol_restart .and. skipme == 0)then
      ! This may happen when the eigenvalue eig_mk(0) is higher than
      ! the lowest non-treated eig_mk+q(0). The solution adopted here
      ! is very crude, and rely upon the fact that occupancies of such
@@ -1426,6 +1426,7 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
  end if
  ABI_DATATYPE_DEALLOCATE(conjgrprj)
 
+print *, 'band, resid    ', band, resid
  if(band>max(1,nband-nbdbuf))then
    ! A small negative residual will be associated with these
    ! in the present algorithm all bands need to be in the loops over cgq etc... for the parallelization
