@@ -5,10 +5,8 @@
  * look at the Fortran interface instead: m_pair_list.F90
  *
  * Possible improvement:
- * - Add new type to be stored: it may worth it to implement
- *   the possibility to store numerical arrays
- * - Optimise memory allocation: malloc is not super efficient
- *   on little chuncks
+ * - Add new type to be stored: it may worth it to implement the possibility to store numerical arrays
+ * - Optimise memory allocation: malloc is not super efficient on little chunks
  */
 #include <stdlib.h>
 

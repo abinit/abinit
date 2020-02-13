@@ -33,10 +33,16 @@
 #include "config.h"
 #endif
 
+#include "abi_common.h"
+
 module m_pair_list
 
   use iso_c_binding
   use m_type_pair_list
+  use m_errors
+
+  use m_fstrings, only : sjoin
+
   implicit none
 
   integer,parameter :: TC_EMPTY=-2, TC_NOTFOUND=-1, TC_INT=0, TC_REAL=1, TC_STRING=2
@@ -51,6 +57,8 @@ module m_pair_list
     type(c_pair_list) :: plc
     contains
       procedure :: set => pair_list_set
+      procedure :: set_keys => pair_list_set_keys
+      procedure :: set_keys_to_null => pair_list_set_keys_to_null
       procedure :: get => pair_list_get
       procedure :: free => pair_list_free
       procedure :: next => pair_list_next
@@ -304,27 +312,145 @@ module m_pair_list
 !!
 !! OUTPUT
 !!
-!! NOTES
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine pair_list_set(pl, key, i, r, s)
+ class(pair_list),intent(in) :: pl
+ character(len=*),intent(in) :: key
+ integer,intent(in),optional :: i
+ real(kind=c_double),intent(in),optional :: r
+ character(len=*),intent(in),optional :: s
+
+ if (present(i)) then
+   call pair_list_seti(pl%plc, trim(key), i, len_trim(key))
+ else if (present(r)) then
+   call pair_list_setr(pl%plc, trim(key), r, len_trim(key))
+ else if (present(s)) then
+   call pair_list_sets(pl%plc, trim(key), s, len_trim(key), len_trim(s))
+ end if
+
+end subroutine pair_list_set
+!!***
+
+!!****f* m_pair_list/pair_list_set_keys
+!! NAME
+!! pair_list_set_keys
+!!
+!! FUNCTION
+!!  Set the value of a list of comma-separated keys.
+!!
+!!  Example
+!!
+!!  d%set_keys("foo, bar", ivals=[1, 2])
+!!
+!! INPUTS
+!!  pl <class(pair_list)>=
+!!  keylist <character(len=*)>=
+!!  i <integer>=optional
+!!  r <real(kind=c_double)>=optional
+!!  s <character(len=*)>=optional
+!!
+!! OUTPUT
 !!
 !! PARENTS
 !!
 !! CHILDREN
 !!
 !! SOURCE
-  subroutine pair_list_set(pl, key, i, r, s)
-    class(pair_list),intent(in) :: pl
-    character(len=*),intent(in) :: key
-    integer,intent(in),optional :: i
-    real(kind=c_double),intent(in),optional :: r
-    character(len=*),intent(in),optional :: s
-    if(present(i)) then
-      call pair_list_seti(pl%plc, trim(key), i, len_trim(key))
-    elseif(present(r)) then
-        call pair_list_setr(pl%plc, trim(key), r, len_trim(key))
-    elseif(present(s)) then
-        call pair_list_sets(pl%plc, trim(key), s, len_trim(key), len_trim(s))
-    end if
-  end subroutine pair_list_set
+
+subroutine pair_list_set_keys(pl, keylist, ivals, rvals, svals)
+
+ class(pair_list),intent(in) :: pl
+ character(len=*),intent(in) :: keylist
+ integer,intent(in),optional :: ivals(:)
+ real(kind=c_double),intent(in),optional :: rvals(:)
+ character(len=*),intent(in),optional :: svals(:)
+
+!Local variables-------------------------------
+ integer :: i, n, start, stp
+ character(len=len(keylist)) :: key
+! *************************************************************************
+
+ n = 1
+ do i=1,len_trim(keylist)
+   if (keylist(i:i) == ",") n = n + 1
+ end do
+
+ start = 1
+ do i=1,n
+   stp = index(keylist(start:), ",")
+   if (stp == 0) then
+     key = keylist(start:)
+   else
+     key = keylist(start: start + stp - 2)
+     start = start + stp
+     ABI_CHECK(start < len_trim(keylist), sjoin("Invalid keylist:", keylist))
+   end if
+   key = adjustl(key)
+
+   if (present(ivals)) then
+     ABI_CHECK(size(ivals) == n, "size(ivals) != n")
+     call pair_list_seti(pl%plc, trim(key), ivals(i), len_trim(key))
+
+   else if (present(rvals)) then
+     ABI_CHECK(size(rvals) == n, "size(rvals) != n")
+     call pair_list_setr(pl%plc, trim(key), rvals(i), len_trim(key))
+
+   else if (present(svals)) then
+     ABI_CHECK(size(svals) == n, "size(svals) != n")
+     call pair_list_sets(pl%plc, trim(key), svals(i), len_trim(key), len_trim(svals(i)))
+   end if
+ end do
+
+end subroutine pair_list_set_keys
+!!***
+
+!!****f* m_pair_list/pair_list_set_keys_to_null
+!! NAME
+!! pair_list_set_keys_to_null
+!!
+!! FUNCTION
+!!  Set the value of a list of comma-separated keys to null
+!!
+!!  Example:
+!!
+!!      dict%set_keys_to_null("foo, bar")
+!!
+!! INPUTS
+!!  keylist: List of comma-separet keys
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine pair_list_set_keys_to_null(pl, keylist)
+
+ class(pair_list),intent(in) :: pl
+ character(len=*),intent(in) :: keylist
+
+!Local variables-------------------------------
+ integer :: i, n, start, stp
+! *************************************************************************
+
+ start = 1
+ do
+   stp = index(keylist(start:), ",")
+   if (stp == 0) then
+     call pl%set(adjustl(trim(keylist(start:len_trim(keylist)))), s="null")
+     exit
+   else
+     call pl%set(adjustl(trim(keylist(start:start+stp-2))), s="null")
+     start = start + stp
+     ABI_CHECK(start < len_trim(keylist), sjoin("Invalid keylist:", keylist))
+   end if
+ end do
+
+end subroutine pair_list_set_keys_to_null
 !!***
 
 !!****f* m_pair_list/pair_list_restart

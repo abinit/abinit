@@ -798,11 +798,11 @@ end function results_gs_ncwrite
 !! results_gs_yaml_write
 !!
 !! FUNCTION
-!! Write results_gs in yaml format to unit iout
+!!  Write results_gs in yaml format to unit.
 !!
 !! INPUTS
 !!  results <type(results_gs_type)>=miscellaneous information about the system after ground state computation
-!!  iout= unit of output file
+!!  unit= unit of output file
 !!  [comment] optional comment for the final document
 !!
 !! PARENTS
@@ -839,18 +839,20 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
  call ydoc%add_int('nsppol', results%nsppol)
  call ydoc%add_int('nspinor', dtset%nspinor)
  call ydoc%add_int('nspden', dtset%nspden)
- call ydoc%add_real("nelect", dtset%nelect)
- call ydoc%add_real("charge", dtset%charge)
-
+ !call ydoc%add_ints("natom, nspden, nspinor, nspden", &
+ !                   [results%natom, results%nsppol, dtset%nspinor, dtset%nspden])
  !call ydoc%add_dict_of_ints("dimensions", &
  !  "natom, nsppol, nspinor, nspden", &
  !  [results%natom, results%nsppol, results%nspinor, results%nspden])
 
+ call ydoc%add_reals("nelect, charge", [dtset%nelect, dtset%charge])
+
  ! Write lattice parameters
+ !call ydoc%add_real2d('rprimd', cryst%rprimd, real_fmt="(f11.7)")
  abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
  call ydoc%add_real1d('lattice_lengths', abc, real_fmt="(f10.5)")
  call ydoc%add_real1d('lattice_angles', cryst%angdeg, real_fmt="(f7.3)")
- !call ydoc%add_real1d('lattice_volume', cryst%ucvol, real_fmt="(f7.3)")
+ !call ydoc%add_real('lattice_volume', cryst%ucvol + tol10, real_fmt="(e15.7)")
 
  ! Write cutoff energies
  call dict%set('ecut', r=dtset%ecut)
@@ -876,22 +878,8 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
  !  multiline_trig=2, real_fmt="(es9.2)")
 
  ! Write energies.
- call ydoc%add_real('etotal', results%etotal)
- call ydoc%add_real('entropy', results%entropy)
- call ydoc%add_real('fermie', results%fermie)
-
- !call ydoc%add_dict_of_reals("energies",
- !  "etotal, entropy, fermie", &
- !  [results%etotal, results%entropy, results%fermie])
-
- ! TODO: Add gaps
- !do spin=1,results%nsppol
- !  if (results%gaps(3, spin) == one) then
- !    call dict%set('fundamental_gap', r=results%gaps(1, spin))
- !    call dict%set('optical_gap', r=results%gaps(2, spin))
- !    call dict%free()
- !  end do
- !end do
+ call ydoc%add_reals("etotal, entropy, fermie", &
+                     [results%etotal, results%entropy, results%fermie])
 
  ! Cartesian stress tensor and forces.
  strten(1,1) = results%strten(1)
@@ -914,16 +902,13 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
 
  if (results%fcart(1,1) /= MAGIC_UNDEF) then
    call ydoc%add_real2d('cartesian_forces', results%fcart)
+   !call ydoc%add_paired_real2d('cartesian_forces_and_xred', results%fcart, cryst%xred, real_fmt="(es12.4)")
    fnorms = [(sqrt(sum(results%fcart(:, ii) ** 2)), ii=1,results%natom)]
    ! Write force statistics
-   call dict%set('min', r=minval(fnorms))
-   call dict%set('max', r=maxval(fnorms))
-   call dict%set('mean', r=sum(fnorms) / results%natom)
+   call dict%set_keys('min, max, mean', rvals=[minval(fnorms), maxval(fnorms), sum(fnorms) / results%natom])
  else
    call ydoc%add_string('cartesian_forces', "null")
-   call dict%set('min', s="null")
-   call dict%set('max', s="null")
-   call dict%set('mean', s="null")
+   call dict%set_keys_to_null("min, max, mean")
  end if
 
  call ydoc%add_dict('force_length_stats', dict)

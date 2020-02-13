@@ -39,7 +39,7 @@ module m_yaml
  use m_pair_list
  use m_stream_string
 
- use m_fstrings, only : sjoin
+ use m_fstrings, only : sjoin, char_count, itoa, sjoin
 
  implicit none
 
@@ -94,6 +94,12 @@ module m_yaml
 
    procedure :: add_real => yamldoc_add_real
      ! Add a real number field to a document
+
+   procedure :: add_reals => yamldoc_add_reals
+     ! Add a list of real number fields to a document
+
+   procedure :: add_paired_real2d => yamldoc_add_paired_real2d
+     !  Add a field containing two 2D array of real numbers with the same shape.
 
    procedure :: add_int => yamldoc_add_int
      ! Add an integer field to a document
@@ -189,6 +195,10 @@ subroutine yaml_iterstart(label, val, unit, use_yaml, newline)
  select case (label)
  case ("dtset")
    DTSET_IDX = val
+   TIMIMAGE_IDX = -1
+   IMAGE_IDX = -1
+   ITIME_IDX = -1
+   ICYCLE_IDX = -1
  case ("timimage")
    TIMIMAGE_IDX = val
  case ("image")
@@ -333,6 +343,60 @@ subroutine yamldoc_add_real(self, label, val, tag, real_fmt, newline, width)
 end subroutine yamldoc_add_real
 !!***
 
+!!****f* m_yaml/yamldoc_add_reals
+!! NAME
+!! yamldoc_add_reals
+!!
+!! FUNCTION
+!!  Add a list of real number fields to a document
+!!
+!! INPUTS
+!!  keylist = List of comma-separated keywords
+!!  values = List of values
+!!  [real_fmt] = override the default formating
+!!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine yamldoc_add_reals(self, keylist, values, real_fmt, width)
+
+!Arguments ------------------------------------
+ class(yamldoc_t),intent(inout) :: self
+ character(len=*),intent(in) :: keylist
+ real(dp),intent(in) :: values(:)
+ character(len=*),intent(in),optional :: real_fmt
+ integer,intent(in),optional :: width
+
+!Local variables-------------------------------
+ integer :: i, n, w, start, stp
+ character(len=30) :: rfmt
+! *************************************************************************
+
+ SET_DEFAULT(w, width, self%default_width)
+ SET_DEFAULT(rfmt, real_fmt, self%default_rfmt)
+
+ n = char_count(keylist, ",") + 1
+ ABI_CHECK(size(values) == n, "size of values != len(tokens)")
+
+ start = 1
+ do i=1,n
+   stp = index(keylist(start:), ",")
+   if (stp == 0) then
+     call self%add_real(adjustl(keylist(start:)), values(i), real_fmt=rfmt, width=w)
+   else
+     call self%add_real(adjustl(keylist(start: start + stp - 2)), values(i), real_fmt=rfmt, width=w)
+     start = start + stp
+     ABI_CHECK(start < len_trim(keylist), sjoin("Invalid keylist:", keylist))
+   end if
+ end do
+
+end subroutine yamldoc_add_reals
+!!***
+
 !!****f* m_yaml/yamldoc_add_int
 !! NAME
 !! yamldoc_add_int
@@ -344,7 +408,7 @@ end subroutine yamldoc_add_real
 !!  label = key name
 !!  val = value
 !!  [tag] = optional, add a tag to the field
-!!  [int_fmt] = optional  override the default formating
+!!  [int_fmt] = optional  override the default formatting
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!
@@ -450,9 +514,9 @@ end subroutine yamldoc_add_string
 !! INPUTS
 !!  label = key name
 !!  arr(:)
-!!  [multiline_trig] = optional minimun number of elements before switching to multline representation
+!!  [multiline_trig] = optional minimum number of elements before switching to multiline representation
 !!  [tag] = optional, add a tag to the field
-!!  [real_fmt] = override the default formating
+!!  [real_fmt] = override the default formatting
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!
@@ -509,9 +573,9 @@ end subroutine yamldoc_add_real1d
 !! INPUTS
 !!  label = key name
 !!  arr(:) <integer>=
-!!  [multiline_trig] = optional minimun number of elements before switching to multline representation
+!!  [multiline_trig] = optional minimum number of elements before switching to multiline representation
 !!  [tag] : add a tag to the field
-!!  int_fmt <character(len=*)>=optional  override the default formating
+!!  int_fmt <character(len=*)>=optional override the default formatting
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!
@@ -568,7 +632,7 @@ end subroutine yamldoc_add_int1d
 !!  pl <type(pair_list)>=
 !!  string_size <integer>=optional maximum storage size for strings found in a pair_list
 !!  key_size <integer>=optional maximum storage size for keys of a pair_list
-!!  multiline_trig <integer>=optional minimun number of elements before switching to multline representation
+!!  multiline_trig <integer>=optional minimum number of elements before switching to multiline representation
 !!  tag <character(len=*)>=optional  add a tag to the field
 !!  key_fmt <character(len=*)>=optional  override the default formating
 !!  int_fmt <character(len=*)>=optional  override the default formating
@@ -632,17 +696,17 @@ end subroutine yamldoc_add_dict
 !! yamldoc_add_real2d
 !!
 !! FUNCTION
-!!  Add a field containing a 2D real number array
+!!  Add a field containing a 2D array of real numbers
 !!
 !! INPUTS
 !!  label = key name
-!!  arr(m, n)
+!!  arr(:, :) = input array.
 !!  [tag]= add a tag to the field
-!!  [real_fmt]: override the default formating
-!!  [multiline_trig] <integer>=optional minimun number of elements before switching to multline representation
-!!  [newline] = set to false to prevent adding newlines after fields
-!!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
-!!  [mode] = "T" to write the transpose of arr i.e columns become rows in output (DEFAULT), "N" for normal order
+!!  [real_fmt]= override the default formating
+!!  [multiline_trig]: optional minimum number of elements before switching to multiline representation
+!!  [newline]: set to false to prevent adding newlines after fields
+!!  [width]: impose a minimum width of the field name side of the column (padding with spaces)
+!!  [mode]: "T" to write the transpose of arr i.e columns become rows in output (DEFAULT), "N" for normal order
 !!
 !! PARENTS
 !!
@@ -704,6 +768,102 @@ subroutine yamldoc_add_real2d(self, label, arr, tag, real_fmt, multiline_trig, n
 end subroutine yamldoc_add_real2d
 !!***
 
+!!****f* m_yaml/yamldoc_add_paired_real2d
+!! NAME
+!! yamldoc_add_paired_real2d
+!!
+!! FUNCTION
+!!  Add a field containing two 2D real arrays with the same shape.
+!!
+!!  Example:
+!!    cartesian_forces_and_xred:
+!!    - [ [ -0.0000E+00,  -0.0000E+00,  -0.0000E+00, ], [  0.0000E+00,   0.0000E+00,   0.0000E+00, ] ]
+!!    - [ [ -0.0000E+00,  -0.0000E+00,  -0.0000E+00, ], [  2.5000E-01,   2.5000E-01,   2.5000E-01, ] ]
+!!
+!! INPUTS
+!!  label = key name
+!!  arr1(:,:), arr2(:,:) = input arrays.
+!!  [tag]= add a tag to the field
+!!  [real_fmt]= override the default formating
+!!  [multiline_trig]: optional minimum number of elements before switching to multiline representation
+!!  [newline]: set to false to prevent adding newlines after fields
+!!  [width]: impose a minimum width of the field name side of the column (padding with spaces)
+!!  [mode]: "T" to write the transpose of arr i.e columns become rows in output (DEFAULT), "N" for normal order
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine yamldoc_add_paired_real2d(self, label, arr1, arr2, tag, real_fmt, multiline_trig, newline, width, mode)
+
+!Arguments ------------------------------------
+ class(yamldoc_t),intent(inout) :: self
+ real(dp),intent(in) :: arr1(:, :), arr2(:,:)
+ character(len=*),intent(in) :: label
+ character(len=*),intent(in),optional :: tag, real_fmt
+ integer,intent(in),optional :: multiline_trig
+ logical,intent(in),optional :: newline
+ integer,intent(in),optional :: width
+ character(len=1),intent(in),optional :: mode
+
+!Local variables-------------------------------
+ integer :: m, n, w, i, vmax
+ real(dp) :: line(2 * max(size(arr1, dim=1), size(arr1, dim=2)))
+ character(len=30) :: rfmt
+ character(len=1) :: my_mode
+ logical :: nl
+! *************************************************************************
+
+ m = size(arr1, dim=1)
+ n = size(arr1, dim=2)
+
+ ABI_CHECK(all(shape(arr1) == shape(arr2)), "arr1 and arr2 must have same shape")
+
+ SET_DEFAULT(nl, newline, .true.)
+ SET_DEFAULT(w, width, self%default_width)
+ SET_DEFAULT(my_mode, mode, "T")
+ SET_DEFAULT(rfmt, real_fmt, self%default_rfmt)
+ SET_DEFAULT(vmax, multiline_trig, 5)
+
+ if (present(tag)) then
+   call yaml_start_field(self%stream, label, width=w, tag=tag)
+ else
+   call yaml_start_field(self%stream, label, width=w)
+ end if
+
+ if (my_mode == "T") then
+   !if present(chars) ABI_CHECK(size(chars) == n, "size(shars) != n")
+   do i=1,n
+     call self%stream%push(eol//'- [')
+     line(1:m) = arr1(:,i)
+     call yaml_print_real1d(self%stream, m, line, rfmt, vmax)
+     call self%stream%push(',')
+     line(1:m) = arr2(:,i)
+     call yaml_print_real1d(self%stream, m, line, rfmt, vmax)
+     !if present(chars) call self%stream%push(', '//trim(chars(i)))
+     call self%stream%push(' ]')
+   end do
+ else
+   !if present(chars) ABI_CHECK(size(chars) == n, "size(shars) != m")
+   do i=1,m
+     call self%stream%push(eol//'- [')
+     line(1:n) = arr1(i,:)
+     call yaml_print_real1d(self%stream, n, line, rfmt, vmax)
+     call self%stream%push(',')
+     line(1:n) = arr2(i,:)
+     call yaml_print_real1d(self%stream, n, line, rfmt, vmax)
+     !if present(chars) call self%stream%push(', '//trim(chars(i)))
+     call self%stream%push(']')
+   end do
+ end if
+
+ if (nl) call self%stream%push(eol)
+
+end subroutine yamldoc_add_paired_real2d
+!!***
+
 !!****f* m_yaml/yamldoc_add_int2d
 !! NAME
 !! yamldoc_add_int2d
@@ -716,7 +876,7 @@ end subroutine yamldoc_add_real2d
 !!  arr(:, :) <integer>=
 !!  [tag]= add a tag to the field
 !!  [int_fmt]: override the default formating
-!!  multiline_trig <integer>=optional minimun number of elements before switching to multline representation
+!!  multiline_trig <integer>=optional minimum number of elements before switching to multiline representation
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!  [mode] = "T" to write the transpose of arr i.e columns become rows in output (DEFAULT), "N" for normal order
@@ -794,7 +954,7 @@ end subroutine yamldoc_add_int2d
 !!  plarr(n) <type(pair_list)>=
 !!  key_size <integer>=optional maximum storage size for keys of a pair_list
 !!  string_size <integer>=optional maximum storage size for strings of a pair_list
-!!  multiline_trig <integer>=optional minimun number of elements before switching to multline representation
+!!  multiline_trig <integer>=optional minimum number of elements before switching to multiline representation
 !!  [tag]= add a tag to the field
 !!  key_fmt <character(len=*)>=optional  override the default formating
 !!  int_fmt <character(len=*)>=optional  override the default formating

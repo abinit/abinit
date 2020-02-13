@@ -672,7 +672,7 @@ subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
  integer :: ia,ii,itypat,jj
 ! *************************************************************************
 
- !  Fill the symbols array
+ ! Fill the symbols array
  do ia=1,natom
    symbols(ia) = adjustl(znucl2symbol(znucl(typat(ia))))
  end do
@@ -1090,7 +1090,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
  ! Set-up atomic symbols.
  do itypat=1,cryst%ntypat
-   call atomdata_from_znucl(atom,cryst%znucl(itypat))
+   call atomdata_from_znucl(atom, cryst%znucl(itypat))
    symbols(itypat) = atom%symbol
    write(symbols_long(itypat),'(a2,a78)') symbols(itypat),REPEAT(CHAR(0),78)
    write(psp_desc(itypat),'(2a)') &
