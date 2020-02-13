@@ -1332,6 +1332,7 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
    jband_me = 0
    do jband = 1, dtefield%mband_occ
      if (band_procs(jband) == mpi_enreg%me_band) then
+       jband_me = jband_me + 1
        vect2(:,1:npw_k2) = &
 &        cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
      end if
@@ -1366,6 +1367,7 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
    jband_me = 0
    do jband = 1, dtefield%mband_occ
      if (band_procs(jband) == mpi_enreg%me_band) then
+       jband_me = jband_me + 1
        vect2(:,1:npw_k2) = &
 &        cg(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
        if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
@@ -1436,7 +1438,7 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
      if (jpw > 0) then
        iband_me = 0
        do iband = 1, dtefield%mband_occ
-         if (band_procs(jband) /= mpi_enreg%me_band) cycle
+         if (band_procs(iband) /= mpi_enreg%me_band) cycle
          iband_me = iband_me + 1
          wfr = cg(1,icg + (iband_me - 1)*npw_k2*nspinor + jpw)
          wfi = cg(2,icg + (iband_me - 1)*npw_k2*nspinor + jpw)
@@ -1465,7 +1467,7 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
      if (jpw > 0) then
        iband_me = 0
        do iband = 1, dtefield%mband_occ
-         if (band_procs(jband) /= mpi_enreg%me_band) cycle
+         if (band_procs(iband) /= mpi_enreg%me_band) cycle
          iband_me = iband_me + 1
          wfr = cg1(1,icg1 + (iband_me - 1)*npw_k2*nspinor + jpw)
          wfi = cg1(2,icg1 + (iband_me - 1)*npw_k2*nspinor + jpw)
@@ -1495,8 +1497,10 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
    pwind_tmp(1:npw_k1) =pwindall((ikptn-1)*mpw_tmp+1:(ikptn-1)*mpw_tmp+npw_k1,8,idir)
 
    vect1(:,0) = zero ; vect2(:,0) = zero
+   jband_me = 0
    do jband = 1, dtefield%mband_occ
      if (band_procs(jband) == mpi_enreg%me_band) then
+       jband_me = jband_me + 1
        vect2(:,1:npw_k2) = &
 &        cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
        if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
@@ -1531,8 +1535,10 @@ subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband
    pwind_tmp(1:npw_k1) =pwindall((ikpt-1)*mpw_tmp+1:(ikpt-1)*mpw_tmp+npw_k1,6,idir)
 
    vect1(:,0) = zero ; vect2(:,0) = zero
+   jband_me = 0
    do jband = 1, dtefield%mband_occ
      if (band_procs(jband) == mpi_enreg%me_band) then
+       jband_me = jband_me + 1
        vect2(:,1:npw_k2) = &
 &        cg(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
        if (npw_k2 < mpw_tmp) vect2(:,npw_k2+1:mpw_tmp) = zero
@@ -2721,9 +2727,9 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mband_mem,
      s1mat = zero
      do jband = 1, dtefield%mband_occ
        if (band_procs(jband) == me_band) then
+         jband_me = jband_me + 1
          vect2(:,1:npw_k2) = &
 &          cg1(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
-         jband_me = jband_me + 1
        end if
        call xmpi_bcast(vect2,band_procs(jband), mpi_enreg%comm_band,ierr)
        
@@ -2762,9 +2768,9 @@ subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mband_mem,
      jband_me = 0
      do jband = 1, dtefield%mband_occ
        if (band_procs(jband) == me_band) then
+         jband_me = jband_me + 1
          vect2(:,1:npw_k2) = &
 &          cg(:,icg1 + 1 + (jband_me-1)*npw_k2*nspinor:icg1 + jband_me*npw_k2*nspinor)
-         jband_me = jband_me + 1
        end if
        call xmpi_bcast(vect2,band_procs(jband),mpi_enreg%comm_band,ierr)
 
