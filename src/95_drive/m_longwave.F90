@@ -563,6 +563,9 @@ ecore=zero
    ABI_DEALLOCATE(dyewdqdq)
  end if
 
+ ! Clean the header
+ call hdr%free()
+
  DBG_EXIT("COLL")
 
 end subroutine longwave

@@ -181,7 +181,6 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
- type(hdr_type) :: hdr_den
  type(pseudopotential_type),intent(in) :: psps
  type(pawtab_type),intent(inout) :: pawtab(psps%ntypat*psps%usepaw)
  type(pawrhoij_type),intent(inout) :: pawrhoij(:)
@@ -217,6 +216,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  logical :: non_magnetic_xc,t_exist 
  character(len=500) :: msg                   
  character(len=fnlen) :: fi1o,fiwfatdis,fiwfefield,fiwfddk,fiwfdkdk
+ type(hdr_type) :: hdr_den
  type(ebands_t) :: bs_rbz
  type(hdr_type) :: hdr0
  type(wvl_data) :: wvl 
@@ -418,6 +418,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
    call appdig(pertcase,dtfil%fildens1in,fi1o)
    call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
     & hdr_den, pawrhoij_read, spaceworld)
+   call hdr_den%free()
 
    !Perform FFT rhor1 to rhog1
    call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,1,ngfft,0)
@@ -461,6 +462,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
    call appdig(pertcase,dtfil%fildens1in,fi1o)
    call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
     & hdr_den, pawrhoij_read, spaceworld)
+   call hdr_den%free()
 
    !Perform FFT rhor1 to rhog1
    call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,1,ngfft,0)
@@ -1002,6 +1004,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ABI_DEALLOCATE(occ_rbz)
  ABI_DEALLOCATE(ph1d)
  ABI_DEALLOCATE(pert_atdis)
+ ABI_DEALLOCATE(phnons1)
  ABI_DEALLOCATE(qdrflg)
  ABI_DEALLOCATE(qdrpwf)
  ABI_DEALLOCATE(qdrpwf_k)
@@ -1957,6 +1960,7 @@ end if
      call appdig(pertcase,dtfil%fildens1in,fi1o)
      call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
       & hdr_den, pawrhoij_read, spaceworld)
+     call hdr_den%free()
 
      !Perform FFT rhor1 to rhog1
      call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,1,ngfft,0)
@@ -1999,6 +2003,7 @@ end if
      call appdig(pertcase,dtfil%fildens1in,fi1o)
      call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
       & hdr_den, pawrhoij_read, spaceworld)
+     call hdr_den%free()
 
      !Perform FFT rhor1 to rhog1
      call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,1,ngfft,0)
@@ -2042,6 +2047,7 @@ endif
      call appdig(pertcase,dtfil%fildens1in,fi1o)
      call read_rhor(fi1o, 1, nspden, nfft, ngfft, pawread, mpi_enreg, rhor1_real, &
       & hdr_den, pawrhoij_read, spaceworld)
+     call hdr_den%free()
 
      !Perform FFT rhor1 to rhog1
      call fourdp(cplex,rhog1_tmp,rhor1_real,-1,mpi_enreg,nfft,1,ngfft,0)
