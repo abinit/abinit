@@ -2140,11 +2140,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &      .not.(dt%kptopt==3 .or. dt%kptopt==0 .or. dt%nsym==1 .or. dt%iscf<0)) then
      write(msg,'(a,i3,2a,a,3f16.6,2a,2a,a)' )&
 &      'The input variable optdriver=',dt%optdriver,' which implies response functions.',ch10,&
-&      'Also qptn=',dt%qptn(:), that is non-zero, or one has a calculation with non-collinear magnetism.',ch10,&
+&      'Also qptn=',dt%qptn(:),' that is non-zero, or one has a calculation with non-collinear magnetism.',ch10,&
 &      'This requires kptopt 3 (or 0 for expert users) or nsym=1, or non-self-consistent calculation (iscf<0).',ch10,&
 &      'Set kptopt to 3 to let the code reduce the k with the correct small group of symmetries.'
        MSG_ERROR_NOSTOP(msg, ierr)
-     end if
    end if
    if (response==1 .and. (sum(dt%qptn(:)**2)<tol12 .and. nspden/=4) .and. &
 &      .not.(dt%kptopt==3 .or. dt%kptopt==0 .or. dt%kptopt==2 .or. dt%nsym==1 .or. dt%iscf<0)) then
@@ -2154,7 +2153,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &      'This requires kptopt 3 or 2 (or 0 for expert users) or nsym=1, or non-self-consistent calculation (iscf<0).',ch10,&
 &      'Set kptopt to 2 to let the code reduce the k with the correct small group of symmetries.'
        MSG_ERROR_NOSTOP(msg, ierr)
-     end if
    end if
    if(usepaw==1)then
      ! Is optdriver compatible with PAW?
