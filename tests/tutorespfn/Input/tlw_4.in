@@ -121,7 +121,7 @@ diemac 12.0
 #%% test_chain =  tlw_4.in, tlw_5.in, tlw_6.in, tlw_7.in
 #%% [files]
 #%% files_to_test = 
-#%%   tlw_4.out, tolnlines=  5, tolabs=  2.e-05, tolrel=  5.00e-04, fld_options=-medium
+#%%   tlw_4.out, tolnlines=  5, tolabs=  3.e-04, tolrel=  5.00e-04, fld_options=-medium
 #%% psp_files =  31-Ga.LDA.fhi, 15-P.LDA.fhi
 #%% [paral_info]
 #%% max_nprocs = 2

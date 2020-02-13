@@ -1,4 +1,5 @@
-# Linear response function and long-wave magnitudes calculation for Silicon
+# Linear response function and long-wave magnitudes calculation 
+# for a 5% distorted 2 atom Silicon cell
 # (M. Royo, 7.11.2019)
 
 ndtset 5
@@ -53,7 +54,7 @@ kptopt 2
 
 #Definition of the unit cell
 #***************************
-acell 3*10.102
+acell 10.102 10.6 9.4
 rprim   0.0000000000    0.5000000000   0.500000000
         0.5000000000    0.0000000000   0.500000000
         0.5000000000    0.5000000000   0.000000000
@@ -66,8 +67,8 @@ znucl 14
 natom 2         
 typat 2*1      
 xred          
-        0.0000000      0.0000000      0.0000000
-        0.2500000      0.2500000      0.2500000
+        0.0500000     -0.0500000      0.0000000
+        0.2000000      0.3000000      0.2000000
 
 #Gives the number of band, explicitely (do not take the default)
 #**************************************************************

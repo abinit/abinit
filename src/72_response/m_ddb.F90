@@ -560,7 +560,7 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 #endif
 
 ! *********************************************************************
-
+ 
  mpert = ddb%mpert
  natom = ddb%natom
 
@@ -2621,6 +2621,9 @@ integer function ddb_get_quadrupoles(ddb, lwsym,rftyp, quadrupoles) result(iblok
  ! Look for the Gamma Block in the DDB
  qphon(:,:)=zero
  qphnrm(:)=one
+ rfphon(:)=0
+ rfelfd(:)=0
+ rfqvec(:)=0
  rfphon(3)=1
  rfelfd(3)=1
  rfstrs(:)=0
