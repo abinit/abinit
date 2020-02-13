@@ -1203,9 +1203,7 @@ subroutine wfk_read_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_
  ABI_CHECK(nb_block>0,"nband <=0")
  npw_tot_disk = npw_disk * nspinor_disk * nb_block
 
-#ifdef DEV_MJV
 print *, 'npw_disk , nspinor_disk , nb_block ', npw_disk, nspinor_disk, nb_block, shape(cg_k)
-#endif
  if (present(kg_k)) then
    ABI_CHECK(SIZE(kg_k,DIM=2) >= npw_disk,"kg_k too small")
  end if
