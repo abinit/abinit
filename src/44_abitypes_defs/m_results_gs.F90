@@ -859,7 +859,7 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
  call ydoc%add_reals( &
    "deltae, res2, residm, diffor", &
    [results%deltae, results%res2, merge(results%residm, zero, results%residm > tol30), results%diffor], &
-   real_fmt="(es9.2)", dict_key="convergence")
+   real_fmt="(es9.2)", dict_key="convergence_")
 
  ! Write energies.
  call ydoc%add_reals("etotal, entropy, fermie", &

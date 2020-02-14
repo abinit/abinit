@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 16h40 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h54 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t10/t10.in
 - output file    -> t10.out
@@ -129,7 +129,7 @@ P           mkmem           2
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.8599379  0.0000000  0.0000000  G(1)=  0.1272275  0.0000000  0.0000000
@@ -228,21 +228,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     470.000     469.983
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        6
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  7.8599379,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.8599379,   0.0000000, ]
+- [  0.0000000,   0.0000000,   5.0291282, ]
 lattice_lengths: [   7.85994,    7.85994,    5.02913, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  10.0, "pawecutdg":  11.0, }
-convergence: {
-    "deltae":  5.63E-12, "res2":  2.25E-11, 
-    "residm":  1.04E-14, "diffor":  4.33E-07, 
-}
+lattice_volume:   3.1069262E+02
+convergence_: {deltae:  5.63E-12, res2:  2.25E-11, residm:  1.04E-14, diffor:  4.33E-07, }
 etotal    :  -7.21508083E+01
 entropy   :   0.00000000E+00
 fermie    :   2.83515066E-01
@@ -258,7 +253,7 @@ cartesian_forces:
 - [ -0.00000000E+00,  -1.44560290E-19,  -0.00000000E+00, ]
 - [  6.31594356E-03,  -6.31594356E-03,  -0.00000000E+00, ]
 - [ -6.31594356E-03,   6.31594356E-03,  -0.00000000E+00, ]
-force_length_stats: {"min":   1.44560290E-19, "max":   8.93209304E-03, "mean":   5.95472869E-03, }
+force_length_stats: {min:   1.44560290E-19, max:   8.93209304E-03, mean:   5.95472869E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -554,7 +549,7 @@ force_length_stats: {"min":   1.44560290E-19, "max":   8.93209304E-03, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.52397342010768E+01
 hartree             :  1.46952025253139E+01
@@ -569,7 +564,7 @@ total_energy_eV     : -1.96332331471629E+03
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -3.20915506460714E-01
 Ewald energy        : -6.41628304168268E+01
@@ -766,10 +761,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.0  wall=          4.0
+- Proc.   0 individual time (sec): cpu=          3.9  wall=          3.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.0  wall=          4.0
++Overall time at end (sec) : cpu=          3.9  wall=          3.9

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 14h28 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h25 )
   
 >>>  Enter the number of files to merge: 
 >>>  Enter the prefix for the final output file: 
@@ -101,7 +101,7 @@
 
   calculation expects a epsm1           |  input file contains a epsm1
 . ABINIT  code version 9.0.0              |  ABINIT  code version 9.0.0
-. date 20200211 bantot   20 natom    2  |  date 20200211 bantot   20 natom    2
+. date 20200214 bantot   20 natom    2  |  date 20200214 bantot   20 natom    2
   nkpt   2 nsym 48 ngfft  16,  16,  16  |  nkpt   2 nsym 48 ngfft  16,  16,  16
   ntypat  1 ecut_eff   5.0727770        |  ntypat  1 ecut_eff   5.0727770
   usepaw  0                             |  usepaw  0

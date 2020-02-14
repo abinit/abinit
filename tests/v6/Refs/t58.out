@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 02h13 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h33 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t58-t59/t58.in
 - output file    -> t58.out
@@ -154,7 +154,7 @@ P          mk1mem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -219,39 +219,34 @@ _setup2: Arith. and geom. avg. npw (full set) are     370.000     370.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        8
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :  1.600000000000000E+001
-charge    :  0.000000000000000E+000
+rprimd    :
+- [ -4.3000000,   4.3000000,   4.3000000, ]
+- [  4.3000000,  -4.3000000,   4.3000000, ]
+- [  4.3000000,   4.3000000,  -4.3000000, ]
 lattice_lengths: [   7.44782,    7.44782,    7.44782, ]
 lattice_angles: [109.471, 109.471, 109.471, ]
-cutoff_energies: {"ecut":   8.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -4.09E-14, "res2":  7.07E-19, 
-    "residm":  3.41E-20, "diffor": undef, 
-}
-etotal    : -1.309118091680699E+001
-entropy   :  0.000000000000000E+000
-fermie    :  9.747221108767315E-002
+lattice_volume:   3.1802800E+02
+convergence_: {deltae: -4.09E-14, res2:  7.07E-19, residm:  3.41E-20, diffor: undef, }
+etotal    :  -1.30911809E+01
+entropy   :   0.00000000E+00
+fermie    :   9.74722111E-02
 cartesian_stress_tensor:
-- [-1.613954543846307E-003, -2.702909164251612E-013,  0.000000000000000E+000, ]
-- [-2.702909164251612E-013, -1.613954543863014E-003,  2.701895441435979E-013, ]
-- [ 0.000000000000000E+000,  2.701895441435979E-013, -1.613954543856931E-003, ]
-pressure_GPa:  4.748417407063576E+001
+- [ -1.61395454E-03,  -2.70290916E-13,   0.00000000E+00, ]
+- [ -2.70290916E-13,  -1.61395454E-03,   2.70189544E-13, ]
+- [  0.00000000E+00,   2.70189544E-13,  -1.61395454E-03, ]
+pressure_GPa:   4.7484E+01
 cartesian_forces:
-- [-3.524542279304775E-013,  2.917832757907314E-012, -3.253874934393260E-012, ]
-- [ 3.839147935609247E-013, -2.984595232705580E-012,  3.376930834355010E-012, ]
-- [ 3.443656998496680E-013, -2.888171598352322E-012,  3.339198379761523E-012, ]
-- [ 3.396416931779886E-013, -2.879485899118995E-012,  3.265383396141807E-012, ]
-- [-3.445617345138352E-013,  2.877445771030306E-012, -3.325629012002075E-012, ]
-- [-3.662983371950373E-013,  2.948389803733013E-012, -3.385386529091485E-012, ]
-- [-3.226117757186853E-013,  2.989820392522846E-012, -3.453627199098907E-012, ]
-- [ 3.180038887694540E-013, -2.981235995016582E-012,  3.437005064327388E-012, ]
-force_length_stats: {"min":  4.366866639453114E-012, "max":  4.579371700106204E-012, "mean":  4.469841789031433E-012, }
+- [ -3.52454228E-13,   2.91783276E-12,  -3.25387493E-12, ]
+- [  3.83914794E-13,  -2.98459523E-12,   3.37693083E-12, ]
+- [  3.44365700E-13,  -2.88817160E-12,   3.33919838E-12, ]
+- [  3.39641693E-13,  -2.87948590E-12,   3.26538340E-12, ]
+- [ -3.44561735E-13,   2.87744577E-12,  -3.32562901E-12, ]
+- [ -3.66298337E-13,   2.94838980E-12,  -3.38538653E-12, ]
+- [ -3.22611776E-13,   2.98982039E-12,  -3.45362720E-12, ]
+- [  3.18003889E-13,  -2.98123600E-12,   3.43700506E-12, ]
+force_length_stats: {min:   4.36686664E-12, max:   4.57937170E-12, mean:   4.46984179E-12, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -332,7 +327,7 @@ force_length_stats: {"min":  4.366866639453114E-012, "max":  4.579371700106204E-
    0.93348    0.93348    0.93348    0.93348    0.93348    0.93348    0.93348    0.93348
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  7.60387664491805E+00
 hartree             :  5.34615847540446E-01
@@ -359,7 +354,7 @@ band_energy         : -1.97064416755832E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -3081,10 +3076,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         21.4  wall=         23.5
+- Proc.   0 individual time (sec): cpu=         21.0  wall=         22.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  63 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         21.4  wall=         23.5
++Overall time at end (sec) : cpu=         21.0  wall=         22.0

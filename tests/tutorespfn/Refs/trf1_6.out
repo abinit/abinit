@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 16h41 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h58 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_trf1_6/trf1_6.in
 - output file    -> trf1_6.out
@@ -524,7 +524,7 @@ P          mk1mem5        256
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -599,21 +599,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      74.469      74.418
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   5.3050000,   5.3050000, ]
+- [  5.3050000,   0.0000000,   5.3050000, ]
+- [  5.3050000,   5.3050000,   0.0000000, ]
 lattice_lengths: [   7.50240,    7.50240,    7.50240, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  1.24E-14, "res2":  1.30E-20, 
-    "residm":  0.00E+00, "diffor": undef, 
-}
+lattice_volume:   2.9859750E+02
+convergence_: {deltae:  1.24E-14, res2:  1.30E-20, residm:  2.57E-23, diffor: undef, }
 etotal    :  -9.76268375E+00
 entropy   :   0.00000000E+00
 fermie    :   7.88413810E-02
@@ -625,7 +620,7 @@ pressure_GPa:  -8.4792E+00
 cartesian_forces:
 - [ -6.19589150E-32,   6.19589150E-32,  -6.19589150E-32, ]
 - [  6.19589150E-32,  -6.19589150E-32,   6.19589150E-32, ]
-force_length_stats: {"min":   1.07315989E-31, "max":   1.07315989E-31, "mean":   1.07315989E-31, }
+force_length_stats: {min:   1.07315989E-31, max:   1.07315989E-31, mean:   1.07315989E-31, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -669,7 +664,7 @@ force_length_stats: {"min":   1.07315989E-31, "max":   1.07315989E-31, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.91979677008900E+00
 hartree             :  7.88574634434192E-01
@@ -696,7 +691,7 @@ band_energy         : -7.13535527934215E-01
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1091,7 +1086,7 @@ band_energy         : -7.13535527934215E-01
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1489,7 +1484,7 @@ band_energy         : -7.13535527934215E-01
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1575,28 +1570,23 @@ band_energy         : -7.13535527934215E-01
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 4, }
+iteration_state: {dtset: 4, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   5.3050000,   5.3050000, ]
+- [  5.3050000,   0.0000000,   5.3050000, ]
+- [  5.3050000,   5.3050000,   0.0000000, ]
 lattice_lengths: [   7.50240,    7.50240,    7.50240, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  0.00E+00, "res2":  0.00E+00, 
-    "residm":  9.92E-19, "diffor":  0.00E+00, 
-}
+lattice_volume:   2.9859750E+02
+convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.92E-19, diffor:  0.00E+00, }
 etotal    :  -9.76268375E+00
 entropy   :   0.00000000E+00
 fermie    :   7.88413810E-02
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1627,7 +1617,7 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2496,10 +2486,10 @@ P          mk1mem5        256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         49.3  wall=         50.3
+- Proc.   0 individual time (sec): cpu=         49.7  wall=         50.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and  82 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         49.3  wall=         50.3
++Overall time at end (sec) : cpu=         49.7  wall=         50.9

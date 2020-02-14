@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 14h36 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h45 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t32/t32.in
 - output file    -> t32.out
@@ -182,7 +182,7 @@ P           mkmem           4
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -258,21 +258,16 @@ _setup2: Arith. and geom. avg. npw (full set) are    1138.185    1138.128
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   5.1085000,   5.1085000, ]
+- [  5.1085000,   0.0000000,   5.1085000, ]
+- [  5.1085000,   5.1085000,   0.0000000, ]
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":  20.0, "pawecutdg":  30.0, }
-convergence: {
-    "deltae": -3.34E-08, "res2":  1.23E-08, 
-    "residm":  3.59E-04, "diffor": undef, 
-}
+lattice_volume:   2.6663072E+02
+convergence_: {deltae: -3.34E-08, res2:  1.23E-08, residm:  3.59E-04, diffor: undef, }
 etotal    :  -8.01601529E+00
 entropy   :   0.00000000E+00
 fermie    :   2.13646666E-01
@@ -284,7 +279,7 @@ pressure_GPa:   1.6992E+00
 cartesian_forces:
 - [  2.96488781E-29,  -1.64715989E-29,  -2.30602385E-29, ]
 - [ -2.96488781E-29,   1.64715989E-29,   2.30602385E-29, ]
-force_length_stats: {"min":   4.10139506E-29, "max":   4.10139506E-29, "mean":   4.10139506E-29, }
+force_length_stats: {min:   4.10139506E-29, max:   4.10139506E-29, mean:   4.10139506E-29, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -417,7 +412,7 @@ force_length_stats: {"min":   4.10139506E-29, "max":   4.10139506E-29, "mean":  
    Integrated=    8.0000E+00
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.10748679266239E+00
 hartree             :  5.68908011794492E-01
@@ -434,7 +429,7 @@ total_energy_eV     : -2.18124772357252E+02
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  1.41721311468540E-01
 Ewald energy        : -8.43581958561899E+00
@@ -460,7 +455,7 @@ total_energy_dc_eV  : -2.18124772357252E+02
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -538,21 +533,16 @@ _setup2: Arith. and geom. avg. npw (full set) are    1138.185    1138.128
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   5.1085000,   5.1085000, ]
+- [  5.1085000,   0.0000000,   5.1085000, ]
+- [  5.1085000,   5.1085000,   0.0000000, ]
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":  20.0, "pawecutdg":  30.0, }
-convergence: {
-    "deltae": -1.34E-09, "res2":  9.45E-10, 
-    "residm":  6.77E-07, "diffor": undef, 
-}
+lattice_volume:   2.6663072E+02
+convergence_: {deltae: -1.34E-09, res2:  9.45E-10, residm:  6.77E-07, diffor: undef, }
 etotal    :  -8.67711231E+00
 entropy   :   0.00000000E+00
 fermie    :   2.02798221E-01
@@ -564,7 +554,7 @@ pressure_GPa:  -4.3737E+01
 cartesian_forces:
 - [  5.76505963E-30,  -5.76505963E-30,   2.47073984E-30, ]
 - [ -5.76505963E-30,   5.76505963E-30,  -2.47073984E-30, ]
-force_length_stats: {"min":   8.51917722E-30, "max":   8.51917722E-30, "mean":   8.51917722E-30, }
+force_length_stats: {min:   8.51917722E-30, max:   8.51917722E-30, mean:   8.51917722E-30, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -697,7 +687,7 @@ force_length_stats: {"min":   8.51917722E-30, "max":   8.51917722E-30, "mean":  
    Integrated=    8.0000E+00
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 2, }
+iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.19146535725979E+00
 hartree             :  6.41861046670551E-01
@@ -714,7 +704,7 @@ total_energy_eV     : -2.36116980990394E+02
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 2, }
+iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  1.07656236280581E-02
 Ewald energy        : -8.43581958561899E+00
@@ -952,10 +942,10 @@ P           mkmem           4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          8.6  wall=          8.9
+- Proc.   0 individual time (sec): cpu=          6.6  wall=          6.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  38 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.6  wall=          8.9
++Overall time at end (sec) : cpu=          6.6  wall=          6.7

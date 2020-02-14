@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 14h39 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h49 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t87-t88-t89/t89.in
 - output file    -> t89.out
@@ -248,7 +248,7 @@ P          mk1mem           8
 
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -555,7 +555,7 @@ P          mk1mem           8
 
 ================================================================================
 == DATASET  6 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -948,7 +948,7 @@ P          mk1mem           8
 
 ================================================================================
 == DATASET  7 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -4004,10 +4004,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         27.4  wall=         28.5
+- Proc.   0 individual time (sec): cpu=         26.9  wall=         28.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered 122 WARNINGs and  17 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         27.4  wall=         28.5
++Overall time at end (sec) : cpu=         26.9  wall=         28.1

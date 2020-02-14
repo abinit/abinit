@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 15h15 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h55 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/psml_t03/t03.in
 - output file    -> t03.out
@@ -317,7 +317,7 @@ P           mkmem         110
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7511064  3.7511064  G(1)= -0.1332940  0.1332940  0.1332940
@@ -370,21 +370,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     124.454     124.404
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.7511064,   3.7511064, ]
+- [  3.7511064,   0.0000000,   3.7511064, ]
+- [  3.7511064,   3.7511064,   0.0000000, ]
 lattice_lengths: [   5.30487,    5.30487,    5.30487, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   7.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -2.29E-10, "res2":  8.21E-07, 
-    "residm":  2.39E-05, "diffor": undef, 
-}
+lattice_volume:   1.0556213E+02
+convergence_: {deltae: -2.29E-10, res2:  8.21E-07, residm:  2.39E-05, diffor: undef, }
 etotal    :  -2.31531328E+00
 entropy   :   0.00000000E+00
 fermie    :   2.75468383E-01
@@ -395,7 +390,7 @@ cartesian_stress_tensor:
 pressure_GPa:   6.0288E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -437,7 +432,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.78679633145844E-01
 hartree             :  4.17566978710674E-03
@@ -466,7 +461,7 @@ band_energy         :  3.20668307176702E-01
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7511064  3.7511064  G(1)= -0.1332940  0.1332940  0.1332940
@@ -518,21 +513,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     151.746     151.731
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.7511064,   3.7511064, ]
+- [  3.7511064,   0.0000000,   3.7511064, ]
+- [  3.7511064,   3.7511064,   0.0000000, ]
 lattice_lengths: [   5.30487,    5.30487,    5.30487, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   8.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -3.31E-10, "res2":  7.49E-07, 
-    "residm":  7.15E-06, "diffor": undef, 
-}
+lattice_volume:   1.0556213E+02
+convergence_: {deltae: -3.31E-10, res2:  7.49E-07, residm:  7.15E-06, diffor: undef, }
 etotal    :  -2.31589936E+00
 entropy   :   0.00000000E+00
 fermie    :   2.75060751E-01
@@ -543,7 +533,7 @@ cartesian_stress_tensor:
 pressure_GPa:   5.4674E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -585,7 +575,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 2, }
+iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.79614078644750E-01
 hartree             :  4.13066729467960E-03
@@ -614,7 +604,7 @@ band_energy         :  3.20165917498289E-01
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7511064  3.7511064  G(1)= -0.1332940  0.1332940  0.1332940
@@ -666,21 +656,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     181.378     181.338
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 3, }
+iteration_state: {dtset: 3, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.7511064,   3.7511064, ]
+- [  3.7511064,   0.0000000,   3.7511064, ]
+- [  3.7511064,   3.7511064,   0.0000000, ]
 lattice_lengths: [   5.30487,    5.30487,    5.30487, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   9.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -4.19E-10, "res2":  6.05E-07, 
-    "residm":  1.01E-05, "diffor": undef, 
-}
+lattice_volume:   1.0556213E+02
+convergence_: {deltae: -4.19E-10, res2:  6.05E-07, residm:  1.01E-05, diffor: undef, }
 etotal    :  -2.31626796E+00
 entropy   :   0.00000000E+00
 fermie    :   2.74921393E-01
@@ -691,7 +676,7 @@ cartesian_stress_tensor:
 pressure_GPa:   5.5652E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -733,7 +718,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 3, }
+iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.80239002396322E-01
 hartree             :  4.11928385122538E-03
@@ -1282,10 +1267,10 @@ P           mkmem         110
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         23.8  wall=         24.1
+- Proc.   0 individual time (sec): cpu=         23.8  wall=         24.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.8  wall=         24.1
++Overall time at end (sec) : cpu=         23.8  wall=         24.0

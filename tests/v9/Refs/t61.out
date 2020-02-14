@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 14h41 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h53 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t57-t58-t59-t60-t61/t61.in
 - output file    -> t61.out
@@ -261,7 +261,7 @@ P           mkmem3         29
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -361,28 +361,23 @@ P           mkmem3         29
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8515040,   3.8515040, ]
+- [  3.8515040,   0.0000000,   3.8515040, ]
+- [  3.8515040,   3.8515040,   0.0000000, ]
 lattice_lengths: [   5.44685,    5.44685,    5.44685, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":  35.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  0.00E+00, "res2":  0.00E+00, 
-    "residm":  9.80E-17, "diffor":  0.00E+00, 
-}
+lattice_volume:   1.1426706E+02
+convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.80E-17, diffor:  0.00E+00, }
 etotal    :  -2.52026287E+01
 entropy   :   0.00000000E+00
 fermie    :  -7.09476690E-03
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -430,7 +425,7 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
 
@@ -540,7 +535,7 @@ Interpolation of the electron-phonon coupling potential completed
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -960,10 +955,10 @@ P           mkmem3         29
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         34.3  wall=         34.6
+- Proc.   0 individual time (sec): cpu=         28.9  wall=         29.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         34.3  wall=         34.6
++Overall time at end (sec) : cpu=         28.9  wall=         29.0

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 14h33 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h39 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t04-t05/t04.in
 - output file    -> t04.out
@@ -343,7 +343,7 @@ P           mkmem4          6
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -407,21 +407,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      82.063      81.984
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.3703265,   3.3703265, ]
+- [  3.3703265,   0.0000000,   3.3703265, ]
+- [  3.3703265,   3.3703265,   0.0000000, ]
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   8.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -9.24E-14, "res2":  2.62E-13, 
-    "residm":  3.36E-06, "diffor": undef, 
-}
+lattice_volume:   7.6567759E+01
+convergence_: {deltae: -9.24E-14, res2:  2.62E-13, residm:  3.36E-06, diffor: undef, }
 etotal    :  -1.16530569E+01
 entropy   :   0.00000000E+00
 fermie    :   5.40204664E-01
@@ -433,7 +428,7 @@ pressure_GPa:  -1.3157E+02
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -477,7 +472,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  7.28840801507944E+00
 hartree             :  8.19404515297404E-01
@@ -504,7 +499,7 @@ band_energy         :  1.32105443307335E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -553,28 +548,23 @@ band_energy         :  1.32105443307335E+00
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.3703265,   3.3703265, ]
+- [  3.3703265,   0.0000000,   3.3703265, ]
+- [  3.3703265,   3.3703265,   0.0000000, ]
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   8.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  0.00E+00, "res2":  0.00E+00, 
-    "residm":  9.88E-11, "diffor":  0.00E+00, 
-}
+lattice_volume:   7.6567759E+01
+convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.88E-11, diffor:  0.00E+00, }
 etotal    :  -1.16530569E+01
 entropy   :   0.00000000E+00
 fermie    :   5.40204664E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -607,7 +597,7 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -854,7 +844,7 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -978,7 +968,7 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
-iteration_state: {"dtset": 4, }
+iteration_state: {dtset: 4, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :    8.226
@@ -998,7 +988,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
-iteration_state: {"dtset": 4, }
+iteration_state: {dtset: 4, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :    9.926
@@ -1018,7 +1008,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
-iteration_state: {"dtset": 4, }
+iteration_state: {dtset: 4, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   10.135
@@ -1038,7 +1028,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
-iteration_state: {"dtset": 4, }
+iteration_state: {dtset: 4, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   19.559
@@ -1058,7 +1048,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
-iteration_state: {"dtset": 4, }
+iteration_state: {dtset: 4, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    9.269
@@ -1078,7 +1068,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
-iteration_state: {"dtset": 4, }
+iteration_state: {dtset: 4, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    4.890
@@ -1456,10 +1446,10 @@ P           mkmem4          6
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          6.4  wall=          6.7
+- Proc.   0 individual time (sec): cpu=          4.4  wall=          8.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.4  wall=          6.7
++Overall time at end (sec) : cpu=          4.4  wall=          8.3

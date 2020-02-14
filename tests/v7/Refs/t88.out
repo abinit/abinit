@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 02h17 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h45 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t85-t86-t87-t88-t89/t88.in
 - output file    -> t88.out
@@ -288,7 +288,7 @@ P           mkmem          29
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -523,7 +523,7 @@ All the independent perturbations are available
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -735,7 +735,7 @@ All the independent perturbations are available
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -888,7 +888,7 @@ Interpolation of the electron-phonon coupling potential completed
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -1474,10 +1474,10 @@ P           mkmem          29
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         10.0  wall=         10.2
+- Proc.   0 individual time (sec): cpu=         10.0  wall=         10.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.0  wall=         10.2
++Overall time at end (sec) : cpu=         10.0  wall=         10.0

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 14h44 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h56 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/wannier90_t12/t12.in
 - output file    -> t12.out
@@ -168,7 +168,7 @@ P           mkmem2          8
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   GGA: revPBE functional - ixc=14
@@ -226,21 +226,16 @@ _setup2: Arith. and geom. avg. npw (full set) are    1776.375    1776.338
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   6.2500000,   6.2500000, ]
+- [  6.2500000,   0.0000000,   6.2500000, ]
+- [  6.2500000,   6.2500000,   0.0000000, ]
 lattice_lengths: [   8.83883,    8.83883,    8.83883, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":  18.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -9.77E-13, "res2":  4.83E-13, 
-    "residm":  1.94E-17, "diffor": undef, 
-}
+lattice_volume:   4.8828125E+02
+convergence_: {deltae: -9.77E-13, res2:  4.83E-13, residm:  1.94E-17, diffor: undef, }
 etotal    :  -2.12517706E+01
 entropy   :   0.00000000E+00
 fermie    :  -3.04472063E-01
@@ -251,7 +246,7 @@ cartesian_stress_tensor:
 pressure_GPa:   4.2828E-02
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -289,7 +284,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  7.52321595108565E+00
 hartree             :  7.39017304188955E+00
@@ -316,7 +311,7 @@ band_energy         : -3.46710791276317E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -343,28 +338,23 @@ band_energy         : -3.46710791276317E+00
 ================================================================================
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   6.2500000,   6.2500000, ]
+- [  6.2500000,   0.0000000,   6.2500000, ]
+- [  6.2500000,   6.2500000,   0.0000000, ]
 lattice_lengths: [   8.83883,    8.83883,    8.83883, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":  18.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  0.00E+00, "res2":  0.00E+00, 
-    "residm":  0.00E+00, "diffor":  0.00E+00, 
-}
+lattice_volume:   4.8828125E+02
+convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  0.00E+00, diffor:  0.00E+00, }
 etotal    :  -2.12517706E+01
 entropy   :   0.00000000E+00
 fermie    :  -3.04472063E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
 
@@ -639,10 +629,10 @@ P           mkmem2          8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.2  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.2  wall=          2.4
++Overall time at end (sec) : cpu=          2.1  wall=          2.2

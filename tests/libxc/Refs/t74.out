@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 16h41 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h55 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t74/t74.in
 - output file    -> t74.out
@@ -871,7 +871,7 @@ P           mkmem           6
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -932,21 +932,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -3.89E-12, "res2":  9.33E-12, 
-    "residm":  4.27E-06, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae: -3.89E-12, res2:  9.33E-12, residm:  4.27E-06, diffor: undef, }
 etotal    :  -2.42142015E+00
 entropy   :   0.00000000E+00
 fermie    :   2.96449216E-01
@@ -957,7 +952,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -4.6152E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -997,7 +992,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.79853268671438E-01
 hartree             :  3.95699428299075E-03
@@ -1026,7 +1021,7 @@ band_energy         :  4.00092280990536E-01
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1081,21 +1076,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  1.29E-14, "res2":  3.91E-17, 
-    "residm":  2.05E-08, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  1.29E-14, res2:  3.91E-17, residm:  2.05E-08, diffor: undef, }
 etotal    :  -2.42141982E+00
 entropy   :   0.00000000E+00
 fermie    :   2.96449396E-01
@@ -1106,7 +1096,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -4.6151E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1146,7 +1136,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 2, }
+iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.79853294279437E-01
 hartree             :  3.95699836954218E-03
@@ -1175,7 +1165,7 @@ band_energy         :  4.00092786274728E-01
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1236,21 +1226,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 3, }
+iteration_state: {dtset: 3, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  2.41E-09, "res2":  5.23E-13, 
-    "residm":  4.30E-11, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  2.41E-09, res2:  5.23E-13, residm:  4.30E-11, diffor: undef, }
 etotal    :  -2.43945667E+00
 entropy   :   0.00000000E+00
 fermie    :   2.87425595E-01
@@ -1261,7 +1246,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.0306E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1301,7 +1286,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 3, }
+iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.71754729134700E-01
 hartree             :  3.31798954109966E-03
@@ -1317,7 +1302,7 @@ total_energy        : -2.43945667383790E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 3, }
+iteration_state     : {dtset: 3, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.86696752290943E-01
 Ewald energy        : -2.71472096493581E+00
@@ -1341,7 +1326,7 @@ total_energy_dc     : -2.43945667568173E+00
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1382,21 +1367,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 4, }
+iteration_state: {dtset: 4, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  2.66E-09, "res2":  7.46E-13, 
-    "residm":  4.10E-11, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  2.66E-09, res2:  7.46E-13, residm:  4.10E-11, diffor: undef, }
 etotal    :  -2.44087616E+00
 entropy   :   0.00000000E+00
 fermie    :   2.87662350E-01
@@ -1407,7 +1387,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.0869E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1447,7 +1427,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 4, }
+iteration_state     : {dtset: 4, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.71709782686362E-01
 hartree             :  3.31490054739652E-03
@@ -1463,7 +1443,7 @@ total_energy        : -2.44087616008365E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 4, }
+iteration_state     : {dtset: 4, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.82490373748894E-01
 Ewald energy        : -2.71472096493581E+00
@@ -1487,7 +1467,7 @@ total_energy_dc     : -2.44087616200519E+00
 
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1528,21 +1508,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 5, }
+iteration_state: {dtset: 5, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  2.65E-09, "res2":  7.43E-13, 
-    "residm":  4.11E-11, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  2.65E-09, res2:  7.43E-13, residm:  4.11E-11, diffor: undef, }
 etotal    :  -2.44081519E+00
 entropy   :   0.00000000E+00
 fermie    :   2.87652050E-01
@@ -1553,7 +1528,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.0845E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1593,7 +1568,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 5, }
+iteration_state     : {dtset: 5, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.71711460588111E-01
 hartree             :  3.31501697453797E-03
@@ -1609,7 +1584,7 @@ total_energy        : -2.44081518725880E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 5, }
+iteration_state     : {dtset: 5, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.82666698481399E-01
 Ewald energy        : -2.71472096493581E+00
@@ -1633,7 +1608,7 @@ total_energy_dc     : -2.44081518917812E+00
 
 ================================================================================
 == DATASET  6 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1694,21 +1669,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 6, }
+iteration_state: {dtset: 6, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  2.34E-09, "res2":  5.09E-14, 
-    "residm":  4.29E-11, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  2.34E-09, res2:  5.09E-14, residm:  4.29E-11, diffor: undef, }
 etotal    :  -2.46696534E+00
 entropy   :   0.00000000E+00
 fermie    :   2.78017616E-01
@@ -1719,7 +1689,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.1662E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1759,7 +1729,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 6, }
+iteration_state     : {dtset: 6, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.72068636513573E-01
 hartree             :  3.34523572431078E-03
@@ -1775,7 +1745,7 @@ total_energy        : -2.46696533821443E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 6, }
+iteration_state     : {dtset: 6, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.53706624427774E-01
 Ewald energy        : -2.71472096493581E+00
@@ -1799,7 +1769,7 @@ total_energy_dc     : -2.46696534102170E+00
 
 ================================================================================
 == DATASET  7 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1839,21 +1809,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 7, }
+iteration_state: {dtset: 7, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  9.51E-10, "res2":  5.51E-14, 
-    "residm":  7.08E-11, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  9.51E-10, res2:  5.51E-14, residm:  7.08E-11, diffor: undef, }
 etotal    :  -2.43227378E+00
 entropy   :   0.00000000E+00
 fermie    :   2.87454127E-01
@@ -1864,7 +1829,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -7.3910E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1904,7 +1869,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 7, }
+iteration_state     : {dtset: 7, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.72637897043700E-01
 hartree             :  3.37504814418271E-03
@@ -1920,7 +1885,7 @@ total_energy        : -2.43227377727384E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 7, }
+iteration_state     : {dtset: 7, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  3.16174254594229E-01
 Ewald energy        : -2.71472096493581E+00
@@ -1944,7 +1909,7 @@ total_energy_dc     : -2.43227377963633E+00
 
 ================================================================================
 == DATASET  8 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2008,21 +1973,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 8, }
+iteration_state: {dtset: 8, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  4.63E-10, "res2":  9.44E-15, 
-    "residm":  2.13E-11, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  4.63E-10, res2:  9.44E-15, residm:  2.13E-11, diffor: undef, }
 etotal    :  -2.42517892E+00
 entropy   :   0.00000000E+00
 fermie    :   2.88455720E-01
@@ -2033,7 +1993,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -5.8685E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2073,7 +2033,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 8, }
+iteration_state     : {dtset: 8, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.71963358599330E-01
 hartree             :  3.27653964548665E-03
@@ -2089,7 +2049,7 @@ total_energy        : -2.42517892080805E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 8, }
+iteration_state     : {dtset: 8, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.75064253488735E-01
 Ewald energy        : -2.71472096493581E+00
@@ -2113,7 +2073,7 @@ total_energy_dc     : -2.42517892096434E+00
 
 ================================================================================
 == DATASET  9 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2174,21 +2134,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 9, }
+iteration_state: {dtset: 9, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  4.63E-10, "res2":  9.44E-15, 
-    "residm":  2.13E-11, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  4.63E-10, res2:  9.44E-15, residm:  2.13E-11, diffor: undef, }
 etotal    :  -2.42517859E+00
 entropy   :   0.00000000E+00
 fermie    :   2.88455884E-01
@@ -2199,7 +2154,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -5.8685E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2239,7 +2194,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 9, }
+iteration_state     : {dtset: 9, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.71963373567469E-01
 hartree             :  3.27653967012249E-03
@@ -2255,7 +2210,7 @@ total_energy        : -2.42517859147044E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 9, }
+iteration_state     : {dtset: 9, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.75064712949027E-01
 Ewald energy        : -2.71472096493581E+00
@@ -2279,7 +2234,7 @@ total_energy_dc     : -2.42517859162672E+00
 
 ================================================================================
 == DATASET 10 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2343,21 +2298,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 10, }
+iteration_state: {dtset: 10, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  1.04E-09, "res2":  4.59E-14, 
-    "residm":  7.53E-10, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  1.04E-09, res2:  4.59E-14, residm:  7.53E-10, diffor: undef, }
 etotal    :  -2.42660394E+00
 entropy   :   0.00000000E+00
 fermie    :   2.84942359E-01
@@ -2368,7 +2318,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -6.2137E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2408,7 +2358,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 10, }
+iteration_state     : {dtset: 10, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.70127989552620E-01
 hartree             :  3.12398637400624E-03
@@ -2424,7 +2374,7 @@ total_energy        : -2.42660394462448E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 10, }
+iteration_state     : {dtset: 10, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.33470694882001E-01
 Ewald energy        : -2.71472096493581E+00
@@ -2448,7 +2398,7 @@ total_energy_dc     : -2.42660394555111E+00
 
 ================================================================================
 == DATASET 11 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2509,21 +2459,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 11, }
+iteration_state: {dtset: 11, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  1.04E-09, "res2":  4.59E-14, 
-    "residm":  7.53E-10, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  1.04E-09, res2:  4.59E-14, residm:  7.53E-10, diffor: undef, }
 etotal    :  -2.42660361E+00
 entropy   :   0.00000000E+00
 fermie    :   2.84942525E-01
@@ -2534,7 +2479,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -6.2137E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2574,7 +2519,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 11, }
+iteration_state     : {dtset: 11, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.70128002972416E-01
 hartree             :  3.12398617298268E-03
@@ -2590,7 +2535,7 @@ total_energy        : -2.42660361458852E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 11, }
+iteration_state     : {dtset: 11, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.33471154839018E-01
 Ewald energy        : -2.71472096493581E+00
@@ -2614,7 +2559,7 @@ total_energy_dc     : -2.42660361551520E+00
 
 ================================================================================
 == DATASET 12 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2673,21 +2618,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 12, }
+iteration_state: {dtset: 12, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -5.69E-10, "res2":  6.63E-12, 
-    "residm":  1.69E-10, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae: -5.69E-10, res2:  6.63E-12, residm:  1.69E-10, diffor: undef, }
 etotal    :  -2.39252158E+00
 entropy   :   0.00000000E+00
 fermie    :   3.01163204E-01
@@ -2698,7 +2638,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.5493E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2738,7 +2678,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 12, }
+iteration_state     : {dtset: 12, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.81669678092672E-01
 hartree             :  4.08051814772279E-03
@@ -2754,7 +2694,7 @@ total_energy        : -2.39252158197539E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 12, }
+iteration_state     : {dtset: 12, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  3.29842994297111E-01
 Ewald energy        : -2.71472096493581E+00
@@ -2778,7 +2718,7 @@ total_energy_dc     : -2.39252163783514E+00
 
 ================================================================================
 == DATASET 13 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2865,21 +2805,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 13, }
+iteration_state: {dtset: 13, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -4.46E-07, "res2":  9.54E-07, 
-    "residm":  4.55E-09, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae: -4.46E-07, res2:  9.54E-07, residm:  4.55E-09, diffor: undef, }
 etotal    :  -1.91303145E+00
 entropy   :   0.00000000E+00
 fermie    :   3.10171342E-01
@@ -2890,7 +2825,7 @@ cartesian_stress_tensor:
 pressure_GPa:   3.7501E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2930,7 +2865,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 13, }
+iteration_state     : {dtset: 13, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.72106767794084E-01
 hartree             :  4.81910138042609E-03
@@ -2946,7 +2881,7 @@ total_energy        : -1.91303145420641E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 13, }
+iteration_state     : {dtset: 13, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  1.03793103875576E-01
 Ewald energy        : -2.71472096493581E+00
@@ -2970,7 +2905,7 @@ total_energy_dc     : -1.91303457301042E+00
 
 ================================================================================
 == DATASET 14 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -3031,21 +2966,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 14, }
+iteration_state: {dtset: 14, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  2.34E-09, "res2":  5.09E-14, 
-    "residm":  4.29E-11, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  2.34E-09, res2:  5.09E-14, residm:  4.29E-11, diffor: undef, }
 etotal    :  -2.46696531E+00
 entropy   :   0.00000000E+00
 fermie    :   2.78017632E-01
@@ -3056,7 +2986,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.1662E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3096,7 +3026,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 14, }
+iteration_state     : {dtset: 14, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.72068635672245E-01
 hartree             :  3.34523565809356E-03
@@ -3112,7 +3042,7 @@ total_energy        : -2.46696530553105E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 14, }
+iteration_state     : {dtset: 14, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.53706651586022E-01
 Ewald energy        : -2.71472096493581E+00
@@ -3136,7 +3066,7 @@ total_energy_dc     : -2.46696530833833E+00
 
 ================================================================================
 == DATASET 15 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -3200,21 +3130,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 15, }
+iteration_state: {dtset: 15, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.43E-08, "res2":  5.84E-09, 
-    "residm":  2.86E-07, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae: -1.43E-08, res2:  5.84E-09, residm:  2.86E-07, diffor: undef, }
 etotal    :  -3.93745006E+02
 entropy   :   0.00000000E+00
 fermie    :   3.00768429E-01
@@ -3225,7 +3150,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.0492E+05
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3265,7 +3190,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 15, }
+iteration_state     : {dtset: 15, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.72119620004422E-01
 hartree             :  3.33962979742564E-03
@@ -3281,7 +3206,7 @@ total_energy        : -3.93745006471926E+02
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 15, }
+iteration_state     : {dtset: 15, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -7.82364978308287E+02
 Ewald energy        : -2.71472096493581E+00
@@ -3305,7 +3230,7 @@ total_energy_dc     : -3.93745006269075E+02
 
 ================================================================================
 == DATASET 16 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -3341,21 +3266,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 16, }
+iteration_state: {dtset: 16, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.79E-11, "res2":  1.18E-10, 
-    "residm":  1.99E-08, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae: -1.79E-11, res2:  1.18E-10, residm:  1.99E-08, diffor: undef, }
 etotal    :  -2.42102139E+00
 entropy   :   0.00000000E+00
 fermie    :   2.96402934E-01
@@ -3366,7 +3286,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -4.8199E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3406,7 +3326,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 16, }
+iteration_state     : {dtset: 16, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.79267484463879E-01
 hartree             :  3.87862605085844E-03
@@ -3422,7 +3342,7 @@ total_energy        : -2.42102138541269E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 16, }
+iteration_state     : {dtset: 16, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  4.00382259302952E-01
 Ewald energy        : -2.71472096493581E+00
@@ -3446,7 +3366,7 @@ total_energy_dc     : -2.42102154273662E+00
 
 ================================================================================
 == DATASET 17 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -3482,21 +3402,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 17, }
+iteration_state: {dtset: 17, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  8.74E-10, "res2":  1.15E-10, 
-    "residm":  2.03E-08, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  8.74E-10, res2:  1.15E-10, residm:  2.03E-08, diffor: undef, }
 etotal    :  -2.42102158E+00
 entropy   :   0.00000000E+00
 fermie    :   2.92873483E-01
@@ -3507,7 +3422,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -7.6721E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3547,7 +3462,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 17, }
+iteration_state     : {dtset: 17, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.79340139175890E-01
 hartree             :  3.88941090607175E-03
@@ -3563,7 +3478,7 @@ total_energy        : -2.42102157734474E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 17, }
+iteration_state     : {dtset: 17, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  3.89771079648744E-01
 Ewald energy        : -2.71472096493581E+00
@@ -3587,7 +3502,7 @@ total_energy_dc     : -2.42102180299380E+00
 
 ================================================================================
 == DATASET 18 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -3648,21 +3563,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 18, }
+iteration_state: {dtset: 18, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  2.41E-09, "res2":  5.23E-13, 
-    "residm":  4.30E-11, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  2.41E-09, res2:  5.23E-13, residm:  4.30E-11, diffor: undef, }
 etotal    :  -2.43945667E+00
 entropy   :   0.00000000E+00
 fermie    :   2.87425595E-01
@@ -3673,7 +3583,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.0306E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3713,7 +3623,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 18, }
+iteration_state     : {dtset: 18, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.71754729134700E-01
 hartree             :  3.31798954109966E-03
@@ -3729,7 +3639,7 @@ total_energy        : -2.43945667383790E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 18, }
+iteration_state     : {dtset: 18, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.86696752290943E-01
 Ewald energy        : -2.71472096493581E+00
@@ -3753,7 +3663,7 @@ total_energy_dc     : -2.43945667568173E+00
 
 ================================================================================
 == DATASET 19 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -3817,21 +3727,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 19, }
+iteration_state: {dtset: 19, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  1.04E-09, "res2":  4.59E-14, 
-    "residm":  7.53E-10, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  1.04E-09, res2:  4.59E-14, residm:  7.53E-10, diffor: undef, }
 etotal    :  -2.42660394E+00
 entropy   :   0.00000000E+00
 fermie    :   2.84942359E-01
@@ -3842,7 +3747,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -6.2137E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3882,7 +3787,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 19, }
+iteration_state     : {dtset: 19, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.70127989552620E-01
 hartree             :  3.12398637400624E-03
@@ -3898,7 +3803,7 @@ total_energy        : -2.42660394462448E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 19, }
+iteration_state     : {dtset: 19, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.33470694882001E-01
 Ewald energy        : -2.71472096493581E+00
@@ -3922,7 +3827,7 @@ total_energy_dc     : -2.42660394555111E+00
 
 ================================================================================
 == DATASET 20 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -3989,21 +3894,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 20, }
+iteration_state: {dtset: 20, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -2.09E-07, "res2":  6.68E-08, 
-    "residm":  1.76E-10, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae: -2.09E-07, res2:  6.68E-08, residm:  1.76E-10, diffor: undef, }
 etotal    :  -2.44000666E+00
 entropy   :   0.00000000E+00
 fermie    :   2.50482308E-01
@@ -4014,7 +3914,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -8.6477E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -4054,7 +3954,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 20, }
+iteration_state     : {dtset: 20, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.61694942675940E-01
 hartree             :  2.40827235087522E-03
@@ -4070,7 +3970,7 @@ total_energy        : -2.44000665684559E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 20, }
+iteration_state     : {dtset: 20, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -9.77235238047214E-02
 Ewald energy        : -2.71472096493581E+00
@@ -4094,7 +3994,7 @@ total_energy_dc     : -2.44000661447624E+00
 
 ================================================================================
 == DATASET 21 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -4132,21 +4032,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 21, }
+iteration_state: {dtset: 21, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  2.22E-15, "res2":  6.23E-18, 
-    "residm":  2.05E-08, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  2.22E-15, res2:  6.23E-18, residm:  2.05E-08, diffor: undef, }
 etotal    :  -2.42142015E+00
 entropy   :   0.00000000E+00
 fermie    :   2.96449237E-01
@@ -4157,7 +4052,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -4.6151E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -4197,7 +4092,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 21, }
+iteration_state     : {dtset: 21, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.79853274158832E-01
 hartree             :  3.95699729284335E-03
@@ -4213,7 +4108,7 @@ total_energy        : -2.42142014920025E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 21, }
+iteration_state     : {dtset: 21, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  4.00092328448513E-01
 Ewald energy        : -2.71472096493581E+00
@@ -4237,7 +4132,7 @@ total_energy_dc     : -2.42142014910351E+00
 
 ================================================================================
 == DATASET 22 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -4298,21 +4193,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 22, }
+iteration_state: {dtset: 22, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  1.04E-09, "res2":  4.59E-14, 
-    "residm":  7.53E-10, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  1.04E-09, res2:  4.59E-14, residm:  7.53E-10, diffor: undef, }
 etotal    :  -2.42660361E+00
 entropy   :   0.00000000E+00
 fermie    :   2.84942525E-01
@@ -4323,7 +4213,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -6.2137E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -4363,7 +4253,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 22, }
+iteration_state     : {dtset: 22, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.70128002972416E-01
 hartree             :  3.12398617298268E-03
@@ -4379,7 +4269,7 @@ total_energy        : -2.42660361458852E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 22, }
+iteration_state     : {dtset: 22, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.33471154839018E-01
 Ewald energy        : -2.71472096493581E+00
@@ -4403,7 +4293,7 @@ total_energy_dc     : -2.42660361551520E+00
 
 ================================================================================
 == DATASET 23 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -4467,21 +4357,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 23, }
+iteration_state: {dtset: 23, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -2.12E-07, "res2":  8.08E-08, 
-    "residm":  1.76E-10, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae: -2.12E-07, res2:  8.08E-08, residm:  1.76E-10, diffor: undef, }
 etotal    :  -2.44000634E+00
 entropy   :   0.00000000E+00
 fermie    :   2.50482233E-01
@@ -4492,7 +4377,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -8.6478E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -4532,7 +4417,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 23, }
+iteration_state     : {dtset: 23, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.61694892546579E-01
 hartree             :  2.40827031849111E-03
@@ -4548,7 +4433,7 @@ total_energy        : -2.44000634380164E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 23, }
+iteration_state     : {dtset: 23, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -9.77232205851061E-02
 Ewald energy        : -2.71472096493581E+00
@@ -4572,7 +4457,7 @@ total_energy_dc     : -2.44000631511767E+00
 
 ================================================================================
 == DATASET 24 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -4607,21 +4492,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 24, }
+iteration_state: {dtset: 24, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  1.02E-14, "res2":  3.91E-17, 
-    "residm":  2.05E-08, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  1.02E-14, res2:  3.91E-17, residm:  2.05E-08, diffor: undef, }
 etotal    :  -2.42141982E+00
 entropy   :   0.00000000E+00
 fermie    :   2.96449396E-01
@@ -4632,7 +4512,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -4.6151E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -4672,7 +4552,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 24, }
+iteration_state     : {dtset: 24, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.79853294279437E-01
 hartree             :  3.95699836954216E-03
@@ -4688,7 +4568,7 @@ total_energy        : -2.42141982197569E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 24, }
+iteration_state     : {dtset: 24, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  4.00092786274727E-01
 Ewald energy        : -2.71472096493581E+00
@@ -4712,7 +4592,7 @@ total_energy_dc     : -2.42141982177313E+00
 
 ================================================================================
 == DATASET 25 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -4776,21 +4656,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      78.656      78.566
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 25, }
+iteration_state: {dtset: 25, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.8000000,   3.8000000, ]
+- [  3.8000000,   0.0000000,   3.8000000, ]
+- [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  4.63E-10, "res2":  9.44E-15, 
-    "residm":  2.13E-11, "diffor": undef, 
-}
+lattice_volume:   1.0974400E+02
+convergence_: {deltae:  4.63E-10, res2:  9.44E-15, residm:  2.13E-11, diffor: undef, }
 etotal    :  -2.42517892E+00
 entropy   :   0.00000000E+00
 fermie    :   2.88455720E-01
@@ -4801,7 +4676,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -5.8685E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -4841,7 +4716,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 25, }
+iteration_state     : {dtset: 25, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.71963358599330E-01
 hartree             :  3.27653964548665E-03
@@ -4857,7 +4732,7 @@ total_energy        : -2.42517892080805E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 25, }
+iteration_state     : {dtset: 25, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  2.75064253488735E-01
 Ewald energy        : -2.71472096493581E+00
@@ -5577,10 +5452,10 @@ P           mkmem           6
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         21.5  wall=         24.5
+- Proc.   0 individual time (sec): cpu=         20.9  wall=         23.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered 203 WARNINGs and 117 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         21.5  wall=         24.5
++Overall time at end (sec) : cpu=         20.9  wall=         23.6

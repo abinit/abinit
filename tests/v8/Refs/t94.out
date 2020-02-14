@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 02h19 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h48 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t94/t94.in
 - output file    -> t94.out
@@ -238,7 +238,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -334,28 +334,23 @@ _setup2: Arith. and geom. avg. npw (full set) are    4680.000    4680.000
 ================================================================================
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :       40
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :  3.280000000000000E+002
-charge    :  0.000000000000000E+000
+rprimd    :
+- [ 14.5210000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  14.5210000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  14.5210000, ]
 lattice_lengths: [  14.52100,   14.52100,   14.52100, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  10.0, "pawecutdg":  15.0, }
-convergence: {
-    "deltae":  0.00E+00, "res2":  0.00E+00, 
-    "residm":  0.00E+00, "diffor":  0.00E+00, 
-}
-etotal    : -1.089574055457424E+003
-entropy   :  0.000000000000000E+000
-fermie    :  0.000000000000000E+000
+lattice_volume:   3.0618899E+03
+convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  0.00E+00, diffor:  0.00E+00, }
+etotal    :  -1.08957406E+03
+entropy   :   0.00000000E+00
+fermie    :   0.00000000E+00
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -573,7 +568,7 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 **********
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.92910627236467E+02
 hartree             :  2.43467026257967E+02
@@ -588,15 +583,15 @@ total_energy_eV     : -3.35894006805497E+04
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  0.000000000000000E+000
-Ewald energy        : -9.137625358324574E+002
-psp_core            :  5.229540180803659E+001
-xc_dc               : -1.891236653354366E+002
-spherical_terms     : -3.898325609756620E+001
-total_energy_dc     : -1.089574055457424E+003
-total_energy_dc_eV  : -3.358940068054972E+004
+band_energy         :  0.00000000000000E+00
+Ewald energy        : -9.13762535832457E+02
+psp_core            :  5.22954018080366E+01
+xc_dc               : -1.89123665335437E+02
+spherical_terms     : -3.89832560975662E+01
+total_energy_dc     : -1.08957405545742E+03
+total_energy_dc_eV  : -3.35894006805497E+04
 ...
 
 
@@ -917,10 +912,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         18.8  wall=         18.8
+- Proc.   0 individual time (sec): cpu=         18.4  wall=         18.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.8  wall=         18.8
++Overall time at end (sec) : cpu=         18.4  wall=         18.5

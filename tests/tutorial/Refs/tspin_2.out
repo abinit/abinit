@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 16h43 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 19h00 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tspin_2/tspin_2.in
 - output file    -> tspin_2.out
@@ -185,7 +185,7 @@ P           mkmem          18
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -274,21 +274,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     524.167     524.148
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        2
-nelect    :   1.60000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  3.3000000,  -3.3000000,   0.0000000, ]
+- [  3.3000000,   3.3000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.6000000, ]
 lattice_lengths: [   4.66690,    4.66690,    6.60000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  18.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  1.92E-13, "res2":  6.81E-15, 
-    "residm":  9.82E-08, "diffor": undef, 
-}
+lattice_volume:   1.4374800E+02
+convergence_: {deltae:  1.92E-13, res2:  6.81E-15, residm:  9.82E-08, diffor: undef, }
 etotal    :  -4.92489593E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.77793565E-01
@@ -300,7 +295,7 @@ pressure_GPa:  -5.7424E+02
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -353,7 +348,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.93907640498278E+01
 hartree             :  5.32638332572483E+00
@@ -601,10 +596,10 @@ P           mkmem          18
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         23.4  wall=         23.6
+- Proc.   0 individual time (sec): cpu=         23.6  wall=         23.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.4  wall=         23.6
++Overall time at end (sec) : cpu=         23.6  wall=         23.7

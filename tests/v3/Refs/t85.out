@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 02h07 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h25 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v3_t85/t85.in
 - output file    -> t85.out
@@ -271,7 +271,7 @@ P          mk1mem           8
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -1548,33 +1548,28 @@ _setup2: Arith. and geom. avg. npw (full set) are      69.000      69.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :  1.400000000000000E+001
-charge    :  0.000000000000000E+000
+rprimd    :
+- [  5.7180000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   5.7180000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   5.7180000, ]
 lattice_lengths: [   5.71800,    5.71800,    5.71800, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   4.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  4.97E-14, "res2":  1.58E-20, 
-    "residm":  1.70E-18, "diffor": undef, 
-}
-etotal    : -3.585338351053631E+001
-entropy   :  0.000000000000000E+000
-fermie    :  1.693925028022711E-001
+lattice_volume:   1.8695301E+02
+convergence_: {deltae:  4.97E-14, res2:  1.58E-20, residm:  1.70E-18, diffor: undef, }
+etotal    :  -3.58533835E+01
+entropy   :   0.00000000E+00
+fermie    :   1.69392503E-01
 cartesian_stress_tensor:
-- [-3.080180736289899E-003,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000, -3.080180736289947E-003,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000, -3.080180736289947E-003, ]
-pressure_GPa:  9.062203071817895E+001
+- [ -3.08018074E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -3.08018074E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -3.08018074E-03, ]
+pressure_GPa:   9.0622E+01
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1716,7 +1711,7 @@ force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+
    Integrated=    1.4000E+01
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  9.26879723445936E+00
 hartree             :  1.98523841875123E+00
@@ -1762,7 +1757,7 @@ band_energy         : -2.41090330979936E+00
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1870,28 +1865,23 @@ band_energy         : -2.41090330979936E+00
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :  1.400000000000000E+001
-charge    :  0.000000000000000E+000
+rprimd    :
+- [  5.7180000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   5.7180000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   5.7180000, ]
 lattice_lengths: [   5.71800,    5.71800,    5.71800, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   4.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  0.00E+00, "res2":  0.00E+00, 
-    "residm":  9.85E-19, "diffor":  0.00E+00, 
-}
-etotal    : -3.585338351053631E+001
-entropy   :  0.000000000000000E+000
-fermie    :  1.693925028022711E-001
+lattice_volume:   1.8695301E+02
+convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.85E-19, diffor:  0.00E+00, }
+etotal    :  -3.58533835E+01
+entropy   :   0.00000000E+00
+fermie    :   1.69392503E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1988,7 +1978,7 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -3109,10 +3099,10 @@ P          mk1mem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          6.1  wall=          6.7
+- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  25 WARNINGs and  31 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.1  wall=          6.7
++Overall time at end (sec) : cpu=          6.0  wall=          6.6

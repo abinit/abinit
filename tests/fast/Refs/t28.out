@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 14h44 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h54 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/fast_t27-t28-t29/t28.in
 - output file    -> t28.out
@@ -121,7 +121,7 @@ P           mkmem           4
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -192,21 +192,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        8
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [ 10.2631100,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.2631100,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2631100, ]
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  0.00E+00, "res2":  2.63E-12, 
-    "residm":  5.53E-15, "diffor": undef, 
-}
+lattice_volume:   1.0810280E+03
+convergence_: {deltae:  0.00E+00, res2:  2.63E-12, residm:  5.53E-15, diffor: undef, }
 etotal    :  -3.51915652E+01
 entropy   :   0.00000000E+00
 fermie    :   1.89013293E-01
@@ -224,7 +219,7 @@ cartesian_forces:
 - [  3.24120197E-04,  -2.15865062E-04,   2.15865061E-04, ]
 - [  9.72209947E-05,   2.43919105E-12,   1.35227436E-11, ]
 - [  3.24120192E-04,   2.15865067E-04,  -2.15865067E-04, ]
-force_length_stats: {"min":   9.72209947E-05, "max":   1.32208648E-03, "mean":   4.35160553E-04, }
+force_length_stats: {min:   9.72209947E-05, max:   1.32208648E-03, mean:   4.35160553E-04, }
 ...
 
  bonds_lgth_angles : about to open file t28o_TIM1_GEO
@@ -303,21 +298,16 @@ force_length_stats: {"min":   9.72209947E-05, "max":   1.32208648E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        8
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [ 10.2631100,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.2631100,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2631100, ]
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  0.00E+00, "res2":  4.50E-11, 
-    "residm":  1.00E-14, "diffor": undef, 
-}
+lattice_volume:   1.0810280E+03
+convergence_: {deltae:  0.00E+00, res2:  4.50E-11, residm:  1.00E-14, diffor: undef, }
 etotal    :  -3.51915668E+01
 entropy   :   0.00000000E+00
 fermie    :   1.88991046E-01
@@ -335,7 +325,7 @@ cartesian_forces:
 - [  2.82490524E-04,  -1.88204359E-04,   1.88204359E-04, ]
 - [  8.47794360E-05,  -7.57475984E-14,  -1.72304240E-13, ]
 - [  2.82490523E-04,   1.88204359E-04,  -1.88204358E-04, ]
-force_length_stats: {"min":   8.47794360E-05, "max":   1.15173557E-03, "mean":   3.79115642E-04, }
+force_length_stats: {min:   8.47794360E-05, max:   1.15173557E-03, mean:   3.79115642E-04, }
 ...
 
  bonds_lgth_angles : about to open file t28o_TIM2_GEO
@@ -419,21 +409,16 @@ force_length_stats: {"min":   8.47794360E-05, "max":   1.15173557E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        8
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [ 10.2631100,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.2631100,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2631100, ]
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -6.18E-13, "res2":  2.00E-11, 
-    "residm":  9.30E-15, "diffor": undef, 
-}
+lattice_volume:   1.0810280E+03
+convergence_: {deltae: -6.18E-13, res2:  2.00E-11, residm:  9.30E-15, diffor: undef, }
 etotal    :  -3.51915720E+01
 entropy   :   0.00000000E+00
 fermie    :   1.88841066E-01
@@ -451,7 +436,7 @@ cartesian_forces:
 - [  8.00421293E-08,  -6.73577701E-08,   6.73578045E-08, ]
 - [ -4.49847416E-08,  -9.53288592E-16,  -1.61927989E-15, ]
 - [  8.00421219E-08,   6.73577585E-08,  -6.73577912E-08, ]
-force_length_stats: {"min":   4.06126651E-08, "max":   2.70959314E-07, "mean":   1.12525822E-07, }
+force_length_stats: {min:   4.06126651E-08, max:   2.70959314E-07, mean:   1.12525822E-07, }
 ...
 
  bonds_lgth_angles : about to open file t28o_TIM3_GEO
@@ -589,7 +574,7 @@ force_length_stats: {"min":   4.06126651E-08, "max":   2.70959314E-07, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.16819735822315E+01
 hartree             :  2.12455537150971E+00
@@ -788,10 +773,10 @@ P           mkmem           4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         11.9  wall=         12.2
+- Proc.   0 individual time (sec): cpu=         10.9  wall=         11.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.9  wall=         12.2
++Overall time at end (sec) : cpu=         10.9  wall=         11.5

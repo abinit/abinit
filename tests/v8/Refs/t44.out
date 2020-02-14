@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 14h37 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h46 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t41-t42-t43-t44/t44.in
 - output file    -> t44.out
@@ -315,7 +315,7 @@ P           mkmem           8
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -528,7 +528,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -723,7 +723,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -809,7 +809,7 @@ Interpolation of the electron-phonon coupling potential completed
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -1025,7 +1025,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
 
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -1223,7 +1223,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    5.0 [K]
 
 ================================================================================
 == DATASET  6 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -1677,10 +1677,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         46.0  wall=         47.4
+- Proc.   0 individual time (sec): cpu=         33.1  wall=         33.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         46.0  wall=         47.4
++Overall time at end (sec) : cpu=         33.1  wall=         33.2

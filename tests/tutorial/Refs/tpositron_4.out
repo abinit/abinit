@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 16h43 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 19h00 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpositron_4/tpositron_4.in
 - output file    -> tpositron_4.out
@@ -173,7 +173,7 @@ P           mkmem           3
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -452,21 +452,16 @@ TC-DFT STEP  19 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  is converged :  diff(etot_el-etot_pos)=  8.970E-06 < postoldfe=  1.000E-05
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :       15
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   6.00000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,  10.2612129,  10.2612129, ]
+- [ 10.2612129,   0.0000000,  10.2612129, ]
+- [ 10.2612129,  10.2612129,   0.0000000, ]
 lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   8.0, "pawecutdg":  15.0, }
-convergence: {
-    "deltae":  8.53E-10, "res2":  3.93E-09, 
-    "residm":  7.60E-09, "diffor":  7.89E-07, 
-}
+lattice_volume:   2.1608573E+03
+convergence_: {deltae:  8.53E-10, res2:  3.93E-09, residm:  7.60E-09, diffor:  7.89E-07, }
 etotal    :  -6.05880820E+01
 entropy   :   0.00000000E+00
 fermie    :   2.04075779E-01
@@ -488,7 +483,7 @@ cartesian_forces:
 - [  7.43061082E-03,  -3.80514424E-19,   6.21155036E-19, ]
 - [ -4.09071279E-19,   7.43061082E-03,  -5.50704713E-20, ]
 - [ -1.13204515E-18,   1.08348835E-18,   7.43061082E-03, ]
-force_length_stats: {"min":   5.11628758E-19, "max":   2.31841231E-02, "mean":   1.02589300E-02, }
+force_length_stats: {min:   5.11628758E-19, max:   2.31841231E-02, mean:   1.02589300E-02, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -781,21 +776,16 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  is converged :  diff(etot_el-etot_pos)=  5.342E-06 < postoldfe=  1.000E-05
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :       15
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   6.00000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,  10.2612129,  10.2612129, ]
+- [ 10.2612129,   0.0000000,  10.2612129, ]
+- [ 10.2612129,  10.2612129,   0.0000000, ]
 lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   8.0, "pawecutdg":  15.0, }
-convergence: {
-    "deltae":  6.59E-10, "res2":  7.01E-09, 
-    "residm":  1.77E-10, "diffor":  8.04E-07, 
-}
+lattice_volume:   2.1608573E+03
+convergence_: {deltae:  6.59E-10, res2:  7.01E-09, residm:  1.77E-10, diffor:  8.04E-07, }
 etotal    :  -6.05905613E+01
 entropy   :   0.00000000E+00
 fermie    :   2.04245771E-01
@@ -817,7 +807,7 @@ cartesian_forces:
 - [  6.71770021E-03,  -1.24245848E-19,  -2.57192230E-19, ]
 - [ -6.87062747E-19,   6.71770021E-03,   6.61577916E-19, ]
 - [ -3.69413235E-19,   3.09435021E-19,   6.71770021E-03, ]
-force_length_stats: {"min":   3.08614169E-19, "max":   2.21484537E-02, "mean":   9.59648611E-03, }
+force_length_stats: {min:   3.08614169E-19, max:   2.21484537E-02, mean:   9.59648611E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1144,21 +1134,16 @@ TC-DFT STEP   9 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  is converged :  diff(etot_el-etot_pos)=  8.570E-06 < postoldfe=  1.000E-05
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :       15
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   6.00000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,  10.2612129,  10.2612129, ]
+- [ 10.2612129,   0.0000000,  10.2612129, ]
+- [ 10.2612129,  10.2612129,   0.0000000, ]
 lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   8.0, "pawecutdg":  15.0, }
-convergence: {
-    "deltae":  5.41E-10, "res2":  8.05E-09, 
-    "residm":  2.59E-12, "diffor":  6.86E-07, 
-}
+lattice_volume:   2.1608573E+03
+convergence_: {deltae:  5.41E-10, res2:  8.05E-09, residm:  2.59E-12, diffor:  6.86E-07, }
 etotal    :  -6.06128905E+01
 entropy   :   0.00000000E+00
 fermie    :   1.94053804E-01
@@ -1180,7 +1165,7 @@ cartesian_forces:
 - [ -6.20401106E-03,  -4.99898082E-19,   3.89437916E-19, ]
 - [ -6.46219210E-19,  -6.20401106E-03,   3.89437916E-19, ]
 - [ -5.48796053E-21,  -1.48088044E-20,  -6.20401106E-03, ]
-force_length_stats: {"min":   2.02493385E-19, "max":   7.96804129E-03, "mean":   5.75137540E-03, }
+force_length_stats: {min:   2.02493385E-19, max:   7.96804129E-03, mean:   5.75137540E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1469,21 +1454,16 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  is converged :  diff(etot_el-etot_pos)=  1.311E-06 < postoldfe=  1.000E-05
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :       15
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   6.00000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,  10.2612129,  10.2612129, ]
+- [ 10.2612129,   0.0000000,  10.2612129, ]
+- [ 10.2612129,  10.2612129,   0.0000000, ]
 lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   8.0, "pawecutdg":  15.0, }
-convergence: {
-    "deltae":  6.33E-11, "res2":  3.41E-10, 
-    "residm":  1.15E-12, "diffor":  1.11E-07, 
-}
+lattice_volume:   2.1608573E+03
+convergence_: {deltae:  6.33E-11, res2:  3.41E-10, residm:  1.15E-12, diffor:  1.11E-07, }
 etotal    :  -6.06134166E+01
 entropy   :   0.00000000E+00
 fermie    :   1.93581373E-01
@@ -1505,7 +1485,7 @@ cartesian_forces:
 - [ -5.48327839E-03,   1.35595469E-19,  -1.37020271E-19, ]
 - [  1.64505724E-20,  -5.48327839E-03,   5.41159588E-20, ]
 - [  1.64842723E-19,   1.35595469E-19,  -5.48327839E-03, ]
-force_length_stats: {"min":   2.47178968E-19, "max":   6.67975075E-03, "mean":   4.94579768E-03, }
+force_length_stats: {min:   2.47178968E-19, max:   6.67975075E-03, mean:   4.94579768E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1820,7 +1800,7 @@ force_length_stats: {"min":   2.47178968E-19, "max":   6.67975075E-03, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.23963355180212E+01
 hartree             :  5.69614788718690E+00
@@ -1838,7 +1818,7 @@ total_energy_eV     : -1.64937520046767E+03
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -7.01191612357312E-01
 Ewald energy        : -5.92968646520594E+01
@@ -2089,10 +2069,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        344.7  wall=        345.1
+- Proc.   0 individual time (sec): cpu=        343.2  wall=        343.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered 517 WARNINGs and  43 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        344.7  wall=        345.1
++Overall time at end (sec) : cpu=        343.2  wall=        343.5

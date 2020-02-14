@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 02h15 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h42 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t43/t43.in
 - output file    -> t43.out
@@ -315,7 +315,7 @@ P          mk1mem4         16
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -421,33 +421,28 @@ _setup2: Arith. and geom. avg. npw (full set) are     353.000     352.996
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :  2.600000000000000E+001
-charge    :  0.000000000000000E+000
+rprimd    :
+- [  0.0000000,   4.9000000,   4.9000000, ]
+- [  4.9000000,   0.0000000,   4.9000000, ]
+- [  4.9000000,   4.9000000,   0.0000000, ]
 lattice_lengths: [   6.92965,    6.92965,    6.92965, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":  10.0, "pawecutdg":  40.0, }
-convergence: {
-    "deltae":  2.84E-13, "res2":  4.19E-16, 
-    "residm":  5.63E-19, "diffor": undef, 
-}
-etotal    : -2.191462462336000E+002
-entropy   :  0.000000000000000E+000
-fermie    :  1.461429742129061E-001
+lattice_volume:   2.3529800E+02
+convergence_: {deltae:  2.84E-13, res2:  4.19E-16, residm:  5.63E-19, diffor: undef, }
+etotal    :  -2.19146246E+02
+entropy   :   0.00000000E+00
+fermie    :   1.46142974E-01
 cartesian_stress_tensor:
-- [ 1.966932447104974E-001,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  1.966932447104974E-001,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  1.966932447104975E-001, ]
-pressure_GPa: -5.786914077543007E+003
+- [  1.96693245E-01,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.96693245E-01,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.96693245E-01, ]
+pressure_GPa:  -5.7869E+03
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+000, "mean":  0.000000000000000E+000, }
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -561,7 +556,7 @@ force_length_stats: {"min":  0.000000000000000E+000, "max":  0.000000000000000E+
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.12704121647447E+01
 hartree             :  3.39268558105511E+01
@@ -576,15 +571,15 @@ total_energy_eV     : -5.96327262747049E+03
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         : -4.786142435366600E+001
-Ewald energy        : -1.153334569733165E+002
-psp_core            :  6.932697065873072E+000
-xc_dc               : -3.166113043839623E+001
-spherical_terms     : -3.122293153409442E+001
-total_energy_dc     : -2.191462462336000E+002
-total_energy_dc_eV  : -5.963272627470486E+003
+band_energy         : -4.78614243536660E+01
+Ewald energy        : -1.15333456973316E+02
+psp_core            :  6.93269706587307E+00
+xc_dc               : -3.16611304383962E+01
+spherical_terms     : -3.12229315340944E+01
+total_energy_dc     : -2.19146246233600E+02
+total_energy_dc_eV  : -5.96327262747049E+03
 ...
 
 
@@ -600,7 +595,7 @@ total_energy_dc_eV  : -5.963272627470486E+003
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -821,7 +816,7 @@ total_energy_dc_eV  : -5.963272627470486E+003
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1049,7 +1044,7 @@ total_energy_dc_eV  : -5.963272627470486E+003
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1732,10 +1727,10 @@ P          mk1mem4         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         25.2  wall=         26.0
+- Proc.   0 individual time (sec): cpu=         25.0  wall=         26.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and  31 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.2  wall=         26.0
++Overall time at end (sec) : cpu=         25.0  wall=         26.4

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 14h44 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h54 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/fast_t27-t28-t29/t29.in
 - output file    -> t29.out
@@ -122,7 +122,7 @@ P           mkmem           4
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -193,21 +193,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     272.000     272.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        8
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [ 10.2631100,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.2631100,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2631100, ]
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.67E-09, "res2":  1.14E-08, 
-    "residm":  1.07E-11, "diffor": undef, 
-}
+lattice_volume:   1.0810280E+03
+convergence_: {deltae: -1.67E-09, res2:  1.14E-08, residm:  1.07E-11, diffor: undef, }
 etotal    :  -3.51915652E+01
 entropy   :   0.00000000E+00
 fermie    :   1.89013303E-01
@@ -225,7 +220,7 @@ cartesian_forces:
 - [  3.24123443E-04,  -2.16001847E-04,   2.16001829E-04, ]
 - [  9.72816665E-05,  -5.06298771E-11,  -7.05777900E-12, ]
 - [  3.24123348E-04,   2.16001770E-04,  -2.16001755E-04, ]
-force_length_stats: {"min":   9.72815802E-05, "max":   1.32243966E-03, "mean":   4.35258913E-04, }
+force_length_stats: {min:   9.72815802E-05, max:   1.32243966E-03, mean:   4.35258913E-04, }
 ...
 
  bonds_lgth_angles : about to open file t29o_TIMA_GEO
@@ -309,21 +304,16 @@ force_length_stats: {"min":   9.72815802E-05, "max":   1.32243966E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        8
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [ 10.2631100,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.2631100,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2631100, ]
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -3.52E+01, "res2":  2.64E-08, 
-    "residm":  3.79E-15, "diffor": undef, 
-}
+lattice_volume:   1.0810280E+03
+convergence_: {deltae: -3.52E+01, res2:  2.64E-08, residm:  3.79E-15, diffor: undef, }
 etotal    :  -3.51915652E+01
 entropy   :   0.00000000E+00
 fermie    :   1.89013285E-01
@@ -341,7 +331,7 @@ cartesian_forces:
 - [  3.24118246E-04,  -2.15743459E-04,   2.15743491E-04, ]
 - [  9.73024894E-05,   6.09920378E-12,   4.89719509E-11, ]
 - [  3.24118256E-04,   2.15743492E-04,  -2.15743477E-04, ]
-force_length_stats: {"min":   9.73024894E-05, "max":   1.32194247E-03, "mean":   4.35144783E-04, }
+force_length_stats: {min:   9.73024894E-05, max:   1.32194247E-03, mean:   4.35144783E-04, }
 ...
 
  bonds_lgth_angles : about to open file t29o_TIMB_GEO
@@ -436,21 +426,16 @@ force_length_stats: {"min":   9.73024894E-05, "max":   1.32194247E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        8
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [ 10.2631100,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.2631100,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2631100, ]
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -9.47E-12, "res2":  6.74E-11, 
-    "residm":  6.09E-14, "diffor": undef, 
-}
+lattice_volume:   1.0810280E+03
+convergence_: {deltae: -9.47E-12, res2:  6.74E-11, residm:  6.09E-14, diffor: undef, }
 etotal    :  -3.51915662E+01
 entropy   :   0.00000000E+00
 fermie    :   1.88999937E-01
@@ -468,7 +453,7 @@ cartesian_forces:
 - [  2.99138044E-04,  -1.99288180E-04,   1.99288181E-04, ]
 - [  8.96458109E-05,   8.35117241E-13,   7.87374816E-13, ]
 - [  2.99138049E-04,   1.99288188E-04,  -1.99288187E-04, ]
-force_length_stats: {"min":   8.96458109E-05, "max":   1.21977459E-03, "mean":   4.01476789E-04, }
+force_length_stats: {min:   8.96458109E-05, max:   1.21977459E-03, mean:   4.01476789E-04, }
 ...
 
  bonds_lgth_angles : about to open file t29o_TIMC_GEO
@@ -563,21 +548,16 @@ force_length_stats: {"min":   8.96458109E-05, "max":   1.21977459E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        8
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [ 10.2631100,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.2631100,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2631100, ]
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -3.04E-11, "res2":  2.07E-10, 
-    "residm":  1.93E-13, "diffor": undef, 
-}
+lattice_volume:   1.0810280E+03
+convergence_: {deltae: -3.04E-11, res2:  2.07E-10, residm:  1.93E-13, diffor: undef, }
 etotal    :  -3.51915644E+01
 entropy   :   0.00000000E+00
 fermie    :   1.89023229E-01
@@ -595,7 +575,7 @@ cartesian_forces:
 - [  3.42679084E-04,  -2.28182292E-04,   2.28182291E-04, ]
 - [  1.02768368E-04,  -2.76696041E-12,  -3.23806449E-12, ]
 - [  3.42679064E-04,   2.28182265E-04,  -2.28182266E-04, ]
-force_length_stats: {"min":   1.02768368E-04, "max":   1.39807393E-03, "mean":   4.60162142E-04, }
+force_length_stats: {min:   1.02768368E-04, max:   1.39807393E-03, mean:   4.60162142E-04, }
 ...
 
  bonds_lgth_angles : about to open file t29o_TIM1_GEO
@@ -690,21 +670,16 @@ force_length_stats: {"min":   1.02768368E-04, "max":   1.39807393E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        8
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [ 10.2631100,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.2631100,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2631100, ]
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -4.48E-11, "res2":  3.04E-10, 
-    "residm":  2.83E-13, "diffor": undef, 
-}
+lattice_volume:   1.0810280E+03
+convergence_: {deltae: -4.48E-11, res2:  3.04E-10, residm:  2.83E-13, diffor: undef, }
 etotal    :  -3.51915665E+01
 entropy   :   0.00000000E+00
 fermie    :   1.88994948E-01
@@ -722,7 +697,7 @@ cartesian_forces:
 - [  2.89802095E-04,  -1.93079261E-04,   1.93079262E-04, ]
 - [  8.68282849E-05,   8.63909819E-13,   8.62944686E-13, ]
 - [  2.89802101E-04,   1.93079269E-04,  -1.93079269E-04, ]
-force_length_stats: {"min":   8.68282849E-05, "max":   1.18154142E-03, "mean":   3.88894053E-04, }
+force_length_stats: {min:   8.68282849E-05, max:   1.18154142E-03, mean:   3.88894053E-04, }
 ...
 
  bonds_lgth_angles : about to open file t29o_TIM2_GEO
@@ -817,21 +792,16 @@ force_length_stats: {"min":   8.68282849E-05, "max":   1.18154142E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        8
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [ 10.2631100,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.2631100,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2631100, ]
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.62E-11, "res2":  1.11E-10, 
-    "residm":  1.02E-13, "diffor": undef, 
-}
+lattice_volume:   1.0810280E+03
+convergence_: {deltae: -1.62E-11, res2:  1.11E-10, residm:  1.02E-13, diffor: undef, }
 etotal    :  -3.51915677E+01
 entropy   :   0.00000000E+00
 fermie    :   1.88977896E-01
@@ -849,7 +819,7 @@ cartesian_forces:
 - [  2.57862641E-04,  -1.71883545E-04,   1.71883545E-04, ]
 - [  7.72366568E-05,   5.72793227E-13,   6.07894684E-13, ]
 - [  2.57862645E-04,   1.71883550E-04,  -1.71883550E-04, ]
-force_length_stats: {"min":   7.72366568E-05, "max":   1.05096817E-03, "mean":   3.45915998E-04, }
+force_length_stats: {min:   7.72366568E-05, max:   1.05096817E-03, mean:   3.45915998E-04, }
 ...
 
  bonds_lgth_angles : about to open file t29o_TIM3_GEO
@@ -944,21 +914,16 @@ force_length_stats: {"min":   7.72366568E-05, "max":   1.05096817E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        8
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [ 10.2631100,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.2631100,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2631100, ]
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.30E-11, "res2":  8.84E-11, 
-    "residm":  8.16E-14, "diffor": undef, 
-}
+lattice_volume:   1.0810280E+03
+convergence_: {deltae: -1.30E-11, res2:  8.84E-11, residm:  8.16E-14, diffor: undef, }
 etotal    :  -3.51915686E+01
 entropy   :   0.00000000E+00
 fermie    :   1.88962673E-01
@@ -976,7 +941,7 @@ cartesian_forces:
 - [  2.29315593E-04,  -1.52916427E-04,   1.52916427E-04, ]
 - [  6.86642267E-05,   7.63573888E-13,   7.73165209E-13, ]
 - [  2.29315599E-04,   1.52916434E-04,  -1.52916433E-04, ]
-force_length_stats: {"min":   6.86642267E-05, "max":   9.34323379E-04, "mean":   3.07523103E-04, }
+force_length_stats: {min:   6.86642267E-05, max:   9.34323379E-04, mean:   3.07523103E-04, }
 ...
 
  bonds_lgth_angles : about to open file t29o_TIM4_GEO
@@ -1071,21 +1036,16 @@ force_length_stats: {"min":   6.86642267E-05, "max":   9.34323379E-04, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        8
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [ 10.2631100,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.2631100,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2631100, ]
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.02E-11, "res2":  7.02E-11, 
-    "residm":  6.45E-14, "diffor": undef, 
-}
+lattice_volume:   1.0810280E+03
+convergence_: {deltae: -1.02E-11, res2:  7.02E-11, residm:  6.45E-14, diffor: undef, }
 etotal    :  -3.51915693E+01
 entropy   :   0.00000000E+00
 fermie    :   1.88949132E-01
@@ -1103,7 +1063,7 @@ cartesian_forces:
 - [  2.03893475E-04,  -1.36015136E-04,   1.36015136E-04, ]
 - [  6.10357698E-05,   6.65018304E-13,   6.76539696E-13, ]
 - [  2.03893480E-04,   1.36015142E-04,  -1.36015141E-04, ]
-force_length_stats: {"min":   6.10357698E-05, "max":   8.30516364E-04, "mean":   2.73355233E-04, }
+force_length_stats: {min:   6.10357698E-05, max:   8.30516364E-04, mean:   2.73355233E-04, }
 ...
 
  bonds_lgth_angles : about to open file t29o_TIM5_GEO
@@ -1198,21 +1158,16 @@ force_length_stats: {"min":   6.10357698E-05, "max":   8.30516364E-04, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        8
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [ 10.2631100,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.2631100,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2631100, ]
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -8.19E-12, "res2":  5.56E-11, 
-    "residm":  5.09E-14, "diffor": undef, 
-}
+lattice_volume:   1.0810280E+03
+convergence_: {deltae: -8.19E-12, res2:  5.56E-11, residm:  5.09E-14, diffor: undef, }
 etotal    :  -3.51915698E+01
 entropy   :   0.00000000E+00
 fermie    :   1.88937100E-01
@@ -1230,7 +1185,7 @@ cartesian_forces:
 - [  1.81282461E-04,  -1.20969934E-04,   1.20969935E-04, ]
 - [  5.42533168E-05,   5.98295490E-13,   6.08152334E-13, ]
 - [  1.81282465E-04,   1.20969940E-04,  -1.20969940E-04, ]
-force_length_stats: {"min":   5.42533168E-05, "max":   7.38230392E-04, "mean":   2.42979986E-04, }
+force_length_stats: {min:   5.42533168E-05, max:   7.38230392E-04, mean:   2.42979986E-04, }
 ...
 
  bonds_lgth_angles : about to open file t29o_TIM6_GEO
@@ -1325,21 +1280,16 @@ force_length_stats: {"min":   5.42533168E-05, "max":   7.38230392E-04, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        8
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [ 10.2631100,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.2631100,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2631100, ]
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -6.29E-12, "res2":  4.30E-11, 
-    "residm":  4.02E-14, "diffor": undef, 
-}
+lattice_volume:   1.0810280E+03
+convergence_: {deltae: -6.29E-12, res2:  4.30E-11, residm:  4.02E-14, diffor: undef, }
 etotal    :  -3.51915703E+01
 entropy   :   0.00000000E+00
 fermie    :   1.88926408E-01
@@ -1357,7 +1307,7 @@ cartesian_forces:
 - [  1.61173634E-04,  -1.07582194E-04,   1.07582194E-04, ]
 - [  4.82220333E-05,   5.32484357E-13,   5.40706977E-13, ]
 - [  1.61173638E-04,   1.07582199E-04,  -1.07582198E-04, ]
-force_length_stats: {"min":   4.82220333E-05, "max":   6.56191838E-04, "mean":   2.15978143E-04, }
+force_length_stats: {min:   4.82220333E-05, max:   6.56191838E-04, mean:   2.15978143E-04, }
 ...
 
  bonds_lgth_angles : about to open file t29o_TIM7_GEO
@@ -1452,21 +1402,16 @@ force_length_stats: {"min":   4.82220333E-05, "max":   6.56191838E-04, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        8
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   3.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [ 10.2631100,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.2631100,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2631100, ]
 lattice_lengths: [  10.26311,   10.26311,   10.26311, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -4.97E-12, "res2":  3.30E-11, 
-    "residm":  3.17E-14, "diffor": undef, 
-}
+lattice_volume:   1.0810280E+03
+convergence_: {deltae: -4.97E-12, res2:  3.30E-11, residm:  3.17E-14, diffor: undef, }
 etotal    :  -3.51915706E+01
 entropy   :   0.00000000E+00
 fermie    :   1.88916907E-01
@@ -1484,7 +1429,7 @@ cartesian_forces:
 - [  1.43296488E-04,  -9.56832858E-05,   9.56832860E-05, ]
 - [  4.28624525E-05,   4.72842577E-13,   4.81586857E-13, ]
 - [  1.43296491E-04,   9.56832901E-05,  -9.56832899E-05, ]
-force_length_stats: {"min":   4.28624525E-05, "max":   5.83308401E-04, "mean":   1.91988115E-04, }
+force_length_stats: {min:   4.28624525E-05, max:   5.83308401E-04, mean:   1.91988115E-04, }
 ...
 
  bonds_lgth_angles : about to open file t29o_TIM8_GEO
@@ -1628,7 +1573,7 @@ force_length_stats: {"min":   4.28624525E-05, "max":   5.83308401E-04, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.16819750413595E+01
 hartree             :  2.12455748715772E+00
@@ -1836,10 +1781,10 @@ P           mkmem           4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         38.3  wall=         44.8
+- Proc.   0 individual time (sec): cpu=         38.4  wall=         38.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         38.3  wall=         44.8
++Overall time at end (sec) : cpu=         38.4  wall=         38.8

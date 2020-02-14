@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 14h33 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h39 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t07/t07.in
 - output file    -> t07.out
@@ -239,7 +239,7 @@ P           mkmem           4
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -314,21 +314,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        9
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   4.80000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  4.6421500,  -8.0404397,   0.0000000, ]
+- [  4.6421500,   8.0404397,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2132705, ]
 lattice_lengths: [   9.28430,    9.28430,   10.21327, ]
 lattice_angles: [ 90.000,  90.000, 120.000, ]
-cutoff_energies: {"ecut":   6.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.98E-10, "res2":  3.64E-09, 
-    "residm":  8.69E-11, "diffor": undef, 
-}
+lattice_volume:   7.6241917E+02
+convergence_: {deltae: -1.98E-10, res2:  3.64E-09, residm:  8.69E-11, diffor: undef, }
 etotal    :  -9.93970296E+01
 entropy   :   0.00000000E+00
 fermie    :   1.81302475E-01
@@ -347,7 +342,7 @@ cartesian_forces:
 - [ -3.69786851E-02,  -8.06974990E-02,  -5.82249570E-02, ]
 - [ -3.69786851E-02,   8.06974990E-02,   5.82249570E-02, ]
 - [  8.83754267E-02,  -8.32426879E-03,   5.82249570E-02, ]
-force_length_stats: {"min":   7.01089576E-04, "max":   1.06158632E-01, "mean":   7.10061177E-02, }
+force_length_stats: {min:   7.01089576E-04, max:   1.06158632E-01, mean:   7.10061177E-02, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -439,7 +434,7 @@ force_length_stats: {"min":   7.01089576E-04, "max":   1.06158632E-01, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.87385893725667E+01
 hartree             :  2.62599330831111E+01
@@ -466,7 +461,7 @@ band_energy         : -1.03145210099871E+01
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -727,7 +722,7 @@ band_energy         : -1.03145210099871E+01
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -828,7 +823,7 @@ band_energy         : -1.03145210099871E+01
  Perturbative Calculation
 
 --- !SelfEnergy_ee
-iteration_state: {"dtset": 3, }
+iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.250, ]
 spin       : 1
 KS_gap     :    2.118
@@ -1117,10 +1112,10 @@ P           mkmem           4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         19.6  wall=         21.6
+- Proc.   0 individual time (sec): cpu=         15.0  wall=         15.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.6  wall=         21.6
++Overall time at end (sec) : cpu=         15.0  wall=         15.1

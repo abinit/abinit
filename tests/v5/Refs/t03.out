@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 14h32 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h30 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t03/t03.in
 - output file    -> t03.out
@@ -106,7 +106,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -178,21 +178,16 @@ _setup2: Arith. and geom. avg. npw (full set) are    1472.000    1472.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -6.22E-14, "res2":  2.22E-12, 
-    "residm":  1.64E-07, "diffor":  2.30E-09, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae: -6.22E-14, res2:  2.22E-12, residm:  1.64E-07, diffor:  2.30E-09, }
 etotal    :  -9.88136883E+00
 entropy   :   0.00000000E+00
 fermie    :   3.76782793E-02
@@ -206,7 +201,7 @@ cartesian_forces:
 - [  6.28063443E-04,  -1.25507307E-03,  -3.32987828E-04, ]
 - [ -6.30592249E-04,   2.57295198E-03,   4.72761536E-04, ]
 - [ -5.00858921E-04,  -1.62949054E-03,   9.81914364E-05, ]
-force_length_stats: {"min":   6.38066158E-04, "max":   2.69095373E-03, "mean":   1.61974652E-03, }
+force_length_stats: {min:   6.38066158E-04, max:   2.69095373E-03, mean:   1.61974652E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -270,21 +265,16 @@ force_length_stats: {"min":   6.38066158E-04, "max":   2.69095373E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -5.86E-14, "res2":  1.93E-12, 
-    "residm":  2.03E-07, "diffor":  8.07E-09, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae: -5.86E-14, res2:  1.93E-12, residm:  2.03E-07, diffor:  8.07E-09, }
 etotal    :  -9.88135810E+00
 entropy   :   0.00000000E+00
 fermie    :   3.76758334E-02
@@ -298,7 +288,7 @@ cartesian_forces:
 - [  6.38982269E-04,  -1.20324615E-03,  -3.36261494E-04, ]
 - [ -5.92432860E-04,   2.47807191E-03,   4.64193620E-04, ]
 - [ -5.54915354E-04,  -1.56639449E-03,   7.36131714E-05, ]
-force_length_stats: {"min":   6.19732816E-04, "max":   2.58984416E-03, "mean":   1.56906533E-03, }
+force_length_stats: {min:   6.19732816E-04, max:   2.58984416E-03, mean:   1.56906533E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -367,21 +357,16 @@ force_length_stats: {"min":   6.19732816E-04, "max":   2.58984416E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  1.24E-14, "res2":  1.71E-13, 
-    "residm":  1.61E-08, "diffor":  1.97E-09, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae:  1.24E-14, res2:  1.71E-13, residm:  1.61E-08, diffor:  1.97E-09, }
 etotal    :  -9.88133729E+00
 entropy   :   0.00000000E+00
 fermie    :   3.76710939E-02
@@ -395,7 +380,7 @@ cartesian_forces:
 - [  6.72854037E-04,  -1.09614547E-03,  -3.52207748E-04, ]
 - [ -4.91589558E-04,   2.26120880E-03,   4.48797836E-04, ]
 - [ -7.05700125E-04,  -1.43046174E-03,   1.25019504E-05, ]
-force_length_stats: {"min":   5.97804434E-04, "max":   2.35714764E-03, "mean":   1.47090056E-03, }
+force_length_stats: {min:   5.97804434E-04, max:   2.35714764E-03, mean:   1.47090056E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -463,21 +448,16 @@ force_length_stats: {"min":   5.97804434E-04, "max":   2.35714764E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -2.84E-14, "res2":  8.61E-13, 
-    "residm":  5.76E-08, "diffor":  6.50E-09, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae: -2.84E-14, res2:  8.61E-13, residm:  5.76E-08, diffor:  6.50E-09, }
 etotal    :  -9.88133986E+00
 entropy   :   0.00000000E+00
 fermie    :   3.76716708E-02
@@ -491,7 +471,7 @@ cartesian_forces:
 - [  6.61419176E-04,  -1.10767325E-03,  -3.44959261E-04, ]
 - [ -5.16425117E-04,   2.29702361E-03,   4.49144243E-04, ]
 - [ -6.64685559E-04,  -1.44831645E-03,   2.56572043E-05, ]
-force_length_stats: {"min":   5.94980408E-04, "max":   2.39681934E-03, "mean":   1.48025224E-03, }
+force_length_stats: {min:   5.94980408E-04, max:   2.39681934E-03, mean:   1.48025224E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -560,21 +540,16 @@ force_length_stats: {"min":   5.94980408E-04, "max":   2.39681934E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -7.46E-14, "res2":  1.44E-12, 
-    "residm":  2.67E-08, "diffor":  5.83E-09, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae: -7.46E-14, res2:  1.44E-12, residm:  2.67E-08, diffor:  5.83E-09, }
 etotal    :  -9.88131634E+00
 entropy   :   0.00000000E+00
 fermie    :   3.76661229E-02
@@ -588,7 +563,7 @@ cartesian_forces:
 - [  7.90081602E-04,  -9.08761016E-04,  -4.20952880E-04, ]
 - [ -2.09486885E-04,   1.78846305E-03,   4.31675970E-04, ]
 - [ -1.15504798E-03,  -1.16731270E-03,  -1.43159532E-04, ]
-force_length_stats: {"min":   6.55938913E-04, "max":   1.85170974E-03, "mean":   1.35792611E-03, }
+force_length_stats: {min:   6.55938913E-04, max:   1.85170974E-03, mean:   1.35792611E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -657,21 +632,16 @@ force_length_stats: {"min":   6.55938913E-04, "max":   1.85170974E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  3.73E-14, "res2":  2.24E-13, 
-    "residm":  8.14E-09, "diffor":  2.26E-09, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae:  3.73E-14, res2:  2.24E-13, residm:  8.14E-09, diffor:  2.26E-09, }
 etotal    :  -9.88132158E+00
 entropy   :   0.00000000E+00
 fermie    :   3.76674615E-02
@@ -685,7 +655,7 @@ cartesian_forces:
 - [  7.36169890E-04,  -9.89519250E-04,  -3.89122755E-04, ]
 - [ -3.37331977E-04,   1.99745972E-03,   4.38525895E-04, ]
 - [ -9.50676451E-04,  -1.28231772E-03,  -7.33124119E-05, ]
-force_length_stats: {"min":   6.16749790E-04, "max":   2.07266571E-03, "mean":   1.39515966E-03, }
+force_length_stats: {min:   6.16749790E-04, max:   2.07266571E-03, mean:   1.39515966E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -754,21 +724,16 @@ force_length_stats: {"min":   6.16749790E-04, "max":   2.07266571E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  8.88E-15, "res2":  1.28E-13, 
-    "residm":  1.20E-08, "diffor":  2.46E-09, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae:  8.88E-15, res2:  1.28E-13, residm:  1.20E-08, diffor:  2.46E-09, }
 etotal    :  -9.88132293E+00
 entropy   :   0.00000000E+00
 fermie    :   3.76676771E-02
@@ -782,7 +747,7 @@ cartesian_forces:
 - [  7.93504360E-04,  -9.68317367E-04,  -4.24352134E-04, ]
 - [ -2.30148796E-04,   1.88099608E-03,   4.42683518E-04, ]
 - [ -1.13281185E-03,  -1.23598180E-03,  -1.25529612E-04, ]
-force_length_stats: {"min":   6.63548647E-04, "max":   1.94604301E-03, "mean":   1.40318520E-03, }
+force_length_stats: {min:   6.63548647E-04, max:   1.94604301E-03, mean:   1.40318520E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -850,21 +815,16 @@ force_length_stats: {"min":   6.63548647E-04, "max":   1.94604301E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.05E-13, "res2":  1.03E-13, 
-    "residm":  8.26E-09, "diffor":  2.80E-09, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae: -1.05E-13, res2:  1.03E-13, residm:  8.26E-09, diffor:  2.80E-09, }
 etotal    :  -9.88132152E+00
 entropy   :   0.00000000E+00
 fermie    :   3.76673617E-02
@@ -878,7 +838,7 @@ cartesian_forces:
 - [  7.85683065E-04,  -9.61844071E-04,  -4.19782398E-04, ]
 - [ -2.40202379E-04,   1.88077505E-03,   4.40630100E-04, ]
 - [ -1.11409132E-03,  -1.23110636E-03,  -1.21896844E-04, ]
-force_length_stats: {"min":   6.56492535E-04, "max":   1.94657824E-03, "mean":   1.39472097E-03, }
+force_length_stats: {min:   6.56492535E-04, max:   1.94657824E-03, mean:   1.39472097E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -947,21 +907,16 @@ force_length_stats: {"min":   6.56492535E-04, "max":   1.94657824E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -3.38E-14, "res2":  5.21E-13, 
-    "residm":  1.67E-08, "diffor":  4.84E-09, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae: -3.38E-14, res2:  5.21E-13, residm:  1.67E-08, diffor:  4.84E-09, }
 etotal    :  -9.88134553E+00
 entropy   :   0.00000000E+00
 fermie    :   3.76724999E-02
@@ -975,7 +930,7 @@ cartesian_forces:
 - [  9.27097352E-04,  -9.99028828E-04,  -5.03877278E-04, ]
 - [ -1.87020417E-05,   1.74715700E-03,   4.64847605E-04, ]
 - [ -1.50506722E-03,  -1.22333067E-03,  -2.17499811E-04, ]
-force_length_stats: {"min":   8.04762177E-04, "max":   1.95168426E-03, "mean":   1.50439199E-03, }
+force_length_stats: {min:   8.04762177E-04, max:   1.95168426E-03, mean:   1.50439199E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1042,21 +997,16 @@ force_length_stats: {"min":   8.04762177E-04, "max":   1.95168426E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -3.20E-14, "res2":  7.99E-12, 
-    "residm":  1.19E-08, "diffor":  1.45E-08, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae: -3.20E-14, res2:  7.99E-12, residm:  1.19E-08, diffor:  1.45E-08, }
 etotal    :  -9.88134499E+00
 entropy   :   0.00000000E+00
 fermie    :   3.76723992E-02
@@ -1070,7 +1020,7 @@ cartesian_forces:
 - [  9.23700799E-04,  -1.00243551E-03,  -5.01273180E-04, ]
 - [ -2.65691336E-05,   1.75859996E-03,   4.64745574E-04, ]
 - [ -1.49166711E-03,  -1.22890003E-03,  -2.13255245E-04, ]
-force_length_stats: {"min":   7.99589140E-04, "max":   1.94441350E-03, "mean":   1.50388456E-03, }
+force_length_stats: {min:   7.99589140E-04, max:   1.94441350E-03, mean:   1.50388456E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1139,21 +1089,16 @@ force_length_stats: {"min":   7.99589140E-04, "max":   1.94441350E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  2.49E-14, "res2":  1.58E-13, 
-    "residm":  4.21E-09, "diffor":  2.15E-09, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae:  2.49E-14, res2:  1.58E-13, residm:  4.21E-09, diffor:  2.15E-09, }
 etotal    :  -9.88136936E+00
 entropy   :   0.00000000E+00
 fermie    :   3.76777036E-02
@@ -1167,7 +1112,7 @@ cartesian_forces:
 - [  1.01651048E-03,  -1.06233457E-03,  -5.51934894E-04, ]
 - [  9.91036191E-05,   1.73718800E-03,   4.84696832E-04, ]
 - [ -1.71741416E-03,  -1.26749859E-03,  -2.60747215E-04, ]
-force_length_stats: {"min":   9.06071707E-04, "max":   2.15036117E-03, "mean":   1.60829900E-03, }
+force_length_stats: {min:   9.06071707E-04, max:   2.15036117E-03, mean:   1.60829900E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1236,21 +1181,16 @@ force_length_stats: {"min":   9.06071707E-04, "max":   2.15036117E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -3.91E-14, "res2":  2.54E-13, 
-    "residm":  1.09E-09, "diffor":  2.50E-09, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae: -3.91E-14, res2:  2.54E-13, residm:  1.09E-09, diffor:  2.50E-09, }
 etotal    :  -9.88133153E+00
 entropy   :   0.00000000E+00
 fermie    :   3.76693488E-02
@@ -1264,7 +1204,7 @@ cartesian_forces:
 - [  8.69933472E-04,  -9.32333300E-04,  -4.79530783E-04, ]
 - [ -7.65947375E-05,   1.69903757E-03,   4.50519041E-04, ]
 - [ -1.40033058E-03,  -1.16113954E-03,  -2.03679396E-04, ]
-force_length_stats: {"min":   7.60370596E-04, "max":   1.83047973E-03, "mean":   1.42815371E-03, }
+force_length_stats: {min:   7.60370596E-04, max:   1.83047973E-03, mean:   1.42815371E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1333,21 +1273,16 @@ force_length_stats: {"min":   7.60370596E-04, "max":   1.83047973E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -6.75E-14, "res2":  1.85E-12, 
-    "residm":  3.83E-09, "diffor":  4.90E-09, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae: -6.75E-14, res2:  1.85E-12, residm:  3.83E-09, diffor:  4.90E-09, }
 etotal    :  -9.88143823E+00
 entropy   :   0.00000000E+00
 fermie    :   3.76928942E-02
@@ -1361,7 +1296,7 @@ cartesian_forces:
 - [  1.22456359E-03,  -1.24979062E-03,  -6.53914802E-04, ]
 - [  3.48055514E-04,   1.79489442E-03,   5.33301545E-04, ]
 - [ -2.16685565E-03,  -1.42123313E-03,  -3.41677111E-04, ]
-force_length_stats: {"min":   1.15517619E-03, "max":   2.61379231E-03, "mean":   1.88535311E-03, }
+force_length_stats: {min:   1.15517619E-03, max:   2.61379231E-03, mean:   1.88535311E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1429,21 +1364,16 @@ force_length_stats: {"min":   1.15517619E-03, "max":   2.61379231E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.78E-15, "res2":  8.74E-13, 
-    "residm":  8.59E-09, "diffor":  8.07E-09, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae: -1.78E-15, res2:  8.74E-13, residm:  8.59E-09, diffor:  8.07E-09, }
 etotal    :  -9.88142856E+00
 entropy   :   0.00000000E+00
 fermie    :   3.76907759E-02
@@ -1457,7 +1387,7 @@ cartesian_forces:
 - [  1.19897703E-03,  -1.22883613E-03,  -6.40564525E-04, ]
 - [  3.15804473E-04,   1.79268221E-03,   5.27307622E-04, ]
 - [ -2.10823324E-03,  -1.40520474E-03,  -3.30322411E-04, ]
-force_length_stats: {"min":   1.12108517E-03, "max":   2.55506568E-03, "mean":   1.85093356E-03, }
+force_length_stats: {min:   1.12108517E-03, max:   2.55506568E-03, mean:   1.85093356E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1526,21 +1456,16 @@ force_length_stats: {"min":   1.12108517E-03, "max":   2.55506568E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -2.13E-14, "res2":  2.44E-13, 
-    "residm":  4.79E-10, "diffor":  1.29E-09, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae: -2.13E-14, res2:  2.44E-13, residm:  4.79E-10, diffor:  1.29E-09, }
 etotal    :  -9.88148256E+00
 entropy   :   0.00000000E+00
 fermie    :   3.77028124E-02
@@ -1554,7 +1479,7 @@ cartesian_forces:
 - [  1.34295114E-03,  -1.37661351E-03,  -7.03922521E-04, ]
 - [  4.75597505E-04,   1.87186898E-03,   5.60611262E-04, ]
 - [ -2.39333902E-03,  -1.53522542E-03,  -3.75895032E-04, ]
-force_length_stats: {"min":   1.29672535E-03, "max":   2.86815024E-03, "mean":   2.05597137E-03, }
+force_length_stats: {min:   1.29672535E-03, max:   2.86815024E-03, mean:   2.05597137E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1623,21 +1548,16 @@ force_length_stats: {"min":   1.29672535E-03, "max":   2.86815024E-03, "mean":  
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   9.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -7.11E-14, "res2":  3.93E-14, 
-    "residm":  5.50E-10, "diffor":  4.10E-10, 
-}
+lattice_volume:   7.2900000E+02
+convergence_: {deltae: -7.11E-14, res2:  3.93E-14, residm:  5.50E-10, diffor:  4.10E-10, }
 etotal    :  -9.88150723E+00
 entropy   :   0.00000000E+00
 fermie    :   3.77083560E-02
@@ -1651,7 +1571,7 @@ cartesian_forces:
 - [  1.40504073E-03,  -1.44419110E-03,  -7.29104745E-04, ]
 - [  5.41638138E-04,   1.91494202E-03,   5.74585347E-04, ]
 - [ -2.50952381E-03,  -1.59646495E-03,  -3.92989114E-04, ]
-force_length_stats: {"min":   1.37251305E-03, "max":   3.00014175E-03, "mean":   2.14669319E-03, }
+force_length_stats: {min:   1.37251305E-03, max:   3.00014175E-03, mean:   2.14669319E-03, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1748,7 +1668,7 @@ force_length_stats: {"min":   1.37251305E-03, "max":   3.00014175E-03, "mean":  
   10.51880   10.52194   10.52265   10.52990   10.53237
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 2, }
+iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.52490465174823E+00
 hartree             :  5.86769934227087E-02
@@ -1926,10 +1846,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         22.2  wall=         24.6
+- Proc.   0 individual time (sec): cpu=         16.2  wall=         17.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         22.2  wall=         24.6
++Overall time at end (sec) : cpu=         16.2  wall=         17.3

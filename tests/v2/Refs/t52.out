@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 14h27 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h22 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v2_t52/t52.in
 - output file    -> t52.out
@@ -1180,7 +1180,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -1233,21 +1233,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [ -0.6972459,   7.9695576,   0.0000000, ]
+- [  0.0000000,   0.7873980,   8.9654896, ]
 lattice_lengths: [   7.00000,    8.00000,    9.00000, ]
 lattice_angles: [ 85.000,  90.000,  95.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.18E+00, "res2":  5.16E-02, 
-    "residm":  1.99E-07, "diffor":  0.00E+00, 
-}
+lattice_volume:   5.0015690E+02
+convergence_: {deltae: -1.18E+00, res2:  5.16E-02, residm:  1.99E-07, diffor:  0.00E+00, }
 etotal    :  -1.17827238E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.68688248E-01
@@ -1258,7 +1253,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -9.4787E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1294,7 +1289,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.16869
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  6.76902110186177E-02
 hartree             :  3.26862943899767E-02
@@ -1321,7 +1316,7 @@ band_energy         : -3.37376495007945E-01
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -1353,21 +1348,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.7844017,   0.0000000,   8.9657523, ]
 lattice_lengths: [   7.00000,    8.00000,    9.00000, ]
 lattice_angles: [ 90.000,  85.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.18E+00, "res2":  5.22E-02, 
-    "residm":  3.34E-08, "diffor":  0.00E+00, 
-}
+lattice_volume:   5.0208213E+02
+convergence_: {deltae: -1.18E+00, res2:  5.22E-02, residm:  3.34E-08, diffor:  0.00E+00, }
 etotal    :  -1.17747055E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.68719404E-01
@@ -1378,7 +1368,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -9.4375E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1414,7 +1404,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.16872
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 2, }
+iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  6.76918548158042E-02
 hartree             :  3.29505547794695E-02
@@ -1441,7 +1431,7 @@ band_energy         : -3.37438808797278E-01
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -1473,21 +1463,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 3, }
+iteration_state: {dtset: 3, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   7.00000,    8.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.18E+00, "res2":  5.61E-02, 
-    "residm":  3.23E-08, "diffor":  0.00E+00, 
-}
+lattice_volume:   5.0400000E+02
+convergence_: {deltae: -1.18E+00, res2:  5.61E-02, residm:  3.23E-08, diffor:  0.00E+00, }
 etotal    :  -1.17715077E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.69011980E-01
@@ -1498,7 +1483,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -9.3463E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1534,7 +1519,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.16901
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 3, }
+iteration_state     : {dtset: 3, }
 comment             : Components of total free energy in Hartree
 kinetic             :  6.85216425899229E-02
 hartree             :  3.35765409071112E-02
@@ -1561,7 +1546,7 @@ band_energy         : -3.38023959503470E-01
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -1593,21 +1578,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 4, }
+iteration_state: {dtset: 4, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   7.00000,    8.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.18E+00, "res2":  5.61E-02, 
-    "residm":  3.23E-08, "diffor":  0.00E+00, 
-}
+lattice_volume:   5.0400000E+02
+convergence_: {deltae: -1.18E+00, res2:  5.61E-02, residm:  3.23E-08, diffor:  0.00E+00, }
 etotal    :  -1.17715077E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.69011980E-01
@@ -1618,7 +1598,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -9.3463E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1654,7 +1634,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.16901
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 4, }
+iteration_state     : {dtset: 4, }
 comment             : Components of total free energy in Hartree
 kinetic             :  6.85216425899229E-02
 hartree             :  3.35765409071112E-02
@@ -1681,7 +1661,7 @@ band_energy         : -3.38023959503470E-01
 
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -1713,21 +1693,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     123.000     123.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 5, }
+iteration_state: {dtset: 5, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   7.00000,    7.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.20E+00, "res2":  7.96E-02, 
-    "residm":  6.11E-08, "diffor":  0.00E+00, 
-}
+lattice_volume:   4.4100000E+02
+convergence_: {deltae: -1.20E+00, res2:  7.96E-02, residm:  6.11E-08, diffor:  0.00E+00, }
 etotal    :  -1.20077761E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.69156357E-01
@@ -1738,7 +1713,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.1142E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1774,7 +1749,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.16916
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 5, }
+iteration_state     : {dtset: 5, }
 comment             : Components of total free energy in Hartree
 kinetic             :  6.43220556739365E-02
 hartree             :  3.43007161428292E-02
@@ -1801,7 +1776,7 @@ band_energy         : -3.38312713270226E-01
 
 ================================================================================
 == DATASET  6 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -1833,21 +1808,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     123.000     123.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 6, }
+iteration_state: {dtset: 6, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   7.00000,    7.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.20E+00, "res2":  7.96E-02, 
-    "residm":  6.11E-08, "diffor":  0.00E+00, 
-}
+lattice_volume:   4.4100000E+02
+convergence_: {deltae: -1.20E+00, res2:  7.96E-02, residm:  6.11E-08, diffor:  0.00E+00, }
 etotal    :  -1.20077761E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.69156357E-01
@@ -1858,7 +1828,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.1142E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1894,7 +1864,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.16916
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 6, }
+iteration_state     : {dtset: 6, }
 comment             : Components of total free energy in Hartree
 kinetic             :  6.43220556739365E-02
 hartree             :  3.43007161428292E-02
@@ -1921,7 +1891,7 @@ band_energy         : -3.38312713270226E-01
 
 ================================================================================
 == DATASET  7 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -1960,21 +1930,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 7, }
+iteration_state: {dtset: 7, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  5.4607306,   0.0000000,   4.3795457, ]
+- [ -2.7303653,   4.7291315,   4.3795457, ]
+- [ -2.7303653,  -4.7291315,   4.3795457, ]
 lattice_lengths: [   7.00000,    7.00000,    7.00000, ]
 lattice_angles: [ 85.000,  85.000,  85.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.24E+00, "res2":  3.54E-02, 
-    "residm":  1.87E-09, "diffor":  0.00E+00, 
-}
+lattice_volume:   3.3929891E+02
+convergence_: {deltae: -1.24E+00, res2:  3.54E-02, residm:  1.87E-09, diffor:  0.00E+00, }
 etotal    :  -1.24195290E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.55870018E-01
@@ -1985,7 +1950,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.7109E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2021,7 +1986,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.15587
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 7, }
+iteration_state     : {dtset: 7, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.65527060186938E-02
 hartree             :  7.86020911395383E-03
@@ -2048,7 +2013,7 @@ band_energy         : -3.11740035392698E-01
 
 ================================================================================
 == DATASET  8 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2080,21 +2045,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      97.000      97.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 8, }
+iteration_state: {dtset: 8, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [ -3.5000000,   6.0621778,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   7.00000,    7.00000,    9.00000, ]
 lattice_angles: [ 90.000,  90.000, 120.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.23E+00, "res2":  2.00E-01, 
-    "residm":  4.77E-10, "diffor":  0.00E+00, 
-}
+lattice_volume:   3.8191720E+02
+convergence_: {deltae: -1.23E+00, res2:  2.00E-01, residm:  4.77E-10, diffor:  0.00E+00, }
 etotal    :  -1.22878888E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.69564179E-01
@@ -2105,7 +2065,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.3571E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2141,7 +2101,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.16956
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 8, }
+iteration_state     : {dtset: 8, }
 comment             : Components of total free energy in Hartree
 kinetic             :  6.07793246332857E-02
 hartree             :  4.13562878259140E-02
@@ -2168,7 +2128,7 @@ band_energy         : -3.39128357756946E-01
 
 ================================================================================
 == DATASET  9 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2200,21 +2160,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 9, }
+iteration_state: {dtset: 9, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   7.0000000, ]
 lattice_lengths: [   7.00000,    7.00000,    7.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.24E+00, "res2":  3.43E-02, 
-    "residm":  1.72E-09, "diffor":  0.00E+00, 
-}
+lattice_volume:   3.4300000E+02
+convergence_: {deltae: -1.24E+00, res2:  3.43E-02, residm:  1.72E-09, diffor:  0.00E+00, }
 etotal    :  -1.23991563E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.56490096E-01
@@ -2225,7 +2180,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.6806E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2261,7 +2216,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.15649
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 9, }
+iteration_state     : {dtset: 9, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.77036281674481E-02
 hartree             :  8.44323622546092E-03
@@ -2288,7 +2243,7 @@ band_energy         : -3.12980191707034E-01
 
 ================================================================================
 == DATASET 10 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2320,21 +2275,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 10, }
+iteration_state: {dtset: 10, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   7.0000000, ]
 lattice_lengths: [   7.00000,    7.00000,    7.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.24E+00, "res2":  3.43E-02, 
-    "residm":  1.72E-09, "diffor":  0.00E+00, 
-}
+lattice_volume:   3.4300000E+02
+convergence_: {deltae: -1.24E+00, res2:  3.43E-02, residm:  1.72E-09, diffor:  0.00E+00, }
 etotal    :  -1.23991563E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.56490096E-01
@@ -2345,7 +2295,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.6806E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2381,7 +2331,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.15649
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 10, }
+iteration_state     : {dtset: 10, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.77036281674482E-02
 hartree             :  8.44323622546091E-03
@@ -2408,7 +2358,7 @@ band_energy         : -3.12980191707034E-01
 
 ================================================================================
 == DATASET 11 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2447,21 +2397,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.000     103.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 11, }
+iteration_state: {dtset: 11, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [ -0.6100902,   6.9733629,   0.0000000, ]
+- [  1.5628336,   1.7055336,   8.6976265, ]
 lattice_lengths: [   7.00000,    7.00000,    9.00000, ]
 lattice_angles: [ 80.000,  80.000,  95.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.21E+00, "res2":  6.36E-02, 
-    "residm":  3.59E-08, "diffor":  0.00E+00, 
-}
+lattice_volume:   4.2456194E+02
+convergence_: {deltae: -1.21E+00, res2:  6.36E-02, residm:  3.59E-08, diffor:  0.00E+00, }
 etotal    :  -1.20503656E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.66082673E-01
@@ -2472,7 +2417,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.2089E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2508,7 +2453,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.16608
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 11, }
+iteration_state     : {dtset: 11, }
 comment             : Components of total free energy in Hartree
 kinetic             :  5.74371287570397E-02
 hartree             :  2.76338039576948E-02
@@ -2535,7 +2480,7 @@ band_energy         : -3.32165345653517E-01
 
 ================================================================================
 == DATASET 12 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2567,21 +2512,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 12, }
+iteration_state: {dtset: 12, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  3.5000000,   8.0000000,   0.0000000, ]
+- [  1.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   7.00000,    8.73212,    9.05539, ]
 lattice_angles: [ 87.463,  83.660,  66.371, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.18E+00, "res2":  6.93E-02, 
-    "residm":  8.48E-09, "diffor":  0.00E+00, 
-}
+lattice_volume:   5.0400000E+02
+convergence_: {deltae: -1.18E+00, res2:  6.93E-02, residm:  8.48E-09, diffor:  0.00E+00, }
 etotal    :  -1.17714670E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.68448264E-01
@@ -2592,7 +2532,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -9.4522E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2628,7 +2568,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.16845
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 12, }
+iteration_state     : {dtset: 12, }
 comment             : Components of total free energy in Hartree
 kinetic             :  6.72810654238674E-02
 hartree             :  3.32420757953171E-02
@@ -2655,7 +2595,7 @@ band_energy         : -3.36896527819612E-01
 
 ================================================================================
 == DATASET 13 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2694,21 +2634,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.000      59.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 13, }
+iteration_state: {dtset: 13, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  3.5000000,   4.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  1.0000000,   0.0000000,   9.0000000, ]
 lattice_lengths: [   5.31507,    8.00000,    9.05539, ]
 lattice_angles: [ 90.000,  85.830,  41.186, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.30E+00, "res2":  3.81E+00, 
-    "residm":  1.79E-08, "diffor":  0.00E+00, 
-}
+lattice_volume:   2.5200000E+02
+convergence_: {deltae: -1.30E+00, res2:  3.81E+00, residm:  1.79E-08, diffor:  0.00E+00, }
 etotal    :  -1.29553436E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.83093066E-01
@@ -2719,7 +2654,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.4643E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2755,7 +2690,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.18309
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 13, }
+iteration_state     : {dtset: 13, }
 comment             : Components of total free energy in Hartree
 kinetic             :  9.75659714747198E-02
 hartree             :  1.01199514314247E-01
@@ -2782,7 +2717,7 @@ band_energy         : -3.66186131332097E-01
 
 ================================================================================
 == DATASET 14 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2814,21 +2749,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.000      59.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 14, }
+iteration_state: {dtset: 14, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  3.5000000,   4.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  1.0000000,  16.0000000,   9.0000000, ]
 lattice_lengths: [   5.31507,    8.00000,   18.38478, ]
 lattice_angles: [ 29.508,  46.309,  41.186, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.30E+00, "res2":  8.03E+00, 
-    "residm":  1.36E-07, "diffor":  0.00E+00, 
-}
+lattice_volume:   2.5200000E+02
+convergence_: {deltae: -1.30E+00, res2:  8.03E+00, residm:  1.36E-07, diffor:  0.00E+00, }
 etotal    :  -1.29553119E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.83093031E-01
@@ -2839,7 +2769,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.4636E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -2875,7 +2805,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.18309
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 14, }
+iteration_state     : {dtset: 14, }
 comment             : Components of total free energy in Hartree
 kinetic             :  9.75912685147109E-02
 hartree             :  1.01219506325062E-01
@@ -2902,7 +2832,7 @@ band_energy         : -3.66186061227888E-01
 
 ================================================================================
 == DATASET 15 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2941,21 +2871,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.000     103.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 15, }
+iteration_state: {dtset: 15, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  1.2155372,   6.8936543,   0.0000000, ]
+- [  1.2155372,  -0.8338338,   6.8430396, ]
 lattice_lengths: [   9.00000,    7.00000,    7.00000, ]
 lattice_angles: [ 95.000,  80.000,  80.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.21E+00, "res2":  6.36E-02, 
-    "residm":  4.90E-09, "diffor":  0.00E+00, 
-}
+lattice_volume:   4.2456194E+02
+convergence_: {deltae: -1.21E+00, res2:  6.36E-02, residm:  4.90E-09, diffor:  0.00E+00, }
 etotal    :  -1.20503623E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.66082682E-01
@@ -2966,7 +2891,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.2091E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3002,7 +2927,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.16608
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 15, }
+iteration_state     : {dtset: 15, }
 comment             : Components of total free energy in Hartree
 kinetic             :  5.74020317825728E-02
 hartree             :  2.76233505329131E-02
@@ -3029,7 +2954,7 @@ band_energy         : -3.32165364944527E-01
 
 ================================================================================
 == DATASET 16 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3061,21 +2986,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 16, }
+iteration_state: {dtset: 16, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  4.0000000,   3.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
 lattice_lengths: [   5.00000,    6.00000,    8.00000, ]
 lattice_angles: [ 90.000,  90.000,  53.130, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.33E+00, "res2":  1.85E+00, 
-    "residm":  1.70E-06, "diffor":  0.00E+00, 
-}
+lattice_volume:   1.9200000E+02
+convergence_: {deltae: -1.33E+00, res2:  1.85E+00, residm:  1.70E-06, diffor:  0.00E+00, }
 etotal    :  -1.33439815E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.62599908E-01
@@ -3086,7 +3006,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.7333E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3122,7 +3042,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.16260
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 16, }
+iteration_state     : {dtset: 16, }
 comment             : Components of total free energy in Hartree
 kinetic             :  9.38811207109594E-02
 hartree             :  7.27337007021426E-02
@@ -3149,7 +3069,7 @@ band_energy         : -3.25199816147541E-01
 
 ================================================================================
 == DATASET 17 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3181,21 +3101,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 17, }
+iteration_state: {dtset: 17, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  4.0000000,  -3.0000000,   0.0000000, ]
+- [  4.0000000,   3.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
 lattice_lengths: [   5.00000,    5.00000,    8.00000, ]
 lattice_angles: [ 90.000,  90.000,  73.740, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.33E+00, "res2":  1.18E+00, 
-    "residm":  1.99E-06, "diffor":  0.00E+00, 
-}
+lattice_volume:   1.9200000E+02
+convergence_: {deltae: -1.33E+00, res2:  1.18E+00, residm:  1.99E-06, diffor:  0.00E+00, }
 etotal    :  -1.33440202E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.62599898E-01
@@ -3206,7 +3121,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.7334E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3242,7 +3157,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.16260
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 17, }
+iteration_state     : {dtset: 17, }
 comment             : Components of total free energy in Hartree
 kinetic             :  9.38675407899640E-02
 hartree             :  7.27208349415922E-02
@@ -3269,7 +3184,7 @@ band_energy         : -3.25199796533141E-01
 
 ================================================================================
 == DATASET 18 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3308,21 +3223,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 18, }
+iteration_state: {dtset: 18, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  4.0000000,  -3.0000000,   0.0000000, ]
+- [  4.0000000,   3.0000000,   0.0000000, ]
+- [ -8.0000000,   0.0000000,   8.0000000, ]
 lattice_lengths: [   5.00000,    5.00000,   11.31371, ]
 lattice_angles: [124.450, 124.450,  73.740, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.33E+00, "res2":  2.47E+00, 
-    "residm":  1.99E-06, "diffor":  0.00E+00, 
-}
+lattice_volume:   1.9200000E+02
+convergence_: {deltae: -1.33E+00, res2:  2.47E+00, residm:  1.99E-06, diffor:  0.00E+00, }
 etotal    :  -1.33440190E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.62599898E-01
@@ -3333,7 +3243,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.7335E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3369,7 +3279,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.16260
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 18, }
+iteration_state     : {dtset: 18, }
 comment             : Components of total free energy in Hartree
 kinetic             :  9.38669894002189E-02
 hartree             :  7.27211661630182E-02
@@ -3396,7 +3306,7 @@ band_energy         : -3.25199796927850E-01
 
 ================================================================================
 == DATASET 19 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3435,21 +3345,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      17.000      17.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 19, }
+iteration_state: {dtset: 19, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [ -2.0000000,   3.0000000,   4.0000000, ]
+- [  2.0000000,  -3.0000000,   4.0000000, ]
+- [  2.0000000,   3.0000000,  -4.0000000, ]
 lattice_lengths: [   5.38516,    5.38516,    5.38516, ]
 lattice_angles: [136.397, 112.291,  84.062, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.45E+00, "res2":  1.65E-01, 
-    "residm":  1.76E-09, "diffor":  0.00E+00, 
-}
+lattice_volume:   9.6000000E+01
+convergence_: {deltae: -1.45E+00, res2:  1.65E-01, residm:  1.76E-09, diffor:  0.00E+00, }
 etotal    :  -1.44547882E+00
 entropy   :   0.00000000E+00
 fermie    :  -5.54188738E-02
@@ -3460,7 +3365,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -3.2518E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3496,7 +3401,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.05542
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 19, }
+iteration_state     : {dtset: 19, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.40659496104423E-02
 hartree             :  5.05410024735162E-03
@@ -3523,7 +3428,7 @@ band_energy         : -1.10837747689569E-01
 
 ================================================================================
 == DATASET 20 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3555,21 +3460,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      13.000      13.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 20, }
+iteration_state: {dtset: 20, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.0000000,   4.0000000, ]
+- [  2.0000000,   0.0000000,   4.0000000, ]
+- [  2.0000000,   3.0000000,   0.0000000, ]
 lattice_lengths: [   5.00000,    4.47214,    3.60555, ]
 lattice_angles: [ 75.637,  60.051,  44.312, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.41E+00, "res2":  4.14E-01, 
-    "residm":  1.57E-08, "diffor":  0.00E+00, 
-}
+lattice_volume:   4.8000000E+01
+convergence_: {deltae: -1.41E+00, res2:  4.14E-01, residm:  1.57E-08, diffor:  0.00E+00, }
 etotal    :  -1.41182782E+00
 entropy   :   0.00000000E+00
 fermie    :   1.39142711E-01
@@ -3580,7 +3480,7 @@ cartesian_stress_tensor:
 pressure_GPa:   1.8329E+02
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3616,7 +3516,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
    0.13914
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 20, }
+iteration_state     : {dtset: 20, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.25038904432999E-01
 hartree             :  1.87541680871327E-02
@@ -3643,7 +3543,7 @@ band_energy         :  2.78285422671568E-01
 
 ================================================================================
 == DATASET 21 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3675,21 +3575,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      15.000      15.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 21, }
+iteration_state: {dtset: 21, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  4.0000000,   0.0000000,   0.0000000, ]
+- [  2.0000000,   2.0000000,  -4.0000000, ]
+- [  2.0000000,   2.0000000,   4.0000000, ]
 lattice_lengths: [   4.00000,    4.89898,    4.89898, ]
 lattice_angles: [109.471,  65.905,  65.905, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.49E+00, "res2":  1.43E-01, 
-    "residm":  6.83E-11, "diffor":  0.00E+00, 
-}
+lattice_volume:   6.4000000E+01
+convergence_: {deltae: -1.49E+00, res2:  1.43E-01, residm:  6.83E-11, diffor:  0.00E+00, }
 etotal    :  -1.48590818E+00
 entropy   :   0.00000000E+00
 fermie    :   3.03751005E-02
@@ -3700,7 +3595,7 @@ cartesian_stress_tensor:
 pressure_GPa:   2.5107E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3736,7 +3631,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
    0.03038
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 21, }
+iteration_state     : {dtset: 21, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.99332133491611E-02
 hartree             :  1.18150662605820E-02
@@ -3763,7 +3658,7 @@ band_energy         :  6.07502009203975E-02
 
 ================================================================================
 == DATASET 22 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3802,21 +3697,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      55.000      55.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 22, }
+iteration_state: {dtset: 22, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [ -4.0000000,   4.0000000,   4.0000000, ]
+- [  4.0000000,  -4.0000000,   4.0000000, ]
+- [  4.0000000,   4.0000000,  -4.0000000, ]
 lattice_lengths: [   6.92820,    6.92820,    6.92820, ]
 lattice_angles: [109.471, 109.471, 109.471, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.30E+00, "res2":  6.71E-02, 
-    "residm":  2.34E-10, "diffor":  0.00E+00, 
-}
+lattice_volume:   2.5600000E+02
+convergence_: {deltae: -1.30E+00, res2:  6.71E-02, residm:  2.34E-10, diffor:  0.00E+00, }
 etotal    :  -1.29993521E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.42422526E-01
@@ -3827,7 +3717,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -2.5738E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3863,7 +3753,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.14242
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 22, }
+iteration_state     : {dtset: 22, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.81295691209662E-02
 hartree             :  7.28308519312837E-04
@@ -3890,7 +3780,7 @@ band_energy         : -2.84845051952831E-01
 
 ================================================================================
 == DATASET 23 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3929,21 +3819,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      27.000      27.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 23, }
+iteration_state: {dtset: 23, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   4.0000000,   4.0000000, ]
+- [  4.0000000,   0.0000000,   4.0000000, ]
+- [  4.0000000,   4.0000000,   0.0000000, ]
 lattice_lengths: [   5.65685,    5.65685,    5.65685, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.44E+00, "res2":  8.59E-02, 
-    "residm":  2.97E-10, "diffor":  0.00E+00, 
-}
+lattice_volume:   1.2800000E+02
+convergence_: {deltae: -1.44E+00, res2:  8.59E-02, residm:  2.97E-10, diffor:  0.00E+00, }
 etotal    :  -1.44139260E+00
 entropy   :   0.00000000E+00
 fermie    :  -9.73671519E-02
@@ -3954,7 +3839,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -4.4472E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -3990,7 +3875,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.09737
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 23, }
+iteration_state     : {dtset: 23, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.98438899240214E-02
 hartree             :  3.19161979749211E-03
@@ -4017,7 +3902,7 @@ band_energy         : -1.94734303768908E-01
 
 ================================================================================
 == DATASET 24 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -4049,21 +3934,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      55.000      55.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 24, }
+iteration_state: {dtset: 24, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  6.6211271,   0.0000000,   2.2717120, ]
+- [ -3.3105636,   5.7340643,   2.2717120, ]
+- [ -3.3105636,  -5.7340643,   2.2717120, ]
 lattice_lengths: [   7.00000,    7.00000,    7.00000, ]
 lattice_angles: [110.000, 110.000, 110.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.30E+00, "res2":  6.64E-02, 
-    "residm":  2.81E-10, "diffor":  0.00E+00, 
-}
+lattice_volume:   2.5874324E+02
+convergence_: {deltae: -1.30E+00, res2:  6.64E-02, residm:  2.81E-10, diffor:  0.00E+00, }
 etotal    :  -1.29755193E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.42796647E-01
@@ -4074,7 +3954,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -2.5430E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -4110,7 +3990,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.14280
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 24, }
+iteration_state     : {dtset: 24, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.82095713383504E-02
 hartree             :  7.80842138597104E-04
@@ -4137,7 +4017,7 @@ band_energy         : -2.85593294689532E-01
 
 ================================================================================
 == DATASET 25 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -4176,21 +4056,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      31.000      31.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 25, }
+iteration_state: {dtset: 25, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  6.9284008,   0.0000000,   0.9986302, ]
+- [ -3.4642004,   6.0001711,   0.9986302, ]
+- [ -3.4642004,  -6.0001711,   0.9986302, ]
 lattice_lengths: [   7.00000,    7.00000,    7.00000, ]
 lattice_angles: [118.000, 118.000, 118.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.19E+00, "res2":  1.42E-01, 
-    "residm":  1.27E-09, "diffor":  0.00E+00, 
-}
+lattice_volume:   1.2454394E+02
+convergence_: {deltae: -1.19E+00, res2:  1.42E-01, residm:  1.27E-09, diffor:  0.00E+00, }
 etotal    :  -1.18953559E+00
 entropy   :   0.00000000E+00
 fermie    :  -8.88104472E-02
@@ -4201,7 +4076,7 @@ cartesian_stress_tensor:
 pressure_GPa:   2.6160E+00
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -4237,7 +4112,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.08881
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 25, }
+iteration_state     : {dtset: 25, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.82807655864983E-02
 hartree             :  3.77587363893314E-03
@@ -4264,7 +4139,7 @@ band_energy         : -1.77620894412817E-01
 
 ================================================================================
 == DATASET 26 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -4303,21 +4178,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      87.000      87.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 26, }
+iteration_state: {dtset: 26, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  5.9593418,   0.0000000,   3.6723624, ]
+- [ -2.9796709,   5.1609414,   3.6723624, ]
+- [ -2.9796709,  -5.1609414,   3.6723624, ]
 lattice_lengths: [   7.00000,    7.00000,    7.00000, ]
 lattice_angles: [ 95.000,  95.000,  95.000, ]
-cutoff_energies: {"ecut":   3.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.24E+00, "res2":  3.42E-02, 
-    "residm":  1.40E-09, "diffor":  0.00E+00, 
-}
+lattice_volume:   3.3883948E+02
+convergence_: {deltae: -1.24E+00, res2:  3.42E-02, residm:  1.40E-09, diffor:  0.00E+00, }
 etotal    :  -1.24268654E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.56012745E-01
@@ -4328,7 +4198,7 @@ cartesian_stress_tensor:
 pressure_GPa:  -1.7079E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -4364,7 +4234,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
   -0.15601
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 26, }
+iteration_state     : {dtset: 26, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.72632424111079E-02
 hartree             :  7.83576086013696E-03
@@ -5231,10 +5101,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         26.8  wall=         32.5
+- Proc.   0 individual time (sec): cpu=         20.2  wall=         22.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and  46 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         26.8  wall=         32.5
++Overall time at end (sec) : cpu=         20.2  wall=         22.8

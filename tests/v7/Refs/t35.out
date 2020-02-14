@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 02h15 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h41 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t35/t35.in
 - output file    -> t35.out
@@ -311,7 +311,7 @@ P           mkmem           4
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -422,28 +422,23 @@ TC-DFT STEP   4 - POSITRONIC GROUND-STATE CALCULATION IN PRESENCE OF ELECTRONS A
   diff=  1.284E-05 exceeds postoldfe=  1.000E-06
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        4
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :  1.200000000000000E+001
-charge    :  0.000000000000000E+000
+rprimd    :
+- [  7.6533908,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.6533908,   0.0000000, ]
+- [  0.0000000,   0.0000000,   7.6533908, ]
 lattice_lengths: [   7.65339,    7.65339,    7.65339, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   8.0, "pawecutdg":  15.0, }
-convergence: {
-    "deltae":  1.64E-12, "res2":  2.38E-11, 
-    "residm":  8.46E-06, "diffor":  0.00E+00, 
-}
-etotal    : -8.613332284535067E+000
-entropy   :  0.000000000000000E+000
-fermie    : -1.598648710475331E-001
+lattice_volume:   4.4829271E+02
+convergence_: {deltae:  1.64E-12, res2:  2.38E-11, residm:  8.46E-06, diffor:  0.00E+00, }
+etotal    :  -8.61333228E+00
+entropy   :   0.00000000E+00
+fermie    :  -1.59864871E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -578,7 +573,7 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.47812486626173E+00
 hartree             :  1.30978374939818E-02
@@ -597,20 +592,20 @@ total_energy_eV     : -2.34380443169756E+02
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
-band_energy         :  1.072656740446162E+000
-Ewald energy        : -1.078313117399870E+001
-psp_core            :  4.356229627825814E-001
-xc_dc               : -4.142843422675400E+000
-spherical_terms     :  4.986319116641106E+000
-'-kT*entropy'       : -5.143432641946151E-003
-electron_positron_dc:  4.623286585163015E-002
-electronic          : -8.390286343594568E+000
-positronic          :  9.293144107338083E-002
-electron_positron_interaction: -3.159774742909837E-001
-total_energy_dc     : -8.613332376812171E+000
-total_energy_dc_eV  : -2.343804431697555E+002
+band_energy         :  1.07265674044616E+00
+Ewald energy        : -1.07831311739987E+01
+psp_core            :  4.35622962782581E-01
+xc_dc               : -4.14284342267540E+00
+spherical_terms     :  4.98631911664111E+00
+'-kT*entropy'       : -5.14343264194615E-03
+electron_positron_dc:  4.62328658516301E-02
+electronic          : -8.39028634359457E+00
+positronic          :  9.29314410733808E-02
+electron_positron_interaction: -3.15977474290984E-01
+total_energy_dc     : -8.61333237681217E+00
+total_energy_dc_eV  : -2.34380443169756E+02
 ...
 
 
@@ -960,10 +955,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         32.8  wall=         32.9
+- Proc.   0 individual time (sec): cpu=         32.5  wall=         32.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         32.8  wall=         32.9
++Overall time at end (sec) : cpu=         32.5  wall=         32.5

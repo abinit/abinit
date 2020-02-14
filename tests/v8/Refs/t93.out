@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 14h37 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h48 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t93/t93.in
 - output file    -> t93.out
@@ -236,7 +236,7 @@ P           mkmem           3
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -325,21 +325,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     534.875     534.793
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        2
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   5.1085000,   5.1085000, ]
+- [  5.1085000,   0.0000000,   5.1085000, ]
+- [  5.1085000,   5.1085000,   0.0000000, ]
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -5.33E-15, "res2":  2.91E-26, 
-    "residm":  9.18E-17, "diffor": undef, 
-}
+lattice_volume:   2.6663072E+02
+convergence_: {deltae: -5.33E-15, res2:  2.91E-26, residm:  9.18E-17, diffor: undef, }
 etotal    :  -8.36638618E+00
 entropy   :   0.00000000E+00
 fermie    :   1.75191570E-01
@@ -351,7 +346,7 @@ pressure_GPa:   1.1434E+01
 cartesian_forces:
 - [  9.88295937E-30,  -7.00649232E-46,  -9.88295937E-30, ]
 - [ -9.88295937E-30,   0.00000000E+00,   9.88295937E-30, ]
-force_length_stats: {"min":   1.39766152E-29, "max":   1.39766152E-29, "mean":   1.39766152E-29, }
+force_length_stats: {min:   1.39766152E-29, max:   1.39766152E-29, mean:   1.39766152E-29, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -398,7 +393,7 @@ force_length_stats: {"min":   1.39766152E-29, "max":   1.39766152E-29, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.29660454276234E+00
 hartree             :  6.26192467227281E-01
@@ -425,7 +420,7 @@ band_energy         : -1.88754758779096E-02
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1103,7 +1098,7 @@ band_energy         : -1.88754758779096E-02
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1200,7 +1195,7 @@ band_energy         : -1.88754758779096E-02
  Perturbative Calculation
 
 --- !SelfEnergy_ee
-iteration_state: {"dtset": 3, }
+iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.438
@@ -1240,7 +1235,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
-iteration_state: {"dtset": 3, }
+iteration_state: {dtset: 3, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.774
@@ -1280,7 +1275,7 @@ data: !SigmaeeData |
 
 
 --- !SelfEnergy_ee
-iteration_state: {"dtset": 3, }
+iteration_state: {dtset: 3, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :    3.526
@@ -1575,10 +1570,10 @@ P           mkmem           3
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         24.8  wall=         25.6
+- Proc.   0 individual time (sec): cpu=         18.6  wall=         19.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  20 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         24.8  wall=         25.6
++Overall time at end (sec) : cpu=         18.6  wall=         19.9

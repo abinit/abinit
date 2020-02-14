@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 02h21 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h49 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t67-t68-t69-t70/t69.in
 - output file    -> t69.out
@@ -132,7 +132,7 @@ P          mk1mem           8
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -476,10 +476,10 @@ P          mk1mem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         50.3  wall=         50.5
+- Proc.   0 individual time (sec): cpu=         51.0  wall=         51.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  17 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         50.3  wall=         50.5
++Overall time at end (sec) : cpu=         51.0  wall=         51.8

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 02h14 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 18h40 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t04/t04.in
 - output file    -> t04.out
@@ -126,7 +126,7 @@ P           mkmem           4
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -187,33 +187,28 @@ _setup2: Arith. and geom. avg. npw (full set) are     235.063     234.957
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :  6.000000000000000E+000
-charge    :  0.000000000000000E+000
+rprimd    :
+- [  5.4117660,   0.0000000,   0.0000000, ]
+- [ -2.7058830,   4.6867268,   0.0000000, ]
+- [  0.0000000,   0.0000000,  17.6747560, ]
 lattice_lengths: [   5.41177,    5.41177,   17.67476, ]
 lattice_angles: [ 90.000,  90.000, 120.000, ]
-cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.39E-10, "res2":  6.74E-10, 
-    "residm":  1.76E-14, "diffor": undef, 
-}
-etotal    : -4.152197744923502E+000
-entropy   :  0.000000000000000E+000
-fermie    :  5.423309574487990E-002
+lattice_volume:   4.4829312E+02
+convergence_: {deltae: -1.39E-10, res2:  6.74E-10, residm:  1.76E-14, diffor: undef, }
+etotal    :  -4.15219774E+00
+entropy   :   0.00000000E+00
+fermie    :   5.42330957E-02
 cartesian_stress_tensor:
-- [ 3.454471785811365E-004,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  3.454471785811365E-004,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000, -1.832815265506905E-004, ]
-pressure_GPa: -4.978160857754573E+000
+- [  3.45447179E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.45447179E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.83281527E-04, ]
+pressure_GPa:  -4.9782E+00
 cartesian_forces:
-- [-0.000000000000000E+000, -0.000000000000000E+000,  2.448648163230495E-002, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000, -2.448648163230495E-002, ]
-force_length_stats: {"min":  2.448648163230495E-002, "max":  2.448648163230495E-002, "mean":  2.448648163230495E-002, }
+- [ -0.00000000E+00,  -0.00000000E+00,   2.44864816E-02, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -2.44864816E-02, ]
+force_length_stats: {min:   2.44864816E-02, max:   2.44864816E-02, mean:   2.44864816E-02, }
 ...
 
  io1dm : about to open file t04o_1DM
@@ -260,7 +255,7 @@ force_length_stats: {"min":  2.448648163230495E-002, "max":  2.448648163230495E-
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.55461881379585E+00
 hartree             :  2.83240118367671E+00
@@ -457,10 +452,10 @@ P           mkmem           4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          3.4  wall=          3.5
+- Proc.   0 individual time (sec): cpu=          3.3  wall=          3.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.4  wall=          3.5
++Overall time at end (sec) : cpu=          3.3  wall=          3.4
