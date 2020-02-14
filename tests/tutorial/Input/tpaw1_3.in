@@ -38,6 +38,9 @@ ndtset 10   pawecutdg: 12. pawecutdg+ 3.
  prtwf 1 prtden 0  prteig 0
  getwfk -1
 
+#Files
+pp_dirpath="../../../Psps_for_tests"
+pseudos="C.LDA_PW-JTH.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

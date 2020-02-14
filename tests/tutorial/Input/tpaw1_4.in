@@ -4,11 +4,11 @@
 # =======================================
 
 #Output of the total DOS
- prtdos 1
+# prtdos 1
 
 #Output of the projected DOS (with PAW contribs)
 # prtdos 3  pawprtdos 1
-# natsph 1 iatsph 1 ratsph 1.5
+# natsph 1 iatsph 1 ratsph 1.51
 
 
 #Cell and atoms definition
@@ -43,6 +43,9 @@
 #I/O parameters
  prtwf 0 prtden 0 prteig 0
 
+#Files
+pp_dirpath="../../../Psps_for_tests"
+pseudos="C.LDA_PW-JTH.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

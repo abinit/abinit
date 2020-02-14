@@ -247,7 +247,9 @@ def main():
     needs_reload = True
     if not options.regenerate and os.path.exists(AbinitProject.get_default_pickle_file()):
         proj = AbinitProject.pickle_load()
+	print("\nCoucou0\n")
         needs_reload = proj.needs_reload()
+	print("\nCoucou1\n")
         if needs_reload:
             cprint("Source tree changed. Need to parse source files again to rebuild dependency graph...", "yellow")
 
@@ -261,9 +263,9 @@ def main():
     if options.command == "makemake":
         retcode = proj.validate(verbose=options.verbose)
         if retcode != 0:
-            cprint("validate returned retcode: %s. Aborting now" % retcode, "red")
+	    cprint("validate returned retcode: %s. Aborting now" % retcode, "red")
             return retcode
-
+	
         #all_mods = proj.find_allmods("dummy_tests.F90")
         #for mod in all_mods: print(mod.basename)
 

@@ -17,6 +17,7 @@
  ecut 15.
  ecutsm 0.5
 
+
 #SCF cycle parameters
  tolvrs 1.0d-10
  nstep 20
@@ -34,6 +35,9 @@
 #I/O parameters
  prtwf 0 prtden 0  prteig 0
 
+#Files
+pp_dirpath="../../../Psps_for_tests"
+pseudos="6c.pspnc"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

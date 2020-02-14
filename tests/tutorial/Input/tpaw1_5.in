@@ -4,7 +4,7 @@
 # =======================================
 
 #Datasets: etotal vs acell
-ndtset 7   acell: 3*3.52 angstrom  acell+ 3*0.005 angstrom
+ndtset 7   acell: 3*3.515 angstrom  acell+ 3*0.005 angstrom
 
 #Cell and atoms definition
  acell 3*3.567 angstrom
@@ -17,9 +17,9 @@ ndtset 7   acell: 3*3.52 angstrom  acell+ 3*0.005 angstrom
  znucl 6  nband 6
 
 #Basis definitions
- ecut 12.
+ ecut 20.
  ecutsm 0.5
- pawecutdg 24.
+ pawecutdg 50.
 
 #SCF cycle parameters
  tolvrs 1.0d-10
@@ -39,6 +39,9 @@ ndtset 7   acell: 3*3.52 angstrom  acell+ 3*0.005 angstrom
  prtwf 1 prtden 0 prteig 0
  getwfk -1
 
+#Files
+pp_dirpath="../../../Psps_for_tests"
+pseudos="C.LDA_PW-JTH.xml"
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
