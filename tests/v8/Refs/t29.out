@@ -175,7 +175,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -281,21 +281,21 @@ lattice_lengths: [  15.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -6.64E-14, "res2":  4.72E-11, 
+    "deltae": -6.59E-14, "res2":  4.72E-11, 
     "residm":  2.90E-15, "diffor": undef, 
 }
 etotal    :  -9.79328306E-01
 entropy   :   0.00000000E+00
 fermie    :  -2.20059708E-01
 cartesian_stress_tensor:
-- [  4.45486655E-05,   0.00000000E+00,  -2.40393929E-14, ]
+- [  4.45486655E-05,   0.00000000E+00,  -2.40393682E-14, ]
 - [  0.00000000E+00,   2.37997468E-05,   0.00000000E+00, ]
-- [ -2.40393929E-14,   0.00000000E+00,   2.37997465E-05, ]
+- [ -2.40393682E-14,   0.00000000E+00,   2.37997465E-05, ]
 pressure_GPa:  -9.0370E-01
 cartesian_forces:
-- [  9.82824985E-03,  -0.00000000E+00,  -6.13356866E-11, ]
-- [ -9.82824985E-03,  -0.00000000E+00,   6.13356866E-11, ]
-force_length_stats: {"min":   9.82824985E-03, "max":   9.82824985E-03, "mean":   9.82824985E-03, }
+- [  8.90534737E-03,  -0.00000000E+00,  -8.13937810E-11, ]
+- [ -8.90534737E-03,  -0.00000000E+00,   8.13937810E-11, ]
+force_length_stats: {"min":   8.90534737E-03, "max":   8.90534737E-03, "mean":   8.90534737E-03, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -351,16 +351,16 @@ force_length_stats: {"min":   9.82824985E-03, "max":   9.82824985E-03, "mean":  
 --- !EnergyTerms
 iteration_state     : {"dtset": 1, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.38822327067591E-01
+kinetic             :  8.38822327067594E-01
 hartree             :  5.59263617105049E-01
-xc                  : -5.62889530544706E-01
+xc                  : -5.62889530544707E-01
 Ewald energy        : -1.22982450254038E-02
 psp_core            :  1.11965412936769E-04
-local_psp           : -1.80233843259820E+00
+local_psp           : -1.80233843259821E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -9.79328305635145E-01
 total_energy_eV     : -2.66488784496013E+01
-band_energy         : -7.87122590482265E-01
+band_energy         : -7.87122590482262E-01
 ...
 
 
@@ -376,7 +376,7 @@ band_energy         : -7.87122590482265E-01
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -448,21 +448,21 @@ lattice_lengths: [  15.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  3.29E-14, "res2":  4.83E-11, 
+    "deltae":  3.42E-14, "res2":  4.83E-11, 
     "residm":  1.72E-17, "diffor": undef, 
 }
 etotal    :  -9.47179869E-01
 entropy   :   0.00000000E+00
 fermie    :  -3.43221352E-01
 cartesian_stress_tensor:
-- [ -3.33440941E-05,   0.00000000E+00,  -1.09856129E-13, ]
+- [ -3.33440941E-05,   0.00000000E+00,  -1.09856101E-13, ]
 - [  0.00000000E+00,   1.16046384E-05,   0.00000000E+00, ]
-- [ -1.09856129E-13,   0.00000000E+00,   1.16046383E-05, ]
+- [ -1.09856101E-13,   0.00000000E+00,   1.16046383E-05, ]
 pressure_GPa:   9.9392E-02
 cartesian_forces:
-- [ -5.24952738E-02,  -0.00000000E+00,   5.25273395E-11, ]
-- [  5.24952738E-02,  -0.00000000E+00,  -5.25273395E-11, ]
-force_length_stats: {"min":   5.24952738E-02, "max":   5.24952738E-02, "mean":   5.24952738E-02, }
+- [ -6.61198647E-02,  -0.00000000E+00,   6.44154744E-11, ]
+- [  6.61198647E-02,  -0.00000000E+00,  -6.44154744E-11, ]
+force_length_stats: {"min":   6.61198647E-02, "max":   6.61198647E-02, "mean":   6.61198647E-02, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -518,16 +518,16 @@ force_length_stats: {"min":   5.24952738E-02, "max":   5.24952738E-02, "mean":  
 --- !EnergyTerms
 iteration_state     : {"dtset": 2, }
 comment             : Components of total free energy in Hartree
-kinetic             :  9.61868236294434E-01
-hartree             :  5.92400347491100E-01
-xc                  : -6.04425941293665E-01
+kinetic             :  9.61868236294435E-01
+hartree             :  5.92400347491101E-01
+xc                  : -6.04425941293666E-01
 Ewald energy        : -1.22982450254038E-02
 psp_core            :  1.11965412936769E-04
 local_psp           : -1.88483622792577E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -9.47179868555396E-01
-total_energy_eV     : -2.57740749877252E+01
-band_energy         : -7.82880877510554E-01
+total_energy        : -9.47179868555397E-01
+total_energy_eV     : -2.57740749877253E+01
+band_energy         : -7.82880877510564E-01
 ...
 
 
@@ -543,7 +543,7 @@ band_energy         : -7.82880877510554E-01
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -626,21 +626,21 @@ lattice_lengths: [  15.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae":  3.00E-14, "res2":  2.01E-10, 
+    "deltae":  2.56E-14, "res2":  2.01E-10, 
     "residm":  9.35E-16, "diffor": undef, 
 }
 etotal    :  -9.78776540E-01
 entropy   :   0.00000000E+00
 fermie    :  -2.19677200E-01
 cartesian_stress_tensor:
-- [  4.40157674E-05,   0.00000000E+00,  -1.95951736E-15, ]
+- [  4.40157674E-05,   0.00000000E+00,  -1.95955749E-15, ]
 - [  0.00000000E+00,   2.42622630E-05,   0.00000000E+00, ]
-- [ -1.95951736E-15,   0.00000000E+00,   2.42622630E-05, ]
+- [ -1.95955749E-15,   0.00000000E+00,   2.42622630E-05, ]
 pressure_GPa:  -9.0754E-01
 cartesian_forces:
-- [  1.15451415E-02,  -0.00000000E+00,  -6.39987184E-12, ]
-- [ -1.15451415E-02,  -0.00000000E+00,   6.39987184E-12, ]
-force_length_stats: {"min":   1.15451415E-02, "max":   1.15451415E-02, "mean":   1.15451415E-02, }
+- [  1.16584257E-02,  -0.00000000E+00,  -8.23411576E-12, ]
+- [ -1.16584257E-02,  -0.00000000E+00,   8.23411576E-12, ]
+force_length_stats: {"min":   1.16584257E-02, "max":   1.16584257E-02, "mean":   1.16584257E-02, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -696,16 +696,16 @@ force_length_stats: {"min":   1.15451415E-02, "max":   1.15451415E-02, "mean":  
 --- !EnergyTerms
 iteration_state     : {"dtset": 3, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.37591342166520E-01
-hartree             :  5.58951059996764E-01
-xc                  : -5.62033462921852E-01
+kinetic             :  8.37591342166440E-01
+hartree             :  5.58951059996799E-01
+xc                  : -5.62033462921854E-01
 Ewald energy        : -1.22982450254038E-02
 psp_core            :  1.11965412936769E-04
-local_psp           : -1.80109918754704E+00
+local_psp           : -1.80109918754709E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -9.78776539930040E-01
-total_energy_eV     : -2.66338641411989E+01
-band_energy         : -7.72299209214105E-01
+total_energy        : -9.78776539930043E-01
+total_energy_eV     : -2.66338641411990E+01
+band_energy         : -7.72299209214057E-01
 ...
 
 
@@ -721,7 +721,7 @@ band_energy         : -7.72299209214105E-01
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -801,21 +801,21 @@ lattice_lengths: [  15.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.12E-14, "res2":  5.09E-11, 
+    "deltae": -1.09E-14, "res2":  5.09E-11, 
     "residm":  5.57E-17, "diffor": undef, 
 }
 etotal    :  -9.58912823E-01
 entropy   :   0.00000000E+00
 fermie    :  -2.54589884E-01
 cartesian_stress_tensor:
-- [  2.52027677E-06,   0.00000000E+00,  -2.20985096E-14, ]
+- [  2.52027677E-06,   0.00000000E+00,  -2.20985036E-14, ]
 - [  0.00000000E+00,   1.80781071E-05,   0.00000000E+00, ]
-- [ -2.20985096E-14,   0.00000000E+00,   1.80781071E-05, ]
+- [ -2.20985036E-14,   0.00000000E+00,   1.80781071E-05, ]
 pressure_GPa:  -3.7930E-01
 cartesian_forces:
-- [ -7.74742892E-03,  -0.00000000E+00,   1.22485744E-11, ]
-- [  7.74742892E-03,  -0.00000000E+00,  -1.22485744E-11, ]
-force_length_stats: {"min":   7.74742892E-03, "max":   7.74742892E-03, "mean":   7.74742892E-03, }
+- [ -6.05875233E-03,  -0.00000000E+00,   1.38394556E-11, ]
+- [  6.05875233E-03,  -0.00000000E+00,  -1.38394556E-11, ]
+force_length_stats: {"min":   6.05875233E-03, "max":   6.05875233E-03, "mean":   6.05875233E-03, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -871,16 +871,16 @@ force_length_stats: {"min":   7.74742892E-03, "max":   7.74742892E-03, "mean":  
 --- !EnergyTerms
 iteration_state     : {"dtset": 4, }
 comment             : Components of total free energy in Hartree
-kinetic             :  8.99283810768338E-01
+kinetic             :  8.99283810768344E-01
 hartree             :  5.75221039622685E-01
 xc                  : -5.81102758991758E-01
 Ewald energy        : -1.22982450254038E-02
 psp_core            :  1.11965412936769E-04
-local_psp           : -1.84012865368098E+00
+local_psp           : -1.84012865368099E+00
 non_local_psp       :  0.00000000000000E+00
 total_energy        : -9.58912822866111E-01
 total_energy_eV     : -2.60933449112859E+01
-band_energy         : -7.19912840127962E-01
+band_energy         : -7.19912840127972E-01
 ...
 
 
@@ -896,7 +896,7 @@ band_energy         : -7.19912840127962E-01
 
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -976,21 +976,21 @@ lattice_lengths: [  15.00000,   10.00000,   10.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
 convergence: {
-    "deltae": -1.08E-14, "res2":  1.33E-12, 
+    "deltae": -8.88E-15, "res2":  1.33E-12, 
     "residm":  2.25E-16, "diffor": undef, 
 }
 etotal    :  -9.78522411E-01
 entropy   :   0.00000000E+00
 fermie    :  -2.27118969E-01
 cartesian_stress_tensor:
-- [  4.45101658E-05,   0.00000000E+00,  -1.95778636E-14, ]
+- [  4.45101658E-05,   0.00000000E+00,  -1.95778801E-14, ]
 - [  0.00000000E+00,   1.90471847E-05,   0.00000000E+00, ]
-- [ -1.95778636E-14,   0.00000000E+00,   1.90471847E-05, ]
+- [ -1.95778801E-14,   0.00000000E+00,   1.90471847E-05, ]
 pressure_GPa:  -8.1010E-01
 cartesian_forces:
-- [  1.58214056E-02,  -0.00000000E+00,   8.94703640E-12, ]
-- [ -1.58214056E-02,  -0.00000000E+00,  -8.94703640E-12, ]
-force_length_stats: {"min":   1.58214056E-02, "max":   1.58214056E-02, "mean":   1.58214056E-02, }
+- [  1.80842154E-02,  -0.00000000E+00,   1.07310085E-11, ]
+- [ -1.80842154E-02,  -0.00000000E+00,  -1.07310085E-11, ]
+force_length_stats: {"min":   1.80842154E-02, "max":   1.80842154E-02, "mean":   1.80842154E-02, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -1047,15 +1047,15 @@ force_length_stats: {"min":   1.58214056E-02, "max":   1.58214056E-02, "mean":  
 iteration_state     : {"dtset": 5, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.52633442431788E-01
-hartree             :  5.69293711566416E-01
-xc                  : -5.67839605580744E-01
+hartree             :  5.69293711566419E-01
+xc                  : -5.67839605580745E-01
 Ewald energy        : -1.22982450254038E-02
 psp_core            :  1.11965412936769E-04
 local_psp           : -1.82042368127849E+00
 non_local_psp       :  0.00000000000000E+00
-total_energy        : -9.78522410664076E-01
+total_energy        : -9.78522410664075E-01
 total_energy_eV     : -2.66269489321927E+01
-band_energy         : -7.87954743394570E-01
+band_energy         : -7.87954743394571E-01
 ...
 
 
