@@ -1017,6 +1017,7 @@ call gs_hamkq%free()
  end if
 
  !Deallocations
+ ABI_DEALLOCATE(cg)
  ABI_DEALLOCATE(eqgradhart)
  ABI_DEALLOCATE(indkpt1)
  ABI_DEALLOCATE(istwfk_rbz)
@@ -1062,6 +1063,9 @@ call gs_hamkq%free()
  if(xmpi_paral==1) then
    ABI_DEALLOCATE(mpi_enreg%proc_distrb)
  end if
+
+ ! Clean the header
+ call hdr0%free()
 
  DBG_EXIT("COLL")
 
@@ -3001,7 +3005,10 @@ call gs_hamkq%free()
    ABI_DEALLOCATE(isdqwf_t4_k)
    ABI_DEALLOCATE(isdqwf_t5)
    ABI_DEALLOCATE(isdqwf_t5_k)
+   ABI_DEALLOCATE(isdq_qgradhart)
+   ABI_DEALLOCATE(isdq_flg)
  end if
+ ABI_DEALLOCATE(cg)
  ABI_DEALLOCATE(q1grad)
  ABI_DEALLOCATE(ph1d)
  ABI_DEALLOCATE(indkpt1)
@@ -3024,6 +3031,9 @@ call gs_hamkq%free()
  if(xmpi_paral==1) then
    ABI_DEALLOCATE(mpi_enreg%proc_distrb)
  end if
+
+ ! Clean the header
+ call hdr0%free()
 
  DBG_EXIT("COLL")
 
