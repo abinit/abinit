@@ -882,7 +882,7 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
  else
    call ydoc%add_string('cartesian_stress_tensor', "null")
    call ydoc%add_string('pressure_GPa', "null")
-   !call ydoc%set_keys_to_null("cartesian_stress_tensor, pressure_GPa")
+   !call ydoc%set_keys_to_string("cartesian_stress_tensor, pressure_GPa", "null")
  end if
 
  !call ydoc%add_real2d('xred', cryst%xred, real_fmt="(es12.4)")
@@ -894,12 +894,12 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
    ! Write force statistics
    call dict%set_keys('min, max, mean', rvals=[minval(fnorms), maxval(fnorms), sum(fnorms) / results%natom])
    !call ydoc%add_reals('min, max, mean',
-   !                    rvals=[minval(fnorms), maxval(fnorms), sum(fnorms) / results%natom], dict_name="force_length_stats")
+   !  rvals=[minval(fnorms), maxval(fnorms), sum(fnorms) / results%natom], dict_name="force_length_stats")
 
  else
    call ydoc%add_string('cartesian_forces', "null")
    call dict%set_keys_to_null("min, max, mean")
-   !call ydoc%set_keys_to_null("min, max, mean", dict_name="force_length_stats")
+   !call ydoc%set_keys_to_string("min, max, mean", "null", dict_name="force_length_stats")
  end if
 
  call ydoc%add_dict('force_length_stats', dict)

@@ -4,7 +4,7 @@
 !!
 !! FUNCTION
 !!  This module is used for tracing memory allocations/deallocations
-!!  when we compile the code with --enable-memory-profiling="yes" that, 
+!!  when we compile the code with --enable-memory-profiling="yes" that,
 !!  in turn, defines the CPP macro HAVE_MEM_PROFILE in abi_common.h
 !!  The main entry point is abimem_init. abimem_record is interfaced via CPP macros
 !!  defined in abi_common
@@ -77,7 +77,7 @@ module m_profiling_abi
    integer(i8b) :: peak = 0
    ! Memory peak in bytes.
 
-   integer :: peak_fileline = -1 
+   integer :: peak_fileline = -1
    ! Line in peak_file
 
    integer(i8b) :: num_alloc = 0
@@ -221,7 +221,7 @@ subroutine abimem_init(level, delta_time, filename, limit_mb)
    _ABORT(msg)
  end select
 
- contains 
+ contains
 
  subroutine write_header(info)
    character(len=*),intent(in) :: info
@@ -296,7 +296,7 @@ end subroutine abimem_shutdown
 !!  Add mallinfo values if `with_mallinfo` (default: False)
 !!
 !! INPUT
-!!  
+!!
 
 subroutine abimem_report(unt, with_mallinfo)
 
@@ -335,7 +335,7 @@ end subroutine abimem_report
 !!
 !! FUNCTION
 !!  Function that returns the number of allocations and deallocations that have
-!!  been done and the memory currently used
+!!  been performed in Fortran and the memory currently used
 !!
 !! OUTPUT
 !!  nalloc: number of allocations that have been done
@@ -435,7 +435,7 @@ subroutine abimem_record(istat, vname, addr, act, isize, file, line)
  !  end if
  !end if
 
- ! IMPORTANT: 
+ ! IMPORTANT:
  ! Remember to change the pyton code in ~abinit/tests/pymods/memprof.py to account for changes in the format
  if (do_log) then
    select case (minfo%level)

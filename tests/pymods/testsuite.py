@@ -394,6 +394,7 @@ class FileToTest(object):
             except Exception as e:
                 warnings.warn(('[{}] Something went wrong with this test:\n'
                                '{}: {}\n').format(self.name, type(e).__name__, str(e)))
+                #raise e
 
                 isok, status = False, 'failed'
                 msg = 'Internal error:\n{}: {}'.format(type(e).__name__, str(e))

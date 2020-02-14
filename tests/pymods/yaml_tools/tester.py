@@ -143,6 +143,7 @@ class Tester(object):
                 for child in ref:
                     if child not in tested:
                         msg = '{} was not present'.format(child)
+                        #raise RuntimeError(msg)
                         self.issues.append(Failure(self.conf, msg))
                     else:
                         self.check_this(child, ref[child], tested[child])

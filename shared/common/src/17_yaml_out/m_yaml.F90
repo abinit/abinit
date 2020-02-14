@@ -138,6 +138,9 @@ module m_yaml
    procedure :: add_dictlist => yamldoc_add_dictlist
      ! Add a field containing a list of dictionaries/array of pair_list
 
+   procedure :: set_keys_to_string => yamldoc_set_keys_to_string
+     ! Set all keys to a commong (string) value
+
  end type yamldoc_t
 !!***
 
@@ -1401,6 +1404,76 @@ subroutine yamldoc_write_and_free(self, unit, newline)
 end subroutine yamldoc_write_and_free
 !!***
 
+!!****f* m_yaml/yamldoc_set_keys_to_string
+!! NAME
+!! yamldoc_set_keys_to_string
+!!
+!! FUNCTION
+!! Set all keys to a commong (string) value
+!!
+!! INPUTS
+!!  keylist = List of comma-separated keywords
+!!  svalue = String Value
+!!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
+!!  [dict_key]=If present, a dictionary with key `dict_key` is created instead of a list.
+!!  [multiline_trig] = optional minimum number of elements before switching to multiline representation
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine yamldoc_set_keys_to_string(self, keylist, svalue, dict_key, width, multiline_trig)
+
+!Arguments ------------------------------------
+ class(yamldoc_t),intent(inout) :: self
+ character(len=*),intent(in) :: keylist, svalue
+ character(len=*),intent(in),optional :: dict_key
+ integer,intent(in),optional :: width, multiline_trig
+
+!Local variables-------------------------------
+ integer :: i, n, w, start, stp, vmax
+ type(pair_list) :: dict
+
+! *************************************************************************
+
+ ABI_DEFAULT(w, width, self%default_width)
+
+ n = char_count(keylist, ",") + 1
+
+ start = 1
+
+ if (.not. present(dict_key)) then
+   do i=1,n
+     stp = index(keylist(start:), ",")
+     if (stp == 0) then
+       call self%add_string(adjustl(keylist(start:)), svalue, width=w)
+     else
+       call self%add_string(adjustl(keylist(start: start + stp - 2)), svalue, width=w)
+       start = start + stp
+       ABI_CHECK(start < len_trim(keylist), sjoin("Invalid keylist:", keylist))
+     end if
+   end do
+
+ else
+   ! Create and insert dictionary.
+   do i=1,n
+     stp = index(keylist(start:), ",")
+     if (stp == 0) then
+       call dict%set(adjustl(keylist(start:)), s=svalue)
+     else
+       call dict%set(adjustl(keylist(start: start + stp - 2)), s=svalue)
+     end if
+   end do
+   ABI_DEFAULT(vmax, multiline_trig, self%default_multiline_trig)
+   call self%add_dict(trim(dict_key), dict, multiline_trig=vmax, width=w)
+   call dict%free()
+ end if
+
+end subroutine yamldoc_set_keys_to_string
+!!***
+
 ! private
 subroutine string_clear(string)
   character(len=*),intent(inout) :: string
@@ -1622,8 +1695,10 @@ subroutine yaml_print_dict(stream, pl, key_size, s_size, kfmt, ifmt, rfmt, sfmt,
 !#endif
 
    ! TODO: Should enclose key in double quotation markers only if needed
-   !call string_clear(tmp_key)
-   !write(tmp_key, kfmt) '"'//trim(key)//'"'
+   !if has_whitespaces(key) then
+   !  call string_clear(tmp_key)
+   !  write(tmp_key, kfmt) '"'//trim(key)//'"'
+   !end if
 
    tmp_key = trim(key)
 
@@ -1663,6 +1738,27 @@ subroutine yaml_print_string(stream, string)
  call stream%push(trim(quoted))
 
 end subroutine yaml_print_string
+
+!pure logical function has_whitespaces(string) result (ans)
+!
+! character(len=*),intent(in) :: string
+! integer :: ii, jj
+!
+! ans = .False.
+! do ii=len_trim(string), 1, -1
+!   if (string(ii:ii) == " ") then
+!     ans = .True.; exit
+!   end if
+! end do
+!
+! if (ans) then
+!   do jj=1,ii-1
+!     if (string(ii:ii) /= " ") exit
+!   end do
+!   if (jj == ii) ans = .False.
+! end do
+!
+!end function has_whitespaces
 
 end module m_yaml
 !!***

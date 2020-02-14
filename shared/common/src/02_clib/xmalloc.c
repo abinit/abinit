@@ -27,6 +27,13 @@ static size_t BYTES_ALLOCATED = 0;
  * Counting bytes deallocated by free requires some non-standard API to access the status of the mallocator
 */
 
+
+void clib_get_meminfo(long int *nalloc_c, long int *nfree_c)
+{
+    *nalloc_c = COUNT_MALLOC;
+    *nfree_c = COUNT_FREE;
+}
+
 static void memory_error_and_abort (const char *fname)
 {
   fprintf (stderr, "%s: out of virtual memory\n", fname);
