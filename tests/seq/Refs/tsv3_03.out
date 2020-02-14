@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 16h24 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 23h05 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Test_suite/seq_tsv3_03/tsv3_03.in
 - output file    -> tsv3_03.out
@@ -499,7 +499,7 @@ P           mkmem8         16
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -604,21 +604,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      14.125      14.121
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   5.3384784,   5.3384784, ]
+- [  5.3384784,   0.0000000,   5.3384784, ]
+- [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   1.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  8.88E-16, "res2":  1.28E-16, 
-    "residm":  1.63E-18, "diffor": undef, 
-}
+lattice_volume:   3.0428635E+02
+convergence_: {deltae:  8.88E-16, res2:  1.28E-16, residm:  1.63E-18, diffor: undef, }
 etotal    :  -7.92532866E+00
 entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
@@ -630,7 +625,7 @@ pressure_GPa:  -2.7654E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -674,7 +669,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.76522246662875E+00
 hartree             :  4.24681996633616E-01
@@ -701,7 +696,7 @@ band_energy         : -1.40550457644689E-01
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -754,28 +749,23 @@ band_energy         : -1.40550457644689E-01
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   5.3384784,   5.3384784, ]
+- [  5.3384784,   0.0000000,   5.3384784, ]
+- [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   1.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  0.00E+00, "res2":  0.00E+00, 
-    "residm":  9.22E-13, "diffor":  0.00E+00, 
-}
+lattice_volume:   3.0428635E+02
+convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.22E-13, diffor:  0.00E+00, }
 etotal    :  -7.92532866E+00
 entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -806,7 +796,7 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -859,28 +849,23 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 3, }
+iteration_state: {dtset: 3, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   5.3384784,   5.3384784, ]
+- [  5.3384784,   0.0000000,   5.3384784, ]
+- [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   1.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  0.00E+00, "res2":  0.00E+00, 
-    "residm":  9.22E-13, "diffor":  0.00E+00, 
-}
+lattice_volume:   3.0428635E+02
+convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.22E-13, diffor:  0.00E+00, }
 etotal    :  -7.92532866E+00
 entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -911,7 +896,7 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -964,28 +949,23 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 4, }
+iteration_state: {dtset: 4, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   5.3384784,   5.3384784, ]
+- [  5.3384784,   0.0000000,   5.3384784, ]
+- [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   1.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  0.00E+00, "res2":  0.00E+00, 
-    "residm":  9.22E-13, "diffor":  0.00E+00, 
-}
+lattice_volume:   3.0428635E+02
+convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.22E-13, diffor:  0.00E+00, }
 etotal    :  -7.92532866E+00
 entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1016,7 +996,7 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -1069,28 +1049,23 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 5, }
+iteration_state: {dtset: 5, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   5.3384784,   5.3384784, ]
+- [  5.3384784,   0.0000000,   5.3384784, ]
+- [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   1.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  0.00E+00, "res2":  0.00E+00, 
-    "residm":  9.22E-13, "diffor":  0.00E+00, 
-}
+lattice_volume:   3.0428635E+02
+convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.22E-13, diffor:  0.00E+00, }
 etotal    :  -7.92532866E+00
 entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -1121,7 +1096,7 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 
 ================================================================================
 == DATASET  6 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -1171,21 +1146,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      14.125      14.121
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 6, }
+iteration_state: {dtset: 6, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        2
-nspinor   :        1
-nspden    :        2
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   5.3384784,   5.3384784, ]
+- [  5.3384784,   0.0000000,   5.3384784, ]
+- [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   1.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  1.78E-15, "res2":  2.57E-16, 
-    "residm":  1.63E-18, "diffor": undef, 
-}
+lattice_volume:   3.0428635E+02
+convergence_: {deltae:  1.78E-15, res2:  2.57E-16, residm:  1.63E-18, diffor: undef, }
 etotal    :  -7.92532866E+00
 entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
@@ -1197,7 +1167,7 @@ pressure_GPa:  -2.7654E+01
 cartesian_forces:
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -1251,7 +1221,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 6, }
+iteration_state     : {dtset: 6, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.76522246662875E+00
 hartree             :  4.24681996633615E-01
@@ -1278,7 +1248,7 @@ band_energy         : -1.40550457644689E-01
 
 ================================================================================
 == DATASET  7 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   6.
 
@@ -1341,28 +1311,23 @@ band_energy         : -1.40550457644689E-01
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 7, }
+iteration_state: {dtset: 7, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        2
-nspinor   :        1
-nspden    :        2
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   5.3384784,   5.3384784, ]
+- [  5.3384784,   0.0000000,   5.3384784, ]
+- [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   1.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  0.00E+00, "res2":  0.00E+00, 
-    "residm":  9.22E-13, "diffor":  0.00E+00, 
-}
+lattice_volume:   3.0428635E+02
+convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.22E-13, diffor:  0.00E+00, }
 etotal    :  -7.92532866E+00
 entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -1403,7 +1368,7 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 
 ================================================================================
 == DATASET  8 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   6.
 
@@ -1466,28 +1431,23 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 8, }
+iteration_state: {dtset: 8, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        2
-nspinor   :        1
-nspden    :        2
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   5.3384784,   5.3384784, ]
+- [  5.3384784,   0.0000000,   5.3384784, ]
+- [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":   1.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  0.00E+00, "res2":  0.00E+00, 
-    "residm":  9.22E-13, "diffor":  0.00E+00, 
-}
+lattice_volume:   3.0428635E+02
+convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.22E-13, diffor:  0.00E+00, }
 etotal    :  -7.92532866E+00
 entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -1837,55 +1797,55 @@ P           mkmem8         16
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          2.7        0.05      0.001
-- Total wall clock time (s,m,h):          3.0        0.05      0.001
+- Total cpu        time (s,m,h):          2.8        0.05      0.001
+- Total wall clock time (s,m,h):          3.1        0.05      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            2.7, wall_time =            3.0
+- cpu_time =            2.8, wall_time =            3.1
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- ewald                          0.694  25.5      0.697  23.0              8      -1.00        1.00       1.00
-- invars2                        0.415  15.2      0.423  14.0              8      -1.00        0.98       0.98
-- fourwf%(pot)                   0.413  15.2      0.398  13.1           9247      -1.00        1.04       1.04
-- nonlop(apply)                  0.152   5.6      0.168   5.5           9247      -1.00        0.90       0.90
-- timing timab                   0.116   4.3      0.116   3.8              9      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.095   3.5      0.090   3.0             -1      -1.00        1.06       1.06
-- stress                         0.095   3.5      0.094   3.1              2      -1.00        1.01       1.01
-- ewald2 (+vdw_dftd)             0.095   3.5      0.094   3.1              2      -1.00        1.01       1.01
-- abinit(2)                      0.088   3.2      0.090   3.0              1      -1.00        0.98       0.98
-- getghc-other                   0.083   3.0      0.088   2.9             -1      -1.00        0.94       0.94
-- projbd                         0.049   1.8      0.057   1.9          13664      -1.00        0.87       0.87
-- others (123)                   0.059   2.2      0.060   2.0             -1      -1.00        0.99       0.99
+- ewald                          0.680  24.3      0.683  22.1              8      -1.00        1.00       1.00
+- invars2                        0.538  19.2      0.543  17.6              8      -1.00        0.99       0.99
+- fourwf%(pot)                   0.409  14.6      0.397  12.8           9247      -1.00        1.03       1.03
+- nonlop(apply)                  0.151   5.4      0.146   4.7           9247      -1.00        1.03       1.03
+- timing timab                   0.117   4.2      0.117   3.8              9      -1.00        1.00       1.00
+- abinit(2)                      0.098   3.5      0.104   3.4              1      -1.00        0.94       0.94
+- stress                         0.092   3.3      0.092   3.0              2      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.091   3.3      0.092   3.0              2      -1.00        0.99       0.99
+- getghc-other                   0.088   3.2      0.092   3.0             -1      -1.00        0.96       0.96
+- vtowfk(ssdiag)                 0.084   3.0      0.085   2.7             -1      -1.00        0.99       0.99
+- projbd                         0.049   1.7      0.053   1.7          13664      -1.00        0.92       0.92
+- others (123)                   0.051   1.8      0.044   1.4             -1      -1.00        1.16       1.16
 -<END_TIMER>
 -
-- subtotal                       2.354  86.4      2.375  78.4                                  0.99       0.99
+- subtotal                       2.447  87.5      2.448  79.2                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           2.7, wall_time =           3.0
+- cpu_time =           2.8, wall_time =           3.1
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- ewald                          0.694  25.5      0.697  23.0              8      -1.00        1.00       1.00
-- invars2                        0.415  15.2      0.423  14.0              8      -1.00        0.98       0.98
-- fourwf%(pot)                   0.413  15.2      0.398  13.1           9247      -1.00        1.04       1.04
-- nonlop(apply)                  0.152   5.6      0.168   5.5           9247      -1.00        0.90       0.90
-- timing timab                   0.116   4.3      0.116   3.8              9      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.095   3.5      0.090   3.0             -1      -1.00        1.06       1.06
-- stress                         0.095   3.5      0.094   3.1              2      -1.00        1.01       1.01
-- ewald2 (+vdw_dftd)             0.095   3.5      0.094   3.1              2      -1.00        1.01       1.01
-- abinit(2)                      0.088   3.2      0.090   3.0              1      -1.00        0.98       0.98
-- getghc-other                   0.083   3.0      0.088   2.9             -1      -1.00        0.94       0.94
-- projbd                         0.049   1.8      0.057   1.9          13664      -1.00        0.87       0.87
-- others (123)                   0.059   2.2      0.060   2.0             -1      -1.00        0.99       0.99
+- ewald                          0.680  24.3      0.683  22.1              8      -1.00        1.00       1.00
+- invars2                        0.538  19.2      0.543  17.6              8      -1.00        0.99       0.99
+- fourwf%(pot)                   0.409  14.6      0.397  12.8           9247      -1.00        1.03       1.03
+- nonlop(apply)                  0.151   5.4      0.146   4.7           9247      -1.00        1.03       1.03
+- timing timab                   0.117   4.2      0.117   3.8              9      -1.00        1.00       1.00
+- abinit(2)                      0.098   3.5      0.104   3.4              1      -1.00        0.94       0.94
+- stress                         0.092   3.3      0.092   3.0              2      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.091   3.3      0.092   3.0              2      -1.00        0.99       0.99
+- getghc-other                   0.088   3.2      0.092   3.0             -1      -1.00        0.96       0.96
+- vtowfk(ssdiag)                 0.084   3.0      0.085   2.7             -1      -1.00        0.99       0.99
+- projbd                         0.049   1.7      0.053   1.7          13664      -1.00        0.92       0.92
+- others (123)                   0.051   1.8      0.044   1.4             -1      -1.00        1.16       1.16
 -<END_TIMER>
 
-- subtotal                       2.354  86.4      2.375  78.4                                  0.99       0.99
+- subtotal                       2.447  87.5      2.448  79.2                                  1.00       1.00
 
 ================================================================================
 
@@ -1965,10 +1925,10 @@ P           mkmem8         16
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.7  wall=          3.0
+- Proc.   0 individual time (sec): cpu=          2.8  wall=          3.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  38 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.7  wall=          3.0
++Overall time at end (sec) : cpu=          2.8  wall=          3.1
