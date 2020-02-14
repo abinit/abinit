@@ -188,7 +188,8 @@ contains
 !! SOURCE
 
 subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eigen,etotal,electronpositron,&
-&          energies,fock,forces_needed,fred,gmet,gprimd,grchempottn,grcondft,grewtn,grvdw,gsqcut,hdr,ifirst_gs,indsym,istep,istep_mix,kg,&
+&          energies,fock,forces_needed,fred,gmet,gprimd,grchempottn,&
+&          grcondft,grewtn,grvdw,gsqcut,hdr,ifirst_gs,indsym,istep,istep_mix,kg,&
 &          kxc,maxfor,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc,nattyp,nfft,ngfft,ngrvdw,nhat,nkxc,npwarr,nvresid,occ,optres,&
 &          paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
 &          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
