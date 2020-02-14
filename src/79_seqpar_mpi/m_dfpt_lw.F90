@@ -1183,7 +1183,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
  DBG_ENTER("COLL")
 
 !Open output files
- if (prtvol==1) then
+ if (prtvol>=10) then
    open(unit=71,file='qdrpl_wf_t1.out',status='unknown',form='formatted',action='write')
    open(unit=72,file='qdrpl_wf_t2.out',status='unknown',form='formatted',action='write')
    open(unit=73,file='qdrpl_wf_t3.out',status='unknown',form='formatted',action='write')
@@ -1248,7 +1248,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
              qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=tmpim
              qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=-tmpre
 
-             if (prtvol==1) then
+             if (prtvol>=10) then
                !Write individual contributions 
                write(71,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
              & qdrpwf_t1(im,iatpert,iq2grad,iq1grad)+qdrpwf_t1(im,iatpert,iiq2grad,iiq1grad),   &
@@ -1330,7 +1330,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
              qdrptens_red(re,iatom,iatdir,iq2dir,iq1dir)=tmpim
              qdrptens_red(im,iatom,iatdir,iq2dir,iq1dir)=0.0_dp
 
-             if (prtvol==1) then
+             if (prtvol>=10) then
                !Write individual contributions 
                write(71,'(4(i2,2x),2(f18.10,2x))') iq2dir,iatom,iatdir,iq1dir,                  &
              & qdrpwf_t1(im,iatpert,iq2grad,iq1grad)+qdrpwf_t1(im,iatpert,iiq2grad,iiq1grad),   &
@@ -1368,7 +1368,7 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
    MSG_BUG(msg)
  end if
 
- if (prtvol==1) then
+ if (prtvol>=10) then
    close(71)
    close(72)
    close(73)
@@ -3194,7 +3194,7 @@ end subroutine dfpt_flexo
            elflexowf_t4(im,iefidir,istr1dir,istr2dir,iq1dir)=-tmpre*2.0_dp*ucvolinv
           
            !Compute and save individual terms in mixed coordinates
-           if (prtvol==1) then
+           if (prtvol>=10) then
 
              tmpre=elqgradhart(re,iefidir,iq1dir,istr1dir,istr2dir)
              tmpim=elqgradhart(im,iefidir,iq1dir,istr1dir,istr2dir)
@@ -3263,7 +3263,7 @@ end subroutine dfpt_flexo
            elflexowf_t4(im,iefidir,istr1dir,istr2dir,iq1dir)=0.0_dp
 
            !Compute and save individual terms in mixed coordinates
-           if (prtvol==1) then
+           if (prtvol>=10) then
 
              tmpim=elqgradhart(im,iefidir,iq1dir,istr1dir,istr2dir)
              elqgradhart(re,iefidir,iq1dir,istr1dir,istr2dir)=-tmpim*2.0_dp*ucvolinv
@@ -3309,7 +3309,7 @@ end subroutine dfpt_flexo
 
 ! ABI_DEALLOCATE(elec_flexotens_red)
 
- if (prtvol==1) then
+ if (prtvol>=10) then
    ABI_ALLOCATE(elflexowf_buffer_cart,(5,2,3,3,3,3))
    elflexowf_buffer_cart(1,:,:,:,:,:)=elflexowf_t1(:,:,:,:,:)
    elflexowf_buffer_cart(2,:,:,:,:,:)=elflexowf_t2(:,:,:,:,:)
@@ -3356,7 +3356,7 @@ end subroutine dfpt_flexo
  end do
 
 !Do now the transformation of the electric field derivative for the other therms
- if (prtvol==1) then
+ if (prtvol>=10) then
    do ibuf=1,5
      do istr2dir=1,3
        do istr1dir=1,3
@@ -3398,7 +3398,7 @@ end subroutine dfpt_flexo
 
 !2nd transform coordinates of the q-gradient (treat it as electric field)
 !of the individual terms
- if (prtvol==1) then
+ if (prtvol>=10) then
    do ibuf=1,5
      do istr2dir=1,3
        do istr1dir=1,3
@@ -3421,7 +3421,7 @@ end subroutine dfpt_flexo
 
 !Write the flexoelectric tensor in cartesian coordinates
 !Open output files
- if (prtvol==1) then
+ if (prtvol>=10) then
    open(unit=71,file='elec_flexo_wf_t1.out',status='unknown',form='formatted',action='write')
    open(unit=72,file='elec_flexo_wf_t2.out',status='unknown',form='formatted',action='write')
    open(unit=73,file='elec_flexo_wf_t3.out',status='unknown',form='formatted',action='write')
@@ -3465,7 +3465,7 @@ end subroutine dfpt_flexo
          & elec_flexotens_cart(re,alpha,gamma,beta,delta), &
          & elec_flexotens_cart(im,alpha,gamma,beta,delta)
 
-           if (prtvol==1) then
+           if (prtvol>=10) then
              write(71,'(4(i5,3x),2(1x,f20.10))') alpha,gamma,beta,delta, &
            & elflexowf_buffer_cart(1,re,alpha,gamma,beta,delta), &
            & elflexowf_buffer_cart(1,im,alpha,gamma,beta,delta)
@@ -3495,7 +3495,7 @@ end subroutine dfpt_flexo
        end do
      end do
      write(ab_out,'(a)')' '
-     if (prtvol==1) then
+     if (prtvol>=10) then
        write(71,*)' ' 
        write(72,*)' ' 
        write(73,*)' ' 
@@ -3506,7 +3506,7 @@ end subroutine dfpt_flexo
    end do
  end do
 
- if (prtvol==1) then
+ if (prtvol>=10) then
    close(71)
    close(72)
    close(73)
@@ -3699,7 +3699,7 @@ end subroutine dfpt_ciflexoout
  DBG_ENTER("COLL")
 
 !Open output files
- if (prtvol==1) then
+ if (prtvol>=10) then
   open(unit=71,file='ddmdq_wf_t1.out',status='unknown',form='formatted',action='write')
    open(unit=72,file='ddmdq_wf_t2.out',status='unknown',form='formatted',action='write')
    open(unit=73,file='ddmdq_wf_t3.out',status='unknown',form='formatted',action='write')
@@ -3738,7 +3738,7 @@ end subroutine dfpt_ciflexoout
            ddmdq_red(re,iatpert,jatpert,iq1grad)=-two*tmpim
            ddmdq_red(im,iatpert,jatpert,iq1grad)=two*tmpre
 
-           if (prtvol==1) then
+           if (prtvol>=10) then
              !Write individual contributions 
              write(71,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
            & -two*ddmdqwf_t1(:,iatpert,jatpert,iq1grad)
@@ -3788,7 +3788,7 @@ end subroutine dfpt_ciflexoout
            ddmdq_red(re,iatpert,jatpert,iq1grad)=-two*tmpim
            ddmdq_red(im,iatpert,jatpert,iq1grad)=zero
 
-           if (prtvol==1) then
+           if (prtvol>=10) then
              !Write individual contributions 
              write(71,'(5(i5,4x),2(1x,f20.10))') iatom, iatdir, jatom, jatdir, iq1dir,       &
            & -two*ddmdqwf_t1(im,iatpert,jatpert,iq1grad)
@@ -3819,7 +3819,7 @@ end subroutine dfpt_ciflexoout
 
  end if
 
- if (prtvol==1) then
+ if (prtvol>=10) then
    close(71)
    close(72)
    close(73)
@@ -4151,7 +4151,7 @@ end subroutine dfpt_ciflexoout
            dyewdqdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)=two*tmpim
            
            !Compute and save individual terms in mixed coordinates
-           if (prtvol==1) then
+           if (prtvol>=10) then
              
              tmpre=isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)
              tmpim=isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
@@ -4236,7 +4236,7 @@ end subroutine dfpt_ciflexoout
            dyewdqdq(im,iatdir,iatom,istr1dir,istr2dir,iq1dir)=zero
            
            !Compute and save individual terms in mixed coordinates
-           if (prtvol==1) then
+           if (prtvol>=10) then
              
              tmpim=isdq_qgradhart(im,iatom,iatdir,iq1dir,istr1dir,istr2dir)
              isdq_qgradhart(re,iatom,iatdir,iq1dir,istr1dir,istr2dir)=-two*tmpim
@@ -4283,7 +4283,7 @@ end subroutine dfpt_ciflexoout
  dyewdqdq_cart=dyewdqdq
  typeI_cartflag=0
 
- if (prtvol==1) then
+ if (prtvol>=10) then
    ABI_ALLOCATE(isdqtens_buffer_cart,(5,2,matom,3,nq1grad,3,3))
    isdqtens_buffer_cart(1,:,:,:,:,:,:)=isdqwf_t1(:,:,:,:,:,:)
    isdqtens_buffer_cart(2,:,:,:,:,:,:)=isdqwf_t2(:,:,:,:,:,:)
@@ -4343,7 +4343,7 @@ end subroutine dfpt_ciflexoout
  end do
 
 !For debugging, transform also all the individual contributions
- if (prtvol==1) then
+ if (prtvol>=10) then
    do ibuf=1,5
      do istr2dir=1,3
        do istr1dir=1,3
@@ -4409,7 +4409,7 @@ end subroutine dfpt_ciflexoout
  end do
 
 !For debugging, transform also all the individual contributions
- if (prtvol==1) then
+ if (prtvol>=10) then
    do ibuf=1,5
      do istr2dir=1,3
        do istr1dir=1,3
@@ -4500,7 +4500,7 @@ end subroutine dfpt_ciflexoout
 
 !Write the q-gradient fo the internal strain tensor in cartesian coordinates
 !Open output files
- if (prtvol==1) then
+ if (prtvol>=10) then
    open(unit=71,file='isdq_wf_t1.out',status='unknown',form='formatted',action='write')
    open(unit=72,file='isdq_wf_t2.out',status='unknown',form='formatted',action='write')
    open(unit=73,file='isdq_wf_t3.out',status='unknown',form='formatted',action='write')
@@ -4566,7 +4566,7 @@ end subroutine dfpt_ciflexoout
            & isdqtens_cart(re,iatom,alpha,gamma,beta,delta), &
            & isdqtens_cart(im,iatom,alpha,gamma,beta,delta)
  
-             if (prtvol==1) then
+             if (prtvol>=10) then
                write(71,'(5(i5,3x),2(1x,f20.10))') iatom,alpha,gamma,beta,delta, &
              & isdqtens_buffer_cart(1,re,iatom,alpha,gamma,beta,delta), &
              & isdqtens_buffer_cart(1,im,iatom,alpha,gamma,beta,delta)
@@ -4602,7 +4602,7 @@ end subroutine dfpt_ciflexoout
          end do
        end do
        write(ab_out,'(a)')' '
-       if (prtvol==1) then
+       if (prtvol>=10) then
          write(71,'(a)')' ' 
          write(72,'(a)')' ' 
          write(73,'(a)')' ' 
@@ -4616,7 +4616,7 @@ end subroutine dfpt_ciflexoout
    end do
  end do
 
- if (prtvol==1) then
+ if (prtvol>=10) then
    close(71)
    close(72)
    close(73)

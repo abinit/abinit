@@ -103,7 +103,7 @@ diemac 13.0
 #%%   tlw_1.out, tolnlines=  5, tolabs=  4.192e-06, tolrel=  3.000e-08, fld_options=-medium
 #%% psp_files =  14si.fhi
 #%% [paral_info]
-#%% max_nprocs = 2
+#%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = M. Royo
 #%% keywords = DFPT, LONGWAVE
