@@ -76,7 +76,6 @@ MODULE m_dens
 
   real(dp) :: magcon_lambda                  ! Strength of the atomic spherical constraint
   real(dp) :: ratsm                          ! Smearing width for ratsph
-  real(dp) :: ucvol                          ! Unit cell volume
 
   integer :: magconon                        ! Turn on the penalty function constraint instead of the more powerful constrainedDFT algorithm
 
@@ -91,9 +90,6 @@ MODULE m_dens
   integer,allocatable :: constraint_kind(:)
   ! constraint_kind(ntypat)
   ! Constraint kind to be applied to each type of atom. See corresponding input variable
-
-  real(dp) :: gmet(3,3)
-  ! Reciprocal space metric tensor, Bohr^2 units.
 
   real(dp) :: rprimd(3,3)
   ! Direct lattice vectors, Bohr units.
@@ -693,15 +689,14 @@ end subroutine add_atomic_fcts
    ABI_ALLOCATE(rhor_dum,(nfftf,nspden))
    ABI_ALLOCATE(gr_dum,(3,nspden,natom))
    rhor_dum(:,:)=zero
-   call calcdenmagsph(gmet,gr_dum,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,&
-&    ratsm,ratsph,rhor_dum,rprimd,typat,ucvol,xred,0,cplex1,intgf2=intgf2)
+   call calcdenmagsph(gr_dum,mpi_enreg,natom,nfftf,ngfftf,nspden,ntypat,&
+&    ratsm,ratsph,rhor_dum,rprimd,typat,xred,0,cplex1,intgf2=intgf2)
    ABI_DEALLOCATE(rhor_dum)
    ABI_DEALLOCATE(gr_dum)
  else
    intgf2=zero
  endif
 
- constrained_dft%gmet            =gmet
  constrained_dft%magconon        =magconon
  constrained_dft%magcon_lambda   =magcon_lambda
  constrained_dft%natom           =natom
@@ -711,7 +706,6 @@ end subroutine add_atomic_fcts
  constrained_dft%ntypat          =ntypat
  constrained_dft%ratsm           =ratsm
  constrained_dft%rprimd          =rprimd
- constrained_dft%ucvol           =ucvol
 
  ABI_ALLOCATE(constrained_dft%chrgat,(natom))
  ABI_ALLOCATE(constrained_dft%constraint_kind,(ntypat))
@@ -873,8 +867,8 @@ end subroutine constrained_dft_free
 !We need the integrated magnetic moments 
  ABI_ALLOCATE(intgden,(nspden,natom))
  ABI_ALLOCATE(gr_intgden,(3,nspden,natom))
- call calcdenmagsph(c_dft%gmet,gr_intgden,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
-&  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
+ call calcdenmagsph(gr_intgden,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
+&  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
 
 !DEBUG
@@ -885,8 +879,8 @@ end subroutine constrained_dft_free
  ABI_ALLOCATE(intgres_tmp,(nspden,natom))
  ABI_ALLOCATE(gr_dum,(3,nspden,natom))
  intgres_tmp(:,:)=zero
- call calcdenmagsph(c_dft%gmet,gr_dum,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
-&  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,11,cplex1,intgden=intgres_tmp,rhomag=rhomag)
+ call calcdenmagsph(gr_dum,mpi_enreg,natom,nfftf,c_dft%ngfftf,nspden,ntypat,&
+&  c_dft%ratsm,c_dft%ratsph,vresid,c_dft%rprimd,c_dft%typat,xred,11,cplex1,intgden=intgres_tmp,rhomag=rhomag)
  ABI_DEALLOCATE(gr_dum)
 
 !DEBUG
@@ -1209,8 +1203,8 @@ subroutine mag_penalty(c_dft,mpi_enreg,rhor,nv_constr_dft_r,xred)
  ABI_ALLOCATE(gr_dum,(3,nspden,natom))
 
 !We need the integrated magnetic moments and the smoothing function
- call calcdenmagsph(c_dft%gmet,gr_dum,mpi_enreg,natom,nfft,c_dft%ngfftf,nspden,ntypat,&
-&  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,c_dft%ucvol,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
+ call calcdenmagsph(gr_dum,mpi_enreg,natom,nfft,c_dft%ngfftf,nspden,ntypat,&
+&  c_dft%ratsm,c_dft%ratsph,rhor,c_dft%rprimd,c_dft%typat,xred,1,cplex1,intgden=intgden,rhomag=rhomag)
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,c_dft%ratsm,c_dft%ratsph,rhomag,c_dft%typat)
  ABI_DEALLOCATE(gr_dum)
 
@@ -1364,7 +1358,7 @@ subroutine mag_penalty_e(magconon,magcon_lambda,mpi_enreg,natom,nfft,ngfft,nspde
 
 !We need the integrated magnetic moments
  cplex1=1
- call calcdenmagsph(gmet,gr_dum,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,ucvol,xred,&
+ call calcdenmagsph(gr_dum,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
 & 1,cplex1,intgden=intgden,rhomag=rhomag)
  call prtdenmagsph(cplex1,intgden,natom,nspden,ntypat,std_out,1,ratsm,ratsph,rhomag,typat)
  ABI_DEALLOCATE(gr_dum)
@@ -1467,7 +1461,6 @@ end subroutine mag_penalty_e
 !! or optionally of integral of potential residual.
 !!
 !! INPUTS
-!!  gmet(3,3)=reciprocal space metric tensor in bohr**-2
 !!  mpi_enreg=information about MPI parallelization
 !!  natom=number of atoms in cell.
 !!  nfft=(effective) number of FFT grid points (for this processor)
@@ -1482,7 +1475,6 @@ end subroutine mag_penalty_e
 !!   (total in first comp. and magnetization in comp. 2 to 4 if nspden=4)
 !!  rprimd(3,3)=dimensional primitive translations in real space (bohr)
 !!  typat(natom)=type of each atom
-!!  ucvol=unit cell volume in bohr**3
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!
 !! OUTPUT
@@ -1502,19 +1494,19 @@ end subroutine mag_penalty_e
 !!
 !! SOURCE
 
-subroutine calcdenmagsph(gmet,gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,ucvol,xred,&
+subroutine calcdenmagsph(gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypat,ratsm,ratsph,rhor,rprimd,typat,xred,&
 &    option,cplex,intgden,dentot,rhomag,intgf2)
 
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in)        :: natom,nfft,nspden,ntypat
- real(dp),intent(in)       :: ratsm,ucvol
+ real(dp),intent(in)       :: ratsm
  type(MPI_type),intent(in) :: mpi_enreg
  integer ,intent(in)       :: option 
  integer, intent(in)       :: cplex
 !arrays
  integer,intent(in)  :: ngfft(18),typat(natom)
- real(dp),intent(in) :: gmet(3,3),ratsph(ntypat),rhor(cplex*nfft,nspden),rprimd(3,3)
+ real(dp),intent(in) :: ratsph(ntypat),rhor(cplex*nfft,nspden),rprimd(3,3)
  real(dp),intent(out) :: gr_intgden(3,nspden,natom)   ! This should be optional
  real(dp),intent(in) :: xred(3,natom)
 !integer,intent(out),optional   :: atgridpts(nfft)
@@ -1529,14 +1521,14 @@ subroutine calcdenmagsph(gmet,gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypa
  integer :: jfft
  real(dp),parameter :: delta=0.99_dp
  real(dp) :: difx,dify,difz,r2,r2atsph,rr1,rr2,rr3,rx,ry,rz
- real(dp) :: dfsm,fact,fsm,ratsm2
+ real(dp) :: dfsm,fact,fsm,ratsm2,ucvol
  logical   :: grid_found
 !arrays
  integer, ABI_CONTIGUOUS pointer :: fftn3_distrib(:),ffti3_local(:)
  integer :: overlap_ij(natom,natom)
- real(dp) :: gr_intg(3,4),intg(4),rhomag_(2,nspden),tsec(2)
+ real(dp) :: gmet(3,3),gprimd(3,3),gr_intg(3,4),intg(4),rhomag_(2,nspden),tsec(2)
  real(dp) :: dist_ij(natom,natom),intgden_(nspden,natom)
- real(dp) :: my_xred(3, natom), xshift(3, natom)
+ real(dp) :: my_xred(3, natom), rmet(3,3),xshift(3, natom)
  real(dp), allocatable :: fsm_atom(:,:)
 
 ! *************************************************************************
@@ -1545,6 +1537,8 @@ subroutine calcdenmagsph(gmet,gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypa
  nfftot=n1*n2*n3
  intgden_=zero
  gr_intgden=zero
+
+ call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
  ! This routine is not able to handle xred positions that are "far" from the
  ! first unit cell so wrap xred into [0, 1[ interval here.
@@ -1659,9 +1653,9 @@ subroutine calcdenmagsph(gmet,gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypa
            if(present(intgden).and. option<10 .and. ratsm2>tol12)then
              do ispden=1,nspden
                fact=two*dfsm*rhor(ifft_local,ispden)
-               gr_intg(1,ispden)=gr_intg(1,ispden)+rx*fact
-               gr_intg(2,ispden)=gr_intg(2,ispden)+ry*fact
-               gr_intg(3,ispden)=gr_intg(3,ispden)+rz*fact
+               gr_intg(1,ispden)=gr_intg(1,ispden)+difx*fact
+               gr_intg(2,ispden)=gr_intg(2,ispden)+dify*fact
+               gr_intg(3,ispden)=gr_intg(3,ispden)+difz*fact
              enddo
            endif
          end do
@@ -1674,6 +1668,8 @@ subroutine calcdenmagsph(gmet,gr_intgden,mpi_enreg,natom,nfft,ngfft,nspden,ntypa
    endif
 
    intg(:)=intg(:)*ucvol/dble(nfftot)
+
+   gr_intg=matmul(rmet,gr_intg)
    gr_intg(:,:)=gr_intg(:,:)*ucvol/dble(nfftot)
 
    if(nspden==2 .and. option/=11)then

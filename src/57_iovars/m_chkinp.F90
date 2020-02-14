@@ -422,7 +422,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &             '   tnons is ',dt%tnons(1:3,isym),ch10,&
 &             '   Please, read the description of the input variable chksymbreak,',ch10,&
 &             '   then, if you feel confident, you might switch it to zero, or consult with the forum.'
-             call wrtout(iout,msg,'COLL')
+             !call wrtout(iout,msg,'COLL')
              call wrtout(std_out,msg,'COLL')
              !ierr=ierr+1 ! moved this to a warning: for slab geometries arbitrary tnons can appear along the vacuum direction
            end if

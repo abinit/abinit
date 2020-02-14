@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 14h55 )
+.Starting date : Thu 13 Feb 2020.
+- ( at 16h51 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/mpiio_t49_MPI4/t49.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/TestBot_MPI4/mpiio_t49_MPI4/t49.in
 - output file    -> t49_MPI4.out
 - root for input  files -> t49_MPI4i
 - root for output files -> t49_MPI4o
@@ -133,331 +133,7 @@ P           mkmem           1
 
  chkinp: Checking input parameters for consistency, jdtset=   1.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=   2.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
 ================================================================================
 == DATASET  1 ==================================================================
@@ -477,8 +153,8 @@ P           mkmem           1
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.16857
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.phoney_mod
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.phoney_mod
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/14si.phoney_mod
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/14si.phoney_mod
 - 2 bohr rc 15 hartree ec psp for silicon 8 November 1991 (new)
 - 14.00000   4.00000    980710                znucl, zion, pspdat
     5    3    2    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -846,10 +522,10 @@ P           mkmem           1
 
  Test the timer : 
   a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
-- CPU time =    1.8984E-06 sec,    Wall time =    1.9272E-06 sec
+- CPU time =    1.6361E-06 sec,    Wall time =    1.6393E-06 sec
 
-- Total cpu        time (s,m,h):          3.4        0.06      0.001
-- Total wall clock time (s,m,h):          4.1        0.07      0.001
+- Total cpu        time (s,m,h):          3.3        0.06      0.001
+- Total wall clock time (s,m,h):          4.0        0.07      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
@@ -858,188 +534,186 @@ P           mkmem           1
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- pspini                         0.319   9.5      0.321   7.9              2      -1.00        1.00       1.00
-- timing timab                   0.109   3.3      0.111   2.7             11      -1.00        0.99       0.99
-- vtowfk(ssdiag)                 0.075   2.2      0.075   1.8             -1      -1.00        1.00       1.00
-- lobpcgwf2                      0.075   2.2      0.075   1.8             12      -1.00        1.00       1.00
-- invars2                        0.059   1.8      0.060   1.5              2      -1.00        0.98       0.98
-- ewald                          0.052   1.5      0.052   1.3              2      -1.00        0.99       0.99
-- stress                         0.036   1.1      0.036   0.9              2      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.035   1.0      0.035   0.9              2      -1.00        1.00       1.00
-- fourwf%(pot)                   0.028   0.8      0.028   0.7            240      -1.00        1.00       1.00
-- abinit(2)                      0.014   0.4      0.015   0.4              1      -1.00        0.94       0.94
-- nonlop(apply)                  0.006   0.2      0.006   0.2            240      -1.00        0.99       0.99
-- fourdp                         0.005   0.2      0.005   0.1             46      -1.00        0.99       0.99
-- mkrho/=                        0.003   0.1      0.003   0.1             16      -1.00        0.85       0.85
-- xc:pot/=fourdp                 0.002   0.0      0.002   0.0             10      -1.00        1.00       1.00
-- inwffil(excl. calls)           0.001   0.0      0.025   0.6              2      -1.00        0.06       0.06
+- pspini                         0.277   8.3      0.280   7.1              2      -1.00        0.99       0.99
+- timing timab                   0.141   4.2      0.142   3.6             12      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.073   2.2      0.073   1.8             -1      -1.00        1.00       1.00
+- lobpcgwf2                      0.073   2.2      0.073   1.8             12      -1.00        1.00       1.00
+- invars2                        0.046   1.4      0.047   1.2              2      -1.00        0.98       0.98
+- ewald                          0.046   1.4      0.046   1.2              2      -1.00        0.99       0.99
+- stress                         0.033   1.0      0.033   0.8              2      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.032   1.0      0.032   0.8              2      -1.00        1.00       1.00
+- fourwf%(pot)                   0.027   0.8      0.027   0.7            240      -1.00        1.00       1.00
+- abinit(2)                      0.012   0.4      0.012   0.3              1      -1.00        0.97       0.97
+- nonlop(apply)                  0.007   0.2      0.007   0.2            240      -1.00        0.99       0.99
+- fourdp                         0.006   0.2      0.006   0.1             46      -1.00        1.00       1.00
+- mkrho/=                        0.003   0.1      0.003   0.1             16      -1.00        0.94       0.94
+- kpgsph                         0.003   0.1      0.003   0.1              4      -1.00        1.00       1.00
+- inwffil(excl. calls)           0.002   0.1      0.030   0.8              2      -1.00        0.07       0.07
+- xc:pot/=fourdp                 0.001   0.0      0.001   0.0             10      -1.00        1.00       1.00
+- getghc-other                   0.001   0.0      0.001   0.0             -1      -1.00        1.03       1.03
 - symrhg(no FFT)                 0.001   0.0      0.001   0.0              8      -1.00        1.00       1.00
-- getghc-other                   0.001   0.0      0.001   0.0             -1      -1.00        1.09       1.09
-- setsym                         0.001   0.0      0.001   0.0              2      -1.00        1.00       1.00
 - nonlop(forces)                 0.001   0.0      0.001   0.0             48      -1.00        0.99       0.99
+- setsym                         0.001   0.0      0.001   0.0              2      -1.00        1.00       1.00
 - forces                         0.001   0.0      0.001   0.0              2      -1.00        0.98       0.98
 - scfcv-scprqt                   0.000   0.0      0.000   0.0              8      -1.00        0.86       0.86
-- vtowfk(contrib)                0.000   0.0      0.000   0.0              8      -1.00        0.97       0.97
-- kpgsph                         0.000   0.0      0.000   0.0              4      -1.00        0.82       0.82
-- prep_bandfft_tabs              0.000   0.0      0.000   0.0              4      -1.00        0.99       0.99
-- newkpt(excl. rwwf   )          0.000   0.0      0.000   0.0             -1      -1.00        0.90       0.90
-- initwf(after rwwf)             0.000   0.0      0.000   0.0              1      -1.00        0.76       0.76
-- vtowfk  (1)                    0.000   0.0      0.000   0.0              8      -1.00        1.07       1.07
-- wfsinp(excl. calls)            0.000   0.0      0.000   0.0              1      -1.00        0.99       0.99
-- others (106)                   0.000   0.0      0.000   0.0             -1      -1.00        0.95       0.95
+- prep_bandfft_tabs              0.000   0.0      0.000   0.0              4      -1.00        1.00       1.00
+- vtowfk(contrib)                0.000   0.0      0.000   0.0              8      -1.00        0.99       0.99
+- newkpt(excl. rwwf   )          0.000   0.0      0.000   0.0             -1      -1.00        0.96       0.96
+- vtowfk  (1)                    0.000   0.0      0.000   0.0              8      -1.00        1.13       1.13
+- initwf(after rwwf)             0.000   0.0      0.000   0.0              1      -1.00        0.63       0.63
+- wfsinp(excl. calls)            0.000   0.0      0.000   0.0              1      -1.00        1.03       1.03
+- others (106)                   0.000   0.0      0.000   0.0             -1      -1.00        1.04       1.04
 -<END_TIMER>
 -
-- subtotal                       0.826  24.6      0.857  21.1                                  0.96       0.96
+- subtotal                       0.787  23.6      0.820  20.7                                  0.96       0.96
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           3.4, wall_time =           4.1
+- cpu_time =           3.3, wall_time =           4.0
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- pspini                         1.278  38.1      1.285  31.6              8      -1.00        0.99       0.99
-- timing timab                   0.439  13.1      0.444  10.9             44      -1.00        0.99       0.99
-- vtowfk(ssdiag)                 0.301   9.0      0.302   7.4             -4      -1.00        1.00       1.00
-- lobpcgwf2                      0.301   9.0      0.301   7.4             48      -1.00        1.00       1.00
-- invars2                        0.235   7.0      0.242   5.9              8      -1.00        0.97       0.97
-- ewald                          0.207   6.2      0.208   5.1              8      -1.00        1.00       1.00
-- stress                         0.143   4.3      0.143   3.5              8      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.141   4.2      0.141   3.5              8      -1.00        1.00       1.00
-- fourwf%(pot)                   0.113   3.4      0.113   2.8            960      -1.00        0.99       0.99
-- abinit(2)                      0.051   1.5      0.054   1.3              4      -1.00        0.94       0.94
-- nonlop(apply)                  0.025   0.8      0.026   0.6            960      -1.00        0.99       0.99
-- fourdp                         0.022   0.6      0.022   0.5            184      -1.00        0.99       0.99
-- mkrho/=                        0.011   0.3      0.012   0.3             64      -1.00        0.94       0.94
-- xc:pot/=fourdp                 0.006   0.2      0.006   0.2             40      -1.00        1.00       1.00
-- symrhg(no FFT)                 0.005   0.2      0.005   0.1             32      -1.00        1.00       1.00
+- pspini                         1.138  34.1      1.143  28.8              8      -1.00        1.00       1.00
+- timing timab                   0.580  17.4      0.580  14.6             48      -1.00        1.00       1.00
+- vtowfk(ssdiag)                 0.291   8.7      0.291   7.3             -4      -1.00        1.00       1.00
+- lobpcgwf2                      0.291   8.7      0.291   7.3             48      -1.00        1.00       1.00
+- invars2                        0.198   5.9      0.200   5.0              8      -1.00        0.99       0.99
+- ewald                          0.184   5.5      0.186   4.7              8      -1.00        0.99       0.99
+- stress                         0.131   3.9      0.131   3.3              8      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.129   3.9      0.129   3.3              8      -1.00        1.00       1.00
+- fourwf%(pot)                   0.109   3.3      0.110   2.8            960      -1.00        1.00       1.00
+- abinit(2)                      0.045   1.3      0.047   1.2              4      -1.00        0.95       0.95
+- nonlop(apply)                  0.026   0.8      0.026   0.7            960      -1.00        0.99       0.99
+- fourdp                         0.022   0.7      0.022   0.6            184      -1.00        0.99       0.99
+- mkrho/=                        0.011   0.3      0.011   0.3             64      -1.00        0.98       0.98
+- xc:pot/=fourdp                 0.006   0.2      0.006   0.1             40      -1.00        1.00       1.00
 - getghc-other                   0.005   0.2      0.005   0.1             -4      -1.00        1.07       1.07
-- inwffil(excl. calls)           0.005   0.2      0.100   2.4              8      -1.00        0.05       0.05
-- setsym                         0.004   0.1      0.004   0.1              8      -1.00        1.00       1.00
+- symrhg(no FFT)                 0.005   0.1      0.005   0.1             32      -1.00        1.00       1.00
+- inwffil(excl. calls)           0.005   0.1      0.117   2.9              8      -1.00        0.04       0.04
+- kpgsph                         0.004   0.1      0.004   0.1             16      -1.00        1.00       1.00
 - nonlop(forces)                 0.004   0.1      0.004   0.1            192      -1.00        0.99       0.99
+- setsym                         0.003   0.1      0.003   0.1              8      -1.00        1.00       1.00
 - scfcv-scprqt                   0.003   0.1      0.003   0.1             32      -1.00        0.97       0.97
 - forces                         0.002   0.1      0.002   0.1              8      -1.00        0.99       0.99
-- kpgsph                         0.001   0.0      0.002   0.0             16      -1.00        0.75       0.75
-- prep_bandfft_tabs              0.001   0.0      0.001   0.0             16      -1.00        1.00       1.00
-- vtowfk(contrib)                0.001   0.0      0.001   0.0             32      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )          0.000   0.0      0.000   0.0             -4      -1.00        0.97       0.97
-- vtowfk  (1)                    0.000   0.0      0.000   0.0             32      -1.00        1.01       1.01
-- wfsinp(excl. calls)            0.000   0.0      0.000   0.0              4      -1.00        0.96       0.96
-- initwf(after rwwf)             0.000   0.0      0.000   0.0              4      -1.00        0.88       0.88
-- initwf(before rwwf)            0.000   0.0      0.000   0.0              4      -1.00        1.08       1.08
-- others (105)                   0.000   0.0      0.000   0.0             -1      -1.00        0.00       0.00
+- prep_bandfft_tabs              0.001   0.0      0.001   0.0             16      -1.00        0.99       0.99
+- vtowfk(contrib)                0.001   0.0      0.001   0.0             32      -1.00        0.98       0.98
+- newkpt(excl. rwwf   )          0.000   0.0      0.000   0.0             -4      -1.00        0.99       0.99
+- wfsinp(excl. calls)            0.000   0.0      0.000   0.0              4      -1.00        0.94       0.94
+- vtowfk  (1)                    0.000   0.0      0.000   0.0             32      -1.00        1.06       1.06
+- initwf(after rwwf)             0.000   0.0      0.000   0.0              4      -1.00        0.81       0.81
+- others (106)                   0.000   0.0      0.000   0.0             -1      -1.00        0.72       0.72
 -<END_TIMER>
 
-- subtotal                       3.305  98.4      3.427  84.2                                  0.96       0.96
+- subtotal                       3.192  95.8      3.319  83.6                                  0.96       0.96
 
  Partitioning of abinit
-- abinit                         3.358 100.0      4.069 100.0              4                   0.83       0.83
+- abinit                         3.334 100.0      3.969 100.0              4                   0.84       0.84
  
-- abinit(1)                      0.041   1.2      0.041   1.0              4                   0.99       0.99
-- abinit(2)                      0.051   1.5      0.054   1.3              4                   0.94       0.94
-- indefo+macroin+invars2m        0.235   7.0      0.242   6.0              4                   0.97       0.97
-- abinit(4)                      0.357  10.6      0.370   9.1              4                   0.97       0.97
-- abinit(5)                      0.139   4.1      0.141   3.5              4                   0.98       0.98
-- driver                         2.400  71.5      3.081  75.7              4                   0.78       0.78
-- abinit(6)                      0.006   0.2      0.016   0.4              4                   0.36       0.36
-- timing timab                   0.439  13.1      0.444  10.9             44                   0.99       0.99
+- abinit(1)                      0.039   1.2      0.039   1.0              4                   0.99       0.99
+- abinit(2)                      0.045   1.3      0.047   1.2              4                   0.95       0.95
+- indefo+macroin+invars2m        0.198   6.0      0.201   5.1              4                   0.99       0.99
+- abinit(4)                      0.322   9.7      0.329   8.3              4                   0.98       0.98
+- abinit(5)                      0.147   4.4      0.151   3.8              4                   0.98       0.98
+- driver                         2.262  67.8      2.880  72.6              4                   0.79       0.79
+- abinit(6)                      0.005   0.2      0.011   0.3              4                   0.44       0.44
+- timing timab                   0.580  17.4      0.580  14.6             48                   1.00       1.00
 
-- subtotal                       3.358 100.0      4.069 100.0                                  0.83       0.83
+- subtotal                       3.334 100.0      3.969 100.0                                  0.84       0.84
 
  Partitioning of driver
-- driver                         2.400  71.5      3.081  75.7              4                   0.78       0.78
+- driver                         2.262  67.8      2.880  72.6              4                   0.79       0.79
  
-- driver(bef. select case)       0.002   0.1      0.003   0.1              8                   0.78       0.78
-- gstateimg                      2.321  69.1      3.000  73.7              8                   0.77       0.77
-- driver(aft. select case)       0.077   2.3      0.078   1.9              8                   0.99       0.99
+- driver(bef. select case)       0.002   0.1      0.002   0.1              8                   0.96       0.96
+- gstateimg                      2.169  65.1      2.786  70.2              8                   0.78       0.78
+- driver(aft. select case)       0.090   2.7      0.090   2.3              8                   1.00       1.00
 
-- subtotal                       2.400  71.5      3.081  75.7                                  0.78       0.78
+- subtotal                       2.262  67.8      2.880  72.6                                  0.79       0.79
 
  Partitioning of gstateimg+gstate
-- gstateimg                      2.321  69.1      3.000  73.7              8                   0.77       0.77
+- gstateimg                      2.169  65.1      2.786  70.2              8                   0.78       0.78
  
-- gstate->kpgsph                 0.023   0.7      0.118   2.9             16                   0.19       0.19
-- gstate(pspini)                 1.278  38.1      1.285  31.6              8                   0.99       0.99
-- gstate  (2)                    0.012   0.4      0.012   0.3              8                   0.98       0.98
-- gstate(...scfcv)               0.824  24.5      0.872  21.4              8                   0.94       0.94
-- gstate  (3)                    0.184   5.5      0.712  17.5              8                   0.26       0.26
+- gstate->kpgsph                 0.055   1.6      0.169   4.3             16                   0.32       0.32
+- gstate(pspini)                 1.138  34.1      1.143  28.8              8                   1.00       1.00
+- gstate  (2)                    0.011   0.3      0.011   0.3              8                   0.98       0.98
+- gstate(...scfcv)               0.775  23.3      0.827  20.8              8                   0.94       0.94
+- gstate  (3)                    0.189   5.7      0.634  16.0              8                   0.30       0.30
 
-- subtotal                       2.321  69.1      3.000  73.7                                  0.77       0.77
+- subtotal                       2.169  65.0      2.786  70.2                                  0.78       0.78
 
  Partitioning of scfcv_core
-- scfcv_core                     0.824  24.5      0.872  21.4              8                   0.94       0.94
+- scfcv_core                     0.775  23.2      0.827  20.8              8                   0.94       0.94
  
-- scfcv_core(iniloop, setv       0.212   6.3      0.213   5.2             32                   1.00       1.00
-- scfcv_core(vtorho(f))          0.365  10.9      0.367   9.0             32                   0.99       0.99
+- scfcv_core(iniloop, setv       0.191   5.7      0.193   4.9             32                   0.99       0.99
+- scfcv_core(vtorho(f))          0.350  10.5      0.351   8.8             32                   1.00       1.00
 - scfcv-scprqt                   0.003   0.1      0.003   0.1             32                   0.97       0.97
-- scfcv_core(rhotov)             0.011   0.3      0.011   0.3             32                   1.00       1.00
-- scfcv_core(mix pot)            0.010   0.3      0.010   0.2             28                   0.99       0.99
-- scfcv_core(afterscfloop)       0.149   4.4      0.150   3.7              8                   1.00       1.00
-- scfcv_core(outscfcv)           0.071   2.1      0.115   2.8              8                   0.62       0.62
-- (other)                        0.001   0.0      0.001   0.0             -1                   0.99       0.99
+- scfcv_core(rhotov)             0.010   0.3      0.010   0.2             32                   1.00       1.00
+- scfcv_core(mix pot)            0.008   0.3      0.009   0.2             28                   0.99       0.99
+- scfcv_core(afterscfloop)       0.138   4.1      0.138   3.5              8                   1.00       1.00
+- scfcv_core(outscfcv)           0.074   2.2      0.122   3.1              8                   0.60       0.60
 
-- subtotal                       0.824  24.5      0.872  21.4                                  0.94       0.94
+- subtotal                       0.775  23.2      0.827  20.8                                  0.94       0.94
 
  Partitioning of rhotov
-- rhotov                         0.011   0.3      0.011   0.3             32                   1.00       1.00
+- rhotov                         0.009   0.3      0.009   0.2             32                   1.00       1.00
  
 - rhotov(rhotoxc)                0.005   0.1      0.005   0.1             32                   1.00       1.00
-- rhotov(other)                  0.001   0.0      0.001   0.0             32                   0.99       0.99
-- (other)                        0.005   0.1      0.005   0.1             -1                   1.00       1.00
+- rhotov(other)                  0.001   0.0      0.001   0.0             32                   1.00       1.00
+- (other)                        0.004   0.1      0.004   0.1             -1                   1.00       1.00
 
-- subtotal                       0.011   0.3      0.011   0.3                                  1.00       1.00
+- subtotal                       0.009   0.3      0.009   0.2                                  1.00       1.00
 
  Partitioning of vtorho
-- vtorho                         0.365  10.9      0.367   9.0             32                   0.99       0.99
+- vtorho                         0.350  10.5      0.351   8.8             32                   1.00       1.00
  
-- vtorho(bef. vtowfk)            0.001   0.0      0.001   0.0             32                   1.00       1.00
-- vtowfk                         0.302   9.0      0.303   7.4             32                   1.00       1.00
-- vtorho(newocc)                 0.034   1.0      0.035   0.9             32                   0.98       0.98
-- vtorho(mkrho 1)                0.023   0.7      0.024   0.6             32                   0.97       0.97
-- vtorho(mkrho 2)                0.002   0.1      0.002   0.0             32                   0.90       0.90
+- vtorho(bef. vtowfk)            0.001   0.0      0.001   0.0             32                   0.99       0.99
+- vtowfk                         0.292   8.7      0.292   7.4             32                   1.00       1.00
+- vtorho(newocc)                 0.031   0.9      0.031   0.8             32                   1.00       1.00
+- vtorho(mkrho 1)                0.022   0.7      0.023   0.6             32                   0.99       0.99
+- vtorho(mkrho 2)                0.002   0.0      0.002   0.0             32                   0.92       0.92
 
-- subtotal                       0.365  10.9      0.367   9.0                                  0.99       0.99
+- subtotal                       0.350  10.5      0.351   8.8                                  1.00       1.00
 
  Partitioning of vtowfk
-- vtowfk                         0.302   9.0      0.303   7.4             32                   1.00       1.00
+- vtowfk                         0.292   8.7      0.292   7.4             32                   1.00       1.00
  
-- vtowfk(2)                      0.301   9.0      0.302   7.4             -4                   1.00       1.00
+- vtowfk(2)                      0.291   8.7      0.291   7.3             -4                   1.00       1.00
 
-- subtotal                       0.302   9.0      0.303   7.4                                  1.00       1.00
+- subtotal                       0.292   8.7      0.292   7.4                                  1.00       1.00
 
  Partitioning of getghc
-- getghc                         0.143   4.3      0.144   3.5            960                   1.00       1.00
+- getghc                         0.141   4.2      0.141   3.5            960                   1.00       1.00
  
-- fourwf%getghc                  0.113   3.4      0.113   2.8            960                   0.99       0.99
-- nonlop%getghc                  0.025   0.8      0.026   0.6            960                   0.99       0.99
+- fourwf%getghc                  0.109   3.3      0.110   2.8            960                   1.00       1.00
+- nonlop%getghc                  0.026   0.8      0.026   0.7            960                   0.99       0.99
 - getghc-other                   0.005   0.2      0.005   0.1             -4                   1.07       1.07
 
-- subtotal                       0.143   4.3      0.144   3.5                                  1.00       1.00
+- subtotal                       0.141   4.2      0.141   3.5                                  1.00       1.00
 
  Partitioning of fourwf (upwards partitioning)
-- fourwf                         0.117   3.5      0.118   2.9           1024                   0.99       0.99
+- fourwf                         0.114   3.4      0.115   2.9           1024                   1.00       1.00
  
-- fourwf%getghc                  0.113   3.4      0.113   2.8            960                   0.99       0.99
+- fourwf%getghc                  0.109   3.3      0.110   2.8            960                   1.00       1.00
 - fourwf%prep_four               0.005   0.1      0.005   0.1             64                   1.00       1.00
 
-- subtotal                       0.117   3.5      0.118   2.9                                  0.99       0.99
+- subtotal                       0.114   3.4      0.115   2.9                                  1.00       1.00
 
  Partitioning of prep_getghc
-- prep_getghc                    0.159   4.7      0.160   3.9            960                   1.00       1.00
+- prep_getghc                    0.155   4.7      0.156   3.9            960                   1.00       1.00
  
 - prep_getghc(before if)         0.002   0.1      0.002   0.1            960                   0.99       0.99
-- prep_getghc(alltoall)          0.010   0.3      0.010   0.2           1920                   1.00       1.00
-- prep_getghc(getghc - 1 )       0.146   4.4      0.147   3.6            960                   1.00       1.00
-- (other)                        0.001   0.0      0.001   0.0             -1                   1.00       1.00
+- prep_getghc(alltoall)          0.009   0.3      0.009   0.2           1920                   1.00       1.00
+- prep_getghc(getghc - 1 )       0.143   4.3      0.143   3.6            960                   1.00       1.00
+- (other)                        0.001   0.0      0.001   0.0             -1                   1.06       1.06
 
-- subtotal                       0.159   4.7      0.160   3.9                                  1.00       1.00
+- subtotal                       0.155   4.7      0.156   3.9                                  1.00       1.00
 
  Partitioning of prep_fourwf
-- prep_fourwf                    0.006   0.2      0.007   0.2            128                   0.93       0.93
+- prep_fourwf                    0.006   0.2      0.006   0.2            128                   1.00       1.00
  
 - fourwf%prep_four               0.005   0.1      0.005   0.1             64                   1.00       1.00
-- alltoall%prep_fo               0.001   0.0      0.002   0.0            128                   0.72       0.72
+- alltoall%prep_fo               0.001   0.0      0.001   0.0            128                   0.98       0.98
 
 - subtotal                       0.006   0.2      0.006   0.2                                  0.92       0.92
 
@@ -1052,132 +726,132 @@ P           mkmem           1
 - subtotal                       0.007   0.2      0.007   0.2                                  1.00       1.00
 
  Partitioning of mkrho (upwards partitioning)
-- mkrho                          0.023   0.7      0.024   0.6             32                   0.97       0.97
+<<<<<<< HEAD
+- mkrho                          0.022   0.7      0.022   0.6             32                   0.99       0.99
  
-- mkrho%vtorho                   0.023   0.7      0.024   0.6             32                   0.97       0.97
+- mkrho%vtorho                   0.022   0.7      0.022   0.6             32                   0.99       0.99
 
-- subtotal                       0.023   0.7      0.024   0.6                                  0.97       0.97
+- subtotal                       0.022   0.7      0.022   0.6                                  0.99       0.99
 
  Partitioning of inwffil
-- inwffil                        0.011   0.3      0.106   2.6              8                   0.11       0.11
+- inwffil                        0.011   0.3      0.125   3.2              8                   0.09       0.09
  
-- inwffil(read header)           0.005   0.2      0.099   2.4              8                   0.05       0.05
-- inwffil(call wfsinp)           0.006   0.2      0.006   0.1              4                   0.98       0.98
+- inwffil(read header)           0.005   0.1      0.117   2.9              8                   0.04       0.04
+- inwffil(call wfsinp)           0.005   0.2      0.008   0.2              4                   0.70       0.70
 
-- subtotal                       0.011   0.3      0.106   2.6                                  0.11       0.11
+- subtotal                       0.011   0.3      0.125   3.1                                  0.09       0.09
 
  Partitioning of wfsinp
-- wfsinp                         0.005   0.2      0.006   0.1              4                   0.98       0.98
+- wfsinp                         0.005   0.2      0.008   0.2              4                   0.70       0.70
  
-- wfsinp(call  initwf)           0.005   0.2      0.005   0.1              4                   0.98       0.98
+- wfsinp(call  initwf)           0.005   0.2      0.008   0.2              4                   0.69       0.69
 
-- subtotal                       0.005   0.2      0.006   0.1                                  0.98       0.98
+- subtotal                       0.005   0.2      0.008   0.2                                  0.70       0.70
 
  Partitioning of initwf
-- initwf                         0.005   0.2      0.005   0.1              4                   0.98       0.98
+- initwf                         0.005   0.2      0.008   0.2              4                   0.69       0.69
  
-- rwwf%initwf(GS)                0.005   0.2      0.005   0.1              4                   0.99       0.99
+- rwwf%initwf(GS)                0.005   0.2      0.007   0.2              4                   0.69       0.69
 
-- subtotal                       0.005   0.2      0.005   0.1                                  0.98       0.98
+- subtotal                       0.005   0.2      0.008   0.2                                  0.69       0.69
 
  Partitioning of newkpt
 - newkpt                         0.000   0.0      0.000   0.0              8                   0.98       0.98
  
 
-- subtotal                       0.000   0.0      0.000   0.0                                  0.97       0.97
+- subtotal                       0.000   0.0      0.000   0.0                                  0.99       0.99
 
  Partitioning of newvtr
-- newvtr                         0.010   0.3      0.010   0.2             28                   0.99       0.99
+- newvtr                         0.008   0.3      0.008   0.2             28                   0.99       0.99
  
-- newvtr(call prcref_PMA)        0.006   0.2      0.006   0.1             28                   1.00       1.00
-- newvtr(aft. prcref_PMA)        0.003   0.1      0.003   0.1             28                   0.96       0.96
-- newvtr(mean potential)         0.000   0.0      0.001   0.0             28                   0.48       0.48
+- newvtr(call prcref_PMA)        0.005   0.2      0.005   0.1             28                   1.00       1.00
+- newvtr(aft. prcref_PMA)        0.002   0.1      0.002   0.1             28                   0.97       0.97
 
-- subtotal                       0.010   0.3      0.010   0.2                                  0.99       0.99
+- subtotal                       0.008   0.3      0.008   0.2                                  0.99       0.99
 
  Partitioning of  fourdp (upwards partitioning)
-- fourdp                         0.022   0.6      0.022   0.5            184                   0.99       0.99
+- fourdp                         0.022   0.7      0.022   0.6            184                   0.99       0.99
  
-- fourdp%(other)                 0.022   0.6      0.022   0.5            184                   0.99       0.99
+- fourdp%(other)                 0.022   0.7      0.022   0.6            184                   0.99       0.99
 
-- subtotal                       0.022   0.6      0.022   0.5                                  0.99       0.99
+- subtotal                       0.022   0.7      0.022   0.6                                  0.99       0.99
 
  Partitioning of afterscfloop
-- afterscfloop                   0.149   4.4      0.150   3.7              8                   1.00       1.00
+- afterscfloop                   0.138   4.1      0.138   3.5              8                   1.00       1.00
  
-- afterscfloop(forstr)           0.148   4.4      0.149   3.7              8                   1.00       1.00
-- afterscfloop(final)            0.001   0.0      0.001   0.0              8                   0.98       0.98
+- afterscfloop(forstr)           0.135   4.1      0.135   3.4              8                   1.00       1.00
+- afterscfloop(final)            0.003   0.1      0.003   0.1              8                   0.99       0.99
 
-- subtotal                       0.149   4.4      0.150   3.7                                  1.00       1.00
+- subtotal                       0.138   4.1      0.138   3.5                                  1.00       1.00
 
  Partitioning of forstr
-- forstr                         0.148   4.4      0.149   3.7              8                   1.00       1.00
+- forstr                         0.135   4.1      0.135   3.4              8                   1.00       1.00
  
-- forstr(forstrnps)              0.003   0.1      0.003   0.1              8                   1.00       1.00
-- forstr(forces)                 0.002   0.1      0.002   0.1              8                   0.99       0.99
-- forstr(stress)                 0.143   4.3      0.144   3.5              8                   1.00       1.00
+- forstr(forstrnps)              0.002   0.1      0.002   0.1              8                   1.00       1.00
+- forstr(forces)                 0.002   0.1      0.002   0.1              8                   1.00       1.00
+- forstr(stress)                 0.131   3.9      0.131   3.3              8                   1.00       1.00
 
-- subtotal                       0.148   4.4      0.149   3.6                                  1.00       1.00
+- subtotal                       0.135   4.1      0.135   3.4                                  1.00       1.00
 
  Partitioning of forstrnps
-- forstrnps                      0.003   0.1      0.003   0.1              8                   1.00       1.00
+- forstrnps                      0.002   0.1      0.002   0.1              8                   0.99       0.99
  
-- forstrnps(nonlop+prep_ba       0.001   0.0      0.001   0.0             16                   1.00       1.00
+- forstrnps(nonlop+prep_ba       0.001   0.0      0.001   0.0             16                   0.99       0.99
 
-- subtotal                       0.003   0.1      0.003   0.1                                  1.00       1.00
+- subtotal                       0.002   0.1      0.002   0.1                                  0.99       0.99
 
  Partitioning of outscfcv
-- outscfcv                       0.071   2.1      0.115   2.8              8                   0.62       0.62
+- outscfcv                       0.074   2.2      0.122   3.1              8                   0.60       0.60
  
-- outscfcv([PAW]prtden)          0.005   0.1      0.005   0.1              8                   0.99       0.99
-- outscfcv(prtelf)               0.011   0.3      0.054   1.3              4                   0.20       0.20
-- outscfcv(calcdenmagsph)        0.055   1.6      0.055   1.3              8                   1.00       1.00
+- outscfcv([PAW]prtden)          0.004   0.1      0.004   0.1              8                   0.99       0.99
+- outscfcv(prtelf)               0.010   0.3      0.059   1.5              4                   0.17       0.17
+- outscfcv(calcdenmagsph)        0.059   1.8      0.059   1.5              8                   1.00       1.00
 
-- subtotal                       0.070   2.1      0.114   2.8                                  0.62       0.62
+- subtotal                       0.073   2.2      0.122   3.1                                  0.60       0.60
 
  Partitioning of lobpcgwf2 core engine
-- lobpcgwf2                      0.301   9.0      0.301   7.4             48                   1.00       1.00
+- lobpcgwf2                      0.291   8.7      0.291   7.3             48                   1.00       1.00
  
-- lobpcg_run                     0.294   8.8      0.295   7.2             48                   1.00       1.00
+- lobpcg_run                     0.284   8.5      0.285   7.2             48                   1.00       1.00
 - lobpcg_orthoWrtPrev            0.007   0.2      0.007   0.2            720                   1.00       1.00
-- lobpcg_Bortho                  0.027   0.8      0.027   0.7           1008                   1.00       1.00
-- lobpcg_RayleighRitz            0.080   2.4      0.080   2.0           1008                   1.00       1.00
-- lobpcg_maxResidu               0.005   0.1      0.005   0.1           1728                   0.99       0.99
-- lobpcg_run@getAX_BX            0.164   4.9      0.165   4.0            960                   1.00       1.00
-- lobpcg_pcond                   0.001   0.0      0.001   0.0            768                   1.00       1.00
-- lobpcg_RayleighRitz@hegv       0.023   0.7      0.023   0.6           1008                   1.00       1.00
+- lobpcg_Bortho                  0.026   0.8      0.026   0.7           1008                   1.00       1.00
+- lobpcg_RayleighRitz            0.075   2.2      0.075   1.9           1008                   1.00       1.00
+- lobpcg_maxResidu               0.006   0.2      0.006   0.2           1728                   1.00       1.00
+- lobpcg_run@getAX_BX            0.160   4.8      0.160   4.0            960                   1.00       1.00
+- lobpcg_pcond                   0.001   0.0      0.001   0.0            768                   1.01       1.01
+- lobpcg_RayleighRitz@hegv       0.022   0.6      0.022   0.5           1008                   1.00       1.00
 
-- subtotal                       0.602  17.9      0.604  14.8                                  1.00       1.00
+- subtotal                       0.581  17.4      0.582  14.7                                  1.00       1.00
 
  Partitioning of low-level xgBlock type
-- xgBlock_potrf                  0.002   0.1      0.002   0.1           1008                   0.99       0.99
+- xgBlock_potrf                  0.002   0.1      0.002   0.1           1008                   1.05       1.05
  
-- xgBlock_trsm                   0.010   0.3      0.010   0.3           3024                   1.02       1.02
-- xgBlock_gemm                   0.041   1.2      0.043   1.0          12240                   0.96       0.96
+- xgBlock_trsm                   0.009   0.3      0.009   0.2           3024                   1.00       1.00
+- xgBlock_gemm                   0.041   1.2      0.041   1.0          12240                   0.99       0.99
 - xgBlock_heev                   0.003   0.1      0.003   0.1            240                   0.99       0.99
-- xgBlock_hegvx                  0.018   0.5      0.018   0.4            768                   0.99       0.99
-- xgBlock_copy                   0.008   0.2      0.008   0.2           7248                   1.01       1.01
-- xgBlock_cshift                 0.001   0.0      0.001   0.0            768                   0.98       0.98
+- xgBlock_hegvx                  0.017   0.5      0.017   0.4            768                   0.99       0.99
+- xgBlock_copy                   0.007   0.2      0.007   0.2           7248                   1.00       1.00
+- xgBlock_cshift                 0.001   0.0      0.001   0.0            768                   1.01       1.01
 
-- subtotal                       0.081   2.4      0.083   2.0                                  0.98       0.98
+- subtotal                       0.078   2.3      0.078   2.0                                  0.99       0.99
 -
 -Synchronisation (=leave_test) and MPI calls 
-- communic.MPI                   0.056   1.7      0.056   1.4            220                   1.00       1.00
+- communic.MPI                   0.061   1.8      0.061   1.5            220                   1.00       1.00
 -
-- forstrnps:synchr               0.000   0.0      0.000   0.0             16                   1.13       1.13
-- wfsinp:synchro                 0.000   0.0      0.000   0.0              4                   0.94       0.94
-- mkrho :MPIrhor                 0.000   0.0      0.000   0.0             32                   0.94       0.94
-- alltoall%back_wf               0.006   0.2      0.006   0.2           1024                   1.03       1.03
-- alltoall%forw_wf               0.004   0.1      0.004   0.1            960                   1.01       1.01
-- subtotal                       0.011   0.3      0.010   0.3                                  1.02       1.02
+- forstrnps:synchr               0.000   0.0      0.000   0.0             16                   0.78       0.78
+- wfsinp:synchro                 0.000   0.0      0.000   0.0              4                   0.99       0.99
+- mkrho :MPIrhor                 0.000   0.0      0.000   0.0             32                   1.00       1.00
+- alltoall%back_wf               0.009   0.3      0.009   0.2           1024                   1.01       1.01
+- alltoall%forw_wf               0.005   0.2      0.005   0.1            960                   1.02       1.02
+- subtotal                       0.014   0.4      0.014   0.4                                  1.01       1.01
 
  Additional information
-- timana(1)                      0.000   0.0      0.000   0.0              4                   0.95       0.95
-- total timab                    0.527  15.7      0.533  13.1         276716                   0.99       0.99
-- fourwf                         0.117   3.5      0.118   2.9           1024                   0.99       0.99
+- timana(1)                      0.000   0.0      0.000   0.0              4                   0.99       0.99
+- total timab                    0.657  19.7      0.657  16.6         392028                   1.00       1.00
+- fourwf                         0.114   3.4      0.115   2.9           1024                   1.00       1.00
 - mklocl(2)                      0.001   0.0      0.001   0.0              8                   1.00       1.00
-- newocc                         0.037   1.1      0.038   0.9             36                   0.98       0.98
-- nonlop(total)                  0.030   0.9      0.030   0.7           1168                   0.99       0.99
+- newocc                         0.034   1.0      0.034   0.9             36                   1.00       1.00
+- nonlop(total)                  0.031   0.9      0.031   0.8           1168                   0.99       0.99
 
  timana : in multi dataset mode, the more detailed analysis is not done.
 
@@ -1272,4 +946,4 @@ P           mkmem           1
 
  Calculation completed.
 .Delivered  37 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.4  wall=          4.1
++Overall time at end (sec) : cpu=          3.4  wall=          4.0

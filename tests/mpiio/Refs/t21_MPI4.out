@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 02h54 )
+.Starting date : Thu 13 Feb 2020.
+- ( at 16h50 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/mpiio_t21_MPI4/t21.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/TestBot_MPI4/mpiio_t21_MPI4/t21.in
 - output file    -> t21_MPI4.out
 - root for input  files -> t21_MPI4i
 - root for output files -> t21_MPI4o
@@ -394,1315 +394,19 @@ P           mkmem8          5
 
  chkinp: Checking input parameters for consistency, jdtset=   1.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=   2.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=   3.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=   4.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=   5.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=   6.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=   7.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=   8.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
 ================================================================================
 == DATASET  1 ==================================================================
@@ -1729,8 +433,8 @@ P           mkmem8          5
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.phoney_mod
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.phoney_mod
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/14si.phoney_mod
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/14si.phoney_mod
 - 2 bohr rc 15 hartree ec psp for silicon 8 November 1991 (new)
 - 14.00000   4.00000    980710                znucl, zion, pspdat
     5    3    2    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -4317,219 +3021,219 @@ P           mkmem8          5
 
  Test the timer : 
   a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
-- CPU time =    1.8934E-06 sec,    Wall time =    1.8938E-06 sec
+- CPU time =    1.7752E-06 sec,    Wall time =    1.7756E-06 sec
 
-- Total cpu        time (s,m,h):         65.4        1.09      0.018
-- Total wall clock time (s,m,h):         68.5        1.14      0.019
+- Total cpu        time (s,m,h):         62.7        1.04      0.017
+- Total wall clock time (s,m,h):         65.2        1.09      0.018
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           15.7, wall_time =           17.2
+- cpu_time =           15.3, wall_time =           16.4
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- vtowfk(ssdiag)                12.052  18.4     12.103  17.7             -1      -1.00        1.00       1.00
-- lobpcgwf2                     12.048  18.4     12.099  17.7            552      -1.00        1.00       1.00
-- fourwf%(pot)                   8.042  12.3      8.071  11.8          16560      -1.00        1.00       1.00
-- nonlop(apply)                  0.630   1.0      0.637   0.9          16560      -1.00        0.99       0.99
-- ewald                          0.572   0.9      0.575   0.8             20      -1.00        0.99       0.99
-- invars2                        0.546   0.8      0.554   0.8              8      -1.00        0.99       0.99
-- stress                         0.386   0.6      0.387   0.6             20      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.375   0.6      0.375   0.5             20      -1.00        1.00       1.00
-- pspini                         0.323   0.5      0.323   0.5              8      -1.00        1.00       1.00
-- fourdp                         0.301   0.5      0.303   0.4            820      -1.00        0.99       0.99
-- vtowfk(contrib)                0.219   0.3      0.220   0.3            432      -1.00        1.00       1.00
-- mkrho/=                        0.142   0.2      0.144   0.2            136      -1.00        0.99       0.99
-- getghc-other                   0.122   0.2      0.114   0.2             -1      -1.00        1.07       1.07
-- abinit(2)                      0.118   0.2      0.124   0.2              1      -1.00        0.95       0.95
-- timing timab                   0.109   0.2      0.109   0.2             11      -1.00        1.00       1.00
-- forces                         0.085   0.1      0.086   0.1            108      -1.00        0.99       0.99
-- symrhg(no FFT)                 0.075   0.1      0.075   0.1            136      -1.00        1.00       1.00
-- nonlop(forces)                 0.073   0.1      0.074   0.1           3312      -1.00        0.99       0.99
-- xc:pot/=fourdp                 0.071   0.1      0.071   0.1            156      -1.00        1.00       1.00
+- vtowfk(ssdiag)                11.872  18.9     11.894  18.2             -1      -1.00        1.00       1.00
+- lobpcgwf2                     11.868  18.9     11.890  18.2            552      -1.00        1.00       1.00
+- fourwf%(pot)                   7.928  12.7      7.940  12.2          16560      -1.00        1.00       1.00
+- nonlop(apply)                  0.625   1.0      0.633   1.0          16560      -1.00        0.99       0.99
+- ewald                          0.561   0.9      0.563   0.9             20      -1.00        1.00       1.00
+- invars2                        0.411   0.7      0.412   0.6              8      -1.00        1.00       1.00
+- stress                         0.381   0.6      0.381   0.6             20      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.369   0.6      0.369   0.6             20      -1.00        1.00       1.00
+- pspini                         0.312   0.5      0.314   0.5              8      -1.00        0.99       0.99
+- fourdp                         0.285   0.5      0.286   0.4            820      -1.00        1.00       1.00
+- vtowfk(contrib)                0.217   0.3      0.217   0.3            432      -1.00        1.00       1.00
+- mkrho/=                        0.140   0.2      0.142   0.2            136      -1.00        0.99       0.99
+- getghc-other                   0.111   0.2      0.102   0.2             -1      -1.00        1.09       1.09
+- timing timab                   0.102   0.2      0.102   0.2             11      -1.00        1.00       1.00
+- abinit(2)                      0.087   0.1      0.089   0.1              1      -1.00        0.98       0.98
+- forces                         0.082   0.1      0.083   0.1            108      -1.00        0.99       0.99
+- nonlop(forces)                 0.075   0.1      0.076   0.1           3312      -1.00        0.98       0.98
+- symrhg(no FFT)                 0.070   0.1      0.070   0.1            136      -1.00        1.00       1.00
+- xc:pot/=fourdp                 0.068   0.1      0.069   0.1            156      -1.00        1.00       1.00
 - setsym                         0.011   0.0      0.011   0.0              8      -1.00        1.00       1.00
-- scfcv-scprqt                   0.008   0.0      0.010   0.0            136      -1.00        0.82       0.82
+- scfcv-scprqt                   0.008   0.0      0.009   0.0            136      -1.00        0.82       0.82
 - prep_bandfft_tabs              0.003   0.0      0.003   0.0            120      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )          0.001   0.0      0.001   0.0             -1      -1.00        0.95       0.95
-- vtowfk  (1)                    0.001   0.0      0.001   0.0            432      -1.00        1.02       1.02
-- kpgsph                         0.001   0.0      0.001   0.0             48      -1.00        0.88       0.88
+- kpgsph                         0.002   0.0      0.003   0.0             48      -1.00        0.84       0.84
+- newkpt(excl. rwwf   )          0.001   0.0      0.002   0.0             -1      -1.00        0.94       0.94
+- vtowfk  (1)                    0.001   0.0      0.001   0.0            432      -1.00        1.01       1.01
 - inwffil(excl. calls)           0.000   0.0      0.000   0.0              8      -1.00        1.00       1.00
 - others (108)                   0.000   0.0      0.000   0.0             -1      -1.00        0.00       0.00
 -<END_TIMER>
 -
-- subtotal                      36.316  55.5     36.474  53.3                                  1.00       1.00
+- subtotal                      35.593  56.8     35.665  54.7                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          65.4, wall_time =          68.5
+- cpu_time =          62.7, wall_time =          65.2
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- vtowfk(ssdiag)                48.261  73.8     48.434  70.7             -4      -1.00        1.00       1.00
-- lobpcgwf2                     48.245  73.8     48.418  70.7           2208      -1.00        1.00       1.00
-- fourwf%(pot)                  32.137  49.1     32.245  47.1          66240      -1.00        1.00       1.00
-- nonlop(apply)                  2.505   3.8      2.529   3.7          66240      -1.00        0.99       0.99
-- ewald                          2.284   3.5      2.293   3.4             80      -1.00        1.00       1.00
-- invars2                        2.173   3.3      2.202   3.2             32      -1.00        0.99       0.99
-- stress                         1.539   2.4      1.542   2.3             80      -1.00        1.00       1.00
-- prep_bandfft_tabs              1.512   2.3      1.514   2.2            480      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             1.494   2.3      1.497   2.2             80      -1.00        1.00       1.00
-- fourdp                         1.312   2.0      1.325   1.9           3280      -1.00        0.99       0.99
-- pspini                         1.294   2.0      1.294   1.9             32      -1.00        1.00       1.00
-- vtowfk(contrib)                0.876   1.3      0.878   1.3           1728      -1.00        1.00       1.00
-- mkrho/=                        0.572   0.9      0.575   0.8            544      -1.00        0.99       0.99
-- getghc-other                   0.500   0.8      0.476   0.7             -4      -1.00        1.05       1.05
-- abinit(2)                      0.460   0.7      0.491   0.7              4      -1.00        0.94       0.94
-- timing timab                   0.434   0.7      0.434   0.6             44      -1.00        1.00       1.00
-- forces                         0.337   0.5      0.340   0.5            432      -1.00        0.99       0.99
-- symrhg(no FFT)                 0.300   0.5      0.301   0.4            544      -1.00        1.00       1.00
-- nonlop(forces)                 0.295   0.5      0.298   0.4          13248      -1.00        0.99       0.99
-- xc:pot/=fourdp                 0.284   0.4      0.284   0.4            624      -1.00        1.00       1.00
-- scfcv-scprqt                   0.057   0.1      0.060   0.1            544      -1.00        0.96       0.96
-- setsym                         0.046   0.1      0.046   0.1             32      -1.00        1.00       1.00
-- kpgsph                         0.013   0.0      0.014   0.0            192      -1.00        0.99       0.99
+- vtowfk(ssdiag)                47.542  75.9     47.604  73.0             -4      -1.00        1.00       1.00
+- lobpcgwf2                     47.526  75.9     47.588  73.0           2208      -1.00        1.00       1.00
+- fourwf%(pot)                  31.686  50.6     31.729  48.7          66240      -1.00        1.00       1.00
+- nonlop(apply)                  2.483   4.0      2.510   3.8          66240      -1.00        0.99       0.99
+- ewald                          2.206   3.5      2.211   3.4             80      -1.00        1.00       1.00
+- invars2                        1.760   2.8      1.762   2.7             32      -1.00        1.00       1.00
+- stress                         1.502   2.4      1.504   2.3             80      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             1.458   2.3      1.460   2.2             80      -1.00        1.00       1.00
+- fourdp                         1.276   2.0      1.279   2.0           3280      -1.00        1.00       1.00
+- pspini                         1.238   2.0      1.240   1.9             32      -1.00        1.00       1.00
+- vtowfk(contrib)                0.869   1.4      0.870   1.3           1728      -1.00        1.00       1.00
+- mkrho/=                        0.567   0.9      0.569   0.9            544      -1.00        1.00       1.00
+- prep_bandfft_tabs              0.536   0.9      0.536   0.8            480      -1.00        1.00       1.00
+- getghc-other                   0.511   0.8      0.480   0.7             -4      -1.00        1.06       1.06
+- timing timab                   0.487   0.8      0.488   0.7             46      -1.00        1.00       1.00
+- abinit(2)                      0.350   0.6      0.355   0.5              4      -1.00        0.99       0.99
+- forces                         0.327   0.5      0.329   0.5            432      -1.00        1.00       1.00
+- nonlop(forces)                 0.300   0.5      0.305   0.5          13248      -1.00        0.98       0.98
+- symrhg(no FFT)                 0.279   0.4      0.281   0.4            544      -1.00        0.99       0.99
+- xc:pot/=fourdp                 0.276   0.4      0.276   0.4            624      -1.00        1.00       1.00
+- scfcv-scprqt                   0.059   0.1      0.062   0.1            544      -1.00        0.96       0.96
+- setsym                         0.045   0.1      0.045   0.1             32      -1.00        1.00       1.00
+- kpgsph                         0.008   0.0      0.009   0.0            192      -1.00        0.95       0.95
 - newkpt(excl. rwwf   )          0.006   0.0      0.006   0.0             -4      -1.00        0.98       0.98
 - vtowfk  (1)                    0.005   0.0      0.005   0.0           1728      -1.00        1.01       1.01
-- inwffil(excl. calls)           0.000   0.0      0.000   0.0             32      -1.00        1.00       1.00
+- inwffil(excl. calls)           0.000   0.0      0.000   0.0             32      -1.00        1.02       1.02
 - others (108)                   0.000   0.0      0.000   0.0             -1      -1.00        0.00       0.00
 -<END_TIMER>
 
-- subtotal                     146.941 224.7    147.502 215.5                                  1.00       1.00
+- subtotal                     143.304 228.7    143.505 220.0                                  1.00       1.00
 
  Partitioning of abinit
-- abinit                        65.388 100.0     68.461 100.0              4                   0.96       0.96
+- abinit                        62.658 100.0     65.218 100.0              4                   0.96       0.96
  
-- abinit(1)                      0.129   0.2      0.134   0.2              4                   0.96       0.96
-- abinit(2)                      0.460   0.7      0.491   0.7              4                   0.94       0.94
-- indefo+macroin+invars2m        2.176   3.3      2.205   3.2              4                   0.99       0.99
-- abinit(4)                      2.956   4.5      3.049   4.5              4                   0.97       0.97
-- abinit(5)                      0.429   0.7      0.430   0.6              4                   1.00       1.00
-- driver                        61.482  94.0     64.406  94.1              4                   0.95       0.95
-- abinit(6)                      0.059   0.1      0.114   0.2              4                   0.51       0.51
-- timing timab                   0.434   0.7      0.434   0.6             44                   1.00       1.00
+- abinit(1)                      0.097   0.2      0.100   0.2              4                   0.97       0.97
+- abinit(2)                      0.350   0.6      0.355   0.5              4                   0.99       0.99
+- indefo+macroin+invars2m        1.764   2.8      1.766   2.7              4                   1.00       1.00
+- abinit(4)                      2.529   4.0      2.560   3.9              4                   0.99       0.99
+- abinit(5)                      0.430   0.7      0.433   0.7              4                   0.99       0.99
+- driver                        59.138  94.4     61.625  94.5              4                   0.96       0.96
+- abinit(6)                      0.055   0.1      0.093   0.1              4                   0.59       0.59
+- timing timab                   0.487   0.8      0.488   0.7             46                   1.00       1.00
 
-- subtotal                      65.388 100.0     68.461 100.0                                  0.96       0.96
+- subtotal                      62.658 100.0     65.218 100.0                                  0.96       0.96
 
  Partitioning of driver
-- driver                        61.482  94.0     64.406  94.1              4                   0.95       0.95
+- driver                        59.138  94.4     61.625  94.5              4                   0.96       0.96
  
-- gstateimg                     61.072  93.4     63.992  93.5             32                   0.95       0.95
-- driver(aft. select case)       0.403   0.6      0.406   0.6             32                   0.99       0.99
+- gstateimg                     58.737  93.7     61.220  93.9             32                   0.96       0.96
+- driver(aft. select case)       0.393   0.6      0.397   0.6             32                   0.99       0.99
 
-- subtotal                      61.482  94.0     64.406  94.1                                  0.95       0.95
+- subtotal                      59.138  94.4     61.625  94.5                                  0.96       0.96
 
  Partitioning of gstateimg+gstate
-- gstateimg                     61.072  93.4     63.992  93.5             32                   0.95       0.95
+- gstateimg                     58.737  93.7     61.220  93.9             32                   0.96       0.96
  
-- gstate->kpgsph                 0.089   0.1      0.090   0.1             64                   1.00       1.00
-- gstate(pspini)                 1.294   2.0      1.294   1.9             32                   1.00       1.00
-- gstate  (2)                    0.108   0.2      0.109   0.2             32                   0.99       0.99
-- gstate(...scfcv)              58.954  90.2     59.884  87.5             32                   0.98       0.98
-- gstate  (3)                    0.624   1.0      2.613   3.8             32                   0.24       0.24
+- gstate->kpgsph                 0.092   0.1      0.093   0.1             64                   0.99       0.99
+- gstate(pspini)                 1.238   2.0      1.241   1.9             32                   1.00       1.00
+- gstate  (2)                    0.104   0.2      0.104   0.2             32                   1.00       1.00
+- gstate(...scfcv)              56.613  90.4     56.963  87.3             32                   0.99       0.99
+- gstate  (3)                    0.688   1.1      2.817   4.3             32                   0.24       0.24
 
-- subtotal                      61.071  93.4     63.991  93.5                                  0.95       0.95
+- subtotal                      58.736  93.7     61.219  93.9                                  0.96       0.96
 
  Partitioning of scfcv_core
-- scfcv_core                    58.917  90.1     59.844  87.4             80                   0.98       0.98
+- scfcv_core                    56.576  90.3     56.924  87.3             80                   0.99       0.99
  
-- scfcv_core(iniloop, setv       2.574   3.9      2.584   3.8            544                   1.00       1.00
-- scfcv_core(vtorho(f))         52.395  80.1     52.586  76.8            544                   1.00       1.00
-- scfcv_core(etotfor)            0.323   0.5      0.324   0.5           1088                   1.00       1.00
-- scfcv-scprqt                   0.057   0.1      0.060   0.1            544                   0.96       0.96
-- scfcv_core(rhotov)             0.517   0.8      0.518   0.8            544                   1.00       1.00
-- scfcv_core(mix pot)            0.496   0.8      0.500   0.7            464                   0.99       0.99
-- scfcv_core(afterscfloop)       1.639   2.5      1.645   2.4             80                   1.00       1.00
-- scfcv_core(outscfcv)           0.885   1.4      1.596   2.3             80                   0.55       0.55
+- scfcv_core(iniloop, setv       2.511   4.0      2.517   3.9            544                   1.00       1.00
+- scfcv_core(vtorho(f))         50.630  80.8     50.702  77.7            544                   1.00       1.00
+- scfcv_core(etotfor)            0.319   0.5      0.320   0.5           1088                   1.00       1.00
+- scfcv-scprqt                   0.059   0.1      0.062   0.1            544                   0.96       0.96
+- scfcv_core(rhotov)             0.510   0.8      0.511   0.8            544                   1.00       1.00
+- scfcv_core(mix pot)            0.476   0.8      0.478   0.7            464                   1.00       1.00
+- scfcv_core(afterscfloop)       1.612   2.6      1.614   2.5             80                   1.00       1.00
+- scfcv_core(outscfcv)           0.431   0.7      0.691   1.1             80                   0.62       0.62
 
-- subtotal                      58.917  90.1     59.844  87.4                                  0.98       0.98
+- subtotal                      56.576  90.3     56.924  87.3                                  0.99       0.99
 
  Partitioning of rhotov
-- rhotov                         0.516   0.8      0.517   0.8            544                   1.00       1.00
+- rhotov                         0.508   0.8      0.509   0.8            544                   1.00       1.00
  
-- rhotov(rhotoxc)                0.248   0.4      0.248   0.4            544                   1.00       1.00
-- rhotov(other)                  0.049   0.1      0.049   0.1            544                   1.00       1.00
+- rhotov(rhotoxc)                0.241   0.4      0.241   0.4            544                   1.00       1.00
+- rhotov(other)                  0.048   0.1      0.048   0.1            544                   1.00       1.00
 - (other)                        0.210   0.3      0.211   0.3             -1                   1.00       1.00
 
-- subtotal                       0.516   0.8      0.517   0.8                                  1.00       1.00
+- subtotal                       0.508   0.8      0.509   0.8                                  1.00       1.00
 
  Partitioning of vtorho
-- vtorho                        52.393  80.1     52.583  76.8            544                   1.00       1.00
+- vtorho                        50.628  80.8     50.699  77.7            544                   1.00       1.00
  
-- vtorho(bef. kpt  loop)         0.018   0.0      0.018   0.0            544                   0.99       0.99
-- vtorho(bef. vtowfk)            1.529   2.3      1.531   2.2           1728                   1.00       1.00
-- vtowfk                        49.142  75.2     49.317  72.0           1728                   1.00       1.00
-- vtorho(aft. kpt loop)          0.055   0.1      0.055   0.1            544                   1.00       1.00
-- vtorho(newocc)                 0.306   0.5      0.307   0.4            272                   1.00       1.00
-- vtorho(mkrho 1)                0.912   1.4      0.918   1.3            272                   0.99       0.99
-- vtorho(mkrho 2)                0.397   0.6      0.403   0.6            816                   0.99       0.99
-- (other)                        0.016   0.0      0.015   0.0             -1                   1.05       1.05
+- vtorho(bef. kpt  loop)         0.018   0.0      0.018   0.0            544                   0.98       0.98
+- vtorho(bef. vtowfk)            0.552   0.9      0.552   0.8           1728                   1.00       1.00
+- vtowfk                        48.416  77.3     48.478  74.3           1728                   1.00       1.00
+- vtorho(aft. kpt loop)          0.052   0.1      0.052   0.1            544                   0.99       0.99
+- vtorho(newocc)                 0.299   0.5      0.302   0.5            272                   0.99       0.99
+- vtorho(mkrho 1)                0.889   1.4      0.891   1.4            272                   1.00       1.00
+- vtorho(mkrho 2)                0.369   0.6      0.373   0.6            816                   0.99       0.99
+- (other)                        0.017   0.0      0.015   0.0             -1                   1.09       1.09
 
-- subtotal                      52.393  80.1     52.583  76.8                                  1.00       1.00
+- subtotal                      50.628  80.8     50.699  77.7                                  1.00       1.00
 
  Partitioning of vtowfk
-- vtowfk                        49.142  75.2     49.317  72.0           1728                   1.00       1.00
+- vtowfk                        48.416  77.3     48.478  74.3           1728                   1.00       1.00
  
-- vtowfk(2)                     48.259  73.8     48.432  70.7             -4                   1.00       1.00
-- prep_nonlop%vtowfk             0.327   0.5      0.327   0.5           5376                   1.00       1.00
-- prep_fourwf%vtow               0.484   0.7      0.486   0.7           5184                   1.00       1.00
-- vtowfk(3)                      0.064   0.1      0.065   0.1             -4                   0.99       0.99
+- vtowfk(2)                     47.540  75.9     47.602  73.0             -4                   1.00       1.00
+- prep_nonlop%vtowfk             0.330   0.5      0.330   0.5           5376                   1.00       1.00
+- prep_fourwf%vtow               0.476   0.8      0.476   0.7           5184                   1.00       1.00
+- vtowfk(3)                      0.063   0.1      0.063   0.1             -4                   0.99       0.99
 
-- subtotal                      49.142  75.2     49.317  72.0                                  1.00       1.00
+- subtotal                      48.416  77.3     48.478  74.3                                  1.00       1.00
 
  Partitioning of getghc
-- getghc                        35.142  53.7     35.251  51.5          66240                   1.00       1.00
+- getghc                        34.680  55.3     34.720  53.2          66240                   1.00       1.00
  
-- fourwf%getghc                 32.137  49.1     32.245  47.1          66240                   1.00       1.00
-- nonlop%getghc                  2.505   3.8      2.529   3.7          66240                   0.99       0.99
-- getghc-other                   0.500   0.8      0.476   0.7             -4                   1.05       1.05
+- fourwf%getghc                 31.686  50.6     31.729  48.7          66240                   1.00       1.00
+- nonlop%getghc                  2.483   4.0      2.510   3.8          66240                   0.99       0.99
+- getghc-other                   0.511   0.8      0.480   0.7             -4                   1.06       1.06
 
-- subtotal                      35.142  53.7     35.251  51.5                                  1.00       1.00
+- subtotal                      34.680  55.3     34.720  53.2                                  1.00       1.00
 
  Partitioning of fourwf (upwards partitioning)
-- fourwf                        33.031  50.5     33.143  48.4          69696                   1.00       1.00
+- fourwf                        32.570  52.0     32.615  50.0          69696                   1.00       1.00
  
-- fourwf%getghc                 32.137  49.1     32.245  47.1          66240                   1.00       1.00
-- fourwf%prep_four               0.894   1.4      0.897   1.3           3456                   1.00       1.00
+- fourwf%getghc                 31.686  50.6     31.729  48.7          66240                   1.00       1.00
+- fourwf%prep_four               0.884   1.4      0.886   1.4           3456                   1.00       1.00
 
-- subtotal                      33.031  50.5     33.143  48.4                                  1.00       1.00
+- subtotal                      32.570  52.0     32.615  50.0                                  1.00       1.00
 
  Partitioning of prep_getghc
-- prep_getghc                   36.441  55.7     36.553  53.4          66240                   1.00       1.00
+- prep_getghc                   35.981  57.4     36.022  55.2          66240                   1.00       1.00
  
-- prep_getghc(before if)         0.206   0.3      0.209   0.3          66240                   0.99       0.99
-- prep_getghc(alltoall)          0.794   1.2      0.804   1.2         132480                   0.99       0.99
-- prep_getghc(getghc - 1 )      35.338  54.0     35.442  51.8          66240                   1.00       1.00
-- (other)                        0.103   0.2      0.098   0.1             -1                   1.05       1.05
+- prep_getghc(before if)         0.210   0.3      0.210   0.3          66240                   1.00       1.00
+- prep_getghc(alltoall)          0.800   1.3      0.809   1.2         132480                   0.99       0.99
+- prep_getghc(getghc - 1 )      34.872  55.7     34.908  53.5          66240                   1.00       1.00
+- (other)                        0.099   0.2      0.095   0.1             -1                   1.04       1.04
 
-- subtotal                      36.441  55.7     36.553  53.4                                  1.00       1.00
+- subtotal                      35.981  57.4     36.022  55.2                                  1.00       1.00
 
  Partitioning of prep_fourwf
-- prep_fourwf                    0.973   1.5      0.976   1.4          10368                   1.00       1.00
+- prep_fourwf                    0.960   1.5      0.961   1.5          10368                   1.00       1.00
  
-- fourwf%prep_four               0.894   1.4      0.897   1.3           3456                   1.00       1.00
-- alltoall%prep_fo               0.041   0.1      0.042   0.1          10368                   0.97       0.97
+- fourwf%prep_four               0.884   1.4      0.886   1.4           3456                   1.00       1.00
+- alltoall%prep_fo               0.040   0.1      0.040   0.1          10368                   1.00       1.00
 
-- subtotal                       0.935   1.4      0.940   1.4                                  1.00       1.00
+- subtotal                       0.924   1.5      0.926   1.4                                  1.00       1.00
 
  Partitioning of prep_nonlop
-- prep_nonlop                    0.769   1.2      0.769   1.1          19104                   1.00       1.00
+- prep_nonlop                    0.778   1.2      0.779   1.2          19104                   1.00       1.00
  
-- nonlop%prep_nonl%vtowfk        0.259   0.4      0.261   0.4           5376                   0.99       0.99
-- nonlop%prep_nonl%forstrn       0.030   0.0      0.030   0.0            480                   0.98       0.98
-- prep_nonlop(alltoall)          0.066   0.1      0.067   0.1          19104                   0.99       0.99
-- (other)                        0.414   0.6      0.410   0.6             -1                   1.01       1.01
+- nonlop%prep_nonl%vtowfk        0.263   0.4      0.265   0.4           5376                   0.99       0.99
+- nonlop%prep_nonl%forstrn       0.029   0.0      0.030   0.0            480                   0.99       0.99
+- prep_nonlop(alltoall)          0.067   0.1      0.068   0.1          19104                   0.99       0.99
+- (other)                        0.418   0.7      0.417   0.6             -1                   1.00       1.00
 
-- subtotal                       0.769   1.2      0.769   1.1                                  1.00       1.00
+- subtotal                       0.778   1.2      0.779   1.2                                  1.00       1.00
 
  Partitioning of mkrho (upwards partitioning)
-- mkrho                          0.911   1.4      0.917   1.3            272                   0.99       0.99
+- mkrho                          0.888   1.4      0.890   1.4            272                   1.00       1.00
  
-- mkrho%vtorho                   0.911   1.4      0.917   1.3            272                   0.99       0.99
+- mkrho%vtorho                   0.888   1.4      0.890   1.4            272                   1.00       1.00
 
-- subtotal                       0.911   1.4      0.917   1.3                                  0.99       0.99
+- subtotal                       0.888   1.4      0.890   1.4                                  1.00       1.00
 
  Partitioning of inwffil
 - inwffil                        0.007   0.0      0.007   0.0             32                   0.99       0.99
@@ -4544,35 +3248,35 @@ P           mkmem8          5
 - subtotal                       0.006   0.0      0.006   0.0                                  0.98       0.98
 
  Partitioning of newvtr
-- newvtr                         0.495   0.8      0.498   0.7            464                   0.99       0.99
+- newvtr                         0.475   0.8      0.476   0.7            464                   1.00       1.00
  
-- newvtr(call prcref_PMA)        0.346   0.5      0.348   0.5            464                   0.99       0.99
-- newvtr(aft. prcref_PMA)        0.121   0.2      0.122   0.2            464                   0.99       0.99
+- newvtr(call prcref_PMA)        0.323   0.5      0.323   0.5            464                   1.00       1.00
+- newvtr(aft. prcref_PMA)        0.123   0.2      0.125   0.2            464                   0.99       0.99
 
-- subtotal                       0.495   0.8      0.498   0.7                                  0.99       0.99
+- subtotal                       0.475   0.8      0.476   0.7                                  1.00       1.00
 
  Partitioning of  fourdp (upwards partitioning)
-- fourdp                         1.312   2.0      1.325   1.9           3280                   0.99       0.99
+- fourdp                         1.276   2.0      1.279   2.0           3280                   1.00       1.00
  
-- fourdp%(other)                 1.312   2.0      1.325   1.9           3280                   0.99       0.99
+- fourdp%(other)                 1.276   2.0      1.279   2.0           3280                   1.00       1.00
 
-- subtotal                       1.312   2.0      1.325   1.9                                  0.99       0.99
+- subtotal                       1.276   2.0      1.279   2.0                                  1.00       1.00
 
  Partitioning of afterscfloop
-- afterscfloop                   1.638   2.5      1.645   2.4             80                   1.00       1.00
+- afterscfloop                   1.611   2.6      1.614   2.5             80                   1.00       1.00
  
-- afterscfloop(forstr)           1.633   2.5      1.639   2.4             80                   1.00       1.00
+- afterscfloop(forstr)           1.588   2.5      1.590   2.4             80                   1.00       1.00
+- afterscfloop(final)            0.023   0.0      0.023   0.0             80                   1.00       1.00
 
-- subtotal                       1.638   2.5      1.644   2.4                                  1.00       1.00
+- subtotal                       1.611   2.6      1.613   2.5                                  1.00       1.00
 
  Partitioning of forstr
-- forstr                         1.633   2.5      1.639   2.4             80                   1.00       1.00
+- forstr                         1.587   2.5      1.590   2.4             80                   1.00       1.00
  
-- forstr(forstrnps)              0.075   0.1      0.076   0.1             80                   1.00       1.00
-- forstr(forces)                 0.018   0.0      0.020   0.0             80                   0.89       0.89
-- forstr(stress)                 1.539   2.4      1.542   2.3             80                   1.00       1.00
+- forstr(forstrnps)              0.072   0.1      0.072   0.1             80                   1.00       1.00
+- forstr(stress)                 1.502   2.4      1.505   2.3             80                   1.00       1.00
 
-- subtotal                       1.632   2.5      1.638   2.4                                  1.00       1.00
+- subtotal                       1.587   2.5      1.589   2.4                                  1.00       1.00
 
  Partitioning of forstrnps
 - forstrnps                      0.075   0.1      0.076   0.1             80                   1.00       1.00
@@ -4583,57 +3287,57 @@ P           mkmem8          5
 - subtotal                       0.075   0.1      0.076   0.1                                  1.00       1.00
 
  Partitioning of outscfcv
-- outscfcv                       0.885   1.4      1.596   2.3             80                   0.55       0.55
+- outscfcv                       0.430   0.7      0.691   1.1             80                   0.62       0.62
  
-- outscfcv([PAW]prtden)          0.034   0.1      0.036   0.1             80                   0.96       0.96
-- outscfcv(prtelf)               0.102   0.2      0.731   1.1             40                   0.14       0.14
-- outscfcv(calcdenmagsph)        0.738   1.1      0.739   1.1             80                   1.00       1.00
+- outscfcv([PAW]prtden)          0.031   0.0      0.031   0.0             80                   0.98       0.98
+- outscfcv(prtelf)               0.099   0.2      0.280   0.4             40                   0.35       0.35
+- outscfcv(calcdenmagsph)        0.289   0.5      0.290   0.4             80                   1.00       1.00
 
-- subtotal                       0.874   1.3      1.507   2.2                                  0.58       0.58
+- subtotal                       0.420   0.7      0.602   0.9                                  0.70       0.70
 
  Partitioning of lobpcgwf2 core engine
-- lobpcgwf2                     48.245  73.8     48.418  70.7           2208                   1.00       1.00
+- lobpcgwf2                     47.526  75.9     47.588  73.0           2208                   1.00       1.00
  
-- lobpcg_init                    0.028   0.0      0.034   0.0           2208                   0.83       0.83
-- lobpcg_run                    47.765  73.0     47.932  70.0           2208                   1.00       1.00
-- lobpcg_orthoWrtPrev            0.777   1.2      0.785   1.1          55200                   0.99       0.99
-- lobpcg_Bortho                  2.581   3.9      2.593   3.8          68448                   1.00       1.00
-- lobpcg_RayleighRitz            6.405   9.8      6.439   9.4          68448                   0.99       0.99
-- lobpcg_maxResidu               0.420   0.6      0.424   0.6         119232                   0.99       0.99
-- lobpcg_run@getAX_BX           36.797  56.3     36.910  53.9          66240                   1.00       1.00
-- lobpcg_pcond                   0.075   0.1      0.077   0.1          52992                   0.97       0.97
-- lobpcg_RayleighRitz@hegv       1.736   2.7      1.745   2.5          68448                   0.99       0.99
+- lobpcg_init                    0.028   0.0      0.033   0.1           2208                   0.85       0.85
+- lobpcg_run                    47.041  75.1     47.096  72.2           2208                   1.00       1.00
+- lobpcg_orthoWrtPrev            0.749   1.2      0.750   1.2          55200                   1.00       1.00
+- lobpcg_Bortho                  2.523   4.0      2.523   3.9          68448                   1.00       1.00
+- lobpcg_RayleighRitz            6.247  10.0      6.260   9.6          68448                   1.00       1.00
+- lobpcg_maxResidu               0.417   0.7      0.422   0.6         119232                   0.99       0.99
+- lobpcg_run@getAX_BX           36.331  58.0     36.372  55.8          66240                   1.00       1.00
+- lobpcg_pcond                   0.075   0.1      0.074   0.1          52992                   1.01       1.01
+- lobpcg_RayleighRitz@hegv       1.677   2.7      1.682   2.6          68448                   1.00       1.00
 
-- subtotal                      96.585 147.7     96.940 141.6                                  1.00       1.00
+- subtotal                      95.087 151.8     95.213 146.0                                  1.00       1.00
 
  Partitioning of low-level xgBlock type
-- xgBlock_potrf                  0.154   0.2      0.156   0.2          68448                   0.99       0.99
+- xgBlock_potrf                  0.149   0.2      0.147   0.2          68448                   1.01       1.01
  
-- xgBlock_trsm                   1.204   1.8      1.215   1.8         205344                   0.99       0.99
-- xgBlock_gemm                   3.927   6.0      4.026   5.9         850080                   0.98       0.98
-- xgBlock_heev                   0.222   0.3      0.229   0.3          15456                   0.97       0.97
-- xgBlock_hegvx                  1.350   2.1      1.367   2.0          52992                   0.99       0.99
-- xgBlock_copy                   0.587   0.9      0.587   0.9         496800                   1.00       1.00
-- xgBlock_cshift                 0.090   0.1      0.092   0.1          52992                   0.98       0.98
+- xgBlock_trsm                   1.189   1.9      1.195   1.8         205344                   0.99       0.99
+- xgBlock_gemm                   3.802   6.1      3.861   5.9         850080                   0.98       0.98
+- xgBlock_heev                   0.210   0.3      0.212   0.3          15456                   0.99       0.99
+- xgBlock_hegvx                  1.306   2.1      1.322   2.0          52992                   0.99       0.99
+- xgBlock_copy                   0.587   0.9      0.584   0.9         496800                   1.00       1.00
+- xgBlock_cshift                 0.088   0.1      0.088   0.1          52992                   1.00       1.00
 
-- subtotal                       7.380  11.3      7.516  11.0                                  0.98       0.98
+- subtotal                       7.182  11.5      7.262  11.1                                  0.99       0.99
 -
 -Synchronisation (=leave_test) and MPI calls 
-- communic.MPI                   0.792   1.2      0.793   1.2           4188                   1.00       1.00
+- communic.MPI                   0.331   0.5      0.330   0.5           4188                   1.00       1.00
 -
-- forstrnps:synchr               0.000   0.0      0.000   0.0             96                   1.08       1.08
-- mkrho :MPIrhor                 0.000   0.0      0.000   0.0            272                   1.00       1.00
-- alltoall%back_wf               1.070   1.6      1.059   1.5          69696                   1.01       1.01
-- alltoall%forw_wf               0.790   1.2      0.799   1.2          66240                   0.99       0.99
-- subtotal                       1.861   2.8      1.858   2.7                                  1.00       1.00
+- forstrnps:synchr               0.000   0.0      0.000   0.0             96                   1.05       1.05
+- mkrho :MPIrhor                 0.000   0.0      0.000   0.0            272                   0.99       0.99
+- alltoall%back_wf               1.081   1.7      1.078   1.7          69696                   1.00       1.00
+- alltoall%forw_wf               0.795   1.3      0.801   1.2          66240                   0.99       0.99
+- subtotal                       1.877   3.0      1.879   2.9                                  1.00       1.00
 
  Additional information
-- timana(1)                      0.000   0.0      0.000   0.0              4                   1.01       1.01
-- total timab                    6.179   9.4      6.180   9.0        3280508                   1.00       1.00
-- fourwf                        33.031  50.5     33.143  48.4          69696                   1.00       1.00
-- mklocl(2)                      0.086   0.1      0.086   0.1            432                   1.00       1.00
-- newocc                         0.305   0.5      0.306   0.4            272                   1.00       1.00
-- nonlop(total)                  3.089   4.7      3.118   4.6          85344                   0.99       0.99
+- timana(1)                      0.000   0.0      0.000   0.0              4                   1.00       1.00
+- total timab                    5.692   9.1      5.697   8.7        3338164                   1.00       1.00
+- fourwf                        32.570  52.0     32.615  50.0          69696                   1.00       1.00
+- mklocl(2)                      0.083   0.1      0.083   0.1            432                   1.00       1.00
+- newocc                         0.298   0.5      0.302   0.5            272                   0.99       0.99
+- nonlop(total)                  3.075   4.9      3.110   4.8          85344                   0.99       0.99
 
  timana : in multi dataset mode, the more detailed analysis is not done.
 
@@ -4722,10 +3426,10 @@ P           mkmem8          5
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         15.7  wall=         17.2
+- Proc.   0 individual time (sec): cpu=         15.3  wall=         16.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered 144 WARNINGs and  28 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         65.7  wall=         68.8
++Overall time at end (sec) : cpu=         62.9  wall=         65.4
