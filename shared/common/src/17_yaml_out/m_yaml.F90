@@ -646,9 +646,8 @@ subroutine yamldoc_add_real1d(self, label, arr, tag, real_fmt, multiline_trig, n
  integer,intent(in),optional :: width
 
 !Local variables-------------------------------
- integer :: w, length
+ integer :: w, length, vmax
  character(len=30) :: rfmt
- integer :: vmax
  logical :: nl
 ! *************************************************************************
 
@@ -771,9 +770,8 @@ subroutine yamldoc_add_dict(self, label, pl, tag, key_size, string_size, key_fmt
  integer,intent(in),optional :: width
 
 !Local variables-------------------------------
- integer :: w
+ integer :: w, vmax, ks, ss
  character(len=30) :: kfmt, ifmt, rfmt, sfmt
- integer :: vmax, ks, ss
  logical :: nl
 ! *************************************************************************
 
@@ -1441,7 +1439,6 @@ subroutine yamldoc_set_keys_to_string(self, keylist, svalue, dict_key, width, mu
  ABI_DEFAULT(w, width, self%default_width)
 
  n = char_count(keylist, ",") + 1
-
  start = 1
 
  if (.not. present(dict_key)) then
@@ -1464,6 +1461,8 @@ subroutine yamldoc_set_keys_to_string(self, keylist, svalue, dict_key, width, mu
        call dict%set(adjustl(keylist(start:)), s=svalue)
      else
        call dict%set(adjustl(keylist(start: start + stp - 2)), s=svalue)
+       start = start + stp
+       ABI_CHECK(start < len_trim(keylist), sjoin("Invalid keylist:", keylist))
      end if
    end do
    ABI_DEFAULT(vmax, multiline_trig, self%default_multiline_trig)
@@ -1700,22 +1699,26 @@ subroutine yaml_print_dict(stream, pl, key_size, s_size, kfmt, ifmt, rfmt, sfmt,
    !  write(tmp_key, kfmt) '"'//trim(key)//'"'
    !end if
 
-   tmp_key = trim(key)
-
+   write(tmp_key, kfmt) trim(key)
    call stream%push(trim(tmp_key)//': ')
-   if (type_code == TC_INT) then
+
+   select case (type_code)
+   case (TC_INT)
      call string_clear(tmp_i)
      write(tmp_i, ifmt) vi
      call stream%push(trim(tmp_i))
-   else if(type_code == TC_REAL) then
+   case (TC_REAL)
      call string_clear(tmp_r)
      call format_real(vr, tmp_r, rfmt)
      call stream%push(trim(tmp_r))
-   else if(type_code == TC_STRING) then
+   case (TC_STRING)
      call string_clear(tmp_s)
      write(tmp_s, sfmt) vs
      call yaml_print_string(stream, trim(tmp_s))
-   end if
+   case default
+     MSG_ERROR(sjoin("Invalid type_code:", itoa(type_code)))
+   end select
+
    if (i > 0 .and. mod(i, vmax) == 0 .and. i /= pl%length()) then
      call stream%push(', '//eol//'    ')
    else

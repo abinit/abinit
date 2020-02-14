@@ -28,6 +28,7 @@
 module m_profiling_abi
 
  use defs_basis
+ use iso_c_binding
  !use m_clib
 #ifdef HAVE_MPI2
  use mpi
@@ -124,6 +125,13 @@ module m_profiling_abi
 
  type(abimem_t),private,save :: minfo
  ! Internal datastructure storing memory profiling data.
+
+  interface
+    subroutine clib_get_meminfo(nalloc_c, nfree_c) bind(C, name="clib_get_meminfo")
+      import
+      integer(c_long),intent(out) :: nalloc_c, nfree_c
+    end subroutine clib_get_meminfo
+  end interface
 
 contains
 
@@ -338,17 +346,25 @@ end subroutine abimem_report
 !!  been performed in Fortran and the memory currently used
 !!
 !! OUTPUT
-!!  nalloc: number of allocations that have been done
-!!  nfree:  number of deallocations that have been done
-!!  allocmemory:  total memory used
+!!  nalloc: number of allocations that have been performed in Fortran
+!!  nfree:  number of deallocations that have been performed in Fortran
+!!  allocmemory:  total memory used (Fortran)
+!!  nalloc_c, nfree_c: Similar to nalloc and nfree but for the C code.
 
-subroutine abimem_get_info(nalloc, nfree, allocmemory)
+subroutine abimem_get_info(nalloc, nfree, allocmemory, nalloc_c, nfree_c)
 
 !Arguments ------------------------------------
- integer(i8b),intent(out) :: nalloc, nfree, allocmemory
+ integer(i8b),intent(out) :: nalloc, nfree, allocmemory, nalloc_c, nfree_c
+
+!Local variables-------------------------------
+ integer(c_long) :: long_nalloc_c, long_nfree_c
 ! *************************************************************************
 
  nalloc = minfo%num_alloc; nfree = minfo%num_free; allocmemory = minfo%memory
+
+ call clib_get_meminfo(long_nalloc_c, long_nfree_c)
+ nalloc_c = long_nalloc_c; nfree_c = long_nfree_c
+ !print *, "C allocations", nalloc_c, nfree_c
 
 end subroutine abimem_get_info
 !!***

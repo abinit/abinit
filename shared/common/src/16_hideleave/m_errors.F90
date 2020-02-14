@@ -1470,7 +1470,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
  character(len=5000) :: msg
 #ifdef HAVE_MEM_PROFILING
  integer :: ii,ierr,unt
- integer(i8b) :: memtot, nalloc, nfree
+ integer(i8b) :: memtot, nalloc, nfree, nalloc_c, nfree_c
  character(len=fnlen) :: path
  character(len=5000) :: errmsg
 #endif
@@ -1484,40 +1484,40 @@ subroutine abinit_doctor(prefix, print_mem_report)
  errmsg = ""; ierr = 0
 
  ! Test on memory leaks.
- call abimem_get_info(nalloc, nfree, memtot)
- !call abimem_get_info(nalloc_c, nfree_c, memtot_c)
+ call abimem_get_info(nalloc, nfree, memtot, nalloc_c, nfree_c)
  call abimem_shutdown()
 
  if (do_mem_report == 1) then
 
    ! Check memory allocated in C.
-   !if (nalloc_c == nfree_c .and. memtot_c == 0) then
-   !  write(msg,'(2a, 2(a,i0))') &
-   !    '- MEMORY CONSUMPTION REPORT FOR C CODE:',ch10, &
-   !    '-   There were ',nalloc_c,' allocations and ',nfree_c,' deallocations'
-   !  else
-   !   ! This msg will make the test fail if the memory leak occurs on master (no dash in the first column)
-   !   write(msg,'(2a,2(a,i0),2a)') &
-   !     'MEMORY CONSUMPTION REPORT FOR C CODE:',ch10, &
-   !     '   There were ',nalloc_c,' allocations and ',nfree_c,' deallocations',ch10, &
-   !     "   Check your C code for memory leaks. Note that abimem.py script does not support allocations in C"
-   !   ! And this will make the code call mpi_abort if the leak occurs on my_rank != master
-   !   ierr = ierr + 1
-   !   errmsg = strcat(errmsg, ch10, msg)
-   !  end if
-   !end if
+   if (nalloc_c == nfree_c) then
+     write(msg,'(2a, 2(a,i0), a)') &
+       '- MEMORY CONSUMPTION REPORT FOR C CODE:',ch10, &
+       '-   There were ',nalloc_c,' allocations and ',nfree_c,' deallocations in C code'
+   else
+     ! This msg will make the test fail if the memory leak occurs on master (no dash in the first column)
+     write(msg,'(2a,2(a,i0),3a)') &
+       'MEMORY CONSUMPTION REPORT FOR C CODE:',ch10, &
+       '   There were ',nalloc_c,' allocations and ',nfree_c,' deallocations in C code',ch10, &
+       "   Check your C code for memory leaks. Note that the abimem.py script does not support allocations in C"
+     ! And this will make the code call mpi_abort if the leak occurs on my_rank != master
+     ierr = ierr + 1
+     errmsg = strcat(errmsg, ch10, msg)
+   end if
+   if (my_rank == master) call wrtout(ab_out, msg)
+   call wrtout(std_out, msg)
 
    ! Check memory allocated in Fortran.
    if (nalloc == nfree .and. memtot == 0) then
      write(msg,'(3a,i0,a,i0,3a,i0)') &
        '- MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:',ch10, &
-       '-   There were ',nalloc,' allocations and ',nfree,' deallocations',ch10, &
+       '-   There were ',nalloc,' allocations and ',nfree,' deallocations in Fortran',ch10, &
        '-   Remaining memory at the end of the calculation is ',memtot
    else
      ! This msg will make the test fail if the memory leak occurs on master (no dash in the first column)
      write(msg,'(2a,2(a,i0),3a,f12.4,1x,11a)') &
        'MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:',ch10, &
-       '   There were ',nalloc,' allocations and ',nfree,' deallocations',ch10, &
+       '   There were ',nalloc,' allocations and ',nfree,' deallocations in Fortran',ch10, &
        '   Remaining memory at the end of the calculation: ',memtot * b2Mb, " (Mb)", ch10, &
        '   As a help for debugging, you might set call abimem_init(2) in the main program,', ch10, &
        '   or use the command line option `abinit --abimem-level 2`', ch10, &
@@ -1552,10 +1552,9 @@ subroutine abinit_doctor(prefix, print_mem_report)
    write(msg, "(a,i0,2a)")"Leaking ",ii," Fortran logical units. See: ",trim(path)
    errmsg = strcat(errmsg, ch10, msg)
    ierr = ierr + 1
+   if (my_rank == master) call wrtout(ab_out, msg)
+   call wrtout(std_out, msg)
  end if
-
- if (my_rank == master) call wrtout(ab_out, msg)
- call wrtout(std_out, msg)
 
  call xmpi_barrier(xmpi_world)
  if (ierr /= 0) then

@@ -6,7 +6,7 @@ ks:
     tol_abs: 5.0e-7
     tol_rel: 5.0e-7
     ResultsGS!:
-        convergence:
+        convergence_:
             ceil: 1.0e-6
         cartesian_stress_tensor:
             tol_vec: 1.0e-7
@@ -29,7 +29,7 @@ dmft:
     tol_abs: 2.0e-8
     tol_rel: 5.0e-9
     ResultsGS!:  # hard reset result_gs
-        convergence:
+        convergence_:
             ceil: 1.0e-6
             deltae:
                 ceil: 2.0e-3

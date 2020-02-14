@@ -23,9 +23,7 @@
 
 static long int COUNT_MALLOC = 0, COUNT_FREE = 0;
 static size_t BYTES_ALLOCATED = 0;
-/*
- * Counting bytes deallocated by free requires some non-standard API to access the status of the mallocator
-*/
+/* Counting bytes deallocated by free requires some non-standard API to access the status of the mallocator */
 
 
 void clib_get_meminfo(long int *nalloc_c, long int *nfree_c)

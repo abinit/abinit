@@ -34,7 +34,6 @@ MODULE m_results_gs
  use m_yaml
  use m_crystal
  use m_stream_string
- use m_dtset
  use m_pair_list
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -810,10 +809,9 @@ end function results_gs_ncwrite
 !!
 !! SOURCE
 
-subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
+subroutine results_gs_yaml_write(results, unit, cryst, comment)
 
  class(results_gs_type),intent(in) :: results
- type(dataset_type),intent(in) :: dtset
  type(crystal_t),intent(in) :: cryst
  integer,intent(in) :: unit
  character(len=*),intent(in),optional :: comment
@@ -822,7 +820,6 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
  integer,parameter :: width=10
  integer :: ii
  type(yamldoc_t) :: ydoc
- type(pair_list) :: dict
  real(dp) :: strten(3,3), abc(3), fnorms(results%natom)
 
 !************************************************************************
@@ -853,7 +850,7 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
  !  real_fmt="(f5.1)", dict_key="cutoff_energies")
 
  ! Write convergence degree.
- ! FIXME: It seems there's a portability problem on for residm computed with nstep = 0
+ ! FIXME: It seems there's a portability problem on for residm computed with nstep = 0 and iscf -3
  ! because one may get very small value e.g. 7.91-323. residm with nstep > 0 are OK though
  ! so print zero if residm < tol30.
  call ydoc%add_reals( &
@@ -862,8 +859,9 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
    real_fmt="(es9.2)", dict_key="convergence_")
 
  ! Write energies.
- call ydoc%add_reals("etotal, entropy, fermie", &
-                     [results%etotal, results%entropy, results%fermie])
+ call ydoc%add_reals( &
+   "etotal, entropy, fermie", &
+   [results%etotal, results%entropy, results%fermie])
 
  ! Cartesian stress tensor and forces.
  strten(1,1) = results%strten(1)
@@ -880,30 +878,23 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
    call ydoc%add_real2d('cartesian_stress_tensor', strten)
    call ydoc%add_real('pressure_GPa', - get_trace(strten) * HaBohr3_GPa / three, real_fmt="(es12.4)")
  else
-   call ydoc%add_string('cartesian_stress_tensor', "null")
-   call ydoc%add_string('pressure_GPa', "null")
-   !call ydoc%set_keys_to_string("cartesian_stress_tensor, pressure_GPa", "null")
+   call ydoc%set_keys_to_string("cartesian_stress_tensor, pressure_GPa", "null")
  end if
 
  !call ydoc%add_real2d('xred', cryst%xred, real_fmt="(es12.4)")
 
  if (results%fcart(1,1) /= MAGIC_UNDEF) then
-   call ydoc%add_real2d('cartesian_forces', results%fcart)
    !call ydoc%add_paired_real2d('cartesian_forces_and_xred', results%fcart, cryst%xred, real_fmt="(es12.4)")
+   call ydoc%add_real2d('cartesian_forces', results%fcart)
    fnorms = [(sqrt(sum(results%fcart(:, ii) ** 2)), ii=1,results%natom)]
    ! Write force statistics
-   call dict%set_keys('min, max, mean', rvals=[minval(fnorms), maxval(fnorms), sum(fnorms) / results%natom])
-   !call ydoc%add_reals('min, max, mean',
-   !  rvals=[minval(fnorms), maxval(fnorms), sum(fnorms) / results%natom], dict_name="force_length_stats")
+   call ydoc%add_reals('min, max, mean', &
+     values=[minval(fnorms), maxval(fnorms), sum(fnorms) / results%natom], dict_key="force_length_stats")
 
  else
    call ydoc%add_string('cartesian_forces', "null")
-   call dict%set_keys_to_null("min, max, mean")
-   !call ydoc%set_keys_to_string("min, max, mean", "null", dict_name="force_length_stats")
+   call ydoc%set_keys_to_string("min, max, mean", "null", dict_key="force_length_stats")
  end if
-
- call ydoc%add_dict('force_length_stats', dict)
- call dict%free()
 
  call ydoc%write_and_free(unit)
 
