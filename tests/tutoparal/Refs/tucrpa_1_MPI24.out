@@ -415,7 +415,8 @@ P           mkmem2          4
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =   24   -> not optimal: autoparal keyword recommended in input file
+-   mpi_nproc: 24, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.2605000  0.0000000  0.0000000  G(1)=  0.1377316  0.0000000  0.0000000
@@ -556,21 +557,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        5
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   4.10000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  7.2605000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.2605000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   7.2605000, ]
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  20.0, }
-convergence: {
-    "deltae": -3.69E-13, "res2":  3.61E-20, 
-    "residm":  3.74E-07, "diffor": undef, 
-}
+lattice_volume:   3.8273624E+02
+convergence_: {deltae: -3.69E-13, res2:  3.61E-20, residm:  3.74E-07, diffor: undef, }
 etotal    :  -1.51928525E+02
 entropy   :   0.00000000E+00
 fermie    :   2.85506715E-01
@@ -585,7 +581,7 @@ cartesian_forces:
 - [  7.44884714E-11,  -9.55727856E-10,  -5.49328789E-10, ]
 - [  1.13960924E-10,  -2.38987642E-10,  -3.54044367E-10, ]
 - [  4.35259006E-10,  -4.76871654E-10,  -2.69714635E-10, ]
-force_length_stats: {"min":   4.42096820E-10, "max":   2.80689355E-09, "mean":   1.15257358E-09, }
+force_length_stats: {min:   4.42096820E-10, max:   2.80689355E-09, mean:   1.15257358E-09, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -716,7 +712,7 @@ force_length_stats: {"min":   4.42096820E-10, "max":   2.80689355E-09, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.22101241859796E+01
 hartree             :  3.42935069756873E+01
@@ -733,7 +729,7 @@ total_energy_eV     : -4.13418541519434E+03
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -1.47235259001391E+01
 Ewald energy        : -1.14220316979058E+02
@@ -759,7 +755,7 @@ total_energy_dc_eV  : -4.13418541519434E+03
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =   24
+-   mpi_nproc: 24, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -1746,28 +1742,23 @@ total_energy_dc_eV  : -4.13418541519434E+03
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        5
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   4.10000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  7.2605000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.2605000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   7.2605000, ]
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  12.0, "pawecutdg":  20.0, }
-convergence: {
-    "deltae":  0.00E+00, "res2":  0.00E+00, 
-    "residm":  1.28E-15, "diffor":  0.00E+00, 
-}
+lattice_volume:   3.8273624E+02
+convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  1.28E-15, diffor:  0.00E+00, }
 etotal    :  -1.51928525E+02
 entropy   :   0.00000000E+00
 fermie    :   2.85506715E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
 

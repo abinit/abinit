@@ -209,7 +209,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =   24
+-   mpi_nproc: 24, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
@@ -347,21 +347,16 @@ _setup2: Arith. and geom. avg. npw (full set) are    1399.000    1398.994
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :       29
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.32000000E+02
-charge    :   0.00000000E+00
+rprimd    :
+- [  7.5589045,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.5589045,   0.0000000, ]
+- [  0.0000000,   0.0000000,  52.9123317, ]
 lattice_lengths: [   7.55890,    7.55890,   52.91233, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  15.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  4.09E-12, "res2":  3.12E-22, 
-    "residm":  4.25E-08, "diffor": undef, 
-}
+lattice_volume:   3.0232539E+03
+convergence_: {deltae:  4.09E-12, res2:  3.12E-22, residm:  4.25E-08, diffor: undef, }
 etotal    :  -7.91536712E+02
 entropy   :   0.00000000E+00
 fermie    :   2.14893685E-01
@@ -400,7 +395,7 @@ cartesian_forces:
 - [  7.19736572E-33,  -0.00000000E+00,  -2.00999380E-03, ]
 - [  7.19736572E-33,  -0.00000000E+00,   4.94969590E-02, ]
 - [  7.19736572E-33,  -0.00000000E+00,   5.13639026E-02, ]
-force_length_stats: {"min":   4.78544407E-19, "max":   5.91530036E-02, "mean":   1.45426575E-02, }
+force_length_stats: {min:   4.78544407E-19, max:   5.91530036E-02, mean:   1.45426575E-02, }
 ...
 
  Integrated electronic density in atomic spheres:
@@ -620,7 +615,7 @@ force_length_stats: {"min":   4.78544407E-19, "max":   5.91530036E-02, "mean":  
 
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.54782876475894E+02
 hartree             :  1.19765137978027E+03
