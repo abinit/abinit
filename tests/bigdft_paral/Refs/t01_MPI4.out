@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 12 Feb 2020.
-- ( at 01h30 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 21h03 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_paral_t01_MPI4/t01.in
 - output file    -> t01_MPI4.out
@@ -108,7 +108,8 @@
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    4   -> not optimal: autoparal keyword recommended in input file
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -168,21 +169,16 @@
  At SCF step    8       nres2   =  6.84E-07 < tolvrs=  1.00E-06 =>converged.
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  8.8000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.8000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.8000000, ]
 lattice_lengths: [   8.80000,    6.80000,    6.80000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  -1.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  7.93E-09, "res2":  6.84E-07, 
-    "residm":  3.38E-05, "diffor": undef, 
-}
+lattice_volume:   4.0691200E+02
+convergence_: {deltae:  7.93E-09, res2:  6.84E-07, residm:  3.38E-05, diffor: undef, }
 etotal    :  -3.12619900E+01
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -191,7 +187,7 @@ pressure_GPa: null
 cartesian_forces:
 - [ -4.27621900E-02,   1.59333624E-03,   1.59333684E-03, ]
 - [  4.27621900E-02,  -1.59333624E-03,  -1.59333684E-03, ]
-force_length_stats: {"min":   4.28215173E-02, "max":   4.28215173E-02, "mean":   4.28215173E-02, }
+force_length_stats: {min:   4.28215173E-02, max:   4.28215173E-02, mean:   4.28215173E-02, }
 ...
 
 ================================================================================
@@ -227,7 +223,7 @@ force_length_stats: {"min":   4.28215173E-02, "max":   4.28215173E-02, "mean":  
   -1.10798   -0.62651   -0.40309   -0.40307   -0.36404   -0.14444   -0.14437
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.37092493227969E+01
 hartree             :  4.29974734941007E+01
@@ -241,7 +237,7 @@ total_energy        : -3.12619914740849E+01
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -6.09818710181490E+00
 'Ion-ion energy'    :  1.57441152968349E+01
@@ -253,7 +249,8 @@ total_energy_dc     : -3.12619899968979E+01
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    4   -> not optimal: autoparal keyword recommended in input file
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -289,21 +286,16 @@ total_energy_dc     : -3.12619899968979E+01
  At SCF step   12       vres2   =  2.46E-07 < tolvrs=  1.00E-06 =>converged.
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.20000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  8.8000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.8000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.8000000, ]
 lattice_lengths: [   8.80000,    6.80000,    6.80000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  -1.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae":  1.44E-06, "res2":  2.46E-07, 
-    "residm":  6.63E-07, "diffor": undef, 
-}
+lattice_volume:   4.0691200E+02
+convergence_: {deltae:  1.44E-06, res2:  2.46E-07, residm:  6.63E-07, diffor: undef, }
 etotal    :  -3.12619899E+01
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -312,7 +304,7 @@ pressure_GPa: null
 cartesian_forces:
 - [ -4.28178920E-02,   1.59327153E-03,   1.59704841E-03, ]
 - [  4.28178920E-02,  -1.59327153E-03,  -1.59704841E-03, ]
-force_length_stats: {"min":   4.28772778E-02, "max":   4.28772778E-02, "mean":   4.28772778E-02, }
+force_length_stats: {min:   4.28772778E-02, max:   4.28772778E-02, mean:   4.28772778E-02, }
 ...
 
 ================================================================================
@@ -348,7 +340,7 @@ force_length_stats: {"min":   4.28772778E-02, "max":   4.28772778E-02, "mean":  
   -1.10797   -0.62651   -0.40309   -0.40307   -0.36404   -0.14443   -0.14436
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 2, }
+iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  2.37092743404434E+01
 hartree             :  4.29975072729516E+01
@@ -362,7 +354,7 @@ total_energy        : -3.12619899150777E+01
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 2, }
+iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -6.09816055994506E+00
 'Ion-ion energy'    :  1.57441152968349E+01
@@ -524,10 +516,10 @@ total_energy_dc     : -3.12619964242796E+01
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          3.6  wall=          4.1
+- Proc.   0 individual time (sec): cpu=          2.9  wall=          3.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.8  wall=         16.3
++Overall time at end (sec) : cpu=         11.8  wall=         12.3

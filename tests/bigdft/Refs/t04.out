@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 15h14 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 21h01 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t04/t04.in
 - output file    -> t04.out
@@ -92,7 +92,8 @@
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1   -> not optimal: autoparal keyword recommended in input file
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -189,21 +190,16 @@
   for the second time, diff in etot=  3.961E-07 < toldfe=  1.000E-06
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        5
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [ 20.5000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  20.5000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  20.5000000, ]
 lattice_lengths: [  20.50000,   20.50000,   20.50000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -3.96E-07, "res2":  9.06E-07, 
-    "residm":  2.67E-04, "diffor": undef, 
-}
+lattice_volume:   8.6151250E+03
+convergence_: {deltae: -3.96E-07, res2:  9.06E-07, residm:  2.67E-04, diffor: undef, }
 etotal    :  -6.23210016E+00
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -215,7 +211,7 @@ cartesian_forces:
 - [  1.55281025E-04,   1.55281025E-04,  -1.54278331E-04, ]
 - [  1.55281025E-04,  -1.54278331E-04,   1.55281025E-04, ]
 - [ -1.54278331E-04,   1.55281025E-04,   1.55281025E-04, ]
-force_length_stats: {"min":   4.42282296E-06, "max":   2.68376968E-04, "mean":   2.15164450E-04, }
+force_length_stats: {min:   4.42282296E-06, max:   2.68376968E-04, mean:   2.15164450E-04, }
 ...
 
 ================================================================================
@@ -266,7 +262,7 @@ force_length_stats: {"min":   4.42282296E-06, "max":   2.68376968E-04, "mean":  
   -0.49686   -0.31305   -0.31304   -0.31304
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.74156942971711E+00
 hartree             :  1.11293168053439E+01
@@ -280,7 +276,7 @@ total_energy        : -6.23210036072892E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -2.87201467910292E+00
 'Ion-ion energy'    :  7.01168188308251E+00
@@ -436,10 +432,10 @@ total_energy_dc     : -6.23212932940417E+00
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         20.0  wall=         20.2
+- Proc.   0 individual time (sec): cpu=         19.5  wall=         19.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         20.0  wall=         20.2
++Overall time at end (sec) : cpu=         19.5  wall=         19.8

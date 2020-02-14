@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 22h15 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 20h32 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t51_MPI10-t52_MPI10-t53_MPI10/t53.in
 - output file    -> t53_MPI10.out
@@ -232,7 +232,7 @@ P          mk1mem          26
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =   10
+-   mpi_nproc: 10, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -688,50 +688,49 @@ P          mk1mem          26
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         27.4        0.46      0.008
-- Total wall clock time (s,m,h):         28.3        0.47      0.008
+- Total cpu        time (s,m,h):         17.2        0.29      0.005
+- Total wall clock time (s,m,h):         17.5        0.29      0.005
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 10, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            2.6, wall_time =            2.9
+- cpu_time =            1.6, wall_time =            1.8
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   0.811   3.0      0.845   3.0           6790      -1.00        0.96       0.96
-- dfpt_vtorho:MPI                0.533   1.9      0.541   1.9             24      -1.00        0.98       0.98
-- fourwf%(G->r)                  0.161   0.6      0.165   0.6           2640      -1.00        0.98       0.98
-- others (131)                   0.331   1.2      0.343   1.2             -1      -1.00        0.96       0.96
+- fourwf%(pot)                   0.636   3.7      0.640   3.7           6790      -1.00        0.99       0.99
+- fourwf%(G->r)                  0.130   0.8      0.131   0.8           2640      -1.00        0.99       0.99
+- others (132)                   0.263   1.5      0.267   1.5             -1      -1.00        0.99       0.99
 -<END_TIMER>
 -
-- subtotal                       1.836   6.7      1.894   6.7                                  0.97       0.97
+- subtotal                       1.030   6.0      1.038   5.9                                  0.99       0.99
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 10, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          27.4, wall_time =          28.3
+- cpu_time =          17.2, wall_time =          17.5
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   7.960  29.1      8.276  29.2          67037      -1.00        0.96       0.96
-- dfpt_vtorho:MPI                5.522  20.2      5.614  19.8            240      -1.00        0.98       0.98
-- fourwf%(G->r)                  1.621   5.9      1.670   5.9          25920      -1.00        0.97       0.97
-- nonlop(forces)                 1.028   3.8      1.070   3.8          35200      -1.00        0.96       0.96
-- projbd                         0.892   3.3      0.924   3.3         113594      -1.00        0.97       0.97
-- nonlop(apply)                  0.755   2.8      0.786   2.8          41437      -1.00        0.96       0.96
-- dfpt_vtorho-kpt loop           0.573   2.1      0.585   2.1            240      -1.00        0.98       0.98
-- getgh1c_setup                  0.514   1.9      0.526   1.9           5120      -1.00        0.98       0.98
-- dfpt_vtowfk(contrib)           0.497   1.8      0.504   1.8            -10      -1.00        0.99       0.99
-- mkrho/=                        0.385   1.4      0.386   1.4             20      -1.00        1.00       1.00
-- invars2                        0.385   1.4      0.400   1.4             10      -1.00        0.96       0.96
-- getghc-other                   0.288   1.1      0.269   0.9            -10      -1.00        1.07       1.07
-- newkpt(excl. rwwf   )          0.255   0.9      0.275   1.0            -10      -1.00        0.93       0.93
-- inwffil(excl. calls)           0.198   0.7      0.202   0.7            100      -1.00        0.98       0.98
-- others (120)                  -2.418  -8.8     -2.532  -8.9             -1      -1.00        0.95       0.95
+- fourwf%(pot)                   6.274  36.4      6.304  36.1          67037      -1.00        1.00       1.00
+- fourwf%(G->r)                  1.280   7.4      1.288   7.4          25920      -1.00        0.99       0.99
+- nonlop(forces)                 0.825   4.8      0.832   4.8          35200      -1.00        0.99       0.99
+- projbd                         0.717   4.2      0.726   4.2         113594      -1.00        0.99       0.99
+- nonlop(apply)                  0.600   3.5      0.607   3.5          41437      -1.00        0.99       0.99
+- dfpt_vtorho:MPI                0.554   3.2      0.554   3.2            240      -1.00        1.00       1.00
+- dfpt_vtorho-kpt loop           0.478   2.8      0.479   2.7            240      -1.00        1.00       1.00
+- getgh1c_setup                  0.432   2.5      0.433   2.5           5120      -1.00        1.00       1.00
+- dfpt_vtowfk(contrib)           0.384   2.2      0.381   2.2            -10      -1.00        1.01       1.01
+- invars2                        0.290   1.7      0.303   1.7             10      -1.00        0.96       0.96
+- getghc-other                   0.229   1.3      0.211   1.2            -10      -1.00        1.09       1.09
+- inwffil(excl. calls)           0.143   0.8      0.150   0.9            100      -1.00        0.95       0.95
+- newkpt(excl. rwwf   )          0.127   0.7      0.128   0.7            -10      -1.00        0.99       0.99
+- fourdp                         0.094   0.5      0.094   0.5           1170      -1.00        0.99       0.99
+- others (120)                  -1.957 -11.4     -1.978 -11.3             -1      -1.00        0.99       0.99
 -<END_TIMER>
 
-- subtotal                      18.455  67.4     18.952  66.9                                  0.97       0.97
+- subtotal                      10.470  60.8     10.513  60.2                                  1.00       1.00
 
 ================================================================================
 
@@ -807,10 +806,10 @@ P          mk1mem          26
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.6  wall=          2.9
+- Proc.   0 individual time (sec): cpu=          1.6  wall=          1.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         27.6  wall=         28.6
++Overall time at end (sec) : cpu=         17.5  wall=         17.7

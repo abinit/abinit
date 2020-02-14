@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 22h17 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 20h32 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t83_MPI10/t83.in
 - output file    -> t83_MPI10.out
@@ -202,7 +202,8 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =   10   -> not optimal: autoparal keyword recommended in input file
+-   mpi_nproc: 10, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -293,21 +294,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     263.704     263.654
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        2
-nspden    :        4
-nelect    :   1.30000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  3.5000000,   3.5000000,   0.0000000, ]
+- [  0.0000000,   3.5000000,   3.5000000, ]
+- [  3.5000000,   0.0000000,   3.5000000, ]
 lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":  16.0, "pawecutdg":  60.0, }
-convergence: {
-    "deltae":  4.58E-10, "res2":  9.39E-09, 
-    "residm":  8.56E-10, "diffor": undef, 
-}
+lattice_volume:   8.5750000E+01
+convergence_: {deltae:  4.58E-10, res2:  9.39E-09, residm:  8.56E-10, diffor: undef, }
 etotal    :  -7.21620130E+01
 entropy   :   0.00000000E+00
 fermie    :   3.82132545E-01
@@ -318,13 +314,13 @@ cartesian_stress_tensor:
 pressure_GPa:   4.2834E+00
 cartesian_forces:
 - [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
-force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":   0.00000000E+00, }
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
+ Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
     1   2.35000       11.747146     -0.000000   -0.000000    0.000000
  ---------------------------------------------------------------------
  Total magnetization (spheres)      -0.000000   -0.000000    0.000000
@@ -905,7 +901,7 @@ force_length_stats: {"min":   0.00000000E+00, "max":   0.00000000E+00, "mean":  
  Next minimum=    0.0000E+00  at reduced coord.    0.0278    0.0000    0.0000
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  6.15466801926239E+00
 hartree             :  1.08325360397806E+01
@@ -922,7 +918,7 @@ total_energy_eV     : -1.96362721462746E+03
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -8.25561831562206E+00
 Ewald energy        : -5.53458350375165E+01
@@ -948,7 +944,8 @@ total_energy_dc_eV  : -1.96362721462746E+03
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =   10   -> not optimal: autoparal keyword recommended in input file
+-   mpi_nproc: 10, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1083,21 +1080,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     263.704     263.654
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 2, }
+iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-natom     :        1
-nsppol    :        1
-nspinor   :        2
-nspden    :        4
-nelect    :   1.30000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [  3.5000000,   3.5000000,   0.0000000, ]
+- [  0.0000000,   3.5000000,   3.5000000, ]
+- [  3.5000000,   0.0000000,   3.5000000, ]
 lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":  16.0, "pawecutdg":  60.0, }
-convergence: {
-    "deltae": -2.18E-05, "res2":  2.88E-03, 
-    "residm":  6.24E-14, "diffor":  0.00E+00, 
-}
+lattice_volume:   8.5750000E+01
+convergence_: {deltae: -2.18E-05, res2:  2.88E-03, residm:  6.24E-14, diffor:  0.00E+00, }
 etotal    :  -7.20884498E+01
 entropy   :   0.00000000E+00
 fermie    :   3.84745788E-01
@@ -1107,13 +1099,13 @@ cartesian_stress_tensor:
 - [  0.00000000E+00,   0.00000000E+00,  -4.45616297E-04, ]
 pressure_GPa:   1.3110E+01
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. mag(i)=approximate local magnetic moment.
- Atom   Radius      Total density     mag(x)      mag(y)      mag(z)
+ Atom    Radius     Total density     mag(x)      mag(y)      mag(z)
     1   2.35000       11.749095      0.000000    0.000000    0.000000
  ---------------------------------------------------------------------
  Total magnetization (spheres)       0.000000    0.000000    0.000000
@@ -1688,7 +1680,7 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
  Next minimum=    0.0000E+00  at reduced coord.    0.0278    0.0000    0.0000
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 2, }
+iteration_state     : {dtset: 2, }
 comment             : Components of total free energy in Hartree
 kinetic             :  6.16619277880063E+00
 hartree             :  1.08639397139508E+01
@@ -1704,7 +1696,7 @@ total_energy_eV     : -1.96130814353282E+03
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 2, }
+iteration_state     : {dtset: 2, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -8.19974108103052E+00
 Ewald energy        : -5.53458350375165E+01
@@ -1984,10 +1976,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        190.7  wall=        195.5
+- Proc.   0 individual time (sec): cpu=        148.4  wall=        148.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=       1909.9  wall=       1954.4
++Overall time at end (sec) : cpu=       1486.8  wall=       1487.8

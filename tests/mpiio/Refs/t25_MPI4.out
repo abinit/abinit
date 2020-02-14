@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 13 Feb 2020.
-- ( at 16h50 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 20h18 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/TestBot_MPI4/mpiio_t25_MPI4/t25.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/mpiio_t25_MPI4/t25.in
 - output file    -> t25_MPI4.out
 - root for input  files -> t25_MPI4i
 - root for output files -> t25_MPI4o
@@ -123,7 +123,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    4
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -155,8 +155,8 @@ P           mkmem           1
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/6c_lda.paw
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c_lda.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -203,21 +203,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
 
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        2
-nspinor   :        1
-nspden    :        2
-nelect    :   8.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [  0.0000000,   3.5000000,   3.5000000, ]
+- [  3.5000000,   0.0000000,   3.5000000, ]
+- [  3.5000000,   3.5000000,   0.0000000, ]
 lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
-cutoff_energies: {"ecut":  15.0, "pawecutdg":  50.0, }
-convergence: {
-    "deltae": -1.36E-06, "res2":  2.63E-05, 
-    "residm":  7.10E-10, "diffor": undef, 
-}
+lattice_volume:   8.5750000E+01
+convergence_: {deltae: -1.36E-06, res2:  2.63E-05, residm:  7.10E-10, diffor: undef, }
 etotal    :  -1.04179435E+01
 entropy   :   0.00000000E+00
 fermie    :   4.73485197E-01
@@ -229,7 +224,7 @@ pressure_GPa:   2.4069E+02
 cartesian_forces:
 - [ -2.35488897E-01,  -2.35488897E-01,  -2.35488897E-01, ]
 - [  2.35488897E-01,   2.35488897E-01,   2.35488897E-01, ]
-force_length_stats: {"min":   4.07878734E-01, "max":   4.07878734E-01, "mean":   4.07878734E-01, }
+force_length_stats: {min:   4.07878734E-01, max:   4.07878734E-01, mean:   4.07878734E-01, }
 ...
 
  Integrated electronic and magnetization densities in atomic spheres:
@@ -414,7 +409,7 @@ force_length_stats: {"min":   4.07878734E-01, "max":   4.07878734E-01, "mean":  
   26.88896   34.19753   34.19753   35.39545
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.71248281670919E+00
 hartree             :  1.52271844730215E+00
@@ -429,7 +424,7 @@ total_energy_eV     : -2.83508381534274E+02
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         :  1.77722282126150E+00
 Ewald energy        : -1.22408856604630E+01
@@ -607,4 +602,4 @@ P           mkmem           1
 
  Calculation completed.
 .Delivered  19 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.6  wall=         14.9
++Overall time at end (sec) : cpu=          3.8  wall=          4.2

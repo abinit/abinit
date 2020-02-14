@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 15h14 )
+.Starting date : Fri 14 Feb 2020.
+- ( at 21h01 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t10/t10.in
 - output file    -> t10.out
@@ -87,7 +87,8 @@
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1   -> not optimal: autoparal keyword recommended in input file
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -155,21 +156,16 @@
  At SCF step    6   max grdnorm=  8.32E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [ 17.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  16.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  16.0000000, ]
 lattice_lengths: [  17.00000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -2.64E-08, "res2":  1.55E-06, 
-    "residm":  8.32E-05, "diffor": undef, 
-}
+lattice_volume:   4.3520000E+03
+convergence_: {deltae: -2.64E-08, res2:  1.55E-06, residm:  8.32E-05, diffor: undef, }
 etotal    :  -1.07973956E+00
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -178,7 +174,7 @@ pressure_GPa: null
 cartesian_forces:
 - [ -3.45699008E-01,  -1.13458863E-07,  -1.13458861E-07, ]
 - [  3.45699008E-01,   1.13458863E-07,   1.13458861E-07, ]
-force_length_stats: {"min":   3.45699008E-01, "max":   3.45699008E-01, "mean":   3.45699008E-01, }
+force_length_stats: {min:   3.45699008E-01, max:   3.45699008E-01, mean:   3.45699008E-01, }
 ...
 
 
@@ -215,21 +211,16 @@ force_length_stats: {"min":   3.45699008E-01, "max":   3.45699008E-01, "mean":  
  At SCF step    7   max grdnorm=  6.53E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [ 18.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  16.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  16.0000000, ]
 lattice_lengths: [  18.00000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.76E-08, "res2":  1.04E-06, 
-    "residm":  6.53E-05, "diffor": undef, 
-}
+lattice_volume:   4.6080000E+03
+convergence_: {deltae: -1.76E-08, res2:  1.04E-06, residm:  6.53E-05, diffor: undef, }
 etotal    :  -1.12948863E+00
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -238,7 +229,7 @@ pressure_GPa: null
 cartesian_forces:
 - [  5.78660662E-02,   1.01987531E-08,   1.01987536E-08, ]
 - [ -5.78660662E-02,  -1.01987531E-08,  -1.01987536E-08, ]
-force_length_stats: {"min":   5.78660662E-02, "max":   5.78660662E-02, "mean":   5.78660662E-02, }
+force_length_stats: {min:   5.78660662E-02, max:   5.78660662E-02, mean:   5.78660662E-02, }
 ...
 
 
@@ -278,21 +269,16 @@ force_length_stats: {"min":   5.78660662E-02, "max":   5.78660662E-02, "mean":  
  At SCF step    6   max grdnorm=  3.00E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [ 17.5000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  16.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  16.0000000, ]
 lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -3.63E-09, "res2":  2.05E-07, 
-    "residm":  3.00E-05, "diffor": undef, 
-}
+lattice_volume:   4.4800000E+03
+convergence_: {deltae: -3.63E-09, res2:  2.05E-07, residm:  3.00E-05, diffor: undef, }
 etotal    :  -1.13430440E+00
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -301,7 +287,7 @@ pressure_GPa: null
 cartesian_forces:
 - [  4.17492071E-02,   1.07264821E-07,   1.07264819E-07, ]
 - [ -4.17492071E-02,  -1.07264821E-07,  -1.07264819E-07, ]
-force_length_stats: {"min":   4.17492071E-02, "max":   4.17492071E-02, "mean":   4.17492071E-02, }
+force_length_stats: {min:   4.17492071E-02, max:   4.17492071E-02, mean:   4.17492071E-02, }
 ...
 
 
@@ -341,21 +327,16 @@ force_length_stats: {"min":   4.17492071E-02, "max":   4.17492071E-02, "mean":  
  At SCF step    6   max grdnorm=  3.53E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [ 17.5000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  16.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  16.0000000, ]
 lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -5.05E-09, "res2":  2.88E-07, 
-    "residm":  3.53E-05, "diffor": undef, 
-}
+lattice_volume:   4.4800000E+03
+convergence_: {deltae: -5.05E-09, res2:  2.88E-07, residm:  3.53E-05, diffor: undef, }
 etotal    :  -1.13737474E+00
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -364,7 +345,7 @@ pressure_GPa: null
 cartesian_forces:
 - [  1.03276310E-02,  -2.88030911E-08,  -2.88030906E-08, ]
 - [ -1.03276310E-02,   2.88030911E-08,   2.88030906E-08, ]
-force_length_stats: {"min":   1.03276310E-02, "max":   1.03276310E-02, "mean":   1.03276310E-02, }
+force_length_stats: {min:   1.03276310E-02, max:   1.03276310E-02, mean:   1.03276310E-02, }
 ...
 
 
@@ -403,21 +384,16 @@ force_length_stats: {"min":   1.03276310E-02, "max":   1.03276310E-02, "mean":  
  At SCF step    5   max grdnorm=  5.80E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [ 17.5000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  16.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  16.0000000, ]
 lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.60E-08, "res2":  3.78E-07, 
-    "residm":  5.80E-05, "diffor": undef, 
-}
+lattice_volume:   4.4800000E+03
+convergence_: {deltae: -1.60E-08, res2:  3.78E-07, residm:  5.80E-05, diffor: undef, }
 etotal    :  -1.13752341E+00
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -426,7 +402,7 @@ pressure_GPa: null
 cartesian_forces:
 - [ -2.50954819E-03,  -4.85159188E-08,  -4.85159181E-08, ]
 - [  2.50954819E-03,   4.85159188E-08,   4.85159181E-08, ]
-force_length_stats: {"min":   2.50954819E-03, "max":   2.50954819E-03, "mean":   2.50954819E-03, }
+force_length_stats: {min:   2.50954819E-03, max:   2.50954819E-03, mean:   2.50954819E-03, }
 ...
 
 
@@ -464,21 +440,16 @@ force_length_stats: {"min":   2.50954819E-03, "max":   2.50954819E-03, "mean":  
  At SCF step    4   max grdnorm=  8.13E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [ 17.5000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  16.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  16.0000000, ]
 lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.59E-08, "res2":  1.87E-07, 
-    "residm":  8.13E-05, "diffor": undef, 
-}
+lattice_volume:   4.4800000E+03
+convergence_: {deltae: -1.59E-08, res2:  1.87E-07, residm:  8.13E-05, diffor: undef, }
 etotal    :  -1.13753223E+00
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -487,7 +458,7 @@ pressure_GPa: null
 cartesian_forces:
 - [  8.34105229E-05,  -6.13084199E-09,  -6.13083929E-09, ]
 - [ -8.34105229E-05,   6.13084199E-09,   6.13083929E-09, ]
-force_length_stats: {"min":   8.34105233E-05, "max":   8.34105233E-05, "mean":   8.34105233E-05, }
+force_length_stats: {min:   8.34105233E-05, max:   8.34105233E-05, mean:   8.34105233E-05, }
 ...
 
 
@@ -523,21 +494,16 @@ force_length_stats: {"min":   8.34105233E-05, "max":   8.34105233E-05, "mean":  
  At SCF step    2   max grdnorm=  6.72E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   2.00000000E+00
-charge    :   0.00000000E+00
+rprimd    :
+- [ 17.5000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  16.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  16.0000000, ]
 lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":  10.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -2.13E-08, "res2":  2.72E-07, 
-    "residm":  6.72E-05, "diffor": undef, 
-}
+lattice_volume:   4.4800000E+03
+convergence_: {deltae: -2.13E-08, res2:  2.72E-07, residm:  6.72E-05, diffor: undef, }
 etotal    :  -1.13753224E+00
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -546,7 +512,7 @@ pressure_GPa: null
 cartesian_forces:
 - [ -7.53209211E-07,  -9.30324075E-09,  -9.30324310E-09, ]
 - [  7.53209211E-07,   9.30324075E-09,   9.30324310E-09, ]
-force_length_stats: {"min":   7.53324111E-07, "max":   7.53324111E-07, "mean":   7.53324111E-07, }
+force_length_stats: {min:   7.53324111E-07, max:   7.53324111E-07, mean:   7.53324111E-07, }
 ...
 
 
@@ -606,7 +572,7 @@ force_length_stats: {"min":   7.53324111E-07, "max":   7.53324111E-07, "mean":  
   -0.37230
 
 --- !EnergyTerms
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.07696772694977E+00
 hartree             :  1.27853318441885E+00
@@ -620,7 +586,7 @@ total_energy        : -1.13753223817299E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -7.44613783660290E-01
 'Ion-ion energy'    :  6.88425933524715E-01
@@ -774,10 +740,10 @@ total_energy_dc     : -1.13754827806611E+00
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         19.2  wall=         20.5
+- Proc.   0 individual time (sec): cpu=         17.9  wall=         18.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.2  wall=         20.5
++Overall time at end (sec) : cpu=         17.9  wall=         18.1
