@@ -1515,6 +1515,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
      '- Memory profiling is activated but not yet usable when bigdft is used'
  end if
  if (my_rank == master) call wrtout(ab_out, msg)
+ call wrtout(std_out, msg)
 
  ! Test whether all logical units have been closed.
  ! If you wonder why I'm doing this, remember that there's a per-user
@@ -1534,6 +1535,9 @@ subroutine abinit_doctor(prefix, print_mem_report)
  end if
 
  if (my_rank == master) call wrtout(ab_out, msg)
+ call wrtout(std_out, msg)
+
+ call xmpi_barrier(xmpi_world)
  if (ierr /= 0) then
    MSG_ERROR(errmsg)
  end if
@@ -1546,7 +1550,6 @@ subroutine abinit_doctor(prefix, print_mem_report)
  if (xmpi_count_requests /= 0) then
    write(msg, "(a,i0,a)")"Leaking ", xmpi_count_requests, " MPI requests at the end of the run"
    MSG_WARNING(msg)
-   !MSG_ERROR(msg)
 #ifdef HAVE_MEM_PROFILING
    MSG_ERROR(msg)
 #endif

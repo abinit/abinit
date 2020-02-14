@@ -21,8 +21,13 @@
 #include "abi_clib.h"
 #include "xmalloc.h"
 
-static void
-memory_error_and_abort (const char *fname)
+static long int COUNT_MALLOC = 0, COUNT_FREE = 0;
+static size_t BYTES_ALLOCATED = 0;
+/*
+ * Counting bytes deallocated by free requires some non-standard API to access the status of the mallocator
+*/
+
+static void memory_error_and_abort (const char *fname)
 {
   fprintf (stderr, "%s: out of virtual memory\n", fname);
 #ifdef HAVE_ABORT
@@ -33,36 +38,45 @@ memory_error_and_abort (const char *fname)
 }
 
 /* Return a pointer to free()able block of memory large enough
-   to hold BYTES number of bytes.  If the memory cannot be allocated,
+   to hold BYTES number of bytes. If the memory cannot be allocated,
    print an error message and abort. */
-void*
-xmalloc(size_t bytes)
+
+void* xmalloc(size_t bytes)
 {
   void* temp;
 
   temp = malloc (bytes);
   if (temp == NULL)
-    memory_error_and_abort ("xmalloc");
-  return (temp);
+    memory_error_and_abort("xmalloc");
+
+#ifdef HAVE_MEM_PROFILING
+  COUNT_MALLOC += 1;
+  BYTES_ALLOCATED += bytes;
+#endif
+
+  return temp;
 }
 
-void*
-xrealloc (void *pointer, size_t bytes)
+/*
+void* xrealloc (void *pointer, size_t bytes)
 {
   void* temp;
-
   temp = pointer ? realloc (pointer, bytes) : malloc (bytes);
 
   if (temp == NULL)
     memory_error_and_abort ("xrealloc");
   return (temp);
 }
+*/
 
-/* Use this as the function to call when adding unwind protects so we
-   don't need to know what free() returns. */
-void
-xfree (void* ptr)
+/* Free pointer returned by xmalloc */
+
+void xfree (void* ptr)
 {
-  if (ptr)
-    free (ptr);
+  if (ptr){
+    free(ptr);
+#ifdef HAVE_MEM_PROFILING
+    COUNT_FREE += 1;
+#endif
+  }
 }

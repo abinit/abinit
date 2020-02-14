@@ -190,6 +190,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  type(pseudopotential_type) :: psps
  type(results_respfn_type) :: results_respfn
  type(wvl_data) :: wvl
+ !type(yamldoc_t) :: ydoc
 #if defined DEV_YP_VDWXC
  type(xc_vdw_type) :: vdw_params
 #endif
@@ -298,6 +299,20 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    call wrtout(std_out,msg,'PERS')     ! PERS is choosen to make debugging easier
 
    call yaml_iterstart('dtset', jdtset, ab_out, dtset%use_yaml)
+
+   !if (mpi_enregs(idtset)%me_cell == 0) then
+   !  ! Write basic dimensions and info on electrons
+   !  ydoc = yamldoc_open('DatasetInfo', comment)
+   !  call ydoc%add_ints( &
+   !    "natom, nkpt, mband, nsppol, nspinor, nspden", &
+   !    [dtset%natom, dtset%nkpt, dtset%mband, dtset%nsppol, dtset%nspinor, dtset%nspden] , dict_key="dimensions")
+   !  if (dtset%optdriver == RUNL_GSTATE) then
+   !  call ydoc%add_ints( &
+   !    "optdriver, ionmov, optcell", &
+   !    [dtset%optdriver, dtset%ionvmov, dtset%optcell] , dict_key="control")
+   !  call ydoc%add_reals("nelect, charge", [dtset%nelect, dtset%charge], dict_key="electrons")
+   !  call ydoc%write_and_free(unit)
+   !end if
 
    if ( dtset%np_slk == 0 ) then
      call xgScalapack_config(SLK_DISABLED,dtset%slk_rankpp)

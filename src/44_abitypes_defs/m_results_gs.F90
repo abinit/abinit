@@ -793,7 +793,6 @@ end function results_gs_ncwrite
 !----------------------------------------------------------------------
 
 !!****f* m_results_gs/results_gs_yaml_write
-!!
 !! NAME
 !! results_gs_yaml_write
 !!
@@ -828,6 +827,8 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
 
 !************************************************************************
 
+ if (unit == dev_null) return
+
  if (present(comment)) then
    ydoc = yamldoc_open('ResultsGS', comment, width=width)
  else
@@ -835,47 +836,30 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
  end if
 
  ! Write basic dimensions and info on electrons
- call ydoc%add_int('natom', results%natom)
- call ydoc%add_int('nsppol', results%nsppol)
- call ydoc%add_int('nspinor', dtset%nspinor)
- call ydoc%add_int('nspden', dtset%nspden)
- !call ydoc%add_ints("natom, nspden, nspinor, nspden", &
- !                   [results%natom, results%nsppol, dtset%nspinor, dtset%nspden])
- !call ydoc%add_dict_of_ints("dimensions", &
+ !call ydoc%add_ints( &
  !  "natom, nsppol, nspinor, nspden", &
- !  [results%natom, results%nsppol, results%nspinor, results%nspden])
-
- call ydoc%add_reals("nelect, charge", [dtset%nelect, dtset%charge])
+ !  [results%natom, results%nsppol, dtset%nspinor, dtset%nspden]) !, dict_key="dimensions")
+ !call ydoc%add_reals("nelect, charge", [dtset%nelect, dtset%charge])
 
  ! Write lattice parameters
- !call ydoc%add_real2d('rprimd', cryst%rprimd, real_fmt="(f11.7)")
+ call ydoc%add_real2d('rprimd', cryst%rprimd, real_fmt="(f11.7)")
  abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
  call ydoc%add_real1d('lattice_lengths', abc, real_fmt="(f10.5)")
  call ydoc%add_real1d('lattice_angles', cryst%angdeg, real_fmt="(f7.3)")
- !call ydoc%add_real('lattice_volume', cryst%ucvol + tol10, real_fmt="(e15.7)")
+ call ydoc%add_real('lattice_volume', cryst%ucvol + tol10, real_fmt="(es15.7)")
 
  ! Write cutoff energies
- call dict%set('ecut', r=dtset%ecut)
- call dict%set('pawecutdg', r=dtset%pawecutdg)
- call ydoc%add_dict('cutoff_energies', dict, real_fmt="(f5.1)")
- call dict%free()
- !call ydoc%add_dict_of_reals("cutoff_energies", &
- !  "ecut, pawecutdg", [dtset%ecut, dtset%pawecutdg], real_fmt="(f5.1)")
+ !call ydoc%add_reals("ecut, pawecutdg", [dtset%ecut, dtset%pawecutdg], &
+ !  real_fmt="(f5.1)", dict_key="cutoff_energies")
 
  ! Write convergence degree.
- ! It seems there's a portability problem on for residm computed with nstep = 0
+ ! FIXME: It seems there's a portability problem on for residm computed with nstep = 0
  ! because one may get very small value e.g. 7.91-323. residm with nstep > 0 are OK though
  ! so print zero if residm < tol30.
- call dict%set('deltae', r=results%deltae)
- call dict%set('res2', r=results%res2)
- call dict%set('residm', r=merge(results%residm, zero, results%residm > tol30))
- call dict%set('diffor', r=results%diffor)
- call ydoc%add_dict('convergence', dict, multiline_trig=2, real_fmt="(es9.2)")
- call dict%free()
- !call ydoc%add_dict_of_reals("convergence",
- !  "deltae, res2, residm, diffor", &
- !  [results%deltae, results%res, merge(results%residm, zero, results%residm > tol30)), results%diffor], &
- !  multiline_trig=2, real_fmt="(es9.2)")
+ call ydoc%add_reals( &
+   "deltae, res2, residm, diffor", &
+   [results%deltae, results%res2, merge(results%residm, zero, results%residm > tol30), results%diffor], &
+   real_fmt="(es9.2)", dict_key="convergence")
 
  ! Write energies.
  call ydoc%add_reals("etotal, entropy, fermie", &
@@ -898,7 +882,10 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
  else
    call ydoc%add_string('cartesian_stress_tensor', "null")
    call ydoc%add_string('pressure_GPa', "null")
+   !call ydoc%set_keys_to_null("cartesian_stress_tensor, pressure_GPa")
  end if
+
+ !call ydoc%add_real2d('xred', cryst%xred, real_fmt="(es12.4)")
 
  if (results%fcart(1,1) /= MAGIC_UNDEF) then
    call ydoc%add_real2d('cartesian_forces', results%fcart)
@@ -906,9 +893,13 @@ subroutine results_gs_yaml_write(results, unit, dtset, cryst, comment)
    fnorms = [(sqrt(sum(results%fcart(:, ii) ** 2)), ii=1,results%natom)]
    ! Write force statistics
    call dict%set_keys('min, max, mean', rvals=[minval(fnorms), maxval(fnorms), sum(fnorms) / results%natom])
+   !call ydoc%add_reals('min, max, mean',
+   !                    rvals=[minval(fnorms), maxval(fnorms), sum(fnorms) / results%natom], dict_name="force_length_stats")
+
  else
    call ydoc%add_string('cartesian_forces', "null")
    call dict%set_keys_to_null("min, max, mean")
+   !call ydoc%set_keys_to_null("min, max, mean", dict_name="force_length_stats")
  end if
 
  call ydoc%add_dict('force_length_stats', dict)
