@@ -1437,7 +1437,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
 !Local variables-------------------------------
 !scalars
- integer :: ipositron,mu,optdc
+ integer :: ipositron,optdc
  logical :: directE_avail,testdmft
  real(dp) :: eent,enevalue,etotal,etotaldc,exc_semilocal
  ! Do not modify the length of these strings
@@ -1445,7 +1445,7 @@ subroutine prtene(dtset,energies,iout,usepaw)
  character(len=500) :: msg
  type(yamldoc_t) :: edoc, dc_edoc
 !arrays
- character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
+ !character(len=10) :: EPName(1:2)=(/"Positronic","Electronic"/)
 
 ! *************************************************************************
 

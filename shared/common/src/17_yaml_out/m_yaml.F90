@@ -663,6 +663,7 @@ subroutine yamldoc_add_real1d(self, label, arr, tag, real_fmt, multiline_trig, n
  else
    call yaml_start_field(self%stream, label, width=w)
  end if
+ !if (present(comment)) call stream%push(' #'//trim(comment))
 
  call yaml_print_real1d(self%stream, length, arr, trim(rfmt), vmax)
  if (nl) call self%stream%push(eol)
@@ -857,6 +858,7 @@ subroutine yamldoc_add_real2d(self, label, arr, slist, tag, real_fmt, multiline_
  else
    call yaml_start_field(self%stream, label, width=w)
  end if
+ !if (present(comment)) call stream%push(' #'//trim(comment))
 
  if (my_mode == "T") then
    do i=1,n
@@ -1611,6 +1613,7 @@ subroutine yaml_start_field(stream, label, tag, width)
  character(len=*),intent(in) :: label
  integer,optional,intent(in) :: width
  character(len=*),intent(in),optional :: tag
+ !character(len=*),optional,intent(in) :: comment
 
  character(len=len_trim(label)+2) :: quoted
 
@@ -1629,6 +1632,7 @@ subroutine yaml_start_field(stream, label, tag, width)
    call stream%push(trim(quoted)//':')
  end if
  if (present(tag)) call stream%push(' !'//trim(tag))
+ !if (present(comment)) call stream%push(' #'//trim(comment))
 
 end subroutine yaml_start_field
 
