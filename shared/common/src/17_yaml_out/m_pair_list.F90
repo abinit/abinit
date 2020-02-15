@@ -45,13 +45,13 @@ module m_pair_list
 
   implicit none
 
-  integer,parameter :: TC_EMPTY=-2, TC_NOTFOUND=-1, TC_INT=0, TC_REAL=1, TC_STRING=2
+  ! Similar constants used in C code.
+  integer,public,parameter :: TC_EMPTY=-2, TC_NOTFOUND=-1, TC_INT=0, TC_REAL=1, TC_STRING=2
 
   private
   public :: pair_list_set, pair_list_get, pair_list_free
   public :: pair_list_next, pair_list_look, pair_list_iter, pair_list_restart
   public :: pair_list
-  public :: TC_EMPTY, TC_NOTFOUND, TC_INT, TC_REAL, TC_STRING
 
   type :: pair_list
     type(c_pair_list) :: plc

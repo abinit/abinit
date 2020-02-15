@@ -98,7 +98,7 @@ static bool get_or_create(pair_list* pl, char* ckey, pair_t** selected){
   if(pl->first){
     pair_t* prev = NULL;
     pair_t* pair = pl->first;
-    pair_t* new_pair = xmalloc(sizeof(pair_t));
+
     while(pair){
       if(str_eq(ckey, pair->key)){
         *selected = pair;
@@ -108,6 +108,8 @@ static bool get_or_create(pair_list* pl, char* ckey, pair_t** selected){
         pair = pair->next;
       }
     }
+    pair_t* new_pair = xmalloc(sizeof(pair_t));
+    new_pair->type_code = TC_EMPTY;
     new_pair->key = ckey;
     new_pair->next = NULL;
     prev->next = new_pair;
@@ -115,6 +117,7 @@ static bool get_or_create(pair_list* pl, char* ckey, pair_t** selected){
     return TRUE;
   } else {  /* first element of the list */
     pair_t* new_pair = xmalloc(sizeof(pair_t));
+    new_pair->type_code = TC_EMPTY;
     new_pair->key = ckey;
     new_pair->next = NULL;
     pl->first = new_pair;
@@ -156,8 +159,7 @@ void pair_list_seti(pair_list* l, char* fkey, int* i, int* len){
   pair->val.i = *i;
 }
 
-/* set a real (double) value
- */
+/* set a real (double) value */
 void pair_list_setr(pair_list* l, char* fkey, double* r, int* len){
   pair_t* pair = NULL;
   char* ckey = ftoc_str(fkey, *len);
@@ -192,8 +194,7 @@ void pair_list_sets(pair_list* l, char* fkey, char* s, int* len, int* len_s){
   pair->val.s = ftoc_str(s, *len_s);
 }
 
-/* get a value from a key
- */
+/* get a value from a key */
 void pair_list_get_(pair_list* l, char* fkey, int* type_code, int*i, double* r, char* s, int* len, int* len_s){
   if(!l->first){
     /* list is empty */
@@ -243,8 +244,7 @@ void pair_list_free(pair_list* pl){
   pl->length = 0;
 }
 
-/* Return the pair pointed by the cursor
- */
+/* Return the pair pointed by the cursor */
 void pair_list_look_(pair_list* pl, char* fkey, int* type_code, int* i, double* r, char* s, int* len, int* len_s){
   pair_t* p = pl->cursor;
   if(p){
