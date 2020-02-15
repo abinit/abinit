@@ -566,7 +566,7 @@ rprimd    :
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   3.8273624E+02
-convergence_: {deltae: -3.69E-13, res2:  3.61E-20, residm:  3.74E-07, diffor: undef, }
+convergence: {deltae: -3.695E-13, res2:  3.609E-20, residm:  3.735E-07, diffor: null, }
 etotal    :  -1.51928525E+02
 entropy   :   0.00000000E+00
 fermie    :   2.85506715E-01
@@ -739,7 +739,7 @@ spherical_terms     :  1.21214337322791E+00
 internal            : -1.51925001757404E+02
 '-kT*entropy'       : -3.52332107437964E-03
 total_energy_dc     : -1.51928525078478E+02
-total_energy_dc_eV  : -4.13418541519434E+03
+total_energy_dc_eV  : -4.13418541519410E+03
 ...
 
 
@@ -1751,7 +1751,7 @@ rprimd    :
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   3.8273624E+02
-convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  1.28E-15, diffor:  0.00E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  1.282E-15, diffor:  0.000E+00, }
 etotal    :  -1.51928525E+02
 entropy   :   0.00000000E+00
 fermie    :   2.85506715E-01
