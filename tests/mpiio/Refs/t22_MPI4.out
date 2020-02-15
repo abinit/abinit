@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 20h18 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h55 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/mpiio_t22_MPI4/t22.in
 - output file    -> t22_MPI4.out
@@ -805,7 +805,7 @@ psp_core            :  5.49532697036699E-01
 xc_dc               : -6.34231938734952E-01
 spherical_terms     :  1.28518549596992E-01
 total_energy_dc     : -1.04202715513813E+01
-total_energy_dc_eV  : -2.83610983030512E+02
+total_energy_dc_eV  : -2.83550009110074E+02
 ...
 
 
@@ -1045,7 +1045,7 @@ spherical_terms     :  1.28518549596992E-01
 internal            : -1.04202715513813E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy_dc     : -1.04202715513813E+01
-total_energy_dc_eV  : -2.83610983030512E+02
+total_energy_dc_eV  : -2.83550009110074E+02
 ...
 
 
@@ -1282,7 +1282,7 @@ psp_core            :  5.49532697036699E-01
 xc_dc               : -2.03968332418913E-01
 spherical_terms     :  1.27954717892873E-01
 total_energy_dc     : -1.14732628560878E+01
-total_energy_dc_eV  : -3.12209779046975E+02
+total_energy_dc_eV  : -3.12203359703684E+02
 ...
 
 
@@ -1526,7 +1526,7 @@ spherical_terms     :  1.27954717892873E-01
 internal            : -1.14732628560878E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy_dc     : -1.14732628560878E+01
-total_energy_dc_eV  : -3.12209779046975E+02
+total_energy_dc_eV  : -3.12203359703684E+02
 ...
 
 
@@ -2076,7 +2076,7 @@ psp_core            :  5.49532697036699E-01
 xc_dc               : -3.73905182875260E-01
 spherical_terms     :  1.28644754072103E-01
 total_energy_dc     : -1.06218090975474E+01
-total_energy_dc_eV  : -2.89035242857155E+02
+total_energy_dc_eV  : -2.89034124641002E+02
 ...
 
  rms coord change=  8.7898E-02   atom, delta coord (reduced):
@@ -2636,7 +2636,7 @@ spherical_terms     :  1.28742297480200E-01
 internal            : -1.06550169036161E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy_dc     : -1.06550169036161E+01
-total_energy_dc_eV  : -2.89891137528524E+02
+total_energy_dc_eV  : -2.89937754999087E+02
 ...
 
  rms coord change=  8.4135E-02   atom, delta coord (reduced):
@@ -3255,7 +3255,7 @@ psp_core            :  6.29274966064348E-01
 xc_dc               : -7.79734777004615E-02
 spherical_terms     :  1.26970639286421E-01
 total_energy_dc     : -1.15074712094702E+01
-total_energy_dc_eV  : -3.13134203739576E+02
+total_energy_dc_eV  : -3.13134216338793E+02
 ...
 
  rms coord change=  1.4659E-02   atom, delta coord (reduced):
@@ -3857,7 +3857,7 @@ spherical_terms     :  1.26970639286421E-01
 internal            : -1.15074712094702E+01
 '-kT*entropy'       : -7.55261880796144E-19
 total_energy_dc     : -1.15074712094702E+01
-total_energy_dc_eV  : -3.13134203739576E+02
+total_energy_dc_eV  : -3.13134216338793E+02
 ...
 
  rms coord change=  1.4659E-02   atom, delta coord (reduced):
@@ -4184,7 +4184,7 @@ psp_core            :  5.49532697036699E-01
 xc_dc               : -6.32120780672552E-01
 spherical_terms     :  1.28257653165783E-01
 total_energy_dc     : -1.04179435084862E+01
-total_energy_dc_eV  : -2.83506594818723E+02
+total_energy_dc_eV  : -2.83486659841214E+02
 ...
 
 
@@ -4708,10 +4708,10 @@ P           mkmem9          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         11.2  wall=         16.2
+- Proc.   0 individual time (sec): cpu=         11.4  wall=         13.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered 183 WARNINGs and  24 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         56.0  wall=         64.2
++Overall time at end (sec) : cpu=         46.4  wall=         51.6

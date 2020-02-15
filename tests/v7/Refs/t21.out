@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h41 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h19 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t21/t21.in
 - output file    -> t21.out
@@ -928,7 +928,7 @@ spherical_terms     : -1.53618143232363E+01
 internal            : -1.12620544209340E+02
 '-kT*entropy'       : -3.46960360572912E-02
 total_energy_dc     : -1.12655240245397E+02
-total_energy_dc_eV  : -3.06550420664447E+03
+total_energy_dc_eV  : -3.06550498615802E+03
 ...
 
 
@@ -1687,7 +1687,7 @@ xc_dc               : -9.26836669552854E+00
 spherical_terms     : -1.53616410363967E+01
 internal            : -1.12561048811209E+02
 total_energy_dc     : -1.12561048811209E+02
-total_energy_dc_eV  : -3.05429185698789E+03
+total_energy_dc_eV  : -3.06294190688602E+03
 ...
 
 
@@ -1918,10 +1918,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        169.6  wall=        170.0
+- Proc.   0 individual time (sec): cpu=        175.2  wall=        176.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        169.6  wall=        170.0
++Overall time at end (sec) : cpu=        175.2  wall=        176.3

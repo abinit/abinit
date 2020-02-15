@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat 15 Feb 2020.
-- ( at 02h25 )
+- ( at 16h12 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_paral_t02_MPI10/t02.in
 - output file    -> t02_MPI10.out
@@ -298,7 +298,7 @@ psp_core            :  0.00000000000000E+00
 xc_dc               : -5.89842337028285E+01
 spherical_terms     : -1.54350592110605E-01
 total_energy_dc     : -3.77874966184819E+01
-total_energy_dc_eV  : -1.02825205192211E+03
+total_energy_dc_eV  : -1.02825007559396E+03
 ...
 
 
@@ -440,10 +440,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.9  wall=          9.0
+- Proc.   0 individual time (sec): cpu=          8.4  wall=          8.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         88.9  wall=         89.3
++Overall time at end (sec) : cpu=         85.1  wall=         85.3

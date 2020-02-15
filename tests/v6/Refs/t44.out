@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h33 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h18 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t44/t44.in
 - output file    -> t44.out
@@ -399,7 +399,7 @@ spherical_terms     : -5.01823135726486E+00
 internal            : -5.76152165694371E+01
 '-kT*entropy'       : -1.42158324588630E-05
 total_energy_dc     : -5.76152307852696E+01
-total_energy_dc_eV  : -1.56774237392372E+03
+total_energy_dc_eV  : -1.56779016108046E+03
 ...
 
 

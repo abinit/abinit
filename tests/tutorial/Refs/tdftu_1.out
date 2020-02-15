@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h59 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h12 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tdftu_1/tdftu_1.in
 - output file    -> tdftu_1.out
@@ -513,7 +513,7 @@ spherical_terms     : -7.30044371953503E+01
 internal            : -3.73041087964328E+02
 '-kT*entropy'       : -6.28391565062215E-03
 total_energy_dc     : -3.73047371879978E+02
-total_energy_dc_eV  : -1.01511360052090E+04
+total_energy_dc_eV  : -1.01511352341903E+04
 ...
 
 
@@ -727,10 +727,10 @@ P           mkmem           3
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         13.9  wall=         13.9
+- Proc.   0 individual time (sec): cpu=         13.9  wall=         14.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.9  wall=         13.9
++Overall time at end (sec) : cpu=         13.9  wall=         14.0

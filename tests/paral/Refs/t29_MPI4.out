@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 20h19 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h56 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t29_MPI4/t29.in
 - output file    -> t29_MPI4.out
@@ -361,7 +361,7 @@ psp_core            :  5.49532697036699E-01
 xc_dc               : -6.33621896339526E-01
 spherical_terms     :  1.28562953295622E-01
 total_energy_dc     : -1.04202713958510E+01
-total_energy_dc_eV  : -2.83571516958973E+02
+total_energy_dc_eV  : -2.83550004877879E+02
 ...
 
 
@@ -526,10 +526,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.9
+- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  19 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.4  wall=          3.5
++Overall time at end (sec) : cpu=          3.2  wall=          3.2

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h55 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h10 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t53/t53.in
 - output file    -> t53.out
@@ -684,7 +684,7 @@ psp_core            :  9.33164515583050E-01
 xc_dc               : -8.81762673031104E-01
 spherical_terms     :  8.88038544341781E-01
 total_energy_dc     : -1.14553251766506E+01
-total_energy_dc_eV  : -3.11715246144909E+02
+total_energy_dc_eV  : -3.11715250622962E+02
 ...
 
 
@@ -955,7 +955,7 @@ psp_core            :  9.33164515583050E-01
 xc_dc               : -2.21731012060639E-01
 spherical_terms     :  7.00755698684161E-01
 total_energy_dc     : -1.14593694000759E+01
-total_energy_dc_eV  : -3.11985680588057E+02
+total_energy_dc_eV  : -3.11825299539004E+02
 ...
 
 
@@ -1204,7 +1204,7 @@ psp_core            :  9.33164515583050E-01
 xc_dc               : -2.21731012060639E-01
 spherical_terms     :  7.00755698684161E-01
 total_energy_dc     : -1.14593694000759E+01
-total_energy_dc_eV  : -3.11985680588057E+02
+total_energy_dc_eV  : -3.11825299539004E+02
 ...
 
 
@@ -1497,10 +1497,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         33.2  wall=         33.8
+- Proc.   0 individual time (sec): cpu=         33.4  wall=         35.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         33.2  wall=         33.8
++Overall time at end (sec) : cpu=         33.4  wall=         35.4

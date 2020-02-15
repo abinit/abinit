@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 20h18 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h55 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/mpiio_t24_MPI4/t24.in
 - output file    -> t24_MPI4.out
@@ -824,7 +824,7 @@ spherical_terms     :  1.26637755787026E-01
 internal            : -1.15075757396570E+01
 '-kT*entropy'       : -7.55261880796143E-19
 total_energy_dc     : -1.15075757396570E+01
-total_energy_dc_eV  : -3.13137063430944E+02
+total_energy_dc_eV  : -3.13137060749829E+02
 ...
 
  rms coord change=  1.4630E-02   atom, delta coord (reduced):
@@ -1089,10 +1089,10 @@ P           mkmem          15
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         10.9  wall=         13.5
+- Proc.   0 individual time (sec): cpu=         10.9  wall=         11.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  22 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         48.7  wall=         53.9
++Overall time at end (sec) : cpu=         43.6  wall=         44.0

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 20h19 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h56 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t41_MPI4/t41.in
 - output file    -> t41_MPI4.out
@@ -814,7 +814,7 @@ spherical_terms     : -1.03788219654763E+00
 internal            : -2.64788646060470E+02
 '-kT*entropy'       : -2.39973902697133E-02
 total_energy_dc     : -2.64812643450740E+02
-total_energy_dc_eV  : -7.17742909913591E+03
+total_energy_dc_eV  : -7.20591849191940E+03
 ...
 
  rms coord change=  1.0357E-03   atom, delta coord (reduced):
@@ -1041,10 +1041,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         12.1  wall=         12.8
+- Proc.   0 individual time (sec): cpu=         12.0  wall=         12.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         50.1  wall=         51.0
++Overall time at end (sec) : cpu=         49.0  wall=         49.5

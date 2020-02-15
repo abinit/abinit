@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 19h00 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h13 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tspin_6/tspin_6.in
 - output file    -> tspin_6.out
@@ -331,7 +331,7 @@ spherical_terms     : -5.93885586381885E+00
 internal            : -7.21574670224112E+01
 '-kT*entropy'       : -3.38513751218332E-02
 total_energy_dc     : -7.21913183975330E+01
-total_energy_dc_eV  : -1.96442510571250E+03
+total_energy_dc_eV  : -1.96442567627475E+03
 ...
 
 
@@ -737,7 +737,7 @@ spherical_terms     : -5.95423387059447E+00
 internal            : -7.22554031481226E+01
 '-kT*entropy'       : -1.79768240517121E-02
 total_energy_dc     : -7.22733799721743E+01
-total_energy_dc_eV  : -1.96665843590852E+03
+total_energy_dc_eV  : -1.96665868528247E+03
 ...
 
 
@@ -896,10 +896,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          7.5  wall=          9.1
+- Proc.   0 individual time (sec): cpu=          7.6  wall=          7.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.5  wall=          9.1
++Overall time at end (sec) : cpu=          7.6  wall=          7.7

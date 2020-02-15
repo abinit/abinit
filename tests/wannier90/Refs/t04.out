@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h56 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h43 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/wannier90_t04/t04.in
 - output file    -> t04.out
@@ -2100,7 +2100,7 @@ spherical_terms     : -8.12584906688646E+00
 internal            : -1.24430588521781E+02
 '-kT*entropy'       : -4.56961034804450E-05
 total_energy_dc     : -1.24430634217884E+02
-total_energy_dc_eV  : -3.38591401550449E+03
+total_energy_dc_eV  : -3.38592975164610E+03
 ...
 
 
@@ -2613,10 +2613,10 @@ P           mkmem          64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         54.6  wall=         56.0
+- Proc.   0 individual time (sec): cpu=         61.4  wall=         61.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         54.6  wall=         56.0
++Overall time at end (sec) : cpu=         61.4  wall=         61.7
