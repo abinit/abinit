@@ -105,9 +105,11 @@ class Tester(object):
             if success:
                 msg = '{} ok'.format(cons.name)
                 self.issues.append(Success(self.conf, msg))
+
             elif hasattr(success, 'details'):
                 msg = '{} ({}) failed'.format(cons.name, short_repr(cons.value))
                 self.issues.append(DetailedFailure(self.conf, msg, success.details))
+
             else:
                 msg = '{} ({}) failed'.format(cons.name, short_repr(cons.value))
                 self.issues.append(Failure(self.conf, msg, ref, tested))
@@ -133,13 +135,14 @@ class Tester(object):
                     except Exception as e:
                         msg = ('Exception while checking {} ({}/{}):\n'
                                '{}: {}').format(cons.name, short_repr(ref),
-                                                short_repr(tested),
-                                                type(e).__name__, str(e))
+                                                short_repr(tested), type(e).__name__, str(e))
                         self.issues.append(Failure(self.conf, msg))
-                    else:  # no exceptions
+                    else:
+                        # no exceptions
                         analyze(success, cons)
 
-            if getattr(ref, 'is_dict_like', False):  # have children
+            if getattr(ref, 'is_dict_like', False):
+                # have children
                 for child in ref:
                     if child not in tested:
                         msg = '{} was not present'.format(child)
@@ -148,7 +151,8 @@ class Tester(object):
                     else:
                         self.check_this(child, ref[child], tested[child])
 
-            elif hasattr(ref, 'get_children'):  # user made browsable
+            elif hasattr(ref, 'get_children'):
+                # user made browsable
                 try:
                     dref = ref.get_children()
                     dtest = tested.get_children()
@@ -192,7 +196,6 @@ class Tester(object):
 
             # enter filters and start checking the docuement
             with self.conf.use_filter(ref_doc.iterators):
-                self.check_this(ref_doc.tag, ref_doc.obj,
-                                self.tested[doc_id].obj)
+                self.check_this(ref_doc.tag, ref_doc.obj, self.tested[doc_id].obj)
 
         return self.issues

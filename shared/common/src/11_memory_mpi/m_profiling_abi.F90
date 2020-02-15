@@ -364,7 +364,6 @@ subroutine abimem_get_info(nalloc, nfree, allocmemory, nalloc_c, nfree_c)
 
  call clib_get_meminfo(long_nalloc_c, long_nfree_c)
  nalloc_c = long_nalloc_c; nfree_c = long_nfree_c
- !print *, "C allocations", nalloc_c, nfree_c
 
 end subroutine abimem_get_info
 !!***

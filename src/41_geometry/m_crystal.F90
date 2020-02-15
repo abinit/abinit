@@ -781,11 +781,9 @@ end function isymmorphic
 !!
 !! SOURCE
 
-pure function isalchemical(Cryst) result(ans)
+pure logical function isalchemical(Cryst) result(ans)
 
 !Arguments ------------------------------------
-!scalars
- logical :: ans
  class(crystal_t),intent(in) :: Cryst
 
 ! *************************************************************************
@@ -808,13 +806,12 @@ end function isalchemical
 !!
 !! SOURCE
 
-function adata_type(crystal, itypat) result(atom)
+type(atomdata_t) function adata_type(crystal, itypat) result(atom)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itypat
  class(crystal_t),intent(in) :: crystal
- type(atomdata_t) :: atom
 
 ! *************************************************************************
 
@@ -1036,7 +1033,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
 ! *************************************************************************
 
- ! TODO alchemy not treated correctly
+ ! TODO alchemy not treated correctly by ETSF_IO specs.
  if (cryst%isalchemical()) then
    write(msg,"(3a)")&
     "Alchemical crystals are not fully supported by the netcdf format",ch10,&

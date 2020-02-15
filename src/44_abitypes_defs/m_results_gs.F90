@@ -820,7 +820,9 @@ subroutine results_gs_yaml_write(results, unit, cryst, comment)
  integer,parameter :: width=10
  integer :: ii
  type(yamldoc_t) :: ydoc
+!arrays
  real(dp) :: strten(3,3), abc(3), fnorms(results%natom)
+ character(len=2) :: species(results%natom)
 
 !************************************************************************
 
@@ -832,22 +834,12 @@ subroutine results_gs_yaml_write(results, unit, cryst, comment)
    ydoc = yamldoc_open('ResultsGS', '', width=width)
  end if
 
- ! Write basic dimensions and info on electrons
- !call ydoc%add_ints( &
- !  "natom, nsppol, nspinor, nspden", &
- !  [results%natom, results%nsppol, dtset%nspinor, dtset%nspden]) !, dict_key="dimensions")
- !call ydoc%add_reals("nelect, charge", [dtset%nelect, dtset%charge])
-
  ! Write lattice parameters
  call ydoc%add_real2d('rprimd', cryst%rprimd, real_fmt="(f11.7)")
  abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
  call ydoc%add_real1d('lattice_lengths', abc, real_fmt="(f10.5)")
  call ydoc%add_real1d('lattice_angles', cryst%angdeg, real_fmt="(f7.3)")
  call ydoc%add_real('lattice_volume', cryst%ucvol + tol10, real_fmt="(es15.7)")
-
- ! Write cutoff energies
- !call ydoc%add_reals("ecut, pawecutdg", [dtset%ecut, dtset%pawecutdg], &
- !  real_fmt="(f5.1)", dict_key="cutoff_energies")
 
  ! Write convergence degree.
  ! FIXME: It seems there's a portability problem on for residm computed with nstep = 0 and iscf -3
@@ -859,9 +851,7 @@ subroutine results_gs_yaml_write(results, unit, cryst, comment)
    real_fmt="(es9.2)", dict_key="convergence_")
 
  ! Write energies.
- call ydoc%add_reals( &
-   "etotal, entropy, fermie", &
-   [results%etotal, results%entropy, results%fermie])
+ call ydoc%add_reals("etotal, entropy, fermie", [results%etotal, results%entropy, results%fermie])
 
  ! Cartesian stress tensor and forces.
  strten(1,1) = results%strten(1)
@@ -881,10 +871,13 @@ subroutine results_gs_yaml_write(results, unit, cryst, comment)
    call ydoc%set_keys_to_string("cartesian_stress_tensor, pressure_GPa", "null")
  end if
 
- !call ydoc%add_real2d('xred', cryst%xred, real_fmt="(es12.4)")
+ species = [(cryst%symbol_iatom(ii), ii=1,cryst%natom)]
+ !call ydoc%add_real2d('xred', cryst%xred, slist=species, real_fmt="(es12.4)")
 
  if (results%fcart(1,1) /= MAGIC_UNDEF) then
-   !call ydoc%add_paired_real2d('cartesian_forces_and_xred', results%fcart, cryst%xred, real_fmt="(es12.4)")
+   !call ydoc%add_paired_real2d('cartesian_forces_and_xred', &
+   !  results%fcart, cryst%xred, chars=species, real_fmt="(es12.4)")
+
    call ydoc%add_real2d('cartesian_forces', results%fcart)
    fnorms = [(sqrt(sum(results%fcart(:, ii) ** 2)), ii=1,results%natom)]
    ! Write force statistics
@@ -892,6 +885,7 @@ subroutine results_gs_yaml_write(results, unit, cryst, comment)
      values=[minval(fnorms), maxval(fnorms), sum(fnorms) / results%natom], dict_key="force_length_stats")
 
  else
+   ! Set entries to (python) None to facilitate life to the parsing routines!
    call ydoc%add_string('cartesian_forces', "null")
    call ydoc%set_keys_to_string("min, max, mean", "null", dict_key="force_length_stats")
  end if

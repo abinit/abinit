@@ -1492,7 +1492,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
    ! Check memory allocated in C.
    if (nalloc_c == nfree_c) then
      write(msg,'(2a, 2(a,i0), a)') &
-       '- MEMORY CONSUMPTION REPORT FOR C CODE:',ch10, &
+       '- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:',ch10, &
        '-   There were ',nalloc_c,' allocations and ',nfree_c,' deallocations in C code'
    else
      ! This msg will make the test fail if the memory leak occurs on master (no dash in the first column)
@@ -1510,7 +1510,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
    ! Check memory allocated in Fortran.
    if (nalloc == nfree .and. memtot == 0) then
      write(msg,'(3a,i0,a,i0,3a,i0)') &
-       '- MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:',ch10, &
+       '- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:',ch10, &
        '-   There were ',nalloc,' allocations and ',nfree,' deallocations in Fortran',ch10, &
        '-   Remaining memory at the end of the calculation is ',memtot
    else

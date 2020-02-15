@@ -218,7 +218,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  prtvol=dtsets(1)%prtvol
  if(prtvol==-level)then
    write(msg,'(80a,a,a)')  ('=',ii=1,80),ch10,' driver : enter , debug mode '
-   call wrtout(std_out,msg)
+   call wrtout(std_out, msg)
  end if
 
  if(ndtset>mdtset)then
@@ -295,24 +295,31 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    end if
 
    write(msg,'(3a)') trim(msg),ch10,' '
-   call wrtout(ab_out,msg,'COLL')
-   call wrtout(std_out,msg,'PERS')     ! PERS is choosen to make debugging easier
+   call wrtout(ab_out, msg)
+   call wrtout(std_out, msg, 'PERS')     ! PERS is choosen to make debugging easier
 
    call yaml_iterstart('dtset', jdtset, ab_out, dtset%use_yaml)
 
-   !if (mpi_enregs(idtset)%me_cell == 0) then
-   !  ! Write basic dimensions and info on electrons
-   !  ydoc = yamldoc_open('DatasetInfo', comment)
-   !  call ydoc%add_ints( &
-   !    "natom, nkpt, mband, nsppol, nspinor, nspden", &
-   !    [dtset%natom, dtset%nkpt, dtset%mband, dtset%nsppol, dtset%nspinor, dtset%nspden] , dict_key="dimensions")
-   !  if (dtset%optdriver == RUNL_GSTATE) then
-   !  call ydoc%add_ints( &
-   !    "optdriver, ionmov, optcell", &
-   !    [dtset%optdriver, dtset%ionvmov, dtset%optcell] , dict_key="control")
-   !  call ydoc%add_reals("nelect, charge", [dtset%nelect, dtset%charge], dict_key="electrons")
-   !  call ydoc%write_and_free(unit)
-   !end if
+#if 0
+   if (mpi_enregs(idtset)%me_cell == 0) then
+     ydoc = yamldoc_open('DatasetInfo', comment)
+     ! Write basic dimensions and info on electrons
+     call ydoc%add_ints( &
+       "natom, nkpt, mband, nsppol, nspinor, nspden", &
+       [dtset%natom, dtset%nkpt, dtset%mband, dtset%nsppol, dtset%nspinor, dtset%nspden], dict_key="dimensions")
+     ! Write cutoff energies
+     call ydoc%add_reals("ecut, pawecutdg", [dtset%ecut, dtset%pawecutdg], real_fmt="(f5.1)", dict_key="cutoff_energies")
+     ! Write info on electrons
+     call ydoc%add_reals("nelect, charge", [dtset%nelect, dtset%charge], dict_key="electrons")
+     ! This part depends on optdriver. Parser will use optdriver to interpret data.
+     if (dtset%optdriver == RUNL_GSTATE) then
+       call ydoc%add_ints( &
+         "optdriver, ionmov, optcell, iscf", &
+         [dtset%optdriver, dtset%ionvmov, dtset%optcell, dtset%iscf] , dict_key="control")
+     end if
+     call ydoc%write_and_free(unit)
+   end if
+#endif
 
    if ( dtset%np_slk == 0 ) then
      call xgScalapack_config(SLK_DISABLED,dtset%slk_rankpp)
@@ -376,7 +383,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      use_results_all=.false.
      if (test_img.and.mpi_enregs(idtset)%me_cell==0) then
        use_results_all=.true.
-       ABI_DATATYPE_ALLOCATE(results_out_all,(0:ndtset_alloc))
+       ABI_MALLOC(results_out_all,(0:ndtset_alloc))
      else
        results_out_all => results_out
      end if
@@ -506,8 +513,8 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
              end do
            end do
          end do
-         ABI_DEALLOCATE(xcart)
-         ABI_DEALLOCATE(xredget)
+         ABI_FREE(xcart)
+         ABI_FREE(xredget)
        end if
      end if
 
@@ -557,12 +564,12 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      end if
 
 !    Clean memory
-     ABI_DEALLOCATE(miximage)
+     ABI_FREE(miximage)
      if (test_img.and.mpi_enregs(idtset)%me_cell==0) then
        if (results_gathered) then
          call destroy_results_out(results_out_all)
        end if
-       ABI_DATATYPE_DEALLOCATE(results_out_all)
+       ABI_FREE(results_out_all)
      else
        nullify(results_out_all)
      end if
@@ -582,11 +589,11 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      if (paw_size_old/=-1) then
        call pawrad_free(pawrad)
        call pawtab_free(pawtab)
-       ABI_DATATYPE_DEALLOCATE(pawrad)
-       ABI_DATATYPE_DEALLOCATE(pawtab)
+       ABI_FREE(pawrad)
+       ABI_FREE(pawtab)
      end if
-     ABI_DATATYPE_ALLOCATE(pawrad,(paw_size))
-     ABI_DATATYPE_ALLOCATE(pawtab,(paw_size))
+     ABI_MALLOC(pawrad,(paw_size))
+     ABI_MALLOC(pawtab,(paw_size))
      call pawtab_nullify(pawtab)
      paw_size_old=paw_size
    end if
@@ -659,7 +666,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        vdw_params%tweaks = dtset%vdw_df_tweaks
        vdw_params%zab = dtset%vdw_df_zab
        write(msg,'(a,1x,a)') ch10,'[vdW-DF] *** Before init ***'
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
        call xc_vdw_show(std_out,vdw_params)
        if ( dtset%irdvdw == 1 ) then
          write(vdw_filnam,'(a,a)') trim(filnam(3)),'_VDW.nc'
@@ -669,7 +676,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        end if
        call xc_vdw_libxc_init(vdw_params%functional)
        write(msg,'(a,1x,a)') ch10,'[vdW-DF] *** After init ***'
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
 !      call xc_vdw_get_params(vdw_params)
        call xc_vdw_memcheck(std_out)
        call xc_vdw_show(std_out)
@@ -678,7 +685,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        write (msg,'(a,1x,a,e10.3,a)')ch10,&
 &       '[vdW-DF] activation threshold: vdw_df_threshold=',dtset%vdw_df_threshold,ch10
        call xc_vdw_trigger(.false.)
-       call wrtout(std_out,msg,'COLL')
+       call wrtout(std_out,msg)
      end if
 #else
      if ( (dtset%vdw_xc > 0) .and. (dtset%vdw_xc < 3) ) then
@@ -699,7 +706,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 !  linalg initialisation
    linalg_max_size=maxval(dtset%nband(:))
    call abi_linalg_init(linalg_max_size,dtset%optdriver,dtset%wfoptalg,dtset%paral_kgb,&
-&       dtset%use_gpu_cuda,dtset%use_slk,dtset%np_slk,mpi_enregs(idtset)%comm_bandspinorfft)
+        dtset%use_gpu_cuda,dtset%use_slk,dtset%np_slk,mpi_enregs(idtset)%comm_bandspinorfft)
 
    call timab(642,2,tsec)
 
@@ -717,14 +724,14 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      ABI_ALLOCATE(strten_img,(6,nimage))
 
      call gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
-&     fred_img,iexit,intgres_img,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
-&     pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
-&     filnam,filstat,idtset,jdtset_,ndtset)
+       fred_img,iexit,intgres_img,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
+       pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,wvl,xred_img,&
+       filnam,filstat,idtset,jdtset_,ndtset)
 
    case(RUNL_RESPFN)
 
      call respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,mkmems,mpi_enregs(idtset),&
-&     npwtot,occ,pawang,pawrad,pawtab,psps,results_respfn,xred)
+       npwtot,occ,pawang,pawrad,pawtab,psps,results_respfn,xred)
 
    case(RUNL_SCREENING)
      call screening(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim)
@@ -734,13 +741,6 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    case(RUNL_NONLINEAR)
      call nonlinear(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,pawang,pawrad,pawtab,psps,xred)
-
-   case(6)
-
-     write(msg,'(3a)')&
-      'The optdriver value 6 has been disabled since ABINITv6.0.',ch10,&
-      'Action: modify optdriver in the input file.'
-     MSG_ERROR(msg)
 
    case (RUNL_BSE)
      call bethe_salpeter(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
@@ -755,15 +755,15 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      ABI_ALLOCATE(strten_img,(6,nimage))
 
      call gwls_sternheimer(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_img,&
-&     fred_img,iexit,intgres_img,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
-&     pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,xred_img,&
-&     filnam,filstat,idtset,jdtset_,ndtset)
+       fred_img,iexit,intgres_img,mixalch_img,mpi_enregs(idtset),nimage,npwtot,occ_img,&
+       pawang,pawrad,pawtab,psps,rprim_img,strten_img,vel_cell_img,vel_img,xred_img,&
+       filnam,filstat,idtset,jdtset_,ndtset)
 
-     ABI_DEALLOCATE(etotal_img)
-     ABI_DEALLOCATE(fcart_img)
-     ABI_DEALLOCATE(fred_img)
-     ABI_DEALLOCATE(intgres_img)
-     ABI_DEALLOCATE(strten_img)
+     ABI_FREE(etotal_img)
+     ABI_FREE(fcart_img)
+     ABI_FREE(fred_img)
+     ABI_FREE(intgres_img)
+     ABI_FREE(strten_img)
 
    case (RUNL_WFK)
      call wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
@@ -777,8 +777,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      ! Bad value for optdriver
      write(msg,'(a,i0,4a)')&
       'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
-      'This is not allowed. ',ch10,&
-      'Action: modify optdriver in the input file.'
+      'This is not allowed.',ch10, 'Action: modify optdriver in the input file.'
      MSG_ERROR(msg)
    end select
 
@@ -814,11 +813,11 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        results_out(idtset)%vel_cell(:,:,iimage)           =vel_cell_img(:,:,iimage)
        results_out(idtset)%xred(:,1:dtset%natom,iimage)   =xred_img(:,:,iimage)
      end do
-     ABI_DEALLOCATE(etotal_img)
-     ABI_DEALLOCATE(fcart_img)
-     ABI_DEALLOCATE(fred_img)
-     ABI_DEALLOCATE(intgres_img)
-     ABI_DEALLOCATE(strten_img)
+     ABI_FREE(etotal_img)
+     ABI_FREE(fcart_img)
+     ABI_FREE(fred_img)
+     ABI_FREE(intgres_img)
+     ABI_FREE(strten_img)
    else
      results_out(idtset)%acell(:,1)                =acell(:)
      results_out(idtset)%etotal(1)                 =etotal
@@ -828,14 +827,14 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 &     occ(1:dtset%mband*dtset%nkpt*dtset%nsppol)
      results_out(idtset)%xred(:,1:dtset%natom,1)   =xred(:,:)
    end if
-   ABI_DEALLOCATE(acell_img)
-   ABI_DEALLOCATE(amu_img)
-   ABI_DEALLOCATE(mixalch_img)
-   ABI_DEALLOCATE(occ_img)
-   ABI_DEALLOCATE(rprim_img)
-   ABI_DEALLOCATE(vel_img)
-   ABI_DEALLOCATE(vel_cell_img)
-   ABI_DEALLOCATE(xred_img)
+   ABI_FREE(acell_img)
+   ABI_FREE(amu_img)
+   ABI_FREE(mixalch_img)
+   ABI_FREE(occ_img)
+   ABI_FREE(rprim_img)
+   ABI_FREE(vel_img)
+   ABI_FREE(vel_cell_img)
+   ABI_FREE(xred_img)
 
    if (dtset%ngfft(7) / 100 == FFT_FFTW3) call fftw3_cleanup()
 
@@ -866,9 +865,9 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    call dtset%free()
 
-   ABI_DEALLOCATE(occ)
-   ABI_DEALLOCATE(xred)
-   ABI_DEALLOCATE(npwtot)
+   ABI_FREE(occ)
+   ABI_FREE(xred)
+   ABI_FREE(npwtot)
 
    call abi_linalg_finalize()
    call xg_finalize()
@@ -881,30 +880,29 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    call timab(643,2,tsec)
 
    if (iexit/=0) exit
-
  end do ! idtset (allocate statements are present - an exit statement is present)
 
 !*********************************************************************
 
  call timab(644,1,tsec)
 
-!PSP deallocation
+ !PSP deallocation
  call psps_free(psps)
 
-!XG 121126 : One should not use dtset or idtset in this section, as these might not be defined for all processors.
+ !XG 121126 : One should not use dtset or idtset in this section, as these might not be defined for all processors.
 
-!PAW deallocation
+ !PAW deallocation
  if (allocated(pawrad)) then
    call pawrad_free(pawrad)
-   ABI_DATATYPE_DEALLOCATE(pawrad)
+   ABI_FREE(pawrad)
  end if
  if (allocated(pawtab)) then
    call pawtab_free(pawtab)
-   ABI_DATATYPE_DEALLOCATE(pawtab)
+   ABI_FREE(pawtab)
  end if
  call pawang_free(pawang)
 
- ABI_DEALLOCATE(jdtset_)
+ ABI_FREE(jdtset_)
 
 !Results_respfn deallocation
  call destroy_results_respfn(results_respfn)

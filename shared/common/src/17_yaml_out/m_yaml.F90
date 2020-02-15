@@ -38,6 +38,7 @@ module m_yaml
  use m_stream_string
 
  use m_fstrings, only : sjoin, char_count, itoa, sjoin
+ use m_io_tools, only : is_open
 
  implicit none
 
@@ -807,6 +808,8 @@ end subroutine yamldoc_add_dict
 !! INPUTS
 !!  label = key name
 !!  arr(:, :) = input array.
+!!  [slist(:)]= List of strings (same length as the first dim or second dime of arr, depending on mode).
+!!    If present, the string will be included in the the row.
 !!  [tag]= add a tag to the field
 !!  [real_fmt]= override the default formatting
 !!  [multiline_trig]: optional minimum number of elements before switching to multiline representation
@@ -820,12 +823,13 @@ end subroutine yamldoc_add_dict
 !!
 !! SOURCE
 
-subroutine yamldoc_add_real2d(self, label, arr, tag, real_fmt, multiline_trig, newline, width, mode)
+subroutine yamldoc_add_real2d(self, label, arr, slist, tag, real_fmt, multiline_trig, newline, width, mode)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
  real(dp),intent(in) :: arr(:, :)
  character(len=*),intent(in) :: label
+ character(len=*),optional,intent(in) :: slist(:)
  character(len=*),intent(in),optional :: tag, real_fmt
  integer,intent(in),optional :: multiline_trig
  logical,intent(in),optional :: newline
@@ -859,13 +863,21 @@ subroutine yamldoc_add_real2d(self, label, arr, tag, real_fmt, multiline_trig, n
    do i=1,n
      call self%stream%push(eol//'-')
      line(1:m) = arr(:,i)
-     call yaml_print_real1d(self%stream, m, line, rfmt, vmax)
+     if (.not. present(slist)) then
+       call yaml_print_real1d(self%stream, m, line, rfmt, vmax)
+     else
+       call yaml_print_real1d(self%stream, m, line, rfmt, vmax, string=slist(i))
+     end if
    end do
  else
    do i=1,m
      call self%stream%push(eol//'-')
      line(1:n) = arr(i,:)
-     call yaml_print_real1d(self%stream, n, line, rfmt, vmax)
+     if (.not. present(slist)) then
+       call yaml_print_real1d(self%stream, n, line, rfmt, vmax)
+     else
+       call yaml_print_real1d(self%stream, n, line, rfmt, vmax, string=slist(i))
+     end if
    end do
  end if
 
@@ -889,6 +901,8 @@ end subroutine yamldoc_add_real2d
 !! INPUTS
 !!  label = key name
 !!  arr1(:,:), arr2(:,:) = input arrays.
+!!  [slist(:)]= List of strings (same length as the first dim or second dime of arr, depending on mode).
+!!    If present, the string will be included in the the row.
 !!  [tag]= add a tag to the field
 !!  [real_fmt]= override the default formatting
 !!  [multiline_trig]: optional minimum number of elements before switching to multiline representation
@@ -902,7 +916,7 @@ end subroutine yamldoc_add_real2d
 !!
 !! SOURCE
 
-subroutine yamldoc_add_paired_real2d(self, label, arr1, arr2, tag, real_fmt, multiline_trig, newline, width, mode)
+subroutine yamldoc_add_paired_real2d(self, label, arr1, arr2, slist, tag, real_fmt, multiline_trig, newline, width, mode)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -913,6 +927,7 @@ subroutine yamldoc_add_paired_real2d(self, label, arr1, arr2, tag, real_fmt, mul
  logical,intent(in),optional :: newline
  integer,intent(in),optional :: width
  character(len=1),intent(in),optional :: mode
+ character(len=*),optional,intent(in) :: slist(:)
 
 !Local variables-------------------------------
  integer :: m, n, w, i, vmax
@@ -940,7 +955,9 @@ subroutine yamldoc_add_paired_real2d(self, label, arr1, arr2, tag, real_fmt, mul
  end if
 
  if (my_mode == "T") then
-   !if present(chars) ABI_CHECK(size(chars) == n, "size(shars) != n")
+   if (present(slist)) then
+     ABI_CHECK(size(slist) == n, "size(slist) != n")
+   end if
    do i=1,n
      call self%stream%push(eol//'- [')
      line(1:m) = arr1(:,i)
@@ -948,11 +965,13 @@ subroutine yamldoc_add_paired_real2d(self, label, arr1, arr2, tag, real_fmt, mul
      call self%stream%push(',')
      line(1:m) = arr2(:,i)
      call yaml_print_real1d(self%stream, m, line, rfmt, vmax)
-     !if present(chars) call self%stream%push(', '//trim(chars(i)))
+     if (present(slist)) call self%stream%push(', '//trim(slist(i)))
      call self%stream%push(' ]')
    end do
  else
-   !if present(chars) ABI_CHECK(size(chars) == n, "size(shars) != m")
+   if (present(slist)) then
+     ABI_CHECK(size(slist) == n, "size(slist) != m")
+   end if
    do i=1,m
      call self%stream%push(eol//'- [')
      line(1:n) = arr1(i,:)
@@ -960,7 +979,7 @@ subroutine yamldoc_add_paired_real2d(self, label, arr1, arr2, tag, real_fmt, mul
      call self%stream%push(',')
      line(1:n) = arr2(i,:)
      call yaml_print_real1d(self%stream, n, line, rfmt, vmax)
-     !if present(chars) call self%stream%push(', '//trim(chars(i)))
+     if (present(slist)) call self%stream%push(', '//trim(slist(i)))
      call self%stream%push(']')
    end do
  end if
@@ -980,6 +999,8 @@ end subroutine yamldoc_add_paired_real2d
 !! INPUTS
 !!  label = key name
 !!  arr(:, :) <integer>=
+!!  [slist(:)]= List of strings (same length as the first dim or second dime of arr, depending on mode).
+!!    If present, the string will be included in the the row.
 !!  [tag]= add a tag to the field
 !!  [int_fmt]: override the default formatting
 !!  multiline_trig <integer>=optional minimum number of elements before switching to multiline representation
@@ -993,12 +1014,13 @@ end subroutine yamldoc_add_paired_real2d
 !!
 !! SOURCE
 
-subroutine yamldoc_add_int2d(self, label, arr, tag, int_fmt, multiline_trig, newline, width, mode)
+subroutine yamldoc_add_int2d(self, label, arr, slist, tag, int_fmt, multiline_trig, newline, width, mode)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
  integer,intent(in) :: arr(:, :)
  character(len=*),intent(in) :: label
+ character(len=*),optional,intent(in) :: slist(:)
  character(len=*),intent(in),optional :: tag, int_fmt
  integer,intent(in),optional :: multiline_trig
  logical,intent(in),optional :: newline
@@ -1032,13 +1054,21 @@ subroutine yamldoc_add_int2d(self, label, arr, tag, int_fmt, multiline_trig, new
    do i=1,n
      call self%stream%push(eol//'-')
      line(1:m) = arr(:,i)
-     call yaml_print_int1d(self%stream, m, line, ifmt, vmax)
+     if (.not. present(slist)) then
+       call yaml_print_int1d(self%stream, m, line, ifmt, vmax)
+     else
+       call yaml_print_int1d(self%stream, m, line, ifmt, vmax, string=slist(i))
+     end if
    end do
  else
    do i=1,m
      call self%stream%push(eol//'-')
      line(1:n) = arr(i,:)
-     call yaml_print_int1d(self%stream, n, line, ifmt, vmax)
+     if (.not. present(slist)) then
+       call yaml_print_int1d(self%stream, n, line, ifmt, vmax)
+     else
+       call yaml_print_int1d(self%stream, n, line, ifmt, vmax, string=slist(i))
+     end if
    end do
  end if
 
@@ -1393,8 +1423,12 @@ subroutine yamldoc_write_and_free(self, unit, newline)
  call self%stream%push('...')
 
  if (self%use_yaml == 1) then
-   write(unit, "(a)")""
-   call self%stream%flush(unit, newline=nl)
+   if (is_open(unit)) then
+     write(unit, "(a)")""
+     call self%stream%flush(unit, newline=nl)
+   else
+     call self%stream%free()
+   end if
  else
    call self%stream%free()
  end if
@@ -1599,16 +1633,19 @@ subroutine yaml_start_field(stream, label, tag, width)
 
 end subroutine yaml_start_field
 
-subroutine yaml_print_real1d(stream, length, arr, rfmt, vmax)
+subroutine yaml_print_real1d(stream, length, arr, rfmt, vmax, string)
 
+!Arguments ------------------------------------
  type(stream_string),intent(inout) :: stream
- integer,intent(in) :: vmax
- integer,intent(in) :: length
+ integer,intent(in) :: vmax, length
  real(dp),intent(in) :: arr(length)
  character(len=*),intent(in) :: rfmt
- character(len=50) :: tmp_r
+ character(len=*),optional,intent(in) :: string
 
+!Local variables-------------------------------
  integer :: i
+ character(len=50) :: tmp_r
+! *************************************************************************
 
  if (length > vmax) then
    call stream%push(' ['//eol//'    ')
@@ -1626,21 +1663,27 @@ subroutine yaml_print_real1d(stream, length, arr, rfmt, vmax)
      call stream%push(', ')
    end if
  end do
+
  if (length > vmax) call stream%push(eol)
+ if (present(string)) call stream%push(trim(string))
  call stream%push(']')
 
 end subroutine yaml_print_real1d
 
-subroutine yaml_print_int1d(stream, length, arr, ifmt, vmax)
+subroutine yaml_print_int1d(stream, length, arr, ifmt, vmax, string)
 
+!Arguments ------------------------------------
  type(stream_string),intent(inout) :: stream
  integer,intent(in) :: vmax
  integer,intent(in) :: length
  integer,intent(in) :: arr(length)
  character(len=*),intent(in) :: ifmt
- character(len=50) :: tmp_i
+ character(len=*),optional,intent(in) :: string
 
+!Local variables-------------------------------
  integer :: i
+ character(len=50) :: tmp_i
+! *************************************************************************
 
  if (length > vmax) then
    call stream%push(' ['//eol//'    ')
@@ -1658,7 +1701,9 @@ subroutine yaml_print_int1d(stream, length, arr, ifmt, vmax)
      call stream%push(', ')
    end if
  end do
+
  if (length > vmax) call stream%push(eol)
+ if (present(string)) call stream%push(trim(string))
  call stream%push(']')
 
 end subroutine yaml_print_int1d
