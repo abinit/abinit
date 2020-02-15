@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 21h01 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 20h25 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t21/t21.in
 - output file    -> t21.out
@@ -315,7 +315,7 @@ rprimd    :
 lattice_lengths: [   5.00000,    5.00000,    5.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.2500000E+02
-convergence_: {deltae: -3.25E-09, res2:  1.29E-04, residm:  2.50E-10, diffor:  0.00E+00, }
+convergence: {deltae: -3.247E-09, res2:  1.294E-04, residm:  2.500E-10, diffor:  0.000E+00, }
 etotal    :  -5.62416610E-01
 entropy   :   0.00000000E+00
 fermie    :  -3.78834593E-01
@@ -440,7 +440,7 @@ rprimd    :
 lattice_lengths: [   5.00000,    5.00000,    5.50000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.3750000E+02
-convergence_: {deltae: -4.33E-09, res2:  1.88E-04, residm:  3.10E-10, diffor:  0.00E+00, }
+convergence: {deltae: -4.333E-09, res2:  1.878E-04, residm:  3.096E-10, diffor:  0.000E+00, }
 etotal    :  -5.51913859E-01
 entropy   :   0.00000000E+00
 fermie    :  -3.69714944E-01
@@ -566,7 +566,7 @@ rprimd    :
 lattice_lengths: [   5.00000,    5.00000,    6.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.5000000E+02
-convergence_: {deltae: -3.17E-09, res2:  1.48E-04, residm:  2.12E-10, diffor:  0.00E+00, }
+convergence: {deltae: -3.166E-09, res2:  1.478E-04, residm:  2.121E-10, diffor:  0.000E+00, }
 etotal    :  -5.43838674E-01
 entropy   :   0.00000000E+00
 fermie    :  -3.61967614E-01
@@ -691,7 +691,7 @@ rprimd    :
 lattice_lengths: [   5.00000,    5.50000,    5.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.3750000E+02
-convergence_: {deltae: -4.33E-09, res2:  1.88E-04, residm:  3.09E-10, diffor:  0.00E+00, }
+convergence: {deltae: -4.328E-09, res2:  1.875E-04, residm:  3.095E-10, diffor:  0.000E+00, }
 etotal    :  -5.51913859E-01
 entropy   :   0.00000000E+00
 fermie    :  -3.69714941E-01
@@ -816,7 +816,7 @@ rprimd    :
 lattice_lengths: [   5.00000,    6.00000,    5.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.5000000E+02
-convergence_: {deltae: -4.78E-09, res2:  2.24E-04, residm:  3.04E-10, diffor:  0.00E+00, }
+convergence: {deltae: -4.784E-09, res2:  2.236E-04, residm:  3.042E-10, diffor:  0.000E+00, }
 etotal    :  -5.43838672E-01
 entropy   :   0.00000000E+00
 fermie    :  -3.61971225E-01
@@ -941,7 +941,7 @@ rprimd    :
 lattice_lengths: [   5.50000,    5.00000,    5.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.3750000E+02
-convergence_: {deltae: -4.08E-09, res2:  1.76E-04, residm:  2.92E-10, diffor:  0.00E+00, }
+convergence: {deltae: -4.081E-09, res2:  1.757E-04, residm:  2.917E-10, diffor:  0.000E+00, }
 etotal    :  -5.51913860E-01
 entropy   :   0.00000000E+00
 fermie    :  -3.69714465E-01
@@ -1067,7 +1067,7 @@ rprimd    :
 lattice_lengths: [   6.00000,    5.00000,    5.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.5000000E+02
-convergence_: {deltae: -3.20E-09, res2:  1.49E-04, residm:  2.14E-10, diffor:  0.00E+00, }
+convergence: {deltae: -3.195E-09, res2:  1.491E-04, residm:  2.140E-10, diffor:  0.000E+00, }
 etotal    :  -5.43838674E-01
 entropy   :   0.00000000E+00
 fermie    :  -3.61967684E-01
@@ -1304,10 +1304,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          4.8  wall=          5.1
+- Proc.   0 individual time (sec): cpu=          4.7  wall=          4.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  37 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.8  wall=          5.1
++Overall time at end (sec) : cpu=          4.7  wall=          4.8

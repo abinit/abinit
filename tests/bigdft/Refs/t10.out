@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 21h01 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 20h25 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t10/t10.in
 - output file    -> t10.out
@@ -156,7 +156,7 @@
  At SCF step    6   max grdnorm=  8.32E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 17.0000000,   0.0000000,   0.0000000, ]
@@ -165,7 +165,7 @@ rprimd    :
 lattice_lengths: [  17.00000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.3520000E+03
-convergence_: {deltae: -2.64E-08, res2:  1.55E-06, residm:  8.32E-05, diffor: undef, }
+convergence: {deltae: -2.638E-08, res2:  1.555E-06, residm:  8.319E-05, diffor: null, }
 etotal    :  -1.07973956E+00
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -211,7 +211,7 @@ force_length_stats: {min:   3.45699008E-01, max:   3.45699008E-01, mean:   3.456
  At SCF step    7   max grdnorm=  6.53E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 18.0000000,   0.0000000,   0.0000000, ]
@@ -220,7 +220,7 @@ rprimd    :
 lattice_lengths: [  18.00000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.6080000E+03
-convergence_: {deltae: -1.76E-08, res2:  1.04E-06, residm:  6.53E-05, diffor: undef, }
+convergence: {deltae: -1.762E-08, res2:  1.038E-06, residm:  6.530E-05, diffor: null, }
 etotal    :  -1.12948863E+00
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -269,7 +269,7 @@ force_length_stats: {min:   5.78660662E-02, max:   5.78660662E-02, mean:   5.786
  At SCF step    6   max grdnorm=  3.00E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 3, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 17.5000000,   0.0000000,   0.0000000, ]
@@ -278,7 +278,7 @@ rprimd    :
 lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.4800000E+03
-convergence_: {deltae: -3.63E-09, res2:  2.05E-07, residm:  3.00E-05, diffor: undef, }
+convergence: {deltae: -3.626E-09, res2:  2.048E-07, residm:  2.996E-05, diffor: null, }
 etotal    :  -1.13430440E+00
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -327,7 +327,7 @@ force_length_stats: {min:   4.17492071E-02, max:   4.17492071E-02, mean:   4.174
  At SCF step    6   max grdnorm=  3.53E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 4, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 17.5000000,   0.0000000,   0.0000000, ]
@@ -336,7 +336,7 @@ rprimd    :
 lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.4800000E+03
-convergence_: {deltae: -5.05E-09, res2:  2.88E-07, residm:  3.53E-05, diffor: undef, }
+convergence: {deltae: -5.051E-09, res2:  2.877E-07, residm:  3.529E-05, diffor: null, }
 etotal    :  -1.13737474E+00
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -384,7 +384,7 @@ force_length_stats: {min:   1.03276310E-02, max:   1.03276310E-02, mean:   1.032
  At SCF step    5   max grdnorm=  5.80E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 5, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 17.5000000,   0.0000000,   0.0000000, ]
@@ -393,7 +393,7 @@ rprimd    :
 lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.4800000E+03
-convergence_: {deltae: -1.60E-08, res2:  3.78E-07, residm:  5.80E-05, diffor: undef, }
+convergence: {deltae: -1.604E-08, res2:  3.779E-07, residm:  5.795E-05, diffor: null, }
 etotal    :  -1.13752341E+00
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -440,7 +440,7 @@ force_length_stats: {min:   2.50954819E-03, max:   2.50954819E-03, mean:   2.509
  At SCF step    4   max grdnorm=  8.13E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 6, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 17.5000000,   0.0000000,   0.0000000, ]
@@ -449,7 +449,7 @@ rprimd    :
 lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.4800000E+03
-convergence_: {deltae: -1.59E-08, res2:  1.87E-07, residm:  8.13E-05, diffor: undef, }
+convergence: {deltae: -1.589E-08, res2:  1.865E-07, residm:  8.129E-05, diffor: null, }
 etotal    :  -1.13753223E+00
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -494,7 +494,7 @@ force_length_stats: {min:   8.34105233E-05, max:   8.34105233E-05, mean:   8.341
  At SCF step    2   max grdnorm=  6.72E-05 < tolwfr=  1.00E-04 =>converged.
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 7, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 17.5000000,   0.0000000,   0.0000000, ]
@@ -503,7 +503,7 @@ rprimd    :
 lattice_lengths: [  17.50000,   16.00000,   16.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.4800000E+03
-convergence_: {deltae: -2.13E-08, res2:  2.72E-07, residm:  6.72E-05, diffor: undef, }
+convergence: {deltae: -2.132E-08, res2:  2.719E-07, residm:  6.721E-05, diffor: null, }
 etotal    :  -1.13753224E+00
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -572,7 +572,7 @@ force_length_stats: {min:   7.53324111E-07, max:   7.53324111E-07, mean:   7.533
   -0.37230
 
 --- !EnergyTerms
-iteration_state     : {dtset: 1, }
+iteration_state     : {dtset: 1, itime: 7, icycle: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.07696772694977E+00
 hartree             :  1.27853318441885E+00
@@ -586,7 +586,7 @@ total_energy        : -1.13753223817299E+00
 
 
 --- !EnergyTermsDC
-iteration_state     : {dtset: 1, }
+iteration_state     : {dtset: 1, itime: 7, icycle: 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -7.44613783660290E-01
 'Ion-ion energy'    :  6.88425933524715E-01
@@ -740,10 +740,10 @@ total_energy_dc     : -1.13754827806611E+00
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         17.9  wall=         18.1
+- Proc.   0 individual time (sec): cpu=         18.9  wall=         19.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  14 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.9  wall=         18.1
++Overall time at end (sec) : cpu=         18.9  wall=         19.1

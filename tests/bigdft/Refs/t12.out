@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 21h01 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 20h25 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t12/t12.in
 - output file    -> t12.out
@@ -170,7 +170,7 @@ rprimd    :
 lattice_lengths: [  17.55000,   17.55000,   17.55000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   5.4054439E+03
-convergence_: {deltae: -7.70E-04, res2:  4.16E+00, residm:  6.19E-03, diffor:  0.00E+00, }
+convergence: {deltae: -7.697E-04, res2:  4.156E+00, residm:  6.189E-03, diffor:  0.000E+00, }
 etotal    :  -1.19990425E+02
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -368,10 +368,10 @@ total_energy_dc     : -1.19920267242670E+02
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         19.4  wall=         19.5
+- Proc.   0 individual time (sec): cpu=         20.3  wall=         20.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         19.4  wall=         19.5
++Overall time at end (sec) : cpu=         20.3  wall=         20.4
