@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 20h32 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 20h08 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t51_MPI10-t52_MPI10-t53_MPI10/t51.in
 - output file    -> t51_MPI10.out
@@ -905,7 +905,7 @@ rprimd    :
 lattice_lengths: [   5.34573,    5.34573,    5.34573, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   1.0802030E+02
-convergence_: {deltae:  1.29E-14, res2:  2.52E-21, residm:  6.46E-10, diffor: undef, }
+convergence: {deltae:  1.288E-14, res2:  2.520E-21, residm:  6.458E-10, diffor: null, }
 etotal    :  -2.09313441E+00
 entropy   :   0.00000000E+00
 fermie    :   3.55003332E-01
@@ -1161,7 +1161,7 @@ P           mkmem           1
 
 ================================================================================
 
-- Total cpu        time (s,m,h):          3.7        0.06      0.001
+- Total cpu        time (s,m,h):          3.6        0.06      0.001
 - Total wall clock time (s,m,h):          3.8        0.06      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
@@ -1171,40 +1171,39 @@ P           mkmem           1
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- invars2                        0.036   1.0      0.037   1.0              1      -1.00        0.98       0.98
-- fourwf%(pot)                   0.028   0.8      0.029   0.8            287      -1.00        1.00       1.00
-- abinit(2)                      0.020   0.6      0.021   0.5              1      -1.00        0.98       0.98
-- others (131)                   0.079   2.2      0.156   4.1             -1      -1.00        0.50       0.50
+- invars2                        0.037   1.0      0.039   1.0              1      -1.00        0.97       0.97
+- fourwf%(pot)                   0.028   0.8      0.028   0.7            287      -1.00        1.00       1.00
+- abinit(2)                      0.020   0.5      0.020   0.5              1      -1.00        1.00       1.00
+- others (131)                   0.081   2.2      0.158   4.2             -1      -1.00        0.51       0.51
 -<END_TIMER>
 -
-- subtotal                       0.163   4.5      0.242   6.4                                  0.68       0.68
+- subtotal                       0.166   4.6      0.245   6.5                                  0.68       0.68
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 10, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           3.7, wall_time =           3.8
+- cpu_time =           3.6, wall_time =           3.8
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- scfcv-scprqt                   0.845  23.1      0.924  24.4            100      -1.00        0.92       0.92
-- invars2                        0.370  10.1      0.374   9.9             10      -1.00        0.99       0.99
+- scfcv-scprqt                   0.842  23.1      0.925  24.5            100      -1.00        0.91       0.91
+- invars2                        0.380  10.4      0.390  10.3             10      -1.00        0.98       0.98
 - fourwf%(pot)                   0.274   7.5      0.277   7.3           2870      -1.00        0.99       0.99
-- abinit(2)                      0.187   5.1      0.192   5.1             10      -1.00        0.97       0.97
-- ewald                          0.127   3.5      0.131   3.5             10      -1.00        0.97       0.97
-- stress                         0.112   3.1      0.112   3.0             10      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.107   2.9      0.107   2.8             10      -1.00        1.00       1.00
-- fourdp                         0.051   1.4      0.052   1.4            510      -1.00        0.99       0.99
-- nonlop(apply)                  0.042   1.1      0.043   1.1           2870      -1.00        0.99       0.99
-- vtorho(MPI)                    0.035   1.0      0.035   0.9            100      -1.00        1.00       1.00
-- mkrho/=                        0.035   1.0      0.035   0.9            200      -1.00        1.00       1.00
-- projbd                         0.030   0.8      0.030   0.8           4300      -1.00        0.99       0.99
+- abinit(2)                      0.184   5.0      0.188   5.0             10      -1.00        0.98       0.98
+- ewald                          0.125   3.4      0.125   3.3             10      -1.00        1.00       1.00
+- stress                         0.109   3.0      0.109   2.9             10      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.104   2.9      0.104   2.8             10      -1.00        1.00       1.00
+- fourdp                         0.052   1.4      0.056   1.5            510      -1.00        0.93       0.93
+- mkrho/=                        0.043   1.2      0.043   1.1            200      -1.00        0.99       0.99
+- nonlop(apply)                  0.042   1.1      0.043   1.1           2870      -1.00        0.98       0.98
+- vtorho(MPI)                    0.034   0.9      0.034   0.9            100      -1.00        1.00       1.00
+- projbd                         0.031   0.8      0.031   0.8           4300      -1.00        0.98       0.98
 - xc:pot/=fourdp                 0.030   0.8      0.030   0.8            110      -1.00        1.00       1.00
-- symrhg(no FFT)                 0.022   0.6      0.022   0.6            100      -1.00        1.00       1.00
-- others (120)                   0.088   2.4      0.090   2.4             -1      -1.00        0.99       0.99
+- others (121)                   0.108   3.0      0.107   2.8             -1      -1.00        1.00       1.00
 -<END_TIMER>
 
-- subtotal                       2.355  64.3      2.453  64.7                                  0.96       0.96
+- subtotal                       2.358  64.6      2.464  65.2                                  0.96       0.96
 
 ================================================================================
 
