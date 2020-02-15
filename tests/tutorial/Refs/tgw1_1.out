@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h59 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h47 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tgw1_1/tgw1_1.in
 - output file    -> tgw1_1.out
@@ -352,7 +352,7 @@ rprimd    :
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.6663072E+02
-convergence_: {deltae: -2.25E-12, res2:  3.10E-11, residm:  2.99E-07, diffor: undef, }
+convergence: {deltae: -2.252E-12, res2:  3.096E-11, residm:  2.993E-07, diffor: null, }
 etotal    :  -8.86425427E+00
 entropy   :   0.00000000E+00
 fermie    :   2.19278031E-01
@@ -491,7 +491,7 @@ rprimd    :
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.6663072E+02
-convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.79E-19, diffor:  0.00E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.789E-19, diffor:  0.000E+00, }
 etotal    :  -8.86425427E+00
 entropy   :   0.00000000E+00
 fermie    :   2.19278031E-01

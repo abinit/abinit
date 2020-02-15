@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h43 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h51 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t82/t82.in
 - output file    -> t82.out
@@ -488,7 +488,7 @@ rprimd    :
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.7025674E+02
-convergence_: {deltae: -1.60E-14, res2:  8.88E-19, residm:  3.67E-21, diffor: undef, }
+convergence: {deltae: -1.599E-14, res2:  8.884E-19, residm:  3.669E-21, diffor: null, }
 etotal    :  -8.02554884E+00
 entropy   :   0.00000000E+00
 fermie    :   1.97515613E-01
@@ -1046,7 +1046,7 @@ psp_core            :  2.10428670391146E-01
 xc_dc               :  1.23627623977635E-01
 spherical_terms     : -4.70452005813990E-02
 total_energy_dc     : -8.02554883924924E+00
-total_energy_dc_eV  : -2.18386290105200E+02
+total_energy_dc_eV  : -2.18386290151988E+02
 ...
 
 
@@ -1129,7 +1129,7 @@ rprimd    :
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.7025674E+02
-convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.53E-23, diffor:  0.00E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.531E-23, diffor:  0.000E+00, }
 etotal    :  -8.02554884E+00
 entropy   :   0.00000000E+00
 fermie    :   1.97515613E-01
@@ -3479,10 +3479,10 @@ P          mk1mem6          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         15.0  wall=         15.5
+- Proc.   0 individual time (sec): cpu=         15.1  wall=         15.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered  27 WARNINGs and  78 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.0  wall=         15.5
++Overall time at end (sec) : cpu=         15.1  wall=         15.8

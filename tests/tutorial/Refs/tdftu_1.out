@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat 15 Feb 2020.
-- ( at 15h12 )
+- ( at 16h47 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tdftu_1/tdftu_1.in
 - output file    -> tdftu_1.out
@@ -274,7 +274,7 @@ rprimd    :
 lattice_lengths: [   5.60029,    5.60029,   11.20057, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.4839654E+02
-convergence_: {deltae:  6.42E-10, res2:  9.25E-09, residm:  2.23E-06, diffor: undef, }
+convergence: {deltae:  6.419E-10, res2:  9.253E-09, residm:  2.228E-06, diffor: null, }
 etotal    :  -3.73047372E+02
 entropy   :   0.00000000E+00
 fermie    :   2.23465580E-01
@@ -727,10 +727,10 @@ P           mkmem           3
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         13.9  wall=         14.0
+- Proc.   0 individual time (sec): cpu=         13.8  wall=         14.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         13.9  wall=         14.0
++Overall time at end (sec) : cpu=         13.8  wall=         14.0

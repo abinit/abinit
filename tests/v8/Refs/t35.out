@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat 15 Feb 2020.
-- ( at 15h01 )
+- ( at 16h53 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t35/t35.in
 - output file    -> t35.out
@@ -534,7 +534,7 @@ rprimd    :
 lattice_lengths: [   5.41000,    4.68520,    5.41000, ]
 lattice_angles: [ 54.736,  90.000,  54.736, ]
 lattice_volume:   7.9170211E+01
-convergence_: {deltae: -4.30E-08, res2:  2.48E-05, residm:  1.29E-03, diffor: undef, }
+convergence: {deltae: -4.300E-08, res2:  2.477E-05, residm:  1.286E-03, diffor: null, }
 etotal    :  -1.24299774E+02
 entropy   :   0.00000000E+00
 fermie    :   3.16152990E-01

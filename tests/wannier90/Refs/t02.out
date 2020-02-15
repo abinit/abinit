@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat 15 Feb 2020.
-- ( at 15h02 )
+- ( at 17h13 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/wannier90_t02/t02.in
 - output file    -> t02.out
@@ -234,7 +234,7 @@ rprimd    :
 lattice_lengths: [   7.49533,    7.49533,    7.49533, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9775400E+02
-convergence_: {deltae:  1.73E-10, res2:  1.71E-10, residm:  7.99E-11, diffor: undef, }
+convergence: {deltae:  1.735E-10, res2:  1.709E-10, residm:  7.987E-11, diffor: null, }
 etotal    :  -5.89800341E+02
 entropy   :   0.00000000E+00
 fermie    :   2.02175171E-01
@@ -605,10 +605,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         12.8  wall=         12.9
+- Proc.   0 individual time (sec): cpu=         12.9  wall=         13.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         12.8  wall=         12.9
++Overall time at end (sec) : cpu=         12.9  wall=         13.0

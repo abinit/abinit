@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h21 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h32 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t75/t75.in
 - output file    -> t75.out
@@ -211,7 +211,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     349.000     349.000
 
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [  7.0000000,   0.0000000,   0.0000000, ]
@@ -220,7 +220,7 @@ rprimd    :
 lattice_lengths: [   7.00000,    5.00000,    5.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.7500000E+02
-convergence_: {deltae: -8.79E-11, res2:  3.04E-10, residm:  5.27E-13, diffor:  3.71E-06, }
+convergence: {deltae: -8.792E-11, res2:  3.043E-10, residm:  5.268E-13, diffor:  3.714E-06, }
 etotal    :  -1.14236942E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.25691728E-01
@@ -279,7 +279,7 @@ force_length_stats: {min:   1.71884946E-02, max:   1.71884946E-02, mean:   1.718
 
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [  7.0000000,   0.0000000,   0.0000000, ]
@@ -288,7 +288,7 @@ rprimd    :
 lattice_lengths: [   7.00000,    5.00000,    5.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.7500000E+02
-convergence_: {deltae: -2.34E-11, res2:  1.32E-08, residm:  1.90E-13, diffor:  1.51E-06, }
+convergence: {deltae: -2.336E-11, res2:  1.315E-08, residm:  1.898E-13, diffor:  1.509E-06, }
 etotal    :  -1.14280831E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.29346522E-01
@@ -367,7 +367,7 @@ force_length_stats: {min:   8.11642552E-03, max:   8.11642552E-03, mean:   8.116
   -0.32935
 
 --- !EnergyTerms
-iteration_state     : {dtset: 1, }
+iteration_state     : {dtset: 1, itime: 2, icycle: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.01088400494995E+00
 hartree             :  4.15531643106673E-01
@@ -447,7 +447,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     349.000     349.000
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 1, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [  7.0000000,   0.0000000,   0.0000000, ]
@@ -456,7 +456,7 @@ rprimd    :
 lattice_lengths: [   7.00000,    5.00000,    5.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.7500000E+02
-convergence_: {deltae: -4.66E-14, res2:  8.48E-13, residm:  9.01E-17, diffor:  4.96E-08, }
+convergence: {deltae: -4.663E-14, res2:  8.482E-13, residm:  9.008E-17, diffor:  4.959E-08, }
 etotal    :  -1.14280831E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.29345752E-01
@@ -515,7 +515,7 @@ force_length_stats: {min:   8.11588790E-03, max:   8.11588790E-03, mean:   8.115
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 2, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [  7.0000000,   0.0000000,   0.0000000, ]
@@ -524,7 +524,7 @@ rprimd    :
 lattice_lengths: [   7.00000,    5.00000,    5.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.7500000E+02
-convergence_: {deltae: -3.40E-12, res2:  2.57E-09, residm:  3.17E-14, diffor:  5.96E-07, }
+convergence: {deltae: -3.395E-12, res2:  2.569E-09, residm:  3.168E-14, diffor:  5.957E-07, }
 etotal    :  -1.14290165E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.31115192E-01
@@ -587,7 +587,7 @@ force_length_stats: {min:   3.32776741E-03, max:   3.32776741E-03, mean:   3.327
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 3, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [  7.0000000,   0.0000000,   0.0000000, ]
@@ -596,7 +596,7 @@ rprimd    :
 lattice_lengths: [   7.00000,    5.00000,    5.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.7500000E+02
-convergence_: {deltae: -1.42E-12, res2:  1.19E-09, residm:  1.36E-14, diffor:  3.87E-07, }
+convergence: {deltae: -1.416E-12, res2:  1.189E-09, residm:  1.363E-14, diffor:  3.869E-07, }
 etotal    :  -1.14291941E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.32361307E-01
@@ -675,7 +675,7 @@ force_length_stats: {min:   2.09764646E-04, max:   2.09764646E-04, mean:   2.097
   -0.33236
 
 --- !EnergyTerms
-iteration_state     : {dtset: 2, }
+iteration_state     : {dtset: 2, itime: 3, icycle: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.02520521285893E+00
 hartree             :  4.24743661076118E-01
@@ -774,7 +774,7 @@ rprimd    :
 lattice_lengths: [   7.00000,    5.00000,    5.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.7500000E+02
-convergence_: {deltae: -2.66E-15, res2:  3.03E-13, residm:  1.21E-15, diffor:  1.89E-08, }
+convergence: {deltae: -2.665E-15, res2:  3.031E-13, residm:  1.207E-15, diffor:  1.889E-08, }
 etotal    :  -1.14377095E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.32490839E-01
@@ -1024,10 +1024,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.9  wall=          2.3
+- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.9  wall=          2.3
++Overall time at end (sec) : cpu=          2.0  wall=          2.3

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h54 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 17h00 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/etsf_io_t01-t03/t01.in
 - output file    -> t01.out
@@ -248,7 +248,7 @@ rprimd    :
 lattice_lengths: [   8.48910,   14.70360,   13.86270, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.7303468E+03
-convergence_: {deltae: -1.32E+02, res2:  3.97E+02, residm:  5.53E-02, diffor: undef, }
+convergence: {deltae: -1.315E+02, res2:  3.968E+02, residm:  5.533E-02, diffor: null, }
 etotal    :  -1.31510537E+02
 entropy   :   0.00000000E+00
 fermie    :  -3.89796823E-02
@@ -709,10 +709,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          5.2  wall=          5.6
+- Proc.   0 individual time (sec): cpu=          5.5  wall=          6.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.2  wall=          5.6
++Overall time at end (sec) : cpu=          5.5  wall=          6.5

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h41 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h50 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t15/t15.in
 - output file    -> t15.out
@@ -183,7 +183,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     769.000     769.000
 
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 10.3343981,   0.0000000,   0.0000000, ]
@@ -192,7 +192,7 @@ rprimd    :
 lattice_lengths: [  10.33440,   10.33440,   10.33440, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.1037115E+03
-convergence_: {deltae: -1.70E-08, res2:  2.33E-07, residm:  7.26E-11, diffor: undef, }
+convergence: {deltae: -1.697E-08, res2:  2.329E-07, residm:  7.264E-11, diffor: null, }
 etotal    :  -3.54361845E+01
 entropy   :   0.00000000E+00
 fermie    :   1.78961464E-01
@@ -285,7 +285,7 @@ force_length_stats: {min:   5.36556552E-04, max:   2.28233506E-03, mean:   1.385
 
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 10.3343981,   0.0000000,   0.0000000, ]
@@ -294,7 +294,7 @@ rprimd    :
 lattice_lengths: [  10.33440,   10.33440,   10.33440, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.1037115E+03
-convergence_: {deltae: -2.56E-09, res2:  2.88E-07, residm:  1.86E-11, diffor: undef, }
+convergence: {deltae: -2.562E-09, res2:  2.879E-07, residm:  1.857E-11, diffor: null, }
 etotal    :  -3.54362003E+01
 entropy   :   0.00000000E+00
 fermie    :   1.78895735E-01
@@ -392,7 +392,7 @@ force_length_stats: {min:   4.60400316E-04, max:   1.80626318E-03, mean:   1.108
 
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 3, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 10.3343981,   0.0000000,   0.0000000, ]
@@ -401,7 +401,7 @@ rprimd    :
 lattice_lengths: [  10.33440,   10.33440,   10.33440, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.1037115E+03
-convergence_: {deltae: -3.94E-09, res2:  1.70E-07, residm:  3.02E-11, diffor: undef, }
+convergence: {deltae: -3.938E-09, res2:  1.696E-07, residm:  3.023E-11, diffor: null, }
 etotal    :  -3.54362276E+01
 entropy   :   0.00000000E+00
 fermie    :   1.78776999E-01
@@ -498,7 +498,7 @@ force_length_stats: {min:   7.62521042E-05, max:   2.29504549E-04, mean:   1.596
 
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 4, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 10.3343981,   0.0000000,   0.0000000, ]
@@ -507,7 +507,7 @@ rprimd    :
 lattice_lengths: [  10.33440,   10.33440,   10.33440, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.1037115E+03
-convergence_: {deltae: -3.73E-11, res2:  3.89E-09, residm:  4.71E-13, diffor: undef, }
+convergence: {deltae: -3.730E-11, res2:  3.893E-09, residm:  4.714E-13, diffor: null, }
 etotal    :  -3.54362278E+01
 entropy   :   0.00000000E+00
 fermie    :   1.78762896E-01
@@ -655,7 +655,7 @@ force_length_stats: {min:   6.22559430E-05, max:   1.81576475E-04, mean:   1.286
 
 
 --- !EnergyTerms
-iteration_state     : {dtset: 1, }
+iteration_state     : {dtset: 1, itime: 4, icycle: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.19369856501588E+01
 hartree             :  2.24005873607917E+00
@@ -847,10 +847,10 @@ P           mkmem           4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          8.9  wall=          9.1
+- Proc.   0 individual time (sec): cpu=          8.9  wall=          9.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.9  wall=          9.1
++Overall time at end (sec) : cpu=          8.9  wall=          9.0

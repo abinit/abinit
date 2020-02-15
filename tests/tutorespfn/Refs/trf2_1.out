@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h58 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h46 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_trf2_1-trf2_3-trf2_4-trf2_5-trf2_6-trf2_7/trf2_1.in
 - output file    -> trf2_1.out
@@ -1077,7 +1077,7 @@ rprimd    :
 lattice_lengths: [   7.50240,    7.50240,    7.50240, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9859750E+02
-convergence_: {deltae: -5.33E-15, res2:  1.14E-20, residm:  2.80E-23, diffor: undef, }
+convergence: {deltae: -5.329E-15, res2:  1.142E-20, residm:  2.802E-23, diffor: null, }
 etotal    :  -9.76268375E+00
 entropy   :   0.00000000E+00
 fermie    :   7.88413810E-02
@@ -5426,10 +5426,10 @@ P          mk1mem10       256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        132.2  wall=        140.3
+- Proc.   0 individual time (sec): cpu=        132.1  wall=        137.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  18 WARNINGs and 211 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        132.2  wall=        140.3
++Overall time at end (sec) : cpu=        132.1  wall=        137.7

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h25 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h35 )
   
  ECHO of the INPUT
  ************************
@@ -1147,8 +1147,8 @@ BCP-RCP-CCP      18      24       8
 
  Time needed (seconds) - total, CP analyse, SURF determination:
 
--               1.90006592      0.52894400      1.35488993
+-               1.96496399      0.55173202      1.39563692
 
-+Total cpu time      1.900  and wall time      1.907 sec
++Total cpu time      1.965  and wall time      1.982 sec
 
  aim : the run completed succesfully.

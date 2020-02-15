@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 19h00 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h47 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpositron_2/tpositron_2.in
 - output file    -> tpositron_2.out
@@ -292,7 +292,7 @@ rprimd    :
 lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.1608573E+03
-convergence_: {deltae:  1.28E-09, res2:  9.72E-09, residm:  1.12E-04, diffor:  0.00E+00, }
+convergence: {deltae:  1.284E-09, res2:  9.719E-09, residm:  1.122E-04, diffor:  0.000E+00, }
 etotal    :  -6.01470177E+01
 entropy   :   0.00000000E+00
 fermie    :   2.03043962E-01
@@ -474,7 +474,7 @@ psp_core            :  1.63276322547783E+00
 xc_dc               : -1.50780825170845E+01
 spherical_terms     :  1.44583016191748E+01
 total_energy_dc     : -6.01470177461402E+01
-total_energy_dc_eV  : -1.63668394837794E+03
+total_energy_dc_eV  : -1.63668358792445E+03
 ...
 
 
@@ -561,7 +561,7 @@ rprimd    :
 lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.1608573E+03
-convergence_: {deltae: -7.69E-10, res2:  1.32E-09, residm:  5.91E-04, diffor:  0.00E+00, }
+convergence: {deltae: -7.693E-10, res2:  1.324E-09, residm:  5.909E-04, diffor:  0.000E+00, }
 etotal    :  -6.05781800E+01
 entropy   :   0.00000000E+00
 fermie    :  -4.31162237E-01
@@ -791,7 +791,7 @@ positronic          : -4.45725408896896E-01
 electronic          : -6.01470177461401E+01
 electron_positron_interaction:  1.45631722342669E-02
 total_energy_dc     : -6.05781799828028E+01
-total_energy_dc_eV  : -1.64841473605647E+03
+total_energy_dc_eV  : -1.64841610905221E+03
 ...
 
 
@@ -1050,10 +1050,10 @@ P           mkmem2          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         25.0  wall=         25.0
+- Proc.   0 individual time (sec): cpu=         25.0  wall=         25.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  43 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.0  wall=         25.0
++Overall time at end (sec) : cpu=         25.0  wall=         25.1

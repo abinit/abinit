@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat 15 Feb 2020.
-- ( at 14h59 )
+- ( at 16h47 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tnuc_3/tnuc_3.in
 - output file    -> tnuc_3.out
@@ -259,7 +259,7 @@ rprimd    :
 lattice_lengths: [   8.67112,    8.67112,    8.67112, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   4.6100971E+02
-convergence_: {deltae: -2.45E-10, res2:  1.43E-11, residm:  4.51E-09, diffor: undef, }
+convergence: {deltae: -2.450E-10, res2:  1.432E-11, residm:  4.506E-09, diffor: null, }
 etotal    :  -7.19532319E+00
 entropy   :   0.00000000E+00
 fermie    :   3.79423071E-02
@@ -636,10 +636,10 @@ P           mkmem          28
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.5  wall=          8.6
+- Proc.   0 individual time (sec): cpu=          8.5  wall=         11.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.5  wall=          8.6
++Overall time at end (sec) : cpu=          8.5  wall=         11.6

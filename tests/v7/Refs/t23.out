@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h41 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h50 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t23-t24-t25/t23.in
 - output file    -> t23.out
@@ -514,7 +514,7 @@ rprimd    :
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   3.8273624E+02
-convergence_: {deltae:  9.38E-13, res2:  4.65E-16, residm:  2.98E-13, diffor: undef, }
+convergence: {deltae:  9.379E-13, res2:  4.648E-16, residm:  2.979E-13, diffor: null, }
 etotal    :  -1.43715660E+02
 entropy   :   0.00000000E+00
 fermie    :   4.40910389E-01
@@ -715,7 +715,7 @@ spherical_terms     : -3.37615329974697E+00
 internal            : -1.43712971060897E+02
 '-kT*entropy'       : -2.68844550128707E-03
 total_energy_dc     : -1.43715659506398E+02
-total_energy_dc_eV  : -3.91070197733477E+03
+total_energy_dc_eV  : -3.91070197752165E+03
 ...
 
 
@@ -797,7 +797,7 @@ rprimd    :
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   3.8273624E+02
-convergence_: {deltae:  1.43E-11, res2:  1.24E-16, residm:  7.29E-15, diffor: undef, }
+convergence: {deltae:  1.427E-11, res2:  1.236E-16, residm:  7.292E-15, diffor: null, }
 etotal    :  -1.43715660E+02
 entropy   :   0.00000000E+00
 fermie    :   4.40910389E-01
@@ -998,7 +998,7 @@ spherical_terms     : -3.37615329668905E+00
 internal            : -1.43712971060889E+02
 '-kT*entropy'       : -2.68844550018988E-03
 total_energy_dc     : -1.43715659506389E+02
-total_energy_dc_eV  : -3.91070197752836E+03
+total_energy_dc_eV  : -3.91070197752141E+03
 ...
 
 
@@ -1076,7 +1076,7 @@ rprimd    :
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   3.8273624E+02
-convergence_: {deltae: -1.44E+02, res2:  4.80E-19, residm:  1.64E-15, diffor:  0.00E+00, }
+convergence: {deltae: -1.437E+02, res2:  4.803E-19, residm:  1.638E-15, diffor:  0.000E+00, }
 etotal    :  -1.43715660E+02
 entropy   :   0.00000000E+00
 fermie    :   4.40910389E-01
@@ -1297,7 +1297,7 @@ spherical_terms     : -3.37615329660275E+00
 internal            : -1.43712971060888E+02
 '-kT*entropy'       : -2.68844550135971E-03
 total_energy_dc     : -1.43715659506389E+02
-total_energy_dc_eV  : -3.91070197751853E+03
+total_energy_dc_eV  : -3.91070197752141E+03
 ...
 
 
@@ -1708,10 +1708,10 @@ P           mkmem3          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         25.7  wall=         27.0
+- Proc.   0 individual time (sec): cpu=         25.9  wall=         26.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         25.7  wall=         27.0
++Overall time at end (sec) : cpu=         25.9  wall=         26.1

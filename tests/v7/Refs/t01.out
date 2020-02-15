@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h40 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h50 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t01/t01.in
 - output file    -> t01.out
@@ -207,7 +207,7 @@ rprimd    :
 lattice_lengths: [   9.28430,    9.28430,   10.21327, ]
 lattice_angles: [ 90.000,  90.000, 120.000, ]
 lattice_volume:   7.6241917E+02
-convergence_: {deltae: -5.14E-08, res2:  1.53E-06, residm:  8.92E-06, diffor: undef, }
+convergence: {deltae: -5.140E-08, res2:  1.533E-06, residm:  8.922E-06, diffor: null, }
 etotal    :  -9.93970294E+01
 entropy   :   0.00000000E+00
 fermie    :   1.81316798E-01

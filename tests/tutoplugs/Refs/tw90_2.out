@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat 15 Feb 2020.
-- ( at 14h59 )
+- ( at 17h01 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutoplugs_tw90_2/tw90_2.in
 - output file    -> tw90_2.out
@@ -257,7 +257,7 @@ rprimd    :
 lattice_lengths: [   7.25704,    7.25704,    7.25704, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.7024832E+02
-convergence_: {deltae:  8.44E-13, res2:  2.41E-11, residm:  1.83E-12, diffor:  2.46E-30, }
+convergence: {deltae:  8.438E-13, res2:  2.412E-11, residm:  1.827E-12, diffor:  2.460E-30, }
 etotal    :  -7.92554776E+00
 entropy   :   0.00000000E+00
 fermie    :   2.09017422E-01
@@ -473,7 +473,7 @@ rprimd    :
 lattice_lengths: [   7.25704,    7.25704,    7.25704, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.7024832E+02
-convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  0.00E+00, diffor:  0.00E+00, }
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
 etotal    :  -7.92554776E+00
 entropy   :   0.00000000E+00
 fermie    :   2.09017422E-01
@@ -812,10 +812,10 @@ P           mkmem2          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.5  wall=          3.7
+- Proc.   0 individual time (sec): cpu=          3.5  wall=          4.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.5  wall=          3.7
++Overall time at end (sec) : cpu=          3.5  wall=          4.3

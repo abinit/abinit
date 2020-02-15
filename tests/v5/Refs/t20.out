@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h30 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h36 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t20/t20.in
 - output file    -> t20.out
@@ -384,7 +384,7 @@ rprimd    :
 lattice_lengths: [   5.60029,    5.60029,   11.20057, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.4839654E+02
-convergence_: {deltae: -8.70E-10, res2:  3.17E-11, residm:  5.22E-13, diffor: undef, }
+convergence: {deltae: -8.702E-10, res2:  3.167E-11, residm:  5.218E-13, diffor: null, }
 etotal    :  -3.71985356E+02
 entropy   :   0.00000000E+00
 fermie    :   2.41975427E-01
@@ -697,7 +697,7 @@ spherical_terms     : -6.95063717206181E+01
 internal            : -3.71985355513611E+02
 '-kT*entropy'       : -2.26578564238843E-17
 total_energy_dc     : -3.71985355513611E+02
-total_energy_dc_eV  : -1.01222362620504E+04
+total_energy_dc_eV  : -1.01222362991794E+04
 ...
 
 
@@ -936,7 +936,7 @@ rprimd    :
 lattice_lengths: [   5.60029,    5.60029,   11.20057, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.4839654E+02
-convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.99E-13, diffor:  0.00E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.990E-13, diffor:  0.000E+00, }
 etotal    :  -3.71985356E+02
 entropy   :   0.00000000E+00
 fermie    :   2.41975427E-01
@@ -1528,10 +1528,10 @@ P           mkmem2         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         16.1  wall=         16.2
+- Proc.   0 individual time (sec): cpu=         16.3  wall=         16.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.1  wall=         16.2
++Overall time at end (sec) : cpu=         16.3  wall=         16.7

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h56 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 17h14 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/wannier90_t13/t13.in
 - output file    -> t13.out
@@ -235,7 +235,7 @@ rprimd    :
 lattice_lengths: [   8.83883,    8.83883,    8.83883, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   4.8828125E+02
-convergence_: {deltae: -9.77E-13, res2:  4.83E-13, residm:  1.94E-17, diffor: undef, }
+convergence: {deltae: -9.770E-13, res2:  4.834E-13, residm:  1.940E-17, diffor: null, }
 etotal    :  -2.12517706E+01
 entropy   :   0.00000000E+00
 fermie    :  -3.04472063E-01
@@ -347,7 +347,7 @@ rprimd    :
 lattice_lengths: [   8.83883,    8.83883,    8.83883, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   4.8828125E+02
-convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  0.00E+00, diffor:  0.00E+00, }
+convergence: {deltae: null, res2: null, residm: null, diffor: null, }
 etotal    :  -2.12517706E+01
 entropy   :   0.00000000E+00
 fermie    :  -3.04472063E-01

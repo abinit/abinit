@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 19h00 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h47 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpaw2_2/tpaw2_2.in
 - output file    -> tpaw2_2.out
@@ -505,7 +505,7 @@ rprimd    :
 lattice_lengths: [   4.69688,    4.69688,    4.69688, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   7.3267708E+01
-convergence_: {deltae:  7.18E-13, res2:  4.65E-10, residm:  6.54E-04, diffor: undef, }
+convergence: {deltae:  7.176E-13, res2:  4.647E-10, residm:  6.537E-04, diffor: null, }
 etotal    :  -3.96286922E+01
 entropy   :   0.00000000E+00
 fermie    :   3.77649040E-01
@@ -671,7 +671,7 @@ spherical_terms     : -7.47881825196519E+00
 internal            : -3.96273434348049E+01
 '-kT*entropy'       : -1.34875409316337E-03
 total_energy_dc     : -3.96286921888981E+01
-total_energy_dc_eV  : -1.07835182834335E+03
+total_energy_dc_eV  : -1.07835155502189E+03
 ...
 
 
@@ -1107,10 +1107,10 @@ P           mkmem          60
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         71.2  wall=         71.5
+- Proc.   0 individual time (sec): cpu=         71.1  wall=         71.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         71.2  wall=         71.5
++Overall time at end (sec) : cpu=         71.1  wall=         71.4

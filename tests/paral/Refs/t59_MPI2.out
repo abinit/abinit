@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 20h09 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 17h24 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t59_MPI2/t59.in
 - output file    -> t59_MPI2.out
@@ -251,7 +251,7 @@ rprimd    :
 lattice_lengths: [   4.70226,    4.70226,    4.70226, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   7.3519906E+01
-convergence_: {deltae: -1.07E-14, res2:  1.68E-17, residm:  9.72E-17, diffor: undef, }
+convergence: {deltae: -1.066E-14, res2:  1.676E-17, residm:  9.724E-17, diffor: null, }
 etotal    :  -1.19970975E+01
 entropy   :   0.00000000E+00
 fermie    :   5.06313249E-01
@@ -1108,10 +1108,10 @@ P          mk1mem          16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         27.3  wall=         81.7
+- Proc.   0 individual time (sec): cpu=         27.2  wall=        108.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  11 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         54.5  wall=        163.4
++Overall time at end (sec) : cpu=         54.5  wall=        217.7

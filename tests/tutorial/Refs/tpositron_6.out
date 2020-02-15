@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 19h00 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h47 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpositron_6/tpositron_6.in
 - output file    -> tpositron_6.out
@@ -275,7 +275,7 @@ rprimd    :
 lattice_lengths: [   7.25577,    7.25577,    7.25577, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.7010716E+02
-convergence_: {deltae:  5.78E-11, res2:  8.83E-11, residm:  1.20E-05, diffor:  0.00E+00, }
+convergence: {deltae:  5.784E-11, res2:  8.832E-11, residm:  1.204E-05, diffor:  0.000E+00, }
 etotal    :  -2.03642433E+02
 entropy   :   0.00000000E+00
 fermie    :   2.14909771E-01
@@ -406,7 +406,7 @@ psp_core            :  1.70691039262478E+00
 xc_dc               : -5.68234129951182E+01
 spherical_terms     : -1.67877186633283E+01
 total_energy_dc     : -2.03642433488899E+02
-total_energy_dc_eV  : -5.54139220335447E+03
+total_energy_dc_eV  : -5.54139242785094E+03
 ...
 
 
@@ -490,7 +490,7 @@ rprimd    :
 lattice_lengths: [   7.25577,    7.25577,    7.25577, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.7010716E+02
-convergence_: {deltae: -6.72E-08, res2:  2.17E-09, residm:  7.87E-04, diffor:  0.00E+00, }
+convergence: {deltae: -6.721E-08, res2:  2.165E-09, residm:  7.873E-04, diffor:  0.000E+00, }
 etotal    :  -2.04117424E+02
 entropy   :   0.00000000E+00
 fermie    :  -4.74990224E-01
@@ -681,7 +681,7 @@ positronic          : -9.50705791847611E-01
 electronic          : -2.03642433488899E+02
 electron_positron_interaction:  4.75715568164759E-01
 total_energy_dc     : -2.04117423712582E+02
-total_energy_dc_eV  : -5.55431699467734E+03
+total_energy_dc_eV  : -5.55431756915733E+03
 ...
 
 
@@ -899,10 +899,10 @@ P           mkmem2          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.1  wall=          5.3
+- Proc.   0 individual time (sec): cpu=          5.1  wall=          5.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.1  wall=          5.3
++Overall time at end (sec) : cpu=          5.1  wall=          5.1

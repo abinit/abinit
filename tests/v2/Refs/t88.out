@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h23 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h35 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v2_t88/t88.in
 - output file    -> t88.out
@@ -296,7 +296,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -5.59E-11, res2:  2.06E-06, residm:  3.85E-12, diffor:  4.55E-06, }
+convergence: {deltae: -5.591E-11, res2:  2.059E-06, residm:  3.855E-12, diffor:  4.549E-06, }
 etotal    :  -1.68217928E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38812056E-01
@@ -432,7 +432,7 @@ _setup2: Arith. and geom. avg. npw (full set) are   12053.000   12053.000
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 1, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -441,7 +441,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -1.64E-10, res2:  1.42E-08, residm:  2.15E-12, diffor:  3.51E-06, }
+convergence: {deltae: -1.640E-10, res2:  1.415E-08, residm:  2.154E-12, diffor:  3.505E-06, }
 etotal    :  -1.68217928E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38801750E-01
@@ -509,7 +509,7 @@ force_length_stats: {min:   1.15524934E-04, max:   2.22428814E-04, mean:   1.511
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 1, icycle: 2, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -518,7 +518,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -2.00E-12, res2:  2.80E-10, residm:  4.19E-14, diffor:  4.85E-07, }
+convergence: {deltae: -2.000E-12, res2:  2.803E-10, residm:  4.194E-14, diffor:  4.852E-07, }
 etotal    :  -1.68217928E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38802908E-01
@@ -592,7 +592,7 @@ force_length_stats: {min:   1.15812554E-04, max:   2.22909959E-04, mean:   1.515
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 1, icycle: 3, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -601,7 +601,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -3.47E-12, res2:  2.15E-07, residm:  2.96E-14, diffor:  1.51E-07, }
+convergence: {deltae: -3.467E-12, res2:  2.149E-07, residm:  2.958E-14, diffor:  1.507E-07, }
 etotal    :  -1.68217921E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38808124E-01
@@ -675,7 +675,7 @@ force_length_stats: {min:   9.14201975E-05, max:   1.79567172E-04, mean:   1.208
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 1, icycle: 4, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -684,7 +684,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -3.23E-12, res2:  4.76E-07, residm:  3.14E-14, diffor:  1.21E-07, }
+convergence: {deltae: -3.233E-12, res2:  4.758E-07, residm:  3.138E-14, diffor:  1.206E-07, }
 etotal    :  -1.68217934E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38797283E-01
@@ -758,7 +758,7 @@ force_length_stats: {min:   1.22688988E-04, max:   2.32691442E-04, mean:   1.593
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 2, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -767,7 +767,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -1.33E-11, res2:  7.07E-07, residm:  1.19E-13, diffor:  3.30E-07, }
+convergence: {deltae: -1.327E-11, res2:  7.073E-07, residm:  1.194E-13, diffor:  3.305E-07, }
 etotal    :  -1.68217919E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38811104E-01
@@ -841,7 +841,7 @@ force_length_stats: {min:   8.32549957E-05, max:   1.64197068E-04, mean:   1.102
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 3, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -850,7 +850,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -5.69E-12, res2:  3.47E-07, residm:  3.43E-14, diffor:  1.28E-07, }
+convergence: {deltae: -5.688E-12, res2:  3.468E-07, residm:  3.430E-14, diffor:  1.279E-07, }
 etotal    :  -1.68217913E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38812050E-01
@@ -924,7 +924,7 @@ force_length_stats: {min:   4.77962408E-05, max:   9.55665675E-05, mean:   6.371
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 4, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -933,7 +933,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -6.48E-12, res2:  1.88E-07, residm:  1.58E-14, diffor:  6.26E-08, }
+convergence: {deltae: -6.484E-12, res2:  1.885E-07, residm:  1.579E-14, diffor:  6.256E-08, }
 etotal    :  -1.68217911E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38812442E-01
@@ -1007,7 +1007,7 @@ force_length_stats: {min:   2.09222140E-05, max:   3.73520263E-05, mean:   2.639
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 5, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -1016,7 +1016,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -2.39E-12, res2:  8.09E-08, residm:  6.26E-15, diffor:  2.08E-08, }
+convergence: {deltae: -2.391E-12, res2:  8.093E-08, residm:  6.263E-15, diffor:  2.081E-08, }
 etotal    :  -1.68217912E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38812124E-01
@@ -1090,7 +1090,7 @@ force_length_stats: {min:   7.28761162E-06, max:   1.35896614E-05, mean:   1.148
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 6, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -1099,7 +1099,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -1.40E-12, res2:  1.89E-08, residm:  1.89E-15, diffor:  2.21E-08, }
+convergence: {deltae: -1.400E-12, res2:  1.887E-08, residm:  1.891E-15, diffor:  2.211E-08, }
 etotal    :  -1.68217915E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38811198E-01
@@ -1172,7 +1172,7 @@ force_length_stats: {min:   2.18509791E-05, max:   3.53353811E-05, mean:   2.634
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 7, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -1181,7 +1181,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -2.74E-11, res2:  3.15E-09, residm:  3.50E-13, diffor:  1.32E-06, }
+convergence: {deltae: -2.745E-11, res2:  3.148E-09, residm:  3.502E-13, diffor:  1.324E-06, }
 etotal    :  -1.68217918E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38810189E-01
@@ -1253,7 +1253,7 @@ force_length_stats: {min:   2.63953818E-05, max:   4.85319528E-05, mean:   3.377
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 8, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -1262,7 +1262,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -3.26E-11, res2:  1.48E-08, residm:  1.53E-12, diffor:  3.07E-06, }
+convergence: {deltae: -3.261E-11, res2:  1.484E-08, residm:  1.528E-12, diffor:  3.071E-06, }
 etotal    :  -1.68217921E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38810169E-01
@@ -1334,7 +1334,7 @@ force_length_stats: {min:   2.47679241E-05, max:   4.79949458E-05, mean:   3.251
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 9, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -1343,7 +1343,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -3.07E-10, res2:  4.98E-08, residm:  4.92E-12, diffor:  5.25E-06, }
+convergence: {deltae: -3.071E-10, res2:  4.982E-08, residm:  4.920E-12, diffor:  5.252E-06, }
 etotal    :  -1.68217924E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38807250E-01
@@ -1415,7 +1415,7 @@ force_length_stats: {min:   2.28546384E-05, max:   4.49659598E-05, mean:   3.022
 
 
 --- !ResultsGS
-iteration_state: {dtset: 2, }
+iteration_state: {dtset: 2, itime: 10, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -1424,7 +1424,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -1.38E-10, res2:  3.12E-08, residm:  2.41E-12, diffor:  3.74E-06, }
+convergence: {deltae: -1.375E-10, res2:  3.123E-08, residm:  2.415E-12, diffor:  3.738E-06, }
 etotal    :  -1.68217926E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38807153E-01
@@ -1514,7 +1514,7 @@ force_length_stats: {min:   1.62553202E-05, max:   3.25028447E-05, mean:   2.167
   -1.05941   -0.40983   -0.36584   -0.23881   -0.05918
 
 --- !EnergyTerms
-iteration_state     : {dtset: 2, }
+iteration_state     : {dtset: 2, itime: 10, icycle: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  9.24260768602631E+00
 hartree             :  1.46418347973764E+01
@@ -1593,7 +1593,7 @@ _setup2: Arith. and geom. avg. npw (full set) are   12053.000   12053.000
 
 
 --- !ResultsGS
-iteration_state: {dtset: 3, }
+iteration_state: {dtset: 3, itime: 1, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -1602,7 +1602,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -1.64E-10, res2:  1.42E-08, residm:  2.15E-12, diffor:  3.51E-06, }
+convergence: {deltae: -1.640E-10, res2:  1.415E-08, residm:  2.154E-12, diffor:  3.505E-06, }
 etotal    :  -1.68217928E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38801750E-01
@@ -1667,7 +1667,7 @@ force_length_stats: {min:   1.15524934E-04, max:   2.22428814E-04, mean:   1.511
 
 
 --- !ResultsGS
-iteration_state: {dtset: 3, }
+iteration_state: {dtset: 3, itime: 2, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -1676,7 +1676,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -1.07E-11, res2:  9.20E-07, residm:  6.75E-14, diffor:  1.23E-07, }
+convergence: {deltae: -1.067E-11, res2:  9.200E-07, residm:  6.752E-14, diffor:  1.234E-07, }
 etotal    :  -1.68217929E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38813237E-01
@@ -1745,7 +1745,7 @@ force_length_stats: {min:   5.35047410E-05, max:   1.04575855E-04, mean:   7.052
 
 
 --- !ResultsGS
-iteration_state: {dtset: 3, }
+iteration_state: {dtset: 3, itime: 3, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -1754,7 +1754,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -9.72E-12, res2:  5.83E-07, residm:  4.55E-14, diffor:  9.26E-08, }
+convergence: {deltae: -9.717E-12, res2:  5.828E-07, residm:  4.545E-14, diffor:  9.264E-08, }
 etotal    :  -1.68217929E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38814693E-01
@@ -1843,7 +1843,7 @@ force_length_stats: {min:   1.72506870E-06, max:   6.60764970E-06, mean:   4.980
   -1.05942   -0.40982   -0.36586   -0.23881   -0.05918
 
 --- !EnergyTerms
-iteration_state     : {dtset: 3, }
+iteration_state     : {dtset: 3, itime: 3, icycle: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  9.24261216010458E+00
 hartree             :  1.46418437515815E+01
@@ -1922,7 +1922,7 @@ _setup2: Arith. and geom. avg. npw (full set) are   12053.000   12053.000
 
 
 --- !ResultsGS
-iteration_state: {dtset: 4, }
+iteration_state: {dtset: 4, itime: 1, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -1931,7 +1931,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -1.64E-10, res2:  1.42E-08, residm:  2.15E-12, diffor:  3.51E-06, }
+convergence: {deltae: -1.640E-10, res2:  1.415E-08, residm:  2.154E-12, diffor:  3.505E-06, }
 etotal    :  -1.68217928E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38801750E-01
@@ -1996,7 +1996,7 @@ force_length_stats: {min:   1.15524934E-04, max:   2.22428814E-04, mean:   1.511
 
 
 --- !ResultsGS
-iteration_state: {dtset: 4, }
+iteration_state: {dtset: 4, itime: 2, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -2005,7 +2005,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -1.07E-11, res2:  9.20E-07, residm:  6.75E-14, diffor:  1.23E-07, }
+convergence: {deltae: -1.067E-11, res2:  9.200E-07, residm:  6.752E-14, diffor:  1.234E-07, }
 etotal    :  -1.68217929E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38813237E-01
@@ -2074,7 +2074,7 @@ force_length_stats: {min:   5.35047410E-05, max:   1.04575855E-04, mean:   7.052
 
 
 --- !ResultsGS
-iteration_state: {dtset: 4, }
+iteration_state: {dtset: 4, itime: 3, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -2083,7 +2083,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -9.88E-12, res2:  7.40E-07, residm:  5.74E-14, diffor:  1.05E-07, }
+convergence: {deltae: -9.884E-12, res2:  7.399E-07, residm:  5.737E-14, diffor:  1.050E-07, }
 etotal    :  -1.68217929E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38815747E-01
@@ -2172,7 +2172,7 @@ force_length_stats: {min:   1.10118523E-05, max:   1.38409112E-05, mean:   1.195
   -1.05942   -0.40982   -0.36586   -0.23882   -0.05918
 
 --- !EnergyTerms
-iteration_state     : {dtset: 4, }
+iteration_state     : {dtset: 4, itime: 3, icycle: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  9.24264340495710E+00
 hartree             :  1.46419035686643E+01
@@ -2251,7 +2251,7 @@ _setup2: Arith. and geom. avg. npw (full set) are   12053.000   12053.000
 
 
 --- !ResultsGS
-iteration_state: {dtset: 5, }
+iteration_state: {dtset: 5, itime: 1, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -2260,7 +2260,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -1.64E-10, res2:  1.42E-08, residm:  2.15E-12, diffor:  3.51E-06, }
+convergence: {deltae: -1.640E-10, res2:  1.415E-08, residm:  2.154E-12, diffor:  3.505E-06, }
 etotal    :  -1.68217928E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38801750E-01
@@ -2334,7 +2334,7 @@ force_length_stats: {min:   1.15524934E-04, max:   2.22428814E-04, mean:   1.511
 
 
 --- !ResultsGS
-iteration_state: {dtset: 5, }
+iteration_state: {dtset: 5, itime: 2, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -2343,7 +2343,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -3.47E-10, res2:  2.76E-04, residm:  3.14E-11, diffor:  3.00E-06, }
+convergence: {deltae: -3.469E-10, res2:  2.763E-04, residm:  3.140E-11, diffor:  2.996E-06, }
 etotal    :  -1.68216379E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.39518303E-01
@@ -2421,7 +2421,7 @@ force_length_stats: {min:   7.58638781E-03, max:   1.10118586E-02, mean:   8.728
 
 
 --- !ResultsGS
-iteration_state: {dtset: 5, }
+iteration_state: {dtset: 5, itime: 3, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -2430,7 +2430,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -4.01E-10, res2:  2.85E-04, residm:  3.52E-11, diffor:  3.55E-06, }
+convergence: {deltae: -4.010E-10, res2:  2.851E-04, residm:  3.519E-11, diffor:  3.548E-06, }
 etotal    :  -1.68208345E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.40175098E-01
@@ -2506,7 +2506,7 @@ force_length_stats: {min:   1.54607024E-02, max:   2.23251800E-02, mean:   1.774
 
 
 --- !ResultsGS
-iteration_state: {dtset: 5, }
+iteration_state: {dtset: 5, itime: 4, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -2515,7 +2515,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -4.14E-09, res2:  6.96E-04, residm:  6.67E-11, diffor:  1.82E-06, }
+convergence: {deltae: -4.143E-09, res2:  6.960E-04, residm:  6.674E-11, diffor:  1.816E-06, }
 etotal    :  -1.68207727E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.39974808E-01
@@ -2595,7 +2595,7 @@ force_length_stats: {min:   1.52559751E-02, max:   2.26008737E-02, mean:   1.770
 
 
 --- !ResultsGS
-iteration_state: {dtset: 5, }
+iteration_state: {dtset: 5, itime: 5, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -2604,7 +2604,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -9.77E-11, res2:  5.89E-05, residm:  1.19E-11, diffor:  1.57E-06, }
+convergence: {deltae: -9.768E-11, res2:  5.891E-05, residm:  1.190E-11, diffor:  1.568E-06, }
 etotal    :  -1.68209034E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38247683E-01
@@ -2688,7 +2688,7 @@ force_length_stats: {min:   1.57832539E-04, max:   2.58885580E-03, mean:   1.778
 
 
 --- !ResultsGS
-iteration_state: {dtset: 5, }
+iteration_state: {dtset: 5, itime: 6, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -2697,7 +2697,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -2.99E-11, res2:  3.99E-07, residm:  2.39E-12, diffor:  6.21E-07, }
+convergence: {deltae: -2.988E-11, res2:  3.987E-07, residm:  2.388E-12, diffor:  6.211E-07, }
 etotal    :  -1.68115189E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.34598337E-01
@@ -2781,7 +2781,7 @@ force_length_stats: {min:   3.65408697E-02, max:   4.84333630E-02, mean:   4.050
 
 
 --- !ResultsGS
-iteration_state: {dtset: 5, }
+iteration_state: {dtset: 5, itime: 7, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -2790,7 +2790,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -5.46E-11, res2:  5.05E-07, residm:  3.05E-12, diffor:  5.91E-07, }
+convergence: {deltae: -5.463E-11, res2:  5.053E-07, residm:  3.055E-12, diffor:  5.913E-07, }
 etotal    :  -1.67905345E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.31593580E-01
@@ -2868,7 +2868,7 @@ force_length_stats: {min:   6.59382333E-02, max:   9.23651853E-02, mean:   7.474
 
 
 --- !ResultsGS
-iteration_state: {dtset: 5, }
+iteration_state: {dtset: 5, itime: 8, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -2877,7 +2877,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -1.30E-09, res2:  3.33E-04, residm:  3.61E-11, diffor:  3.03E-06, }
+convergence: {deltae: -1.304E-09, res2:  3.327E-04, residm:  3.608E-11, diffor:  3.031E-06, }
 etotal    :  -1.67935324E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.32314712E-01
@@ -2960,7 +2960,7 @@ force_length_stats: {min:   6.06513090E-02, max:   8.85443923E-02, mean:   6.994
 
 
 --- !ResultsGS
-iteration_state: {dtset: 5, }
+iteration_state: {dtset: 5, itime: 9, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -2969,7 +2969,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -4.32E-11, res2:  4.14E-06, residm:  4.57E-12, diffor:  3.79E-06, }
+convergence: {deltae: -4.322E-11, res2:  4.140E-06, residm:  4.571E-12, diffor:  3.791E-06, }
 etotal    :  -1.68156635E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.40554417E-01
@@ -3053,7 +3053,7 @@ force_length_stats: {min:   6.86471490E-03, max:   1.90466164E-02, mean:   1.498
 
 
 --- !ResultsGS
-iteration_state: {dtset: 5, }
+iteration_state: {dtset: 5, itime: 10, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -3062,7 +3062,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae:  7.57E-11, res2:  4.28E-06, residm:  1.04E-11, diffor:  2.07E-06, }
+convergence: {deltae:  7.565E-11, res2:  4.279E-06, residm:  1.038E-11, diffor:  2.065E-06, }
 etotal    :  -1.65186225E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.54742058E-01
@@ -3157,7 +3157,7 @@ force_length_stats: {min:   7.13654829E-01, max:   9.85551153E-01, mean:   8.042
   -1.25158   -0.48785   -0.43185   -0.25474   -0.03227
 
 --- !EnergyTerms
-iteration_state     : {dtset: 5, }
+iteration_state     : {dtset: 5, itime: 10, icycle: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  1.11305854769417E+01
 hartree             :  1.71329531326430E+01
@@ -3236,7 +3236,7 @@ _setup2: Arith. and geom. avg. npw (full set) are   12053.000   12053.000
 
 
 --- !ResultsGS
-iteration_state: {dtset: 6, }
+iteration_state: {dtset: 6, itime: 1, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -3245,7 +3245,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -1.64E-10, res2:  1.42E-08, residm:  2.15E-12, diffor:  3.51E-06, }
+convergence: {deltae: -1.640E-10, res2:  1.415E-08, residm:  2.154E-12, diffor:  3.505E-06, }
 etotal    :  -1.68217928E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.38801750E-01
@@ -3321,7 +3321,7 @@ force_length_stats: {min:   1.15524934E-04, max:   2.22428814E-04, mean:   1.511
 
 
 --- !ResultsGS
-iteration_state: {dtset: 6, }
+iteration_state: {dtset: 6, itime: 2, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -3330,7 +3330,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -6.83E-09, res2:  2.42E-03, residm:  1.99E-10, diffor:  6.48E-06, }
+convergence: {deltae: -6.827E-09, res2:  2.417E-03, residm:  1.988E-10, diffor:  6.482E-06, }
 etotal    :  -1.68211304E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.37294480E-01
@@ -3407,7 +3407,7 @@ force_length_stats: {min:   1.31144118E-02, max:   1.79014087E-02, mean:   1.471
 
 
 --- !ResultsGS
-iteration_state: {dtset: 6, }
+iteration_state: {dtset: 6, itime: 3, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -3416,7 +3416,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -1.55E-09, res2:  2.17E-04, residm:  3.00E-11, diffor:  4.75E-06, }
+convergence: {deltae: -1.551E-09, res2:  2.168E-04, residm:  3.000E-11, diffor:  4.747E-06, }
 etotal    :  -1.68205342E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.36881502E-01
@@ -3493,7 +3493,7 @@ force_length_stats: {min:   1.69747671E-02, max:   2.13947593E-02, mean:   1.844
 
 
 --- !ResultsGS
-iteration_state: {dtset: 6, }
+iteration_state: {dtset: 6, itime: 4, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -3502,7 +3502,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -4.76E-11, res2:  1.55E-04, residm:  1.48E-11, diffor:  6.68E-07, }
+convergence: {deltae: -4.763E-11, res2:  1.546E-04, residm:  1.482E-11, diffor:  6.676E-07, }
 etotal    :  -1.68210078E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.37280942E-01
@@ -3585,7 +3585,7 @@ force_length_stats: {min:   1.34819937E-02, max:   1.56949463E-02, mean:   1.421
 
 
 --- !ResultsGS
-iteration_state: {dtset: 6, }
+iteration_state: {dtset: 6, itime: 5, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -3594,7 +3594,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -1.11E-11, res2:  5.75E-07, residm:  1.82E-12, diffor:  3.22E-06, }
+convergence: {deltae: -1.108E-11, res2:  5.750E-07, residm:  1.815E-12, diffor:  3.224E-06, }
 etotal    :  -1.68214218E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.39652222E-01
@@ -3677,7 +3677,7 @@ force_length_stats: {min:   1.06684268E-02, max:   1.66680244E-02, mean:   1.266
 
 
 --- !ResultsGS
-iteration_state: {dtset: 6, }
+iteration_state: {dtset: 6, itime: 6, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -3686,7 +3686,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -2.67E-11, res2:  5.57E-07, residm:  2.07E-12, diffor:  3.45E-06, }
+convergence: {deltae: -2.665E-11, res2:  5.569E-07, residm:  2.068E-12, diffor:  3.446E-06, }
 etotal    :  -1.68166825E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.41599252E-01
@@ -3763,7 +3763,7 @@ force_length_stats: {min:   3.35513924E-02, max:   4.53090557E-02, mean:   3.747
 
 
 --- !ResultsGS
-iteration_state: {dtset: 6, }
+iteration_state: {dtset: 6, itime: 7, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -3772,7 +3772,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -1.58E-09, res2:  1.61E-03, residm:  2.69E-10, diffor:  1.57E-06, }
+convergence: {deltae: -1.578E-09, res2:  1.613E-03, residm:  2.688E-10, diffor:  1.575E-06, }
 etotal    :  -1.68123144E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.42599820E-01
@@ -3853,7 +3853,7 @@ force_length_stats: {min:   4.68675060E-02, max:   5.94442608E-02, mean:   5.105
 
 
 --- !ResultsGS
-iteration_state: {dtset: 6, }
+iteration_state: {dtset: 6, itime: 8, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -3862,7 +3862,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -7.88E-11, res2:  1.39E-05, residm:  5.62E-12, diffor:  5.84E-07, }
+convergence: {deltae: -7.880E-11, res2:  1.390E-05, residm:  5.622E-12, diffor:  5.840E-07, }
 etotal    :  -1.68201304E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.40426115E-01
@@ -3946,7 +3946,7 @@ force_length_stats: {min:   1.94306582E-02, max:   2.78538777E-02, mean:   2.223
 
 
 --- !ResultsGS
-iteration_state: {dtset: 6, }
+iteration_state: {dtset: 6, itime: 9, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -3955,7 +3955,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -1.71E-11, res2:  5.92E-07, residm:  5.01E-12, diffor:  2.24E-07, }
+convergence: {deltae: -1.709E-11, res2:  5.919E-07, residm:  5.006E-12, diffor:  2.236E-07, }
 etotal    :  -1.68135063E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.34524755E-01
@@ -4039,7 +4039,7 @@ force_length_stats: {min:   3.72609096E-02, max:   4.66931831E-02, mean:   4.040
 
 
 --- !ResultsGS
-iteration_state: {dtset: 6, }
+iteration_state: {dtset: 6, itime: 10, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 20.0000000,   0.0000000,   0.0000000, ]
@@ -4048,7 +4048,7 @@ rprimd    :
 lattice_lengths: [  20.00000,   20.00000,   20.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   8.0000000E+03
-convergence_: {deltae: -2.94E-11, res2:  1.28E-06, residm:  7.96E-12, diffor:  3.31E-07, }
+convergence: {deltae: -2.938E-11, res2:  1.280E-06, residm:  7.960E-12, diffor:  3.308E-07, }
 etotal    :  -1.67738875E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.29536536E-01
@@ -4143,7 +4143,7 @@ force_length_stats: {min:   8.48380919E-02, max:   1.13736423E-01, mean:   9.447
   -1.02639   -0.35432   -0.34681   -0.22954   -0.10749
 
 --- !EnergyTerms
-iteration_state     : {dtset: 6, }
+iteration_state     : {dtset: 6, itime: 10, icycle: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  8.81639282605476E+00
 hartree             :  1.36024693100139E+01
@@ -4412,10 +4412,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         79.9  wall=         85.1
+- Proc.   0 individual time (sec): cpu=         81.9  wall=         89.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         79.9  wall=         85.1
++Overall time at end (sec) : cpu=         81.9  wall=         89.5

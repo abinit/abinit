@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h58 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h46 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_tffield_4/tffield_4.in
 - output file    -> tffield_4.out
@@ -500,7 +500,7 @@ rprimd    :
 lattice_lengths: [   7.44856,    7.44856,    7.44856, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9221464E+02
-convergence_: {deltae:  1.24E-14, res2:  1.15E-14, residm:  3.98E-11, diffor: undef, }
+convergence: {deltae:  1.243E-14, res2:  1.153E-14, residm:  3.978E-11, diffor: null, }
 etotal    :  -1.00857697E+01
 entropy   :   0.00000000E+00
 fermie    :   9.05459446E-02
@@ -697,7 +697,7 @@ rprimd    :
 lattice_lengths: [   7.48580,    7.44856,    7.44856, ]
 lattice_angles: [ 59.669,  59.835,  59.835, ]
 lattice_volume:   2.9220368E+02
-convergence_: {deltae:  1.60E-14, res2:  4.27E-16, residm:  9.78E-11, diffor: undef, }
+convergence: {deltae:  1.599E-14, res2:  4.268E-16, residm:  9.780E-11, diffor: null, }
 etotal    :  -1.00857263E+01
 entropy   :   0.00000000E+00
 fermie    :   9.12457924E-02
@@ -893,7 +893,7 @@ rprimd    :
 lattice_lengths: [   7.41132,    7.44856,    7.44856, ]
 lattice_angles: [ 60.331,  60.165,  60.165, ]
 lattice_volume:   2.9220368E+02
-convergence_: {deltae:  0.00E+00, res2:  2.24E-14, residm:  4.09E-10, diffor: undef, }
+convergence: {deltae:  0.000E+00, res2:  2.238E-14, residm:  4.087E-10, diffor: null, }
 etotal    :  -1.00857264E+01
 entropy   :   0.00000000E+00
 fermie    :   9.12448593E-02

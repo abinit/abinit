@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 19h00 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h47 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tgw1_2-tgw1_3-tgw1_4-tgw1_5/tgw1_4.in
 - output file    -> tgw1_4.out
@@ -2153,10 +2153,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         17.2  wall=         17.2
+- Proc.   0 individual time (sec): cpu=         17.1  wall=         17.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  44 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.2  wall=         17.2
++Overall time at end (sec) : cpu=         17.1  wall=         17.2

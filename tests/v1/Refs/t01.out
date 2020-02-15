@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h19 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h32 )
   
 - input  file    -> t01.in
 - output file    -> t01.out
@@ -349,7 +349,7 @@ rprimd    :
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   1.0974400E+02
-convergence_: {deltae:  4.44E-15, res2:  6.05E-16, residm:  6.63E-13, diffor: undef, }
+convergence: {deltae:  4.441E-15, res2:  6.050E-16, residm:  6.632E-13, diffor: null, }
 etotal    :  -2.09308835E+00
 entropy   :   0.00000000E+00
 fermie    :   3.32315685E-01
@@ -593,10 +593,10 @@ P           mkmem           2
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          0.2  wall=          0.6
+- Proc.   0 individual time (sec): cpu=          0.3  wall=          0.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.2  wall=          0.6
++Overall time at end (sec) : cpu=          0.3  wall=          0.9

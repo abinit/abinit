@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 20h06 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 17h02 )
   
 -  nproc =    1
 
@@ -1662,6 +1662,6 @@ dipdip_range         2         2         2
 
 ================================================================================
 
-+Total cpu time      0.475  and wall time      0.477 sec
++Total cpu time      0.530  and wall time      0.533 sec
 
  multibinit : the run completed succesfully.

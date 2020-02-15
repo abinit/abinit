@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h56 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 17h01 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/psml_t14/t14.in
 - output file    -> t14.out
@@ -368,7 +368,7 @@ rprimd    :
 lattice_lengths: [   5.45185,    5.45185,    5.45185, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   1.1458219E+02
-convergence_: {deltae: -2.15E-08, res2:  6.45E-07, residm:  9.83E-06, diffor: undef, }
+convergence: {deltae: -2.154E-08, res2:  6.455E-07, residm:  9.826E-06, diffor: null, }
 etotal    :  -3.20762078E+01
 entropy   :   0.00000000E+00
 fermie    :   1.39176830E-01
@@ -765,10 +765,10 @@ P           mkmem         110
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         16.2  wall=         16.3
+- Proc.   0 individual time (sec): cpu=         16.2  wall=         16.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.2  wall=         16.3
++Overall time at end (sec) : cpu=         16.2  wall=         16.5

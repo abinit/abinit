@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h33 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h49 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t36/t36.in
 - output file    -> t36.out
@@ -298,7 +298,7 @@ rprimd    :
 lattice_lengths: [   6.69714,    6.69714,    6.69714, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.1239948E+02
-convergence_: {deltae:  1.42E-14, res2:  8.83E-16, residm:  5.31E-19, diffor: undef, }
+convergence: {deltae:  1.421E-14, res2:  8.832E-16, residm:  5.313E-19, diffor: null, }
 etotal    :  -7.64082356E+01
 entropy   :   0.00000000E+00
 fermie    :   3.84785713E-01
@@ -1058,53 +1058,55 @@ P          mk1mem2         32
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         30.0        0.50      0.008
+- Total cpu        time (s,m,h):         30.3        0.50      0.008
 - Total wall clock time (s,m,h):         31.1        0.52      0.009
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           30.0, wall_time =           31.1
+- cpu_time =           30.3, wall_time =           31.1
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                  18.268  61.0     18.352  59.1          72209      -1.00        1.00       1.00
-- fourwf%(G->r)                  3.370  11.2      3.387  10.9          23712      -1.00        1.00       1.00
-- projbd                         2.170   7.2      2.188   7.0         119890      -1.00        0.99       0.99
-- nonlop(apply)                  1.876   6.3      1.892   6.1          60353      -1.00        0.99       0.99
-- pspini                         0.694   2.3      0.697   2.2              2      -1.00        1.00       1.00
-- nonlop(forces)                 0.641   2.1      0.647   2.1          21360      -1.00        0.99       0.99
-- dfpt_vtowfk(contrib)           0.607   2.0      0.603   1.9             -1      -1.00        1.01       1.01
-- getghc-other                   0.414   1.4      0.369   1.2             -1      -1.00        1.12       1.12
-- dfpt_vtorho-kpt loop           0.177   0.6      0.177   0.6             45      -1.00        1.00       1.00
-- getgh1c_setup                  0.166   0.6      0.166   0.5            988      -1.00        1.00       1.00
-- others (124)                  -1.886  -6.3     -1.913  -6.2             -1      -1.00        0.99       0.99
+- fourwf%(pot)                  18.453  60.9     18.594  59.7          72209      -1.00        0.99       0.99
+- fourwf%(G->r)                  3.399  11.2      3.422  11.0          23712      -1.00        0.99       0.99
+- projbd                         2.177   7.2      2.204   7.1         119890      -1.00        0.99       0.99
+- nonlop(apply)                  1.904   6.3      1.930   6.2          60353      -1.00        0.99       0.99
+- pspini                         0.716   2.4      0.717   2.3              2      -1.00        1.00       1.00
+- nonlop(forces)                 0.629   2.1      0.637   2.0          21360      -1.00        0.99       0.99
+- dfpt_vtowfk(contrib)           0.607   2.0      0.607   2.0             -1      -1.00        1.00       1.00
+- getghc-other                   0.421   1.4      0.385   1.2             -1      -1.00        1.09       1.09
+- dfpt_vtorho-kpt loop           0.182   0.6      0.183   0.6             45      -1.00        1.00       1.00
+- getgh1c_setup                  0.170   0.6      0.171   0.5            988      -1.00        0.99       0.99
+- ewald                          0.158   0.5      0.158   0.5              1      -1.00        1.00       1.00
+- others (123)                  -2.020  -6.7     -2.054  -6.6             -1      -1.00        0.98       0.98
 -<END_TIMER>
 -
-- subtotal                      26.496  88.4     26.564  85.5                                  1.00       1.00
+- subtotal                      26.798  88.5     26.954  86.6                                  0.99       0.99
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          30.0, wall_time =          31.1
+- cpu_time =          30.3, wall_time =          31.1
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                  18.268  61.0     18.352  59.1          72209      -1.00        1.00       1.00
-- fourwf%(G->r)                  3.370  11.2      3.387  10.9          23712      -1.00        1.00       1.00
-- projbd                         2.170   7.2      2.188   7.0         119890      -1.00        0.99       0.99
-- nonlop(apply)                  1.876   6.3      1.892   6.1          60353      -1.00        0.99       0.99
-- pspini                         0.694   2.3      0.697   2.2              2      -1.00        1.00       1.00
-- nonlop(forces)                 0.641   2.1      0.647   2.1          21360      -1.00        0.99       0.99
-- dfpt_vtowfk(contrib)           0.607   2.0      0.603   1.9             -1      -1.00        1.01       1.01
-- getghc-other                   0.414   1.4      0.369   1.2             -1      -1.00        1.12       1.12
-- dfpt_vtorho-kpt loop           0.177   0.6      0.177   0.6             45      -1.00        1.00       1.00
-- getgh1c_setup                  0.166   0.6      0.166   0.5            988      -1.00        1.00       1.00
-- others (124)                  -1.886  -6.3     -1.913  -6.2             -1      -1.00        0.99       0.99
+- fourwf%(pot)                  18.453  60.9     18.594  59.7          72209      -1.00        0.99       0.99
+- fourwf%(G->r)                  3.399  11.2      3.422  11.0          23712      -1.00        0.99       0.99
+- projbd                         2.177   7.2      2.204   7.1         119890      -1.00        0.99       0.99
+- nonlop(apply)                  1.904   6.3      1.930   6.2          60353      -1.00        0.99       0.99
+- pspini                         0.716   2.4      0.717   2.3              2      -1.00        1.00       1.00
+- nonlop(forces)                 0.629   2.1      0.637   2.0          21360      -1.00        0.99       0.99
+- dfpt_vtowfk(contrib)           0.607   2.0      0.607   2.0             -1      -1.00        1.00       1.00
+- getghc-other                   0.421   1.4      0.385   1.2             -1      -1.00        1.09       1.09
+- dfpt_vtorho-kpt loop           0.182   0.6      0.183   0.6             45      -1.00        1.00       1.00
+- getgh1c_setup                  0.170   0.6      0.171   0.5            988      -1.00        0.99       0.99
+- ewald                          0.158   0.5      0.158   0.5              1      -1.00        1.00       1.00
+- others (123)                  -2.020  -6.7     -2.054  -6.6             -1      -1.00        0.98       0.98
 -<END_TIMER>
 
-- subtotal                      26.496  88.4     26.564  85.5                                  1.00       1.00
+- subtotal                      26.798  88.5     26.954  86.6                                  0.99       0.99
 
 ================================================================================
 
@@ -1180,10 +1182,10 @@ P          mk1mem2         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         30.0  wall=         31.1
+- Proc.   0 individual time (sec): cpu=         30.3  wall=         31.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and  29 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         30.0  wall=         31.1
++Overall time at end (sec) : cpu=         30.3  wall=         31.1

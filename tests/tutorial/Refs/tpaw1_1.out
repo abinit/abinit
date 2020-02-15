@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 19h00 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h47 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpaw1_1/tpaw1_1.in
 - output file    -> tpaw1_1.out
@@ -237,7 +237,7 @@ rprimd    :
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   7.6567760E+01
-convergence_: {deltae: -2.34E-13, res2:  5.56E-12, residm:  2.73E-04, diffor: undef, }
+convergence: {deltae: -2.345E-13, res2:  5.564E-12, residm:  2.729E-04, diffor: null, }
 etotal    :  -1.19981837E+01
 entropy   :   0.00000000E+00
 fermie    :   4.66500726E-01
@@ -526,10 +526,10 @@ P           mkmem          28
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.7  wall=          2.7
+- Proc.   0 individual time (sec): cpu=          2.7  wall=          2.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.7  wall=          2.7
++Overall time at end (sec) : cpu=          2.7  wall=          2.8

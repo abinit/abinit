@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h58 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h46 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_telast_5/telast_5.in
 - output file    -> telast_5.out
@@ -401,7 +401,7 @@ rprimd    :
 lattice_lengths: [   7.53896,    7.53896,   12.27780, ]
 lattice_angles: [ 90.000,  90.000, 120.000, ]
 lattice_volume:   6.0433042E+02
-convergence_: {deltae: -3.91E-14, res2:  6.24E-21, residm:  6.05E-24, diffor:  1.05E-12, }
+convergence: {deltae: -3.908E-14, res2:  6.240E-21, residm:  6.050E-24, diffor:  1.051E-12, }
 etotal    :  -2.02709438E+01
 entropy   :   0.00000000E+00
 fermie    :   8.61617366E-02
@@ -556,7 +556,7 @@ rprimd    :
 lattice_lengths: [   7.53896,    7.53896,   12.27780, ]
 lattice_angles: [ 90.000,  90.000, 120.000, ]
 lattice_volume:   6.0433042E+02
-convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  8.03E-21, diffor:  0.00E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  8.031E-21, diffor:  0.000E+00, }
 etotal    :  -2.02709438E+01
 entropy   :   0.00000000E+00
 fermie    :   8.61617366E-02
@@ -1217,10 +1217,10 @@ P          mk1mem3         32
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          7.9  wall=         12.3
+- Proc.   0 individual time (sec): cpu=          8.0  wall=          8.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.9  wall=         12.3
++Overall time at end (sec) : cpu=          8.0  wall=          8.6

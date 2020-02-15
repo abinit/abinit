@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 19h00 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h48 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tspin_2/tspin_2.in
 - output file    -> tspin_2.out
@@ -283,7 +283,7 @@ rprimd    :
 lattice_lengths: [   4.66690,    4.66690,    6.60000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.4374800E+02
-convergence_: {deltae:  1.92E-13, res2:  6.81E-15, residm:  9.82E-08, diffor: undef, }
+convergence: {deltae:  1.918E-13, res2:  6.814E-15, residm:  9.823E-08, diffor: null, }
 etotal    :  -4.92489593E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.77793565E-01
@@ -596,10 +596,10 @@ P           mkmem          18
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         23.6  wall=         23.7
+- Proc.   0 individual time (sec): cpu=         23.3  wall=         23.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.6  wall=         23.7
++Overall time at end (sec) : cpu=         23.3  wall=         23.4

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h33 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h49 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t42/t42.in
 - output file    -> t42.out
@@ -1027,7 +1027,7 @@ rprimd    :
 lattice_lengths: [   7.44583,    7.44583,    7.44583, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9189397E+02
-convergence_: {deltae:  2.17E-12, res2:  5.52E-13, residm:  1.79E-15, diffor: undef, }
+convergence: {deltae:  2.171E-12, res2:  5.518E-13, residm:  1.792E-15, diffor: null, }
 etotal    :  -8.58523996E+00
 entropy   :   0.00000000E+00
 fermie    :   8.20644288E-02
@@ -1157,7 +1157,7 @@ psp_core            :  7.25428932010496E-01
 xc_dc               : -2.54954992410559E-01
 spherical_terms     :  8.07146823680498E-02
 total_energy_dc     : -8.58523995964426E+00
-total_energy_dc_eV  : -2.33616270183053E+02
+total_energy_dc_eV  : -2.33616260072091E+02
 ...
 
 
@@ -1307,7 +1307,7 @@ rprimd    :
 lattice_lengths: [   7.44583,    7.44583,    7.44583, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9189397E+02
-convergence_: {deltae:  6.41E-13, res2:  4.46E-12, residm:  1.11E-14, diffor: undef, }
+convergence: {deltae:  6.413E-13, res2:  4.462E-12, residm:  1.114E-14, diffor: null, }
 etotal    :  -8.58523451E+00
 entropy   :   0.00000000E+00
 fermie    :   8.25335897E-02
@@ -1437,7 +1437,7 @@ psp_core            :  7.25428932010496E-01
 xc_dc               : -2.54958067641580E-01
 spherical_terms     :  8.07144674403517E-02
 total_energy_dc     : -8.58523451119152E+00
-total_energy_dc_eV  : -2.33616150009962E+02
+total_energy_dc_eV  : -2.33616111812152E+02
 ...
 
 
@@ -1587,7 +1587,7 @@ rprimd    :
 lattice_lengths: [   7.44583,    7.44583,    7.44583, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9189397E+02
-convergence_: {deltae:  7.57E-13, res2:  3.77E-12, residm:  9.18E-15, diffor: undef, }
+convergence: {deltae:  7.567E-13, res2:  3.773E-12, residm:  9.183E-15, diffor: null, }
 etotal    :  -8.58523451E+00
 entropy   :   0.00000000E+00
 fermie    :   8.25335759E-02
@@ -1717,7 +1717,7 @@ psp_core            :  7.25428932010496E-01
 xc_dc               : -2.54958054317881E-01
 spherical_terms     :  8.07144674417450E-02
 total_energy_dc     : -8.58523451119150E+00
-total_energy_dc_eV  : -2.33616148216742E+02
+total_energy_dc_eV  : -2.33616111812151E+02
 ...
 
 
@@ -1867,7 +1867,7 @@ rprimd    :
 lattice_lengths: [   7.44583,    7.44583,    7.44583, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9189397E+02
-convergence_: {deltae:  2.07E-12, res2:  4.34E-13, residm:  4.34E-15, diffor: undef, }
+convergence: {deltae:  2.068E-12, res2:  4.337E-13, residm:  4.343E-15, diffor: null, }
 etotal    :  -8.58523996E+00
 entropy   :   0.00000000E+00
 fermie    :   8.20644366E-02
@@ -1997,7 +1997,7 @@ psp_core            :  7.25428932010496E-01
 xc_dc               : -2.54955041977226E-01
 spherical_terms     :  8.07146865833170E-02
 total_energy_dc     : -8.58523995964412E+00
-total_energy_dc_eV  : -2.33616277210000E+02
+total_energy_dc_eV  : -2.33616260072087E+02
 ...
 
 
@@ -2147,7 +2147,7 @@ rprimd    :
 lattice_lengths: [   7.44583,    7.44583,    7.44583, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9189397E+02
-convergence_: {deltae: -6.22E-13, res2:  6.55E-12, residm:  1.23E-14, diffor: undef, }
+convergence: {deltae: -6.217E-13, res2:  6.546E-12, residm:  1.232E-14, diffor: null, }
 etotal    :  -8.58523451E+00
 entropy   :   0.00000000E+00
 fermie    :   8.25336008E-02
@@ -2277,7 +2277,7 @@ psp_core            :  7.25428932010496E-01
 xc_dc               : -2.54958130057175E-01
 spherical_terms     :  8.07144680793970E-02
 total_energy_dc     : -8.58523451119163E+00
-total_energy_dc_eV  : -2.33616148339191E+02
+total_energy_dc_eV  : -2.33616111812155E+02
 ...
 
 
@@ -2427,7 +2427,7 @@ rprimd    :
 lattice_lengths: [   7.44583,    7.44583,    7.44583, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9189397E+02
-convergence_: {deltae: -4.05E-13, res2:  5.63E-12, residm:  1.09E-14, diffor: undef, }
+convergence: {deltae: -4.050E-13, res2:  5.626E-12, residm:  1.086E-14, diffor: null, }
 etotal    :  -8.58523451E+00
 entropy   :   0.00000000E+00
 fermie    :   8.25335798E-02
@@ -2557,7 +2557,7 @@ psp_core            :  7.25428932010496E-01
 xc_dc               : -2.54958116305770E-01
 spherical_terms     :  8.07144698795352E-02
 total_energy_dc     : -8.58523451119152E+00
-total_energy_dc_eV  : -2.33616147201719E+02
+total_energy_dc_eV  : -2.33616111812152E+02
 ...
 
 
@@ -2707,7 +2707,7 @@ rprimd    :
 lattice_lengths: [   7.44583,    7.44583,    7.44583, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9189397E+02
-convergence_: {deltae:  2.02E-12, res2:  5.64E-13, residm:  5.15E-16, diffor: undef, }
+convergence: {deltae:  2.018E-12, res2:  5.636E-13, residm:  5.147E-16, diffor: null, }
 etotal    :  -8.58523996E+00
 entropy   :   0.00000000E+00
 fermie    :   8.20644293E-02
@@ -2837,7 +2837,7 @@ psp_core            :  7.25428932010496E-01
 xc_dc               : -2.54954994515363E-01
 spherical_terms     :  8.07146766333526E-02
 total_energy_dc     : -8.58523995964486E+00
-total_energy_dc_eV  : -2.33616269417125E+02
+total_energy_dc_eV  : -2.33616260072107E+02
 ...
 
 
@@ -2987,7 +2987,7 @@ rprimd    :
 lattice_lengths: [   7.44583,    7.44583,    7.44583, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9189397E+02
-convergence_: {deltae: -2.93E-13, res2:  4.81E-12, residm:  9.59E-15, diffor: undef, }
+convergence: {deltae: -2.931E-13, res2:  4.806E-12, residm:  9.590E-15, diffor: null, }
 etotal    :  -8.58523451E+00
 entropy   :   0.00000000E+00
 fermie    :   8.25335966E-02
@@ -3117,7 +3117,7 @@ psp_core            :  7.25428932010496E-01
 xc_dc               : -2.54958110127439E-01
 spherical_terms     :  8.07144642770274E-02
 total_energy_dc     : -8.58523451119235E+00
-total_energy_dc_eV  : -2.33616145447813E+02
+total_energy_dc_eV  : -2.33616111812175E+02
 ...
 
 
@@ -3267,7 +3267,7 @@ rprimd    :
 lattice_lengths: [   7.44583,    7.44583,    7.44583, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9189397E+02
-convergence_: {deltae: -3.38E-14, res2:  4.33E-12, residm:  9.25E-15, diffor: undef, }
+convergence: {deltae: -3.375E-14, res2:  4.334E-12, residm:  9.255E-15, diffor: null, }
 etotal    :  -8.58523451E+00
 entropy   :   0.00000000E+00
 fermie    :   8.25335803E-02
@@ -3397,7 +3397,7 @@ psp_core            :  7.25428932010496E-01
 xc_dc               : -2.54958097256004E-01
 spherical_terms     :  8.07144652502478E-02
 total_energy_dc     : -8.58523451119230E+00
-total_energy_dc_eV  : -2.33616145022244E+02
+total_energy_dc_eV  : -2.33616111812173E+02
 ...
 
 
@@ -3547,7 +3547,7 @@ rprimd    :
 lattice_lengths: [   7.44583,    7.44583,    7.44583, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9189397E+02
-convergence_: {deltae:  5.99E-12, res2:  1.03E-12, residm:  2.98E-14, diffor: undef, }
+convergence: {deltae:  5.986E-12, res2:  1.033E-12, residm:  2.984E-14, diffor: null, }
 etotal    :  -8.58523996E+00
 entropy   :   0.00000000E+00
 fermie    :   8.20644201E-02
@@ -3677,7 +3677,7 @@ psp_core            :  7.25428932010496E-01
 xc_dc               : -2.54954975859101E-01
 spherical_terms     :  8.07147202258660E-02
 total_energy_dc     : -8.58523995964667E+00
-total_energy_dc_eV  : -2.33616281122061E+02
+total_energy_dc_eV  : -2.33616260072157E+02
 ...
 
 
@@ -3827,7 +3827,7 @@ rprimd    :
 lattice_lengths: [   7.44583,    7.44583,    7.44583, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9189397E+02
-convergence_: {deltae:  9.81E-13, res2:  6.41E-12, residm:  1.25E-14, diffor: undef, }
+convergence: {deltae:  9.805E-13, res2:  6.413E-12, residm:  1.247E-14, diffor: null, }
 etotal    :  -8.58523451E+00
 entropy   :   0.00000000E+00
 fermie    :   8.25335865E-02
@@ -3957,7 +3957,7 @@ psp_core            :  7.25428932010496E-01
 xc_dc               : -2.54958076747966E-01
 spherical_terms     :  8.07144995136206E-02
 total_energy_dc     : -8.58523451119319E+00
-total_energy_dc_eV  : -2.33616158014748E+02
+total_energy_dc_eV  : -2.33616111812197E+02
 ...
 
 
@@ -4107,7 +4107,7 @@ rprimd    :
 lattice_lengths: [   7.44583,    7.44583,    7.44583, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9189397E+02
-convergence_: {deltae:  1.05E-12, res2:  5.68E-12, residm:  1.05E-14, diffor: undef, }
+convergence: {deltae:  1.046E-12, res2:  5.675E-12, residm:  1.048E-14, diffor: null, }
 etotal    :  -8.58523451E+00
 entropy   :   0.00000000E+00
 fermie    :   8.25335714E-02
@@ -4237,7 +4237,7 @@ psp_core            :  7.25428932010496E-01
 xc_dc               : -2.54958071043169E-01
 spherical_terms     :  8.07144999252221E-02
 total_energy_dc     : -8.58523451119314E+00
-total_energy_dc_eV  : -2.33616156462915E+02
+total_energy_dc_eV  : -2.33616111812196E+02
 ...
 
 
@@ -4960,10 +4960,10 @@ P           mkmem43         6
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         10.2  wall=         10.6
+- Proc.   0 individual time (sec): cpu=         10.3  wall=         11.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  21 WARNINGs and  32 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.2  wall=         10.6
++Overall time at end (sec) : cpu=         10.3  wall=         11.6

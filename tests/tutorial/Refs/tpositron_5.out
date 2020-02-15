@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 19h00 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h47 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpositron_5/tpositron_5.in
 - output file    -> tpositron_5.out
@@ -250,7 +250,7 @@ rprimd    :
 lattice_lengths: [   7.25577,    7.25577,    7.25577, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.7010716E+02
-convergence_: {deltae: -6.21E-11, res2:  1.13E-10, residm:  9.11E-02, diffor:  0.00E+00, }
+convergence: {deltae: -6.209E-11, res2:  1.130E-10, residm:  9.107E-02, diffor:  0.000E+00, }
 etotal    :  -8.25880236E+00
 entropy   :   0.00000000E+00
 fermie    :  -2.63847357E-01
@@ -616,10 +616,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         74.0  wall=         74.2
+- Proc.   0 individual time (sec): cpu=         74.5  wall=         74.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  29 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         74.0  wall=         74.2
++Overall time at end (sec) : cpu=         74.5  wall=         74.7

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h23 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h35 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v3_t18/t18.in
 - output file    -> t18.out
@@ -758,7 +758,7 @@ rprimd    :
 lattice_lengths: [   5.20000,    5.05000,    5.05000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.3261300E+02
-convergence_: {deltae:  5.95E-14, res2:  9.38E-15, residm:  1.77E-17, diffor: undef, }
+convergence: {deltae:  5.951E-14, res2:  9.382E-15, residm:  1.771E-17, diffor: null, }
 etotal    :  -2.01910301E+00
 entropy   :   0.00000000E+00
 fermie    :   2.91848217E-01
@@ -890,7 +890,7 @@ rprimd    :
 lattice_lengths: [   5.20000,    5.05000,    5.05000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.3261300E+02
-convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  4.68E-23, diffor:  0.00E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  4.676E-23, diffor:  0.000E+00, }
 etotal    :  -2.01910301E+00
 entropy   :   0.00000000E+00
 fermie    :   2.91848217E-01
@@ -983,7 +983,7 @@ rprimd    :
 lattice_lengths: [   5.20000,    5.05000,    5.05000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.3261300E+02
-convergence_: {deltae: -2.02E+00, res2:  5.64E-18, residm:  5.70E-26, diffor: undef, }
+convergence: {deltae: -2.019E+00, res2:  5.644E-18, residm:  5.703E-26, diffor: null, }
 etotal    :  -2.01910301E+00
 entropy   :   0.00000000E+00
 fermie    :   2.91848219E-01
@@ -1119,7 +1119,7 @@ rprimd    :
 lattice_lengths: [   5.20000,    5.05000,    5.05000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.3261300E+02
-convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.79E-24, diffor:  0.00E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.787E-24, diffor:  0.000E+00, }
 etotal    :  -2.01910301E+00
 entropy   :   0.00000000E+00
 fermie    :   2.91848219E-01
@@ -1372,7 +1372,7 @@ rprimd    :
 lattice_lengths: [  10.40000,    5.05000,    5.05000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   2.6522600E+02
-convergence_: {deltae: -2.92E-13, res2:  1.46E-12, residm:  5.49E-16, diffor: undef, }
+convergence: {deltae: -2.922E-13, res2:  1.456E-12, residm:  5.492E-16, diffor: null, }
 etotal    :  -4.03820603E+00
 entropy   :   0.00000000E+00
 fermie    :   2.91848212E-01
@@ -1523,7 +1523,7 @@ rprimd    :
 lattice_lengths: [  10.40000,    5.05000,    5.05000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   2.6522600E+02
-convergence_: {deltae:  7.02E-14, res2:  1.74E-15, residm:  7.11E-19, diffor: undef, }
+convergence: {deltae:  7.017E-14, res2:  1.741E-15, residm:  7.113E-19, diffor: null, }
 etotal    :  -4.03821008E+00
 entropy   :   0.00000000E+00
 fermie    :   2.91847533E-01
@@ -1831,7 +1831,7 @@ rprimd    :
 lattice_lengths: [  10.40000,    5.05000,    5.05000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   2.6522600E+02
-convergence_: {deltae: -9.77E-15, res2:  9.98E-14, residm:  1.70E-20, diffor: undef, }
+convergence: {deltae: -9.770E-15, res2:  9.982E-14, residm:  1.701E-20, diffor: null, }
 etotal    :  -4.00010309E+00
 entropy   :   0.00000000E+00
 fermie    :   3.05279742E-01
@@ -1978,7 +1978,7 @@ rprimd    :
 lattice_lengths: [  10.40000,    5.05000,    5.05000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   2.6522600E+02
-convergence_: {deltae: -8.88E-16, res2:  3.06E-16, residm:  3.21E-19, diffor: undef, }
+convergence: {deltae: -8.882E-16, res2:  3.056E-16, residm:  3.211E-19, diffor: null, }
 etotal    :  -4.00009769E+00
 entropy   :   0.00000000E+00
 fermie    :   3.05775937E-01
@@ -2855,10 +2855,10 @@ P          mk1mem11         1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.7  wall=          6.9
+- Proc.   0 individual time (sec): cpu=          4.8  wall=          6.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  44 WARNINGs and  52 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.7  wall=          6.9
++Overall time at end (sec) : cpu=          4.8  wall=          6.1

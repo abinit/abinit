@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h55 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 17h01 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/psml_t05/t05.in
 - output file    -> t05.out
@@ -243,7 +243,7 @@ rprimd    :
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.7025701E+02
-convergence_: {deltae:  1.78E-15, res2:  5.82E-28, residm:  9.92E-14, diffor: undef, }
+convergence: {deltae:  1.776E-15, res2:  5.823E-28, residm:  9.923E-14, diffor: null, }
 etotal    :  -8.41835705E+00
 entropy   :   0.00000000E+00
 fermie    :   1.61759281E-01

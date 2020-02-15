@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h31 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h36 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t58/t58.in
 - output file    -> t58.out
@@ -261,7 +261,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     649.569     649.559
 
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [  7.4000000,   0.0000000,   0.0000000, ]
@@ -270,7 +270,7 @@ rprimd    :
 lattice_lengths: [   7.40000,    7.40000,   22.20000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.2156720E+03
-convergence_: {deltae: -3.65E-12, res2:  3.41E-09, residm:  7.57E-08, diffor:  1.04E-07, }
+convergence: {deltae: -3.649E-12, res2:  3.406E-09, residm:  7.569E-08, diffor:  1.042E-07, }
 etotal    :  -6.80232046E+00
 entropy   :   0.00000000E+00
 fermie    :  -7.61456762E-02
@@ -337,7 +337,7 @@ force_length_stats: {min:   1.68407154E-05, max:   1.68407154E-05, mean:   1.684
 
 
 --- !EnergyTerms
-iteration_state     : {dtset: 1, }
+iteration_state     : {dtset: 1, itime: 1, icycle: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  4.56148975939268E-01
 hartree             :  1.10824023514939E+00
@@ -586,10 +586,10 @@ P           mkmem          42
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          5.1  wall=          5.1
+- Proc.   0 individual time (sec): cpu=          5.2  wall=          5.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.1  wall=          5.1
++Overall time at end (sec) : cpu=          5.2  wall=          5.4

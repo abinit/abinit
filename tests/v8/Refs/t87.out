@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h47 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h54 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t87-t88-t89/t87.in
 - output file    -> t87.out
@@ -421,7 +421,7 @@ rprimd    :
 lattice_lengths: [   7.52362,    7.52362,    7.52362, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   3.0113754E+02
-convergence_: {deltae: -1.16E-11, res2:  2.94E-09, residm:  1.99E-07, diffor: undef, }
+convergence: {deltae: -1.157E-11, res2:  2.942E-09, residm:  1.989E-07, diffor: null, }
 etotal    :  -8.65742359E+00
 entropy   :   0.00000000E+00
 fermie    :   5.72009775E-02
@@ -599,7 +599,7 @@ psp_core            :  8.37953233227450E-01
 xc_dc               : -4.38554514453294E+00
 spherical_terms     :  4.13779038505388E+00
 total_energy_dc     : -8.65742358633352E+00
-total_energy_dc_eV  : -2.35579024800492E+02
+total_energy_dc_eV  : -2.35580476446339E+02
 ...
 
 
@@ -705,7 +705,7 @@ rprimd    :
 lattice_lengths: [   7.52362,    7.52362,    7.52362, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   3.0113754E+02
-convergence_: {deltae:  0.00E+00, res2:  3.06E-30, residm:  9.83E-23, diffor: undef, }
+convergence: {deltae:  0.000E+00, res2:  3.060E-30, residm:  9.831E-23, diffor: null, }
 etotal    :  -8.65742359E+00
 entropy   :   0.00000000E+00
 fermie    :   5.72008904E-02
@@ -2520,10 +2520,10 @@ P          mk1mem4          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         88.4  wall=         89.5
+- Proc.   0 individual time (sec): cpu=         89.5  wall=         90.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  25 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         88.4  wall=         89.5
++Overall time at end (sec) : cpu=         89.5  wall=         90.3

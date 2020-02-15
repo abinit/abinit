@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h58 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h46 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_tffield_2-tffield_3/tffield_2.in
 - output file    -> tffield_2.out
@@ -435,7 +435,7 @@ rprimd    :
 lattice_lengths: [   7.44583,    7.44583,    7.44583, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9189397E+02
-convergence_: {deltae: -5.33E-15, res2:  1.14E-14, residm:  3.73E-11, diffor: undef, }
+convergence: {deltae: -5.329E-15, res2:  1.143E-14, residm:  3.730E-11, diffor: null, }
 etotal    :  -1.00857692E+01
 entropy   :   0.00000000E+00
 fermie    :   9.08248925E-02
@@ -607,7 +607,7 @@ rprimd    :
 lattice_lengths: [   7.44583,    7.44583,    7.44583, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9189397E+02
-convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.42E-23, diffor:  0.00E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.415E-23, diffor:  0.000E+00, }
 etotal    :  -1.00857692E+01
 entropy   :   0.00000000E+00
 fermie    :   9.08248925E-02
@@ -1925,10 +1925,10 @@ P          mk1mem3        432
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         27.1  wall=         28.0
+- Proc.   0 individual time (sec): cpu=         26.9  wall=         31.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  51 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         27.1  wall=         28.0
++Overall time at end (sec) : cpu=         26.9  wall=         31.9

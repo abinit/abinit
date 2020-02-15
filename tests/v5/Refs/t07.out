@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h30 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h36 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t07/t07.in
 - output file    -> t07.out
@@ -1589,7 +1589,7 @@ rprimd    :
 lattice_lengths: [   7.65339,    7.65339,    7.65339, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.4829271E+02
-convergence_: {deltae:  1.68E-08, res2:  2.86E-13, residm:  3.45E-06, diffor:  0.00E+00, }
+convergence: {deltae:  1.681E-08, res2:  2.864E-13, residm:  3.454E-06, diffor:  0.000E+00, }
 etotal    :  -8.39135141E+00
 entropy   :   0.00000000E+00
 fermie    :   2.59658281E-01
@@ -1719,7 +1719,7 @@ spherical_terms     :  4.98523531243248E+00
 internal            : -8.38636367666237E+00
 '-kT*entropy'       : -4.98773715957252E-03
 total_energy_dc     : -8.39135141382194E+00
-total_energy_dc_eV  : -2.28340090911473E+02
+total_energy_dc_eV  : -2.28340284425663E+02
 ...
 
 
@@ -1808,7 +1808,7 @@ rprimd    :
 lattice_lengths: [   7.65339,    7.65339,    7.65339, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.4829271E+02
-convergence_: {deltae: -2.05E-07, res2:  1.55E-10, residm:  4.31E-04, diffor:  0.00E+00, }
+convergence: {deltae: -2.053E-07, res2:  1.555E-10, residm:  4.313E-04, diffor:  0.000E+00, }
 etotal    :  -8.56648319E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.45865353E-01
@@ -1966,7 +1966,7 @@ positronic          :  9.81040571531488E-03
 electronic          : -8.39135141382194E+00
 electron_positron_interaction: -1.84942182086029E-01
 total_energy_dc     : -8.56648319019265E+00
-total_energy_dc_eV  : -2.33105864171904E+02
+total_energy_dc_eV  : -2.33105862418570E+02
 ...
 
 
@@ -2055,7 +2055,7 @@ rprimd    :
 lattice_lengths: [   7.65339,    7.65339,    7.65339, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.4829271E+02
-convergence_: {deltae: -8.02E-08, res2:  9.10E-11, residm:  1.18E-05, diffor:  0.00E+00, }
+convergence: {deltae: -8.017E-08, res2:  9.100E-11, residm:  1.182E-05, diffor:  0.000E+00, }
 etotal    :  -8.56754124E+00
 entropy   :   0.00000000E+00
 fermie    :   2.54602002E-01
@@ -2222,7 +2222,7 @@ electronic          : -8.39033645801894E+00
 positronic          :  9.81040571531505E-03
 electron_positron_interaction: -1.87015188071590E-01
 total_energy_dc     : -8.56754124037522E+00
-total_energy_dc_eV  : -2.33136047627502E+02
+total_energy_dc_eV  : -2.33134653428231E+02
 ...
 
 
@@ -2352,7 +2352,7 @@ rprimd    :
 lattice_lengths: [   7.65339,    7.65339,    7.65339, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.4829271E+02
-convergence_: {deltae:  5.08E-12, res2:  1.14E-10, residm:  2.89E-04, diffor:  0.00E+00, }
+convergence: {deltae:  5.080E-12, res2:  1.138E-10, residm:  2.888E-04, diffor:  0.000E+00, }
 etotal    :  -8.61333246E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.59864893E-01
@@ -2519,7 +2519,7 @@ electronic          : -8.39028642400658E+00
 positronic          :  9.29316596446687E-02
 electron_positron_interaction: -3.15977713503176E-01
 total_energy_dc     : -8.61333247786509E+00
-total_energy_dc_eV  : -2.34380864175606E+02
+total_energy_dc_eV  : -2.34380696368992E+02
 ...
 
 
@@ -2643,7 +2643,7 @@ rprimd    :
 lattice_lengths: [   7.65339,    7.65339,    7.65339, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.4829271E+02
-convergence_: {deltae:  1.55E-12, res2:  2.38E-11, residm:  1.40E-04, diffor:  0.00E+00, }
+convergence: {deltae:  1.554E-12, res2:  2.383E-11, residm:  1.405E-04, diffor:  0.000E+00, }
 etotal    :  -8.61333228E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.59864863E-01
@@ -2810,7 +2810,7 @@ electronic          : -8.39028635076321E+00
 positronic          :  9.29314425852674E-02
 electron_positron_interaction: -3.15977468480313E-01
 total_energy_dc     : -8.61333237665826E+00
-total_energy_dc_eV  : -2.34380443168563E+02
+total_energy_dc_eV  : -2.34380693615014E+02
 ...
 
 
@@ -2914,7 +2914,7 @@ rprimd    :
 lattice_lengths: [   7.65339,    7.65339,    7.65339, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.4829271E+02
-convergence_: {deltae:  1.82E-11, res2:  9.47E-11, residm:  4.81E-04, diffor:  2.54E-08, }
+convergence: {deltae:  1.816E-11, res2:  9.468E-11, residm:  4.806E-04, diffor:  2.542E-08, }
 etotal    :  -8.61351937E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.60449520E-01
@@ -3099,7 +3099,7 @@ electronic          : -8.39007580397180E+00
 positronic          :  9.22404887243609E-02
 electron_positron_interaction: -3.15684134459792E-01
 total_energy_dc     : -8.61351944970723E+00
-total_energy_dc_eV  : -2.34385660012894E+02
+total_energy_dc_eV  : -2.34385784131559E+02
 ...
 
 
@@ -4574,10 +4574,10 @@ P           mkmem6          6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         26.3  wall=         26.4
+- Proc.   0 individual time (sec): cpu=         27.2  wall=         29.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  43 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         26.3  wall=         26.4
++Overall time at end (sec) : cpu=         27.2  wall=         29.3

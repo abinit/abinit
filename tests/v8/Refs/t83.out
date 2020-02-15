@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h47 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h54 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t83-t84/t83.in
 - output file    -> t83.out
@@ -422,7 +422,7 @@ rprimd    :
 lattice_lengths: [   7.52362,    7.52362,    7.52362, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   3.0113754E+02
-convergence_: {deltae:  2.22E-09, res2:  5.85E-09, residm:  2.35E-11, diffor: undef, }
+convergence: {deltae:  2.218E-09, res2:  5.845E-09, residm:  2.354E-11, diffor: null, }
 etotal    :  -8.65797258E+00
 entropy   :   0.00000000E+00
 fermie    :   5.69007269E-02
@@ -552,7 +552,7 @@ psp_core            :  8.37953233227450E-01
 xc_dc               : -4.38355005122128E+00
 spherical_terms     :  4.13780285893281E+00
 total_energy_dc     : -8.65797257530728E+00
-total_energy_dc_eV  : -2.35593599991314E+02
+total_energy_dc_eV  : -2.35595415196039E+02
 ...
 
 
@@ -639,7 +639,7 @@ rprimd    :
 lattice_lengths: [   7.52362,    7.52362,    7.52362, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   3.0113754E+02
-convergence_: {deltae: -2.27E-13, res2:  2.73E-21, residm:  6.96E-23, diffor: undef, }
+convergence: {deltae: -2.274E-13, res2:  2.728E-21, residm:  6.959E-23, diffor: null, }
 etotal    :  -8.65797258E+00
 entropy   :   0.00000000E+00
 fermie    :   5.69021946E-02
@@ -769,7 +769,7 @@ psp_core            :  8.37953233227450E-01
 xc_dc               : -4.38356248696034E+00
 spherical_terms     :  4.13780639164639E+00
 total_energy_dc     : -8.65797257542467E+00
-total_energy_dc_eV  : -2.35595415199463E+02
+total_energy_dc_eV  : -2.35595415199233E+02
 ...
 
 
@@ -1962,10 +1962,10 @@ P          mk1mem4         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         14.9  wall=         15.8
+- Proc.   0 individual time (sec): cpu=         15.1  wall=         16.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         14.9  wall=         15.8
++Overall time at end (sec) : cpu=         15.1  wall=         16.9

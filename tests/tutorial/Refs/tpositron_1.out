@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 19h00 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h47 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpositron_1/tpositron_1.in
 - output file    -> tpositron_1.out
@@ -271,7 +271,7 @@ rprimd    :
 lattice_lengths: [   7.25577,    7.25577,    7.25577, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.7010716E+02
-convergence_: {deltae:  6.16E-10, res2:  1.93E-09, residm:  5.69E-06, diffor:  0.00E+00, }
+convergence: {deltae:  6.156E-10, res2:  1.931E-09, residm:  5.685E-06, diffor:  0.000E+00, }
 etotal    :  -8.03177530E+00
 entropy   :   0.00000000E+00
 fermie    :   1.96480278E-01
@@ -397,7 +397,7 @@ psp_core            :  2.32215214290181E-01
 xc_dc               : -1.87062966986254E+00
 spherical_terms     :  1.92720662864006E+00
 total_energy_dc     : -8.03177530211391E+00
-total_energy_dc_eV  : -2.18554746782054E+02
+total_energy_dc_eV  : -2.18555720823089E+02
 ...
 
 
@@ -480,7 +480,7 @@ rprimd    :
 lattice_lengths: [   7.25577,    7.25577,    7.25577, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.7010716E+02
-convergence_: {deltae: -2.07E-08, res2:  1.12E-10, residm:  4.59E-05, diffor:  0.00E+00, }
+convergence: {deltae: -2.072E-08, res2:  1.125E-10, residm:  4.586E-05, diffor:  0.000E+00, }
 etotal    :  -8.45497719E+00
 entropy   :   0.00000000E+00
 fermie    :  -4.23201892E-01
@@ -654,7 +654,7 @@ positronic          : -2.74972359602487E-01
 electronic          : -8.03177530211391E+00
 electron_positron_interaction: -1.48229532074618E-01
 total_energy_dc     : -8.45497719379101E+00
-total_energy_dc_eV  : -2.30072002661580E+02
+total_energy_dc_eV  : -2.30071629947793E+02
 ...
 
 

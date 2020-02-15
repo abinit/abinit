@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h30 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h36 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t42/t42.in
 - output file    -> t42.out
@@ -333,7 +333,7 @@ rprimd    :
 lattice_lengths: [  15.00000,   15.00000,   15.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   3.3750000E+03
-convergence_: {deltae: -8.98E-09, res2:  1.47E-05, residm:  4.58E-09, diffor: undef, }
+convergence: {deltae: -8.984E-09, res2:  1.468E-05, residm:  4.585E-09, diffor: null, }
 etotal    :  -1.17568585E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.13981534E-01
@@ -481,7 +481,7 @@ rprimd    :
 lattice_lengths: [  15.00000,   15.00000,   15.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   3.3750000E+03
-convergence_: {deltae: -5.74E-09, res2:  3.92E-07, residm:  1.33E-09, diffor: undef, }
+convergence: {deltae: -5.744E-09, res2:  3.917E-07, residm:  1.330E-09, diffor: null, }
 etotal    :  -1.59087975E+01
 entropy   :   0.00000000E+00
 fermie    :  -4.88750362E-01
@@ -636,7 +636,7 @@ rprimd    :
 lattice_lengths: [  15.00000,   15.00000,   15.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   3.3750000E+03
-convergence_: {deltae: -1.20E-09, res2:  8.22E-08, residm:  3.76E-11, diffor: undef, }
+convergence: {deltae: -1.204E-09, res2:  8.221E-08, residm:  3.760E-11, diffor: null, }
 etotal    :  -1.87974333E+01
 entropy   :   0.00000000E+00
 fermie    :  -1.74286165E-01
@@ -806,7 +806,7 @@ rprimd    :
 lattice_lengths: [  15.00000,   15.00000,   15.00000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   3.3750000E+03
-convergence_: {deltae: -1.95E-09, res2:  2.81E-07, residm:  1.26E-10, diffor: undef, }
+convergence: {deltae: -1.946E-09, res2:  2.810E-07, residm:  1.260E-10, diffor: null, }
 etotal    :  -2.29742194E+01
 entropy   :   0.00000000E+00
 fermie    :  -3.57789935E-01
@@ -1157,10 +1157,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          7.7  wall=          7.9
+- Proc.   0 individual time (sec): cpu=          8.0  wall=         10.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.7  wall=          7.9
++Overall time at end (sec) : cpu=          8.0  wall=         10.2

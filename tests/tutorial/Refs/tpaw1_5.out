@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 19h00 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h47 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpaw1_5/tpaw1_5.in
 - output file    -> tpaw1_5.out
@@ -460,7 +460,7 @@ rprimd    :
 lattice_lengths: [   4.70356,    4.70356,    4.70356, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   7.3580817E+01
-convergence_: {deltae:  4.44E-13, res2:  1.70E-11, residm:  3.47E-04, diffor: undef, }
+convergence: {deltae:  4.441E-13, res2:  1.698E-11, residm:  3.469E-04, diffor: null, }
 etotal    :  -1.15249303E+01
 entropy   :   0.00000000E+00
 fermie    :   4.32368587E-01
@@ -589,7 +589,7 @@ psp_core            :  5.62980026285148E-01
 xc_dc               :  1.52786480909945E-01
 spherical_terms     : -9.10455421038625E-02
 total_energy_dc     : -1.15249302541495E+01
-total_energy_dc_eV  : -3.13609262448028E+02
+total_energy_dc_eV  : -3.13609301105390E+02
 ...
 
 
@@ -670,7 +670,7 @@ rprimd    :
 lattice_lengths: [   4.71024,    4.71024,    4.71024, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   7.3894817E+01
-convergence_: {deltae:  1.02E-11, res2:  1.61E-11, residm:  1.12E-04, diffor: undef, }
+convergence: {deltae:  1.022E-11, res2:  1.607E-11, residm:  1.124E-04, diffor: null, }
 etotal    :  -1.15249818E+01
 entropy   :   0.00000000E+00
 fermie    :   4.29778179E-01
@@ -799,7 +799,7 @@ psp_core            :  5.60587763091008E-01
 xc_dc               :  1.49517059168649E-01
 spherical_terms     : -9.08553382033723E-02
 total_energy_dc     : -1.15249817769526E+01
-total_energy_dc_eV  : -3.13610614347592E+02
+total_energy_dc_eV  : -3.13610703112163E+02
 ...
 
 
@@ -880,7 +880,7 @@ rprimd    :
 lattice_lengths: [   4.71692,    4.71692,    4.71692, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   7.4209710E+01
-convergence_: {deltae:  1.02E-11, res2:  1.57E-11, residm:  1.68E-05, diffor: undef, }
+convergence: {deltae:  1.018E-11, res2:  1.573E-11, residm:  1.682E-05, diffor: null, }
 etotal    :  -1.15250117E+01
 entropy   :   0.00000000E+00
 fermie    :   4.27198106E-01
@@ -1009,7 +1009,7 @@ psp_core            :  5.58209034602353E-01
 xc_dc               :  1.46249186323216E-01
 spherical_terms     : -9.06662522024018E-02
 total_energy_dc     : -1.15250116984105E+01
-total_energy_dc_eV  : -3.13611427254151E+02
+total_energy_dc_eV  : -3.13611517316437E+02
 ...
 
 
@@ -1090,7 +1090,7 @@ rprimd    :
 lattice_lengths: [   4.72360,    4.72360,    4.72360, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   7.4525495E+01
-convergence_: {deltae:  1.01E-11, res2:  1.54E-11, residm:  1.17E-05, diffor: undef, }
+convergence: {deltae:  1.011E-11, res2:  1.537E-11, residm:  1.168E-05, diffor: null, }
 etotal    :  -1.15250205E+01
 entropy   :   0.00000000E+00
 fermie    :   4.24629032E-01
@@ -1219,7 +1219,7 @@ psp_core            :  5.55843745235297E-01
 xc_dc               :  1.42983593694857E-01
 spherical_terms     : -9.04783670643341E-02
 total_energy_dc     : -1.15250205209253E+01
-total_energy_dc_eV  : -3.13611666187559E+02
+total_energy_dc_eV  : -3.13611757389276E+02
 ...
 
 
@@ -1300,7 +1300,7 @@ rprimd    :
 lattice_lengths: [   4.73028,    4.73028,    4.73028, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   7.4842175E+01
-convergence_: {deltae:  1.02E-11, res2:  1.52E-11, residm:  5.43E-06, diffor: undef, }
+convergence: {deltae:  1.023E-11, res2:  1.518E-11, residm:  5.427E-06, diffor: null, }
 etotal    :  -1.15250083E+01
 entropy   :   0.00000000E+00
 fermie    :   4.22071948E-01
@@ -1429,7 +1429,7 @@ psp_core            :  5.53491800214841E-01
 xc_dc               :  1.39720284264394E-01
 spherical_terms     : -9.02916487278906E-02
 total_energy_dc     : -1.15250083442576E+01
-total_energy_dc_eV  : -3.13611334218184E+02
+total_energy_dc_eV  : -3.13611426045295E+02
 ...
 
 
@@ -1510,7 +1510,7 @@ rprimd    :
 lattice_lengths: [   4.73696,    4.73696,    4.73696, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   7.5159751E+01
-convergence_: {deltae:  1.03E-11, res2:  1.49E-11, residm:  5.62E-06, diffor: undef, }
+convergence: {deltae:  1.026E-11, res2:  1.487E-11, residm:  5.617E-06, diffor: null, }
 etotal    :  -1.15249752E+01
 entropy   :   0.00000000E+00
 fermie    :   4.19527834E-01
@@ -1639,7 +1639,7 @@ psp_core            :  5.51153105566899E-01
 xc_dc               :  1.36459242198687E-01
 spherical_terms     : -9.01060792305772E-02
 total_energy_dc     : -1.15249752448596E+01
-total_energy_dc_eV  : -3.13610432525771E+02
+total_energy_dc_eV  : -3.13610525364871E+02
 ...
 
 
@@ -1720,7 +1720,7 @@ rprimd    :
 lattice_lengths: [   4.74365,    4.74365,    4.74365, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   7.5478224E+01
-convergence_: {deltae:  1.03E-11, res2:  1.46E-11, residm:  4.26E-06, diffor: undef, }
+convergence: {deltae:  1.031E-11, res2:  1.460E-11, residm:  4.259E-06, diffor: null, }
 etotal    :  -1.15249214E+01
 entropy   :   0.00000000E+00
 fermie    :   4.16997244E-01
@@ -1849,7 +1849,7 @@ psp_core            :  5.48827568110417E-01
 xc_dc               :  1.33200448979369E-01
 spherical_terms     : -8.99216450035789E-02
 total_energy_dc     : -1.15249213699385E+01
-total_energy_dc_eV  : -3.13608965410812E+02
+total_energy_dc_eV  : -3.13609059353715E+02
 ...
 
 
@@ -2177,10 +2177,10 @@ P           mkmem         110
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         34.2  wall=         34.4
+- Proc.   0 individual time (sec): cpu=         34.1  wall=         34.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  43 WARNINGs and  27 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         34.2  wall=         34.4
++Overall time at end (sec) : cpu=         34.1  wall=         34.3

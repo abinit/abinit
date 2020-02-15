@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat 15 Feb 2020.
-- ( at 15h10 )
+- ( at 17h00 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/etsf_io_t00/t00.in
 - output file    -> t00.out
@@ -177,7 +177,7 @@ rprimd    :
 lattice_lengths: [   4.20000,    4.90000,    5.60000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   1.1524800E+02
-convergence_: {deltae:  2.05E-11, res2:  6.48E-11, residm:  2.71E-13, diffor: undef, }
+convergence: {deltae:  2.053E-11, res2:  6.478E-11, residm:  2.706E-13, diffor: null, }
 etotal    :  -3.33078259E+01
 entropy   :   0.00000000E+00
 fermie    :   2.83615631E-01

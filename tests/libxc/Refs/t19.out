@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h54 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 17h00 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t19/t19.in
 - output file    -> t19.out
@@ -268,7 +268,7 @@ rprimd    :
 lattice_lengths: [   7.02320,    7.02320,    7.02320, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.4495680E+02
-convergence_: {deltae:  3.80E-13, res2:  1.46E-13, residm:  1.41E-16, diffor: undef, }
+convergence: {deltae:  3.801E-13, res2:  1.455E-13, residm:  1.405E-16, diffor: null, }
 etotal    :  -2.11621655E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.21650621E-01
@@ -425,7 +425,7 @@ rprimd    :
 lattice_lengths: [   7.02320,    7.02320,    7.02320, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.4495680E+02
-convergence_: {deltae:  1.35E-06, res2:  1.00E-09, residm:  1.88E-13, diffor: undef, }
+convergence: {deltae:  1.353E-06, res2:  1.000E-09, residm:  1.881E-13, diffor: null, }
 etotal    :  -1.78104198E+01
 entropy   :   0.00000000E+00
 fermie    :  -1.98817936E-01
@@ -553,7 +553,7 @@ rprimd    :
 lattice_lengths: [   7.02320,    7.02320,    7.02320, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.4495680E+02
-convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.97E-17, diffor:  0.00E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.969E-17, diffor:  0.000E+00, }
 etotal    :  -1.78104198E+01
 entropy   :   0.00000000E+00
 fermie    :  -1.98817936E-01
@@ -786,10 +786,10 @@ P           mkmem3          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         11.7  wall=         12.2
+- Proc.   0 individual time (sec): cpu=         12.1  wall=         14.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.7  wall=         12.2
++Overall time at end (sec) : cpu=         12.1  wall=         14.7

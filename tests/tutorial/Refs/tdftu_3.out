@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h59 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h47 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tdftu_3/tdftu_3.in
 - output file    -> tdftu_3.out
@@ -288,7 +288,7 @@ rprimd    :
 lattice_lengths: [   5.60029,    5.60029,   11.20057, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.4839654E+02
-convergence_: {deltae: -2.26E-09, res2:  9.57E-09, residm:  5.45E-11, diffor: undef, }
+convergence: {deltae: -2.265E-09, res2:  9.574E-09, residm:  5.449E-11, diffor: null, }
 etotal    :  -3.72908937E+02
 entropy   :   0.00000000E+00
 fermie    :   2.34663034E-01
@@ -601,7 +601,7 @@ spherical_terms     : -7.09650591878693E+01
 internal            : -3.72908936568828E+02
 '-kT*entropy'       : -2.43070243971353E-14
 total_energy_dc     : -3.72908936568828E+02
-total_energy_dc_eV  : -1.01473687481040E+04
+total_energy_dc_eV  : -1.01473682177988E+04
 ...
 
 

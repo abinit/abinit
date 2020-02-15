@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h32 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h37 )
   
 
 ================================================================================
@@ -90,7 +90,7 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.032  and twall      0.032 sec
+-begin at tcpu      0.033  and twall      0.033 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -403,6 +403,6 @@ Gkk matrix elements on input grid of qpoints will be written to disk. File gkqfi
 
 ================================================================================
 
-+Total cpu time      2.193  and wall time      2.196 sec
++Total cpu time      2.166  and wall time      2.237 sec
 
  anaddb : the run completed succesfully.

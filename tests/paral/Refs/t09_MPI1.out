@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 20h04 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 17h01 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t09_MPI1/t09.in
 - output file    -> t09_MPI1.out
@@ -506,7 +506,7 @@ rprimd    :
 lattice_lengths: [   7.60000,    7.60000,    7.60000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.3897600E+02
-convergence_: {deltae: -1.62E-12, res2:  3.11E-12, residm:  1.86E-10, diffor: undef, }
+convergence: {deltae: -1.616E-12, res2:  3.109E-12, residm:  1.859E-10, diffor: null, }
 etotal    :  -8.37696112E+00
 entropy   :   0.00000000E+00
 fermie    :   3.43036151E-01
@@ -686,7 +686,7 @@ rprimd    :
 lattice_lengths: [   7.60000,    7.60000,    7.60000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.3897600E+02
-convergence_: {deltae: -4.35E-09, res2:  3.89E-12, residm:  1.84E-12, diffor: undef, }
+convergence: {deltae: -4.355E-09, res2:  3.890E-12, residm:  1.837E-12, diffor: null, }
 etotal    :  -8.39990617E+00
 entropy   :   0.00000000E+00
 fermie    :   3.34881874E-01
@@ -850,7 +850,7 @@ rprimd    :
 lattice_lengths: [   7.60000,    7.60000,    7.60000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.3897600E+02
-convergence_: {deltae:  9.73E-10, res2:  1.58E-13, residm:  2.33E-13, diffor: undef, }
+convergence: {deltae:  9.730E-10, res2:  1.580E-13, residm:  2.330E-13, diffor: null, }
 etotal    :  -8.47951309E+00
 entropy   :   0.00000000E+00
 fermie    :   3.20111554E-01
@@ -1023,7 +1023,7 @@ rprimd    :
 lattice_lengths: [   7.60000,    7.60000,    7.60000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.3897600E+02
-convergence_: {deltae:  6.48E-08, res2:  1.64E-14, residm:  2.22E-10, diffor: undef, }
+convergence: {deltae:  6.476E-08, res2:  1.641E-14, residm:  2.221E-10, diffor: null, }
 etotal    :  -8.39946911E+00
 entropy   :   0.00000000E+00
 fermie    :   3.31649327E-01
@@ -1188,7 +1188,7 @@ rprimd    :
 lattice_lengths: [   7.60000,    7.60000,    7.60000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.3897600E+02
-convergence_: {deltae:  1.21E-09, res2:  6.28E-16, residm:  6.35E-11, diffor: undef, }
+convergence: {deltae:  1.211E-09, res2:  6.280E-16, residm:  6.352E-11, diffor: null, }
 etotal    :  -8.27063926E+00
 entropy   :   0.00000000E+00
 fermie    :   3.58708102E-01
@@ -1802,10 +1802,10 @@ P           mkmem          10
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         68.8  wall=         69.1
+- Proc.   0 individual time (sec): cpu=         71.0  wall=         71.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  31 WARNINGs and  32 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         68.8  wall=         69.1
++Overall time at end (sec) : cpu=         71.0  wall=         71.3

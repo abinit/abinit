@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h46 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h53 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t47-t48-t49-t50/t47.in
 - output file    -> t47.out
@@ -482,7 +482,7 @@ rprimd    :
 lattice_lengths: [   7.50702,    7.50702,    7.50702, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9914923E+02
-convergence_: {deltae: -1.34E-12, res2:  3.33E-12, residm:  2.94E-14, diffor: undef, }
+convergence: {deltae: -1.338E-12, res2:  3.332E-12, residm:  2.937E-14, diffor: null, }
 etotal    :  -1.00978614E+01
 entropy   :   0.00000000E+00
 fermie    :   7.09487818E-02
@@ -606,7 +606,7 @@ rprimd    :
 lattice_lengths: [   7.50702,    7.50702,    7.50702, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   2.9914923E+02
-convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.55E-19, diffor:  0.00E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.551E-19, diffor:  0.000E+00, }
 etotal    :  -1.00978614E+01
 entropy   :   0.00000000E+00
 fermie    :   7.09487818E-02
