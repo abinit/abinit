@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 23h05 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 19h36 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Test_suite/seq_tsv3_04/tsv3_04.in
 - output file    -> tsv3_04.out
@@ -504,7 +504,7 @@ rprimd    :
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   3.0428635E+02
-convergence_: {deltae: -9.45E-13, res2:  4.19E-12, residm:  4.56E-05, diffor: undef, }
+convergence: {deltae: -9.450E-13, res2:  4.192E-12, residm:  4.563E-05, diffor: null, }
 etotal    :  -8.48132118E+00
 entropy   :   0.00000000E+00
 fermie    :   1.67558753E-02
@@ -660,7 +660,7 @@ rprimd    :
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   3.0428635E+02
-convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.95E-13, diffor:  0.00E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.947E-13, diffor:  0.000E+00, }
 etotal    :  -8.48132118E+00
 entropy   :   0.00000000E+00
 fermie    :   1.67558753E-02
@@ -756,7 +756,7 @@ rprimd    :
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   3.0428635E+02
-convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.95E-13, diffor:  0.00E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.947E-13, diffor:  0.000E+00, }
 etotal    :  -8.48132118E+00
 entropy   :   0.00000000E+00
 fermie    :   1.67558753E-02
@@ -852,7 +852,7 @@ rprimd    :
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   3.0428635E+02
-convergence_: {deltae:  0.00E+00, res2:  0.00E+00, residm:  9.67E-13, diffor:  0.00E+00, }
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.666E-13, diffor:  0.000E+00, }
 etotal    :  -8.48132118E+00
 entropy   :   0.00000000E+00
 fermie    :   1.67558753E-02
@@ -1208,23 +1208,23 @@ P           mkmem4         80
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   0.900  30.6      0.897  29.0          14586      -1.00        1.00       1.00
-- ewald                          0.333  11.3      0.333  10.7              4      -1.00        1.00       1.00
-- nonlop(apply)                  0.213   7.3      0.197   6.4          14586      -1.00        1.08       1.08
-- pspini                         0.199   6.8      0.201   6.5              4      -1.00        0.99       0.99
-- invars2                        0.189   6.4      0.194   6.3              4      -1.00        0.97       0.97
-- getghc-other                   0.144   4.9      0.148   4.8             -1      -1.00        0.97       0.97
-- vtowfk(ssdiag)                 0.130   4.4      0.155   5.0             -1      -1.00        0.84       0.84
-- timing timab                   0.117   4.0      0.118   3.8              9      -1.00        1.00       1.00
-- projbd                         0.104   3.5      0.118   3.8          20916      -1.00        0.88       0.88
-- stress                         0.046   1.6      0.046   1.5              1      -1.00        0.99       0.99
-- ewald2 (+vdw_dftd)             0.045   1.5      0.046   1.5              1      -1.00        0.99       0.99
-- abinit(2)                      0.037   1.3      0.040   1.3              1      -1.00        0.93       0.93
-- newkpt(excl. rwwf   )          0.021   0.7      0.023   0.7             -1      -1.00        0.92       0.92
-- others (121)                   0.054   1.8      0.051   1.6             -1      -1.00        1.07       1.07
+- fourwf%(pot)                   0.891  30.7      0.920  29.2          14586      -1.00        0.97       0.97
+- ewald                          0.333  11.4      0.334  10.6              4      -1.00        1.00       1.00
+- nonlop(apply)                  0.210   7.2      0.223   7.1          14586      -1.00        0.94       0.94
+- pspini                         0.197   6.8      0.197   6.3              4      -1.00        1.00       1.00
+- invars2                        0.186   6.4      0.192   6.1              4      -1.00        0.97       0.97
+- getghc-other                   0.141   4.9      0.111   3.5             -1      -1.00        1.27       1.27
+- vtowfk(ssdiag)                 0.130   4.5      0.117   3.7             -1      -1.00        1.11       1.11
+- timing timab                   0.120   4.1      0.122   3.9              9      -1.00        0.98       0.98
+- projbd                         0.099   3.4      0.114   3.6          20916      -1.00        0.87       0.87
+- stress                         0.046   1.6      0.046   1.5              1      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.046   1.6      0.045   1.4              1      -1.00        1.01       1.01
+- abinit(2)                      0.037   1.3      0.038   1.2              1      -1.00        0.98       0.98
+- newkpt(excl. rwwf   )          0.021   0.7      0.018   0.6             -1      -1.00        1.16       1.16
+- others (121)                   0.053   1.8      0.062   2.0             -1      -1.00        0.86       0.86
 -<END_TIMER>
 -
-- subtotal                       2.533  86.1      2.567  82.9                                  0.99       0.99
+- subtotal                       2.511  86.3      2.539  80.7                                  0.99       0.99
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
@@ -1234,23 +1234,23 @@ P           mkmem4         80
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   0.900  30.6      0.897  29.0          14586      -1.00        1.00       1.00
-- ewald                          0.333  11.3      0.333  10.7              4      -1.00        1.00       1.00
-- nonlop(apply)                  0.213   7.3      0.197   6.4          14586      -1.00        1.08       1.08
-- pspini                         0.199   6.8      0.201   6.5              4      -1.00        0.99       0.99
-- invars2                        0.189   6.4      0.194   6.3              4      -1.00        0.97       0.97
-- getghc-other                   0.144   4.9      0.148   4.8             -1      -1.00        0.97       0.97
-- vtowfk(ssdiag)                 0.130   4.4      0.155   5.0             -1      -1.00        0.84       0.84
-- timing timab                   0.117   4.0      0.118   3.8              9      -1.00        1.00       1.00
-- projbd                         0.104   3.5      0.118   3.8          20916      -1.00        0.88       0.88
-- stress                         0.046   1.6      0.046   1.5              1      -1.00        0.99       0.99
-- ewald2 (+vdw_dftd)             0.045   1.5      0.046   1.5              1      -1.00        0.99       0.99
-- abinit(2)                      0.037   1.3      0.040   1.3              1      -1.00        0.93       0.93
-- newkpt(excl. rwwf   )          0.021   0.7      0.023   0.7             -1      -1.00        0.92       0.92
-- others (121)                   0.054   1.8      0.051   1.6             -1      -1.00        1.07       1.07
+- fourwf%(pot)                   0.891  30.7      0.920  29.2          14586      -1.00        0.97       0.97
+- ewald                          0.333  11.4      0.334  10.6              4      -1.00        1.00       1.00
+- nonlop(apply)                  0.210   7.2      0.223   7.1          14586      -1.00        0.94       0.94
+- pspini                         0.197   6.8      0.197   6.3              4      -1.00        1.00       1.00
+- invars2                        0.186   6.4      0.192   6.1              4      -1.00        0.97       0.97
+- getghc-other                   0.141   4.9      0.111   3.5             -1      -1.00        1.27       1.27
+- vtowfk(ssdiag)                 0.130   4.5      0.117   3.7             -1      -1.00        1.11       1.11
+- timing timab                   0.120   4.1      0.122   3.9              9      -1.00        0.98       0.98
+- projbd                         0.099   3.4      0.114   3.6          20916      -1.00        0.87       0.87
+- stress                         0.046   1.6      0.046   1.5              1      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.046   1.6      0.045   1.4              1      -1.00        1.01       1.01
+- abinit(2)                      0.037   1.3      0.038   1.2              1      -1.00        0.98       0.98
+- newkpt(excl. rwwf   )          0.021   0.7      0.018   0.6             -1      -1.00        1.16       1.16
+- others (121)                   0.053   1.8      0.062   2.0             -1      -1.00        0.86       0.86
 -<END_TIMER>
 
-- subtotal                       2.533  86.1      2.567  82.9                                  0.99       0.99
+- subtotal                       2.511  86.3      2.539  80.7                                  0.99       0.99
 
 ================================================================================
 
