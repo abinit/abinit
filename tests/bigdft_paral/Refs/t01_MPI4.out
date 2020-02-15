@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 21h03 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 22h10 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_paral_t01_MPI4/t01.in
 - output file    -> t01_MPI4.out
@@ -178,7 +178,7 @@ rprimd    :
 lattice_lengths: [   8.80000,    6.80000,    6.80000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.0691200E+02
-convergence_: {deltae:  7.93E-09, res2:  6.84E-07, residm:  3.38E-05, diffor: undef, }
+convergence: {deltae:  7.928E-09, res2:  6.839E-07, residm:  3.376E-05, diffor: null, }
 etotal    :  -3.12619900E+01
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -295,7 +295,7 @@ rprimd    :
 lattice_lengths: [   8.80000,    6.80000,    6.80000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   4.0691200E+02
-convergence_: {deltae:  1.44E-06, res2:  2.46E-07, residm:  6.63E-07, diffor: undef, }
+convergence: {deltae:  1.444E-06, res2:  2.458E-07, residm:  6.628E-07, diffor: null, }
 etotal    :  -3.12619899E+01
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -516,10 +516,10 @@ total_energy_dc     : -3.12619964242796E+01
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.9  wall=          3.5
+- Proc.   0 individual time (sec): cpu=          3.0  wall=          3.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         11.8  wall=         12.3
++Overall time at end (sec) : cpu=         12.2  wall=         12.4

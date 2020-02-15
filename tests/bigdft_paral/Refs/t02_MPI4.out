@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat 15 Feb 2020.
-- ( at 16h13 )
+- ( at 22h10 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_paral_t02_MPI4/t02.in
 - output file    -> t02_MPI4.out
@@ -189,7 +189,7 @@ rprimd    :
 lattice_lengths: [  11.60000,    9.20000,    9.20000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   9.8182400E+02
-convergence_: {deltae:  2.31E-08, res2:  2.49E-07, residm:  7.82E-06, diffor: undef, }
+convergence: {deltae:  2.313E-08, res2:  2.495E-07, residm:  7.820E-06, diffor: null, }
 etotal    :  -3.77874966E+01
 entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
@@ -440,10 +440,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.2  wall=          8.3
+- Proc.   0 individual time (sec): cpu=          9.4  wall=         15.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         32.8  wall=         32.9
++Overall time at end (sec) : cpu=         54.5  wall=         60.6
