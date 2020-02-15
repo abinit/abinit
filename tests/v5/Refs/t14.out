@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h30 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h00 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t14/t14.in
 - output file    -> t14.out
@@ -463,7 +463,7 @@ psp_core            :  9.04880150314593E-01
 xc_dc               : -6.36678734727187E+01
 spherical_terms     : -3.56958015132696E+01
 total_energy_dc     : -1.70111023353240E+02
-total_energy_dc_eV  : -4.62895635983141E+03
+total_energy_dc_eV  : -4.62895635528245E+03
 ...
 
 
@@ -739,7 +739,7 @@ psp_core            :  9.04880150314593E-01
 xc_dc               : -6.34762525131624E+01
 spherical_terms     : -3.54755339436157E+01
 total_energy_dc     : -1.69735579300506E+02
-total_energy_dc_eV  : -4.62891689790241E+03
+total_energy_dc_eV  : -4.61874000304553E+03
 ...
 
 
@@ -1013,7 +1013,7 @@ psp_core            :  9.04880150314593E-01
 xc_dc               : -6.35676197658553E+01
 spherical_terms     : -3.55818612396891E+01
 total_energy_dc     : -1.69923657199030E+02
-total_energy_dc_eV  : -4.62892625880832E+03
+total_energy_dc_eV  : -4.62385786293787E+03
 ...
 
 
@@ -1287,7 +1287,7 @@ psp_core            :  9.04880150314593E-01
 xc_dc               : -6.36442090027842E+01
 spherical_terms     : -3.56705328612195E+01
 total_energy_dc     : -1.70073694903651E+02
-total_energy_dc_eV  : -4.62894822674286E+03
+total_energy_dc_eV  : -4.62794059651176E+03
 ...
 
 
@@ -1454,10 +1454,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         10.2  wall=         10.8
+- Proc.   0 individual time (sec): cpu=         10.4  wall=         11.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  15 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.2  wall=         10.8
++Overall time at end (sec) : cpu=         10.4  wall=         11.1

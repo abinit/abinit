@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 19h00 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h00 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tudet_1-tudet_2-tudet_3/tudet_1.in
 - output file    -> tudet_1.out
@@ -667,7 +667,7 @@ spherical_terms     : -2.24473353935877E+01
 internal            : -2.48668500694265E+02
 '-kT*entropy'       :  5.08873107421461E-05
 total_energy_dc     : -2.48668449806954E+02
-total_energy_dc_eV  : -6.76661159272985E+03
+total_energy_dc_eV  : -6.76661264156817E+03
 ...
 
 
@@ -950,10 +950,10 @@ P           mkmem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          5.7  wall=          5.7
+- Proc.   0 individual time (sec): cpu=          5.6  wall=          5.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.7  wall=          5.7
++Overall time at end (sec) : cpu=          5.6  wall=          5.7

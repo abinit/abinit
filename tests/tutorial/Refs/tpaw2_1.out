@@ -584,7 +584,7 @@ spherical_terms     : -6.57679851813731E+00
 internal            : -3.92987534818935E+01
 '-kT*entropy'       : -1.53809935371840E-03
 total_energy_dc     : -3.93002915812472E+01
-total_energy_dc_eV  : -1.06941527266316E+03
+total_energy_dc_eV  : -1.06941532002724E+03
 ...
 
 

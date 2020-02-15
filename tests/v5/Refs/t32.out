@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h30 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h00 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t32/t32.in
 - output file    -> t32.out
@@ -556,7 +556,7 @@ psp_core            :  1.85071074447428E+00
 xc_dc               : -1.54173586218257E+01
 spherical_terms     :  4.36487349383541E+00
 total_energy_dc     : -7.27121148258780E+01
-total_energy_dc_eV  : -1.97859656474725E+03
+total_energy_dc_eV  : -1.97859726779936E+03
 ...
 
 
@@ -734,10 +734,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.3  wall=          4.3
+- Proc.   0 individual time (sec): cpu=          4.3  wall=          4.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.3  wall=          4.3
++Overall time at end (sec) : cpu=          4.3  wall=          4.4

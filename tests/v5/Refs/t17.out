@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h30 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h00 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t17/t17.in
 - output file    -> t17.out
@@ -563,7 +563,7 @@ psp_core            :  6.40783148571284E+00
 xc_dc               : -2.38554017543678E+01
 spherical_terms     : -1.08645248922782E+01
 total_energy_dc     : -1.44134494067323E+02
-total_energy_dc_eV  : -3.92209855655278E+03
+total_energy_dc_eV  : -3.92209904553282E+03
 ...
 
 
@@ -1205,7 +1205,7 @@ psp_core            :  6.40783148571284E+00
 xc_dc               : -2.40231658070107E+01
 spherical_terms     : -1.08763529658042E+01
 total_energy_dc     : -1.44196411062217E+02
-total_energy_dc_eV  : -3.92377969422935E+03
+total_energy_dc_eV  : -3.92378389264833E+03
 ...
 
 
@@ -1854,7 +1854,7 @@ psp_core            :  6.40783148571284E+00
 xc_dc               : -2.40232902097741E+01
 spherical_terms     : -1.08761976270461E+01
 total_energy_dc     : -1.44196411064383E+02
-total_energy_dc_eV  : -3.92377944486651E+03
+total_energy_dc_eV  : -3.92378389270728E+03
 ...
 
 
@@ -2495,7 +2495,7 @@ psp_core            :  6.40783148571284E+00
 xc_dc               : -2.38916810776678E+01
 spherical_terms     : -1.08664580928668E+01
 total_energy_dc     : -1.44148903080608E+02
-total_energy_dc_eV  : -3.92249776100715E+03
+total_energy_dc_eV  : -3.92249113472435E+03
 ...
 
 
@@ -3001,6 +3001,10 @@ force_length_stats: {min:   1.79330305E-03, max:   1.79330305E-03, mean:   1.793
   without the knowledge of imaginary part of Rhoij atomic occupancies
   (computed only when pawcpxocc=2).
 
+band_energy:  -1.39521288E+01
+...
+
+
 --- !EnergyTermsDC
 iteration_state     : {dtset: 5, }
 comment             : '"Double-counting" decomposition of free energy'
@@ -3010,7 +3014,7 @@ psp_core            :  6.40783148571284E+00
 xc_dc               : -2.40231658069831E+01
 spherical_terms     : -1.08763529658023E+01
 total_energy_dc     : -1.44196411062218E+02
-total_energy_dc_eV  : -3.92011509902011E+03
+total_energy_dc_eV  : -3.92378389264835E+03
 ...
 
 
@@ -3322,10 +3326,10 @@ P           mkmem5          4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         28.9  wall=         29.0
+- Proc.   0 individual time (sec): cpu=         29.3  wall=         29.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and  28 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         28.9  wall=         29.0
++Overall time at end (sec) : cpu=         29.3  wall=         29.4

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h29 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h00 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v4_t05/t05.in
 - output file    -> t05.out
@@ -388,7 +388,7 @@ spherical_terms     : -8.35741475958351E-03
 internal            : -1.30933390301291E+01
 '-kT*entropy'       : -2.20206658257099E-02
 total_energy_dc     : -1.31153596959548E+01
-total_energy_dc_eV  : -3.56887109576513E+02
+total_energy_dc_eV  : -3.56887087148598E+02
 ...
 
 
@@ -585,7 +585,7 @@ spherical_terms     : -8.35746355201850E-03
 internal            : -1.30933390601735E+01
 '-kT*entropy'       : -2.20206357571927E-02
 total_energy_dc     : -1.31153596959307E+01
-total_energy_dc_eV  : -3.56887191880754E+02
+total_energy_dc_eV  : -3.56887087147943E+02
 ...
 
 
@@ -782,7 +782,7 @@ spherical_terms     : -8.35741475958351E-03
 internal            : -1.30933390301291E+01
 '-kT*entropy'       : -2.20206658257099E-02
 total_energy_dc     : -1.31153596959548E+01
-total_energy_dc_eV  : -3.56887109576513E+02
+total_energy_dc_eV  : -3.56887087148598E+02
 ...
 
 
@@ -979,7 +979,7 @@ spherical_terms     : -8.35746355201850E-03
 internal            : -1.30933390601735E+01
 '-kT*entropy'       : -2.20206357571927E-02
 total_energy_dc     : -1.31153596959307E+01
-total_energy_dc_eV  : -3.56887191880754E+02
+total_energy_dc_eV  : -3.56887087147943E+02
 ...
 
 
@@ -1176,7 +1176,7 @@ spherical_terms     : -8.35741475958351E-03
 internal            : -1.30933390301291E+01
 '-kT*entropy'       : -2.20206658257099E-02
 total_energy_dc     : -1.31153596959548E+01
-total_energy_dc_eV  : -3.56887109576513E+02
+total_energy_dc_eV  : -3.56887087148598E+02
 ...
 
 
@@ -1350,10 +1350,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.4
+- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  10 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.0  wall=          2.4
++Overall time at end (sec) : cpu=          2.0  wall=          2.1

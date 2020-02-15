@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h43 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h01 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t76/t76.in
 - output file    -> t76.out
@@ -791,7 +791,7 @@ spherical_terms     : -4.69286586267264E+01
 internal            : -1.97424221232124E+02
 '-kT*entropy'       : -1.83459720046560E-03
 total_energy_dc     : -1.97426055829325E+02
-total_energy_dc_eV  : -5.37223636066755E+03
+total_energy_dc_eV  : -5.37223618913754E+03
 ...
 
 
@@ -1006,7 +1006,7 @@ spherical_terms     : -4.69285631015928E+01
 internal            : -1.97424221288869E+02
 '-kT*entropy'       : -1.83453984176360E-03
 total_energy_dc     : -1.97426055828710E+02
-total_energy_dc_eV  : -5.37223618815534E+03
+total_energy_dc_eV  : -5.37223618912083E+03
 ...
 
 
@@ -1271,7 +1271,7 @@ spherical_terms     : -4.69285627079854E+01
 internal            : -1.97424221289017E+02
 '-kT*entropy'       : -1.83453969282007E-03
 total_energy_dc     : -1.97426055828710E+02
-total_energy_dc_eV  : -5.37223619154357E+03
+total_energy_dc_eV  : -5.37223618912082E+03
 ...
 
 
@@ -2732,10 +2732,10 @@ P           mkmem4         41
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         15.2  wall=         15.6
+- Proc.   0 individual time (sec): cpu=         15.8  wall=         16.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  11 WARNINGs and  21 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.2  wall=         15.6
++Overall time at end (sec) : cpu=         15.8  wall=         16.0

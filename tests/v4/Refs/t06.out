@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h29 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h00 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v4_t06/t06.in
 - output file    -> t06.out
@@ -428,7 +428,7 @@ spherical_terms     : -6.10266176294290E-02
 internal            : -1.52483499134963E+01
 '-kT*entropy'       : -2.00858823273697E-02
 total_energy_dc     : -1.52684357958236E+01
-total_energy_dc_eV  : -4.15475165171984E+02
+total_energy_dc_eV  : -4.15475267381921E+02
 ...
 
 
@@ -647,7 +647,7 @@ spherical_terms     : -8.42958251274357E-02
 internal            : -1.54564183145886E+01
 '-kT*entropy'       : -8.59356077602866E-03
 total_energy_dc     : -1.54650118753646E+01
-total_energy_dc_eV  : -4.20825082513021E+02
+total_energy_dc_eV  : -4.20824374540005E+02
 ...
 
 
@@ -865,7 +865,7 @@ spherical_terms     : -1.15839373192046E-01
 internal            : -1.56242061309222E+01
 '-kT*entropy'       : -1.61558280936204E-02
 total_energy_dc     : -1.56403619590158E+01
-total_energy_dc_eV  : -4.25596934571369E+02
+total_energy_dc_eV  : -4.25595892976121E+02
 ...
 
 
@@ -1084,7 +1084,7 @@ spherical_terms     : -1.37570920341693E-01
 internal            : -1.57040844301791E+01
 '-kT*entropy'       : -1.77322035851516E-02
 total_energy_dc     : -1.57218166337642E+01
-total_energy_dc_eV  : -4.27812422873867E+02
+total_energy_dc_eV  : -4.27812387397892E+02
 ...
 
 
@@ -1301,7 +1301,7 @@ spherical_terms     : -1.56907857010906E-01
 internal            : -1.57625971355224E+01
 '-kT*entropy'       : -1.61566029575511E-02
 total_energy_dc     : -1.57787537384799E+01
-total_energy_dc_eV  : -4.29365367096236E+02
+total_energy_dc_eV  : -4.29361724810188E+02
 ...
 
 
@@ -1519,7 +1519,7 @@ spherical_terms     : -1.68172987825843E-01
 internal            : -1.57885989838937E+01
 '-kT*entropy'       : -1.58164515272540E-02
 total_energy_dc     : -1.58044154354209E+01
-total_energy_dc_eV  : -4.30058809118012E+02
+total_energy_dc_eV  : -4.30060015096147E+02
 ...
 
 
@@ -1708,10 +1708,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          5.9  wall=          6.6
+- Proc.   0 individual time (sec): cpu=          5.8  wall=          7.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   7 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.9  wall=          6.6
++Overall time at end (sec) : cpu=          5.8  wall=          7.3

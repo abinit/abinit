@@ -478,7 +478,7 @@ psp_core            :  2.06103740855524E-01
 xc_dc               : -1.33806725606238E-01
 spherical_terms     : -5.46490387513119E-02
 total_energy_dc     : -7.40570688128349E+00
-total_energy_dc_eV  : -2.01519534465141E+02
+total_energy_dc_eV  : -2.01519532701249E+02
 ...
 
 
@@ -761,7 +761,7 @@ psp_core            :  2.06103740855524E-01
 xc_dc               : -1.33806724833844E-01
 spherical_terms     : -5.46490341581449E-02
 total_energy_dc     : -7.40570688128352E+00
-total_energy_dc_eV  : -2.01519532508654E+02
+total_energy_dc_eV  : -2.01519532701249E+02
 ...
 
 

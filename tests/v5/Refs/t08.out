@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h30 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h00 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t08/t08.in
 - output file    -> t08.out
@@ -1016,7 +1016,7 @@ spherical_terms     : -4.76423769607461E+01
 internal            : -3.52963671286215E+02
 '-kT*entropy'       : -1.41041540693718E-03
 total_energy_dc     : -3.52965081701622E+02
-total_energy_dc_eV  : -9.57969244090061E+03
+total_energy_dc_eV  : -9.60466832735909E+03
 ...
 
 
@@ -1764,7 +1764,7 @@ spherical_terms     : -4.71786373305868E+01
 internal            : -3.52302234980358E+02
 '-kT*entropy'       : -1.77934893452816E-03
 total_energy_dc     : -3.52304014329293E+02
-total_energy_dc_eV  : -9.56079819024808E+03
+total_energy_dc_eV  : -9.58667976933332E+03
 ...
 
 
@@ -2512,7 +2512,7 @@ spherical_terms     : -4.76092678026764E+01
 internal            : -3.52968242677807E+02
 '-kT*entropy'       : -1.37836077552293E-03
 total_energy_dc     : -3.52969621038582E+02
-total_energy_dc_eV  : -9.57271673187456E+03
+total_energy_dc_eV  : -9.60479184899959E+03
 ...
 
 
@@ -3260,7 +3260,7 @@ spherical_terms     : -4.83842543586557E+01
 internal            : -3.58351498163252E+02
 '-kT*entropy'       : -1.53695139107963E-03
 total_energy_dc     : -3.58353035114643E+02
-total_energy_dc_eV  : -9.58298298735392E+03
+total_energy_dc_eV  : -9.75128199590061E+03
 ...
 
 
@@ -3638,10 +3638,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          8.9  wall=         11.0
+- Proc.   0 individual time (sec): cpu=          9.1  wall=          9.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.9  wall=         11.0
++Overall time at end (sec) : cpu=          9.1  wall=          9.7

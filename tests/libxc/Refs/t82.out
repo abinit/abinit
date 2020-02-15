@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h55 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 14h59 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/libxc_t82/t82.in
 - output file    -> t82.out
@@ -695,7 +695,7 @@ psp_core            :  2.13102601960423E-01
 xc_dc               :  1.29540757789038E-01
 spherical_terms     : -4.23147281823026E-02
 total_energy_dc     : -8.00025895566803E+00
-total_energy_dc_eV  : -2.17729554370922E+02
+total_energy_dc_eV  : -2.17698117422086E+02
 ...
 
 
@@ -972,7 +972,7 @@ psp_core            :  2.13102601960423E-01
 xc_dc               :  1.29540757791810E-01
 spherical_terms     : -4.23147281555760E-02
 total_energy_dc     : -8.00025895566812E+00
-total_energy_dc_eV  : -2.17729554370387E+02
+total_energy_dc_eV  : -2.17698117422088E+02
 ...
 
 
@@ -2521,10 +2521,10 @@ P          mk1mem32        16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         10.9  wall=         13.0
+- Proc.   0 individual time (sec): cpu=         11.2  wall=         11.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  22 WARNINGs and  42 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.9  wall=         13.0
++Overall time at end (sec) : cpu=         11.2  wall=         11.6

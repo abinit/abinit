@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h30 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 15h00 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t11-t12-t13/t11.in
 - output file    -> t11.out
@@ -361,7 +361,7 @@ psp_core            :  1.68105436135424E-01
 xc_dc               : -4.15298615073135E+00
 spherical_terms     :  4.19998292294656E+00
 total_energy_dc     : -8.03597613569201E+00
-total_energy_dc_eV  : -2.18669986102676E+02
+total_energy_dc_eV  : -2.18670031318115E+02
 ...
 
 

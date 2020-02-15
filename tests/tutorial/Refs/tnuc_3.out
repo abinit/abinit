@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 18h59 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 14h59 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tnuc_3/tnuc_3.in
 - output file    -> tnuc_3.out
@@ -418,7 +418,7 @@ psp_core            :  9.73150399293690E-01
 xc_dc               : -5.29287174026596E+00
 spherical_terms     :  5.21190247027341E+00
 total_energy_dc     : -7.19532319297533E+00
-total_energy_dc_eV  : -1.95794773286776E+02
+total_energy_dc_eV  : -1.95794701400813E+02
 ...
 
 

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 21h01 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 14h59 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/bigdft_t23/t23.in
 - output file    -> t23.out
@@ -262,7 +262,7 @@ psp_core            :  0.00000000000000E+00
 xc_dc               : -1.82381484677558E-01
 spherical_terms     : -2.44501014426690E-05
 total_energy_dc     : -4.76423499357225E-01
-total_energy_dc_eV  : -1.29923154963701E+01
+total_energy_dc_eV  : -1.29641427209339E+01
 ...
 
 
@@ -420,10 +420,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.4
+- Proc.   0 individual time (sec): cpu=          0.4  wall=          0.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.4  wall=          0.4
++Overall time at end (sec) : cpu=          0.4  wall=          0.5
