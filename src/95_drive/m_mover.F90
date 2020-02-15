@@ -35,6 +35,7 @@ module m_mover
  use m_xmpi
  use m_nctk
  use m_dtfil
+ use m_yaml
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -481,7 +482,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
  do itime=1,ntime
 
-   !call yaml_iterstart("itime", itime, std_out, scfcv_args%dtset%use_yaml)
+   call yaml_iterstart("itime", itime, dev_null, scfcv_args%dtset%use_yaml)
 
    ! Handle time limit condition.
    if (itime == 1) prev = abi_wtime()
@@ -518,7 +519,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !  ### 09. Loop for icycle (From 1 to ncycle)
    do icycle=1,ncycle
 
-     !call yaml_iterstart("icycle", icycle, std_out, scfcv_args%dtset%use_yaml)
+     call yaml_iterstart("icycle", icycle, dev_null, scfcv_args%dtset%use_yaml)
 
      itime_hist = (itime-1)*ncycle + icycle ! Store the time step in of the history
 

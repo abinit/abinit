@@ -94,6 +94,6 @@ jpawu2  0.7583333333333333  0.0  0.0  eV
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = B. Amadon, J. Bieder 
-#%% keywords = DMFT, CTQMC, FAILS_IFMPI
+#%% keywords = PAW, DMFT, CTQMC, FAILS_IFMPI
 #%% description = Test entropy calculation for SrVO3 within DMFT
 #%%<END TEST_INFO>

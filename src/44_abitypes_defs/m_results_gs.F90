@@ -454,7 +454,6 @@ subroutine destroy_results_gs(results_gs)
 !Arguments ------------------------------------
 !arrays
  type(results_gs_type),intent(inout) :: results_gs
-!Local variables-------------------------------
 
 !************************************************************************
 
@@ -801,6 +800,8 @@ end function results_gs_ncwrite
 !! INPUTS
 !!  results <type(results_gs_type)>=miscellaneous information about the system after ground state computation
 !!  unit= unit of output file
+!!  cryst: Crystal structure
+!!  with_conv: True if the convergence dictionary with residuals and diffs should be written.
 !!  [comment] optional comment for the final document
 !!
 !! PARENTS
@@ -809,10 +810,11 @@ end function results_gs_ncwrite
 !!
 !! SOURCE
 
-subroutine results_gs_yaml_write(results, unit, cryst, comment)
+subroutine results_gs_yaml_write(results, unit, cryst, with_conv, comment)
 
  class(results_gs_type),intent(in) :: results
  type(crystal_t),intent(in) :: cryst
+ logical,intent(in) :: with_conv
  integer,intent(in) :: unit
  character(len=*),intent(in),optional :: comment
 
@@ -845,10 +847,15 @@ subroutine results_gs_yaml_write(results, unit, cryst, comment)
  ! FIXME: It seems there's a portability problem on for residm computed with nstep = 0 and iscf -3
  ! because one may get very small value e.g. 7.91-323. residm with nstep > 0 are OK though
  ! so print zero if residm < tol30.
- call ydoc%add_reals( &
-   "deltae, res2, residm, diffor", &
-   [results%deltae, results%res2, merge(results%residm, zero, results%residm > tol30), results%diffor], &
-   real_fmt="(es9.2)", dict_key="convergence_")
+ if (with_conv) then
+   call ydoc%add_reals( &
+     "deltae, res2, residm, diffor", &
+     [results%deltae, results%res2, merge(results%residm, zero, results%residm > tol30), results%diffor], &
+     real_fmt="(es10.3)", dict_key="convergence")
+     !real_fmt="(es9.2)", dict_key="convergence_")
+ else
+   call ydoc%set_keys_to_string("deltae, res2, residm, diffor", "null", dict_key="convergence")
+ end if
 
  ! Write energies.
  call ydoc%add_reals("etotal, entropy, fermie", [results%etotal, results%entropy, results%fermie])

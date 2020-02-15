@@ -402,7 +402,7 @@ rprimd    :
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   3.8273624E+02
-convergence_: {deltae:  2.38E-09, res2:  1.42E-08, residm:  2.60E-07, diffor: undef, }
+convergence: {deltae:  2.38E-09, res2:  1.42E-08, residm:  2.60E-07, diffor: null, }
 etotal    :  -1.51507712E+02
 entropy   :   0.00000000E+00
 fermie    :   3.09658146E-01
@@ -672,7 +672,7 @@ spherical_terms     : -4.67794622882536E+00
 internal            : -1.51504536825893E+02
 '-kT*entropy'       : -3.17488176662769E-03
 total_energy_dc     : -1.51507711707660E+02
-total_energy_dc_eV  : -4.12273389925231E+03
+total_energy_dc_eV  : -4.12273450102728E+03
 ...
 
 
@@ -896,7 +896,7 @@ rprimd    :
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   3.8273624E+02
-convergence_: {deltae:  1.17E-04, res2:  1.55E-01, residm:  5.75E-13, diffor:  0.00E+00, }
+convergence: {deltae:  1.17E-04, res2:  1.55E-01, residm:  5.75E-13, diffor:  0.00E+00, }
 etotal    :  -1.51475040E+02
 entropy   :   0.00000000E+00
 fermie    :   3.04097076E-01
@@ -1145,8 +1145,9 @@ xc_dc               : -2.43712799495973E+01
 spherical_terms     : -4.73302160916917E+00
 internal            : -1.51475039954668E+02
 total_energy_dc     : -1.51475039954668E+02
-total_energy_dc_eV  : -4.12649332004448E+03
+total_energy_dc_eV  : -4.12184545739417E+03
 ...
+
 
 
  Cartesian components of stress tensor (hartree/bohr^3)

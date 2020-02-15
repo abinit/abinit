@@ -61,7 +61,7 @@ shiftk
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He
-#%% keywords = Wannier90
+#%% keywords = PAW, Wannier90
 #%% description = 
 #%%   Wannier function for bcc Fe. 
 #%%   To check whether wannier90 interface works properly with nsppol=2 and nspden=2.

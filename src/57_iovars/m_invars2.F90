@@ -2304,6 +2304,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntime',tread,'INT')
  if(tread==1) dtset%ntime=intarr(1)
 
+ !if (tread == 0) then
+ !  ! if ntime is not given but ionmov > 0, use a reasonable number of iterations!
+ !  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ionmov',tread,'INT')
+ !  if (intarr(1) /= 0) then
+ !    dtset%ntime = 50
+ !    MSG_COMMENT("Calculation with ionmov /= 0 without ntime in the input. ntime has been set automatically to 50")
+ !  end if
+ !end if
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nctime',tread,'INT')
  if(tread==1) dtset%nctime=intarr(1)
 

@@ -57,7 +57,7 @@ diemac 2.0
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = J. Zwanziger
-#%% keywords = 
+#%% keywords = PAW
 #%% description = 
 #%%   Electric field gradients in ICl molecule, with and without spin orbit coupling.
 #%% topics = EFG

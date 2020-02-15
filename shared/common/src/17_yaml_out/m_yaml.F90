@@ -202,8 +202,6 @@ subroutine yaml_iterstart(label, val, unit, use_yaml, newline)
  type(stream_string) :: stream
 ! *************************************************************************
 
- if (unit == dev_null) return
-
  select case (label)
  case ("dtset")
    DTSET_IDX = val
@@ -224,6 +222,7 @@ subroutine yaml_iterstart(label, val, unit, use_yaml, newline)
  end select
 
  if (use_yaml == 1) then
+   if (unit == dev_null .or. .not. is_open(unit)) return
    ABI_DEFAULT(nl, newline, .true.)
    write(tmp_i, '(I6)') val
    call stream%push('--- !IterStart'//eol//label//':'//tmp_i//eol//'...')
@@ -1525,7 +1524,7 @@ subroutine format_real(val, dest, formt)
 #else
   if (val == MAGIC_UNDEF) then
 #endif
-    write(dest, '(a)') 'undef'
+    write(dest, '(a)') 'null'
   else
     write(dest, trim(formt)) val
   end if
