@@ -1519,13 +1519,14 @@ subroutine format_real(val, dest, formt)
   character(len=*),intent(out) :: dest
   character(len=*),intent(in) :: formt
 
-#ifdef HAVE_FC_IEEE_ARITHMETIC
-  if (ieee_is_nan(val)) then  ! NaN
-    write(dest, '(a)') '.nan'
-  else if (val == MAGIC_UNDEF) then
-#else
+!#ifdef HAVE_FC_IEEE_ARITHMETIC
+!  if (ieee_is_nan(val)) then  ! NaN
+!    write(dest, '(a)') '.nan'
+!  else if (val == MAGIC_UNDEF) then
+!#else
+!  if (val == MAGIC_UNDEF) then
+!#endif
   if (val == MAGIC_UNDEF) then
-#endif
     write(dest, '(a)') 'null'
   else
     write(dest, trim(formt)) val
