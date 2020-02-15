@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 11 Feb 2020.
-- ( at 23h37 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 02h25 )
   
 - input  file    -> t14.in
 - output file    -> t14.out
@@ -92,8 +92,9 @@
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1   -> not optimal: autoparal keyword recommended in input file
-
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
+ 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
@@ -191,28 +192,23 @@
  
 
 --- !ResultsGS
-iteration_state: {"dtset": 1, }
+iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :   1.30000000E+01
-charge    :   0.00000000E+00
+rprimd    :
+- [ 24.3000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  21.6000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  21.6000000, ]
 lattice_lengths: [  24.30000,   21.60000,   21.60000, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
-cutoff_energies: {"ecut":   5.0, "pawecutdg":  -1.0, }
-convergence: {
-    "deltae": -1.68E-01, "res2":  8.01E-02, 
-    "residm":  5.51E-02, "diffor":  0.00E+00, 
-}
+lattice_volume:   1.1337408E+04
+convergence_: {deltae: -1.68E-01, res2:  8.01E-02, residm:  5.51E-02, diffor:  0.00E+00, }
 etotal    :  -5.84395750E+01
 entropy   :   0.00000000E+00
 fermie    :  -4.19599406E-03
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
-force_length_stats: {"min": null, "max": null, "mean": null, }
+force_length_stats: {min: null, max: null, mean: null, }
 ...
 
 ================================================================================
@@ -243,7 +239,7 @@ force_length_stats: {"min": null, "max": null, "mean": null, }
    0.00000    0.00000    0.00000
 
 --- !EnergyTermsDC
-iteration_state     : {"dtset": 1, }
+iteration_state     : {dtset: 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -1.12041714345060E+01
 'Ion-ion energy'    :  2.54955460188745E+00
