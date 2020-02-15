@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat 15 Feb 2020.
-- ( at 15h56 )
+- ( at 18h30 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t41_MPI4/t41.in
 - output file    -> t41_MPI4.out
@@ -237,7 +237,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     242.000     242.000
 
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 15.7060000,   0.0000000,   0.0000000, ]
@@ -246,7 +246,7 @@ rprimd    :
 lattice_lengths: [  15.70600,   15.70600,   15.70600, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   3.8743315E+03
-convergence_: {deltae:  3.17E+00, res2:  1.62E+01, residm:  2.48E-04, diffor: undef, }
+convergence: {deltae:  3.175E+00, res2:  1.623E+01, residm:  2.480E-04, diffor: null, }
 etotal    :  -2.64662354E+02
 entropy   :   0.00000000E+00
 fermie    :  -1.67757692E-01
@@ -450,7 +450,7 @@ force_length_stats: {min:   7.13570800E+01, max:   8.00545996E+02, mean:   2.136
 
 
 --- !ResultsGS
-iteration_state: {dtset: 1, }
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
 comment   : Summary of ground state results
 rprimd    :
 - [ 15.7060000,   0.0000000,   0.0000000, ]
@@ -459,7 +459,7 @@ rprimd    :
 lattice_lengths: [  15.70600,   15.70600,   15.70600, ]
 lattice_angles: [ 90.000,  90.000,  90.000, ]
 lattice_volume:   3.8743315E+03
-convergence_: {deltae:  1.43E-01, res2:  9.31E+00, residm:  4.15E-05, diffor: undef, }
+convergence: {deltae:  1.428E-01, res2:  9.313E+00, residm:  4.146E-05, diffor: null, }
 etotal    :  -2.64812643E+02
 entropy   :   0.00000000E+00
 fermie    :  -1.74461822E-01
@@ -787,7 +787,7 @@ force_length_stats: {min:   1.53453133E+01, max:   4.96634212E+02, mean:   2.013
   23.07873   23.29649   23.39723   23.53502   23.58733   23.87245   23.93160   24.02034
 
 --- !EnergyTerms
-iteration_state     : {dtset: 1, }
+iteration_state     : {dtset: 1, itime: 2, icycle: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  5.65998596481211E+01
 hartree             :  1.56997428273715E+02
@@ -804,7 +804,7 @@ total_energy_eV     : -7.17742909913591E+03
 
 
 --- !EnergyTermsDC
-iteration_state     : {dtset: 1, }
+iteration_state     : {dtset: 1, itime: 2, icycle: 1, }
 comment             : '"Double-counting" decomposition of free energy'
 band_energy         : -2.76648326660893E+01
 Ewald energy        : -9.53422797948199E+01
@@ -1041,10 +1041,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         12.0  wall=         12.4
+- Proc.   0 individual time (sec): cpu=         12.8  wall=         13.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         49.0  wall=         49.5
++Overall time at end (sec) : cpu=         52.0  wall=         53.0

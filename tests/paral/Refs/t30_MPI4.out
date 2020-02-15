@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Sat 15 Feb 2020.
-- ( at 15h56 )
+- ( at 18h30 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t30_MPI4/t30.in
 - output file    -> t30_MPI4.out
@@ -213,7 +213,7 @@ rprimd    :
 lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
 lattice_angles: [ 60.000,  60.000,  60.000, ]
 lattice_volume:   8.5750000E+01
-convergence_: {deltae: -9.07E-05, res2:  4.22E-02, residm:  5.44E-04, diffor: undef, }
+convergence: {deltae: -9.075E-05, res2:  4.216E-02, residm:  5.445E-04, diffor: null, }
 etotal    :  -1.04179772E+01
 entropy   :   0.00000000E+00
 fermie    :   4.71364953E-01
@@ -598,10 +598,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.9
+- Proc.   0 individual time (sec): cpu=          0.9  wall=          4.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  19 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.3  wall=          3.5
++Overall time at end (sec) : cpu=         12.9  wall=         16.2

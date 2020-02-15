@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Fri 14 Feb 2020.
-- ( at 20h19 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 18h30 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t28_MPI4/t28.in
 - output file    -> t28_MPI4.out
@@ -261,7 +261,7 @@ rprimd    :
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 57.250,  57.250,  57.250, ]
 lattice_volume:   4.8283574E+02
-convergence_: {deltae: -1.90E-08, res2:  1.25E-08, residm:  2.03E-10, diffor: undef, }
+convergence: {deltae: -1.900E-08, res2:  1.248E-08, residm:  2.027E-10, diffor: null, }
 etotal    :  -1.44196411E+02
 entropy   :   0.00000000E+00
 fermie    :   1.48141542E-01
@@ -821,7 +821,7 @@ psp_core            :  6.40783148571284E+00
 xc_dc               : -2.40235627744097E+01
 spherical_terms     : -1.08762561904110E+01
 total_energy_dc     : -1.44196411062213E+02
-total_energy_dc_eV  : -3.92378721222001E+03
+total_energy_dc_eV  : -3.92378389264822E+03
 ...
 
 
@@ -905,7 +905,7 @@ rprimd    :
 lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
 lattice_angles: [ 57.250,  57.250,  57.250, ]
 lattice_volume:   4.8283574E+02
-convergence_: {deltae: -2.93E-07, res2:  8.26E-08, residm:  3.41E-10, diffor: undef, }
+convergence: {deltae: -2.932E-07, res2:  8.256E-08, residm:  3.412E-10, diffor: null, }
 etotal    :  -1.44196411E+02
 entropy   :   0.00000000E+00
 fermie    :   1.48140908E-01
@@ -1469,7 +1469,7 @@ psp_core            :  6.40783148571284E+00
 xc_dc               : -2.40237772725089E+01
 spherical_terms     : -1.08761576702705E+01
 total_energy_dc     : -1.44196411063859E+02
-total_energy_dc_eV  : -3.92379164898799E+03
+total_energy_dc_eV  : -3.92378389269302E+03
 ...
 
 
@@ -1670,10 +1670,10 @@ P           mkmem2          8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         13.7  wall=         13.9
+- Proc.   0 individual time (sec): cpu=         14.5  wall=         15.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         54.9  wall=         55.2
++Overall time at end (sec) : cpu=         60.7  wall=         62.5
