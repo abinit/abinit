@@ -368,7 +368,6 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    end if
 
  end if !if (ab_mover%restartxf<=0)
-
 #endif
 
 !###########################################################
@@ -521,7 +520,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
      call yaml_iterstart("icycle", icycle, dev_null, scfcv_args%dtset%use_yaml)
 
-     itime_hist = (itime-1)*ncycle + icycle ! Store the time step in of the history
+     itime_hist = (itime-1)*ncycle + icycle ! Store the time step in the history
 
 !    ###########################################################
 !    ### 10. Output for each icycle (and itime)

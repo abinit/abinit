@@ -79,7 +79,7 @@ module m_common
  public :: crystal_from_file       ! Build a crystal_t object from netcdf file or Abinit input file
                                    ! with file extension in [".abi", ".in"]
 
- type(yamldoc_t),private,save :: etot_yaml_doc
+ !type(yamldoc_t),private,save :: etot_yaml_doc
 !!***
 
 contains
@@ -100,8 +100,7 @@ contains
 !!          if 3 => called at the end of scfcv.f
 !!  cpus=cpu time limit in seconds
 !!  deltae=change in energy between the previous and present SCF cycle
-!!  diffor=maximum absolute change in component of fcart between present
-!!          and previous SCF cycle.
+!!  diffor=maximum absolute change in component of fcart between present and previous SCF cycle.
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!   | chkexit= if non-zero, check whether the user wishes to exit
 !!   | enunit=parameter determining units of output energies
@@ -225,9 +224,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  character(len=5) :: format_magnet
  character(len=8) :: colname
  character(len=1) :: firstchar
+ type(yamldoc_t) :: ydoc
 !arrays
- real(dp) :: residm_band(dtset%mband,dtset%nsppol)
- real(dp) :: f_tmp(3)
+ real(dp) :: residm_band(dtset%mband,dtset%nsppol), f_tmp(3)
 
 ! *********************************************************************
 
@@ -255,8 +254,8 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
  end do
 
  select case (choice)
-
  case (1)
+   ! choice= if 1 => called at the initialisation of scfcv.f
    ! Examine tolerance criteria
    ! NB: The tests on tolwfr and the presence of tolerances in the SCF case are
    ! also done at the level of the parser in chkinp.
@@ -275,9 +274,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    !  If non-scf calculations, tolwfr must be defined
    if(ttolwfr /= 1 .and. (iscf<0 .and. iscf/=-3) )then
      write(message,'(a,a,a,es14.6,a,a)')&
-&     'when iscf <0 and /= -3, tolwfr must be strictly',ch10,&
-&     'positive, while it is ',tolwfr,ch10,&
-&     'Action: change tolwfr in your input file and resubmit the job.'
+      'when iscf <0 and /= -3, tolwfr must be strictly',ch10,&
+      'positive, while it is ',tolwfr,ch10,&
+      'Action: change tolwfr in your input file and resubmit the job.'
      MSG_ERROR(message)
    end if
    ! toldff only allowed when prtfor==1
@@ -349,13 +348,25 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
          end if
        end if
      end if
+
      ! Will save iterations in this global variables.
      ! MG: For the time being the document is not written to std_out
      ! Should reconsider whether it makes sense to use yaml and global state (problematic if prtvol and/or DFMT)
-     etot_yaml_doc = yamldoc_open('EtotSteps', "")
-     etot_yaml_doc%use_yaml = 0
-     call etot_yaml_doc%open_tabular('data', tag='EtotIters')
-     call etot_yaml_doc%add_tabular_line(message)
+     !etot_yaml_doc = yamldoc_open('EtotSteps', "")
+     !etot_yaml_doc%use_yaml = 0
+     !call etot_yaml_doc%open_tabular('data', tag='EtotIters')
+     !call etot_yaml_doc%add_tabular_line(message)
+
+#if 1
+     ydoc = yamldoc_open('EtotSteps', "")
+     call ydoc%add_ints("iscf, nstep, nline, wfoptalg", &
+                        [dtset%iscf, dtset%nstep, dtset%nline, dtset%wfoptalg], dict_key="control")
+     call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff, vdw_df_threshold", &
+                        [tolwfr, toldff, toldfe, tolvrs, tolrff, vdw_df_threshold], &
+                        real_fmt="(es8.1)", dict_key="tolerances")
+     call ydoc%write_and_free(ab_out, newline=.False.)
+#endif
+
      call wrtout(ab_out,message,'COLL')
    end if
 
@@ -374,10 +385,9 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
    if(abs(tolrff)>tiny(0.0_dp))ttolrff=1
    if(abs(toldfe)>tiny(0.0_dp))ttoldfe=1
    if(abs(tolvrs)>tiny(0.0_dp))ttolvrs=1
+
    ! Conduct printing. If extra output follows, then put a blank line into the output here
-   if (dtset%prtvol>=10) then
-     call wrtout([std_out, ab_out], ' ')
-   end if
+   if (dtset%prtvol>=10) call wrtout([std_out, ab_out], ' ')
 
    ! Calculate up and down charge and magnetization
    if(tmagnet==1) then
@@ -460,7 +470,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
 &         firstchar,'ETOT',istep,etotal,deltae,residm,res2
        end if
      end if
-     if (etot_yaml_doc%stream%length /= 0) call etot_yaml_doc%add_tabular_line('  '//message(6:))
+     !if (etot_yaml_doc%stream%length /= 0) call etot_yaml_doc%add_tabular_line('  '//message(6:))
      call wrtout(ab_out,message,'COLL')
 
      if(mpi_enreg%paral_pert==1) then
@@ -827,7 +837,7 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      end if
 
      ! If enabled, output a YAML document with the ETOT iterations
-     if (etot_yaml_doc%stream%length > 0) call etot_yaml_doc%write_and_free(ab_out)
+     !if (etot_yaml_doc%stream%length > 0) call etot_yaml_doc%write_and_free(ab_out)
    end if ! nstep == 0 : no output
 
  case default
@@ -1074,7 +1084,6 @@ end subroutine setup1
 !!***
 
 !!****f* ABINIT/prteigrs
-!!
 !! NAME
 !! prteigrs
 !!
@@ -1162,13 +1171,11 @@ subroutine prteigrs(eigen,enunit,fermie,fname_eig,iout,iscf,kptns,kptopt,mband,n
 ! *************************************************************************
 
  if (enunit<0.or.enunit>2) then
-   write(msg, '(a,i0)' )' enunit must be 0, 1 or 2. Argument was ',enunit
-   MSG_BUG(msg)
+   MSG_BUG(sjoin('enunit must be 0, 1 or 2. Argument was:', itoa(enunit)))
  end if
 
  if (prteig > 0) then
-   write(msg, '(2a)' ) ' prteigrs : about to open file ',TRIM(fname_eig)
-   call wrtout(iout,msg)
+   call wrtout(iout, sjoin(' prteigrs : about to open file ', fname_eig))
    if (open_file(fname_eig, msg, newunit=temp_unit, status='unknown', form='formatted') /= 0) then
      MSG_ERROR(msg)
    end if

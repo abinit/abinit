@@ -2250,18 +2250,16 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
  integer :: iatom,mu
  real(dp) :: devsqr,grchempot2
  character(len=500) :: msg
+ integer :: units(2)
 
 ! *************************************************************************
-!
-!DEBUG
+
 !write(std_out,*)' clnup2 : enter '
-!ENDDEBUG
 
 !Only print additional info for scf calculations
  if (iscf>=0) then
 
-   if((prtvol>=10).and.(prtfor>0))then
-
+   if(prtvol >= 10 .and. prtfor > 0) then
      write(msg, '(a,10x,a)' ) ch10, '===> extra information on forces <==='
      call wrtout(ab_out,msg)
 
@@ -2287,21 +2285,21 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
      end do
 
      call wrtout(ab_out, ' local psp contribution to red. grads')
-     if (n1xccc/=0) then
+     if (n1xccc /= 0) then
        do iatom=1,natom
-         write(msg,format01020) iatom,fred(:,iatom)-&
-&         (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+grxc(:,iatom)+gresid(:,iatom))
+         write(msg,format01020) iatom,fred(:,iatom) - &
+          (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+grxc(:,iatom)+gresid(:,iatom))
          call wrtout(ab_out,msg)
        end do
      else
        do iatom=1,natom
-         write(msg,format01020) iatom,fred(:,iatom)-&
-&         (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+gresid(:,iatom))
+         write(msg,format01020) iatom,fred(:,iatom) - &
+         (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+gresid(:,iatom))
          call wrtout(ab_out,msg)
        end do
      end if
 
-     if (n1xccc/=0) then
+     if (n1xccc /= 0) then
        call wrtout(ab_out,' core charge xc contribution to reduced grads')
        do iatom=1,natom
          write(msg,format01020) iatom,(grxc(mu,iatom),mu=1,3)
@@ -2309,7 +2307,7 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
        end do
      end if
 
-     if (ngrvdw==natom) then
+     if (ngrvdw == natom) then
        call wrtout(ab_out,' Van der Waals DFT-D contribution to reduced grads')
        do iatom=1,natom
          write(msg,format01020) iatom,(grvdw(mu,iatom),mu=1,3)
@@ -2326,7 +2324,7 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
    end if
 
 !  Compute mean squared deviation from starting coords
-   devsqr=0.0_dp
+   devsqr=zero
    do iatom=1,natom
      do mu=1,3
        devsqr=devsqr+(xred(mu,iatom)-start(mu,iatom))**2
@@ -2343,43 +2341,42 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
      end do
    end if
 
-!  Write out stress results
-   if (prtstr>0) then
+   if (prtstr > 0) then
+     !  Write out stress results
+     units = [std_out, ab_out]
      write(msg, '(a,a)' ) ch10,' Cartesian components of stress tensor (hartree/bohr^3)'
-     call wrtout([std_out, ab_out], msg)
+     call wrtout(units, msg)
 
      write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) '  sigma(1 1)=',strten(1),'  sigma(3 2)=',strten(4)
-     call wrtout([std_out, ab_out], msg)
+     call wrtout(units, msg)
      write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) '  sigma(2 2)=',strten(2),'  sigma(3 1)=',strten(5)
-     call wrtout([std_out, ab_out], msg)
+     call wrtout(units, msg)
      write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) '  sigma(3 3)=',strten(3),'  sigma(2 1)=',strten(6)
-     call wrtout([std_out, ab_out], msg)
+     call wrtout(units, msg)
 
      !  Also output the pressure (minus one third the trace of the stress tensor).
      write(msg, '(a,a,es12.4,a)' ) ch10,&
      '-Cartesian components of stress tensor (GPa)         [Pressure=',&
       -(strten(1)+strten(2)+strten(3))*HaBohr3_GPa/3.0_dp,' GPa]'
-     call wrtout([std_out, ab_out], msg)
+     call wrtout(units, msg)
 
      write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) &
        '- sigma(1 1)=',strten(1)*HaBohr3_GPa,&
        '  sigma(3 2)=',strten(4)*HaBohr3_GPa
-     call wrtout([std_out, ab_out], msg)
+     call wrtout(units, msg)
      write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) &
        '- sigma(2 2)=',strten(2)*HaBohr3_GPa,&
        '  sigma(3 1)=',strten(5)*HaBohr3_GPa
-     call wrtout([std_out, ab_out], msg)
+     call wrtout(units, msg)
      write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) &
        '- sigma(3 3)=',strten(3)*HaBohr3_GPa,&
        '  sigma(2 1)=',strten(6)*HaBohr3_GPa
-     call wrtout([std_out, ab_out], msg)
+     call wrtout(units, msg)
    end if
 
- end if !  Last end if above refers to iscf > 0
+ end if ! iscf > 0
 
-!DEBUG
-!write(std_out,*)' clnup2 : exit '
-!ENDDEBUG
+ !write(std_out,*)' clnup2 : exit '
 
 end subroutine clnup2
 !!***

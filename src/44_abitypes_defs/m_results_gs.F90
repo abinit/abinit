@@ -844,15 +844,14 @@ subroutine results_gs_yaml_write(results, unit, cryst, with_conv, comment)
  call ydoc%add_real('lattice_volume', cryst%ucvol + tol10, real_fmt="(es15.7)")
 
  ! Write convergence degree.
- ! FIXME: It seems there's a portability problem on for residm computed with nstep = 0 and iscf -3
+ ! It seems there's a portability problem on for residm computed with nstep = 0 and iscf -3
  ! because one may get very small value e.g. 7.91-323. residm with nstep > 0 are OK though
- ! so print zero if residm < tol30.
+ ! so print zero if residm < tol30 or allow called to not write the convergence dict.
  if (with_conv) then
    call ydoc%add_reals( &
      "deltae, res2, residm, diffor", &
      [results%deltae, results%res2, merge(results%residm, zero, results%residm > tol30), results%diffor], &
      real_fmt="(es10.3)", dict_key="convergence")
-     !real_fmt="(es9.2)", dict_key="convergence_")
  else
    call ydoc%set_keys_to_string("deltae, res2, residm, diffor", "null", dict_key="convergence")
  end if
@@ -872,7 +871,7 @@ subroutine results_gs_yaml_write(results, unit, cryst, with_conv, comment)
  strten(2,1) = results%strten(6)
 
  if (strten(1,1) /= MAGIC_UNDEF) then
-   call ydoc%add_real2d('cartesian_stress_tensor', strten)
+   call ydoc%add_real2d('cartesian_stress_tensor', strten) !, comment="hartree/bohr^3")
    call ydoc%add_real('pressure_GPa', - get_trace(strten) * HaBohr3_GPa / three, real_fmt="(es12.4)")
  else
    call ydoc%set_keys_to_string("cartesian_stress_tensor, pressure_GPa", "null")
@@ -885,7 +884,7 @@ subroutine results_gs_yaml_write(results, unit, cryst, with_conv, comment)
    !call ydoc%add_paired_real2d('cartesian_forces_and_xred', &
    !  results%fcart, cryst%xred, chars=species, real_fmt="(es12.4)")
 
-   call ydoc%add_real2d('cartesian_forces', results%fcart)
+   call ydoc%add_real2d('cartesian_forces', results%fcart) !, comment="hartree/bohr")
    fnorms = [(sqrt(sum(results%fcart(:, ii) ** 2)), ii=1,results%natom)]
    ! Write force statistics
    call ydoc%add_reals('min, max, mean', &

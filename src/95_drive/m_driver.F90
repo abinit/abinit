@@ -302,22 +302,51 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
 #if 0
    if (mpi_enregs(idtset)%me_cell == 0) then
-     ydoc = yamldoc_open('DatasetInfo', comment)
-     ! Write basic dimensions and info on electrons
+     ydoc = yamldoc_open('DatasetInfo', "")
+
+     ! Write basic dimensions.
      call ydoc%add_ints( &
-       "natom, nkpt, mband, nsppol, nspinor, nspden", &
-       [dtset%natom, dtset%nkpt, dtset%mband, dtset%nsppol, dtset%nspinor, dtset%nspden], dict_key="dimensions")
-     ! Write cutoff energies
+       "natom, nkpt, mband, nsppol, nspinor, nspden, mpw", &
+       [dtset%natom, dtset%nkpt, dtset%mband, dtset%nsppol, dtset%nspinor, dtset%nspden, dtset%mpw], dict_key="dimensions")
+     ! Write cutoff energies.
      call ydoc%add_reals("ecut, pawecutdg", [dtset%ecut, dtset%pawecutdg], real_fmt="(f5.1)", dict_key="cutoff_energies")
-     ! Write info on electrons
-     call ydoc%add_reals("nelect, charge", [dtset%nelect, dtset%charge], dict_key="electrons")
-     ! This part depends on optdriver. Parser will use optdriver to interpret data.
-     if (dtset%optdriver == RUNL_GSTATE) then
-       call ydoc%add_ints( &
-         "optdriver, ionmov, optcell, iscf", &
-         [dtset%optdriver, dtset%ionvmov, dtset%optcell, dtset%iscf] , dict_key="control")
-     end if
-     call ydoc%write_and_free(unit)
+     ! Write info on electrons.
+     call ydoc%add_reals("nelect, charge, occopt, tsmear", [dtset%nelect, dtset%charge, one * dtset%occopt, dtset%tsmear], &
+       dict_key="electrons")
+
+     ! This part depends on optdriver.
+     ! Third-party Yaml parsers may use optdriver to specialize the logic used to interpret the next data.
+     select case (dtset%optdriver)
+     case (RUNL_GSTATE)
+       call ydoc%add_ints("optdriver, ionmov, optcell, iscf, paral_kgb", &
+         [dtset%optdriver, dtset%ionmov, dtset%optcell, dtset%iscf, dtset%paral_kgb] , dict_key="meta")
+     case(RUNL_RESPFN)
+       call ydoc%add_ints(&
+         "optdriver, rfddk, rfdir, rfelfd, rfmagn, rfphon, rfstrs", &
+         [dtset%optdriver, dtset%rfddk, dtset%rfdir, dtset%rfelfd, dtset%rfmagn, dtset%rfphon, dtset%rfstrs], &
+         dict_key="meta")
+     case(RUNL_NONLINEAR)
+     case(RUNL_GWLS)
+     case(RUNL_WFK)
+       call ydoc%add_ints("optdriver, wfk_task", &
+         [dtset%optdriver, dtset%wfk_task] , dict_key="meta")
+     case (RUNL_SCREENING, RUNL_SIGMA)
+       call ydoc%add_ints("optdriver, gwcalctyp", &
+         [dtset%optdriver, dtset%gwcalctyp] , dict_key="meta")
+     case (RUNL_BSE)
+       call ydoc%add_ints("optdriver, bs_calctype, bs_algorithm", &
+         [dtset%optdriver, dtset%bs_calctype, dtset%bs_algorithm] , dict_key="meta")
+     case (RUNL_EPH)
+       call ydoc%add_ints("optdriver, eph_task", &
+         [dtset%optdriver, dtset%eph_task] , dict_key="meta")
+     case default
+       write(msg,'(a,i0,4a)')&
+        'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
+        'This is not allowed.',ch10, 'Action: modify optdriver in the input file.'
+       MSG_ERROR(msg)
+     end select
+
+     call ydoc%write_and_free(ab_out)
    end if
 #endif
 

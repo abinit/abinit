@@ -70,11 +70,10 @@ module m_yaml
    integer :: default_width = 0
    ! impose a minimum width of the field name side of the column (padding with spaces)
 
-   integer :: default_multiline_trig = 5
+   integer :: default_multiline_trig = 8
    ! minimum number of elements before switching to multiline representation.
 
    character(len=20) :: default_ifmt = '(I0)'
-   !character(len=20) :: default_ifmt = '(I8)'
    ! Default format for integer
 
    character(len=20) :: default_rfmt = '(ES16.8)'
@@ -312,6 +311,7 @@ end function yamldoc_open
 !!  [real_fmt] = override the default formatting
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
+!!  [comment]: optional Yaml comment added after the value
 !!
 !! PARENTS
 !!
@@ -319,7 +319,7 @@ end function yamldoc_open
 !!
 !! SOURCE
 
-subroutine yamldoc_add_real(self, label, val, tag, real_fmt, newline, width)
+subroutine yamldoc_add_real(self, label, val, tag, real_fmt, newline, width, comment)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -328,6 +328,7 @@ subroutine yamldoc_add_real(self, label, val, tag, real_fmt, newline, width)
  character(len=*),intent(in),optional :: tag, real_fmt
  logical,intent(in),optional :: newline
  integer,intent(in),optional :: width
+ character(len=*),intent(in),optional :: comment
 
 !Local variables-------------------------------
  integer :: w
@@ -349,6 +350,8 @@ subroutine yamldoc_add_real(self, label, val, tag, real_fmt, newline, width)
  call self%stream%push(' ')
  call format_real(val, tmp_r, trim(rfmt))
  call self%stream%push(trim(tmp_r))
+
+ if (present(comment)) call self%stream%push(' # '//trim(comment))
  if (nl) call self%stream%push(eol)
 
 end subroutine yamldoc_add_real
@@ -445,6 +448,7 @@ end subroutine yamldoc_add_reals
 !!  [int_fmt] = optional  override the default formatting
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
+!!  [comment]: optional Yaml comment added after the value
 !!
 !! PARENTS
 !!
@@ -452,7 +456,7 @@ end subroutine yamldoc_add_reals
 !!
 !! SOURCE
 
-subroutine yamldoc_add_int(self, label, val, tag, int_fmt, newline, width)
+subroutine yamldoc_add_int(self, label, val, tag, int_fmt, newline, width, comment)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -461,6 +465,7 @@ subroutine yamldoc_add_int(self, label, val, tag, int_fmt, newline, width)
  character(len=*),intent(in),optional :: tag, int_fmt
  logical,intent(in),optional :: newline
  integer,intent(in),optional :: width
+ character(len=*),intent(in),optional :: comment
 
 !Local variables-------------------------------
  integer :: w
@@ -482,6 +487,8 @@ subroutine yamldoc_add_int(self, label, val, tag, int_fmt, newline, width)
  call self%stream%push(' ')
  write(tmp_i, trim(ifmt)) val
  call self%stream%push(trim(tmp_i))
+
+ if (present(comment)) call self%stream%push(' # '//trim(comment))
  if (nl) call self%stream%push(eol)
 
 end subroutine yamldoc_add_int
@@ -551,6 +558,8 @@ subroutine yamldoc_add_ints(self, keylist, values, int_fmt, width, dict_key, mul
        call dict%set(adjustl(keylist(start:)), i=values(i))
      else
        call dict%set(adjustl(keylist(start: start + stp - 2)), i=values(i))
+       start = start + stp
+       ABI_CHECK(start < len_trim(keylist), sjoin("Invalid keylist:", keylist))
      end if
    end do
    ABI_DEFAULT(vmax, multiline_trig, self%default_multiline_trig)
@@ -816,6 +825,7 @@ end subroutine yamldoc_add_dict
 !!  [newline]: set to false to prevent adding newlines after fields
 !!  [width]: impose a minimum width of the field name side of the column (padding with spaces)
 !!  [mode]: "T" to write the transpose of arr i.e columns become rows in output (DEFAULT), "N" for normal order
+!!  [comment]: optional Yaml comment added after the key.
 !!
 !! PARENTS
 !!
@@ -823,7 +833,7 @@ end subroutine yamldoc_add_dict
 !!
 !! SOURCE
 
-subroutine yamldoc_add_real2d(self, label, arr, slist, tag, real_fmt, multiline_trig, newline, width, mode)
+subroutine yamldoc_add_real2d(self, label, arr, slist, tag, real_fmt, multiline_trig, newline, width, mode, comment)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -835,6 +845,7 @@ subroutine yamldoc_add_real2d(self, label, arr, slist, tag, real_fmt, multiline_
  logical,intent(in),optional :: newline
  integer,intent(in),optional :: width
  character(len=1),intent(in),optional :: mode
+ character(len=*),intent(in),optional :: comment
 
 !Local variables-------------------------------
  integer :: m, n, w, i, vmax
@@ -858,7 +869,7 @@ subroutine yamldoc_add_real2d(self, label, arr, slist, tag, real_fmt, multiline_
  else
    call yaml_start_field(self%stream, label, width=w)
  end if
- !if (present(comment)) call stream%push(' #'//trim(comment))
+ if (present(comment)) call self%stream%push(' # '//trim(comment))
 
  if (my_mode == "T") then
    do i=1,n
@@ -1008,6 +1019,7 @@ end subroutine yamldoc_add_paired_real2d
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!  [mode] = "T" to write the transpose of arr i.e columns become rows in output (DEFAULT), "N" for normal order
+!!  [comment]: optional Yaml comment added after the key.
 !!
 !! PARENTS
 !!
@@ -1015,7 +1027,7 @@ end subroutine yamldoc_add_paired_real2d
 !!
 !! SOURCE
 
-subroutine yamldoc_add_int2d(self, label, arr, slist, tag, int_fmt, multiline_trig, newline, width, mode)
+subroutine yamldoc_add_int2d(self, label, arr, slist, tag, int_fmt, multiline_trig, newline, width, mode, comment)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -1027,6 +1039,7 @@ subroutine yamldoc_add_int2d(self, label, arr, slist, tag, int_fmt, multiline_tr
  logical,intent(in),optional :: newline
  integer,intent(in),optional :: width
  character(len=1),intent(in),optional :: mode
+ character(len=*),intent(in),optional :: comment
 
 !Local variables-------------------------------
  integer :: m, n, w, i, vmax
@@ -1050,6 +1063,7 @@ subroutine yamldoc_add_int2d(self, label, arr, slist, tag, int_fmt, multiline_tr
  else
    call yaml_start_field(self%stream, label, width=w)
  end if
+ if (present(comment)) call self%stream%push(' # '//trim(comment))
 
  if (my_mode == "T") then
    do i=1,n
