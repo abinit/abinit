@@ -844,6 +844,17 @@ print *, ' g0 calculation ', kbz(:,ikpt_found)-ksym, '   ', bz2kin_smap(ikpt_fou
    end if
  end do
 
+! check for redundant k in the kbz set
+ do ikpt=1, nkbz
+   if (bz2kin_smap(ikpt,1) /= 0) cycle
+! find index according to krank
+   ikpt_found = krank%get_index(kbz(:,ikpt))
+! if I am not my own hash image, associate the smap data from my image
+   if (ikpt_found /= ikpt) then
+     bz2kin_smap(ikpt,:) = bz2kin_smap(ikpt_found,:)
+   end if
+ end do
+
  call krank%free()
 
  !Here I make a check if the mapping was sucessfull
