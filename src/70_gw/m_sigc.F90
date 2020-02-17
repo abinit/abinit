@@ -328,7 +328,14 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  ! Set up logical flags for Sigma calculation
  if (mod10==SIG_GW_AC.and.Sigp%gwcalctyp/=1) then
-   MSG_ERROR("not implemented")
+         ! MRM allow gwcalctyp to compute the 1-RDM
+   if(Sigp%gwcalctyp/=21) then
+       MSG_ERROR("not implemented")
+   else
+     write(msg,'(a34,i9)')'Constructing Sigma_c(iw) for k = ',ikcalc
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+   end if  
  end if
 
  ! Initialize some values
@@ -473,7 +480,7 @@ subroutine calc_sigc_me(sigmak_ibz,ikcalc,nomega_sigc,minbnd,maxbnd,&
 
  if (mod10==SIG_GW_AC) then ! Calculate Gauss-Legendre quadrature knots and weights for analytic continuation
    call coeffs_gausslegint(zero,one,gl_knots,gl_wts,Er%nomega_i)
-
+   
    do io=1,Er%nomega_i ! First frequencies are always real
      if (ABS(AIMAG(one*Er%omega(Er%nomega_r+io))-(one/gl_knots(io)-one)) > 0.0001) then
       write(msg,'(3a)')&

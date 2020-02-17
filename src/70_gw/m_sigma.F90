@@ -342,8 +342,11 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
  if (mod10==1) then
    write(msg,'(a,i12)')' number of imaginary frequencies for Sigma',Sigp%nomegasi
    call wrtout([std_out, ab_out], msg)
-   write(msg,'(a,f12.2)')' max omega for Sigma on imag axis  [eV]   ',Sigp%omegasimax*Ha_eV
-   call wrtout([std_out, ab_out], msg)
+   ! MRM not needed for GW 1RDM
+   if(gwcalctyp/=21) then
+    write(msg,'(a,f12.2)')' max omega for Sigma on imag axis  [eV]   ',Sigp%omegasimax*Ha_eV
+    call wrtout([std_out, ab_out], msg)
+   endif 
  end if
 
  if (sigma_needs_w(Sigp)) then
@@ -367,8 +370,11 @@ subroutine write_sigma_header(Sigp,Er,Cryst,Kmesh,Qmesh)
    call wrtout([std_out, ab_out], msg)
  end if
 
- write(msg,'(3a)')ch10,' matrix elements of self-energy operator (all in [eV])',ch10
- call wrtout([std_out, ab_out], msg)
+! MRM not needed for GW 1RDM
+  if(gwcalctyp/=21) then
+   write(msg,'(3a)')ch10,' matrix elements of self-energy operator (all in [eV])',ch10
+   call wrtout([std_out, ab_out], msg)
+  endif
 
  if (gwcalctyp<10) then
    write(msg,'(a)')' Perturbative Calculation'

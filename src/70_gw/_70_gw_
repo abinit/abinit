@@ -41,6 +41,7 @@
 !! m_gwls_utility.F90
 !! m_gwls_valenceWavefunctions.F90
 !! m_gwls_wf.F90
+!! m_gwrdm.F90
 !! m_model_screening.F90
 !! m_ppmodel.F90
 !! m_prep_calc_ucrpa.F90
