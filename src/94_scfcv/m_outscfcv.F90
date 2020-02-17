@@ -382,7 +382,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
  ! YAML output
  if (me == master) then
-   call results_gs%yaml_write(ab_out, crystal, dtset%nstep > 0, comment="Summary of ground state results")
+   call results_gs%yaml_write(ab_out, crystal, dtset%nstep > 0, info="Summary of ground state results")
  end if
 
 !wannier interface

@@ -519,7 +519,7 @@ type(abimover_specs),intent(out) :: specs
    specs%isARused=.FALSE.
  end if
 
-!Velocities are never change excepts for ionmov=1,6,7,8
+!Velocities are never changed excepts for ionmov=1,6,7,8
  specs%isVused=.FALSE.
 
 !In general convergence is needed
