@@ -844,9 +844,9 @@ subroutine results_gs_yaml_write(results, unit, cryst, with_conv, info)
  call ydoc%add_real('lattice_volume', cryst%ucvol + tol10, real_fmt="(es15.7)")
 
  ! Write convergence degree.
- ! It seems there's a portability problem on for residm computed with nstep = 0 and iscf -3
+ ! It seems there's a portability problem for residm computed with nstep = 0 and iscf -3
  ! because one may get very small value e.g. 7.91-323. residm with nstep > 0 are OK though
- ! so print zero if residm < tol30 or allow called to not write the convergence dict.
+ ! so print zero if residm < tol30 or allow the caller not to write the convergence dict.
  if (with_conv) then
    call ydoc%add_reals( &
      "deltae, res2, residm, diffor", &

@@ -333,8 +333,12 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
          ! dtset%rfdir ??
 
      case(RUNL_NONLINEAR)
+       call ydoc%add_ints("optdriver", [dtset%optdriver], &
+         dict_key="meta")
 
      case(RUNL_GWLS)
+       call ydoc%add_ints("optdriver", [dtset%optdriver], &
+         dict_key="meta")
 
      case(RUNL_WFK)
        call ydoc%add_ints("optdriver, wfk_task", &
@@ -622,7 +626,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
    end if
 
 !  ****************************************************************************
-!  Treat the pseudopotentials : initialize the psps/PAW variable
+!  Treat the pseudopotentials: initialize the psps/PAW variable
 
    call psps_init_from_dtset(dtset, idtset, psps, pspheads)
 
