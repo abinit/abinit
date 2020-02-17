@@ -2321,47 +2321,47 @@ subroutine ctqmcoutput_printgreen(cryst_struc,eigvectmatlu,pawang,paw_dmft,gtmp_
         ((gtmp_nd(itau,iflavor,iflavor1), iflavor=1, nflavor),iflavor1=1, nflavor)
       end do
       close(unt)
-      if(paw_dmft%natom==1) then ! If natom>1, it should be moved outside the loop over atoms
-       ! ABI_DATATYPE_ALLOCATE(matlu1,(paw_dmft%natom))
-       ! call init_matlu(paw_dmft%natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,matlu1)
-       ! do itau=1,paw_dmft%dmftqmc_l
-       !   do isppol=1,paw_dmft%nsppol
-       !     do ispinor1=1,paw_dmft%nspinor
-       !       do im1=1,tndim
-       !         iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
-       !         do ispinor2=1,paw_dmft%nspinor
-       !           do im2=1,tndim
-       !             iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
-       !             matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
-&      !               gtmp_nd(itau,iflavor1,iflavor2)
-       !           end do  ! im2
-       !         end do  ! ispinor2
-       !       end do  ! im1
-       !     end do  ! ispinor
-       !   end do ! isppol
-       !   call rotate_matlu(matlu1,eigvectmatlu,paw_dmft%natom,3,0)
-       !   call slm2ylm_matlu(matlu1,paw_dmft%natom,2,0)
-       !   call sym_matlu(cryst_struc,matlu1,pawang,paw_dmft)
-       !   call slm2ylm_matlu(matlu1,paw_dmft%natom,1,0)
-       !   call rotate_matlu(matlu1,eigvectmatlu,paw_dmft%natom,3,1)
-       !   do isppol=1,paw_dmft%nsppol
-       !     do ispinor1=1,paw_dmft%nspinor
-       !       do im1=1,tndim
-       !         iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
-       !         do ispinor2=1,paw_dmft%nspinor
-       !           do im2=1,tndim
-       !             iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
-       !             gtmp_nd(itau,iflavor1,iflavor2)=&
-       !              matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)
-       !           end do  ! im2
-       !         end do  ! ispinor2
-       !       end do  ! im1
-       !     end do  ! ispinor
-       !   end do ! isppol
-       ! end do  !itau
-       ! call destroy_matlu(matlu1,paw_dmft%natom)
-       ! ABI_DATATYPE_DEALLOCATE(matlu1)
-      endif ! if natom=1
+!      if(paw_dmft%natom==1) then ! If natom>1, it should be moved outside the loop over atoms
+!        ABI_DATATYPE_ALLOCATE(matlu1,(paw_dmft%natom))
+!        call init_matlu(paw_dmft%natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,matlu1)
+!        do itau=1,paw_dmft%dmftqmc_l
+!          do isppol=1,paw_dmft%nsppol
+!            do ispinor1=1,paw_dmft%nspinor
+!              do im1=1,tndim
+!                iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
+!                do ispinor2=1,paw_dmft%nspinor
+!                  do im2=1,tndim
+!                    iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
+!                    matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
+!&                     gtmp_nd(itau,iflavor1,iflavor2)
+!                  end do  ! im2
+!                end do  ! ispinor2
+!              end do  ! im1
+!            end do  ! ispinor
+!          end do ! isppol
+!          call rotate_matlu(matlu1,eigvectmatlu,paw_dmft%natom,3,0)
+!          call slm2ylm_matlu(matlu1,paw_dmft%natom,2,0)
+!          call sym_matlu(cryst_struc,matlu1,pawang,paw_dmft)
+!          call slm2ylm_matlu(matlu1,paw_dmft%natom,1,0)
+!          call rotate_matlu(matlu1,eigvectmatlu,paw_dmft%natom,3,1)
+!          do isppol=1,paw_dmft%nsppol
+!            do ispinor1=1,paw_dmft%nspinor
+!              do im1=1,tndim
+!                iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
+!                do ispinor2=1,paw_dmft%nspinor
+!                  do im2=1,tndim
+!                    iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
+!                    gtmp_nd(itau,iflavor1,iflavor2)=&
+!                     matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)
+!                  end do  ! im2
+!                end do  ! ispinor2
+!              end do  ! im1
+!            end do  ! ispinor
+!          end do ! isppol
+!        end do  !itau
+!        call destroy_matlu(matlu1,paw_dmft%natom)
+!        ABI_DATATYPE_DEALLOCATE(matlu1)
+!      endif ! if natom=1
       if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_"//gtau_iter//".dat",&
 &      message, newunit=unt) /= 0) then
         MSG_ERROR(message)

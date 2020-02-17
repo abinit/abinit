@@ -699,7 +699,7 @@ it in file bands.dat:
 
     cp tdmft_5o_DS3_DFTDMFT_SpectralFunction_kresolved_from_realaxisself bands_dmft.dat
 
-Extract DFT band structure from fatbands file in readable file for gnuplot (211 is the number
+Extract DFT band structure from fatbands file in readable file for gnuplot (261 is the number
 of k-point used to plot the band structure (it can be obtained by "grep nkpt log_5_dataset3"):
 
     grep " BAND" -A 261 tdmft_5o_DS3_FATBANDS_at0001_V_is1_l0001 | grep -v BAND > bands_dft.dat
