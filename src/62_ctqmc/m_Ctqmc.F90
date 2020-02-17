@@ -1273,6 +1273,7 @@ SUBROUTINE Ctqmc_computeF(this, Gomega, F, opt_fk)
     F(1:samples+1,iflavor) = (/ (-F_tmp%oper(samples+1-itau),itau=0,samples) /)
   END DO
   IF ( this%rank .EQ. 0 ) THEN
+    open (unit=346,file='Hybridization.dat',status='unknown',form='formatted')
     DO iflavor = 1, flavors
       write(346,*) "#",iflavor
       do  itau=1,this%samples+1
@@ -1280,8 +1281,8 @@ SUBROUTINE Ctqmc_computeF(this, Gomega, F, opt_fk)
       enddo
       write(346,*) 
     END DO
+    close(346)
   ENDIF
-  close(346)
   FREE(F_omega)
   CALL GreenHyb_destroy(F_tmp)
 END SUBROUTINE Ctqmc_computeF
