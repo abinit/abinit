@@ -505,6 +505,7 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
 
  do_write_hdr = .TRUE.; if (present(write_hdr)) do_write_hdr = write_hdr
  do_write_frm = .TRUE.; if (present(write_frm)) do_write_frm = write_frm
+print *, 'do_write_frm do_write_hdr ', do_write_frm, do_write_hdr
 
  !Initialize mandatory data of the Wfk datastructure
  !@wfk_t
@@ -733,7 +734,7 @@ print *, ' wfkclose: Wfk%iomode, IO_MODE_FORTRAN, IO_MODE_MPI ', Wfk%iomode, IO_
        ABI_CHECK_MPI(mpierr,"MPI_FILE_OPEN")
        call hdr_bsize_frecords(Wfk%Hdr,Wfk%formeig,nfrec,bsize_frecords)
 #ifdef DEV_MJV
-print *, 'xmpio_check_frmarkers 724'
+print *, 'xmpio_check_frmarkers 724 '
 #endif
        call xmpio_check_frmarkers(Wfk%fh,Wfk%hdr_offset,xmpio_single,nfrec,bsize_frecords,ierr)
        ABI_CHECK(ierr==0,"xmpio_check_frmarkers returned ierr!=0")
@@ -1170,6 +1171,7 @@ subroutine wfk_read_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_
 !Local variables-------------------------------
 !scalars
  integer :: ierr,npw_disk,nspinor_disk,nband_disk,band
+ integer :: nband_disk_keep
  integer :: ipw,my_bcount,npwso,npw_tot_disk,nb_block,base
  integer :: npw_read,nspinor_read,nband_read
  character(len=500) :: msg,errmsg
@@ -1198,7 +1200,23 @@ subroutine wfk_read_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig_
  ! Look before you leap.
  npw_disk     = Wfk%Hdr%npwarr(ik_ibz)
  nspinor_disk = Wfk%nspinor
+
  nband_disk   = Wfk%nband(ik_ibz,spin)
+ ! there are several cases here, reading in fewer than mband bands, 
+ !   or possibly more than you have allocated, and truncating
+ !   nband_disk_keep could be used to distinguish these cases
+ nband_disk_keep = nband_disk
+ if (present(occ_k)) then
+   nband_disk_keep = min(nband_disk, size(occ_k))
+ end if
+ if (present(eig_k)) then
+   if (Wfk%formeig == 0) then
+     nband_disk_keep = min( nband_disk_keep, size(eig_k) )
+   else if (Wfk%formeig == 1) then
+     nband_disk_keep = min( nband_disk_keep, int(sqrt(size(eig_k)/two)) )
+   end if
+ end if
+
  nb_block     = (band_block(2) - band_block(1) + 1)
  ABI_CHECK(nb_block>0,"nband <=0")
  npw_tot_disk = npw_disk * nspinor_disk * nb_block
@@ -1215,17 +1233,18 @@ print *, 'npw_disk , nspinor_disk , nb_block ', npw_disk, nspinor_disk, nb_block
  end if
 
  if (present(eig_k)) then
-   if (Wfk%formeig==0) then
-      ABI_CHECK(SIZE(eig_k) <= nband_disk, "GS eig_k too large, not enough data on disk")
-   else if (Wfk%formeig==1) then
-      ABI_CHECK(SIZE(eig_k) <= 2*nband_disk**2, "DFPT eig_k too large, not enough data on disk")
-   else
-     MSG_ERROR("formeig != [0,1]")
-   end if
+print *, 'SIZE(eig_k) <= nband_disk ', SIZE(eig_k), nband_disk, nband_disk_keep
+!   if (Wfk%formeig==0) then
+!      ABI_CHECK(SIZE(eig_k) <= nband_disk, "GS eig_k too large, not enough data on disk")
+!   else if (Wfk%formeig==1) then
+!      ABI_CHECK(SIZE(eig_k) <= 2*nband_disk**2, "DFPT eig_k too large, not enough data on disk")
+!   else
+!     MSG_ERROR("formeig != [0,1]")
+!   end if
  end if
 
  if (present(occ_k)) then
-   ABI_CHECK(SIZE(occ_k) <= nband_disk, "GS occ_k too large, not enough data on disk")
+!   ABI_CHECK(SIZE(occ_k) <= nband_disk, "GS occ_k too large, not enough data on disk")
    if (Wfk%formeig==1) then
      MSG_ERROR("occ_k cannot be used when formeig ==1")
    end if
@@ -1268,8 +1287,8 @@ print *, ' ik_ibz,spin ', ik_ibz,spin
 
        read(Wfk%fh, err=10, iomsg=errmsg) tmp_eigk, tmp_occk
 
-       if (present(eig_k)) eig_k = tmp_eigk
-       if (present(occ_k)) occ_k = tmp_occk
+       if (present(eig_k)) eig_k = tmp_eigk(1:Wfk%mband)
+       if (present(occ_k)) occ_k = tmp_occk(1:Wfk%mband)
 
        ABI_FREE(tmp_eigk)
        ABI_FREE(tmp_occk)
@@ -1306,7 +1325,7 @@ print *, ' ik_ibz,spin ', ik_ibz,spin
        if (present(eig_k)) then
          ! Read column matrix of size (2*nband_k)
          base = 2*(band-1)*nband_disk
-         read(Wfk%fh, err=10, iomsg=errmsg) eig_k(base+1:base+2*nband_disk)
+         read(Wfk%fh, err=10, iomsg=errmsg) eig_k(base+1:base+2*Wfk%mband)
        else
          read(Wfk%fh, err=10, iomsg=errmsg ) ! eig_k(2*nband_disk)
        end if
@@ -2085,8 +2104,8 @@ print *, 'in writing of records for mpio formeig 1'
 
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_EIG) + my_offpad
 #ifdef DEV_MJV
-print *, 'RF writing mpio ik, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_EIG), my_offset, my_offpad, xmpio_bsize_frm ', &
-&                     ik_ibz, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_EIG), my_offset, my_offpad, xmpio_bsize_frm
+print *, 'RF writing mpio eig spin, ik, band_block(1), band_block(2), Wfk%offset_ks(ik_ibz,spin,REC_EIG), my_offset, my_offpad, xmpio_bsize_frm ', &
+&                     spin, ik_ibz, band_block(1), band_block(2), Wfk%offset_ks(ik_ibz,spin,REC_EIG), my_offset, my_offpad, xmpio_bsize_frm
 #endif
 
        call MPI_FILE_SET_VIEW(Wfk%fh,my_offset,MPI_BYTE,gkk_type,'native',xmpio_info,mpierr)
@@ -2129,8 +2148,8 @@ print *, 'RF writing mpio ik, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_EIG),
 &                              + 4 * xmpio_bsize_frm)
 
 #ifdef DEV_MJV
-print *, 'RF writing mpio ik, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_CG), my_offset, my_offpad, xmpio_bsize_frm ', &
-&                     ik_ibz, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_CG), my_offset, my_offpad, xmpio_bsize_frm
+print *, 'RF writing mpio  cg spin, ik, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_CG), my_offset, my_offpad, xmpio_bsize_frm ', &
+&                    spin,  ik_ibz, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_CG), my_offset, my_offpad, xmpio_bsize_frm
 #endif
        call MPI_FILE_SET_VIEW(Wfk%fh,my_offset,MPI_BYTE,cgblock_type,'native',xmpio_info,mpierr)
        ABI_CHECK_MPI(mpierr,"SET_VIEW")
@@ -3563,7 +3582,9 @@ print *, ' nband_k npw_k ', nband_k, npw_k
      ! even if I do not have any bands to run, go through the mpio calls to avoid deadlocks
      !if (.not. any(distrb_flags(ik_rbz,:,spin))) cycle
 
-     nband_me = count(distrb_flags(ik_rbz,:,spin))
+     ! in case nband is not constant with k this creates chaos in the file writing
+     ! as distrb_flags is allocated for mband, and true
+     nband_me = min(count(distrb_flags(ik_rbz,:,spin)), nband_k)
      if (nband_me == 0) then
        iband = 1 ! does write_band_block accept the range [1,0]?
      else
