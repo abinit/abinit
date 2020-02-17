@@ -505,7 +505,9 @@ subroutine wfk_open_write(Wfk,Hdr,fname,formeig,iomode,funt,comm,write_hdr,write
 
  do_write_hdr = .TRUE.; if (present(write_hdr)) do_write_hdr = write_hdr
  do_write_frm = .TRUE.; if (present(write_frm)) do_write_frm = write_frm
+#ifdef DEV_MJV
 print *, 'do_write_frm do_write_hdr ', do_write_frm, do_write_hdr
+#endif
 
  !Initialize mandatory data of the Wfk datastructure
  !@wfk_t
@@ -1233,7 +1235,9 @@ print *, 'npw_disk , nspinor_disk , nb_block ', npw_disk, nspinor_disk, nb_block
  end if
 
  if (present(eig_k)) then
+#ifdef DEV_MJV
 print *, 'SIZE(eig_k) <= nband_disk ', SIZE(eig_k), nband_disk, nband_disk_keep
+#endif
 !   if (Wfk%formeig==0) then
 !      ABI_CHECK(SIZE(eig_k) <= nband_disk, "GS eig_k too large, not enough data on disk")
 !   else if (Wfk%formeig==1) then
@@ -3179,9 +3183,11 @@ write(201, *) rbz2disk
  call listkk(dksqmax, cryst%gmet, rbz2disk, wfk_disk%hdr%kptns, kptns_in, wfk_disk%hdr%nkpt, nkpt_in, cryst%nsym, &
    sppoldbl, cryst%symafm, cryst%symrel, cryst%timrev-1, xmpi_comm_self, use_symrec=.False.)
 
+#ifdef DEV_MJV
+print *, ' dksqmax ', dksqmax
 write(202, *) 'rbz2disk listkk'
 write(202, *) rbz2disk
-print *, ' dksqmax ', dksqmax
+#endif
 
  if (ask_accurate == 1) then
    ABI_CHECK(dksqmax < tol8, " WF file read but k-points too far from requested set")
@@ -3238,7 +3244,9 @@ print *, 'rbz2disk_sort ', rbz2disk_sort
      ll = ll+nband_k
 
      if (.not. any(distrb_flags(ikpt,:,spin))) cycle
+#ifdef DEV_MJV
 print *, 'icg counts ikpt, spin ', icg(ikpt,spin),ikpt,spin
+#endif
 ! TODO: this does not take into account variable nband(ik)
      icg(ikpt,spin) = ii
      ii = ii+dtset%mband_mem*npwarr(ikpt)*dtset%nspinor
@@ -3567,7 +3575,6 @@ print *, 'after wfk_disk%open_write  wfk_disk%hdr_offset ', wfk_disk%hdr_offset
    do ik_rbz=1,nkpt_in
 #ifdef DEV_MJV
 print *, 'spin, ik_rbz, nkpt_in ', spin, ik_rbz, nkpt_in
-
 print *, 'ibdeig, ibdocc, icg, ikg ', ibdeig, ibdocc, icg, ikg
 print *, 'shapekg ', shape(kg)
 print *, 'shapecg ', shape(cg)
