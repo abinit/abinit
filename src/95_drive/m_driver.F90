@@ -190,7 +190,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
  type(pseudopotential_type) :: psps
  type(results_respfn_type) :: results_respfn
  type(wvl_data) :: wvl
- !type(yamldoc_t) :: ydoc
+ type(yamldoc_t) :: ydoc
 #if defined DEV_YP_VDWXC
  type(xc_vdw_type) :: vdw_params
 #endif
@@ -300,18 +300,22 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
 
    call yaml_iterstart('dtset', jdtset, ab_out, dtset%use_yaml)
 
-#if 0
    if (mpi_enregs(idtset)%me_cell == 0) then
-     ydoc = yamldoc_open('DatasetInfo', "")
+     ydoc = yamldoc_open('DatasetInfo')
 
      ! Write basic dimensions.
      call ydoc%add_ints( &
        "natom, nkpt, mband, nsppol, nspinor, nspden, mpw", &
-       [dtset%natom, dtset%nkpt, dtset%mband, dtset%nsppol, dtset%nspinor, dtset%nspden, dtset%mpw], dict_key="dimensions")
+       [dtset%natom, dtset%nkpt, dtset%mband, dtset%nsppol, dtset%nspinor, dtset%nspden, dtset%mpw], &
+       dict_key="dimensions")
+
      ! Write cutoff energies.
-     call ydoc%add_reals("ecut, pawecutdg", [dtset%ecut, dtset%pawecutdg], real_fmt="(f5.1)", dict_key="cutoff_energies")
+     call ydoc%add_reals("ecut, pawecutdg", [dtset%ecut, dtset%pawecutdg], &
+       real_fmt="(f5.1)", dict_key="cutoff_energies")
+
      ! Write info on electrons.
-     call ydoc%add_reals("nelect, charge, occopt, tsmear", [dtset%nelect, dtset%charge, one * dtset%occopt, dtset%tsmear], &
+     call ydoc%add_reals("nelect, charge, occopt, tsmear", &
+       [dtset%nelect, dtset%charge, one * dtset%occopt, dtset%tsmear], &
        dict_key="electrons")
 
      ! This part depends on optdriver.
@@ -319,26 +323,35 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      select case (dtset%optdriver)
      case (RUNL_GSTATE)
        call ydoc%add_ints("optdriver, ionmov, optcell, iscf, paral_kgb", &
-         [dtset%optdriver, dtset%ionmov, dtset%optcell, dtset%iscf, dtset%paral_kgb] , dict_key="meta")
-     case(RUNL_RESPFN)
-       call ydoc%add_ints(&
-         "optdriver, rfddk, rfdir, rfelfd, rfmagn, rfphon, rfstrs", &
-         [dtset%optdriver, dtset%rfddk, dtset%rfdir, dtset%rfelfd, dtset%rfmagn, dtset%rfphon, dtset%rfstrs], &
+         [dtset%optdriver, dtset%ionmov, dtset%optcell, dtset%iscf, dtset%paral_kgb], &
          dict_key="meta")
+
+     case(RUNL_RESPFN)
+       call ydoc%add_ints("optdriver, rfddk, rfelfd, rfmagn, rfphon, rfstrs", &
+         [dtset%optdriver, dtset%rfddk, dtset%rfelfd, dtset%rfmagn, dtset%rfphon, dtset%rfstrs], &
+         dict_key="meta")
+         ! dtset%rfdir ??
+
      case(RUNL_NONLINEAR)
+
      case(RUNL_GWLS)
+
      case(RUNL_WFK)
        call ydoc%add_ints("optdriver, wfk_task", &
          [dtset%optdriver, dtset%wfk_task] , dict_key="meta")
+
      case (RUNL_SCREENING, RUNL_SIGMA)
        call ydoc%add_ints("optdriver, gwcalctyp", &
          [dtset%optdriver, dtset%gwcalctyp] , dict_key="meta")
+
      case (RUNL_BSE)
        call ydoc%add_ints("optdriver, bs_calctype, bs_algorithm", &
          [dtset%optdriver, dtset%bs_calctype, dtset%bs_algorithm] , dict_key="meta")
+
      case (RUNL_EPH)
        call ydoc%add_ints("optdriver, eph_task", &
          [dtset%optdriver, dtset%eph_task] , dict_key="meta")
+
      case default
        write(msg,'(a,i0,4a)')&
         'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
@@ -346,9 +359,12 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        MSG_ERROR(msg)
      end select
 
-     call ydoc%write_and_free(ab_out)
+     if (dtset%use_yaml == 1) then
+       call ydoc%write_and_free(ab_out)
+     else
+       call ydoc%write_and_free(std_out)
+     end if
    end if
-#endif
 
    if ( dtset%np_slk == 0 ) then
      call xgScalapack_config(SLK_DISABLED,dtset%slk_rankpp)

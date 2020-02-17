@@ -66,14 +66,18 @@ class DataExtractor(object):
     def extract(self, src_lines):
         """
         Extract formatted documents and significant lines from list of strings `src_lines`.
+        Main entry point for client code.
         """
-        # Reset internal state to allow several extractions with the same instance
+        # Reset internal state to allow several extractions with the same instance.
         self.iterators_state = {}
         self.corrupted_docs = []
         lines, docs, ignored = [], {}, []
 
         current_doc = None
         for i, line in enumerate(src_lines):
+
+            # TODO
+            # Ignore Yaml documents matching e.g. `--- !tagname # fldiff_ignore
 
             if current_doc is not None:
                 # accumulate source lines

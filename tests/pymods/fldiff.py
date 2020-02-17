@@ -367,7 +367,8 @@ class Differ(object):
 
     def __init__(self, yaml_test=None, **options):
         """
-        Init a differ with some parameters.
+        Init a differ with some parameters passed via options.
+
         Known parameters are:
             - ignore: bool (default True)
             - ignoreP: bool (default True)
@@ -378,8 +379,7 @@ class Differ(object):
             - label: str (default None)
             - use_yaml: bool (default True)
             - use_fl: bool (default True)
-            - verbose: bool (default False) enable report of successful
-                       yaml tests too
+            - verbose: bool (default False) enable report of successful yaml tests too
         """
         self.xml_mode = False  # this is the first dirty fix.
 
@@ -441,8 +441,7 @@ class Differ(object):
             # Remark: self.options['use_yam'] -> explicit request for YAML
             #         self.use_yaml -> explicit request AND availability of YAML
             dext = DataExtractor(self.options['use_yaml'], xml_mode=self.xml_mode,
-                                 ignore=self.options['ignore'],
-                                 ignoreP=self.options['ignoreP'])
+                                 ignore=self.options['ignore'], ignoreP=self.options['ignoreP'])
 
             lines[i], documents[i], _ = dext.extract(src)
             corrupted[i] = dext.corrupted_docs
@@ -505,21 +504,25 @@ class Differ(object):
                     if meta1 != '_' and meta2 != '_':
                         return [MetaCharDifference(i1, i2, meta1, meta2)]
                 else:
-                    if meta1 == '_':  # ignore these lines
+                    if meta1 == '_':
+                        # ignore these lines
                         pass
 
-                    elif meta1 == '+':  # these lines are arbitrarily different
+                    elif meta1 == '+':
+                        # these lines are arbitrarily different
                         differences.append(ForcedDifference(
                             i1, i2, line1, line2
                         ))
 
-                    elif meta1 in {':', '.'}:  # do a character comparison
+                    elif meta1 in {':', '.'}:
+                        # do a character comparison
                         if norm_spaces(line1) != norm_spaces(line2):
                             differences.append(TextDifference(
                                 i1, i2, line1, line2, silent=(meta1 == '.')
                             ))
 
-                    else:  # compare numerical values
+                    else:
+                        # compare numerical values
                         splitted1 = float_re.split(line1)
                         splitted2 = float_re.split(line2)
 
@@ -527,7 +530,8 @@ class Differ(object):
                         if len(splitted1) != len(splitted2):
                             differences.append(TextDifference(i1, i2, line1, line2))
                         else:
-                            if meta1 == '%':  # force tolerance
+                            if meta1 == '%':
+                                # force tolerance
                                 tol = 1.01e-2
                                 tolrel = tol
                             else:
@@ -556,11 +560,14 @@ class Differ(object):
                                     differences.append(TextDifference(
                                         i1, i2, line1, line2
                                     ))
-                                if f1 is not None:  # reached the end
+
+                                if f1 is not None:
+                                    # reached the end
                                     f1 = to_float(f1)
                                     f2 = to_float(f2)
 
-                                    if meta1 == ';':  # compare absolute values
+                                    if meta1 == ';':
+                                        # compare absolute values
                                         f1, f2 = abs(f1), abs(f2)
 
                                     abs_sum = abs(f1) + abs(f2)

@@ -802,7 +802,7 @@ end function results_gs_ncwrite
 !!  unit= unit of output file
 !!  cryst: Crystal structure
 !!  with_conv: True if the convergence dictionary with residuals and diffs should be written.
-!!  [comment] optional comment for the final document
+!!  [info]: optional info for the final document
 !!
 !! PARENTS
 !!
@@ -810,13 +810,13 @@ end function results_gs_ncwrite
 !!
 !! SOURCE
 
-subroutine results_gs_yaml_write(results, unit, cryst, with_conv, comment)
+subroutine results_gs_yaml_write(results, unit, cryst, with_conv, info)
 
  class(results_gs_type),intent(in) :: results
+ integer,intent(in) :: unit
  type(crystal_t),intent(in) :: cryst
  logical,intent(in) :: with_conv
- integer,intent(in) :: unit
- character(len=*),intent(in),optional :: comment
+ character(len=*),intent(in),optional :: info
 
 !Local variables-------------------------------
  integer,parameter :: width=10
@@ -830,10 +830,10 @@ subroutine results_gs_yaml_write(results, unit, cryst, with_conv, comment)
 
  if (unit == dev_null) return
 
- if (present(comment)) then
-   ydoc = yamldoc_open('ResultsGS', comment, width=width)
+ if (present(info)) then
+   ydoc = yamldoc_open('ResultsGS', info=info, width=width)
  else
-   ydoc = yamldoc_open('ResultsGS', '', width=width)
+   ydoc = yamldoc_open('ResultsGS', width=width)
  end if
 
  ! Write lattice parameters
@@ -878,7 +878,10 @@ subroutine results_gs_yaml_write(results, unit, cryst, with_conv, comment)
  end if
 
  species = [(cryst%symbol_iatom(ii), ii=1,cryst%natom)]
+
  !call ydoc%add_real2d('xred', cryst%xred, slist=species, real_fmt="(es12.4)")
+ !call ydoc%add_paired_real2d('xred_xcart_specie', &
+ !  cryst%xred, cryst%xcart, slist=species, real_fmt="(es12.4)")
 
  if (results%fcart(1,1) /= MAGIC_UNDEF) then
    !call ydoc%add_paired_real2d('cartesian_forces_and_xred', &
@@ -891,7 +894,7 @@ subroutine results_gs_yaml_write(results, unit, cryst, with_conv, comment)
      values=[minval(fnorms), maxval(fnorms), sum(fnorms) / results%natom], dict_key="force_length_stats")
 
  else
-   ! Set entries to (python) None to facilitate life to the parsing routines!
+   ! Set entries to null (python None) to facilitate life to the parsing routines!
    call ydoc%add_string('cartesian_forces', "null")
    call ydoc%set_keys_to_string("min, max, mean", "null", dict_key="force_length_stats")
  end if

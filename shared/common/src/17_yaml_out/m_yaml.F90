@@ -58,9 +58,6 @@ module m_yaml
 
  type,public :: yamldoc_t
 
-   integer :: use_yaml = 1
-   ! Temporary flag used to deactivate Yaml output
-
    integer :: default_keysize = 30
    ! Default key size
 
@@ -90,7 +87,7 @@ module m_yaml
 
  contains
 
-   procedure :: write_and_free => yamldoc_write_and_free
+   procedure :: write_and_free => yamldoc_write_unit_and_free, yamldoc_write_units_and_free
     ! Write Yaml document to unit and free memory.
 
    procedure :: add_real => yamldoc_add_real
@@ -106,7 +103,10 @@ module m_yaml
      ! Add an integer field to a document
 
    procedure :: add_ints => yamldoc_add_ints
-     ! Add an integer field to a document
+     ! Add a list of integers to a document
+
+   !procedure :: add_ints_and_reals => yamldoc_add_ints_and_reals
+     ! Add a list of integer and real value a document
 
    procedure :: add_string => yamldoc_add_string
      ! Add a string field to a document
@@ -167,6 +167,9 @@ module m_yaml
  integer,save,protected :: IMAGE_IDX = -1
  integer,save,protected :: ITIME_IDX = -1
  integer,save,protected :: ICYCLE_IDX = -1
+
+ integer,parameter,private :: MAGIC_IGNORE_INT = huge(0) - 1
+ real(dp),parameter,private :: MAGIC_IGNORE_REAL = huge(one) - one
 
 contains
 
@@ -241,7 +244,7 @@ end subroutine yaml_iterstart
 !!
 !! INPUTS
 !!  tag: add a tag to the field
-!!  comment: string with comment.
+!!  [info]: info about document.
 !!  [newline]: optional, set to false to prevent adding newlines after fields
 !!  [width]: optional, impose a minimum width of the field name side of the column (padding with spaces)
 !!  [int_fmt]: Default format for integers.
@@ -253,10 +256,11 @@ end subroutine yaml_iterstart
 !!
 !! SOURCE
 
-type(yamldoc_t) function yamldoc_open(tag, comment, newline, width, int_fmt, real_fmt) result(new)
+type(yamldoc_t) function yamldoc_open(tag, info, newline, width, int_fmt, real_fmt) result(new)
 
 !Arguments ------------------------------------
- character(len=*),intent(in) :: tag, comment
+ character(len=*),intent(in) :: tag
+ character(len=*),optional,intent(in) :: info
  logical,intent(in),optional :: newline
  integer,intent(in),optional :: width
  character(len=*),optional,intent(in) :: int_fmt, real_fmt
@@ -272,7 +276,7 @@ type(yamldoc_t) function yamldoc_open(tag, comment, newline, width, int_fmt, rea
  if (present(int_fmt)) new%default_ifmt = int_fmt
  if (present(real_fmt)) new%default_rfmt = real_fmt
 
- call new%stream%push('---'//' !'//trim(tag)//ch10)
+ call new%stream%push(ch10//'---'//' !'//trim(tag)//ch10)
 
  if (DTSET_IDX /= -1) then
    ! Write dictionary with iteration state.
@@ -285,13 +289,17 @@ type(yamldoc_t) function yamldoc_open(tag, comment, newline, width, int_fmt, rea
    call dict%free()
  end if
 
- if (comment /= '') then
-   call new%stream%push('comment')
-   if (new%default_width > 7) call new%stream%push(repeat(' ', new%default_width - 7))
-   call new%stream%push(': ')
-   call yaml_print_string(new%stream, comment)
-   call new%stream%push(eol)
+ if (present(info)) then
+   if (len_trim(info) /= 0) then
+     ! TODO: Replace comment with info
+     call new%stream%push('comment')
+     if (new%default_width > 7) call new%stream%push(repeat(' ', new%default_width - 7))
+     call new%stream%push(': ')
+     call yaml_print_string(new%stream, info)
+     call new%stream%push(eol)
+   end if
  end if
+
  if (nl) call new%stream%push(eol)
 
 end function yamldoc_open
@@ -312,6 +320,7 @@ end function yamldoc_open
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!  [comment]: optional Yaml comment added after the value
+!!  [ignore]= If present, ignore entrie if values is equal to ignore.
 !!
 !! PARENTS
 !!
@@ -319,7 +328,7 @@ end function yamldoc_open
 !!
 !! SOURCE
 
-subroutine yamldoc_add_real(self, label, val, tag, real_fmt, newline, width, comment)
+subroutine yamldoc_add_real(self, label, val, tag, real_fmt, newline, width, comment, ignore)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -329,6 +338,7 @@ subroutine yamldoc_add_real(self, label, val, tag, real_fmt, newline, width, com
  logical,intent(in),optional :: newline
  integer,intent(in),optional :: width
  character(len=*),intent(in),optional :: comment
+ real(dp),optional,intent(in) :: ignore
 
 !Local variables-------------------------------
  integer :: w
@@ -336,6 +346,10 @@ subroutine yamldoc_add_real(self, label, val, tag, real_fmt, newline, width, com
  character(len=30) :: rfmt
  logical :: nl
 ! *************************************************************************
+
+ if (present(ignore)) then
+   if (val == ignore) return
+ end if
 
  ABI_DEFAULT(nl, newline, .true.)
  ABI_DEFAULT(w, width, self%default_width)
@@ -371,6 +385,7 @@ end subroutine yamldoc_add_real
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!  [dict_key]=If present, a dictionary with key `dict_key` is created instead of a list.
 !!  [multiline_trig] = optional minimum number of elements before switching to multiline representation
+!!  [ignore]= If present, ignore entries whose values is equal to ignore.
 !!
 !! PARENTS
 !!
@@ -378,7 +393,7 @@ end subroutine yamldoc_add_real
 !!
 !! SOURCE
 
-subroutine yamldoc_add_reals(self, keylist, values, real_fmt, width, dict_key, multiline_trig)
+subroutine yamldoc_add_reals(self, keylist, values, real_fmt, width, dict_key, multiline_trig, ignore)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -386,18 +401,21 @@ subroutine yamldoc_add_reals(self, keylist, values, real_fmt, width, dict_key, m
  real(dp),intent(in) :: values(:)
  character(len=*),intent(in),optional :: real_fmt, dict_key
  integer,intent(in),optional :: width, multiline_trig
+ real(dp),optional,intent(in) :: ignore
 
 !Local variables-------------------------------
  integer :: i, n, w, start, stp, vmax
  character(len=30) :: rfmt
+ real(dp) :: my_ignore
  type(pair_list) :: dict
 ! *************************************************************************
 
  ABI_DEFAULT(w, width, self%default_width)
  ABI_DEFAULT(rfmt, real_fmt, self%default_rfmt)
+ ABI_DEFAULT(my_ignore, ignore, MAGIC_IGNORE_REAL)
 
  n = char_count(keylist, ",") + 1
- ABI_CHECK(size(values) == n, "size of values != len(tokens)")
+ ABI_CHECK(size(values) == n, sjoin("size of values:", itoa(size(values)), " != len(tokens):", keylist))
 
  start = 1
 
@@ -405,9 +423,9 @@ subroutine yamldoc_add_reals(self, keylist, values, real_fmt, width, dict_key, m
    do i=1,n
      stp = index(keylist(start:), ",")
      if (stp == 0) then
-       call self%add_real(adjustl(keylist(start:)), values(i), real_fmt=rfmt, width=w)
+       call self%add_real(adjustl(keylist(start:)), values(i), real_fmt=rfmt, width=w, ignore=my_ignore)
      else
-       call self%add_real(adjustl(keylist(start: start + stp - 2)), values(i), real_fmt=rfmt, width=w)
+       call self%add_real(adjustl(keylist(start: start + stp - 2)), values(i), real_fmt=rfmt, width=w, ignore=my_ignore)
        start = start + stp
        ABI_CHECK(start < len_trim(keylist), sjoin("Invalid keylist:", keylist))
      end if
@@ -419,9 +437,9 @@ subroutine yamldoc_add_reals(self, keylist, values, real_fmt, width, dict_key, m
    do i=1,n
      stp = index(keylist(start:), ",")
      if (stp == 0) then
-       call dict%set(adjustl(keylist(start:)), r=values(i))
+       if (values(i) /= my_ignore) call dict%set(adjustl(keylist(start:)), r=values(i))
      else
-       call dict%set(adjustl(keylist(start: start + stp - 2)), r=values(i))
+       if (values(i) /= my_ignore) call dict%set(adjustl(keylist(start: start + stp - 2)), r=values(i))
        start = start + stp
        ABI_CHECK(start < len_trim(keylist), sjoin("Invalid keylist:", keylist))
      end if
@@ -449,6 +467,7 @@ end subroutine yamldoc_add_reals
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!  [comment]: optional Yaml comment added after the value
+!!  [ignore]= If present, ignore entrie if values is equal to ignore.
 !!
 !! PARENTS
 !!
@@ -456,7 +475,7 @@ end subroutine yamldoc_add_reals
 !!
 !! SOURCE
 
-subroutine yamldoc_add_int(self, label, val, tag, int_fmt, newline, width, comment)
+subroutine yamldoc_add_int(self, label, val, tag, int_fmt, newline, width, comment, ignore)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -466,6 +485,7 @@ subroutine yamldoc_add_int(self, label, val, tag, int_fmt, newline, width, comme
  logical,intent(in),optional :: newline
  integer,intent(in),optional :: width
  character(len=*),intent(in),optional :: comment
+ integer,intent(in),optional :: ignore
 
 !Local variables-------------------------------
  integer :: w
@@ -473,6 +493,10 @@ subroutine yamldoc_add_int(self, label, val, tag, int_fmt, newline, width, comme
  character(len=30) :: ifmt
  logical :: nl
 ! *************************************************************************
+
+ if (present(ignore)) then
+   if (val == ignore) return
+ end if
 
  ABI_DEFAULT(nl, newline, .true.)
  ABI_DEFAULT(w, width, self%default_width)
@@ -508,6 +532,7 @@ end subroutine yamldoc_add_int
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
 !!  [dict_key]=If present, a dictionary with key `dict_key` is created instead of a list.
 !!  [multiline_trig] = optional minimum number of elements before switching to multiline representation
+!!  [ignore]= If present, ignore entrie if values is equal to ignore.
 !!
 !! PARENTS
 !!
@@ -515,7 +540,7 @@ end subroutine yamldoc_add_int
 !!
 !! SOURCE
 
-subroutine yamldoc_add_ints(self, keylist, values, int_fmt, width, dict_key, multiline_trig)
+subroutine yamldoc_add_ints(self, keylist, values, int_fmt, width, dict_key, multiline_trig, ignore)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -523,28 +548,31 @@ subroutine yamldoc_add_ints(self, keylist, values, int_fmt, width, dict_key, mul
  integer,intent(in) :: values(:)
  character(len=*),intent(in),optional :: int_fmt, dict_key
  integer,intent(in),optional :: width, multiline_trig
+ integer,intent(in),optional :: ignore
 
 !Local variables-------------------------------
- integer :: i, n, w, start, stp, vmax
+ integer :: i, n, w, start, stp, vmax, my_ignore
  character(len=30) :: ifmt
  type(pair_list) :: dict
 ! *************************************************************************
 
  ABI_DEFAULT(w, width, self%default_width)
  ABI_DEFAULT(ifmt, int_fmt, self%default_ifmt)
+ ABI_DEFAULT(my_ignore, ignore, MAGIC_IGNORE_INT)
 
  n = char_count(keylist, ",") + 1
- ABI_CHECK(size(values) == n, "size of values != len(tokens)")
+ ABI_CHECK(size(values) == n, sjoin("size of values:", itoa(size(values)), " != len(tokens):", keylist))
 
  start = 1
 
  if (.not. present(dict_key)) then
+   ! one line per entry.
    do i=1,n
      stp = index(keylist(start:), ",")
      if (stp == 0) then
-       call self%add_int(adjustl(keylist(start:)), values(i), int_fmt=ifmt, width=w)
+       call self%add_int(adjustl(keylist(start:)), values(i), int_fmt=ifmt, width=w, ignore=my_ignore)
      else
-       call self%add_int(adjustl(keylist(start: start + stp - 2)), values(i), int_fmt=ifmt, width=w)
+       call self%add_int(adjustl(keylist(start: start + stp - 2)), values(i), int_fmt=ifmt, width=w, ignore=my_ignore)
        start = start + stp
        ABI_CHECK(start < len_trim(keylist), sjoin("Invalid keylist:", keylist))
      end if
@@ -555,13 +583,14 @@ subroutine yamldoc_add_ints(self, keylist, values, int_fmt, width, dict_key, mul
    do i=1,n
      stp = index(keylist(start:), ",")
      if (stp == 0) then
-       call dict%set(adjustl(keylist(start:)), i=values(i))
+       if (values(i) /= my_ignore) call dict%set(adjustl(keylist(start:)), i=values(i))
      else
-       call dict%set(adjustl(keylist(start: start + stp - 2)), i=values(i))
+       if (values(i) /= my_ignore) call dict%set(adjustl(keylist(start: start + stp - 2)), i=values(i))
        start = start + stp
        ABI_CHECK(start < len_trim(keylist), sjoin("Invalid keylist:", keylist))
      end if
    end do
+
    ABI_DEFAULT(vmax, multiline_trig, self%default_multiline_trig)
    call self%add_dict(trim(dict_key), dict, multiline_trig=vmax, int_fmt=ifmt, width=w)
    call dict%free()
@@ -636,6 +665,7 @@ end subroutine yamldoc_add_string
 !!  [real_fmt] = override the default formatting
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
+!!  [comment]: optional Yaml comment added after the value
 !!
 !! PARENTS
 !!
@@ -643,7 +673,7 @@ end subroutine yamldoc_add_string
 !!
 !! SOURCE
 
-subroutine yamldoc_add_real1d(self, label, arr, tag, real_fmt, multiline_trig, newline, width)
+subroutine yamldoc_add_real1d(self, label, arr, tag, real_fmt, multiline_trig, newline, width, comment)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -653,6 +683,7 @@ subroutine yamldoc_add_real1d(self, label, arr, tag, real_fmt, multiline_trig, n
  character(len=*),intent(in),optional :: tag, real_fmt
  logical,intent(in),optional :: newline
  integer,intent(in),optional :: width
+ character(len=*),intent(in),optional :: comment
 
 !Local variables-------------------------------
  integer :: w, length, vmax
@@ -672,9 +703,9 @@ subroutine yamldoc_add_real1d(self, label, arr, tag, real_fmt, multiline_trig, n
  else
    call yaml_start_field(self%stream, label, width=w)
  end if
- !if (present(comment)) call stream%push(' #'//trim(comment))
 
  call yaml_print_real1d(self%stream, length, arr, trim(rfmt), vmax)
+ if (present(comment)) call self%stream%push(' #'//trim(comment))
  if (nl) call self%stream%push(eol)
 
 end subroutine yamldoc_add_real1d
@@ -695,6 +726,7 @@ end subroutine yamldoc_add_real1d
 !!  int_fmt <character(len=*)>=optional override the default formatting
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [width] = impose a minimum width of the field name side of the column (padding with spaces)
+!!  [comment]: optional Yaml comment added after the value
 !!
 !! PARENTS
 !!
@@ -702,7 +734,7 @@ end subroutine yamldoc_add_real1d
 !!
 !! SOURCE
 
-subroutine yamldoc_add_int1d(self, label, arr, tag, int_fmt, multiline_trig, newline, width)
+subroutine yamldoc_add_int1d(self, label, arr, tag, int_fmt, multiline_trig, newline, width, comment)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -712,6 +744,7 @@ subroutine yamldoc_add_int1d(self, label, arr, tag, int_fmt, multiline_trig, new
  character(len=*),intent(in),optional :: tag, int_fmt
  logical,intent(in),optional :: newline
  integer,intent(in),optional :: width
+ character(len=*),intent(in),optional :: comment
 
 !Local variables-------------------------------
  character(len=30) :: ifmt
@@ -732,6 +765,7 @@ subroutine yamldoc_add_int1d(self, label, arr, tag, int_fmt, multiline_trig, new
  end if
 
  call yaml_print_int1d(self%stream, length, arr, trim(ifmt), vmax)
+ if (present(comment)) call self%stream%push(' # '//trim(comment))
  if (nl) call self%stream%push(eol)
 
 end subroutine yamldoc_add_int1d
@@ -757,6 +791,7 @@ end subroutine yamldoc_add_int1d
 !!  string_fmt <character(len=*)>=optional  override the default formatting
 !!  newline <logical>=optional  set to false to prevent adding newlines after fields
 !!  width <integer>=optional impose a minimum width of the field name side of the column (padding with spaces)
+!!  [comment]: optional Yaml comment added after the value
 !!
 !! OUTPUT
 !!  pl <type(pair_list)>=
@@ -768,7 +803,7 @@ end subroutine yamldoc_add_int1d
 !! SOURCE
 
 subroutine yamldoc_add_dict(self, label, pl, tag, key_size, string_size, key_fmt, &
-                            int_fmt, real_fmt, string_fmt, multiline_trig, newline, width)
+                            int_fmt, real_fmt, string_fmt, multiline_trig, newline, width, comment)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -778,6 +813,7 @@ subroutine yamldoc_add_dict(self, label, pl, tag, key_size, string_size, key_fmt
  character(len=*),intent(in),optional :: tag, key_fmt, int_fmt, real_fmt, string_fmt
  logical,intent(in),optional :: newline
  integer,intent(in),optional :: width
+ character(len=*),intent(in),optional :: comment
 
 !Local variables-------------------------------
  integer :: w, vmax, ks, ss
@@ -802,6 +838,7 @@ subroutine yamldoc_add_dict(self, label, pl, tag, key_size, string_size, key_fmt
  end if
 
  call yaml_print_dict(self%stream, pl, ks, ss, trim(kfmt), trim(ifmt), trim(rfmt), trim(sfmt), vmax)
+ if (present(comment)) call self%stream%push(' # '//trim(comment))
  if (nl) call self%stream%push(eol)
 
 end subroutine yamldoc_add_dict
@@ -921,6 +958,7 @@ end subroutine yamldoc_add_real2d
 !!  [newline]: set to false to prevent adding newlines after fields
 !!  [width]: impose a minimum width of the field name side of the column (padding with spaces)
 !!  [mode]: "T" to write the transpose of arr i.e columns become rows in output (DEFAULT), "N" for normal order
+!!  [comment]: optional Yaml comment added after the key
 !!
 !! PARENTS
 !!
@@ -928,7 +966,8 @@ end subroutine yamldoc_add_real2d
 !!
 !! SOURCE
 
-subroutine yamldoc_add_paired_real2d(self, label, arr1, arr2, slist, tag, real_fmt, multiline_trig, newline, width, mode)
+subroutine yamldoc_add_paired_real2d(self, label, arr1, arr2, slist, tag, real_fmt, &
+        multiline_trig, newline, width, mode, comment)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -940,6 +979,7 @@ subroutine yamldoc_add_paired_real2d(self, label, arr1, arr2, slist, tag, real_f
  integer,intent(in),optional :: width
  character(len=1),intent(in),optional :: mode
  character(len=*),optional,intent(in) :: slist(:)
+ character(len=*),intent(in),optional :: comment
 
 !Local variables-------------------------------
  integer :: m, n, w, i, vmax
@@ -965,6 +1005,7 @@ subroutine yamldoc_add_paired_real2d(self, label, arr1, arr2, slist, tag, real_f
  else
    call yaml_start_field(self%stream, label, width=w)
  end if
+ if (present(comment)) call self%stream%push(' # '//trim(comment))
 
  if (my_mode == "T") then
    if (present(slist)) then
@@ -1161,7 +1202,7 @@ subroutine yamldoc_add_dictlist(self, label, n, plarr, tag, key_size, string_siz
  do i=1,n
    call self%stream%push('- ')
    call yaml_print_dict(self%stream, plarr(i), ks, ss, trim(kfmt), trim(ifmt), trim(rfmt), trim(sfmt), vmax)
-   if (nl .or. i/=n) call self%stream%push(eol)
+   if (nl .or. i /= n) call self%stream%push(eol)
  end do
 
 end subroutine yamldoc_add_dictlist
@@ -1179,6 +1220,7 @@ end subroutine yamldoc_add_dictlist
 !!  tag <character(len=*)>=optional  add a tag to the field
 !!  [newline] = set to false to prevent adding newlines after fields
 !!  [indent] = optional number of spaces to add to the header
+!!  [comment]: optional Yaml comment added after the value
 !!
 !! PARENTS
 !!
@@ -1186,7 +1228,7 @@ end subroutine yamldoc_add_dictlist
 !!
 !! SOURCE
 
-subroutine yamldoc_open_tabular(self, label, tag, indent, newline)
+subroutine yamldoc_open_tabular(self, label, tag, indent, newline, comment)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -1194,6 +1236,7 @@ subroutine yamldoc_open_tabular(self, label, tag, indent, newline)
  character(len=*),intent(in),optional :: tag
  logical,intent(in),optional :: newline
  integer,intent(in),optional :: indent
+ character(len=*),intent(in),optional :: comment
 
 !Local variables-------------------------------
  integer :: n
@@ -1212,7 +1255,12 @@ subroutine yamldoc_open_tabular(self, label, tag, indent, newline)
  else
    call yaml_start_field(self%stream, label, tag='Tabular')
  end if
- call self%stream%push(' |'//eol)
+
+ if (present(comment)) then
+   call self%stream%push(' | # '//trim(comment)//eol)
+ else
+   call self%stream%push(' |'//eol)
+ end if
 
 end subroutine yamldoc_open_tabular
 !!***
@@ -1277,7 +1325,7 @@ end subroutine yamldoc_add_tabular_line
 !!
 !! SOURCE
 
-!subroutine yamldoc_add_tabular(self, label, input, tag,  newline, indent)
+!subroutine yamldoc_add_tabular(self, label, input, tag, newline, indent)
 !
 !!Arguments ------------------------------------
 ! class(yamldoc_t),intent(inout) :: self
@@ -1405,12 +1453,12 @@ subroutine yaml_single_dict(unit, tag, comment, pl, key_size, string_size, &
 end subroutine yaml_single_dict
 !!***
 
-!!****f* m_yaml/yamldoc_write_and_free
+!!****f* m_yaml/yamldoc_write_unit_and_free
 !! NAME
-!! yamldoc_write_and_free
+!! yamldoc_write_unit_and_free
 !!
 !! FUNCTION
-!!  Close a previously opened document
+!!  Write Yaml document to unit and free memory.
 !!
 !! INPUTS
 !!  [newline]= set to false to prevent adding newlines after fields. Default: True
@@ -1421,7 +1469,7 @@ end subroutine yaml_single_dict
 !!
 !! SOURCE
 
-subroutine yamldoc_write_and_free(self, unit, newline)
+subroutine yamldoc_write_unit_and_free(self, unit, newline)
 
 !Arguments ------------------------------------
  class(yamldoc_t),intent(inout) :: self
@@ -1437,18 +1485,66 @@ subroutine yamldoc_write_and_free(self, unit, newline)
 
  call self%stream%push('...')
 
- if (self%use_yaml == 1) then
-   if (is_open(unit)) then
-     write(unit, "(a)")""
-     call self%stream%flush(unit, newline=nl)
-   else
-     call self%stream%free()
-   end if
+ ! FIXME: In principle, we should not use is_open here but it seems that
+ ! ab_out is not set to dev_null if parallelism over images.
+ if (is_open(unit)) then
+   call self%stream%flush(unit, newline=nl)
  else
    call self%stream%free()
  end if
 
-end subroutine yamldoc_write_and_free
+end subroutine yamldoc_write_unit_and_free
+!!***
+
+!!****f* m_yaml/yamldoc_write_units_and_free
+!! NAME
+!! yamldoc_write_units_and_free
+!!
+!! FUNCTION
+!!  Write Yaml document to a list of units and free memory.
+!!
+!! INPUTS
+!!  [newline]= set to false to prevent adding newlines after fields. Default: True
+!!
+!! PARENTS
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine yamldoc_write_units_and_free(self, units, newline)
+
+!Arguments ------------------------------------
+ class(yamldoc_t),intent(inout) :: self
+ integer,intent(in) :: units(:)
+ logical,intent(in),optional :: newline
+
+!Local variables-------------------------------
+ integer :: ii, cnt
+ logical :: nl
+!arrays
+ integer :: my_units(size(units))
+! *************************************************************************
+
+ if (self%stream%length == 0) return
+ ABI_DEFAULT(nl, newline, .true.)
+
+ ! Remove duplicated units (if any)
+ ! FIXME: In principle, we should not use is_open here but it seems that
+ ! ab_out is not set to dev_null if parallelism over images.
+ my_units(1) = units(1); cnt = 1
+ do ii=2,size(units)
+   if (any(units(ii) == my_units(1:cnt))) cycle
+   if (is_open(units(ii))) then
+     cnt = cnt + 1
+     my_units(cnt) = units(ii)
+   end if
+ end do
+
+ call self%stream%push('...')
+ call self%stream%flush_units(my_units, newline=nl)
+
+end subroutine yamldoc_write_units_and_free
 !!***
 
 !!****f* m_yaml/yamldoc_set_keys_to_string
@@ -1587,6 +1683,7 @@ subroutine forbid_reserved_label(label)
 end subroutine forbid_reserved_label
 
 pure function yaml_quote_string(string) result(quoted)
+
  character(len=*),intent(in) :: string
  character(len=len(string)+2) :: quoted
  logical :: multiline, spec_char, quote
@@ -1760,9 +1857,10 @@ subroutine yaml_print_dict(stream, pl, key_size, s_size, kfmt, ifmt, rfmt, sfmt,
    !if has_whitespaces(key) then
    !  call string_clear(tmp_key)
    !  write(tmp_key, kfmt) '"'//trim(key)//'"'
+   !else
    !end if
-
    write(tmp_key, kfmt) trim(key)
+
    call stream%push(trim(tmp_key)//': ')
 
    select case (type_code)

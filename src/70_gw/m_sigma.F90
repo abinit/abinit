@@ -458,7 +458,7 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
    end if
    call wrtout(std_out,msg,'COLL')
 
-   ydoc = yamldoc_open('SelfEnergy_ee', comment="", width=11, real_fmt='(3f8.3)')
+   ydoc = yamldoc_open('SelfEnergy_ee', width=11, real_fmt='(3f8.3)')
    call ydoc%add_real1d('kpoint', Sigp%kptgw(:,ikcalc))
    call ydoc%add_int('spin', is, int_fmt="(i1)")
    call ydoc%add_real('KS_gap', Sr%e0gap(ikibz,is)*Ha_eV)
@@ -707,7 +707,8 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
     end if
   end if
 
- else  ! PAW+U+GW calculation.
+ else
+   ! PAW+U+GW calculation.
    ABI_CHECK(Sr%nsig_ab==1,'LDA+U with spinor not implemented')
    write(msg,'(i5,10f8.3)')                   &
          iband,                               &
@@ -868,7 +869,8 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,yd
      end if
    end if
 
- else ! PAW+U+GW calculation.
+ else
+   ! PAW+U+GW calculation.
    MSG_ERROR("PAW+U+GW not yet implemented")
  end if
 

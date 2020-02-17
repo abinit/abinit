@@ -79,7 +79,6 @@ module m_common
  public :: crystal_from_file       ! Build a crystal_t object from netcdf file or Abinit input file
                                    ! with file extension in [".abi", ".in"]
 
- !type(yamldoc_t),private,save :: etot_yaml_doc
 !!***
 
 contains
@@ -349,23 +348,18 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
        end if
      end if
 
-     ! Will save iterations in this global variables.
-     ! MG: For the time being the document is not written to std_out
-     ! Should reconsider whether it makes sense to use yaml and global state (problematic if prtvol and/or DFMT)
-     !etot_yaml_doc = yamldoc_open('EtotSteps', "")
-     !etot_yaml_doc%use_yaml = 0
-     !call etot_yaml_doc%open_tabular('data', tag='EtotIters')
-     !call etot_yaml_doc%add_tabular_line(message)
-
-#if 1
-     ydoc = yamldoc_open('EtotSteps', "")
+     ydoc = yamldoc_open('BeginCycle')
      call ydoc%add_ints("iscf, nstep, nline, wfoptalg", &
-                        [dtset%iscf, dtset%nstep, dtset%nline, dtset%wfoptalg], dict_key="control")
+                        [dtset%iscf, dtset%nstep, dtset%nline, dtset%wfoptalg], dict_key="solver")
      call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff, vdw_df_threshold", &
                         [tolwfr, toldff, toldfe, tolvrs, tolrff, vdw_df_threshold], &
-                        real_fmt="(es8.1)", dict_key="tolerances")
-     call ydoc%write_and_free(ab_out, newline=.False.)
-#endif
+                        real_fmt="(es8.2)", dict_key="tolerances", ignore=zero)
+
+     if (dtset%use_yaml == 1) then
+       call ydoc%write_and_free(ab_out, newline=.False.)
+     else
+       call ydoc%write_and_free(std_out, newline=.False.)
+     end if
 
      call wrtout(ab_out,message,'COLL')
    end if
@@ -1497,7 +1491,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
  if (optdc==0.or.optdc==2) then
 
    if (directE_avail) then
-     edoc = yamldoc_open('EnergyTerms', 'Components of total free energy in Hartree', width=20, real_fmt='(es21.14)')
+     edoc = yamldoc_open('EnergyTerms', info='Components of total free energy in Hartree', &
+                         width=20, real_fmt='(es21.14)')
      call edoc%add_real('kinetic', energies%e_kinetic)
      if (ipositron/=1) then
        exc_semilocal=energies%e_xc+energies%e_hybcomp_E0-energies%e_hybcomp_v0+energies%e_hybcomp_v
@@ -1584,7 +1579,8 @@ subroutine prtene(dtset,energies,iout,usepaw)
 
  if (optdc>=1) then
 
-   dc_edoc = yamldoc_open('EnergyTermsDC', '"Double-counting" decomposition of free energy', width=20, real_fmt="(es21.14)")
+   dc_edoc = yamldoc_open('EnergyTermsDC', info='"Double-counting" decomposition of free energy', &
+                          width=20, real_fmt="(es21.14)")
    call dc_edoc%add_real('band_energy', energies%e_eigenvalues)
 
    if (ipositron/=1) then
