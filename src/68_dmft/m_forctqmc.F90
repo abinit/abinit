@@ -1387,7 +1387,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
      ! Print green function is files directly from CTQMC
      ! --------------------------------------------------
-     call ctqmcoutput_printgreen(cryst_struc,eigvectmatlu,pawang,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
+     call ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
 
 
      ! If the CTQMC code in ABINIT was used, then destroy it and deallocate arrays
@@ -2228,8 +2228,6 @@ end subroutine ctqmcoutput_to_green
 !!  gw_tmp_nd(nb_of_frequency,nflavor,nflavor) = Green's fct in imag freq (with off diag terms)
 !!  gtmp(dmftqmc_l,nflavor) = Green's fct in imag time (diag)
 !!  gw_tmp(nb_of_frequency,nflavor+1) =Green's fct in imag freq (diag)
-!!  cryst_struc <type(crystal_t)>=crystal structure data
-!!  pawang <type(pawang)>=paw angular mesh and related data
 !!  iatom = atoms on which the calculation has been done
 !!
 !! OUTPUT
@@ -2246,7 +2244,7 @@ end subroutine ctqmcoutput_to_green
 !!
 !! SOURCE
 
-subroutine ctqmcoutput_printgreen(cryst_struc,eigvectmatlu,pawang,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
+subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
 
 !Arguments ------------------------------------
 !scalars
@@ -2255,16 +2253,12 @@ subroutine ctqmcoutput_printgreen(cryst_struc,eigvectmatlu,pawang,paw_dmft,gtmp_
  complex(dpc), allocatable, intent(in) :: gw_tmp(:,:)
  complex(dpc), allocatable, intent(in) :: gw_tmp_nd(:,:,:)
  real(dp), allocatable, intent(in) :: gtmp(:,:)
- type(crystal_t),intent(in) :: cryst_struc
  integer, intent(in) :: iatom
- type(coeff2c_type), intent(inout) :: eigvectmatlu(:,:)
- type(pawang_type), intent(in) :: pawang
 
 !Local variables ------------------------------
  character(len=500) :: message
- type(matlu_type), allocatable :: matlu1(:)
- integer :: ifreq, itau,im1,im2,isppol,ispinor1,ispinor2,iflavor1
- integer :: iflavor2,tndim,iflavor,nflavor
+ integer :: ifreq, itau,iflavor1
+ integer :: tndim,iflavor,nflavor
  character(len=2) :: gtau_iter,iatomnb
  integer :: unt
 ! ************************************************************************
