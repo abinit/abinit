@@ -104,7 +104,7 @@ subroutine make_vectornd(cplex,gsqcut,izero,mpi_enreg,natom,nfft,ngfft,nucdipmom
  integer :: ig1min,ig2min,ig3min
  integer :: ii,ii1,ing,me_fft,n1,n2,n3,nd_atom,nd_atom_tot,nproc_fft
  real(dp),parameter :: tolfix=1.000000001e0_dp
- real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs,phase,ucvol, rcut
+ real(dp) :: cutoff,gqgm12,gqg2p3,gqgm23,gqgm13,gs2,gs3,gs,phase,ucvol
  complex(dpc) :: prefac,cgr
  !arrays
  integer :: id(3)
@@ -343,7 +343,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: rprimd(3,3),rhog(2,nfft)
- real(dp),intent(in),optional :: divgq0
+ real(dp),intent(inout),optional :: divgq0
  real(dp),intent(in),optional :: qpt(3)
  real(dp),intent(out) :: vhartr(cplex*nfft)
 
@@ -354,7 +354,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
  integer :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05,me_fft,nproc_fft
  real(dp),parameter :: tolfix=1.000000001e0_dp
- real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,ucvol
+ real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,ucvol,rcut
  character(len=500) :: message
 !arrays
  integer :: id(3)
