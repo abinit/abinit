@@ -1347,10 +1347,6 @@
 #
 #enable_zdot_bugfix="yes"
 
-# Enable the build of macroave (default is no)
-#
-#enable_macroave="yes"
-
 # -------------------------------------------------------------------------- #
 # Maintainer options                                                         #
 # -------------------------------------------------------------------------- #

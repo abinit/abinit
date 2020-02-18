@@ -112,6 +112,7 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
  real(dp) :: pol1(3,3,3,ddb%natom)
  real(dp) :: psinvdm(3*ddb%natom,3*ddb%natom)
  real(dp) :: totflexo(3,3,3,3)
+ character(len=2) :: voigt(9)=(/'xx','yy','zz','yz','xz','xy','zy','zx','yx'/)
  
 ! *************************************************************************
 
@@ -306,22 +307,20 @@ subroutine ddb_flexo(asr,d2asr,ddb,ddb_lw,crystal,filnamddb,flexoflg,zeff)
  if (iwrite) then
    write(msg,'(3a)')ch10,' TOTAL flexoelectric tensor (units= nC/m) ',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
-   write(msg,*)'      xx          yy          zz          yz          xz          xy          zy          zx          yx'
+   write(msg,*)'           xx          yy          zz          yz          xz          xy'
    call wrtout([ab_out,std_out],msg,'COLL')
    do ivar=1,6
      elfd=alpha(ivar)
      qvecd=beta(ivar)
-     write(msg,'(9f12.6)') totflexo(elfd,qvecd,1,1),totflexo(elfd,qvecd,2,2),totflexo(elfd,qvecd,3,3),&
-                           totflexo(elfd,qvecd,2,3),totflexo(elfd,qvecd,1,3),totflexo(elfd,qvecd,1,2),&
-                           totflexo(elfd,qvecd,3,2),totflexo(elfd,qvecd,3,1),totflexo(elfd,qvecd,2,1)
+     write(msg,'(3x,a2,6f12.6)') voigt(ivar),totflexo(elfd,qvecd,1,1),totflexo(elfd,qvecd,2,2),totflexo(elfd,qvecd,3,3),&
+                           totflexo(elfd,qvecd,2,3),totflexo(elfd,qvecd,1,3),totflexo(elfd,qvecd,1,2)
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
    do ivar=4,6
      elfd=beta(ivar)
      qvecd=alpha(ivar)
-     write(msg,'(9f12.6)') totflexo(elfd,qvecd,1,1),totflexo(elfd,qvecd,2,2),totflexo(elfd,qvecd,3,3),&
-                           totflexo(elfd,qvecd,2,3),totflexo(elfd,qvecd,1,3),totflexo(elfd,qvecd,1,2),&
-                           totflexo(elfd,qvecd,3,2),totflexo(elfd,qvecd,3,1),totflexo(elfd,qvecd,2,1)
+     write(msg,'(3x,a2,6f12.6)') voigt(ivar+3),totflexo(elfd,qvecd,1,1),totflexo(elfd,qvecd,2,2),totflexo(elfd,qvecd,3,3),&
+                           totflexo(elfd,qvecd,2,3),totflexo(elfd,qvecd,1,3),totflexo(elfd,qvecd,1,2)
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
  end if
@@ -377,6 +376,7 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
 !arrays
  integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
  real(dp) :: d3cart(2,3,mpert,3,mpert,3,mpert)
+ character(len=2) :: voigt(9)=(/'xx','yy','zz','yz','xz','xy','zy','zx','yx'/)
 
 ! *********************************************************************
 
@@ -405,22 +405,22 @@ subroutine dtciflexo(blkval,mpert,natom,ciflexo,ucvol)
  if (iwrite) then
    write(msg,'(3a)')ch10,' Type-II electronic (clamped ion) flexoelectric tensor (units= nC/m) ',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
-   write(msg,*)'      xx          yy          zz          yz          xz          xy          zy          zx          yx'
+   write(msg,*)'           xx          yy          zz          yz          xz          xy'
    call wrtout([ab_out,std_out],msg,'COLL')
    do ivarA=1,6
      elfd=alpha(ivarA)
      qvecd=beta(ivarA)
-     write(msg,'(9f12.6)') ciflexo(elfd,qvecd,1,1),ciflexo(elfd,qvecd,2,2),ciflexo(elfd,qvecd,3,3),&
-                           ciflexo(elfd,qvecd,2,3),ciflexo(elfd,qvecd,1,3),ciflexo(elfd,qvecd,1,2),&
-                           ciflexo(elfd,qvecd,3,2),ciflexo(elfd,qvecd,3,1),ciflexo(elfd,qvecd,2,1)
+     write(msg,'(3x,a2,6f12.6)') voigt(ivarA), ciflexo(elfd,qvecd,1,1),ciflexo(elfd,qvecd,2,2), &
+                                 ciflexo(elfd,qvecd,3,3), ciflexo(elfd,qvecd,2,3), &
+                                 ciflexo(elfd,qvecd,1,3),ciflexo(elfd,qvecd,1,2)
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
    do ivarA=4,6
      elfd=beta(ivarA)
      qvecd=alpha(ivarA)
-     write(msg,'(9f12.6)') ciflexo(elfd,qvecd,1,1),ciflexo(elfd,qvecd,2,2),ciflexo(elfd,qvecd,3,3),&
-                           ciflexo(elfd,qvecd,2,3),ciflexo(elfd,qvecd,1,3),ciflexo(elfd,qvecd,1,2),&
-                           ciflexo(elfd,qvecd,3,2),ciflexo(elfd,qvecd,3,1),ciflexo(elfd,qvecd,2,1)
+     write(msg,'(3x,a2,6f12.6)') voigt(ivarA+3), ciflexo(elfd,qvecd,1,1),ciflexo(elfd,qvecd,2,2), &
+                                 ciflexo(elfd,qvecd,3,3), ciflexo(elfd,qvecd,2,3), &
+                                 ciflexo(elfd,qvecd,1,3),ciflexo(elfd,qvecd,1,2)
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
  end if
@@ -499,6 +499,7 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
  real(dp) :: piezofr(3,natom,3,3)
  integer :: flg1(3),flg2(3)
  real(dp) :: vec1(3),vec2(3)
+ character(len=2) :: voigt(9)=(/'xx','yy','zz','yz','xz','xy','zy','zx','yx'/)
 
 ! *********************************************************************
  
@@ -637,22 +638,20 @@ subroutine dtmixflexo(asr,d2asr,blkval1d,blkval2d,blkval,gprimd,intstrn,intstrn_
    if (.not.intstrn_only) then
      write(msg,'(3a)')ch10,' Type-II mixed contribution to flexoelectric tensor (units: nC/m)',ch10
      call wrtout([ab_out,std_out],msg,'COLL')
-     write(msg,*)'      xx          yy          zz          yz          xz          xy          zy          zx          yx'
+     write(msg,*)'           xx          yy          zz          yz          xz          xy'
      call wrtout([ab_out,std_out],msg,'COLL')
      do ivar=1,6
        elfd=alpha(ivar)
        qvecd=beta(ivar)
-       write(msg,'(9f12.6)') mixflexo(elfd,qvecd,1,1),mixflexo(elfd,qvecd,2,2),mixflexo(elfd,qvecd,3,3),&
-                             mixflexo(elfd,qvecd,2,3),mixflexo(elfd,qvecd,1,3),mixflexo(elfd,qvecd,1,2),&
-                             mixflexo(elfd,qvecd,3,2),mixflexo(elfd,qvecd,3,1),mixflexo(elfd,qvecd,2,1)
+       write(msg,'(3x,a2,6f12.6)') voigt(ivar),mixflexo(elfd,qvecd,1,1),mixflexo(elfd,qvecd,2,2),mixflexo(elfd,qvecd,3,3),&
+                             mixflexo(elfd,qvecd,2,3),mixflexo(elfd,qvecd,1,3),mixflexo(elfd,qvecd,1,2)
        call wrtout([ab_out,std_out],msg,'COLL')
      end do
      do ivar=4,6
        elfd=beta(ivar)
        qvecd=alpha(ivar)
-       write(msg,'(9f12.6)') mixflexo(elfd,qvecd,1,1),mixflexo(elfd,qvecd,2,2),mixflexo(elfd,qvecd,3,3),&
-                             mixflexo(elfd,qvecd,2,3),mixflexo(elfd,qvecd,1,3),mixflexo(elfd,qvecd,1,2),&
-                             mixflexo(elfd,qvecd,3,2),mixflexo(elfd,qvecd,3,1),mixflexo(elfd,qvecd,2,1)
+       write(msg,'(3x,a2,6f12.6)') voigt(ivar+3),mixflexo(elfd,qvecd,1,1),mixflexo(elfd,qvecd,2,2),mixflexo(elfd,qvecd,3,3),&
+                             mixflexo(elfd,qvecd,2,3),mixflexo(elfd,qvecd,1,3),mixflexo(elfd,qvecd,1,2)
        call wrtout([ab_out,std_out],msg,'COLL')
      end do
    end if
@@ -737,6 +736,7 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
  real(dp) :: roundbkt(3,3,3,3),roundbkt_k(3,3,3,3,natom)
  real(dp) :: sqrbkt_t1(3,3,3,3)
  real(dp) :: stress(3,3)
+ character(len=2) :: voigt(9)=(/'xx','yy','zz','yz','xz','xy','zy','zx','yx'/)
 
 ! MR: Kept for testing 
 ! integer :: i,j,k,l
@@ -1061,22 +1061,20 @@ subroutine dtlattflexo(amu,blkval1d,blkvalA,blkvalB,intstrn,lattflexo,mpert,nato
 
    write(msg,'(3a)')ch10,' Type-II lattice contribution to flexoelectric tensor (units= nC/m) ',ch10
    call wrtout([ab_out,std_out],msg,'COLL')
-   write(msg,*)'      xx          yy          zz          yz          xz          xy          zy          zx          yx'
+   write(msg,*)'           xx          yy          zz          yz          xz          xy'
    call wrtout([ab_out,std_out],msg,'COLL')
    do ivar=1,6
      elfd=alpha(ivar)
      qvecd=beta(ivar)
-     write(msg,'(9f12.6)') lattflexo(elfd,qvecd,1,1),lattflexo(elfd,qvecd,2,2),lattflexo(elfd,qvecd,3,3),&
-                           lattflexo(elfd,qvecd,2,3),lattflexo(elfd,qvecd,1,3),lattflexo(elfd,qvecd,1,2),&
-                           lattflexo(elfd,qvecd,3,2),lattflexo(elfd,qvecd,3,1),lattflexo(elfd,qvecd,2,1)
+     write(msg,'(3x,a2,6f12.6)') voigt(ivar),lattflexo(elfd,qvecd,1,1),lattflexo(elfd,qvecd,2,2),lattflexo(elfd,qvecd,3,3),&
+                           lattflexo(elfd,qvecd,2,3),lattflexo(elfd,qvecd,1,3),lattflexo(elfd,qvecd,1,2)
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
    do ivar=4,6
      elfd=beta(ivar)
      qvecd=alpha(ivar)
-     write(msg,'(9f12.6)') lattflexo(elfd,qvecd,1,1),lattflexo(elfd,qvecd,2,2),lattflexo(elfd,qvecd,3,3),&
-                           lattflexo(elfd,qvecd,2,3),lattflexo(elfd,qvecd,1,3),lattflexo(elfd,qvecd,1,2),&
-                           lattflexo(elfd,qvecd,3,2),lattflexo(elfd,qvecd,3,1),lattflexo(elfd,qvecd,2,1)
+     write(msg,'(3x,a2,6f12.6)') voigt(ivar+3),lattflexo(elfd,qvecd,1,1),lattflexo(elfd,qvecd,2,2),lattflexo(elfd,qvecd,3,3),&
+                           lattflexo(elfd,qvecd,2,3),lattflexo(elfd,qvecd,1,3),lattflexo(elfd,qvecd,1,2)
      call wrtout([ab_out,std_out],msg,'COLL')
    end do
 
