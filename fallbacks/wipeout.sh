@@ -37,6 +37,7 @@ echo "[fbkclean]   Removing autotools files"
 # Remove Makefiles 
 echo "[fbkclean]   Removing files produced by the configure script"
 rm -f libtool
+rm -f make.log make.stderr
 find . -name Makefile -exec rm {} \;
 find . -name Makefile.in -exec rm {} \;
 find . -name Makefile.am -exec rm {} \;

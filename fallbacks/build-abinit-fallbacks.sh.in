@@ -8,11 +8,10 @@ cd @abinit_builddir@/fallbacks
 tarfile=$(ls *.tar.gz)
 source=${tarfile%.tar.gz}
 if [ ! -d "$source" ]; then
-    tar xzf $tarfile
+    tar -xzf $tarfile
+fi
 cd $source
 make clean
-
-cd $source
 
 # Configure
 ./configure \
@@ -26,7 +25,7 @@ cd $source
   --disable-bigdft \
   --disable-atompaw \
   --disable-wannier90 \
-  --disbale-xmlf90 --disable-libpsml \
+  --disable-xmlf90 --disable-libpsml \
   CC="@CC@" \
   CXX="@CXX@" \
   FC="@FC@"

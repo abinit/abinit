@@ -40,15 +40,19 @@ AC_DEFUN([ABI_FALLBACKS_INIT],[
     echo "abi_fbk_config = ${abi_fbk_config}"
   elif test -d "${with_fallbacks}"; then
     abi_fbk_prefix="${with_fallbacks}"
-    abi_fbk_config="${abi_fbk_prefix}/build-abinit-fallbacks.sh"
+    #abi_fbk_config="${abi_fbk_prefix}/build-abinit-fallbacks.sh"
+    abi_fbk_config="${ac_abs_confdir}/fallbacks/build-abinit-fallbacks.sh"
     dnl if test -x "${abi_fbk_config}"; then
     if test -f "${abi_fbk_config}.in"; then
       abi_fbk_enable="yes"
       abi_fbk_init="dir"
     fi
-    echo "abi_fbk_prefix=${ac_abs_confdir}/fallbacks"
+    #echo "abi_fbk_prefix=${ac_abs_confdir}/fallbacks"
     echo "with_fallbacks=${with_fallbacks}"
+    echo "abi_fbk_prefix=${abi_fbk_prefix}"
     echo "abi_fbk_config = ${abi_fbk_config}"
+    echo "abi_fbk_enable = ${abi_fbk_enable}"
+    echo "abi_fbk_init = ${abi_fbk_init}"
   elif test "${with_fallbacks}" != ""; then
     AC_MSG_ERROR([invalid fallbacks install prefix: '${with_fallbacks}'
                   please use --with-fallbacks without argument or make it
