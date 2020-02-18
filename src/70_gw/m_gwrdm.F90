@@ -69,8 +69,8 @@ subroutine calc_rdm(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
  integer,intent(in) :: ib1,ib2,kpoint,isgn,iinfo
  type(ebands_t),target,intent(in) :: BSt
  !arrays
- real(dp),intent(in) :: pot(:,:)
- real(dp),intent(inout) :: dm1(:,:)
+ complex(dpc),intent(in) :: pot(:,:)
+ complex(dpc),intent(inout) :: dm1(:,:)
 !Local variables ------------------------------
 !scalars
  character(len=500) :: msg,msg2
@@ -84,14 +84,14 @@ subroutine calc_rdm(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
 
  tol=1.0d-8
  if(isgn==0) then !Vxc
-  sgn_spin=-2.0d0
-  msg2='Vxc    '
+   sgn_spin=-2.0d0
+   msg2='Vxc    '
  else if(isgn==1) then !Sigma_x
-  sgn_spin=2.0d0       
-  msg2='Sx     '
+   sgn_spin=2.0d0       
+   msg2='Sx     '
  else ! Both: Sigma_x - Vxc
-  sgn_spin=2.0d0       
-  msg2='Sx-Vxc '
+   sgn_spin=2.0d0       
+   msg2='Sx-Vxc '
  endif
 
  if(iinfo==0) then 
@@ -104,12 +104,12 @@ subroutine calc_rdm(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
  endif
 
  do ib1dm=ib1,ib2-1  
-  do ib2dm=ib1dm+1,ib2
-   if((BSt%occ(ib1dm,kpoint,1).gt.tol) .and. (BSt%occ(ib2dm,kpoint,1).lt.tol)) then
-    dm1(ib1dm,ib2dm)=sgn_spin*pot(ib1dm,ib2dm)/(BSt%eig(ib1dm,kpoint,1)-BSt%eig(ib2dm,kpoint,1))
-    dm1(ib2dm,ib1dm)=dm1(ib1dm,ib2dm)
-   endif
-  enddo
+   do ib2dm=ib1dm+1,ib2
+     if((BSt%occ(ib1dm,kpoint,1)>tol) .and. (BSt%occ(ib2dm,kpoint,1)<tol)) then
+       dm1(ib1dm,ib2dm)=sgn_spin*pot(ib1dm,ib2dm)/(BSt%eig(ib1dm,kpoint,1)-BSt%eig(ib2dm,kpoint,1))
+       dm1(ib2dm,ib1dm)=dm1(ib1dm,ib2dm)
+     endif
+   enddo
  enddo
 
  DBG_EXIT("COLL")
@@ -127,46 +127,54 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
  type(sigma_t) :: Sr
 !arrays
  real(dp),intent(in) :: weights(:)
- real(dp),intent(inout) :: dm1(:,:)
+ complex(dpc),intent(inout) :: dm1(:,:)
  complex(dpc),intent(in) :: sigcme_k(:,:,:,:)
 !Local variables ------------------------------
 !scalars
  real(dp), parameter :: pi=3.141592653589793238462643383279502884197
  character(len=500) :: msg,msg2
  integer :: ib1dm,ib2dm,iquad 
+ real(dp) :: tol
  complex(dpc) :: denominator,fact,division,dm1_mel
 !arrays
 
 !************************************************************************
 
  DBG_ENTER("COLL")
+
+ tol=1.0d-8
  msg2='Sc     '
  fact=cmplx(0.0d0,-1.0d0/pi)
 
  if(iinfo==0) then
-  write(msg,'(a37,a7,a14,3f10.5)')'Computing the 1-RDM correction for  ',msg2,' and k-point: ',BSt%kptns(1:,kpoint)
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a11,i5,a8,i5)')'from band ',ib1,' to band',ib2
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
+   write(msg,'(a37,a7,a14,3f10.5)')'Computing the 1-RDM correction for  ',msg2,' and k-point: ',BSt%kptns(1:,kpoint)
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   write(msg,'(a11,i5,a8,i5)')'from band ',ib1,' to band',ib2
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
  endif
-
 
  dm1=0.0d0
  do ib1dm=ib1,ib2  
-  do ib2dm=ib1dm,ib2 
-   do iquad=1,nomega_sigc
-    denominator=(Sr%omega_i(iquad)-BSt%eig(ib1dm,kpoint,1))*(Sr%omega_i(iquad)-BSt%eig(ib2dm,kpoint,1)) ! As in FHI-aims for RPA?
-    if((zabs(denominator).ge.1.0d-8).and.(zabs(sigcme_k(iquad,ib1dm,ib2dm,1)).ge.1.0d-10)) then
-      division=sigcme_k(iquad,ib1dm,ib2dm,1)/denominator 
-      dm1_mel=dm1_mel+weights(iquad)*(division-conjg(division))
-    endif 
-   enddo
-   dm1_mel=fact*dm1_mel
-   dm1(ib1dm,ib2dm)=real(dm1_mel)
-   dm1(ib2dm,ib1dm)=dm1(ib1dm,ib2dm)
-  enddo  
+   do ib2dm=ib1dm,ib2 
+     do iquad=1,nomega_sigc
+       denominator=(Sr%omega_i(iquad)-BSt%eig(ib1dm,kpoint,1))*(Sr%omega_i(iquad)-BSt%eig(ib2dm,kpoint,1)) ! As in FHI-aims for RPA
+       if(abs(denominator)>tol) then 
+         if(abs(sigcme_k(iquad,ib1dm,ib2dm,1))>tol) then
+           division=sigcme_k(iquad,ib1dm,ib2dm,1)/denominator 
+           dm1_mel=dm1_mel+weights(iquad)*division
+         endif 
+         !if(abs(sigcme_k(iquad,ib2dm,ib1dm,1))>tol) then
+         !  division=sigcme_k(iquad,ib2dm,ib1dm,1)/denominator 
+         !  dm1_mel=dm1_mel+weights(iquad)*conjg(division)
+         !endif 
+       endif
+     enddo
+     dm1_mel=fact*dm1_mel
+     dm1(ib1dm,ib2dm)=dm1_mel
+     dm1(ib2dm,ib1dm)=dm1(ib1dm,ib2dm)
+   enddo  
  enddo
 
  DBG_EXIT("COLL")
@@ -180,65 +188,69 @@ subroutine natoccs(ib1,ib2,dm1,BSt,kpoint,iinfo)
  integer,intent(in) :: ib1,ib2,kpoint,iinfo
  type(ebands_t),target,intent(in) :: BSt
 !arrays
- real(dp),intent(inout) :: dm1(:,:)
+ complex(dpc),intent(inout) :: dm1(:,:)
 !Local variables ------------------------------
 !scalars
  integer::ndim,ib1dm,ib2dm,lwork,info
  character(len=500) :: msg,msg2
- real(dp) :: toccs
+ real(dp) :: toccs_k
 !arrays
- real(dp),allocatable :: occs(:),work(:),dm1_tmp(:,:)
+ real(dp),allocatable :: occs(:),rwork(:)
+ complex(dpc),allocatable :: work(:),dm1_tmp(:,:)
 !************************************************************************
 
  DBG_ENTER("COLL")
  
  ndim=ib2-ib1+1
- lwork=3*ndim-1
+ lwork=2*ndim-1
  ABI_MALLOC(occs,(ndim))
  ABI_MALLOC(work,(lwork))
  ABI_MALLOC(dm1_tmp,(ndim,ndim))
+ ABI_MALLOC(rwork,(3*ndim-2))
 
  dm1_tmp=0.0d0
  do ib2dm=1,ndim
-  do ib1dm=1,ndim
-   dm1_tmp(ib1dm,ib2dm)=dm1(ib1+(ib1dm-1),ib1+(ib2dm-1))
-  enddo
+   do ib1dm=ib2dm,ndim
+     dm1_tmp(ib1dm,ib2dm)=dm1(ib1+(ib1dm-1),ib1+(ib2dm-1))
+     dm1_tmp(ib2dm,ib1dm)=dm1_tmp(ib1dm,ib2dm)
+   enddo
  enddo
 
  work=0.0d0
  occs=0.0d0
  info=0
- call dsyev('v','u',ndim,dm1_tmp,ndim,occs,work,lwork,info)
+ call zheev('v','u',ndim,dm1_tmp,ndim,occs,work,lwork,rwork,info)
 
  if(info==0) then
-  if(iinfo==0) then       
-   write(msg,'(a52,3f10.5)') 'Occs. after updating with the exchange at k-point:',BSt%kptns(1:,kpoint)
-  else
-   write(msg,'(a52,3f10.5)') 'Occs. after updating with the exch+cor at k-point:',BSt%kptns(1:,kpoint)
-  endif 
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
-  write(msg,'(a2,*(f10.5))') '  ',occs(1:)
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
+   if(iinfo==0) then       
+     write(msg,'(a52,3f10.5)') 'Occs. after updating with the exchange at k-point:',BSt%kptns(1:,kpoint)
+   else
+     write(msg,'(a52,3f10.5)') 'Occs. after updating with the exch+cor at k-point:',BSt%kptns(1:,kpoint)
+   endif 
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   write(msg,'(a2,*(f10.5))') '  ',occs(1:)
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
  else
-  write(msg,'(a39,3f10.5)') 'Error computing the occs. for k-point: ',BSt%kptns(1:,kpoint)
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
+   write(msg,'(a39,3f10.5)') 'Error computing the occs. for k-point: ',BSt%kptns(1:,kpoint)
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
  endif
  
- toccs=0.0d0
+ toccs_k=0.0d0
  do ib1dm=1,ndim
-  toccs=toccs+occs(ib1dm)
+   toccs_k=toccs_k+occs(ib1dm)
  enddo
 
- write(msg,'(a24,f10.5)') 'Total Occ. at k-point: ',toccs
+ write(msg,'(a24,f10.5)') 'Total Occ. at k-point: ',toccs_k
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
  write(msg,'(a5)') ' '
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
 
+ ABI_FREE(rwork)
  ABI_FREE(occs)
  ABI_FREE(work)
  ABI_FREE(dm1_tmp)
@@ -253,7 +265,7 @@ subroutine printdm1(ib1,ib2,dm1)
 !scalars
  integer,intent(in) :: ib1,ib2
 !arrays
- real(dp),intent(in) :: dm1(:,:)
+ complex(dpc),intent(in) :: dm1(:,:)
 !Local variables ------------------------------
 !scalars
  integer::ib1dm
@@ -261,9 +273,9 @@ subroutine printdm1(ib1,ib2,dm1)
 !arrays
 !************************************************************************
  do ib1dm=ib1,ib2
-  write(msg,'(a2,*(f10.5))') '  ',dm1(ib1dm,ib1:)
-  call wrtout(std_out,msg,'COLL')
-  call wrtout(ab_out,msg,'COLL')
+   write(msg,'(a2,*(f10.5))') '  ',dm1(ib1dm,ib1:)
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
  enddo
 
 end subroutine printdm1

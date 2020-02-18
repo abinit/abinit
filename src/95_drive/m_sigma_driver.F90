@@ -112,6 +112,9 @@ module m_sigma_driver
  use m_calc_ucrpa,    only : calc_ucrpa
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
+! MRM density matrix module and Gaussian quadrature one
+ use m_gwrdm,         only : calc_rdm, calc_rdmc, natoccs, printdm1
+ use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre
 
  implicit none
 
@@ -231,6 +234,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
+ integer :: ib1dm,order_int,ifreqs,iinfo,gw1rdm !MRM
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
@@ -266,6 +270,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
+ real(dp),allocatable :: weights(:),freqs(:) ! MRM
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
@@ -283,6 +288,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc),allocatable :: ctmp(:,:),hbare(:,:,:,:)
  complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
  complex(dpc),allocatable :: hlda(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
+ complex(dpc),allocatable :: dm1(:,:,:),dm1k(:,:),potk(:,:) ! MRM
  complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
 !complex(dpc),pointer :: sigcme_p(:,:,:,:)
@@ -336,6 +342,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call wrtout(ab_out,msg,'COLL')
 
  gwcalctyp=Dtset%gwcalctyp
+! gw1rdm=Dtset%gw1rdm ! MRM input variable
+!     write(msg,'(i5)') gw1rdm
+!     call wrtout(std_out,msg,'COLL')
+!     call wrtout(ab_out,msg,'COLL')
+ 
  mod10 =MOD(Dtset%gwcalctyp,10)
 
  ! Perform some additional checks for hybrid functional calculations
@@ -2015,7 +2026,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if (gwcalctyp==1) msg = " Newton Raphson method "
  else if (gwcalctyp<20) then
    msg = " Self-Consistent on Energies only"
- else
+ else if (gwcalctyp==21) then
+   msg = " 1-RDM Corrections"
+ else  
    msg = " Self-Consistent on Energies and Wavefunctions"
  end if
  if(Dtset%ucrpa==0) then
@@ -2138,6 +2151,44 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ABI_FREE(M1_q_m)
 
  else
+   if(gwcalctyp==21) then  !! MRM allocate the 1-RDM correction info if gwcalctyp=21
+     iinfo=1  !! This should be input parameter 
+     ABI_MALLOC(dm1,(b1gw:b2gw,b1gw:b2gw,Sigp%nkptgw))
+     ABI_MALLOC(dm1k,(b1gw:b2gw,b1gw:b2gw)) 
+     ABI_MALLOC(potk,(b1gw:b2gw,b1gw:b2gw))
+     dm1=0.0d0
+     do ikcalc=1,Sigp%nkptgw
+       do ib=b1gw,b2gw
+         dm1(ib,ib,ikcalc)=KS_BSt%occ(ib,ikcalc,1)
+       enddo 
+     enddo
+     order_int=Sigp%nomegasi 
+     write(msg,'(a45,i9)')' number of imaginary frequencies for Sigma_c ',order_int
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+     order_int=Sigp%nomegasi 
+     ABI_MALLOC(freqs,(order_int))
+     ABI_MALLOC(weights,(order_int))
+     call get_frequencies_and_weights_legendre(order_int,freqs,weights)
+     do ifreqs=1,order_int
+
+       ! 0 to Inf  TO -1 to 1
+       weights(ifreqs)=2.0d0*weights(ifreqs)/(1.0d0+freqs(ifreqs))**2.0d0
+       freqs(ifreqs)=2.0d0*(freqs(ifreqs)/(1.0d0+freqs(ifreqs))-0.5d0)
+       ! -1 to 1  TO -Inf to Inf
+       weights(ifreqs)=weights(ifreqs)*(1.0d0+freqs(ifreqs)**2.0d0)/(1.0d0-freqs(ifreqs)**2.0d0)**2.0d0
+       freqs(ifreqs)=freqs(ifreqs)/(1.0d0-freqs(ifreqs)**2.0d0)
+
+       !Form complex frequencies and print them
+       Sigp%omegasi(ifreqs)=cmplx(0.0d0,freqs(ifreqs))
+       Sr%omega_i(ifreqs)=Sigp%omegasi(ifreqs)
+       if(iinfo==0) then
+         write(msg,'(3f10.5)') Sr%omega_i(ifreqs),weights(ifreqs)
+         call wrtout(std_out,msg,'COLL')
+         call wrtout(ab_out,msg,'COLL')
+       endif 
+     enddo 
+   endif  
    do ikcalc=1,Sigp%nkptgw
      ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
      ib1=MINVAL(Sigp%minbnd(ikcalc,:)) ! min and max band indices for GW corrections (for this k-point)
@@ -2146,6 +2197,23 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      call calc_sigx_me(ik_ibz,ikcalc,ib1,ib2,Cryst,QP_bst,Sigp,Sr,Gsph_x,Vcp,Kmesh,Qmesh,Ltg_k(ikcalc),&
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,Psps,Wfd,Wfdf,QP_sym,&
 &     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
+      ! MRM compute 1-RDM correction?
+      if(gwcalctyp==21) then 
+!       Compute for Sigma_x - Vxc
+        potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) 
+        !call printdm1(ib1,ib2,potk)
+        dm1k=0.0d0 
+        call calc_rdm(ib1,ib2,ikcalc,3,iinfo,potk,dm1k,KS_BSt)
+!       Print the exchange correction for debug?
+        !call printdm1(ib1,ib2,dm1k)
+!       Update the full 1RDM with the exchange (k-point) one
+        dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
+!       Compute NAT ORBS for exchange corrected 1-RDM?
+        !do ib1dm=ib1,ib2
+        !  dm1k(ib1dm,ib1dm)=dm1k(ib1dm,ib1dm)+KS_BSt%occ(ib1dm,ikcalc,1)
+        !enddo
+        !call natoccs(ib1,ib2,dm1k,KS_BSt,ikcalc,iinfo)
+      endif 
    end do
 
    ! for the time being, do not remove this barrier!
@@ -2153,6 +2221,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    call timab(421,2,tsec) ! calc_sigx_me
 
+   if(gwcalctyp==21) then
+     write(msg,'(a1)')' '
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+   endif
    ! ==========================================================
    ! ==== Correlation part using the coarse gwc_ngfft mesh ====
    ! ==========================================================
@@ -2179,13 +2252,34 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &         gwc_ngfft,ngfftf,nfftf,ks_rhor,use_aerhor,ks_aepaw_rhor,sigcme_k)
        end if
        sigcme(:,ib1:ib2,ib1:ib2,ikcalc,:)=sigcme_k
+       ! MRM compute 1-RDM correction and update dm1
+       if(gwcalctyp==21) then
+         dm1k=0.0d0 
+         call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,iinfo,Sr,weights,sigcme_k,KS_BSt,dm1k)
+!        Update the full 1RDM with the correlation (k-point) one
+         dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
+!        Print for debug?
+         !call printdm1(ib1,ib2,dm1k)
+         dm1k(ib1:ib2,ib1:ib2)=dm1(ib1:ib2,ib1:ib2,ikcalc) 
+!        Compute NAT ORBS
+         call natoccs(ib1,ib2,dm1k,KS_BSt,ikcalc,iinfo)
+       endif
        ABI_DEALLOCATE(sigcme_k)
-
      end do
    end if
+   !! MRM deallocate the 1-RDM
+   if(gwcalctyp==21) then
+     ABI_FREE(dm1) 
+     ABI_FREE(freqs)
+     ABI_FREE(weights) 
+     ABI_FREE(potk)     
+     ABI_FREE(dm1k)  
+   endif  
 
    call xmpi_barrier(Wfd%comm)
 
+  !MRM jump the rest for gwcalctyp=21, why not? 
+  if(gwcalctyp/=21) then 
    !  =====================================================
    !  ==== Solve Dyson equation storing results in Sr% ====
    !  =====================================================
@@ -2226,6 +2320,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
      if (wfd%iam_master()) call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,KS_BSt,dtset%use_yaml)
    end do !ikcalc
+    write(msg,'(a20)')'SIGMAS TO DO'
 
    call timab(425,2,tsec) ! solve_dyson
    call timab(426,1,tsec) ! finalize
@@ -2320,7 +2415,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      NCF_CHECK(nf90_close(ncid))
    end if
 #endif
-
+  end if ! MRM 1-RDM 
  end if ! ucrpa
 
  !----------------------------- END OF THE CALCULATION ------------------------
@@ -2610,21 +2705,24 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
      !end do
    end if
 
-   write(msg,'(4a)')ch10,&
+   ! MRM do not print for 1-RDM correction
+   if(Sigp%gwcalctyp/=21) then
+    write(msg,'(4a)')ch10,&
 &    ' setup_sigma : calculating Sigma(iw)',&
 &    ' at imaginary frequencies [eV] (Fermi Level set to 0) ',ch10
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
-   do io=1,Sigp%nomegasi
-     write(msg,'(2(f10.3,2x))')Sigp%omegasi(io)*Ha_eV
-     call wrtout(std_out,msg,'COLL')
-     call wrtout(ab_out,msg,'COLL')
-   end do
+    call wrtout(std_out,msg,'COLL')
+    call wrtout(ab_out,msg,'COLL')
+    do io=1,Sigp%nomegasi
+      write(msg,'(2(f10.3,2x))')Sigp%omegasi(io)*Ha_eV
+      call wrtout(std_out,msg,'COLL')
+      call wrtout(ab_out,msg,'COLL')
+    end do
+   endif
 
    ltest=(Sigp%omegasimax>0.1d-4.and.Sigp%nomegasi>0)
    ABI_CHECK(ltest,'Wrong value of omegasimax or nomegasi')
    if (Sigp%gwcalctyp/=1) then ! only one shot GW is allowed for AC.
-     MSG_ERROR("SC-GW with analytic continuation is not coded")
+     !MSG_ERROR("SC-GW with analytic continuation is not coded") MRM let's allow it
    end if
  end if
 
@@ -3411,7 +3509,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
  end if
 
  if (mod10==SIG_GW_AC) then
-   if (Sigp%gwcalctyp/=1) MSG_ERROR("Self-consistency with AC not implemented")
+!   if (Sigp%gwcalctyp/=1) MSG_ERROR("Self-consistency with AC not implemented") MRM let's allow it
    if (Sigp%gwcomp==1) MSG_ERROR("AC with extrapolar technique not implemented")
  end if
 
