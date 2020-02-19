@@ -850,6 +850,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 ! CMartins: TEST for HF
  names(1501)='HF_init                         '; basic(1501)=1
  names(1502)='HF_updatecgocc                  '; basic(1502)=1
+ !===START===containers used for testing purposes
  names(1503)='HF_updatecgocc-MPI              ';! basic(1503)=1  ! 100 % nested inside 1502
  names(1504)='HF_getghc                       ';! basic(1504)=1  !1504 = 1505 + 1506 + 1511 + extra_loops
  names(1505)='HF_getghc-init                  ';! basic(1505)=1  ! 100 % nested inside 1504
@@ -859,6 +860,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(1509)='HF_getghc-calc_rhog_munu        ';! basic(1509)=1  ! 100 % nested inside 1506
  names(1510)='HF_getghc-calc_vloc             ';! basic(1510)=1  ! 100 % nested inside 1506
  names(1511)='HF_getghc-calc_ghc              ';! basic(1511)=1  ! 100 % nested inside 1504
+ !===STOP===containers used for testing purposes
  names(1515)='HF_getghc_main                  ';  basic(1515)=1  ! ulterior slot for test
 
  ! Chebfi
@@ -1594,7 +1596,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
          list(:9)=(/1001,1002,1003,1004,1005,1006,1007,1008,1009/)
          msg='initberry '
        case(50)
-         list(:12)=(/1500,1501,1502,1503,1504,1505,1506,1507,1508,1509,1510,1511,1515/)          ; msg='hartreefock '
+         list(:3)=(/1501,1502,1515/)                           ; msg='hartreefock '
        case(60)
          list(:13) = (/1600,1607,1630,1631,1632,1601,1603,1604,1605,1606,1608,1609,1610/)
          msg = 'chebfi'
