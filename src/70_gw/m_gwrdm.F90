@@ -158,6 +158,7 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
  dm1=0.0d0
  do ib1dm=ib1,ib2  
    do ib2dm=ib1dm,ib2 
+     dm1_mel=0.0d0
      do iquad=1,nomega_sigc
        denominator=(Sr%omega_i(iquad)-BSt%eig(ib1dm,kpoint,1))*(Sr%omega_i(iquad)-BSt%eig(ib2dm,kpoint,1)) ! As in FHI-aims for RPA
        if(abs(denominator)>tol) then 
@@ -165,10 +166,10 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
            division=sigcme_k(iquad,ib1dm,ib2dm,1)/denominator 
            dm1_mel=dm1_mel+weights(iquad)*division
          endif 
-         !if(abs(sigcme_k(iquad,ib2dm,ib1dm,1))>tol) then
-         !  division=sigcme_k(iquad,ib2dm,ib1dm,1)/denominator 
-         !  dm1_mel=dm1_mel+weights(iquad)*conjg(division)
-         !endif 
+         if(abs(sigcme_k(iquad,ib2dm,ib1dm,1))>tol) then  
+           division=sigcme_k(iquad,ib2dm,ib1dm,1)/denominator 
+           dm1_mel=dm1_mel+weights(iquad)*conjg(division)
+         endif 
        endif
      enddo
      dm1_mel=fact*dm1_mel
@@ -223,9 +224,9 @@ subroutine natoccs(ib1,ib2,dm1,BSt,kpoint,iinfo)
 
  if(info==0) then
    if(iinfo==0) then       
-     write(msg,'(a52,3f10.5)') 'Occs. after updating with the exchange at k-point:',BSt%kptns(1:,kpoint)
+     write(msg,'(a51,3f10.5)') 'Occs. after updating with the exchange at k-point:',BSt%kptns(1:,kpoint)
    else
-     write(msg,'(a52,3f10.5)') 'Occs. after updating with the exch+cor at k-point:',BSt%kptns(1:,kpoint)
+     write(msg,'(a51,3f10.5)') 'Occs. after updating with the  ex+cor  at k-point:',BSt%kptns(1:,kpoint)
    endif 
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
@@ -243,7 +244,7 @@ subroutine natoccs(ib1,ib2,dm1,BSt,kpoint,iinfo)
    toccs_k=toccs_k+occs(ib1dm)
  enddo
 
- write(msg,'(a24,f10.5)') 'Total Occ. at k-point: ',toccs_k
+ write(msg,'(a21,i5,a3,i5,a21,f10.5)') 'Total occ. from band ',ib1,' to', ib2,' at current k-point: ',toccs_k
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
  write(msg,'(a5)') ' '
@@ -260,7 +261,7 @@ subroutine natoccs(ib1,ib2,dm1,BSt,kpoint,iinfo)
 end subroutine natoccs
 !!***
 
-subroutine printdm1(ib1,ib2,dm1) 
+subroutine printdm1(ib1,ib2,dm1) ! Basically used for debug
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ib1,ib2

@@ -2170,16 +2170,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      ABI_MALLOC(freqs,(order_int))
      ABI_MALLOC(weights,(order_int))
      call get_frequencies_and_weights_legendre(order_int,freqs,weights)
+     !Form complex frequencies from 0 to iInf and print them
      do ifreqs=1,order_int
-
-       ! 0 to Inf  TO -1 to 1
-       weights(ifreqs)=2.0d0*weights(ifreqs)/(1.0d0+freqs(ifreqs))**2.0d0
-       freqs(ifreqs)=2.0d0*(freqs(ifreqs)/(1.0d0+freqs(ifreqs))-0.5d0)
-       ! -1 to 1  TO -Inf to Inf
-       weights(ifreqs)=weights(ifreqs)*(1.0d0+freqs(ifreqs)**2.0d0)/(1.0d0-freqs(ifreqs)**2.0d0)**2.0d0
-       freqs(ifreqs)=freqs(ifreqs)/(1.0d0-freqs(ifreqs)**2.0d0)
-
-       !Form complex frequencies and print them
        Sigp%omegasi(ifreqs)=cmplx(0.0d0,freqs(ifreqs))
        Sr%omega_i(ifreqs)=Sigp%omegasi(ifreqs)
        if(iinfo==0) then
@@ -2187,7 +2179,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          call wrtout(std_out,msg,'COLL')
          call wrtout(ab_out,msg,'COLL')
        endif 
-     enddo 
+     enddo
    endif  
    do ikcalc=1,Sigp%nkptgw
      ik_ibz=Kmesh%tab(Sigp%kptgw2bz(ikcalc)) ! Index of the irred k-point for GW
@@ -2201,7 +2193,6 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
       if(gwcalctyp==21) then 
 !       Compute for Sigma_x - Vxc
         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) 
-        !call printdm1(ib1,ib2,potk)
         dm1k=0.0d0 
         call calc_rdm(ib1,ib2,ikcalc,3,iinfo,potk,dm1k,KS_BSt)
 !       Print the exchange correction for debug?
@@ -2212,7 +2203,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
         !do ib1dm=ib1,ib2
         !  dm1k(ib1dm,ib1dm)=dm1k(ib1dm,ib1dm)+KS_BSt%occ(ib1dm,ikcalc,1)
         !enddo
-        !call natoccs(ib1,ib2,dm1k,KS_BSt,ikcalc,iinfo)
+        !call natoccs(ib1,ib2,dm1k,KS_BSt,ikcalc,0)
       endif 
    end do
 
@@ -2261,8 +2252,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !        Print for debug?
          !call printdm1(ib1,ib2,dm1k)
          dm1k(ib1:ib2,ib1:ib2)=dm1(ib1:ib2,ib1:ib2,ikcalc) 
-!        Compute NAT ORBS
-         call natoccs(ib1,ib2,dm1k,KS_BSt,ikcalc,iinfo)
+!        Compute nat orbs and occ numbers
+         call natoccs(ib1,ib2,dm1k,KS_BSt,ikcalc,1)
        endif
        ABI_DEALLOCATE(sigcme_k)
      end do
