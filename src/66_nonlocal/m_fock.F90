@@ -509,7 +509,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
 
  DBG_ENTER("COLL")
 
- call timab(1500,1,tsec)
+ call timab(1501,1,tsec)
 
  if (dtset%nspinor/=1) then
    MSG_ERROR('Hartree-Fock option can be used only with option nspinor=1.')
@@ -1118,7 +1118,7 @@ subroutine fock_init(atindx,cplex,dtset,fock,gsqcut,kg,mpi_enreg,nattyp,npwarr,p
  ABI_DEALLOCATE(phase1d)
  call fock_print(fockcommon,fockbz,unit=std_out)
 
- call timab(1500,2,tsec)
+ call timab(1501,2,tsec)
 
  DBG_EXIT("COLL")
 
