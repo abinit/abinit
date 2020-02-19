@@ -1024,7 +1024,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
 !      Select occupied bandsddk
        occblock(:)=occ(1+(iblock-1)*blocksize+bdtot_index:iblock*blocksize+bdtot_index)
-       call timab(923,1,tsec)
+       call timab(926,1,tsec)
        weight(:)=wtk(ikpt)*occblock(:)
 
 !        Load contribution from n,k
