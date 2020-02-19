@@ -108,9 +108,6 @@
  #define HAVE_MEM_PROFILING
 */
 
-/* Miquel Royo developments */
-#define MR_DEV 1
-
 #ifdef HAVE_MEM_PROFILING
 
 /* 

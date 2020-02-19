@@ -41,9 +41,7 @@ module m_mklocl
  use m_mklocl_realspace, only : mklocl_realspace, mklocl_wavelets
  use m_fft,      only : fourdp
 
-#ifdef MR_DEV
  use m_splines,  only : splfit
-#endif
 
 #if defined HAVE_BIGDFT
  use BigDFT_API, only : ELECTRONIC_DENSITY
@@ -59,11 +57,9 @@ module m_mklocl
  public :: mklocl_recipspace
  public :: dfpt_vlocal           ! Local part of 1st-order potential due to atomic displacement.
  public :: vlocalstr             ! Compute strain derivatives of local ionic potential
-#ifdef MR_DEV
  public :: dfpt_vlocaldq         ! Compute the first q-gradient of the 1st-order potential due to atomic displacement. 
  public :: dfpt_vlocaldqdq       ! Compute the second q-gradient of the 1st-order potential due to atomic displacement. 
  public :: dfpt_vmetdqdq       ! Compute the second q-gradient of the 1st-order potential due to a metric perturbation.
-#endif
 !!***
 
 contains
@@ -1192,7 +1188,6 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
  work1(re,1)=0.0_dp
  work1(im,1)=0.0_dp
 
-#ifdef MR_DEV
 !Alternative treatment of Vloc(G=0) for the flexoelectric tensor calculation
  g0term_=0; if (present(g0term)) g0term_=g0term
  if (g0term_==1) then
@@ -1210,7 +1205,6 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
      work1(re,1)=-half*vlocg0
    end if
  end if
-#endif
 
 !Transform back to real space
  call fourdp(1,work1,vpsp1,1,mpi_enreg,nfft,1,ngfft,0)
@@ -1298,7 +1292,6 @@ subroutine vlocalstr(gmet,gprimd,gsqcut,istr,mgfft,mpi_enreg,&
 end subroutine vlocalstr
 !!***
 
-#ifdef MR_DEV
 !!****f* ABINIT/dfpt_vlocaldq
 !! NAME
 !! dfpt_vlocaldq
@@ -2438,7 +2431,6 @@ subroutine dfpt_vmetdqdq(cplex,gmet,gprimd,gsqcut,idir,ipert,&
  end function gsq_vl
 
 end subroutine dfpt_vmetdqdq
-#endif
 
 end module m_mklocl
 !!***

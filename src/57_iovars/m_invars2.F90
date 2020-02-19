@@ -782,7 +782,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'mdtemp',tread,'DPR')
  if(tread==1) dtset%mdtemp(1:2)=dprarr(1:2)
 
-#ifdef MR_DEV
 !LONG WAVE integer input variables
 !FIXME
 ! if(dtset%optdriver==RUNL_LONGWAVE) then
@@ -862,7 +861,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prepalw',tread,'INT')
    if(tread==1) dtset%prepalw=intarr(1)
 ! end if
-#endif
 
  ! Recursion input variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tfkinfunc',tread,'INT')
@@ -3046,13 +3044,11 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    response = 1
  end if
 
-#ifdef MR_DEV
 !In case of longwave calculation put response = 1
 !in order to set istwfk = 1 at all k-points
  if ( dtset%optdriver==10 ) then
    response = 1
  end if
-#endif
 
  nsym=dtset%nsym
  ii=0;if (mod(dtset%wfoptalg,10)==4) ii=2

@@ -1148,10 +1148,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  ABI_ALLOCATE(pertsy,(3,natom+6))
  call irreducible_set_pert(indsym,natom+6,natom,dtset%nsym,pertsy,rfdir,rfpert,symq,symrec,dtset%symrel)
 
-#ifdef MR_DEV
-!MR modi:
-!Desactivate perturbation symmetries temporarily
-!Remember that the same has been done in 51_manage_mpi/get_npert_rbz.F90
+!MR: Deactivate perturbation symmetries temporarily for a longwave calculation
+!The same has been done in 51_manage_mpi/get_npert_rbz.F90
  if (dtset%prepalw==1) then
    do ipert=1,natom+6
      do idir=1,3
@@ -1159,8 +1157,6 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      end do
    end do
  endif
-!........
-#endif
 
  write(message,'(a)') ' The list of irreducible perturbations for this q vector is:'
  call wrtout(ab_out,message,'COLL')

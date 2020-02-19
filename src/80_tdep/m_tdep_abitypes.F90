@@ -213,11 +213,7 @@ contains
 !! val(2,3*mpert*3*mpert,nblok)= all the dynamical matrices
 !!                   real(dp),intent(in) :: blkval(2,3*mpert*3*mpert,nblok)
 !! nblok=number of blocks in the DDB
-#ifdef MR_DEV
   mpert=InVar%natom_unitcell+MPERT_MAX
-#else
-  mpert=InVar%natom_unitcell+6
-#endif
   msize=3*mpert*3*mpert
   nblok=nqbz
   ABI_MALLOC(DDB%flg,(msize,nblok))  ; DDB%flg(:,:)  =1

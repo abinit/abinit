@@ -345,19 +345,11 @@ end subroutine ifc_free
 !!
 !! SOURCE
 
-#ifdef MR_DEV
 subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
   rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
   prtsrlr,enunit, & ! TODO: TO BE REMOVED
   comm, &
   Ifc_coarse,dipquad,quadquad) ! Optional
-#else
-subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
-  rfmeth,ngqpt_in,nqshft,q1shft,dielt,zeff,qdrp_cart,nsphere,rifcsph,&
-  prtsrlr,enunit, & ! TODO: TO BE REMOVED
-  comm, &
-  Ifc_coarse) ! Optional
-#endif
 
 !Arguments ------------------------------------
  integer,intent(in) :: asr,brav,dipdip,symdynmat,nqshft,rfmeth,nsphere,comm
@@ -366,9 +358,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  type(crystal_t),intent(in) :: Crystal
  type(ddb_type),intent(in) :: ddb
  type(ifc_type),optional,intent(in) :: Ifc_coarse
-#ifdef MR_DEV
  integer,optional,intent(in) :: dipquad, quadquad
-#endif
 
 !arrays
  integer,intent(in) :: ngqpt_in(3)
@@ -409,11 +399,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
 
  ! TODO: This dimension should be encapsulated somewhere. We don't want to
  ! change the entire code if someone adds a new kind of perturbation.
-#ifdef MR_DEV
  mpert = Crystal%natom + MPERT_MAX; iout = ab_out
-#else
- mpert = Crystal%natom + 6; iout = ab_out
-#endif
 
  rprim = ddb%rprim; gprim = ddb%gprim
 
@@ -430,10 +416,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  Ifc%asr = asr
  Ifc%brav = brav
  Ifc%dipdip = abs(dipdip)
-#ifdef MR_DEV
  if (present(dipquad)) Ifc%dipquad = dipquad
  if (present(quadquad)) Ifc%quadquad = quadquad
-#endif
  Ifc%symdynmat = symdynmat
  Ifc%nqshft = nqshft
  call alloc_copy(q1shft(:,1:Ifc%nqshft),Ifc%qshft)
@@ -452,7 +436,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    sumg0=0
    qpt(:)=zero
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
-#ifdef MR_DEV
    if (present(dipquad).or.present(quadquad)) then
    call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                Crystal%xred,zeff,qdrp_cart,ifc%ewald_option,dipquad=dipquad,quadquad=quadquad)
@@ -460,10 +443,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
    call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                Crystal%xred,zeff,qdrp_cart,ifc%ewald_option)
    end if
-#else
-   call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
-               Crystal%xred,zeff,qdrp_cart,ifc%ewald_option)
-#endif
 
    call q0dy3_calc(natom,dyewq0,dyew,Ifc%asr)
    ABI_FREE(dyew)
@@ -559,7 +538,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      end if
      qpt(:)=qbz(:,iqpt)
      sumg0=0
-#ifdef MR_DEV
      if (present(dipquad).or.present(quadquad)) then
        call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                  Crystal%xred,zeff,qdrp_cart,ifc%ewald_option,dipquad=dipquad,quadquad=quadquad)
@@ -567,10 +545,6 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
        call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                  Crystal%xred,zeff,qdrp_cart,ifc%ewald_option)
      end if
-#else
-     call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
-                 Crystal%xred,zeff,qdrp_cart,ifc%ewald_option)
-#endif
      call q0dy3_apply(natom,dyewq0,dyew)
      plus=0
      call nanal9(dyew,Ifc%dynmat,iqpt,natom,nqbz,plus)
@@ -1019,15 +993,9 @@ subroutine ifc_fourq(ifc, crystal, qpt, phfrq, displ_cart, &
  end if
 
  ! The dynamical matrix d2cart is calculated here:
-#ifdef MR_DEV
  call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom,&
    Ifc%nrpt,qphnrm,my_qpt,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,Ifc%zeff,&
    Ifc%qdrp_cart,Ifc%ewald_option,comm_,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
-#else
- call gtdyn9(Ifc%acell,Ifc%atmfrc,Ifc%dielt,Ifc%dipdip,Ifc%dyewq0,d2cart,Crystal%gmet,Ifc%gprim,Ifc%mpert,natom,&
-   Ifc%nrpt,qphnrm,my_qpt,Crystal%rmet,Ifc%rprim,Ifc%rpt,Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,Ifc%zeff,&
-   Ifc%qdrp_cart,Ifc%ewald_option,comm_)
-#endif
 
  ! Calculate the eigenvectors and eigenvalues of the dynamical matrix
  call dfpt_phfrq(Ifc%amu,displ_cart,d2cart,eigval,eigvec,Crystal%indsym,&
@@ -1764,11 +1732,7 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
 
  if (iout > 0) then
    write(iout, '(/,a,/)' )' Analysis of interatomic force constants '
-#ifdef MR_DEV
    if(Ifc%dipdip==1.and.Ifc%dipquad==0.and.Ifc%quadquad==0)then
-#else
-   if(Ifc%dipdip==1)then
-#endif 
      write(iout, '(a)' )' Are given : column(1-3), the total force constant'
      write(iout, '(a)' )'       then  column(4-6), the Ewald part'
      write(iout, '(a)' )'       then  column(7-9), the short-range part'
@@ -1778,7 +1742,6 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
      write(iout, '(a)' )'       of the generic atom along y,               '
      write(iout, '(a)' )' column 3, 6 and 9 are related to the displacement'
      write(iout, '(a)')'       of the generic atom along z.               '
-#ifdef MR_DEV
    else if(Ifc%dipquad==1.or.Ifc%quadquad==1)then
      write(iout, '(a)' )' Are given : column(1-3), ONLY the short-range part!!!!'
      write(iout, '(a)' )' column 1 is related to the displacement'
@@ -1787,7 +1750,6 @@ subroutine ifc_write(Ifc,ifcana,atifc,ifcout,prt_ifc,ncid)
      write(iout, '(a)' )'        of the generic atom along y,    '
      write(iout, '(a)' )' column 3 is related to the displacement'
      write(iout, '(a)' )'        of the generic atom along z,    '
-#endif
    else if(Ifc%dipdip==0)then
      write(iout, '(a)' )' column 1 is related to the displacement'
      write(iout, '(a)' )'        of the generic atom along x,    '
@@ -2167,11 +2129,7 @@ subroutine ifc_getiaf(Ifc,ifcana,ifcout,iout,zeff,ia,ra,list,&
      vect1(3)=(posngb(3,ii)-ra(3))/dist1
    end if
 
-#ifdef MR_DEV
    if(Ifc%dipdip==0.or.Ifc%dipquad==1.or.Ifc%quadquad==1)then
-#else
-   if(Ifc%dipdip==0)then
-#endif
      ! Get the "total" force constants (=real space FC)
      ! without taking into account the dipole-dipole interaction
      do mu=1,3

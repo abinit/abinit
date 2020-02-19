@@ -2151,9 +2151,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%d3e_pert2_dir(1:3)=0
    dtsets(idtset)%d3e_pert2_elfd=0
    dtsets(idtset)%d3e_pert2_phon=0
-#ifdef MR_DEV
    dtsets(idtset)%d3e_pert2_strs=0
-#endif
    dtsets(idtset)%d3e_pert3_atpol(1:2)=1
    dtsets(idtset)%d3e_pert3_dir(1:3)=0
    dtsets(idtset)%d3e_pert3_elfd=0
@@ -2357,10 +2355,8 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%lotf_nneigx=40
    dtsets(idtset)%lotf_version=2
 #endif
-#ifdef MR_DEV
    dtsets(idtset)%lw_qdrpl=0
    dtsets(idtset)%lw_flexo=0
-#endif
 !  M
    dtsets(idtset)%magconon = 0
    dtsets(idtset)%magcon_lambda = 0.01_dp
@@ -2530,9 +2526,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%postoldff=zero
    dtsets(idtset)%ppmodel=1
    dtsets(idtset)%ppmfrq=zero
-#ifdef MR_DEV
    dtsets(idtset)%prepalw=0
-#endif
    dtsets(idtset)%prepanl=0
    dtsets(idtset)%prepgkk=0
    dtsets(idtset)%prtbbb=0

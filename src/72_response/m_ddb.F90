@@ -57,14 +57,12 @@ MODULE m_ddb
  public :: chkin9
  public :: carttransf       ! Transform a second-derivative matrix (EIG2D) from reduced
                             ! coordinates to cartesian coordinates.
-#ifdef MR_DEV
  public :: dfpt_lw_doutput  ! Write the matrix of third-order derivatives to the output file and the DDB
  public :: lwcart           ! Transform a 3rd order derivative tensor (long-wave) from reduced (actually
                             ! mixed since strain derivatives are already in cartesian) to cartesian
                             ! coordinates
  public :: ddb_lw_copy      ! Copy the ddb object after reading the long wave 3rd order derivatives
                             ! into a new ddb_lw and resizes ddb as for 2nd order derivatives 
-#endif
 
  integer,public,parameter :: DDB_VERSION=100401
  ! DDB Version number.
@@ -528,11 +526,7 @@ end subroutine ddb_bcast
 !!
 !! SOURCE
 
-#ifdef MR_DEV
 subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp,rfqvec)
-#else
-subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
-#endif
 
 !Arguments -------------------------------
 !scalars
@@ -542,9 +536,7 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 !arrays
  integer,intent(in) :: rfelfd(4),rfphon(4),rfstrs(4)
  real(dp),intent(inout) :: qphnrm(3),qphon(3,3)
-#ifdef MR_DEV
  integer,optional,intent(in) :: rfqvec(4)
-#endif
 
 !Local variables -------------------------
 !scalars
@@ -555,9 +547,7 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
  integer :: gamma(3)
  integer,allocatable :: worki(:,:)
  real(dp) :: qpt(3)
-#ifdef MR_DEV
  integer :: rfqvec_(4)
-#endif
 
 ! *********************************************************************
  
@@ -567,13 +557,8 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
 !Get the number of derivative
  if(rftyp==1.or.rftyp==2)then
    nder=2
-#ifdef MR_DEV
  else if(rftyp==3.or.rftyp==33)then
    nder=3
-#else
- else if(rftyp==3)then
-   nder=3
-#endif
  else if(rftyp==0)then
    nder=0
  else if(rftyp==4)then
@@ -583,9 +568,7 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
    MSG_BUG(message)
  end if
 
-#ifdef MR_DEV
  rfqvec_(:)=0; if(present(rfqvec))rfqvec_(:)=rfqvec(:)
-#endif
 
 !In case of a second-derivative, a second phonon wavevector is provided.
  if(nder==2)then
@@ -613,11 +596,7 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
    call gamma9(gamma(ider),qphon(1:3,ider),qphnrm(ider),DDB_QTOL)
 
    if(gamma(ider)==0)then
-#ifdef MR_DEV
      if(rfstrs(ider)/=0.or.rfelfd(ider)/=0.or.rfqvec_(ider)/=0)then
-#else
-     if(rfstrs(ider)/=0.or.rfelfd(ider)/=0)then
-#endif
        write(message, '(a,a)' )&
 &       'Not yet able to handle stresses or electric fields',ch10,&
 &       'with non-zero wavevector.'
@@ -646,12 +625,10 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
    if(rfelfd(ider)==2.or.rfelfd(ider)==3)then
      worki(natom+2,ider)=1
    end if
-#ifdef MR_DEV
 !  Then the ddq
    if(rfqvec_(ider)==1)then
      worki(natom+8,ider)=1
    end if
-#endif
 !  Then the uniaxial stress
    if(rfstrs(ider)==1.or.rfstrs(ider)==3)then
      worki(natom+3,ider)=1
@@ -766,7 +743,6 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
      call wrtout(std_out,message,'COLL')
      write(message, '(a,i3)' )' Type (rfmeth) =',rftyp
      call wrtout(std_out,message,'COLL')
-#ifdef MR_DEV
      write(message, '(a)' ) ' ider qphon(3)         qphnrm   rfphon rfelfd rfstrs rfqvec'
      call wrtout(std_out,message,'COLL')
      do ider=1,nder
@@ -774,15 +750,6 @@ subroutine ddb_get_block(ddb,iblok,qphon,qphnrm,rfphon,rfelfd,rfstrs,rftyp)
        ider,(qphon(ii,ider),ii=1,3),qphnrm(ider),rfphon(ider),rfelfd(ider),rfstrs(ider),rfqvec_(ider)
        call wrtout(std_out,message,'COLL')
      end do
-#else
-     write(message, '(a)' ) ' ider qphon(3)         qphnrm   rfphon rfelfd rfstrs'
-     call wrtout(std_out,message,'COLL')
-     do ider=1,nder
-       write(message, '(i4,4f6.2,3i7)' )&
-       ider,(qphon(ii,ider),ii=1,3),qphnrm(ider),rfphon(ider),rfelfd(ider),rfstrs(ider)
-       call wrtout(std_out,message,'COLL')
-     end do
-#endif
    end if
  end if
 
@@ -935,10 +902,8 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    ddb%typ(iblok)=4
  else if(name==' 2nd eigenvalue derivatives   - ' .or. name==' 2rd eigenvalue derivatives   - ')then
    ddb%typ(iblok)=5
-#ifdef MR_DEV
  else if(name==' 3rd derivatives (long wave)  - ')then
    ddb%typ(iblok)=33
-#endif 
  else
    write(message,'(6a)')&
    'The following string appears in the DDB in place of',&
@@ -971,11 +936,7 @@ subroutine ddb_read_block(ddb,iblok,mband,mpert,msize,nkpt,nunit,&
    end do
 
 !  Read the 3rd derivative block
-#ifdef MR_DEV
  else if(ddb%typ(iblok)==3.or.ddb%typ(iblok)==33)then
-#else
- else if(ddb%typ(iblok)==3)then
-#endif
 
 !  First check if there is enough space to read it
    if(msize<(3*mpert*3*mpert*3*mpert))then
@@ -1340,7 +1301,6 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
      ABI_FREE(tmpval)
      ABI_FREE(rfpert)
 
-#ifdef MR_DEV
    else if (ddb%typ(iblok) == 33) then
 
      nsize=3*mpert*3*mpert*3*mpert
@@ -1364,7 +1324,6 @@ subroutine rdddb9(acell,atifc,amu,ddb,ddbun,filnam,gmet,gprim,indsym,iout,&
      ABI_FREE(car3flg)
      ABI_FREE(tmpflg)
      ABI_FREE(tmpval)
-#endif
    end if
  end do ! iblok
 
@@ -1700,12 +1659,7 @@ subroutine ddb_from_file(ddb, filename, brav, natom, natifc, atifc, crystal, com
  end if
 
  mpert = natom+MPERT_MAX
-#ifdef MR_DEV
  msize=3*mpert*3*mpert; if (mtyp==3.or.mtyp==33) msize=msize*3*mpert
-#else
- msize=3*mpert*3*mpert; if (mtyp==3) msize=msize*3*mpert
-#endif
-
 
  ! Allocate arrays depending on msym (which is actually fixed to nsym inside inprep8)
  ABI_MALLOC(symrel,(3,3,msym))
@@ -3126,10 +3080,8 @@ subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
    write(nunit, '(a,i8)' )' 1st derivatives              - # elements :',nelmts
  else if (ddb%typ(iblok) == 5) then
    write(nunit, '(a,i8)' )' 2nd eigenvalue derivatives   - # elements :',nelmts
-#ifdef MR_DEV
  else if(ddb%typ(iblok)==33) then
    write(nunit, '(a,i8)' )' 3rd derivatives (long wave)  - # elements :',nelmts
-#endif
  end if
 
 !Write the 2nd derivative block
@@ -3156,11 +3108,7 @@ subroutine ddb_write_block(ddb,iblok,choice,mband,mpert,msize,nkpt,nunit,&
    end if
 
 !  Write the 3rd derivative block
-#ifdef MR_DEV
  else if(ddb%typ(iblok)==3.or.ddb%typ(iblok)==33)then
-#else
- else if(ddb%typ(iblok)==3)then
-#endif
 
 !  Write the phonon wavevectors
    write(nunit, '(a,3es16.8,f6.1)' )' qpt',(ddb%qpt(ii,iblok),ii=1,3),ddb%nrm(1,iblok)
@@ -3638,11 +3586,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
  mpert=matom+MPERT_MAX
  msize=3*mpert*3*mpert
 
-#ifdef MR_DEV
  if(mblktyp==3.or.mblktyp==33)msize=msize*3*mpert
-#else
- if(mblktyp==3)msize=msize*3*mpert
-#endif 
 
  call ddb%malloc(msize, mblok, matom, mtypat)
 
@@ -3763,11 +3707,7 @@ subroutine mblktyp1(chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
          tmerge=1
          if(ddb%typ(iblok1)==1.or.ddb%typ(iblok1)==2)then
            nq=1
-#ifdef MR_DEV
          else if(ddb%typ(iblok1)==3.or.ddb%typ(iblok1)==33)then
-#else
-         else if(ddb%typ(iblok1)==3)then
-#endif
 !          Note : do not merge permutation related elements ....
            nq=3
          else if(ddb%typ(iblok1)==4 .or. ddb%typ(iblok1)==0)then
@@ -3972,11 +3912,7 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 
  mpert=matom+MPERT_MAX
  msize=3*mpert*3*mpert
-#ifdef MR_DEV
  if(mblktyp==3.or.mblktyp==33)msize=msize*3*mpert
-#else
- if(mblktyp==3)msize=msize*3*mpert
-#endif
 
 !write(std_out,*),'msize',msize,'mpert',mpert,'mblktyp',mblktyp
  call ddb%malloc(msize, mblok, matom, mtypat)
@@ -4194,7 +4130,6 @@ subroutine mblktyp5 (chkopt,ddbun,dscrpt,filnam,mddb,msym,nddb,vrsddb)
 end subroutine mblktyp5
 !!***
 
-#ifdef MR_DEV
 !!****f* m_ddb/dfpt_lw_doutput
 !! NAME
 !! dfpt_lw_doutput
@@ -4406,25 +4341,6 @@ subroutine lwcart(blkflg,carflg,d3,d3cart,gprimd,mpert,natom,rprimd)
    end do
  end do
 
-! do i3pert=1,mpert
-!   do i3dir=1,3
-!     do i2pert=1,mpert
-!       do i2dir=1,3
-!         do i1pert=1,mpert
-!           do i1dir=1,3
-!             if (carflg(i1dir,i1pert,i2dir,i2pert,i3dir,i3pert)==1) then
-!               write(100,'(1x,6i3,2f14.7)') &
-!             & i1dir, i1pert, i2dir, i2pert, i3dir, i3pert, &
-!             & d3cart(1,i1dir, i1pert, i2dir, i2pert, i3dir, i3pert), &
-!             & d3cart(2,i1dir, i1pert, i2dir, i2pert, i3dir, i3pert)
-!             end if
-!           end do
-!         end do
-!       end do
-!     end do
-!   end do
-! end do
- 
 end subroutine lwcart
 !!***
 
@@ -4612,8 +4528,6 @@ subroutine dtqdrp(blkval,lwsym,mpert,natom,lwtens)
 
  end subroutine ddb_lw_copy
 !!***
-
-#endif
 
 end module m_ddb
 !!***

@@ -463,10 +463,8 @@ contains
  intarr(1,:)=dtsets(:)%ppmodel
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ppmodel','INT',0)
 
-#ifdef MR_DEV
  intarr(1,:)=dtsets(:)%prepalw
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prepalw','INT',0)
-#endif
 
  intarr(1,:)=dtsets(:)%prepanl
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prepanl','INT',0)

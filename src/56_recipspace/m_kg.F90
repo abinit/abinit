@@ -50,10 +50,8 @@ MODULE m_kg
  public :: kpgstr       ! Derivative of kinetic energy operator in reciprocal space.
  public :: mkkpg        ! Compute all (k+G) vectors (dp, in reduced coordinates) for given k point
  public :: mkpwind_k    ! Make plane wave index at k point for basis at second k point
-#ifdef MR_DEV
  public :: mkkpgcart    ! Compute all (k+G) vectors (dp, in cartesian coordinates) for given k point
  public :: mkkin_metdqdq ! Compute the second q-gradient of the derivative of the kinetic energy operator w.r.t a metric
-#endif
 
 contains
 !!***
@@ -1173,8 +1171,6 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
 end subroutine mkpwind_k
 !!***
 
-#ifdef MR_DEV
-
 !!****f* m_kg/mkkpgcart
 !! NAME
 !! mkkpgcart
@@ -1372,7 +1368,6 @@ subroutine mkkin_metdqdq(dqdqkinpw,effmass,gprimd,idir,kg,kpt,npw,qdir)
 
 end subroutine mkkin_metdqdq
 !!***
-#endif
 
 end module m_kg
 !!***

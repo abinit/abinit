@@ -82,9 +82,7 @@ program anaddb
  use m_ddb_elast,      only : ddb_elast
  use m_ddb_piezo,      only : ddb_piezo
  use m_ddb_internalstr, only : ddb_internalstr
-#ifdef MR_DEV
  use m_ddb_flexo
-#endif
 
  implicit none
 
@@ -124,9 +122,7 @@ program anaddb
  type(phonon_dos_type) :: Phdos
  type(ifc_type) :: Ifc,Ifc_coarse
  type(ddb_type) :: ddb
-#ifdef MR_DEV
  type(ddb_type) :: ddb_lw
-#endif
  type(ddb_hdr_type) :: ddb_hdr
  type(asrq0_t) :: asrq0
  type(crystal_t) :: Crystal
@@ -248,13 +244,11 @@ program anaddb
  call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc,Crystal,comm, prtvol=inp%prtvol)
  nsym = Crystal%nsym
 
-#ifdef MR_DEV
- ! A new ddb is necessary for the quadrupoles due to incompability of it with authomatic reshapes
+ ! MR: a new ddb is necessary for the quadrupoles due to incompability of it with authomatic reshapes
  ! that ddb%val and ddb%flg experience when passed as arguments of some routines
  if (mtyp==33) then
    call ddb_lw_copy(ddb,ddb_lw,mpert,natom,ntypat)
  end if
-#endif
 
  ! Acoustic Sum Rule
  ! In case the interatomic forces are not calculated, the
@@ -483,7 +477,6 @@ program anaddb
    write(msg, '(a,f11.3,a,f11.3,a)' )'-begin at tcpu',tcpu-tcpui,'  and twall',twall-twalli,' sec'
    call wrtout([std_out, ab_out], msg)
 
-#ifdef MR_DEV
    if (any(inp%qrefine(:) > 1)) then
      ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
      ! Build the IFCs using the coarse q-mesh.
@@ -506,30 +499,6 @@ program anaddb
        inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,qdrp_cart,&
        inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,dipquad=inp%dipquad,quadquad=inp%quadquad)
    end if
-#else
-   if (any(inp%qrefine(:) > 1)) then
-     ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
-     ! Build the IFCs using the coarse q-mesh.
-     do ii = 1, 3
-       ngqpt_coarse(ii) = inp%ngqpt(ii) / inp%qrefine(ii)
-     end do
-     call ifc_init(Ifc_coarse,Crystal,ddb,&
-       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,ngqpt_coarse,inp%nqshft,inp%q1shft,dielt,zeff,qdrp_cart,&
-       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
-
-     ! Now use the coarse q-mesh to fill the entries in dynmat(q)
-     ! on the dense q-mesh that cannot be obtained from the DDB file.
-     call ifc_init(Ifc,Crystal,ddb,&
-      inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,qdrp_cart,&
-      inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm,Ifc_coarse=Ifc_coarse)
-     call Ifc_coarse%free()
-
-   else
-     call ifc_init(Ifc,Crystal,ddb,&
-       inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,qdrp_cart,&
-       inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
-   end if
-#endif
 
    call ifc%print(unit=std_out)
 
@@ -667,18 +636,11 @@ program anaddb
 
      ! Get d2cart using the interatomic forces and the
      ! long-range coulomb interaction through Ewald summation
-#ifdef MR_DEV
      call gtdyn9(ddb%acell,Ifc%atmfrc,dielt,Ifc%dipdip,&
        Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,mpert,natom,&
        Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,&
        Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff,qdrp_cart,Ifc%ewald_option,xmpi_comm_self,&
        dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
-#else
-     call gtdyn9(ddb%acell,Ifc%atmfrc,dielt,inp%dipdip,&
-       Ifc%dyewq0,d2cart,Crystal%gmet,ddb%gprim,mpert,natom,&
-       Ifc%nrpt,qphnrm(1),qphon,Crystal%rmet,ddb%rprim,Ifc%rpt,&
-       Ifc%trans,Crystal%ucvol,Ifc%wghatm,Crystal%xred,zeff,qdrp_cart,Ifc%ewald_option,xmpi_comm_self)
-#endif
 
    else if (inp%ifcflag==0) then
 
@@ -935,7 +897,6 @@ program anaddb
 
 !**********************************************************************
 
-#ifdef MR_DEV
  if (inp%flexoflag/=0 ) then
    ! Here treating the flexoelectric tensor
    write(msg, '(a,a,(80a),a,a,a,a)') ch10,('=',ii=1,80),ch10,ch10,&
@@ -945,7 +906,6 @@ program anaddb
    ! Compute and print the contributions to the flexoelectric tensor
    call ddb_flexo(inp%asr,asrq0%d2asr,ddb,ddb_lw,crystal,filnam(3),inp%flexoflag,zeff)
  end if
-#endif
 
 !**********************************************************************
 
@@ -968,9 +928,7 @@ program anaddb
  call ddb%free()
  call anaddb_dtset_free(inp)
  call thermal_supercell_free(inp%ntemper, thm_scells)
-#ifdef MR_DEV
  call ddb_lw%free()
-#endif
 
  if (sum(abs(inp%thermal_supercell))>0 .and. inp%ifcflag==1) then
    ABI_FREE(thm_scells)

@@ -37,9 +37,7 @@ module m_nonlop_ylm
  use m_opernlb_ylm, only : opernlb_ylm
  use m_opernlc_ylm, only : opernlc_ylm
  use m_opernld_ylm, only : opernld_ylm
-#ifdef MR_DEV
  use m_kg,          only : mkkpgcart
-#endif
 
  implicit none
 
@@ -648,16 +646,12 @@ contains
  if (nkpgin<nkpgin_) then
    ABI_ALLOCATE(kpgin_,(npwin,nkpgin_))
 
-#ifdef MR_DEV
    !For the metric derivatives we need kpg in Cartesian coordinates
    if (choice==33) then
      call mkkpgcart(gprimd,kgin,kpgin_,kptin,nkpgin_,npwin)
    else
      call mkkpg(kgin,kpgin_,kptin,nkpgin_,npwin)
    end if 
-#else
-   call mkkpg(kgin,kpgin_,kptin,nkpgin_,npwin)
-#endif
 
  else
    nkpgin_ = nkpgin
@@ -669,16 +663,12 @@ contains
  if (nkpgout<nkpgout_) then
    ABI_ALLOCATE(kpgout_,(npwout,nkpgout_))
 
-#ifdef MR_DEV
    !For the metric derivatives we need kpg in Cartesian coordinates
    if (choice==33) then
      call mkkpgcart(gprimd,kgout,kpgout_,kptout,nkpgout_,npwout)
    else
      call mkkpg(kgout,kpgout_,kptout,nkpgout_,npwout)
    end if 
-#else
-   call mkkpg(kgout,kpgout_,kptout,nkpgout_,npwout)
-#endif
 
  else
    nkpgout_ = nkpgout

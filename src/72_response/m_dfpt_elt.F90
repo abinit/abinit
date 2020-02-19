@@ -61,10 +61,8 @@ module m_dfpt_elt
  public :: dfpt_eltfrhar
  public :: elt_ewald
  public :: dfpt_ewald
-#ifdef MR_DEV
  public :: dfpt_ewalddq
  public :: dfpt_ewalddqdq
-#endif
 !!***
 
 contains

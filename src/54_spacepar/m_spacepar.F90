@@ -53,9 +53,7 @@ public :: hartrestr         ! FFT of (rho(G)/pi)*[d(1/G**2)/d(strain) - delta(di
 public :: symrhg            ! Symmetrize rhor(r)
 public :: irrzg             ! Find the irreducible zone in reciprocal space (used by symrhg)
 public :: setsym            ! Set up irreducible zone in  G space by direct calculation.
-#ifdef MR_DEV
 public :: hartredq          ! Compute the q-gradient of the Hartree potential (=FFT of -rho(G)*G_qdir/pi**2/|G|**4 )
-#endif
 
 ! MG FIXME This routine is deprecated. Now the symmetrization of the **potentials** is done in the m_dvdb
 public :: rotate_rho
@@ -2454,7 +2452,6 @@ subroutine setsym(indsym,irrzon,iscf,natom,nfft,ngfft,nspden,nsppol,nsym,phnons,
 end subroutine setsym
 !!***
 
-#ifdef MR_DEV
 !!****f* ABINIT/hartredq.F90
 !! NAME
 !!  hartredq.F90
@@ -2598,8 +2595,6 @@ subroutine hartredq(cplex,gmet,gsqcut,mpi_enreg,nfft,ngfft,qdir,rhog,vqgradhart)
 
 end subroutine hartredq
 !!***
-
-#endif
 
 end module m_spacepar
 !!***

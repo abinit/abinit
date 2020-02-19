@@ -52,10 +52,8 @@ module m_getgh1c
  public :: rf_transgrid_and_pack
  public :: getgh1c_setup
  public :: getdc1
-#ifdef MR_DEV
  public :: getgh1dqc
  public :: getgh1dqc_setup
-#endif
 !!***
 
 contains
@@ -1283,7 +1281,6 @@ subroutine getdc1(cgq,cprjq,dcwavef,dcwaveprj,ibgq,icgq,istwfk,mcgq,mcprjq,&
 end subroutine getdc1
 !!***
 
-#ifdef MR_DEV
 !!****f* ABINIT/getgh1dqc
 !! NAME
 !!  getgh1dqc
@@ -1296,7 +1293,7 @@ end subroutine getdc1
 !! The first (second) derivative direction is inferred from idir (qdir1).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018 ABINIT group (FIXME: add author)
+!!  Copyright (C) 2018 ABINIT group (MR,MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1765,7 +1762,6 @@ ABI_ALLOCATE(dqdqkinpw,(npw_k))
 
 end subroutine getgh1dqc_setup
 !!***
-#endif
 
 end module m_getgh1c
 !!***

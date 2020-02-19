@@ -641,22 +641,15 @@ end subroutine ewald2
 !!
 !! SOURCE
 
-#ifdef MR_DEV
 subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff, &
       qdrp_cart,option,dipquad,quadquad)
-#else
-subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff, &
-      qdrp_cart,option)
-#endif
 
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: natom,sumg0
  integer,optional,intent(in) :: option
  real(dp),intent(in) :: ucvol
-#ifdef MR_DEV
  integer,optional,intent(in) :: dipquad, quadquad
-#endif
 !arrays
  real(dp),intent(in) :: acell(3),dielt(3,3),gmet(3,3),gprim(3,3),qphon(3)
  real(dp),intent(in) :: rmet(3,3),rprim(3,3),xred(3,natom),zeff(3,3,natom)
@@ -668,9 +661,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  integer,parameter :: mr=10000,ny2_spline=1024*10
  integer :: ia,ib,ig1,ig2,ig3,ii,ll,kk,ir,ir1,ir2,ir3,jj,mu,newg,newr,ng,nr,nu,ng_expxq
  integer :: ewald_option
-#ifdef MR_DEV
  integer :: dipquad_,quadquad_
-#endif
  logical :: do_quadrupole
  real(dp),parameter :: fac=4.0_dp/3.0_dp/sqrt(pi)
  real(dp),parameter :: fact2=2.0_dp/sqrt(pi)
@@ -705,11 +696,9 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
  ! Keep track of total time spent.
  call timab(1749, 1, tsec)
 
-#ifdef MR_DEV
  ! Initialize dipquad and quadquad options
  dipquad_=1; if(present(dipquad)) dipquad_=dipquad
  quadquad_=1; if(present(quadquad)) quadquad_=quadquad
-#endif
 
 !This is the minimum argument of an exponential, with some safety
  minexparg=log(tiny(0._dp))+five
@@ -1123,9 +1112,7 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
               zeff(ii,mu,ia)*zeff(jj,nu,ib)*dyddt(2,ii,ia,jj,ib)
              if (do_quadrupole) then
                do kk=1,3
-#ifdef MR_DEV
                  if (dipquad_==1) then
-#endif
                    ! dipole-quadrupole correction
                    dyew(1,mu,ia,nu,ib)=dyew(1,mu,ia,nu,ib) + &
                      (zeff(ii,nu,ib)*qdrp_cart(kk,jj,mu,ia) - &
@@ -1133,21 +1120,17 @@ subroutine ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol
                    dyew(2,mu,ia,nu,ib)=dyew(2,mu,ia,nu,ib) + &
                      (zeff(ii,nu,ib)*qdrp_cart(kk,jj,mu,ia) - &
                       zeff(ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dydqt(2,ii,ia,jj,ib,kk)
-#ifdef MR_DEV
                  end if
 
                  ! quadrupole-quadrupole correction
                  if (quadquad_==1) then
-#endif
                    do ll=1,3
                      dyew(1,mu,ia,nu,ib)=dyew(1,mu,ia,nu,ib) + &
                      (qdrp_cart(ll,ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dyqqt(1,ii,ia,jj,ib,kk,ll)
                      dyew(2,mu,ia,nu,ib)=dyew(2,mu,ia,nu,ib) + &
                      (qdrp_cart(ll,ii,mu,ia)*qdrp_cart(kk,jj,nu,ib)) * dyqqt(2,ii,ia,jj,ib,kk,ll)
                    end do
-#ifdef MR_DEV
                  end if
-#endif
                end do
              end if
 

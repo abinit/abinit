@@ -72,9 +72,7 @@ module m_driver
 &                        mpi_environment_set,bigdft_mpi, f_malloc_set_status
 #endif
 
-#ifdef MR_DEV
  use m_longwave
-#endif
 
  implicit none
 
@@ -755,12 +753,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call dtsets(idtset)%free_nkpt_arrays()
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
 
-#ifdef MR_DEV
    case(RUNL_LONGWAVE)
 
      call longwave(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,&
 &     pawrad,pawtab,psps,xred)
-#endif
 
    case default
      ! Bad value for optdriver

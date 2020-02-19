@@ -429,7 +429,6 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
          end do
        end if
 
-#ifdef MR_DEV
 !      --------------------------------------------------------------------
 !      CHOICE= 22 and 25  --  SIGNS= 2
 !      Accumulate dGxdt --- derivative wrt atm pos. and one or two q-vectors--- 
@@ -476,7 +475,6 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            end if
          end do
        end if
-#endif
 
 !      --------------------------------------------------------------------
 !      CHOICE= 3, 6, 23, 55  -- SIGNS= 1
@@ -630,7 +628,6 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
          end do
        end if
 
-#ifdef MR_DEV
 !      --------------------------------------------------------------------
 !      CHOICE= 33  --  SIGNS= 2
 !      Accumulate dGxdt and d2Gxdt --- mixed derivative wrt strain and q-vector --- 
@@ -742,7 +739,6 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            end if
          end do
        end if
-#endif
 
 !      --------------------------------------------------------------------
 !      CHOICE= 4, 24  -- SIGNS= 1
@@ -1747,7 +1743,6 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
          end do
        end if
 
-#ifdef MR_DEV
 !      --------------------------------------------------------------------
 !      CHOICE= 22 and 25  --  SIGNS= 2
 !      Accumulate dGxdt --- derivative wrt atm pos. and one or two q-vectors--- 
@@ -1815,7 +1810,6 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            end if
          end do
        end if
-#endif
 
 !      --------------------------------------------------------------------
 !      CHOICE= 3, 6, 23, 55  -- SIGNS= 1
@@ -2014,7 +2008,6 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
          end do
        end if
 
-#ifdef MR_DEV
 !      --------------------------------------------------------------------
 !      CHOICE= 33  --  SIGNS= 2
 !      Accumulate dGxdt and d2Gxdt --- mixed derivative wrt strain and q-vector --- 
@@ -2147,7 +2140,6 @@ subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxd
            end if
          end do
        end if
-#endif
 
 !      --------------------------------------------------------------------
 !      CHOICE= 4, 24  --  SIGNS= 1

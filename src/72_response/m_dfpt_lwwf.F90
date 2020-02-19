@@ -785,7 +785,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
      &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
 
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-     call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
+     call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
      call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
@@ -1705,7 +1705,7 @@ c0_VefielddQ_c1strain_bks=zero
      &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dqdq,dum_vlocal,vlocal1dqdq)
 
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-     call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
+     call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
      call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dqdq,with_nonlocal=.true.)
 
@@ -2367,7 +2367,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
      &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
 
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-     call init_rf_hamiltonian(cplex,gs_hamkq,jpert,rf_hamkq,&
+     call init_rf_hamiltonian(2,gs_hamkq,jpert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
      call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
@@ -3220,7 +3220,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
      &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dqdq,dum_vlocal,vlocal1dqdq)
 
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-     call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
+     call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
      call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dqdq,with_nonlocal=.true.)
 
@@ -3322,7 +3322,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
      &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
 
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-     call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
+     call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
      call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
@@ -3678,7 +3678,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
      &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
 
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-     call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
+     call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
      call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
@@ -3764,7 +3764,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
        &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
 
        !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-       call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
+       call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
        & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
        call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
