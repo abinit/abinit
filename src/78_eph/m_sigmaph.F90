@@ -610,7 +610,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
  integer,parameter :: ngvecs = 1
- integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_frohl,iq_bz_frohl,iq_microzone_frohl,iq_bz_fine,my_npert
+ integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_frohl,iq_bz_frohl,my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj, iw
  integer :: mcgq, mgscq, nband_kq, ig, ispinor, ifft
@@ -647,13 +647,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,allocatable :: gtmp(:,:),kg_k(:,:),kg_kq(:,:),nband(:,:), qselect(:), wfd_istwfk(:)
  integer,allocatable :: gbound_kq(:,:), osc_gbound_q(:,:), osc_gvecq(:,:), osc_indpw(:)
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
- real(dp) :: phfrq_fine(3*cryst%natom), qpt_fine(3)
  real(dp) :: vk(3), vkq(3), tsec(2), eminmax(2)
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
  real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp) :: gdw2, gdw2_stern
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
- real(dp),allocatable :: displ_cart_fine(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
  real(dp),allocatable :: ffnlk(:,:,:,:),ffnl1(:,:,:,:),ph3d(:,:,:),ph3d1(:,:,:),v1scf(:,:,:,:)
  real(dp),allocatable :: gkq_atm(:,:,:),gkq_nu(:,:,:),gkq0_atm(:,:,:,:)
@@ -668,9 +666,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: delta_e_minus_emkq(:)
  logical,allocatable :: osc_mask(:)
  real(dp),allocatable :: gkq2_lr(:,:,:)
- complex(dpc),allocatable :: gkqg_fine(:)
  complex(dpc) :: cp3(3)
- complex(dpc),allocatable :: osc_ks(:,:), osc_ks_bs(:)
+ complex(dpc),allocatable :: osc_ks(:,:)
  complex(dpc),allocatable :: cfact_wr(:), tpp_red(:,:)
  complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
@@ -5123,7 +5120,7 @@ end subroutine qpoints_oracle
 !!  oscillator=oscillator matrix elements for the wavefunction to be used
 !!
 
-function get_frohlich(cryst,ifc,qpt,nu,phfrq,displ_cart,qdamp,ngvecs,gvecs) result(gkqg_lr)
+function get_frohlich(cryst,ifc,qpt,nu,phfrq,displ_cart,ngvecs,gvecs) result(gkqg_lr)
 
 !Arguments ------------------------------------
 !scalars
@@ -5131,7 +5128,7 @@ function get_frohlich(cryst,ifc,qpt,nu,phfrq,displ_cart,qdamp,ngvecs,gvecs) resu
  type(ifc_type),intent(in) :: ifc
  integer,intent(in)  :: nu,ngvecs
  real(dp),intent(in) :: qpt(3)
- real(dp),intent(in) :: qdamp, phfrq(3*cryst%natom)
+ real(dp),intent(in) :: phfrq(3*cryst%natom)
  real(dp),intent(in) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
 !arrays
  integer,intent(in) :: gvecs(3,ngvecs)

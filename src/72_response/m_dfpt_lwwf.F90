@@ -55,6 +55,7 @@ module m_dfpt_lwwf
  public :: dfpt_ddmdqwf
  public :: dfpt_isdqwf
  public :: dfpt_isdqfr
+!!***
 
 ! *************************************************************************
 
@@ -784,7 +785,7 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
      &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
 
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-     call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
+     call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
      call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
@@ -1704,7 +1705,7 @@ c0_VefielddQ_c1strain_bks=zero
      &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dqdq,dum_vlocal,vlocal1dqdq)
 
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-     call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
+     call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
      call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dqdq,with_nonlocal=.true.)
 
@@ -2366,7 +2367,7 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
      &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
 
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-     call init_rf_hamiltonian(2,gs_hamkq,jpert,rf_hamkq,&
+     call init_rf_hamiltonian(cplex,gs_hamkq,jpert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
      call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
@@ -3219,7 +3220,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
      &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dqdq,dum_vlocal,vlocal1dqdq)
 
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-     call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
+     call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
      call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dqdq,with_nonlocal=.true.)
 
@@ -3321,7 +3322,7 @@ c0_HatdisdagdQ_c1strain_bks=zero
      &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
 
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-     call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
+     call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
      call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
@@ -3530,7 +3531,6 @@ end subroutine dfpt_isdqwf
 !!  nband_k=number of bands at this k point for that spin polarization
 !!  nfft=(effective) number of FFT grid points (for this proc)
 !!  ngfft(1:18)=integer array with FFT box dimensions and other
-!!  nkpt_rbz= number of k-points in the RBZ
 !!  npw_k=number of plane waves at this k point
 !!  nq1grad=number of q1 (q_{\gamma}) gradients
 !!  nspden=number of spin-density components
@@ -3546,7 +3546,6 @@ end subroutine dfpt_isdqwf
 !!  ucvol=unit cell volume in bohr**3.
 !!  useylmgr= if 1 use the derivative of spherical harmonics
 !!  wtk_k=weight assigned to the k point.
-!!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)=real spherical harmonics for the k point
 !!  ylmgr_k(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)= k-gradients of real spherical
 !!                                                                      harmonics for the k point
@@ -3570,8 +3569,8 @@ end subroutine dfpt_isdqwf
            
 subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
        &  isppol,istwf_k,kg_k,kpt,mkmem,mpi_enreg,matom,mpw,natpert,nattyp,nband_k,nfft,&
-       &  ngfft,nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
-       &  pert_strain,ph1d,psps,rmet,ucvol,useylmgr,wtk_k,xred,ylm_k,ylmgr_k)
+       &  ngfft,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
+       &  pert_strain,ph1d,psps,rmet,ucvol,useylmgr,wtk_k,ylm_k,ylmgr_k)
 
 !This section has been created automatically by the script Abilint (TD).
 !Do not modify the following lines by hand.
@@ -3585,7 +3584,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
 !scalars
  integer,intent(in) :: cplex,icg,ikpt,isppol,istwf_k
  integer,intent(in) :: matom,mkmem,mpw,natpert,nband_k,nfft
- integer,intent(in) :: nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr
+ integer,intent(in) :: npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr
  integer,intent(in) :: useylmgr
  real(dp),intent(in) :: gsqcut,ucvol,wtk_k
  type(dataset_type),intent(in) :: dtset
@@ -3602,7 +3601,6 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
  real(dp),intent(in) :: kpt(3),occ_k(nband_k)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: rmet(3,3) 
- real(dp),intent(in) :: xred(3,dtset%natom)
  real(dp),intent(in) :: ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr_k(npw_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
 
@@ -3680,7 +3678,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
      &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
 
      !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-     call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
+     call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
      & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
      call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 
@@ -3766,7 +3764,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
        &  gs_hamkq%nvloc,pawfgr,mpi_enreg,dum_vpsp,vpsp1dq,dum_vlocal,vlocal1dq)
 
        !Initialize rf_hamiltonian (the k-dependent part is prepared in getgh1c_setup)
-       call init_rf_hamiltonian(2,gs_hamkq,ipert,rf_hamkq,&
+       call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,&
        & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab,mpi_spintab=mpi_enreg%my_isppoltab)
        call rf_hamkq%load_spin(isppol,vlocal1=vlocal1dq,with_nonlocal=.true.)
 

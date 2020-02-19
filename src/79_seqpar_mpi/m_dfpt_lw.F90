@@ -66,14 +66,16 @@ module m_dfpt_lw
  implicit none
 
  private
-!***
+!!***
 
  public :: dfpt_qdrpole
  public :: dfpt_flexo
+!!***
 
 ! *************************************************************************
 
 contains 
+!!***
 
 !!****f* ABINIT/dfpt_qdrpole
 !! NAME
@@ -2765,8 +2767,8 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 !      this term)
        call dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
        &  isppol,istwf_k,kg_k,kpoint,mkmem_rbz,mpi_enreg,matom,mpw,natpert,nattyp,nband_k,nfft,&
-       &  ngfft,nkpt_rbz,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
-       &  pert_strain,ph1d,psps,rmet,ucvol,useylmgr,wtk_k,xred,ylm_k,ylmgr_k)
+       &  ngfft,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
+       &  pert_strain,ph1d,psps,rmet,ucvol,useylmgr,wtk_k,ylm_k,ylmgr_k)
 
 !      Add the contribution from each k-point
        frwfdq=frwfdq + frwfdq_k
