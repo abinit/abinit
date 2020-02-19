@@ -580,7 +580,7 @@ elec_eval = .FALSE.
     !TEST_AM SECTION
 
 
-    ! Compute the monte carlo, molecular dynamics of compute specific energy
+    ! Run lattice dynamics (relaxation or molecular dynamics, most of abinits ionmovs are allowed)
     !****************************************************************************************
     if(inp%dynamics>=1) then
        call mover_effpot(inp,filnam,reference_effective_potential,inp%dynamics,comm)

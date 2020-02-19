@@ -360,10 +360,15 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
      call abihist_free(hist_prev)
    end if
 !  If restarxf specifies to start to the last iteration
-   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then
+   if (hist_prev%mxhist>0.and.ab_mover%restartxf==-3)then 
+     if(present(effective_potential))then
+       call effective_potential_file_mapHistToRef(effective_potential,hist_prev,comm,scfcv_args%dtset%iatfix,need_verbose) ! Map Hist to Ref to order atoms
+       xred(:,:) = hist_prev%xred(:,:,1) ! Fill xred with new ordering
+       hist%ihist = 1 
+     end if
      acell(:)   =hist_prev%acell(:,hist_prev%mxhist)
      rprimd(:,:)=hist_prev%rprimd(:,:,hist_prev%mxhist)
-     xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
+     !xred(:,:)  =hist_prev%xred(:,:,hist_prev%mxhist)
      call abihist_free(hist_prev)
    end if
 
@@ -538,7 +543,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 
 !    ###########################################################
 !    ### 11. Symmetrize atomic coordinates over space group elements
-
+     
      call symmetrize_xred(scfcv_args%indsym,ab_mover%natom,&
 &     scfcv_args%dtset%nsym,scfcv_args%dtset%symrel,scfcv_args%dtset%tnons,xred)
 

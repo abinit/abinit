@@ -2333,7 +2333,7 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank
  character(len=500) :: msg
 !Uncommend for dipdip test
 ! type(abihist) :: hist_out
-! character(len=200) :: filename_hist
+ character(len=200) :: filename_hist
 
 ! *************************************************************************
  !MS Hide SCALE-UP variables 
@@ -2428,18 +2428,18 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank
    end if
     
     !MS Uncommented for abihist test 
-    !ifirst=merge(0,1,(ii>1))
-    !filename_hist = trim("test.nc")
-    !hist_out%fcart(:,:,hist_out%ihist) = fcart(:,:)
-    !hist_out%strten(:,hist_out%ihist)  = strten(:)
-    !hist_out%etot(hist_out%ihist)      = energy
-    !hist_out%entropy(hist_out%ihist)   = hist%entropy(ii)
-    !hist_out%time(hist_out%ihist)      = real(ii,kind=dp)
-    !call vel2hist(ab_mover%amass,hist,vel,vel_cell)
-    !call var2hist(hist%acell(:,ii),hist_out,natom,hist%rprimd(:,:,ii),hist%xred(:,:,ii),.false.)
-    !call write_md_hist(hist_out,filename_hist,ifirst,ii,natom,1,eff_pot%crystal%ntypat,&
- !&                    eff_pot%supercell%typat,eff_pot%crystal%amu,eff_pot%crystal%znucl,&
- !&                    real(100,dp),(/real(100,dp),real(100,dp)/))
+!    ifirst=merge(0,1,(ii>1))
+!    filename_hist = trim("test.nc")
+!    hist_out%fcart(:,:,hist_out%ihist) = fcart(:,:)
+!    hist_out%strten(:,hist_out%ihist)  = strten(:)
+!    hist_out%etot(hist_out%ihist)      = energy
+!    hist_out%entropy(hist_out%ihist)   = hist%entropy(ii)
+!    hist_out%time(hist_out%ihist)      = real(ii,kind=dp)
+!!    call vel2hist(ab_mover%amass,hist,vel,vel_cell)
+!    call var2hist(hist%acell(:,ii),hist_out,natom,hist%rprimd(:,:,ii),hist%xred(:,:,ii),.false.)
+!    call write_md_hist(hist_out,filename_hist,ifirst,ii,natom,1,eff_pot%crystal%ntypat,&
+!&                    eff_pot%supercell%typat,eff_pot%crystal%amu,eff_pot%crystal%znucl,&
+!&                    real(100,dp),(/real(100,dp),real(100,dp)/))
 
    mse  = mse  + ((hist%etot(ii) - energy))**2 !+abs(hist$etot(ii) - energy)
    do ia=1,natom ! Loop over atoms
@@ -2462,7 +2462,7 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank
  end if
 
  !MS uncommented for PHONOPY TEST
- !call abihist_free(hist_out)
+! call abihist_free(hist_out)
 
 end subroutine fit_polynomial_coeff_computeMSD
 !!***

@@ -565,7 +565,8 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
             ! Copy all the terms in eff pot 
             ! Get new name of term and set new terms to potential 
             !write(*,*) 'ndisp of term', my_coeffs(nterm_start+icombi)%nterm
-            !write(*,*) 'and wath is nterm_start', nterm_start,'and icomb btw', icombi
+            !write(*,*) 'and wath is nterm_start', nterm_start,'and icomb btw', icomb
+            !write(std_out,*) 'get name in main bound'
             call polynomial_coeff_getName(name,my_coeffs(nterm_start+icombi),symbols,recompute=.TRUE.)
             call polynomial_coeff_SetName(name,my_coeffs(nterm_start+icombi))
           
@@ -1331,7 +1332,8 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm)
 !Local variables ------------------------------
 !scalars
  integer ::  nterm_tot_tmp,icombi 
- integer :: ii 
+ integer :: i,ii
+ real(dp) :: coeff_ini 
 !reals 
  type(crystal_t) :: crystal
 !arrays
@@ -1342,6 +1344,7 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm)
 !*************************************************************************
     !Get variables 
     crystal = eff_pot%crystal
+    coeff_ini = 1000000
 
     write(message, '(a,(80a),a)' ) ch10,&
 &   ('_',ii=1,80),ch10
@@ -1359,10 +1362,17 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm)
     nterm_start = eff_pot%anharmonics_terms%ncoeff
     nterm_tot_tmp = eff_pot%anharmonics_terms%ncoeff + ncombi
     ABI_DATATYPE_ALLOCATE(terms,(nterm_tot_tmp)) 
-    do icombi=1,ncombi
-       terms(nterm_start+icombi) = strain_terms_tmp(icombi)
-       terms(nterm_start+icombi)%coefficient = 1000000      ! eff_pot%harmonics_terms%elastic_constants(1,1)
+    do i=1,nterm_tot_tmp
+       if(i<=nterm_start)then 
+          call polynomial_coeff_init(coeff_ini,eff_pot%anharmonics_terms%coefficients(i)%nterm,terms(i),&
+& eff_pot%anharmonics_terms%coefficients(i)%terms,eff_pot%anharmonics_terms%coefficients(i)%name,check=.TRUE.)
+       else 
+          call polynomial_coeff_init(coeff_ini,strain_terms_tmp(i-nterm_start)%nterm,terms(i),&
+&         strain_terms_tmp(i-nterm_start)%terms,strain_terms_tmp(i-nterm_start)%name,check=.TRUE.)
+       endif
     enddo
+
+    call polynomial_coeff_list_free(strain_terms_tmp)
 
 end subroutine opt_getHOstrain
 !!***
@@ -1604,16 +1614,18 @@ subroutine opt_getSingleDispTerms(terms,crystal,sc_size,comm)
 !scalars
  integer :: natom,nsym,nrpt,ncoeff_sym,nstr_sym
  integer :: ncoeff,ncoeff_out,power_strph,option_GN,option
- integer :: nterms_out
- integer :: lim1,lim2,lim3
+ integer :: nterms_out,nterm1,iterm1,iterm2,ind,iatom,i
+ integer :: lim1,lim2,lim3,ncopy
  integer :: ii,ia,ib,r1,r2,r3
  integer :: irpt,irpt_ref
  integer :: master,nproc,my_rank
  real(dp) :: norm, cutoff
 !arrays
  integer :: ncell(3),power_disp(2)
- integer, allocatable :: cell(:,:)
+ integer,allocatable :: cell(:,:)
  integer,allocatable :: list_symcoeff(:,:,:),list_symstr(:,:,:)
+ logical,allocatable :: terms_to_copy(:)
+ type(polynomial_coeff_type),allocatable :: terms_tmp(:),terms_tmp2(:)
  !type(polynomial_coeff_type),allocatable :: terms(:)
  real(dp),allocatable :: xcart(:,:),xred(:,:),rpt(:,:)
  real(dp) :: rprimd(3,3),range_ifc(3)
@@ -1739,7 +1751,7 @@ elseif(option == 2)then
    option_GN = 0 
    sc_size = (/2,2,2/)
    cutoff = 0  
-
+   natom  = crystal%natom
    do ii=1,3
       cutoff = cutoff + sqrt(crystal%rprimd(ii,1)**2 + &
 &                            crystal%rprimd(ii,2)**2 + &
@@ -1747,20 +1759,73 @@ elseif(option == 2)then
    enddo 
 
 
-call polynomial_coeff_getNorder(terms,crystal,cutoff,ncoeff,ncoeff_out,power_disp,& 
+   do iatom=1,3 
+      call polynomial_coeff_getNorder(terms_tmp,crystal,cutoff,ncoeff,ncoeff_out,power_disp,& 
 &                               power_strph,option_GN,sc_size,comm,anharmstr=.false.,spcoupling=.false.,&
 &                               only_odd_power=.false.,only_even_power=.true.,verbose=.false.,&
-&                               compute_symmetric=.false.) 
-
+&                               compute_symmetric=.false.,fit_iatom=iatom)
  !TEST MS 
- !  write(*,*) "behind call getNorder"
- !  write(*,*) "ncoeff_out: ", ncoeff_out
+ !  write(std_out,*) "behind call getNorder"
+ !  write(std_out,*) "ncoeff_out: ", ncoeff_out
  !  do ii=1,ncoeff_out 
- !     write(*,*) "Term(",ii,"/",ncoeff_out,"): ", terms(ii)%name 
+ !     write(*,*) "Term(",ii,"/",ncoeff_out,"): ", terms_tmp(ii)%name 
  !  enddo
  !TEST MS
+      if(iatom == 1)then 
+         ABI_ALLOCATE(terms,(size(terms_tmp)))
+         call coeffs_list_copy(terms,terms_tmp)
+      else 
+         ABI_ALLOCATE(terms_to_copy,(size(terms_tmp)))
+         nterm1 = size(terms)
+         ABI_ALLOCATE(terms_tmp2,(nterm1))
+         terms_tmp2 = terms
+         terms_to_copy = .TRUE.
+         do iterm1=1,size(terms_tmp)
+           do iterm2=1,size(terms) 
+              if(terms_tmp(iterm1) == terms(iterm2))then 
+                 terms_to_copy(iterm1) = .FALSE.
+                 exit
+              endif
+           enddo!iterm1 
+         enddo!iterm2 
+         ncopy = count(terms_to_copy)
+!         write(std_out,*) "ncopy", ncopy
+!         write(std_out,*) "behind iatom>1"
+!
+!         write(std_out,*) "ncoeff_out: ", size(terms_tmp2)
+!         do ii=1,size(terms_tmp2) 
+!           write(*,*) "Term(",ii,"/",size(terms_tmp2),"): ", terms_tmp2(ii)%name 
+!         enddo
+         call polynomial_coeff_list_free(terms)
+         ABI_ALLOCATE(terms,(nterm1+ncopy))
+         !terms(:nterm1) = terms_tmp2
+         call coeffs_list_copy(terms(:nterm1),terms_tmp2)
+         ind = 0 
+         do i =1,size(terms_tmp) 
+           if(terms_to_copy(i))then 
+               ind=ind+1
+               call polynomial_coeff_init(terms_tmp(i)%coefficient,terms_tmp(i)%nterm,terms(nterm1+ind),terms_tmp(i)%terms,&
+&                              terms_tmp(i)%name,check=.TRUE.)
+           endif
+         enddo!i=1,nterm1+ncopy
+         call polynomial_coeff_list_free(terms_tmp)
+         call polynomial_coeff_list_free(terms_tmp2)
+         ABI_DEALLOCATE(terms_to_copy)
+      endif!iatom==1
+   enddo !iatom=1,natom 
+!      call polynomial_coeff_getNorder(terms,crystal,cutoff,ncoeff,ncoeff_out,power_disp,& 
+!&                               power_strph,option_GN,sc_size,comm,anharmstr=.false.,spcoupling=.false.,&
+!&                               only_odd_power=.false.,only_even_power=.true.,verbose=.false.,&
+!&                               compute_symmetric=.false.)
 
 endif !option
+ !TEST MS 
+ !  write(std_out,*) "behind call getNorder"
+ !  write(std_out,*) "ncoeff_out: ", size(terms)
+ !  do ii=1,size(terms) 
+ !     write(*,*) "Term(",ii,"/",size(terms),"): ", terms(ii)%name 
+ !  enddo
+ !TEST MS
 
 end subroutine opt_getSingleDispTerms
 !!***

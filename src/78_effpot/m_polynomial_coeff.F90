@@ -58,12 +58,17 @@ module m_polynomial_coeff
  public :: polynomial_coeff_setCoefficient
  public :: polynomial_coeff_writeXML
  public :: polynomial_coeff_getEvenAnhaStrain
+ public :: coeffs_list_copy 
+ public :: coeffs_list_conc
  private :: computeNorder
  private :: computeCombinationFromList
  private :: computeSymmetricCombinations
  private :: getCoeffFromList
  private :: generateTermsFromList
  private :: reduce_zero_combinations
+ private :: check_irreducibility 
+ private :: sort_combination_list 
+ private :: sort_combination 
 !!***
 
 !!****t* m_polynomial_coeff/polynomial_coeff_type
@@ -2093,7 +2098,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  else
     fit_iatom_in = -1
  endif
-
+ 
  natom  = crystal%natom
  nsym   = crystal%nsym
  rprimd = crystal%rprimd
@@ -3855,7 +3860,7 @@ integer,intent(in) :: comm
 !scalars
 !arrays
 !Local variables-------------------------------
-real(dp) :: cutoff
+real(dp) :: cutoff,coeff_ini
 integer :: ncoeff
 integer :: power_strph
 integer :: option
@@ -3873,6 +3878,7 @@ cutoff = zero
 power_strph = zero
 option = 0
 sc_size = (/1,1,1/)
+coeff_ini = 1000000
 
 
 call polynomial_coeff_getNorder(strain_terms_tmp,crystal,cutoff,ncoeff,ncoeff_out,power_strain,&
@@ -3903,7 +3909,8 @@ icoeff1=0
 do icoeff1=1,ncoeff_out
         if(.not.same(icoeff1))then
                 icoeff2=icoeff2 + 1
-                strain_terms(icoeff2) = strain_terms_tmp(icoeff1)
+                call polynomial_coeff_init(coeff_ini,strain_terms_tmp(icoeff1)%nterm,strain_terms(icoeff2),&
+&               strain_terms_tmp(icoeff1)%terms,strain_terms_tmp(icoeff1)%name,check=.TRUE.)
         endif
 enddo
 
