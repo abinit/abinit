@@ -3567,7 +3567,7 @@ end subroutine dfpt_isdqwf
 !!
 !! SOURCE
            
-subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
+subroutine dfpt_isdqfr(atindx,cg,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
        &  isppol,istwf_k,kg_k,kpt,mkmem,mpi_enreg,matom,mpw,natpert,nattyp,nband_k,nfft,&
        &  ngfft,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
        &  pert_strain,ph1d,psps,rmet,ucvol,useylmgr,wtk_k,ylm_k,ylmgr_k)
@@ -3582,7 +3582,7 @@ subroutine dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: cplex,icg,ikpt,isppol,istwf_k
+ integer,intent(in) :: icg,ikpt,isppol,istwf_k
  integer,intent(in) :: matom,mkmem,mpw,natpert,nband_k,nfft
  integer,intent(in) :: npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr
  integer,intent(in) :: useylmgr

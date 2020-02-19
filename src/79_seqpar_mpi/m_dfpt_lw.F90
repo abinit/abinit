@@ -2765,7 +2765,7 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
 
 !      First calculate the frozen wf contribution (notice the type-I indexing of
 !      this term)
-       call dfpt_isdqfr(atindx,cg,cplex,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
+       call dfpt_isdqfr(atindx,cg,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
        &  isppol,istwf_k,kg_k,kpoint,mkmem_rbz,mpi_enreg,matom,mpw,natpert,nattyp,nband_k,nfft,&
        &  ngfft,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
        &  pert_strain,ph1d,psps,rmet,ucvol,useylmgr,wtk_k,ylm_k,ylmgr_k)
