@@ -141,6 +141,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !return
  call timab(1504,1,tsec)
  call timab(1505,1,tsec)
+ call timab(1515,1,tsec)
 
  ABI_CHECK(associated(gs_ham%fockcommon),"fock_common must be associated!")
  fockcommon => gs_ham%fockcommon
@@ -334,7 +335,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 &       npwj,1,n4f,n5f,n6f,tim_fourwf0,0,weight1,weight1,use_gpu_cuda=gs_ham%use_gpu_cuda)
        cwaveocc_r=cwaveocc_r*invucvol
      end if
-
+ call timab(1515,2,tsec)
 ! ================================================
 ! === Get the overlap density matrix rhor_munu ===
 ! ================================================
@@ -343,6 +344,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! vfock=-int{conj(cwaveocc_r)*cwavef_r*dr'/|r-r'|}
 
      call timab(1508,1,tsec)
+     call timab(1515,1,tsec)
      ind=0
      do i3=1,n3f
        do i2=1,n2f
@@ -376,9 +378,11 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        rhor_munu(1,:)=rhor_munu(1,:)+rho12(1,:,nspinor)
        rhor_munu(2,:)=rhor_munu(2,:)-rho12(2,:,nspinor)
      end if
-
+     call timab(1515,2,tsec) 
      ! Perform an FFT using fourwf to get rhog_munu = FFT^-1(rhor_munu)
+     call timab(260+tim_fourdp0,1,tsec)
      call fourdp(cplex_fock,rhog_munu,rhor_munu,-1,mpi_enreg,nfftf,1,ngfftf,tim_fourdp0)
+     call timab(260+tim_fourdp0,1,tsec)
      call timab(1509,2,tsec)
 
      if(fockcommon%optstr.and.(fockcommon%ieigen/=0)) then
@@ -401,6 +405,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !* vfock will contain the local Fock potential, the result of hartre routine.
 !* vfock = FFT( rhog_munu/|g+qvec|^2 )
      call timab(1510,1,tsec)
+     call timab(1515,1,tsec)
 #if 0
 
      call hartre(cplex_fock,fockcommon%gsqcut,fockcommon%usepaw,mpi_enreg,nfftf,ngfftf,&
@@ -412,8 +417,10 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
        rhog_munu(2,ifft) = rhog_munu(2,ifft) * vqg(ifft)
      end do
 
-
+     call timab(1515,2,tsec)
+     call timab(260+tim_fourdp0,1,tsec) 
      call fourdp(cplex_fock,rhog_munu,vfock,+1,mpi_enreg,nfftf,1,ngfftf,tim_fourdp0)
+     call timab(260+tim_fourdp0,1,tsec) 
 
 #endif
      call timab(1510,2,tsec)
@@ -423,6 +430,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !===============================================================
 
      if (fockcommon%usepaw==1) then
+       call timab(1515,1,tsec)
        qphon=qvec_j;nfftotf=product(ngfftf(1:3))
        cplex_dij=1;ndij=nspden_fock
        ABI_ALLOCATE(dijhat,(cplex_dij*gs_ham%dimekb1,natom,ndij,cplex_fock))
@@ -442,6 +450,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
          ABI_DEALLOCATE(dijhat_tmp)
        end do
        signs=2; cpopt=2;idir=0; paw_opt=1;nnlout=1;tim_nonlop=1
+       call timab(1515,2,tsec)
        if(need_ghc) then
          choice=1
          call nonlop(choice,cpopt,cwaveocc_prj,enlout_dum,gs_ham,idir,(/zero/),mpi_enreg,&
@@ -461,6 +470,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 &             ndat1,nnlout,paw_opt,signs,gsc_dum,tim_nonlop,vectin_dum,&
 &             forout,enl=dijhat,iatom_only=iatom,&
 &             select_k=K_H_KPRIME)
+             call timab(1515,1,tsec)
              call dotprod_g(dotr(idir),doti,gs_ham%istwf_k,npw,2,cwavef,forout,mpi_enreg%me_g0,mpi_enreg%comm_fft)
              for1(idir)=zero
              do ifft=1,fockcommon%pawfgrtab(iatom)%nfgd
@@ -468,11 +478,14 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
                for1(idir)=for1(idir)+vfock(2*ind-1)*grnhat_12(1,ind,1,idir,iatom)-&
 &               vfock(2*ind)*grnhat_12(2,ind,1,idir,iatom)
              end do
+             call timab(1515,2,tsec)
            end do
+           call timab(1515,1,tsec)
            do idir=1,3
              for12(idir)=rprimd(1,idir)*for1(1)+rprimd(2,idir)*for1(2)+rprimd(3,idir)*for1(3)
              forikpt(idir,iatom)=forikpt(idir,iatom)-(for12(idir)*gs_ham%ucvol/nfftf+dotr(idir))*occ*wtk
            end do
+           call timab(1515,2,tsec)
          end do
        end if
 
@@ -536,6 +549,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! === Apply the local potential vfockloc_munu to cwaveocc_r ===
 ! =============================================================
      call timab(1507,1,tsec)
+     call timab(1515,1,tsec)
      ind=0
      do i3=1,ngfftf(3)
        do i2=1,ngfftf(2)
@@ -654,14 +668,14 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  ghc(:,:)=ghc(:,:)/mpi_enreg%nproc_hf + ghc1(:,:)
 
  call xmpi_sum(ghc,mpi_enreg%comm_hf,ier)
-
+ call timab(1515,2,tsec)
  call timab(1511,2,tsec)
 
 
 ! ===============================
 ! === Deallocate local PAW arrays ===
 ! ===============================
-
+ call timab(1515,1,tsec)
  if (fockcommon%usepaw==1) then
    ABI_DEALLOCATE(gvnlxc)
    ABI_DEALLOCATE(grnhat12)
@@ -677,12 +691,13 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  if(fockcommon%usepaw==1.or.fockcommon%optstr) then
    ABI_DEALLOCATE(gboundf)
  end if
-
+ call timab(1515,2,tsec)
 ! ============================================
 ! === Calculate the contribution to energy ===
 ! ============================================
 !* Only the contribution when cwavef=cgocc_bz are calculated, in order to cancel exactly the self-interaction
 !* at each convergence step. (consistent definition with the definition of hartree energy)
+ call timab(1515,1,tsec)
  if (fockcommon%ieigen/=0) then
    eigen=zero
 !* Dot product of cwavef and ghc
@@ -713,7 +728,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  ABI_DEALLOCATE(dummytab)
  ABI_DEALLOCATE(vfock)
  ABI_DEALLOCATE(vqg)
-
+ call timab(1515,2,tsec)
  call timab(1504,2,tsec)
 
 end subroutine fock_getghc
