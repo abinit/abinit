@@ -1075,7 +1075,6 @@ print *, 'after kpgio npwarr ', npwarr
    bantot_rbz=sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
    ABI_ALLOCATE(eigen0,(bantot_rbz))
    eigen0 = zero
-   occ_rbz = zero
    call ebands_init(bantot_rbz,ebands_k,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
 &   nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
 &   dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
@@ -1091,8 +1090,8 @@ print *, 'after kpgio npwarr ', npwarr
      residm,rprimd,occ_rbz,pawrhoij_pert,xred,dtset%amu_orig(:,1),&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 print *, ' fermie ', fermie
-print *, " ebands_k%eig 1087 ", ebands_k%eig
-print *, " occ_rbz 1087 ", occ_rbz
+print *, " ebands_k%eig 1095 ", ebands_k%eig
+print *, " occ_rbz 1095 ", occ_rbz
 print *, 'istwfk_rbz ', istwfk_rbz
 
 !  Initialize GS wavefunctions at k
@@ -1119,11 +1118,11 @@ print *, 'istwfk_rbz ', istwfk_rbz
 ! if the occ are not fixed by the input file, read in from GS file
 !   if (dtset%occopt /= 2) then
 ! how can I tell if the occ need to be read in from disk???
-   if (sum(abs(occ_rbz)) < tol12) then
-     occ_rbz = occ_disk
-   end if 
-print *, 'eigen0 1111 ', eigen0
-print *, " occ_rbz 1111 ", occ_rbz
+!   if (sum(abs(occ_rbz)) < tol12) then
+!     occ_rbz = occ_disk
+!   end if 
+print *, 'eigen0 1125 ', eigen0
+print *, " occ_rbz 1125 ", occ_rbz
   
 !DEBUG
 !mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
@@ -1140,7 +1139,7 @@ print *, " occ_rbz 1111 ", occ_rbz
 &   dtset%symrel,dtset%tnons,dtfil%unkg,wffgs,wfftgs,&
 &   dtfil%unwffgs,dtfil%fnamewffk,wvl)
    call timab(144,2,tsec)
-print *, " occ_tmp 1128 ", occ_tmp
+print *, " occ_tmp 1143 ", occ_tmp
 !  Close wffgs%unwff, if it was ever opened (in inwffil)
    if (ireadwf0==1) then
      call WffClose(wffgs,ierr)
@@ -1186,13 +1185,6 @@ print *, ' diff in eigen0 ', eigen0(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*
 else
 write (301, *) 'is ik ib ', isppol, ikpt, iband, kpt_rbz(:,ikpt)
 end if
-!if (sum(abs(occ_rbz(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
-!&           occ_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))))) > tol6) then
-!print *, ' diff in occ ', occ_rbz(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
-!&                         occ_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1)))
-!else
-!write (302, *) 'is ik ib ', isppol, ikpt, iband, kpt_rbz(:,ikpt)
-!end if
        ibdoffst = ibdoffst + nband_rbz(ikpt+nkpt_rbz*(isppol-1))
      end do
    end do
