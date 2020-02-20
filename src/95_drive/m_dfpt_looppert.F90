@@ -1426,7 +1426,7 @@ end if
        !SPr: later "make" a separate WFQ file for "-q"
        call timab(144,1,tsec)
        call wfk_read_my_kptbands(dtfil%fnamewffq, dtset, distrb_flags, spacecomm, &
-&            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1_mq, &
+&            formeig, istwfk_rbz, kmq_rbz, nkpt_rbz, npwar1_mq, &
 &            cg_mq, eigen=eigen_mq, occ=occ_tmp)
        call timab(144,2,tsec)
 
