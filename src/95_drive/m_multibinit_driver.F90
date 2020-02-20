@@ -524,7 +524,8 @@ elec_eval = .FALSE.
      if(inp%analyze_anh_pot == 1) need_analyze_anh_pot = .TRUE.  
 !  Call to test routine
      call fit_polynomial_coeff_testEffPot(reference_effective_potential,hist_tes,master,comm,&
-&                                   print_anharmonic=need_analyze_anh_pot,scup_dtset=inp%scup_dtset)
+&                                   print_anharmonic=need_analyze_anh_pot,scup_dtset=inp%scup_dtset,& 
+&                                         prt_ph=inp%test_prt_ph)
 
    end if ! End if(inp%test_effpot == 1)then 
    

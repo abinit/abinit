@@ -118,7 +118,8 @@ module m_multibinit_dataset
   integer :: rfmeth
   integer :: restartxf
   integer :: symdynmat
-  integer :: test_effpot ! TODO MARCUS add test_effpot for test-set implementation
+  integer :: test_effpot 
+  integer :: test_prt_ph 
   integer :: dipdip_range(3)
   integer :: fit_grid(3)
   integer :: fit_rangePower(2)
@@ -377,6 +378,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%symdynmat=1
  multibinit_dtset%temperature=325
  multibinit_dtset%test_effpot=0 
+ multibinit_dtset%test_prt_ph=0 
  multibinit_dtset%tolmxf=2.0d-5
  
  multibinit_dtset%spin_calc_traj_obs=0
@@ -1631,13 +1633,24 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'Action: correct test_effpot in your input file.'
    MSG_ERROR(message)
  end if
+ 
+ multibinit_dtset%test_prt_ph=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'test_prt_ph',tread,'DPR')
+ if(tread==1) multibinit_dtset%test_prt_ph=dprarr(1)
+ if(multibinit_dtset%test_prt_ph<0 .or. multibinit_dtset%test_prt_ph>1)then
+   write(message, '(a,i0,a,a,a,a,a)' )&
+&   'test_prt_ph is ',multibinit_dtset%test_prt_ph,'. The only allowed values',ch10,&
+&   'are 0 and 1.',ch10,&
+&   'Action: correct test_prt_ph in your input file.'
+   MSG_ERROR(message)
+ end if
 
  multibinit_dtset%tolmxf=2.0d-5
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolmxf',tread,'DPR')
  if(tread==1) multibinit_dtset%tolmxf=dprarr(1)
  if(multibinit_dtset%tolmxf<0)then
    write(message, '(a,i0,a,a,a,a,a)' )&
-&   'tolmxf is ',multibinit_dtset%test_effpot,'. The only allowed values',ch10,&
+&   'tolmxf is ',multibinit_dtset%tolmxf,'. The only allowed values',ch10,&
 &   'are positiv.',ch10,&
 &   'Action: correct tolmxf in your input file.'
    MSG_ERROR(message)

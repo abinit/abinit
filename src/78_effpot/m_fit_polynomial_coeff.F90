@@ -2303,7 +2303,7 @@ end subroutine fit_polynomial_coeff_getFS
 !! SOURCE
 
 subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,sqomega,comm,&
-&                                          compute_anharmonic,print_file,filename,scup_dtset)
+&                                          compute_anharmonic,print_file,filename,scup_dtset,prt_ph)
 
  implicit none
 
@@ -2311,7 +2311,7 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
 !scalars
  integer, intent(in) :: natom,ntime,comm
  real(dp),intent(out):: mse,msef,mses
- logical,optional,intent(in) :: compute_anharmonic,print_file
+ logical,optional,intent(in) :: compute_anharmonic,print_file,prt_ph
 !arrays
  real(dp),intent(in) :: sqomega(ntime)
  type(effective_potential_type),intent(in) :: eff_pot
@@ -2321,18 +2321,19 @@ subroutine fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntim
  type(scup_dtset_type),optional,intent(inout) :: scup_dtset
 !Local variables-------------------------------
 !scalar
-integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank
+integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank,i
 !Uncommend for dipdip test
-! integer :: ifirst
+ integer :: ifirst
  real(dp):: energy,energy_harm
  logical :: need_anharmonic = .TRUE.,need_print=.FALSE.,need_elec_eval,iam_master
+ logical :: need_prt_ph 
  !arrays
  real(dp):: fcart(3,natom),fred(3,natom),strten(6),rprimd(3,3),xred(3,natom)
 !Strings/Characters 
  character(len=fnlen) :: file_energy, file_stress, file_anh, name_file
  character(len=500) :: msg
 !Uncommend for dipdip test
-! type(abihist) :: hist_out
+ type(abihist) :: hist_out
  character(len=200) :: filename_hist
 
 ! *************************************************************************
@@ -2368,10 +2369,13 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank
  need_elec_eval = .FALSE. 
  if(present(scup_dtset))need_elec_eval=scup_dtset%scup_elec_model
 
+ need_prt_ph=.FALSE. 
+ if(present(prt_ph))need_prt_ph=prt_ph
+
 
  if(need_print .and. present(filename))then
    !MS hist out uncommented for PHONOPY test
-   !call abihist_init(hist_out,natom,ntime,.false.,.false.)
+   call abihist_init(hist_out,natom,ntime,.false.,.false.)
    file_energy=trim(name_file)//'_energy.dat'
    unit_energy = get_unit()
    if (open_file(file_energy,msg,unit=unit_energy,form="formatted",&
@@ -2427,19 +2431,29 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank
      WRITE(unit_stress,'(I10,12(F23.14))') ii,hist%strten(:,ii),strten(:)
    end if
     
-    !MS Uncommented for abihist test 
-!    ifirst=merge(0,1,(ii>1))
-!    filename_hist = trim("test.nc")
-!    hist_out%fcart(:,:,hist_out%ihist) = fcart(:,:)
-!    hist_out%strten(:,hist_out%ihist)  = strten(:)
-!    hist_out%etot(hist_out%ihist)      = energy
-!    hist_out%entropy(hist_out%ihist)   = hist%entropy(ii)
-!    hist_out%time(hist_out%ihist)      = real(ii,kind=dp)
-!!    call vel2hist(ab_mover%amass,hist,vel,vel_cell)
-!    call var2hist(hist%acell(:,ii),hist_out,natom,hist%rprimd(:,:,ii),hist%xred(:,:,ii),.false.)
-!    call write_md_hist(hist_out,filename_hist,ifirst,ii,natom,1,eff_pot%crystal%ntypat,&
-!&                    eff_pot%supercell%typat,eff_pot%crystal%amu,eff_pot%crystal%znucl,&
-!&                    real(100,dp),(/real(100,dp),real(100,dp)/))
+    !MS Uncommented for abihist test
+   if(need_prt_ph)then 
+    if(ii == 1)then 
+      write(msg,'(a,(80a))') ch10,('-',i=1,80)
+      call wrtout(ab_out,msg,'COLL')
+      call wrtout(std_out,msg,'COLL')
+      write(msg,'(3a)') ch10,'test_prt_ph == 1, write evulation of Model on the TEST-set into ph_test.nc',ch10
+      call wrtout(ab_out,msg,'COLL')
+      call wrtout(std_out,msg,'COLL')
+    endif
+    ifirst=merge(0,1,(ii>1))
+    filename_hist = trim("ph_test.nc")
+    hist_out%fcart(:,:,hist_out%ihist) = fcart(:,:)
+    hist_out%strten(:,hist_out%ihist)  = strten(:)
+    hist_out%etot(hist_out%ihist)      = energy
+    hist_out%entropy(hist_out%ihist)   = hist%entropy(ii)
+    hist_out%time(hist_out%ihist)      = real(ii,kind=dp)
+!    call vel2hist(ab_mover%amass,hist,vel,vel_cell)
+    call var2hist(hist%acell(:,ii),hist_out,natom,hist%rprimd(:,:,ii),hist%xred(:,:,ii),.false.)
+    call write_md_hist(hist_out,filename_hist,ifirst,ii,natom,1,eff_pot%crystal%ntypat,&
+&                    eff_pot%supercell%typat,eff_pot%crystal%amu,eff_pot%crystal%znucl,&
+&                    real(100,dp),(/real(100,dp),real(100,dp)/))
+   endif!(need_prt_ph)
 
    mse  = mse  + ((hist%etot(ii) - energy))**2 !+abs(hist$etot(ii) - energy)
    do ia=1,natom ! Loop over atoms
@@ -2450,7 +2464,12 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank
    do mu=1,6 ! Loop over stresses
      mses = mses + sqomega(ii)*(hist%strten(mu,ii) - strten(mu))**2
    end do
-   end do ! End loop itime 
+ end do ! End loop itime 
+   if(need_prt_ph)then      
+    write(msg,'(a,(80a))') ch10,('-',i=1,80)
+    call wrtout(ab_out,msg,'COLL')
+    call wrtout(std_out,msg,'COLL')
+   endif
 
  mse  = mse  /  ntime
  msef = msef / (3*natom*ntime)
@@ -2462,7 +2481,7 @@ integer :: ii,ia,mu,unit_energy,unit_stress,itime,master,nproc,my_rank
  end if
 
  !MS uncommented for PHONOPY TEST
-! call abihist_free(hist_out)
+ call abihist_free(hist_out)
 
 end subroutine fit_polynomial_coeff_computeMSD
 !!***
@@ -2488,7 +2507,7 @@ end subroutine fit_polynomial_coeff_computeMSD
 !!
 !! SOURCE
 
-subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharmonic,scup_dtset)
+subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharmonic,scup_dtset,prt_ph)
 
        
   implicit none
@@ -2496,6 +2515,7 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
 !Arguments ------------------------------------
 !scalars
   integer,intent(in) :: master,comm
+  integer,optional,intent(in) :: prt_ph
 !logicals
   logical,optional,intent(in) :: print_anharmonic
 !array
@@ -2511,7 +2531,7 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
   integer :: itime,unit_anh
   integer :: natom,ntime,ncoeff,my_rank
 !logicals 
-  logical :: iam_master, need_print_anharmonic,file_opened
+  logical :: iam_master, need_print_anharmonic,file_opened,need_prt_ph
 !strings/characters
  character(len=fnlen) :: filename 
  character(len=1000) :: message
@@ -2527,6 +2547,10 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
   need_print_anharmonic = .FALSE. 
   if(present(print_anharmonic)) need_print_anharmonic = print_anharmonic
 
+  need_prt_ph = .FALSE. 
+  if(present(prt_ph))then
+     if(prt_ph==1) need_prt_ph=.TRUE.
+  endif
 
   !Setting/Allocating other Variables 
   natom = size(hist%xred,2)   
@@ -2552,7 +2576,7 @@ subroutine fit_polynomial_coeff_testEffPot(eff_pot,hist,master,comm,print_anharm
 
   call fit_polynomial_coeff_computeMSD(eff_pot,hist,mse,msef,mses,natom,ntime,&
 &                                      sqomega,comm,&
-&                 compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename,scup_dtset=scup_dtset)
+&                 compute_anharmonic=.TRUE.,print_file=.TRUE.,filename=filename,scup_dtset=scup_dtset,prt_ph=need_prt_ph)
 
 
 !  Print the standard deviation after the fit
