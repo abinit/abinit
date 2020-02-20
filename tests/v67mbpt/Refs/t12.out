@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h32 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h49 )
   
-- input  file    -> t12.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t12-t13/t12.in
 - output file    -> t12.out
 - root for input  files -> t12i
 - root for output files -> t12o
@@ -196,7 +196,7 @@ P           mkmem           2
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -221,8 +221,8 @@ P           mkmem           2
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/18ar.revpbe
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/18ar.revpbe
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/18ar.revpbe
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -258,6 +258,31 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
   sigma(2 2)=  1.98364445E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.98364445E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  0.0000000,   4.0000000,   4.0000000, ]
+- [  4.0000000,   0.0000000,   4.0000000, ]
+- [  4.0000000,   4.0000000,   0.0000000, ]
+lattice_lengths: [   5.65685,    5.65685,    5.65685, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_volume:   1.2800000E+02
+convergence: {deltae: -9.948E-14, res2:  2.629E-16, residm:  5.703E-17, diffor: null, }
+etotal    :  -2.11337960E+01
+entropy   :   0.00000000E+00
+fermie    :  -4.44166627E-02
+cartesian_stress_tensor:
+- [  1.98364445E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.98364445E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.98364445E-04, ]
+pressure_GPa:  -5.8361E+00
+cartesian_forces:
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -292,22 +317,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.52930287940126E+00
-    Hartree energy  =  3.06584127364742E+00
-    XC energy       = -3.60415236678074E+00
-    Ewald energy    = -1.83394482964552E+01
-    PspCore energy  =  1.04469034002258E+00
-    Loc. psp. energy= -1.17174881592611E+01
-    NL   psp  energy=  8.87458329901809E-01
-    >>>>>>>>> Etotal= -2.11337959995240E+01
-
- Other information on the energy :
-    Total energy(eV)= -5.75079835361981E+02 ; Band energy (Ha)=  -1.8860742292E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.52930287940126E+00
+hartree             :  3.06584127364742E+00
+xc                  : -3.60415236678074E+00
+Ewald energy        : -1.83394482964552E+01
+psp_core            :  1.04469034002258E+00
+local_psp           : -1.17174881592611E+01
+non_local_psp       :  8.87458329901809E-01
+total_energy        : -2.11337959995240E+01
+total_energy_eV     : -5.75079835361981E+02
+band_energy         : -1.88607422924117E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -322,7 +345,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -345,8 +368,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/18ar.revpbe
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/18ar.revpbe
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/18ar.revpbe
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/18ar.revpbe
 -   Ar  APE 1.0 : Troullier-Martins scheme, Perdew-Wang LDA, llocal= 1
 - 18.00000   8.00000  20100419                znucl, zion, pspdat
     6    7    1    1       800   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -567,7 +590,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -687,6 +710,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     138.000     137.957
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [  -0.250,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   13.219
@@ -703,7 +727,9 @@ data: !SigmaeeData |
         8    19.266   -11.112    19.266    30.378    -4.454    -2.143     1.000     0.000    -6.597     4.515    23.781    23.782
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [  -0.250,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   11.849
@@ -719,6 +745,7 @@ data: !SigmaeeData |
         7    17.453   -10.929    17.453    28.382    -4.564    -1.972     1.000     0.000    -6.536     4.393    21.846    21.844
         8    17.453   -10.929    17.453    28.382    -4.567    -1.972     1.000     0.000    -6.539     4.391    21.844    21.846
 ...
+
 
  New Fermi energy :        2.052596E-01 Ha ,    5.585399E+00 eV
 
@@ -934,10 +961,10 @@ P           mkmem           2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.1
+- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.9  wall=          1.9
++Overall time at end (sec) : cpu=          2.0  wall=          2.0

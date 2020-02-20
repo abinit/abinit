@@ -1,5 +1,5 @@
 
-.Version 8.11.13 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sun 29 Dec 2019.
-- ( at 17h47 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h50 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v67mbpt_t40/t40.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t40/t40.in
 - output file    -> t40.out
 - root for input  files -> t40i
 - root for output files -> t40o
@@ -232,7 +232,7 @@ P           mkmem           4
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -250,8 +250,8 @@ P           mkmem           4
          ecut(hartree)=     12.000   => boxcut(ratio)=   2.00923
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Si-GGA.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Si-GGA.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-GGA.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-GGA.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    150713                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -265,8 +265,8 @@ P           mkmem           4
              2  -10.098774   -0.937313
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O-GGA.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O-GGA.psp8
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O-GGA.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O-GGA.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -307,6 +307,39 @@ _setup2: Arith. and geom. avg. npw (full set) are    1518.125    1518.062
   sigma(2 2)=  5.39758429E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.37684060E-03  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  4.6421500,  -8.0404397,   0.0000000, ]
+- [  4.6421500,   8.0404397,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2132705, ]
+lattice_lengths: [   9.28430,    9.28430,   10.21327, ]
+lattice_angles: [ 90.000,  90.000, 120.000, ]
+lattice_volume:   7.6241917E+02
+convergence: {deltae: -2.714E-11, res2:  2.692E-12, residm:  9.090E-13, diffor: null, }
+etotal    :  -1.09269195E+02
+entropy   :   0.00000000E+00
+fermie    :   3.05539758E-02
+cartesian_stress_tensor:
+- [  5.39758429E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   5.39758429E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   5.37684060E-03, ]
+pressure_GPa:  -1.5860E+02
+cartesian_forces:
+- [ -1.29772308E-04,   2.24772231E-04,  -3.78417025E-19, ]
+- [ -1.29772308E-04,  -2.24772231E-04,  -3.99648268E-19, ]
+- [  2.59544616E-04,  -1.76202525E-19,  -3.71339943E-19, ]
+- [ -1.40728931E-02,   1.65381264E-02,  -1.75497659E-02, ]
+- [  2.13588842E-02,   3.91841973E-03,  -1.75497659E-02, ]
+- [ -7.28599106E-03,  -2.04565462E-02,  -1.75497659E-02, ]
+- [ -7.28599106E-03,   2.04565462E-02,   1.75497659E-02, ]
+- [ -1.40728931E-02,  -1.65381264E-02,   1.75497659E-02, ]
+- [  2.13588842E-02,  -3.91841973E-03,   1.75497659E-02, ]
+force_length_stats: {min:   2.59544616E-04, max:   2.79204267E-02, mean:   1.87001327E-02, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -323,7 +356,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1518.125    1518.062
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   64.621E-10; max=  90.900E-14
+ Mean square residual over all n,k,spin=   29.292E-14; max=  90.900E-14
  reduced coordinates (array xred) for    9 atoms
        0.465000000000     -0.000000000000      0.000000000000
       -0.000000000000      0.465000000000      0.666666666667
@@ -395,22 +428,20 @@ _setup2: Arith. and geom. avg. npw (full set) are    1518.125    1518.062
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  6.31682235357822E+01
-    Hartree energy  =  3.46989115301827E+01
-    XC energy       = -2.95070743413276E+01
-    Ewald energy    = -6.95068319280861E+01
-    PspCore energy  =  4.10625290251091E+00
-    Loc. psp. energy= -1.05215459370996E+02
-    NL   psp  energy= -7.01321693450828E+00
-    >>>>>>>>> Etotal= -1.09269194606442E+02
-
- Other information on the energy :
-    Total energy(eV)= -2.97336599850893E+03 ; Band energy (Ha)=  -1.2218628224E+01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  6.31682235357822E+01
+hartree             :  3.46989115301827E+01
+xc                  : -2.95070743413276E+01
+Ewald energy        : -6.95068319280861E+01
+psp_core            :  4.10625290251091E+00
+local_psp           : -1.05215459370996E+02
+non_local_psp       : -7.01321693450828E+00
+total_energy        : -1.09269194606442E+02
+total_energy_eV     : -2.97336599850893E+03
+band_energy         : -1.22186282242088E+01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -425,7 +456,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1518.125    1518.062
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -448,8 +479,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1518.125    1518.062
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Si-GGA.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/Si-GGA.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-GGA.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-GGA.psp8
 - Si    ONCVPSP  r_core=  1.60  1.72  1.92
 - 14.00000   4.00000    150713                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -463,8 +494,8 @@ _setup2: Arith. and geom. avg. npw (full set) are    1518.125    1518.062
              2  -10.098774   -0.937313
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O-GGA.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/O-GGA.psp8
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O-GGA.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O-GGA.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -639,7 +670,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1518.125    1518.062
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -738,6 +769,7 @@ _setup2: Arith. and geom. avg. npw (full set) are    1518.125    1518.062
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    4.791
@@ -749,7 +781,9 @@ data: !SigmaeeData |
        25   5.398 -10.696  -6.175  -2.593   0.879  -0.138  -9.002   1.694   7.092
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    7.341
@@ -760,6 +794,7 @@ data: !SigmaeeData |
        24   0.831 -19.026 -23.766   3.477   0.846  -0.182 -20.094  -1.068  -0.236
        25   8.172 -12.239  -7.002  -2.633   0.872  -0.147  -9.969   2.270  10.442
 ...
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1029,10 +1064,10 @@ P           mkmem           4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         30.2  wall=         30.4
+- Proc.   0 individual time (sec): cpu=         31.5  wall=         31.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   4 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         27.5  wall=         27.6
++Overall time at end (sec) : cpu=         31.5  wall=         31.6

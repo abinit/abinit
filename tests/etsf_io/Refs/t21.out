@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h17 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 17h00 )
   
-- input  file    -> t21.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/etsf_io_t21/t21.in
 - output file    -> t21.out
 - root for input  files -> t21i
 - root for output files -> t21o
@@ -119,7 +119,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -137,8 +137,8 @@ P           mkmem           1
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.15249
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -190,6 +190,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(2 2)=  1.66578874E-04  sigma(3 1)= -3.37973593E-10
   sigma(3 3)=  1.66578662E-04  sigma(2 1)= -1.40970011E-12
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -4.564E-09, res2:  9.558E-07, residm:  8.199E-11, diffor:  3.315E-06, }
+etotal    :  -8.65650320E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.81241300E-02
+cartesian_stress_tensor:
+- [  1.65331564E-04,  -1.40970011E-12,  -3.37973593E-10, ]
+- [ -1.40970011E-12,   1.66578874E-04,   7.57628109E-11, ]
+- [ -3.37973593E-10,   7.57628109E-11,   1.66578662E-04, ]
+pressure_GPa:  -4.8887E+00
+cartesian_forces:
+- [ -1.94280686E-02,   7.96436309E-08,  -2.44213284E-07, ]
+- [  1.94280686E-02,  -7.96436309E-08,   2.44213284E-07, ]
+force_length_stats: {min:   1.94280686E-02, max:   1.94280686E-02, mean:   1.94280686E-02, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
@@ -238,6 +264,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(1 1)=  1.65945594E-04  sigma(3 2)=  1.93890438E-12
   sigma(2 2)=  1.66603248E-04  sigma(3 1)= -5.25418270E-10
   sigma(3 3)=  1.66603263E-04  sigma(2 1)= -1.49522382E-10
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -1.807E-09, res2:  6.938E-07, residm:  3.191E-11, diffor:  1.881E-06, }
+etotal    :  -8.65652163E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.80790043E-02
+cartesian_stress_tensor:
+- [  1.65945594E-04,  -1.49522382E-10,  -5.25418270E-10, ]
+- [ -1.49522382E-10,   1.66603248E-04,   1.93890438E-12, ]
+- [ -5.25418270E-10,   1.93890438E-12,   1.66603263E-04, ]
+pressure_GPa:  -4.8952E+00
+cartesian_forces:
+- [ -1.93240482E-02,  -1.64767898E-08,  -5.81838460E-08, ]
+- [  1.93240482E-02,   1.64767898E-08,   5.81838460E-08, ]
+force_length_stats: {min:   1.93240482E-02, max:   1.93240482E-02, mean:   1.93240482E-02, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -292,6 +344,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(1 1)=  1.68031514E-04  sigma(3 2)=  4.55894995E-14
   sigma(2 2)=  1.66600729E-04  sigma(3 1)= -2.28708419E-11
   sigma(3 3)=  1.66600729E-04  sigma(2 1)= -7.32866009E-12
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -4.831E-10, res2:  4.064E-07, residm:  3.186E-11, diffor:  2.198E-06, }
+etotal    :  -8.65657615E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.79349884E-02
+cartesian_stress_tensor:
+- [  1.68031514E-04,  -7.32866009E-12,  -2.28708419E-11, ]
+- [ -7.32866009E-12,   1.66600729E-04,   4.55894995E-14, ]
+- [ -2.28708419E-11,   4.55894995E-14,   1.66600729E-04, ]
+pressure_GPa:  -4.9156E+00
+cartesian_forces:
+- [ -1.90035105E-02,  -1.59316293E-09,  -3.42031689E-09, ]
+- [  1.90035105E-02,   1.59316293E-09,   3.42031689E-09, ]
+force_length_stats: {min:   1.90035105E-02, max:   1.90035105E-02, mean:   1.90035105E-02, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -348,6 +426,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(2 2)=  1.66621008E-04  sigma(3 1)=  1.41525429E-12
   sigma(3 3)=  1.66621008E-04  sigma(2 1)= -6.52773521E-13
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -5.185E-10, res2:  7.190E-08, residm:  1.322E-11, diffor:  6.589E-07, }
+etotal    :  -8.65666436E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.76991288E-02
+cartesian_stress_tensor:
+- [  1.71407985E-04,  -6.52773521E-13,   1.41525429E-12, ]
+- [ -6.52773521E-13,   1.66621008E-04,   0.00000000E+00, ]
+- [  1.41525429E-12,   0.00000000E+00,   1.66621008E-04, ]
+pressure_GPa:  -4.9491E+00
+cartesian_forces:
+- [ -1.84812813E-02,  -1.80569500E-10,   5.60585934E-10, ]
+- [  1.84812813E-02,   1.80569500E-10,  -5.60585934E-10, ]
+force_length_stats: {min:   1.84812813E-02, max:   1.84812813E-02, mean:   1.84812813E-02, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
@@ -402,6 +506,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(1 1)=  1.76009355E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.66661946E-04  sigma(3 1)=  3.19565410E-12
   sigma(3 3)=  1.66661946E-04  sigma(2 1)= -5.15472927E-13
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 5, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -7.705E-11, res2:  1.861E-08, residm:  1.375E-12, diffor:  2.178E-06, }
+etotal    :  -8.65678248E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.73752033E-02
+cartesian_stress_tensor:
+- [  1.76009355E-04,  -5.15472927E-13,   3.19565410E-12, ]
+- [ -5.15472927E-13,   1.66661946E-04,   0.00000000E+00, ]
+- [  3.19565410E-12,   0.00000000E+00,   1.66661946E-04, ]
+pressure_GPa:  -4.9950E+00
+cartesian_forces:
+- [ -1.77695752E-02,  -1.61995812E-10,   1.00703699E-09, ]
+- [  1.77695752E-02,   1.61995812E-10,  -1.00703699E-09, ]
+force_length_stats: {min:   1.77695752E-02, max:   1.77695752E-02, mean:   1.77695752E-02, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -458,6 +588,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(2 2)=  1.66709797E-04  sigma(3 1)=  4.16750490E-12
   sigma(3 3)=  1.66709797E-04  sigma(2 1)= -6.26135004E-13
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 6, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -1.270E-10, res2:  1.941E-08, residm:  2.479E-12, diffor:  2.988E-06, }
+etotal    :  -8.65692554E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.69665439E-02
+cartesian_stress_tensor:
+- [  1.81782429E-04,  -6.26135004E-13,   4.16750490E-12, ]
+- [ -6.26135004E-13,   1.66709797E-04,   0.00000000E+00, ]
+- [  4.16750490E-12,   0.00000000E+00,   1.66709797E-04, ]
+pressure_GPa:  -5.0526E+00
+cartesian_forces:
+- [ -1.68818941E-02,  -1.95795192E-10,   1.30334328E-09, ]
+- [  1.68818941E-02,   1.95795192E-10,  -1.30334328E-09, ]
+force_length_stats: {min:   1.68818941E-02, max:   1.68818941E-02, mean:   1.68818941E-02, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
@@ -512,6 +668,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(1 1)=  1.88614287E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.66768254E-04  sigma(3 1)=  5.17117731E-12
   sigma(3 3)=  1.66768254E-04  sigma(2 1)= -7.46921447E-13
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 7, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -1.838E-10, res2:  2.562E-08, residm:  3.661E-12, diffor:  3.656E-06, }
+etotal    :  -8.65708768E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.64791653E-02
+cartesian_stress_tensor:
+- [  1.88614287E-04,  -7.46921447E-13,   5.17117731E-12, ]
+- [ -7.46921447E-13,   1.66768254E-04,   0.00000000E+00, ]
+- [  5.17117731E-12,   0.00000000E+00,   1.66768254E-04, ]
+pressure_GPa:  -5.1207E+00
+cartesian_forces:
+- [ -1.58385107E-02,  -2.31954827E-10,   1.60594207E-09, ]
+- [  1.58385107E-02,   2.31954827E-10,  -1.60594207E-09, ]
+force_length_stats: {min:   1.58385107E-02, max:   1.58385107E-02, mean:   1.58385107E-02, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -569,6 +751,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(2 2)=  1.66843084E-04  sigma(3 1)=  6.22357870E-12
   sigma(3 3)=  1.66843084E-04  sigma(2 1)= -8.73743281E-13
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 8, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -1.995E-11, res2:  1.393E-09, residm:  7.191E-13, diffor:  1.283E-06, }
+etotal    :  -8.65726247E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.59200030E-02
+cartesian_stress_tensor:
+- [  1.96374065E-04,  -8.73743281E-13,   6.22357870E-12, ]
+- [ -8.73743281E-13,   1.66843084E-04,   0.00000000E+00, ]
+- [  6.22357870E-12,   0.00000000E+00,   1.66843084E-04, ]
+pressure_GPa:  -5.1983E+00
+cartesian_forces:
+- [ -1.46626315E-02,  -2.69285746E-10,   1.91801344E-09, ]
+- [  1.46626315E-02,   2.69285746E-10,  -1.91801344E-09, ]
+force_length_stats: {min:   1.46626315E-02, max:   1.46626315E-02, mean:   1.46626315E-02, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
@@ -625,6 +833,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(2 2)=  1.66924687E-04  sigma(3 1)=  7.32674160E-12
   sigma(3 3)=  1.66924687E-04  sigma(2 1)= -1.00658689E-12
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 9, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -5.169E-12, res2:  9.749E-10, residm:  2.066E-13, diffor:  5.164E-07, }
+etotal    :  -8.65744326E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.52960485E-02
+cartesian_stress_tensor:
+- [  2.04948236E-04,  -1.00658689E-12,   7.32674160E-12, ]
+- [ -1.00658689E-12,   1.66924687E-04,   0.00000000E+00, ]
+- [  7.32674160E-12,   0.00000000E+00,   1.66924687E-04, ]
+pressure_GPa:  -5.2840E+00
+cartesian_forces:
+- [ -1.33754874E-02,  -3.07964249E-10,   2.24157574E-09, ]
+- [  1.33754874E-02,   3.07964249E-10,  -2.24157574E-09, ]
+force_length_stats: {min:   1.33754874E-02, max:   1.33754874E-02, mean:   1.33754874E-02, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
@@ -680,6 +914,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(1 1)=  2.14193861E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.67018221E-04  sigma(3 1)=  8.48020210E-12
   sigma(3 3)=  1.67018221E-04  sigma(2 1)= -1.14528114E-12
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 10, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -6.246E-12, res2:  1.012E-09, residm:  2.523E-13, diffor:  5.712E-07, }
+etotal    :  -8.65762351E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.46153450E-02
+cartesian_stress_tensor:
+- [  2.14193861E-04,  -1.14528114E-12,   8.48020210E-12, ]
+- [ -1.14528114E-12,   1.67018221E-04,   0.00000000E+00, ]
+- [  8.48020210E-12,   0.00000000E+00,   1.67018221E-04, ]
+pressure_GPa:  -5.3765E+00
+cartesian_forces:
+- [ -1.20019573E-02,  -3.47839466E-10,   2.57554297E-09, ]
+- [  1.20019573E-02,   3.47839466E-10,  -2.57554297E-09, ]
+force_length_stats: {min:   1.20019573E-02, max:   1.20019573E-02, mean:   1.20019573E-02, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -758,22 +1018,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.90789   -5.13068   -2.21603
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.52883269501767E+00
-    Hartree energy  =  1.51200470714318E+00
-    XC energy       = -3.22864163398869E+00
-    Ewald energy    = -5.51151606295952E+00
-    PspCore energy  =  2.98722879456821E-02
-    Loc. psp. energy= -6.02781746645031E+00
-    NL   psp  energy=  2.03964196636158E+00
-    >>>>>>>>> Etotal= -8.65762350693041E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.35585916562443E+02 ; Band energy (Ha)=  -1.3649173136E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, itime: 10, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.52883269501767E+00
+hartree             :  1.51200470714318E+00
+xc                  : -3.22864163398869E+00
+Ewald energy        : -5.51151606295952E+00
+psp_core            :  2.98722879456821E-02
+local_psp           : -6.02781746645031E+00
+non_local_psp       :  2.03964196636158E+00
+total_energy        : -8.65762350693041E+00
+total_energy_eV     : -2.35585916562443E+02
+band_energy         : -1.36491731358434E+00
+...
 
  rms coord change=  1.7262E-03   atom, delta coord (reduced):
      1       -0.002989934759      0.000000001293     -0.000000009575
@@ -791,7 +1049,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -840,6 +1098,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(1 1)=  1.65331564E-04  sigma(3 2)=  7.57628109E-11
   sigma(2 2)=  1.66578874E-04  sigma(3 1)= -3.37973593E-10
   sigma(3 3)=  1.66578662E-04  sigma(2 1)= -1.40970011E-12
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -4.564E-09, res2:  9.558E-07, residm:  8.199E-11, diffor:  3.315E-06, }
+etotal    :  -8.65650320E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.81241300E-02
+cartesian_stress_tensor:
+- [  1.65331564E-04,  -1.40970011E-12,  -3.37973593E-10, ]
+- [ -1.40970011E-12,   1.66578874E-04,   7.57628109E-11, ]
+- [ -3.37973593E-10,   7.57628109E-11,   1.66578662E-04, ]
+pressure_GPa:  -4.8887E+00
+cartesian_forces:
+- [ -1.94280686E-02,   7.96436309E-08,  -2.44213284E-07, ]
+- [  1.94280686E-02,  -7.96436309E-08,   2.44213284E-07, ]
+force_length_stats: {min:   1.94280686E-02, max:   1.94280686E-02, mean:   1.94280686E-02, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -894,6 +1178,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(1 1)=  1.89334433E-04  sigma(3 2)= -1.03409479E-13
   sigma(2 2)=  1.66777416E-04  sigma(3 1)=  1.73787843E-11
   sigma(3 3)=  1.66777416E-04  sigma(2 1)= -8.58105188E-12
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -1.849E-12, res2:  5.161E-10, residm:  1.182E-13, diffor:  1.359E-07, }
+etotal    :  -8.65710457E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.64270832E-02
+cartesian_stress_tensor:
+- [  1.89334433E-04,  -8.58105188E-12,   1.73787843E-11, ]
+- [ -8.58105188E-12,   1.66777416E-04,  -1.03409479E-13, ]
+- [  1.73787843E-11,  -1.03409479E-13,   1.66777416E-04, ]
+pressure_GPa:  -5.1280E+00
+cartesian_forces:
+- [ -1.57286314E-02,  -2.69248234E-09,   5.32695642E-09, ]
+- [  1.57286314E-02,   2.69248234E-09,  -5.32695642E-09, ]
+force_length_stats: {min:   1.57286314E-02, max:   1.57286314E-02, mean:   1.57286314E-02, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -952,6 +1262,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(2 2)=  1.67387877E-04  sigma(3 1)=  5.07771910E-11
   sigma(3 3)=  1.67387877E-04  sigma(2 1)= -1.63811547E-11
 
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -3.037E-11, res2:  3.927E-09, residm:  1.753E-12, diffor:  4.582E-07, }
+etotal    :  -8.65812589E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.21734637E-02
+cartesian_stress_tensor:
+- [  2.46439377E-04,  -1.63811547E-11,   5.07771910E-11, ]
+- [ -1.63811547E-11,   1.67387877E-04,   0.00000000E+00, ]
+- [  5.07771910E-11,   0.00000000E+00,   1.67387877E-04, ]
+pressure_GPa:  -5.7000E+00
+cartesian_forces:
+- [ -7.33431851E-03,  -4.87271496E-09,   1.51130103E-08, ]
+- [  7.33431851E-03,   4.87271496E-09,  -1.51130103E-08, ]
+force_length_stats: {min:   7.33431851E-03, max:   7.33431851E-03, mean:   7.33431851E-03, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
@@ -1009,6 +1345,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(2 2)=  1.68347088E-04  sigma(3 1)=  8.22099146E-11
   sigma(3 3)=  1.68347088E-04  sigma(2 1)= -2.63629966E-11
 
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -5.532E-11, res2:  6.695E-09, residm:  2.602E-12, diffor:  9.219E-07, }
+etotal    :  -8.65846291E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.70979277E-02
+cartesian_stress_tensor:
+- [  3.08927271E-04,  -2.63629966E-11,   8.22099146E-11, ]
+- [ -2.63629966E-11,   1.68347088E-04,   0.00000000E+00, ]
+- [  8.22099146E-11,   0.00000000E+00,   1.68347088E-04, ]
+pressure_GPa:  -6.3316E+00
+cartesian_forces:
+- [  1.09708067E-03,  -7.69078215E-09,   2.39828529E-08, ]
+- [ -1.09708067E-03,   7.69078215E-09,  -2.39828529E-08, ]
+force_length_stats: {min:   1.09708067E-03, max:   1.09708067E-03, mean:   1.09708067E-03, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
@@ -1065,6 +1427,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(2 2)=  1.68338992E-04  sigma(3 1)=  7.91688938E-11
   sigma(3 3)=  1.68338992E-04  sigma(2 1)= -2.53877055E-11
 
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 5, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -1.857E-10, res2:  1.702E-08, residm:  1.046E-11, diffor:  2.548E-07, }
+etotal    :  -8.65846491E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.71786968E-02
+cartesian_stress_tensor:
+- [  3.07970121E-04,  -2.53877055E-11,   7.91688938E-11, ]
+- [ -2.53877055E-11,   1.68338992E-04,   0.00000000E+00, ]
+- [  7.91688938E-11,   0.00000000E+00,   1.68338992E-04, ]
+pressure_GPa:  -6.3221E+00
+cartesian_forces:
+- [  9.74334302E-04,  -7.40581591E-09,   2.30942620E-08, ]
+- [ -9.74334302E-04,   7.40581591E-09,  -2.30942620E-08, ]
+force_length_stats: {min:   9.74334302E-04, max:   9.74334302E-04, mean:   9.74334302E-04, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
@@ -1119,6 +1507,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(2 2)=  1.68303919E-04  sigma(3 1)=  7.03731087E-11
   sigma(3 3)=  1.68303920E-04  sigma(2 1)= -2.25670858E-11
 
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 6, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -1.458E-09, res2:  1.303E-07, residm:  8.375E-11, diffor:  8.575E-07, }
+etotal    :  -8.65846924E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.74044380E-02
+cartesian_stress_tensor:
+- [  3.05298786E-04,  -2.25670858E-11,   7.03731087E-11, ]
+- [ -2.25670858E-11,   1.68303919E-04,   0.00000000E+00, ]
+- [  7.03731087E-11,   0.00000000E+00,   1.68303920E-04, ]
+pressure_GPa:  -6.2952E+00
+cartesian_forces:
+- [  6.31578851E-04,  -6.58250471E-09,   2.05268563E-08, ]
+- [ -6.31578851E-04,   6.58250471E-09,  -2.05268563E-08, ]
+force_length_stats: {min:   6.31578852E-04, max:   6.31578852E-04, mean:   6.31578852E-04, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
@@ -1172,6 +1586,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(1 1)=  3.01487587E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.68244945E-04  sigma(3 1)=  5.66401552E-11
   sigma(3 3)=  1.68244945E-04  sigma(2 1)= -1.81632318E-11
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 7, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -2.970E-09, res2:  2.672E-07, residm:  1.704E-10, diffor:  1.543E-06, }
+etotal    :  -8.65847219E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.77258076E-02
+cartesian_stress_tensor:
+- [  3.01487587E-04,  -1.81632318E-11,   5.66401552E-11, ]
+- [ -1.81632318E-11,   1.68244945E-04,   0.00000000E+00, ]
+- [  5.66401552E-11,   0.00000000E+00,   1.68244945E-04, ]
+pressure_GPa:  -6.2566E+00
+cartesian_forces:
+- [  1.39682186E-04,  -5.29738129E-09,   1.65193336E-08, ]
+- [ -1.39682186E-04,   5.29738129E-09,  -1.65193336E-08, ]
+force_length_stats: {min:   1.39682187E-04, max:   1.39682187E-04, mean:   1.39682187E-04, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -1228,6 +1668,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(2 2)=  1.68153831E-04  sigma(3 1)=  3.91808204E-11
   sigma(3 3)=  1.68153831E-04  sigma(2 1)= -1.25644101E-11
 
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 8, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -1.264E-10, res2:  5.100E-08, residm:  2.188E-12, diffor:  2.372E-06, }
+etotal    :  -8.65847120E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.80718052E-02
+cartesian_stress_tensor:
+- [  2.97396462E-04,  -1.25644101E-11,   3.91808204E-11, ]
+- [ -1.25644101E-11,   1.68153831E-04,   0.00000000E+00, ]
+- [  3.91808204E-11,   0.00000000E+00,   1.68153831E-04, ]
+pressure_GPa:  -6.2147E+00
+cartesian_forces:
+- [ -3.91526594E-04,  -3.66895091E-09,   1.14412458E-08, ]
+- [  3.91526594E-04,   3.66895091E-09,  -1.14412458E-08, ]
+force_length_stats: {min:   3.91526594E-04, max:   3.91526594E-04, mean:   3.91526594E-04, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
@@ -1283,6 +1749,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(2 2)=  1.68157869E-04  sigma(3 1)=  3.78461171E-11
   sigma(3 3)=  1.68157869E-04  sigma(2 1)= -1.21364006E-11
 
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 9, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -1.283E-10, res2:  2.918E-07, residm:  5.244E-12, diffor:  7.873E-07, }
+etotal    :  -8.65847146E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.80429710E-02
+cartesian_stress_tensor:
+- [  2.97739667E-04,  -1.21364006E-11,   3.78461171E-11, ]
+- [ -1.21364006E-11,   1.68157869E-04,   0.00000000E+00, ]
+- [  3.78461171E-11,   0.00000000E+00,   1.68157869E-04, ]
+pressure_GPa:  -6.2182E+00
+cartesian_forces:
+- [ -3.43940121E-04,  -3.53769097E-09,   1.10319252E-08, ]
+- [  3.43940121E-04,   3.53769097E-09,  -1.10319252E-08, ]
+force_length_stats: {min:   3.43940121E-04, max:   3.43940121E-04, mean:   3.43940121E-04, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
@@ -1335,6 +1827,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
   sigma(1 1)=  2.98674962E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.68186196E-04  sigma(3 1)=  3.38617359E-11
   sigma(3 3)=  1.68186195E-04  sigma(2 1)= -1.08586994E-11
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 10, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -9.666E-10, res2:  2.226E-06, residm:  4.128E-11, diffor:  2.181E-06, }
+etotal    :  -8.65847199E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.79634421E-02
+cartesian_stress_tensor:
+- [  2.98674962E-04,  -1.08586994E-11,   3.38617359E-11, ]
+- [ -1.08586994E-11,   1.68186196E-04,   0.00000000E+00, ]
+- [  3.38617359E-11,   0.00000000E+00,   1.68186195E-04, ]
+pressure_GPa:  -6.2279E+00
+cartesian_forces:
+- [ -2.17054097E-04,  -3.14678499E-09,   9.81292388E-09, ]
+- [  2.17054097E-04,   3.14678499E-09,  -9.81292388E-09, ]
+force_length_stats: {min:   2.17054098E-04, max:   2.17054098E-04, mean:   2.17054098E-04, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -1418,22 +1936,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     405.000     405.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.70259   -5.18854   -2.22824
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.49534610799689E+00
-    Hartree energy  =  1.43502552686961E+00
-    XC energy       = -3.21356143192281E+00
-    Ewald energy    = -5.60959211990110E+00
-    PspCore energy  =  2.98722879456821E-02
-    Loc. psp. energy= -5.82583130598614E+00
-    NL   psp  energy=  2.03026894502914E+00
-    >>>>>>>>> Etotal= -8.65847198996873E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.35609004960097E+02 ; Band energy (Ha)=  -1.3413381326E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 2, itime: 10, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.49534610799689E+00
+hartree             :  1.43502552686961E+00
+xc                  : -3.21356143192281E+00
+Ewald energy        : -5.60959211990110E+00
+psp_core            :  2.98722879456821E-02
+local_psp           : -5.82583130598614E+00
+non_local_psp       :  2.03026894502914E+00
+total_energy        : -8.65847198996873E+00
+total_energy_eV     : -2.35609004960097E+02
+band_energy         : -1.34133813256689E+00
+...
 
  rms coord change=  5.2725E-03   atom, delta coord (reduced):
      1       -0.009132260704      0.000000010126     -0.000000031576
@@ -1539,7 +2055,24 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1553,11 +2086,11 @@ P           mkmem           1
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT: First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1566,11 +2099,13 @@ P           mkmem           1
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -1578,24 +2113,15 @@ P           mkmem           1
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [4] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=          9.5  wall=         14.6
+- Proc.   0 individual time (sec): cpu=          9.6  wall=         10.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  11 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.5  wall=         14.6
++Overall time at end (sec) : cpu=          9.6  wall=         10.5

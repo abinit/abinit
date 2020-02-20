@@ -61,6 +61,5 @@
 #%% keywords = 
 #%% description = 
 #%%   Restart 05 again, but use ALL 48 cubic symmetries (the above tests
-#%%   don't bother with the nonsymmorphic ones) to test nonsymmorphic
-#%%   symmetrization.
+#%%   don't bother with the nonsymmorphic ones) to test nonsymmorphic symmetrization.
 #%%<END TEST_INFO>

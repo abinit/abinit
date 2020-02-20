@@ -254,6 +254,22 @@ def fgrep(ctx, pattern):
         ctx.run(cmd, pty=True)
 
 
+@task
+def cgrep(ctx, pattern):
+    """
+    Grep for `pattern` in all C files contained in `src` and `shared` directories.
+    """
+    # grep -r -i --include \*.h
+    # Syntax notes:
+    #    -r - search recursively
+    #    -i - case-insensitive search
+    #    --include=\*.${file_extension} - search files that match the extension(s) or file pattern only
+    with cd(ABINIT_ROOTDIR):
+        cmd  = 'grep -r -i --color --include "*.c" "%s" src shared' % pattern
+        print("Executing:", cmd)
+        ctx.run(cmd, pty=True)
+
+
 #def pull_trunk(ctx):
 #    ctx.run("git stash")
 #    ctx.run("git pull trunk develop")

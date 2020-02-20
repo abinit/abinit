@@ -41,7 +41,7 @@
 #%% max_nprocs = 6
 #%% [extra_info]
 #%% authors = M. Torrent
-#%% keywords = 
+#%% keywords = PAW
 #%% description = 
 #%%   Test the possibility to include a file into an input file
 #%%   Diamond silicon with few k-points and low cut-off
