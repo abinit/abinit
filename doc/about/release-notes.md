@@ -1,3 +1,55 @@
+## v9.0
+  
+Version 9.0, released on March 15, 2020.
+List of changes with respect to version 8.10.
+
+Many thanks to the contributors to the ABINIT project between
+October 2018 and March 2020. These release notes
+are relative to modifications/improvements of ABINIT v9.0 with respect to v8.10.
+<TBU>
+The merge request #408 is the first MR not reported in these release notes. Then, #410-411, #413-416 have also been included.
+<ETBU>
+
+The list of contributors includes:
+<TO BE UPDATED>
+B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, F. Bruneval, Wei Chen, M. Cote,
+J. Denier, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault, Xu He, Y. Jia, F. Jollet,
+A. Lherbier, A. Martin, H. Miranda, F. Naccarato, G. Petretto, N. Pike,
+S. Ponce, Y. Pouillon, S. Prokhorenko, F. Ricci, M. Torrent, M. van Setten, B. Van Troeye, M. Verstraete, J. Zwanziger.
+<END OF TO BE UPDATED>
+
+It is worth to read carefully all the modifications that are mentioned in the present file,
+and examine the links to help files or test cases.
+This might take some time ...
+
+Xavier
+
+### A. Important remark and warnings.
+
+A.1 At the occasion of the switch from ABINITv8 to ABINITv9, many improvements of the formats and content of files
+    have been made, so the backward compatibility of ABINITv9 is often broken. 
+    The present ABINITv9.0 is NOT to be considered a production version, but more a beta release, allowing to get feedback
+    from the users. Many features will work correctly, of course. Still, beginners are advised
+    to stick to ABINITv8.10.3 except if ABINITv8.10.3 is not appropriate (or not working) for them.
+    In particular, the build system relies on new <hostname>.ac9 files (see XX), superceeding the v8 <hostname>.ac files.
+    ABINITv9 does not build the dependencies (Linalg, NetCDF, LibXC, ...) anymore, as this was not sustainable (see XX).
+    The output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information),
+    which means that some user-developed parsing tools might not work anymore, they have to be adapted to the new ABINITv9 output file. (see XX).
+
+* * *
+
+### B. Most noticeable achievements
+
+* * *
+
+### C. Changes for the developers (also compilers)
+
+* * *
+
+### D.  Other changes (or on-going developments, not yet finalized)
+
+* * *
+
 ## v8.10
 
 Version 8.10, released on October 15, 2018.
