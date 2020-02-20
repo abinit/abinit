@@ -28,25 +28,132 @@ Xavier
 
 A.1 At the occasion of the switch from ABINITv8 to ABINITv9, many improvements of the formats and content of files
     have been made, so the backward compatibility of ABINITv9 is often broken. 
-    The present ABINITv9.0 is NOT to be considered a production version, but more a beta release, allowing to get feedback
+    The present ABINITv9.0 is NOT to be considered a production version. It is a beta release, allowing to get feedback
     from the users. Many features will work correctly, of course. Still, beginners are advised
     to stick to ABINITv8.10.3 except if ABINITv8.10.3 is not appropriate (or not working) for them.
-    In particular, the build system relies on new <hostname>.ac9 files (see XX), superceeding the v8 <hostname>.ac files.
-    ABINITv9 does not build the dependencies (Linalg, NetCDF, LibXC, ...) anymore, as this was not sustainable (see XX).
-    The output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information),
+    In particular, (1) the build system relies on new <hostname>.ac9 files (see XX), superceeding the v8 <hostname>.ac files.
+    (2) ABINITv9 does not build the dependencies (Linalg, NetCDF, LibXC, ...) anymore, as this was not sustainable (see XX).
+    (3) The output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information),
     which means that some user-developed parsing tools might not work anymore, they have to be adapted to the new ABINITv9 output file. (see XX).
 
 * * *
 
 ### B. Most noticeable achievements
 
+B.1 Electron-phonon self energy (for mobility, temperature-dependent electronic structure -incl. zero-point motion-, ...)
+v9#50-61  
+#50 Preparatory run for the calculation of the Fan-Migdal self-energy
+#%%   C in diamond structure. Very rough 2x2x2 q-point grid (3 qpoints); low ecut.
+#51   Merge the DDB files produced in t50.in
+#52 Merge the DFPT POT files produced in t50.in
+#53  Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
+#54 Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
+#%%   Use of the tetrahedron method for the electron linewidth
+#55  Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
+#%%   Use of the two-grids technique
+#56   Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
+#%%   Test of the calculation of the fermi level under different conditions
+#57   Calculation of the Fan-Migdal + Debye-Waller self-energy matrix elements.
+#58   Merge the DDB files produced in t57.in
+#59  Merge the DFPT POT files produced in t57.in
+#60  Calculation of the Fan-Migdal self-energy matrix elements in LiF.
+#61  Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
+By G. Brunin, H. Miranda, M. Giantomassi
+
+B.2 DFT+DMFT
+
+paral#84   DFT+DMFT for Vanadium using off diag CTQMC code with KGB parallelism
+#85    DFT+DMFT for Gadolinium using Hubbard 1 code with KGB parallelism  with Self-consistency over Green function and density
+# and Spin Orbit Coupling.
+#86    DFT+DMFT for SrVO3 using Hubard I code with KGB parallelism
+
+By T. Cavignac and B. Amadon
+
+
+B.3 Multibinit for spin
+
+tutomultibinit tmulti5
+#1  multibinit, just read xml and run spin dynamics
+#2  LaFeO3 Pnma with U(Fe)=4 eV; PBEsol; exchange parameter generated with TB2J.
+#%%   Parameters in this file does not give reasonable results and should be
+#%%   tuned, which is designed for the tutorial. It also serve the purpose  of
+#%%   limiting the test run to a short enough time.
+#3 1-D spin chain, with 1st nearest neighbor AFM exchange and DMI.
+#%%   1NN J=5 meV, 1NN D=(0, 0, 2) meV with two neighboring D opposite.
+#%%   This is to show how to see the spin canting.
+
+v8#23
+#23 This is to test spin_dynamics=2 (Depondt-Mertens method of spin rotation.)
+#%%   The ncell, spin_ntime_pre, spin_ntime parameters are small.
+wannier90#04 Wannier function for bcc Fe.
+#%%   To check whether wannier90 interface works properly with nsppol=2 and nspden=2.
+
+By He Xu, Ph. Ghosez, M. Verstraete + ... ?
+
+
+B.4 Constrained DFT
+
+X.Gonze
+v8#24-29  Constrained DFT
+v8#95-97  CDFT + test recognition of symmetry in the non-collinear case
+v9#1-3  CDFT PAW
+
 * * *
 
 ### C. Changes for the developers (also compilers)
 
+C.1 unitary ttransposer#1
+Test the transposer for linear algebra to KGB parallelisation.
+By J. Bieder
+
 * * *
 
 ### D.  Other changes (or on-going developments, not yet finalized)
+
+D.1 Test of linear electro-optical coefficient
+
+tutorespfn toptic#5-6
+#5 is exactly the same as #3 - should be rationalized !
+#6 (from N Pike) is claimed to be about the linear electro-optical coefficient ?!
+
+By N. Pike
+
+D.2
+v7#73
+#%% authors = X. Gonze
+#%% description =
+#%%   Helium atom in a box. NC, only local potential (too smooth to reproduce experiment).
+#%%   Simple system for testing Hartree-Fock and the SCF algorithms. Start from PBE.
+
+
+D.3  Multibinit
+Improvements from M. Schmitt
+#38 Multibinit Restart a Molecular-Dynamics run from a _HIST.nc file with one step in it.
+#98 Test the test set option. Evaluate a given effective potential on a set of configurations.
+#99 Test the optimize effective potential option. Optimize the value of 2 coefficients with respect
+#%%    to a training set.
+
+D.4 J. Zwanziger
+#39 Test Chern number and orbital magnetization calculation
+
+D.5 Miranda Giantomassi
+v8#52-54 ANADDB input for phonon bands and DOS, Test tolerance in the new inteergration weights
+
+D.6 Gmatteo
+v8#58  Calculation of Debye-Waller tensor.
+
+D.7 Gmatteo
+Gmatteo
+v8#59  Calculation of velocity matrix elements (DDK) with
+#%%   optdriver 8 and wfk_task4 "wfk_ddk”.
+
+D.8 F Ricci
+v8#94   test supercell_latt construction
+
+D.9 He Xu
+wannier90#4
+test wannier90 interface with nsppol=2 and nspden=2
+
 
 * * *
 
