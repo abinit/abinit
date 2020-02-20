@@ -67,7 +67,7 @@ dmatpawu
 #%% executable = abinit
 #%% [files]
 #%% files_to_test =
-#%%   t35.out, tolnlines = 19, tolabs = 1.000e-06, tolrel = 5.000e-04
+#%%   t35.out, tolnlines = 22, tolabs = 1.000e-06, tolrel = 5.000e-04
 #%% psp_files = 26fe.lda2.paw
 #%% [paral_info]
 #%% max_nprocs = 1
@@ -79,4 +79,3 @@ dmatpawu
 #%%   Test done in comparison to [[cite:Chen2016a]].
 #%% topics = DFT+U
 #%%<END TEST_INFO>
-

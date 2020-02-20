@@ -5,16 +5,16 @@
  * look at the Fortran interface instead: m_pair_list.F90
  *
  * Possible improvement:
- * - Add new type to be stored: it may worth it to implement
- *   the possibility to store numerical arrays
- * - Optimise memory allocation: malloc is not super efficient
- *   on little chuncks
+ * - Add new type to be stored: it may worth it to implement the possibility to store numerical arrays
+ * - Optimise memory allocation: malloc is not super efficient on little chunks
  */
 #include <stdlib.h>
 
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+
+#include "abi_clib.h"
 
 #define FALSE 0
 #define TRUE 1
@@ -51,8 +51,7 @@ typedef struct {
   int length;
 } pair_list;
 
-/* Lazy string comparision
- */
+/* Lazy string comparision */
 static bool str_eq(char* s1, char* s2){
   while(*s1 && *s2){
     if(*s1 != *s2){
@@ -69,7 +68,7 @@ static bool str_eq(char* s1, char* s2){
 static char* ftoc_str(char* fstr, int length){
   int i;
   char* cstr;
-  cstr = malloc((length+1)*sizeof(char));
+  cstr = xmalloc((length+1)*sizeof(char));
   for(i = 0; i < length; i++){
     cstr[i] = fstr[i];
   }
@@ -99,7 +98,7 @@ static bool get_or_create(pair_list* pl, char* ckey, pair_t** selected){
   if(pl->first){
     pair_t* prev = NULL;
     pair_t* pair = pl->first;
-    pair_t* new_pair = malloc(sizeof(pair_t));
+
     while(pair){
       if(str_eq(ckey, pair->key)){
         *selected = pair;
@@ -109,13 +108,16 @@ static bool get_or_create(pair_list* pl, char* ckey, pair_t** selected){
         pair = pair->next;
       }
     }
+    pair_t* new_pair = xmalloc(sizeof(pair_t));
+    new_pair->type_code = TC_EMPTY;
     new_pair->key = ckey;
     new_pair->next = NULL;
     prev->next = new_pair;
     *selected = new_pair;
     return TRUE;
   } else {  /* first element of the list */
-    pair_t* new_pair = malloc(sizeof(pair_t));
+    pair_t* new_pair = xmalloc(sizeof(pair_t));
+    new_pair->type_code = TC_EMPTY;
     new_pair->key = ckey;
     new_pair->next = NULL;
     pl->first = new_pair;
@@ -125,33 +127,31 @@ static bool get_or_create(pair_list* pl, char* ckey, pair_t** selected){
   }
 }
 
-/* free a pair after freeing the next one
- */
+/* free a pair after freeing the next one */
 static void pair_free(pair_t* p){
   if(p){
     pair_free(p->next);
-    free(p->key);
+    xfree(p->key);
     if(p->type_code == TC_STRING){
-      free(p->val.s);
+      xfree(p->val.s);
     }
-    free(p);
+    xfree(p);
   }
 }
 
 
 /* Visible from fortran */
 
-/* set an integer value
- */
+/* set an integer value */
 void pair_list_seti(pair_list* l, char* fkey, int* i, int* len){
   pair_t* pair = NULL;
   char* ckey = ftoc_str(fkey, *len);
   bool is_new = get_or_create(l, ckey, &pair);
   if(!is_new){
-    free(ckey);
+    xfree(ckey);
   } else {
     if(pair->type_code == TC_STRING){
-      free(pair->val.s);
+      xfree(pair->val.s);
     }
   }
   l->length += is_new;
@@ -159,17 +159,16 @@ void pair_list_seti(pair_list* l, char* fkey, int* i, int* len){
   pair->val.i = *i;
 }
 
-/* set a real (double) value
- */
+/* set a real (double) value */
 void pair_list_setr(pair_list* l, char* fkey, double* r, int* len){
   pair_t* pair = NULL;
   char* ckey = ftoc_str(fkey, *len);
   bool is_new = get_or_create(l, ckey, &pair);
   if(!is_new){
-    free(ckey);
+    xfree(ckey);
   } else {
     if(pair->type_code == TC_STRING){
-      free(pair->val.s);
+      xfree(pair->val.s);
     }
   }
   l->length += is_new;
@@ -184,10 +183,10 @@ void pair_list_sets(pair_list* l, char* fkey, char* s, int* len, int* len_s){
   char* ckey = ftoc_str(fkey, *len);
   bool is_new = get_or_create(l, ckey, &pair);
   if(!is_new){
-    free(ckey);
+    xfree(ckey);
   } else {
     if(pair->type_code == TC_STRING){
-      free(pair->val.s);
+      xfree(pair->val.s);
     }
   }
   l->length += is_new;
@@ -195,8 +194,7 @@ void pair_list_sets(pair_list* l, char* fkey, char* s, int* len, int* len_s){
   pair->val.s = ftoc_str(s, *len_s);
 }
 
-/* get a value from a key
- */
+/* get a value from a key */
 void pair_list_get_(pair_list* l, char* fkey, int* type_code, int*i, double* r, char* s, int* len, int* len_s){
   if(!l->first){
     /* list is empty */
@@ -228,7 +226,7 @@ void pair_list_get_(pair_list* l, char* fkey, int* type_code, int*i, double* r, 
       /* key not found */
       *type_code = TC_NOTFOUND;
     }
-    free(ckey);
+    xfree(ckey);
   }
 }
 
@@ -238,8 +236,7 @@ void pair_list_next(pair_list* pl){
   pl->cursor = pl->cursor->next;
 }
 
-/* free the whole chained list
- */
+/* free the whole chained list */
 void pair_list_free(pair_list* pl){
   pair_free(pl->first);
   pl->first = NULL;
@@ -247,8 +244,7 @@ void pair_list_free(pair_list* pl){
   pl->length = 0;
 }
 
-/* Return the pair pointed by the cursor
- */
+/* Return the pair pointed by the cursor */
 void pair_list_look_(pair_list* pl, char* fkey, int* type_code, int* i, double* r, char* s, int* len, int* len_s){
   pair_t* p = pl->cursor;
   if(p){

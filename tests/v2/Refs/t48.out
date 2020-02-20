@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h26 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h35 )
   
-- input  file    -> t48.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v2_t48/t48.in
 - output file    -> t48.out
 - root for input  files -> t48i
 - root for output files -> t48o
@@ -391,7 +391,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET 11 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -416,8 +416,8 @@ P           mkmem           1
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/1h.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/1h.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/1h.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/1h.pspnc
 -  Troullier-Martins psp for element  H         Thu Oct 27 17:28:54 EDT 1994
 -  1.00000   1.00000    940714                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -466,6 +466,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)= -6.82211950E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  7.26684490E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  7.26684490E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 11, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  1.799E-14, res2:  5.024E-18, residm:  1.414E-23, diffor:  1.388E-11, }
+etotal    :  -1.10102504E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.10230373E-01
+cartesian_stress_tensor:
+- [ -6.82211950E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   7.26684490E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   7.26684490E-04, ]
+pressure_GPa:  -7.5627E+00
+cartesian_forces:
+- [ -2.29246523E-01,   2.91790485E-19,  -1.58583030E-17, ]
+- [  2.29246523E-01,  -2.91790485E-19,   1.58583030E-17, ]
+force_length_stats: {min:   2.29246523E-01, max:   2.29246523E-01, mean:   2.29246523E-01, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -516,6 +542,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  2.15220494E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.36109857E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.36109857E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 11, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -1.066E-14, res2:  2.261E-20, residm:  1.606E-25, diffor:  2.832E-12, }
+etotal    :  -1.13467578E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.69056066E-01
+cartesian_stress_tensor:
+- [  2.15220494E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.36109857E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.36109857E-04, ]
+pressure_GPa:  -1.4587E+01
+cartesian_forces:
+- [  1.83157417E-02,  -1.67859882E-17,   2.28063308E-18, ]
+- [ -1.83157417E-02,   1.67859882E-17,  -2.28063308E-18, ]
+force_length_stats: {min:   1.83157417E-02, max:   1.83157417E-02, mean:   1.83157417E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -569,6 +621,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.39685677E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.39685677E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 11, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -2.309E-14, res2:  5.684E-19, residm:  2.977E-24, diffor:  8.518E-12, }
+etotal    :  -1.13517440E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.71641006E-01
+cartesian_stress_tensor:
+- [  1.71008697E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.39685677E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.39685677E-04, ]
+pressure_GPa:  -1.4224E+01
+cartesian_forces:
+- [  1.09058998E-02,   1.88087780E-18,   8.97032127E-18, ]
+- [ -1.09058998E-02,  -1.88087780E-18,  -8.97032127E-18, ]
+force_length_stats: {min:   1.09058998E-02, max:   1.09058998E-02, mean:   1.09058998E-02, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -621,6 +699,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.45770960E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.45770960E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 11, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -1.110E-14, res2:  2.226E-18, residm:  1.572E-23, diffor:  3.207E-11, }
+etotal    :  -1.13540578E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.75580512E-01
+cartesian_stress_tensor:
+- [  1.00696751E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.45770960E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.45770960E-04, ]
+pressure_GPa:  -1.3654E+01
+cartesian_forces:
+- [ -2.07395978E-03,   9.08334639E-18,   8.30149155E-19, ]
+- [  2.07395978E-03,  -9.08334639E-18,  -8.30149155E-19, ]
+force_length_stats: {min:   2.07395978E-03, max:   2.07395978E-03, mean:   2.07395978E-03, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -671,6 +775,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  1.12367311E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.44730951E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.44730951E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 11, itime: 5, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  5.995E-15, res2:  2.472E-19, residm:  1.415E-23, diffor:  3.434E-11, }
+etotal    :  -1.13541329E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.74940196E-01
+cartesian_stress_tensor:
+- [  1.12367311E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.44730951E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.44730951E-04, ]
+pressure_GPa:  -1.3748E+01
+cartesian_forces:
+- [  1.78985005E-04,  -2.59443193E-17,  -3.23198871E-18, ]
+- [ -1.78985005E-04,   2.59443193E-17,   3.23198871E-18, ]
+force_length_stats: {min:   1.78985005E-04, max:   1.78985005E-04, mean:   1.78985005E-04, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -738,22 +868,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -10.20264
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.01867350183720E-01
-    Hartree energy  =  4.11366876671432E-01
-    XC energy       = -5.64240513284106E-01
-    Ewald energy    = -1.46554436918676E-01
-    PspCore energy  =  5.18358393225783E-04
-    Loc. psp. energy= -1.53837092310613E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.13541328806053E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.08961668211599E+01 ; Band energy (Ha)=  -7.4988039266E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 11, itime: 5, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.01867350183720E-01
+hartree             :  4.11366876671432E-01
+xc                  : -5.64240513284106E-01
+Ewald energy        : -1.46554436918676E-01
+psp_core            :  5.18358393225783E-04
+local_psp           : -1.53837092310613E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.13541328806053E+00
+total_energy_eV     : -3.08961668211599E+01
+band_energy         : -7.49880392663930E-01
+...
 
  rms coord change=  1.2273E-02   atom, delta coord (reduced):
      1       -0.021256843140     -0.000000000000      0.000000000000
@@ -771,7 +899,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 
 ================================================================================
 == DATASET 12 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  11.
 
@@ -833,6 +961,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  7.26684490E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  7.26684490E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 12, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -2.220E-16, res2:  1.079E-17, residm:  9.116E-24, diffor:  6.225E-12, }
+etotal    :  -1.10102504E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.10230373E-01
+cartesian_stress_tensor:
+- [ -6.82211950E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   7.26684490E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   7.26684490E-04, ]
+pressure_GPa:  -7.5627E+00
+cartesian_forces:
+- [ -2.29246523E-01,   3.03121839E-17,   3.59570339E-18, ]
+- [  2.29246523E-01,  -3.03121839E-17,  -3.59570339E-18, ]
+force_length_stats: {min:   2.29246523E-01, max:   2.29246523E-01, mean:   2.29246523E-01, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -882,6 +1036,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  2.15220494E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.36109857E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.36109857E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 12, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -7.994E-15, res2:  2.260E-20, residm:  1.605E-25, diffor:  2.832E-12, }
+etotal    :  -1.13467578E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.69056066E-01
+cartesian_stress_tensor:
+- [  2.15220494E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.36109857E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.36109857E-04, ]
+pressure_GPa:  -1.4587E+01
+cartesian_forces:
+- [  1.83157417E-02,   4.37386841E-18,  -2.23621632E-17, ]
+- [ -1.83157417E-02,  -4.37386841E-18,   2.23621632E-17, ]
+force_length_stats: {min:   1.83157417E-02, max:   1.83157417E-02, mean:   1.83157417E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -935,6 +1115,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.45440841E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.45440841E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 12, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  1.554E-15, res2:  7.870E-18, residm:  2.278E-23, diffor:  4.338E-11, }
+etotal    :  -1.13541008E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.75378556E-01
+cartesian_stress_tensor:
+- [  1.04387845E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.45440841E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.45440841E-04, ]
+pressure_GPa:  -1.3683E+01
+cartesian_forces:
+- [ -1.35725177E-03,  -6.73456683E-18,   6.47644573E-18, ]
+- [  1.35725177E-03,   6.73456683E-18,  -6.47644573E-18, ]
+force_length_stats: {min:   1.35725177E-03, max:   1.35725177E-03, mean:   1.35725177E-03, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -985,6 +1191,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  1.11444962E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.44812741E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.44812741E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 12, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -1.021E-14, res2:  1.182E-19, residm:  8.747E-23, diffor:  7.282E-11, }
+etotal    :  -1.13541335E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.74990991E-01
+cartesian_stress_tensor:
+- [  1.11444962E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.44812741E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.44812741E-04, ]
+pressure_GPa:  -1.3740E+01
+cartesian_forces:
+- [  2.33296542E-06,   3.05079225E-17,   7.16765648E-18, ]
+- [ -2.33296542E-06,  -3.05079225E-17,  -7.16765648E-18, ]
+force_length_stats: {min:   2.33296542E-06, max:   2.33296542E-06, mean:   2.33296542E-06, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1052,22 +1284,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -10.20402
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.02146704274427E-01
-    Hartree energy  =  4.11547191605013E-01
-    XC energy       = -5.64328643232181E-01
-    Ewald energy    = -1.46300362798720E-01
-    PspCore energy  =  5.18358393225783E-04
-    Loc. psp. energy= -1.53899659386766E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.13541334562589E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.08961683875930E+01 ; Band energy (Ha)=  -7.4998198173E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 12, itime: 4, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.02146704274427E-01
+hartree             :  4.11547191605013E-01
+xc                  : -5.64328643232181E-01
+Ewald energy        : -1.46300362798720E-01
+psp_core            :  5.18358393225783E-04
+local_psp           : -1.53899659386766E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.13541334562589E+00
+total_energy_eV     : -3.08961683875930E+01
+band_energy         : -7.49981981731005E-01
+...
 
  rms coord change=  1.2252E-02   atom, delta coord (reduced):
      1       -0.021221581720      0.000000000000     -0.000000000000
@@ -1085,7 +1315,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 
 ================================================================================
 == DATASET 21 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  12.
 
@@ -1147,6 +1377,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.75450936E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.75450936E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 21, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  4.441E-16, res2:  6.045E-18, residm:  6.500E-23, diffor:  4.854E-12, }
+etotal    :  -1.12951466E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.90637807E-01
+cartesian_stress_tensor:
+- [ -2.01579824E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.75450936E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.75450936E-04, ]
+pressure_GPa:  -1.1271E+01
+cartesian_forces:
+- [ -7.29229474E-02,  -1.96142446E-17,  -3.08338691E-18, ]
+- [  7.29229474E-02,   1.96142446E-17,   3.08338691E-18, ]
+force_length_stats: {min:   7.29229474E-02, max:   7.29229474E-02, mean:   7.29229474E-02, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1194,6 +1450,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  5.71255492E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.49745878E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.49745878E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 21, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -8.882E-15, res2:  2.271E-16, residm:  2.681E-21, diffor:  3.710E-10, }
+etotal    :  -1.13522245E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.77926691E-01
+cartesian_stress_tensor:
+- [  5.71255492E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.49745878E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.49745878E-04, ]
+pressure_GPa:  -1.3304E+01
+cartesian_forces:
+- [ -1.08209319E-02,   8.33040388E-18,   8.34161031E-19, ]
+- [  1.08209319E-02,  -8.33040388E-18,  -8.34161031E-19, ]
+force_length_stats: {min:   1.08209319E-02, max:   1.08209319E-02, mean:   1.08209319E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1246,6 +1528,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.46220481E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.46220481E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 21, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  2.665E-15, res2:  2.537E-18, residm:  1.718E-23, diffor:  5.040E-11, }
+etotal    :  -1.13539710E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.75853640E-01
+cartesian_stress_tensor:
+- [  9.56898943E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.46220481E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.46220481E-04, ]
+pressure_GPa:  -1.3613E+01
+cartesian_forces:
+- [ -3.05227604E-03,   2.72460830E-18,  -5.96468446E-19, ]
+- [  3.05227604E-03,  -2.72460830E-18,   5.96468446E-19, ]
+force_length_stats: {min:   3.05227604E-03, max:   3.05227604E-03, mean:   3.05227604E-03, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1296,6 +1604,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  1.10360783E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.44908971E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.44908971E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 21, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -1.443E-14, res2:  3.730E-19, residm:  2.039E-23, diffor:  4.428E-11, }
+etotal    :  -1.13541327E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.75050656E-01
+cartesian_stress_tensor:
+- [  1.10360783E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.44908971E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.44908971E-04, ]
+pressure_GPa:  -1.3732E+01
+cartesian_forces:
+- [ -2.05621924E-04,  -2.40112391E-17,  -1.37517062E-17, ]
+- [  2.05621924E-04,   2.40112391E-17,   1.37517062E-17, ]
+force_length_stats: {min:   2.05621924E-04, max:   2.05621924E-04, mean:   2.05621924E-04, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1363,22 +1697,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -10.20565
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.02474829781088E-01
-    Hartree energy  =  4.11758938339670E-01
-    XC energy       = -5.64432137323614E-01
-    Ewald energy    = -1.46001824811901E-01
-    PspCore energy  =  5.18358393225783E-04
-    Loc. psp. energy= -1.53973143430454E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.13541326992607E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.08961663276962E+01 ; Band energy (Ha)=  -7.5010131151E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 21, itime: 4, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.02474829781088E-01
+hartree             :  4.11758938339670E-01
+xc                  : -5.64432137323614E-01
+Ewald energy        : -1.46001824811901E-01
+psp_core            :  5.18358393225783E-04
+local_psp           : -1.53973143430454E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.13541326992607E+00
+total_energy_eV     : -3.08961663276962E+01
+band_energy         : -7.50101311506536E-01
+...
 
  rms coord change=  5.8134E-03   atom, delta coord (reduced):
      1       -0.010069074634     -0.000000000000     -0.000000000000
@@ -1396,7 +1728,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 
 ================================================================================
 == DATASET 22 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  21.
 
@@ -1458,6 +1790,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.75450936E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.75450936E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 22, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -2.043E-14, res2:  6.199E-18, residm:  7.384E-23, diffor:  7.002E-12, }
+etotal    :  -1.12951466E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.90637807E-01
+cartesian_stress_tensor:
+- [ -2.01579824E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.75450936E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.75450936E-04, ]
+pressure_GPa:  -1.1271E+01
+cartesian_forces:
+- [ -7.29229474E-02,  -9.29900106E-19,  -7.03415459E-18, ]
+- [  7.29229474E-02,   9.29900106E-19,   7.03415459E-18, ]
+force_length_stats: {min:   7.29229474E-02, max:   7.29229474E-02, mean:   7.29229474E-02, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1505,6 +1863,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  5.71255492E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.49745878E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.49745878E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 22, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -8.438E-15, res2:  2.271E-16, residm:  2.681E-21, diffor:  3.710E-10, }
+etotal    :  -1.13522245E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.77926691E-01
+cartesian_stress_tensor:
+- [  5.71255492E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.49745878E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.49745878E-04, ]
+pressure_GPa:  -1.3304E+01
+cartesian_forces:
+- [ -1.08209319E-02,   9.43488479E-18,   2.19236828E-17, ]
+- [  1.08209319E-02,  -9.43488479E-18,  -2.19236828E-17, ]
+force_length_stats: {min:   1.08209319E-02, max:   1.08209319E-02, mean:   1.08209319E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1556,6 +1940,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  1.12362339E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.44731392E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.44731392E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 22, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -1.066E-14, res2:  4.863E-18, residm:  6.018E-23, diffor:  3.689E-11, }
+etotal    :  -1.13541329E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.74940470E-01
+cartesian_stress_tensor:
+- [  1.12362339E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.44731392E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.44731392E-04, ]
+pressure_GPa:  -1.3748E+01
+cartesian_forces:
+- [  1.78033271E-04,  -3.25551958E-17,  -1.02692908E-17, ]
+- [ -1.78033271E-04,   3.25551958E-17,   1.02692908E-17, ]
+force_length_stats: {min:   1.78033271E-04, max:   1.78033271E-04, mean:   1.78033271E-04, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1623,22 +2033,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -10.20265
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.01868856723309E-01
-    Hartree energy  =  4.11367849202664E-01
-    XC energy       = -5.64240988610220E-01
-    Ewald energy    = -1.46553066905523E-01
-    PspCore energy  =  5.18358393225783E-04
-    Loc. psp. energy= -1.53837429747517E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.13541328867172E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.08961668377911E+01 ; Band energy (Ha)=  -7.4988094059E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 22, itime: 3, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.01868856723309E-01
+hartree             :  4.11367849202664E-01
+xc                  : -5.64240988610220E-01
+Ewald energy        : -1.46553066905523E-01
+psp_core            :  5.18358393225783E-04
+local_psp           : -1.53837429747517E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.13541328867172E+00
+total_energy_eV     : -3.08961668377911E+01
+band_energy         : -7.49880940593826E-01
+...
 
  rms coord change=  5.8575E-03   atom, delta coord (reduced):
      1       -0.010145541816      0.000000000000      0.000000000000
@@ -1656,7 +2064,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 
 ================================================================================
 == DATASET 31 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  22.
 
@@ -1715,6 +2123,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.42555434E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.42555434E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 31, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  2.220E-15, res2:  2.547E-16, residm:  4.962E-22, diffor:  9.071E-11, }
+etotal    :  -1.13536917E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.73559714E-01
+cartesian_stress_tensor:
+- [  1.37207820E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.42555434E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.42555434E-04, ]
+pressure_GPa:  -1.3949E+01
+cartesian_forces:
+- [  4.84504255E-03,  -1.86605481E-17,  -1.38355236E-18, ]
+- [ -4.84504255E-03,   1.86605481E-17,   1.38355236E-18, ]
+force_length_stats: {min:   4.84504255E-03, max:   4.84504255E-03, mean:   4.84504255E-03, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1761,6 +2195,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  1.23453126E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.43753482E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.43753482E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 31, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -2.220E-15, res2:  1.929E-19, residm:  3.391E-24, diffor:  3.835E-12, }
+etotal    :  -1.13540378E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.74327115E-01
+cartesian_stress_tensor:
+- [  1.23453126E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.43753482E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.43753482E-04, ]
+pressure_GPa:  -1.3837E+01
+cartesian_forces:
+- [  2.28322590E-03,   2.22371134E-17,   7.53462627E-19, ]
+- [ -2.28322590E-03,  -2.22371134E-17,  -7.53462627E-19, ]
+force_length_stats: {min:   2.28322590E-03, max:   2.28322590E-03, mean:   2.28322590E-03, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1812,6 +2272,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  1.10986998E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.44853378E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.44853378E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 31, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -5.329E-15, res2:  2.475E-19, residm:  2.822E-24, diffor:  8.101E-12, }
+etotal    :  -1.13541333E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.75016199E-01
+cartesian_stress_tensor:
+- [  1.10986998E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.44853378E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.44853378E-04, ]
+pressure_GPa:  -1.3737E+01
+cartesian_forces:
+- [ -8.54678032E-05,   9.40858915E-18,   7.17310445E-18, ]
+- [  8.54678032E-05,  -9.40858915E-18,  -7.17310445E-18, ]
+force_length_stats: {min:   8.54678032E-05, max:   8.54678032E-05, mean:   8.54678032E-05, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1879,22 +2365,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -10.20471
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.02285338447704E-01
-    Hartree energy  =  4.11636661758292E-01
-    XC energy       = -5.64372372764361E-01
-    Ewald energy    = -1.46174243444310E-01
-    PspCore energy  =  5.18358393225783E-04
-    Loc. psp. energy= -1.53930707493100E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.13541333254045E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.08961680315200E+01 ; Band energy (Ha)=  -7.5003239839E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 31, itime: 3, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.02285338447704E-01
+hartree             :  4.11636661758292E-01
+xc                  : -5.64372372764361E-01
+Ewald energy        : -1.46174243444310E-01
+psp_core            :  5.18358393225783E-04
+local_psp           : -1.53930707493100E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.13541333254045E+00
+total_energy_eV     : -3.08961680315200E+01
+band_energy         : -7.50032398391968E-01
+...
 
  rms coord change=  5.8782E-04   atom, delta coord (reduced):
      1        0.001018133290      0.000000000000      0.000000000000
@@ -1912,7 +2396,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 
 ================================================================================
 == DATASET 32 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  31.
 
@@ -1971,6 +2455,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.42555434E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.42555434E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 32, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  6.439E-15, res2:  2.734E-16, residm:  5.530E-22, diffor:  7.794E-11, }
+etotal    :  -1.13536917E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.73559714E-01
+cartesian_stress_tensor:
+- [  1.37207820E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.42555434E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.42555434E-04, ]
+pressure_GPa:  -1.3949E+01
+cartesian_forces:
+- [  4.84504255E-03,   1.37094034E-17,  -6.11153734E-18, ]
+- [ -4.84504255E-03,  -1.37094034E-17,   6.11153734E-18, ]
+force_length_stats: {min:   4.84504255E-03, max:   4.84504255E-03, mean:   4.84504255E-03, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2017,6 +2527,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  1.23453126E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.43753482E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.43753482E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 32, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  1.776E-15, res2:  1.929E-19, residm:  3.392E-24, diffor:  3.839E-12, }
+etotal    :  -1.13540378E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.74327115E-01
+cartesian_stress_tensor:
+- [  1.23453126E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.43753482E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.43753482E-04, ]
+pressure_GPa:  -1.3837E+01
+cartesian_forces:
+- [  2.28322591E-03,  -2.37741837E-17,   3.16704785E-18, ]
+- [ -2.28322591E-03,   2.37741837E-17,  -3.16704785E-18, ]
+force_length_stats: {min:   2.28322591E-03, max:   2.28322591E-03, mean:   2.28322591E-03, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2068,6 +2604,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  1.11430853E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.44813993E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.44813993E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 32, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  1.599E-14, res2:  2.266E-19, residm:  2.626E-24, diffor:  7.926E-12, }
+etotal    :  -1.13541335E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.74991768E-01
+cartesian_stress_tensor:
+- [  1.11430853E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.44813993E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.44813993E-04, ]
+pressure_GPa:  -1.3740E+01
+cartesian_forces:
+- [ -3.71157991E-07,   2.05060041E-17,   1.58312122E-17, ]
+- [  3.71157991E-07,  -2.05060041E-17,  -1.58312122E-17, ]
+force_length_stats: {min:   3.71157991E-07, max:   3.71157991E-07, mean:   3.71157991E-07, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2135,22 +2697,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -10.20404
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.02150976090561E-01
-    Hartree energy  =  4.11549948641080E-01
-    XC energy       = -5.64329990759455E-01
-    Ewald energy    = -1.46296476918195E-01
-    PspCore energy  =  5.18358393225783E-04
-    Loc. psp. energy= -1.53900616108262E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.13541334563540E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.08961683878517E+01 ; Band energy (Ha)=  -7.4998353527E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 32, itime: 3, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.02150976090561E-01
+hartree             :  4.11549948641080E-01
+xc                  : -5.64329990759455E-01
+Ewald energy        : -1.46296476918195E-01
+psp_core            :  5.18358393225783E-04
+local_psp           : -1.53900616108262E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.13541334563540E+00
+total_energy_eV     : -3.08961683878517E+01
+band_energy         : -7.49983535266994E-01
+...
 
  rms coord change=  5.7803E-04   atom, delta coord (reduced):
      1        0.001001179579     -0.000000000000      0.000000000000
@@ -2168,7 +2728,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 
 ================================================================================
 == DATASET 41 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  32.
 
@@ -2230,6 +2790,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.25602378E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.25602378E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 41, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -1.332E-15, res2:  4.749E-20, residm:  6.616E-25, diffor:  4.139E-12, }
+etotal    :  -1.13042262E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.59053583E-01
+cartesian_stress_tensor:
+- [  3.72075035E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.25602378E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.25602378E-04, ]
+pressure_GPa:  -1.5920E+01
+cartesian_forces:
+- [  3.94491735E-02,   7.98894980E-18,   8.41888824E-18, ]
+- [ -3.94491735E-02,  -7.98894980E-18,  -8.41888824E-18, ]
+force_length_stats: {min:   3.94491735E-02, max:   3.94491735E-02, mean:   3.94491735E-02, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2277,6 +2863,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  2.89823428E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.30625105E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.30625105E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 41, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -7.105E-15, res2:  3.642E-18, residm:  3.642E-22, diffor:  1.269E-10, }
+etotal    :  -1.13316527E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.64477117E-01
+cartesian_stress_tensor:
+- [  2.89823428E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.30625105E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.30625105E-04, ]
+pressure_GPa:  -1.5211E+01
+cartesian_forces:
+- [  2.94173165E-02,  -1.34749392E-17,  -7.79509701E-18, ]
+- [ -2.94173165E-02,   1.34749392E-17,   7.79509701E-18, ]
+force_length_stats: {min:   2.94173165E-02, max:   2.94173165E-02, mean:   2.94173165E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2331,6 +2943,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.58508788E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.58508788E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 41, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -7.550E-15, res2:  5.252E-18, residm:  2.342E-24, diffor:  2.313E-12, }
+etotal    :  -1.13407212E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.82652719E-01
+cartesian_stress_tensor:
+- [ -3.45418053E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.58508788E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.58508788E-04, ]
+pressure_GPa:  -1.2577E+01
+cartesian_forces:
+- [ -3.08913582E-02,   1.01411312E-17,  -2.41769142E-18, ]
+- [  3.08913582E-02,  -1.01411312E-17,   2.41769142E-18, ]
+force_length_stats: {min:   3.08913582E-02, max:   3.08913582E-02, mean:   3.08913582E-02, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2384,6 +3022,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.41565340E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.41565340E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 41, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -1.155E-14, res2:  1.297E-19, residm:  3.384E-24, diffor:  2.248E-11, }
+etotal    :  -1.13532048E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.72911255E-01
+cartesian_stress_tensor:
+- [  1.48725487E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.41565340E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.41565340E-04, ]
+pressure_GPa:  -1.4042E+01
+cartesian_forces:
+- [  6.94801687E-03,  -5.31219848E-19,  -1.71954960E-17, ]
+- [ -6.94801687E-03,   5.31219848E-19,   1.71954960E-17, ]
+force_length_stats: {min:   6.94801687E-03, max:   6.94801687E-03, mean:   6.94801687E-03, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2435,6 +3099,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.44236417E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.44236417E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 41, itime: 5, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  7.550E-15, res2:  9.503E-19, residm:  1.436E-23, diffor:  1.335E-11, }
+etotal    :  -1.13541053E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.74631428E-01
+cartesian_stress_tensor:
+- [  1.17961296E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.44236417E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.44236417E-04, ]
+pressure_GPa:  -1.3793E+01
+cartesian_forces:
+- [  1.24518391E-03,   1.16620664E-18,   8.95420515E-18, ]
+- [ -1.24518391E-03,  -1.16620664E-18,  -8.95420515E-18, ]
+force_length_stats: {min:   1.24518391E-03, max:   1.24518391E-03, mean:   1.24518391E-03, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2485,6 +3175,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  1.11079563E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.44845163E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.44845163E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 41, itime: 6, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  3.331E-15, res2:  7.620E-20, residm:  2.013E-23, diffor:  5.421E-12, }
+etotal    :  -1.13541334E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.75011105E-01
+cartesian_stress_tensor:
+- [  1.11079563E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.44845163E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.44845163E-04, ]
+pressure_GPa:  -1.3737E+01
+cartesian_forces:
+- [ -6.77164696E-05,  -1.71522225E-17,   2.06835106E-19, ]
+- [  6.77164696E-05,   1.71522225E-17,  -2.06835106E-19, ]
+force_length_stats: {min:   6.77164696E-05, max:   6.77164696E-05, mean:   6.77164696E-05, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2552,22 +3268,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -10.20457
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.02257321089050E-01
-    Hartree energy  =  4.11618580989907E-01
-    XC energy       = -5.64363535561828E-01
-    Ewald energy    = -1.46199733262900E-01
-    PspCore energy  =  5.18358393225783E-04
-    Loc. psp. energy= -1.53924432906126E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.13541333741381E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.08961681641309E+01 ; Band energy (Ha)=  -7.5002220935E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 41, itime: 6, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.02257321089050E-01
+hartree             :  4.11618580989907E-01
+xc                  : -5.64363535561828E-01
+Ewald energy        : -1.46199733262900E-01
+psp_core            :  5.18358393225783E-04
+local_psp           : -1.53924432906126E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.13541333741381E+00
+total_energy_eV     : -3.08961681641309E+01
+band_energy         : -7.50022209346964E-01
+...
 
  rms coord change=  7.0008E-03   atom, delta coord (reduced):
      1        0.012125709521     -0.000000000000     -0.000000000000
@@ -2585,7 +3299,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 
 ================================================================================
 == DATASET 42 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  41.
 
@@ -2647,6 +3361,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.25602378E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.25602378E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 42, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -5.329E-15, res2:  4.893E-20, residm:  6.653E-25, diffor:  4.179E-12, }
+etotal    :  -1.13042262E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.59053583E-01
+cartesian_stress_tensor:
+- [  3.72075035E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.25602378E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.25602378E-04, ]
+pressure_GPa:  -1.5920E+01
+cartesian_forces:
+- [  3.94491735E-02,  -6.41588861E-18,   5.58822414E-18, ]
+- [ -3.94491735E-02,   6.41588861E-18,  -5.58822414E-18, ]
+force_length_stats: {min:   3.94491735E-02, max:   3.94491735E-02, mean:   3.94491735E-02, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2694,6 +3434,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  2.89823428E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.30625105E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.30625105E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 42, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -1.776E-15, res2:  3.642E-18, residm:  3.642E-22, diffor:  1.269E-10, }
+etotal    :  -1.13316527E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.64477117E-01
+cartesian_stress_tensor:
+- [  2.89823428E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.30625105E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.30625105E-04, ]
+pressure_GPa:  -1.5211E+01
+cartesian_forces:
+- [  2.94173165E-02,   4.66494255E-18,   2.59951481E-18, ]
+- [ -2.94173165E-02,  -4.66494255E-18,  -2.59951481E-18, ]
+force_length_stats: {min:   2.94173165E-02, max:   2.94173165E-02, mean:   2.94173165E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2748,6 +3514,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.45151421E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.45151421E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 42, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  4.441E-15, res2:  3.619E-19, residm:  6.273E-23, diffor:  6.064E-11, }
+etotal    :  -1.13541240E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.75200517E-01
+cartesian_stress_tensor:
+- [  1.07634015E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.45151421E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.45151421E-04, ]
+pressure_GPa:  -1.3710E+01
+cartesian_forces:
+- [ -7.30112525E-04,   1.01966681E-17,  -1.11975226E-17, ]
+- [  7.30112525E-04,  -1.01966681E-17,   1.11975226E-17, ]
+force_length_stats: {min:   7.30112525E-04, max:   7.30112525E-04, mean:   7.30112525E-04, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2797,6 +3589,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  1.11453883E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.44811950E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.44811950E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 42, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -2.220E-15, res2:  6.313E-18, residm:  7.964E-25, diffor:  1.288E-12, }
+etotal    :  -1.13541335E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.74990500E-01
+cartesian_stress_tensor:
+- [  1.11453883E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.44811950E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.44811950E-04, ]
+pressure_GPa:  -1.3740E+01
+cartesian_forces:
+- [  4.04267449E-06,   1.37084701E-17,  -4.99994050E-18, ]
+- [ -4.04267449E-06,  -1.37084701E-17,   4.99994050E-18, ]
+force_length_stats: {min:   4.04267449E-06, max:   4.04267449E-06, mean:   4.04267449E-06, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2864,22 +3682,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -10.20401
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.02144003341950E-01
-    Hartree energy  =  4.11545448410669E-01
-    XC energy       = -5.64327791230749E-01
-    Ewald energy    = -1.46302819723204E-01
-    PspCore energy  =  5.18358393225783E-04
-    Loc. psp. energy= -1.53899054479823E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.13541334560634E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.08961683870611E+01 ; Band energy (Ha)=  -7.4998099957E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 42, itime: 4, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.02144003341950E-01
+hartree             :  4.11545448410669E-01
+xc                  : -5.64327791230749E-01
+Ewald energy        : -1.46302819723204E-01
+psp_core            :  5.18358393225783E-04
+local_psp           : -1.53899054479823E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.13541334560634E+00
+total_energy_eV     : -3.08961683870611E+01
+band_energy         : -7.49980999565640E-01
+...
 
  rms coord change=  6.9925E-03   atom, delta coord (reduced):
      1        0.012111410767      0.000000000000     -0.000000000000
@@ -2897,7 +3713,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 
 ================================================================================
 == DATASET 51 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  42.
 
@@ -2960,6 +3776,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.20562794E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.20562794E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 51, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -1.288E-14, res2:  4.131E-20, residm:  1.565E-24, diffor:  1.604E-11, }
+etotal    :  -1.12109626E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.46938170E-01
+cartesian_stress_tensor:
+- [  5.31875122E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.20562794E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.20562794E-04, ]
+pressure_GPa:  -1.7388E+01
+cartesian_forces:
+- [  5.11770912E-02,   2.03725356E-17,   3.20105125E-18, ]
+- [ -5.11770912E-02,  -2.03725356E-17,  -3.20105125E-18, ]
+force_length_stats: {min:   5.11770912E-02, max:   5.11770912E-02, mean:   5.11770912E-02, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3007,6 +3849,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  4.57960331E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.21926640E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.21926640E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 51, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -9.770E-15, res2:  2.762E-17, residm:  2.365E-22, diffor:  1.034E-10, }
+etotal    :  -1.12615788E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.52856139E-01
+cartesian_stress_tensor:
+- [  4.57960331E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.21926640E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.21926640E-04, ]
+pressure_GPa:  -1.6690E+01
+cartesian_forces:
+- [  4.71542535E-02,   2.09523971E-17,  -5.11385762E-18, ]
+- [ -4.71542535E-02,  -2.09523971E-17,   5.11385762E-18, ]
+force_length_stats: {min:   4.71542535E-02, max:   4.71542535E-02, mean:   4.71542535E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3060,6 +3928,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)= -3.00363248E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  9.19342028E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  9.19342028E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 51, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -1.643E-14, res2:  1.769E-17, residm:  9.546E-22, diffor:  3.788E-11, }
+etotal    :  -7.30956651E-01
+entropy   :   0.00000000E+00
+fermie    :  -4.65552363E-01
+cartesian_stress_tensor:
+- [ -3.00363248E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   9.19342028E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   9.19342028E-04, ]
+pressure_GPa:   1.1425E+01
+cartesian_forces:
+- [ -1.63947113E+00,  -2.22305685E-16,   4.70809047E-17, ]
+- [  1.63947113E+00,   2.22305685E-16,  -4.70809047E-17, ]
+force_length_stats: {min:   1.63947113E+00, max:   1.63947113E+00, mean:   1.63947113E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3115,6 +4009,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.22900940E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.22900940E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 51, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  3.331E-15, res2:  3.311E-18, residm:  6.331E-22, diffor:  3.658E-10, }
+etotal    :  -1.12770481E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.54922531E-01
+cartesian_stress_tensor:
+- [  4.30285458E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.22900940E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.22900940E-04, ]
+pressure_GPa:  -1.6437E+01
+cartesian_forces:
+- [  4.50043537E-02,  -6.93383634E-18,   5.16278140E-18, ]
+- [ -4.50043537E-02,   6.93383634E-18,  -5.16278140E-18, ]
+force_length_stats: {min:   4.50043537E-02, max:   4.50043537E-02, mean:   4.50043537E-02, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3166,6 +4086,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  4.02896954E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.24070160E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.24070160E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 51, itime: 5, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -7.772E-15, res2:  1.565E-17, residm:  1.828E-23, diffor:  6.786E-11, }
+etotal    :  -1.12907015E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.56900240E-01
+cartesian_stress_tensor:
+- [  4.02896954E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.24070160E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.24070160E-04, ]
+pressure_GPa:  -1.6192E+01
+cartesian_forces:
+- [  4.25595208E-02,  -2.97046150E-18,  -1.30667433E-17, ]
+- [ -4.25595208E-02,   2.97046150E-18,   1.30667433E-17, ]
+force_length_stats: {min:   4.25595208E-02, max:   4.25595208E-02, mean:   4.25595208E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3221,6 +4167,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  7.01177222E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  7.01177222E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 51, itime: 6, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  1.643E-14, res2:  8.611E-18, residm:  5.733E-23, diffor:  1.287E-11, }
+etotal    :  -1.11780527E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.01067254E-01
+cartesian_stress_tensor:
+- [ -4.44099160E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   7.01177222E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   7.01177222E-04, ]
+pressure_GPa:  -9.3976E+00
+cartesian_forces:
+- [ -1.45531416E-01,   3.15051064E-17,   4.48613892E-17, ]
+- [  1.45531416E-01,  -3.15051064E-17,  -4.48613892E-17, ]
+force_length_stats: {min:   1.45531416E-01, max:   1.45531416E-01, mean:   1.45531416E-01, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3274,6 +4246,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.31478893E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.31478893E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 51, itime: 7, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -8.660E-15, res2:  3.579E-18, residm:  5.314E-24, diffor:  3.583E-11, }
+etotal    :  -1.13347624E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.65255479E-01
+cartesian_stress_tensor:
+- [  2.77475746E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.31478893E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.31478893E-04, ]
+pressure_GPa:  -1.5107E+01
+cartesian_forces:
+- [  2.77062740E-02,   1.28532906E-17,  -1.04308254E-17, ]
+- [ -2.77062740E-02,  -1.28532906E-17,   1.04308254E-17, ]
+force_length_stats: {min:   2.77062740E-02, max:   2.77062740E-02, mean:   2.77062740E-02, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3326,6 +4324,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  1.95500043E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.37678188E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.37678187E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 51, itime: 8, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -1.776E-15, res2:  4.487E-19, residm:  5.420E-24, diffor:  2.198E-11, }
+etotal    :  -1.13493314E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.70220050E-01
+cartesian_stress_tensor:
+- [  1.95500043E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.37678188E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.37678187E-04, ]
+pressure_GPa:  -1.4425E+01
+cartesian_forces:
+- [  1.50844918E-02,  -1.96564831E-19,   1.02131329E-17, ]
+- [ -1.50844918E-02,   1.96564831E-19,  -1.02131329E-17, ]
+force_length_stats: {min:   1.50844918E-02, max:   1.50844918E-02, mean:   1.50844918E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3394,22 +4418,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -10.07420
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  6.75874304577263E-01
-    Hartree energy  =  3.94416092516012E-01
-    XC energy       = -5.55962097139088E-01
-    Ewald energy    = -1.69857117876759E-01
-    PspCore energy  =  5.18358393225783E-04
-    Loc. psp. energy= -1.47992268193694E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.13493314146628E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.08831013678747E+01 ; Band energy (Ha)=  -7.4044009959E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 51, itime: 8, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  6.75874304577263E-01
+hartree             :  3.94416092516012E-01
+xc                  : -5.55962097139088E-01
+Ewald energy        : -1.69857117876759E-01
+psp_core            :  5.18358393225783E-04
+local_psp           : -1.47992268193694E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.13493314146628E+00
+total_energy_eV     : -3.08831013678747E+01
+band_energy         : -7.40440099589214E-01
+...
 
  rms coord change=  1.1448E-02   atom, delta coord (reduced):
      1        0.019827861050      0.000000000000     -0.000000000000
@@ -3427,7 +4449,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 
 ================================================================================
 == DATASET 52 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  51.
 
@@ -3489,6 +4511,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.20562794E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.20562794E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 52, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  4.885E-15, res2:  2.983E-18, residm:  5.738E-25, diffor:  9.211E-12, }
+etotal    :  -1.12109626E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.46938170E-01
+cartesian_stress_tensor:
+- [  5.31875122E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.20562794E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.20562794E-04, ]
+pressure_GPa:  -1.7388E+01
+cartesian_forces:
+- [  5.11770912E-02,   1.68326920E-17,   2.15362074E-18, ]
+- [ -5.11770912E-02,  -1.68326920E-17,  -2.15362074E-18, ]
+force_length_stats: {min:   5.11770912E-02, max:   5.11770912E-02, mean:   5.11770912E-02, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3536,6 +4584,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  4.57960331E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.21926640E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.21926640E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 52, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -9.992E-15, res2:  2.762E-17, residm:  2.365E-22, diffor:  1.034E-10, }
+etotal    :  -1.12615788E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.52856139E-01
+cartesian_stress_tensor:
+- [  4.57960331E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.21926640E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.21926640E-04, ]
+pressure_GPa:  -1.6690E+01
+cartesian_forces:
+- [  4.71542535E-02,  -3.58380053E-17,   9.64352947E-18, ]
+- [ -4.71542535E-02,   3.58380053E-17,  -9.64352947E-18, ]
+force_length_stats: {min:   4.71542535E-02, max:   4.71542535E-02, mean:   4.71542535E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3591,6 +4665,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.45784305E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.45784305E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 52, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -1.776E-15, res2:  1.450E-19, residm:  1.554E-23, diffor:  3.683E-11, }
+etotal    :  -1.13540557E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.75588651E-01
+cartesian_stress_tensor:
+- [  1.00547791E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.45784305E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.45784305E-04, ]
+pressure_GPa:  -1.3652E+01
+cartesian_forces:
+- [ -2.10296412E-03,   2.63635465E-17,  -1.18047663E-17, ]
+- [  2.10296412E-03,  -2.63635465E-17,   1.18047663E-17, ]
+force_length_stats: {min:   2.10296412E-03, max:   2.10296412E-03, mean:   2.10296412E-03, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3641,6 +4741,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  1.11672878E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.44792524E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.44792524E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 52, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  6.661E-16, res2:  2.259E-19, residm:  1.247E-23, diffor:  3.286E-11, }
+etotal    :  -1.13541334E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.74978442E-01
+cartesian_stress_tensor:
+- [  1.11672878E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.44792524E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.44792524E-04, ]
+pressure_GPa:  -1.3742E+01
+cartesian_forces:
+- [  4.60067702E-05,   1.31236960E-17,  -4.06738664E-18, ]
+- [ -4.60067702E-05,  -1.31236960E-17,   4.06738664E-18, ]
+force_length_stats: {min:   4.60067702E-05, max:   4.60067702E-05, mean:   4.60067702E-05, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3708,22 +4834,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -10.20368
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.02077692525180E-01
-    Hartree energy  =  4.11502650080196E-01
-    XC energy       = -5.64306873186916E-01
-    Ewald energy    = -1.46363137083343E-01
-    PspCore energy  =  5.18358393225783E-04
-    Loc. psp. energy= -1.53884203256479E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.13541334183644E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.08961682844768E+01 ; Band energy (Ha)=  -7.4995688482E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 52, itime: 4, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.02077692525180E-01
+hartree             :  4.11502650080196E-01
+xc                  : -5.64306873186916E-01
+Ewald energy        : -1.46363137083343E-01
+psp_core            :  5.18358393225783E-04
+local_psp           : -1.53884203256479E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.13541334183644E+00
+total_energy_eV     : -3.08961682844768E+01
+band_energy         : -7.49956884822218E-01
+...
 
  rms coord change=  1.3403E-02   atom, delta coord (reduced):
      1        0.023214153304     -0.000000000000      0.000000000000
@@ -3741,7 +4865,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 
 ================================================================================
 == DATASET 61 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  52.
 
@@ -3804,6 +4928,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.23119250E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.23119250E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 61, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  0.000E+00, res2:  5.096E-19, residm:  6.418E-24, diffor:  8.269E-12, }
+etotal    :  -1.11068380E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.36928979E-01
+cartesian_stress_tensor:
+- [  6.38701319E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.23119250E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.23119250E-04, ]
+pressure_GPa:  -1.8486E+01
+cartesian_forces:
+- [  5.17576101E-02,  -1.30667674E-17,  -5.06361653E-18, ]
+- [ -5.17576101E-02,   1.30667674E-17,   5.06361653E-18, ]
+force_length_stats: {min:   5.17576101E-02, max:   5.17576101E-02, mean:   5.17576101E-02, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3851,6 +5001,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  5.88885456E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.21099586E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.21099586E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 61, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -5.329E-15, res2:  6.380E-18, residm:  1.370E-23, diffor:  4.578E-11, }
+etotal    :  -1.11608527E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.41865744E-01
+cartesian_stress_tensor:
+- [  5.88885456E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.21099586E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.21099586E-04, ]
+pressure_GPa:  -1.7957E+01
+cartesian_forces:
+- [  5.23511184E-02,   6.26918769E-18,  -6.08471001E-19, ]
+- [ -5.23511184E-02,  -6.26918769E-18,   6.08471001E-19, ]
+force_length_stats: {min:   5.23511184E-02, max:   5.23511184E-02, mean:   5.23511184E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3919,22 +5095,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.30264
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  5.21821616797556E-01
-    Hartree energy  =  2.84186444482299E-01
-    XC energy       = -5.02705939938813E-01
-    Ewald energy    = -3.01198106660570E-01
-    PspCore energy  =  5.18358393225783E-04
-    Loc. psp. energy= -1.11870764343498E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.11608527036128E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.03702247122928E+01 ; Band energy (Ha)=  -6.8373148712E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 61, itime: 2, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  5.21821616797556E-01
+hartree             :  2.84186444482299E-01
+xc                  : -5.02705939938813E-01
+Ewald energy        : -3.01198106660570E-01
+psp_core            :  5.18358393225783E-04
+local_psp           : -1.11870764343498E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.11608527036128E+00
+total_energy_eV     : -3.03702247122928E+01
+band_energy         : -6.83731487123020E-01
+...
 
  rms coord change=  3.3203E-03   atom, delta coord (reduced):
      1        0.005750845567     -0.000000000000     -0.000000000000
@@ -3952,7 +5126,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 
 ================================================================================
 == DATASET 62 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  61.
 
@@ -4013,6 +5187,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.23119250E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.23119250E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 62, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  8.438E-15, res2:  7.889E-19, residm:  1.849E-24, diffor:  2.154E-11, }
+etotal    :  -1.11068380E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.36928979E-01
+cartesian_stress_tensor:
+- [  6.38701319E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.23119250E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.23119250E-04, ]
+pressure_GPa:  -1.8486E+01
+cartesian_forces:
+- [  5.17576101E-02,   5.55462251E-18,  -2.67523538E-18, ]
+- [ -5.17576101E-02,  -5.55462251E-18,   2.67523538E-18, ]
+force_length_stats: {min:   5.17576101E-02, max:   5.17576101E-02, mean:   5.17576101E-02, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -4060,6 +5260,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  5.88885456E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.21099586E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.21099586E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 62, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  3.109E-15, res2:  6.380E-18, residm:  1.370E-23, diffor:  4.578E-11, }
+etotal    :  -1.11608527E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.41865744E-01
+cartesian_stress_tensor:
+- [  5.88885456E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.21099586E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.21099586E-04, ]
+pressure_GPa:  -1.7957E+01
+cartesian_forces:
+- [  5.23511184E-02,  -1.29008105E-17,   2.95547201E-18, ]
+- [ -5.23511184E-02,   1.29008105E-17,  -2.95547201E-18, ]
+force_length_stats: {min:   5.23511184E-02, max:   5.23511184E-02, mean:   5.23511184E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4112,6 +5338,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  4.91274031E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.21067813E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.21067813E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 62, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae:  1.199E-14, res2:  7.300E-17, residm:  9.672E-23, diffor:  7.500E-11, }
+etotal    :  -1.12405450E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.50267077E-01
+cartesian_stress_tensor:
+- [  4.91274031E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.21067813E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.21067813E-04, ]
+pressure_GPa:  -1.7000E+01
+cartesian_forces:
+- [  4.92903264E-02,   2.73303669E-17,  -1.02997923E-17, ]
+- [ -4.92903264E-02,  -2.73303669E-17,   1.02997923E-17, ]
+force_length_stats: {min:   4.92903264E-02, max:   4.92903264E-02, mean:   4.92903264E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4166,6 +5418,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(2 2)=  6.42853571E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.42853571E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 62, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -2.220E-16, res2:  5.994E-17, residm:  6.442E-22, diffor:  2.020E-10, }
+etotal    :  -1.13538021E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.73752398E-01
+cartesian_stress_tensor:
+- [  1.33766903E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.42853571E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.42853571E-04, ]
+pressure_GPa:  -1.3921E+01
+cartesian_forces:
+- [  4.20929267E-03,   4.75207703E-18,  -1.88347047E-19, ]
+- [ -4.20929267E-03,  -4.75207703E-18,   1.88347047E-19, ]
+force_length_stats: {min:   4.20929267E-03, max:   4.20929267E-03, mean:   4.20929267E-03, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -4216,6 +5494,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   sigma(1 1)=  1.10794599E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  6.44870455E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  6.44870455E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 62, itime: 5, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   9.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.2400000E+02
+convergence: {deltae: -3.109E-15, res2:  8.422E-19, residm:  9.075E-24, diffor:  3.953E-12, }
+etotal    :  -1.13541332E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.75026787E-01
+cartesian_stress_tensor:
+- [  1.10794599E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   6.44870455E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   6.44870455E-04, ]
+pressure_GPa:  -1.3735E+01
+cartesian_forces:
+- [ -1.22372260E-04,   3.64614460E-17,  -1.20903542E-18, ]
+- [  1.22372260E-04,  -3.64614460E-17,   1.20903542E-18, ]
+force_length_stats: {min:   1.22372260E-04, max:   1.22372260E-04, mean:   1.22372260E-04, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -4283,22 +5587,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
  -10.20500
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.02343567270634E-01
-    Hartree energy  =  4.11674238015681E-01
-    XC energy       = -5.64390738673951E-01
-    Ewald energy    = -1.46121264965727E-01
-    PspCore energy  =  5.18358393225783E-04
-    Loc. psp. energy= -1.53943747883929E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.13541331879943E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.08961676576079E+01 ; Band energy (Ha)=  -7.5005357453E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 62, itime: 5, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.02343567270634E-01
+hartree             :  4.11674238015681E-01
+xc                  : -5.64390738673951E-01
+Ewald energy        : -1.46121264965727E-01
+psp_core            :  5.18358393225783E-04
+local_psp           : -1.53943747883929E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.13541331879943E+00
+total_energy_eV     : -3.08961676576079E+01
+band_energy         : -7.50053574533631E-01
+...
 
  rms coord change=  1.9837E-02   atom, delta coord (reduced):
      1        0.034358812665      0.000000000000     -0.000000000000
@@ -4526,7 +5828,24 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -4540,11 +5859,11 @@ P           mkmem           1
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT: First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -4553,11 +5872,13 @@ P           mkmem           1
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -4565,24 +5886,15 @@ P           mkmem           1
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [4] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=         16.0  wall=         18.0
+- Proc.   0 individual time (sec): cpu=         16.5  wall=         24.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  19 WARNINGs and 124 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.0  wall=         18.0
++Overall time at end (sec) : cpu=         16.5  wall=         24.1

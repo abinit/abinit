@@ -73,7 +73,7 @@ prtwf 0      # Don't output the wave-functions
 #%% exclude_hosts = gfortran@abiref
 #%% [files]
 #%% files_to_test = 
-#%%   t14.out, tolnlines = 2, tolabs = 5.0e-8, tolrel = 1.0e-9
+#%%   t14.out, tolnlines = 2, tolabs = 1.0e-4, tolrel = 1.0e-4
 #%% extra_inputs = t14i_OCCUP
 #%% psp_files = 22ti.12.khgh, HGH/11na.1.hgh
 #%% [paral_info]
