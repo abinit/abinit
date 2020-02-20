@@ -1027,12 +1027,6 @@ print *, 'skipping for resid'
    ! with an additional factor of 2 for the difference between E(2) and the 2DTE
    dedt = zero
    call dotprod_g(dedt,doti,istwf_k,npw1*nspinor,1,conjgr,gresid,me_g0,mpi_enreg%comm_spinorfft)
-if (any(isnan(gresid))) then
-print *, 'gresid ', gresid
-end if
-if (any(isnan(conjgr))) then
-print *, 'conjgr ', conjgr
-end if
    dedt=-two*two*dedt
    if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) call wrtout(std_out,' CGWF3_WARNING : dedt>0')
    ABI_ALLOCATE(gvnlx_direc,(2,npw1*nspinor))
