@@ -428,7 +428,6 @@ Flag to activate the bound process:
 **Related variables:1 and 2** The number of maximum additional coefficient in the polynome ([[multibinit:bound_maxCoeff]]), the  power range for the additional coefficients ([[multibinit:bound_rangePower]]), the cut off of the additional interactions ([[multibinit:bound_cutoff]])
 
 *3 --> Check each anharmonic term in the effective potential. If the term contains has a negative coefficient and is even in its displacement or contains odd powers in the displacement generate high order bounding terms of the same combination of displacement within the range of powers defined by the user ([[multibinit:bound_rangePower]]). The coefficients of the added high-order terms are optimized until the precision of the original effective potential is retained. 
-
 """,
 ),
 
@@ -591,7 +590,6 @@ thermostats ([[qmass]]).
 
 
 * 120 --> Dummy mover. Atoms does not move. For testing only.
-
 """,
 
 ),
@@ -1217,11 +1215,12 @@ Variable(
     mnemonics="TEST EFFective POTential",
     text=r"""
 * 0 --> nothing.
-* 1 --> Evaluate the effective potential with respect to given test-set and calculate mean square differences between ab-initio energy/forces and model energy/forces""",
+* 1 --> Evaluate the effective potential with respect to given test-set and calculate mean square differences between ab-initio energy/forces and model energy/forces
+""",
 ),
 
 Variable(
-    abivarname="analyze_anh_pot@multibinit",
+abivarname="analyze_anh_pot@multibinit",
     varset="multibinit",
     vartype="integer",
     topics=['LatticeModel_expert'],
@@ -1231,9 +1230,10 @@ Variable(
     text=r"""
 * 0 --> nothing.
 * 1 --> Print energy contribution of each anharmonic term in the effective Potential. 
-        If it is a Molecular Dynamics (MD) run the contribution of each term is printed for each MD-step into MD_anharmonic_terms_energy.dat
-        If the effective potential is tested against a test set the contribution of each term for each configuration in the test is set is printed in TES_anharmonic_terms_energy.dat 
-        If the a effective potential is fitted the contribution of each selected term for each configuration in the training set is printed in TRS_anharmonic_terms_energy.dat""",
+        If it is a Molecular Dynamics (MD) run, the contribution of each term is printed for each MD-step into MD_anharmonic_terms_energy.dat .
+        If the effective potential is tested against a test set the contribution of each term for each configuration in the test set is printed in TES_anharmonic_terms_energy.dat .
+        If the effective potential is fitted, the contribution of each selected term for each configuration in the training set is printed in TRS_anharmonic_terms_energy.dat
+""",
 ),
 
 
@@ -1250,7 +1250,8 @@ Variable(
 * 1 --> Turn on reading of optimization of effective potential keywords (opt_)
         The optimization process gives the user the ability to refit the coefficients of specified terms with respect to the training set while keeping the rest fixed.
 
-**Related variables:** The number of coefficients to refit ([[multibinit:opt_ncoeff]]), the  indexes of the coefficients to optimize ([[multibinit:opt_coeff]])""" 
+**Related variables:** The number of coefficients to refit ([[multibinit:opt_ncoeff]]), the  indexes of the coefficients to optimize ([[multibinit:opt_coeff]])
+""",
 ),
 
 Variable(
@@ -1262,7 +1263,8 @@ Variable(
     defaultval=0,
     mnemonics="OPTimize NUMBER of COEFFicients",
     text=r"""
-* Number of anharmonic terms to refit in the effective potential""" 
+* Number of anharmonic terms to refit in the effective potential
+""", 
 ),
 
 Variable(
@@ -1274,7 +1276,8 @@ Variable(
     defaultval=0,
     mnemonics="OPTimize Cofficients",
     text=r"""
-Indexes of the terms to refit in the effective potential. """,
+Indexes of the terms to refit in the effective potential. 
+""",
 ),
 
 
