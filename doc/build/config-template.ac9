@@ -1319,6 +1319,10 @@
 #
 #enable_bse_unpacked="yes"
 
+# Enable non optimized cRPA build (routerovitch)
+#
+#enable_crpa_no_optim="yes"
+
 # Enable exports (pouillon)
 #
 #enable_exports="yes"
