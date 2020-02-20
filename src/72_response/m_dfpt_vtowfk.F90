@@ -435,6 +435,7 @@ unit_me = 6
      if ( (ipert/=natom+10 .and. ipert/=natom+11) .or. abs(occ_k(iband))>tol8 ) then
        nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
 
+print *, ' vtowfk isppol.ikpt, nband_me ', isppol, ikpt, nband_me, iband, iband_me 
        call dfpt_cgwf(iband,iband_me,band_procs,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
 &       rf2,dcwavef,&
 &       eig0nk,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
@@ -1008,6 +1009,8 @@ print *, 'factr, facti ', factr, facti
      end if
    end if
  end do ! loop over all bands presently running in parallel
+
+print *, 'edocc ', edocc
 
 !In the PAW case, compute <Psi^(1)_ortho|H-Eig0_k.S|Psi^(1)_parallel> contribution to 2DTE
  if (usepaw==1.and.wf_corrected==1) then

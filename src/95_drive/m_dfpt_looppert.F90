@@ -1074,7 +1074,8 @@ print *, 'after kpgio npwarr ', npwarr
 !   need to check if this is correct (or indifferent) in all cases
    bantot_rbz=sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
    ABI_ALLOCATE(eigen0,(bantot_rbz))
-   eigen0(:)=zero
+   eigen0 = zero
+   occ_rbz = zero
    call ebands_init(bantot_rbz,ebands_k,dtset%nelect,doccde_rbz,eigen0,istwfk_rbz,kpt_rbz,&
 &   nband_rbz,nkpt_rbz,npwarr,dtset%nsppol,dtset%nspinor,dtset%tphysel,dtset%tsmear,dtset%occopt,occ_rbz,wtk_rbz,&
 &   dtset%charge, dtset%kptopt, dtset%kptrlatt_orig, dtset%nshiftk_orig, dtset%shiftk_orig, &
@@ -1117,8 +1118,10 @@ print *, 'istwfk_rbz ', istwfk_rbz
 &            cg, eigen=eigen0, occ=occ_disk)
 ! if the occ are not fixed by the input file, read in from GS file
 !   if (dtset%occopt /= 2) then
-!     occ_rbz = occ_disk
-!   end if 
+! how can I tell if the occ need to be read in from disk???
+   if (sum(abs(occ_rbz)) < tol12) then
+     occ_rbz = occ_disk
+   end if 
 print *, 'eigen0 1111 ', eigen0
 print *, " occ_rbz 1111 ", occ_rbz
   
@@ -1417,9 +1420,9 @@ end if
        ibdoffst = ibdoffst + nband_rbz(ikpt+nkpt_rbz*(isppol-1))
      end do
    end do
-   ABI_DEALLOCATE(cg_tmp)
    ABI_DEALLOCATE(eigen_tmp)
    ABI_DEALLOCATE(occ_tmp)
+   ABI_DEALLOCATE(cg_tmp)
  
 !    Close dtfil%unwffkq, if it was ever opened (in inwffil)
      if (ireadwf0==1) then
@@ -1623,27 +1626,82 @@ print *, 'mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol ', &
    end if
    ABI_ALLOCATE(eigen1,(2*dtset%mband*dtset%mband*nkpt_rbz*dtset%nsppol))
    ABI_ALLOCATE(resid,(dtset%mband*nkpt_rbz*dtset%nsppol))
+
    call timab(144,1,tsec)
    if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
-&      (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
+&      (dtset%get1wf /= 0 .or. dtset%ird1wf /= 0)) then
 print *, 'init cg1 from disk ', shape(cg1)
      call wfk_read_my_kptbands(fiwf1i, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1, &
 &            cg1, eigen=eigen1, ask_accurate_=0)
+
+
+!DEBUG
+   mcg_tmp = mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
+   ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
+   ABI_ALLOCATE(occ_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
+   ABI_ALLOCATE(eigen_tmp,(2*dtset%mband**2*nkpt_rbz*dtset%nsppol))
+
+     call timab(144,1,tsec)
+     call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen_tmp,dtset%exchn2n3d,&
+&     formeig,hdr,&
+&     dtfil%ireadwf,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,&
+&     dtset%mband,mcg_tmp,mk1mem_rbz,mpi_enreg,mpw1,nband_rbz,dtset%ngfft,nkpt_rbz,npwar1,&
+&     dtset%nsppol,nsym1,occ_tmp,optorth,&
+&     symaf1,symrl1,tnons1,dtfil%unkg1,wff1,wffnow,dtfil%unwff1,&
+&     fiwf1i,wvl)
+print *, ' mk1mem_rbz, ', mk1mem_rbz
+   !transfer to local array
+   icg=0
+   icg_tmp=0
+   ibdoffst=0
+   do isppol=1, nsppol
+     do ikpt=1, mk1mem_rbz
+       npw = npwar1(ikpt)
+       iband_me = 0
+       do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) then
+           icg_tmp = icg_tmp + npw
+           cycle
+         end if
+         iband_me = iband_me + 1
+if (sum(abs(cg1(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol6) then
+print *, 'NB: this comparison does not seem to work, though the cg1 read above works fine in the tests'
+print *, 'is ik ib cg1 ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
+print *, ' diff in cg1 ', cg1(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+else
+write (202, *) 'is ik ib cg1 ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
+end if
+         icg = icg + npw
+         icg_tmp = icg_tmp + npw
+       end do
+if (sum(abs(eigen1(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2) - &
+&        eigen_tmp(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2 ))) > tol6) then
+print *, ' diff in eigen1 ', eigen1(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2) - &
+&                         eigen_tmp(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2)
+else
+write (302, *) 'is ik ib ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
+end if
+       ibdoffst = ibdoffst + 2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2
+     end do
+   end do
+   ABI_DEALLOCATE(eigen_tmp)
+   ABI_DEALLOCATE(occ_tmp)
+   ABI_DEALLOCATE(cg_tmp)
+ 
+!    Close dtfil%unwffkq, if it was ever opened (in inwffil)
+     if (dtfil%ireadwf==1) then
+       call WffClose(wff1,ierr)
+     end if
+!ENDDEBUG
+
    else
 print *, 'init cg1 to 0'
      cg1 = zero
      eigen1 = zero
-!     call inwffil(ask_accurate,cg1,dtset,dtset%ecut,ecut_eff,eigen1,dtset%exchn2n3d,&
-!&     formeig,hdr,&
-!&     dtfil%ireadwf,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,&
-!&     dtset%mband,mcg_tmp,mk1mem_rbz,mpi_enreg,mpw1,nband_rbz,dtset%ngfft,nkpt_rbz,npwar1,&
-!&     dtset%nsppol,nsym1,occ_rbz,optorth,&
-!&     symaf1,symrl1,tnons1,dtfil%unkg1,wff1,wffnow,dtfil%unwff1,&
-!&     fiwf1i,wvl)
    end if
-   call timab(144,2,tsec)
 
+   call timab(144,2,tsec)
    if(.not.kramers_deg) then
      ABI_ALLOCATE(eigen1_mq,(2*dtset%mband*dtset%mband*nkpt_rbz*dtset%nsppol))
      ABI_ALLOCATE(resid_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))

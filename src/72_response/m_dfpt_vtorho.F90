@@ -665,7 +665,8 @@ print *, occ_kq
          eloc0=eloc0+wtk_k*occ_k(iband)*eloc0_k(iband)
          enl0=enl0+wtk_k*occ_k(iband)*enl0_k(iband)
          enl1=enl1+wtk_k*occ_k(iband)*enl1_k(iband)
-write (*,*) ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), &
+print *, ' wtk_k ', wtk_k, occ_k(iband) 
+print *, ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), &
 &   ek0_k(iband), ek1_k(iband), eloc0_k(iband), enl0_k(iband), enl1_k(iband)
        end do
      end if
