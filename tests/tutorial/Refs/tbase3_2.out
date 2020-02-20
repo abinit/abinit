@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h21 )
+.Starting date : Tue 11 Feb 2020.
+- ( at 16h42 )
   
-- input  file    -> tbase3_2.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tbase3_2/tbase3_2.in
 - output file    -> tbase3_2.out
 - root for input  files -> tbase3_2i
 - root for output files -> tbase3_2o

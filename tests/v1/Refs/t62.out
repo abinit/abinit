@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h25 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h32 )
   
-- input  file    -> t62.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t62-t63/t62.in
 - output file    -> t62.out
 - root for input  files -> t62i
 - root for output files -> t62o
@@ -179,7 +179,7 @@ P           mkmem          10
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -197,8 +197,8 @@ P           mkmem          10
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.10256
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -240,6 +240,31 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
   sigma(1 1)=  1.28848842E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.28848842E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.28848842E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  0.0000000,   3.7800000,   3.7800000, ]
+- [  3.7800000,   0.0000000,   3.7800000, ]
+- [  3.7800000,   3.7800000,   0.0000000, ]
+lattice_lengths: [   5.34573,    5.34573,    5.34573, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_volume:   1.0802030E+02
+convergence: {deltae: -9.211E-11, res2:  3.377E-09, residm:  5.935E-08, diffor: null, }
+etotal    :  -2.09429521E+00
+entropy   :   0.00000000E+00
+fermie    :   3.55100289E-01
+cartesian_stress_tensor:
+- [  1.28848842E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.28848842E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.28848842E-05, ]
+pressure_GPa:  -3.7909E-01
+cartesian_forces:
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -283,25 +308,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  8.94276183344586E-01
-    Hartree energy  =  4.54089095275091E-03
-    XC energy       = -8.09637252569120E-01
-    Ewald energy    = -2.72908456792489E+00
-    PspCore energy  = -1.66387883282358E-01
-    Loc. psp. energy=  3.37927112815856E-01
-    NL   psp  energy=  3.75787946890842E-01
-    >>>>> Internal E= -2.09257756977233E+00
-
-    -kT*entropy     = -1.71764351502464E-03
-    >>>>>>>>> Etotal= -2.09429521328736E+00
-
- Other information on the energy :
-    Total energy(eV)= -5.69886709649228E+01 ; Band energy (Ha)=   5.6217989714E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.94276183344586E-01
+hartree             :  4.54089095275091E-03
+xc                  : -8.09637252569120E-01
+Ewald energy        : -2.72908456792489E+00
+psp_core            : -1.66387883282358E-01
+local_psp           :  3.37927112815856E-01
+non_local_psp       :  3.75787946890842E-01
+internal            : -2.09257756977233E+00
+'-kT*entropy'       : -1.71764351502464E-03
+total_energy        : -2.09429521328736E+00
+total_energy_eV     : -5.69886709649228E+01
+band_energy         :  5.62179897135767E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -316,7 +338,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -353,6 +375,31 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
   sigma(1 1)=  1.28843989E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.28843989E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.28843989E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, }
+comment   : Summary of ground state results
+rprimd    :
+- [  0.0000000,   3.7800000,   3.7800000, ]
+- [  3.7800000,   0.0000000,   3.7800000, ]
+- [  3.7800000,   3.7800000,   0.0000000, ]
+lattice_lengths: [   5.34573,    5.34573,    5.34573, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_volume:   1.0802030E+02
+convergence: {deltae:  1.688E-14, res2:  9.642E-16, residm:  5.383E-13, diffor: null, }
+etotal    :  -2.09429521E+00
+entropy   :   0.00000000E+00
+fermie    :   3.55100324E-01
+cartesian_stress_tensor:
+- [  1.28843989E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.28843989E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.28843989E-05, ]
+pressure_GPa:  -3.7907E-01
+cartesian_forces:
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -396,25 +443,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  8.94276273816569E-01
-    Hartree energy  =  4.54094549705317E-03
-    XC energy       = -8.09637295992611E-01
-    Ewald energy    = -2.72908456792489E+00
-    PspCore energy  = -1.66387883282358E-01
-    Loc. psp. energy=  3.37926900976199E-01
-    NL   psp  energy=  3.75788041261016E-01
-    >>>>> Internal E= -2.09257758564902E+00
-
-    -kT*entropy     = -1.71762764037462E-03
-    >>>>>>>>> Etotal= -2.09429521328939E+00
-
- Other information on the energy :
-    Total energy(eV)= -5.69886709649783E+01 ; Band energy (Ha)=   5.6217998258E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 2, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.94276273816569E-01
+hartree             :  4.54094549705317E-03
+xc                  : -8.09637295992611E-01
+Ewald energy        : -2.72908456792489E+00
+psp_core            : -1.66387883282358E-01
+local_psp           :  3.37926900976199E-01
+non_local_psp       :  3.75788041261016E-01
+internal            : -2.09257758564902E+00
+'-kT*entropy'       : -1.71762764037462E-03
+total_energy        : -2.09429521328939E+00
+total_energy_eV     : -5.69886709649783E+01
+band_energy         :  5.62179982579728E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -429,7 +473,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -466,6 +510,31 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
   sigma(1 1)=  1.70554289E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.70554289E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.70554289E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, }
+comment   : Summary of ground state results
+rprimd    :
+- [  0.0000000,   3.7800000,   3.7800000, ]
+- [  3.7800000,   0.0000000,   3.7800000, ]
+- [  3.7800000,   3.7800000,   0.0000000, ]
+lattice_lengths: [   5.34573,    5.34573,    5.34573, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_volume:   1.0802030E+02
+convergence: {deltae: -2.724E-12, res2:  2.611E-12, residm:  3.647E-13, diffor: null, }
+etotal    :  -2.09313440E+00
+entropy   :   0.00000000E+00
+fermie    :   3.55003332E-01
+cartesian_stress_tensor:
+- [  1.70554289E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.70554289E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.70554289E-05, ]
+pressure_GPa:  -5.0179E-01
+cartesian_forces:
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -509,25 +578,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  8.94953467378812E-01
-    Hartree energy  =  4.66492366818276E-03
-    XC energy       = -8.09732435608433E-01
-    Ewald energy    = -2.72908456792489E+00
-    PspCore energy  = -1.66387883282358E-01
-    Loc. psp. energy=  3.38462152376527E-01
-    NL   psp  energy=  3.74941877348808E-01
-    >>>>> Internal E= -2.09218246604335E+00
-
-    -kT*entropy     = -9.51938248439836E-04
-    >>>>>>>>> Etotal= -2.09313440429179E+00
-
- Other information on the energy :
-    Total energy(eV)= -5.69570837457563E+01 ; Band energy (Ha)=   5.6266900825E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 3, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.94953467378812E-01
+hartree             :  4.66492366818276E-03
+xc                  : -8.09732435608433E-01
+Ewald energy        : -2.72908456792489E+00
+psp_core            : -1.66387883282358E-01
+local_psp           :  3.38462152376527E-01
+non_local_psp       :  3.74941877348808E-01
+internal            : -2.09218246604335E+00
+'-kT*entropy'       : -9.51938248439836E-04
+total_energy        : -2.09313440429179E+00
+total_energy_eV     : -5.69570837457563E+01
+band_energy         :  5.62669008246722E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -542,7 +608,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   3.
 
@@ -579,6 +645,31 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
   sigma(1 1)=  1.53538812E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  1.53538812E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.53538812E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 4, }
+comment   : Summary of ground state results
+rprimd    :
+- [  0.0000000,   3.7800000,   3.7800000, ]
+- [  3.7800000,   0.0000000,   3.7800000, ]
+- [  3.7800000,   3.7800000,   0.0000000, ]
+lattice_lengths: [   5.34573,    5.34573,    5.34573, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_volume:   1.0802030E+02
+convergence: {deltae: -5.289E-13, res2:  4.289E-13, residm:  7.247E-14, diffor: null, }
+etotal    :  -2.09269109E+00
+entropy   :   0.00000000E+00
+fermie    :   3.58478821E-01
+cartesian_stress_tensor:
+- [  1.53538812E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.53538812E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.53538812E-05, ]
+pressure_GPa:  -4.5173E-01
+cartesian_forces:
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -622,25 +713,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  8.95593725750306E-01
-    Hartree energy  =  4.71168793738917E-03
-    XC energy       = -8.09770052857846E-01
-    Ewald energy    = -2.72908456792489E+00
-    PspCore energy  = -1.66387883282358E-01
-    Loc. psp. energy=  3.38446457408491E-01
-    NL   psp  energy=  3.74782923309881E-01
-    >>>>> Internal E= -2.09170770965902E+00
-
-    -kT*entropy     = -9.83377637596644E-04
-    >>>>>>>>> Etotal= -2.09269108729662E+00
-
- Other information on the energy :
-    Total energy(eV)= -5.69450204768291E+01 ; Band energy (Ha)=   5.6317865463E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 4, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.95593725750306E-01
+hartree             :  4.71168793738917E-03
+xc                  : -8.09770052857846E-01
+Ewald energy        : -2.72908456792489E+00
+psp_core            : -1.66387883282358E-01
+local_psp           :  3.38446457408491E-01
+non_local_psp       :  3.74782923309881E-01
+internal            : -2.09170770965902E+00
+'-kT*entropy'       : -9.83377637596644E-04
+total_energy        : -2.09269108729662E+00
+total_energy_eV     : -5.69450204768291E+01
+band_energy         :  5.63178654628775E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -791,7 +879,24 @@ P           mkmem          10
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -805,11 +910,11 @@ P           mkmem          10
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT: First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -818,11 +923,13 @@ P           mkmem          10
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -830,24 +937,15 @@ P           mkmem          10
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [4] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=          1.0  wall=          1.1
+- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  15 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.0  wall=          1.1
++Overall time at end (sec) : cpu=          1.1  wall=          1.5

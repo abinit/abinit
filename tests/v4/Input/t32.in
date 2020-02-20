@@ -28,7 +28,7 @@
 #%% test_chain = t32.in, t33.in, t34.in
 #%% [files]
 #%% files_to_test = 
-#%%   t32.out, tolnlines = 38, tolabs = 3.0e-06, tolrel = 7.000e-07
+#%%   t32.out, tolnlines = 50, tolabs = 3.0e-06, tolrel = 7.000e-07
 #%% psp_files = 8o.pspnc, 12mg.pspnc
 #%% [shell]
 #%% post_commands = ww_cp t32o_DEN t33i_DEN; ww_mv t32o_DEN t34i_DEN

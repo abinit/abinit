@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h25 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h34 )
   
-- input  file    -> t05.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v2_t05/t05.in
 - output file    -> t05.out
 - root for input  files -> t05i
 - root for output files -> t05o
@@ -191,7 +191,7 @@ P          mk1mem           2
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
@@ -207,8 +207,8 @@ P          mk1mem           2
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.01062
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.Hamann_mod
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.Hamann_mod
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.Hamann_mod
 -   Si psp produced from Hamann's atompp on 14 Feb 1990 ( !! OLD, for tests only )
 - 14.00000   4.00000    900214                znucl, zion, pspdat
     5    3    2    0       770   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -258,6 +258,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     166.000     165.892
   sigma(2 2)=  3.12986279E-04  sigma(3 1)= -1.77311396E-15
   sigma(3 3)= -2.52556365E-03  sigma(2 1)=  3.58204370E-15
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 10.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  12.5000000, ]
+lattice_lengths: [  10.00000,   10.00000,   12.50000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   1.2500000E+03
+convergence: {deltae:  1.066E-14, res2:  2.600E-19, residm:  8.589E-23, diffor: null, }
+etotal    :  -6.64999247E+00
+entropy   :   0.00000000E+00
+fermie    :  -2.16518912E-01
+cartesian_stress_tensor:
+- [  3.12986279E-04,   3.58204370E-15,  -1.77311396E-15, ]
+- [  3.58204370E-15,   3.12986279E-04,   0.00000000E+00, ]
+- [ -1.77311396E-15,   0.00000000E+00,  -2.52556365E-03, ]
+pressure_GPa:   1.8629E+01
+cartesian_forces:
+- [ -1.77598609E-13,  -1.62843026E-13,  -1.39442274E+00, ]
+- [  1.77598609E-13,   1.62843026E-13,   1.39442274E+00, ]
+force_length_stats: {min:   1.39442274E+00, max:   1.39442274E+00, mean:   1.39442274E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -298,22 +324,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     166.000     165.892
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.96063057516735E+00
-    Hartree energy  =  3.61408459242119E+00
-    XC energy       = -2.28228607110879E+00
-    Ewald energy    = -1.81143676288751E+00
-    PspCore energy  =  3.60621757934793E-01
-    Loc. psp. energy= -9.27524992720742E+00
-    NL   psp  energy= -2.16356638120233E-01
-    >>>>>>>>> Etotal= -6.64999247380062E+00
-
- Other information on the energy :
-    Total energy(eV)= -1.80955497870700E+02 ; Band energy (Ha)=  -2.2789488794E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.96063057516735E+00
+hartree             :  3.61408459242119E+00
+xc                  : -2.28228607110879E+00
+Ewald energy        : -1.81143676288751E+00
+psp_core            :  3.60621757934793E-01
+local_psp           : -9.27524992720742E+00
+non_local_psp       : -2.16356638120233E-01
+total_energy        : -6.64999247380062E+00
+total_energy_eV     : -1.80955497870700E+02
+band_energy         : -2.27894887944559E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -328,7 +352,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     166.000     165.892
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -462,7 +486,7 @@ P newkpt: treating      4 bands with npw=     172 for ikpt=   2 by node    0
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1016,7 +1040,35 @@ P          mk1mem           2
 - Comment: to be cited in case the extrapolar conditioner is used, i.e. non-vanishing iprcel.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#anglade2008
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [3] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
+-
+- [4] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- interatomic force constants from density-functional perturbation theory,
+- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
+-
+- [5] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1030,22 +1082,11 @@ P          mk1mem           2
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
-- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
--
-- [4] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
-- interatomic force constants from density-functional perturbation theory,
-- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
--
-- [5] ABINIT: First-principles approach of materials and nanosystem properties.
+- [6] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1054,27 +1095,14 @@ P          mk1mem           2
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [6] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.4
+- Proc.   0 individual time (sec): cpu=          1.3  wall=          1.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and  10 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.1  wall=          1.4
++Overall time at end (sec) : cpu=          1.3  wall=          1.6

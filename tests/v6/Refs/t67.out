@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h31 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h49 )
   
-- input  file    -> t67.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t67/t67.in
 - output file    -> t67.out
 - root for input  files -> t67i
 - root for output files -> t67o
@@ -571,7 +571,7 @@ P          mk1mem           5
 
 ================================================================================
 == DATASET 11 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -589,8 +589,8 @@ P          mk1mem           5
          ecut(hartree)=     18.743   => boxcut(ratio)=   2.05249
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/02he.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/02he.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  2.00000   2.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -639,6 +639,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
   sigma(1 1)=  3.23732173E-04  sigma(3 2)=  9.98461576E-15
   sigma(2 2)= -1.69915486E-04  sigma(3 1)=  1.82091737E-15
   sigma(3 3)= -1.69915488E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 11, }
+comment   : Summary of ground state results
+rprimd    :
+- [  8.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   5.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   5.0000000, ]
+lattice_lengths: [   8.00000,    5.00000,    5.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   2.0000000E+02
+convergence: {deltae:  8.793E-14, res2:  7.739E-14, residm:  2.600E-16, diffor: null, }
+etotal    :  -4.79391243E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.72200689E-01
+cartesian_stress_tensor:
+- [  3.23732173E-04,   0.00000000E+00,   1.82091737E-15, ]
+- [  0.00000000E+00,  -1.69915486E-04,   9.98461576E-15, ]
+- [  1.82091737E-15,   9.98461576E-15,  -1.69915488E-04, ]
+pressure_GPa:   1.5788E-01
+cartesian_forces:
+- [ -4.47675834E-02,  -1.83976926E-12,  -4.72534061E-12, ]
+- [  4.47675834E-02,   1.83976926E-12,   4.72534061E-12, ]
+force_length_stats: {min:   4.47675834E-02, max:   4.47675834E-02, mean:   4.47675834E-02, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -690,28 +716,26 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.00681380769331E+00
-    Hartree energy  =  1.58433651546949E+00
-    XC energy       = -1.46221283118292E+00
-    Ewald energy    = -1.59795996427760E+00
-    PspCore energy  =  5.02654824574367E-07
-    Loc. psp. energy= -7.32489046330099E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -4.79391243294389E+00
-
- Other information on the energy :
-    Total energy(eV)= -1.30448991404063E+02 ; Band energy (Ha)=  -2.0668661099E+00
-
  Calculation was performed for a charged system with PBC
  You may consider including the monopole correction to the total energy
  The correction is to be divided by the dielectric constant
-    Monopole correction (Ha)= 2.22440061134641E-01
-    Monopole correction (eV)= 6.05290188937659E+00
---------------------------------------------------------------------------------
 
+--- !EnergyTerms
+iteration_state     : {dtset: 11, }
+comment             : Components of total free energy in Hartree
+kinetic             :  4.00681380769331E+00
+hartree             :  1.58433651546949E+00
+xc                  : -1.46221283118292E+00
+Ewald energy        : -1.59795996427760E+00
+psp_core            :  5.02654824574367E-07
+local_psp           : -7.32489046330099E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -4.79391243294389E+00
+total_energy_eV     : -1.30448991404063E+02
+band_energy         : -2.06686610991810E+00
+monopole_correction :  2.22440061134641E-01
+monopole_correction_eV:  6.05290188937659E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -726,7 +750,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
 
 ================================================================================
 == DATASET 12 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  11.
 
@@ -767,6 +791,27 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
+
+--- !ResultsGS
+iteration_state: {dtset: 12, }
+comment   : Summary of ground state results
+rprimd    :
+- [  8.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   5.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   5.0000000, ]
+lattice_lengths: [   8.00000,    5.00000,    5.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   2.0000000E+02
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.043E-23, diffor:  0.000E+00, }
+etotal    :  -4.79391243E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.72200689E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
@@ -805,7 +850,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
 
 ================================================================================
 == DATASET 13 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  12.
 
@@ -1040,7 +1085,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
 
 ================================================================================
 == DATASET 14 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  12.
 
@@ -1918,7 +1963,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
 
 ================================================================================
 == DATASET 15 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  12.
 
@@ -2089,7 +2134,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
 
 ================================================================================
 == DATASET 21 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -2134,6 +2179,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
   sigma(1 1)=  2.97887053E-04  sigma(3 2)=  9.40394260E-15
   sigma(2 2)= -1.70022630E-04  sigma(3 1)=  1.63288445E-15
   sigma(3 3)= -1.70022632E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 21, }
+comment   : Summary of ground state results
+rprimd    :
+- [  8.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   5.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   5.0000000, ]
+lattice_lengths: [   8.00000,    5.00000,    5.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   2.0000000E+02
+convergence: {deltae:  2.842E-14, res2:  1.187E-13, residm:  3.678E-16, diffor: null, }
+etotal    :  -4.79344964E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.70190909E-01
+cartesian_stress_tensor:
+- [  2.97887053E-04,   0.00000000E+00,   1.63288445E-15, ]
+- [  0.00000000E+00,  -1.70022630E-04,   9.40394260E-15, ]
+- [  1.63288445E-15,   9.40394260E-15,  -1.70022632E-04, ]
+pressure_GPa:   4.1345E-01
+cartesian_forces:
+- [ -4.78094594E-02,  -1.77770591E-12,  -4.79464523E-12, ]
+- [  4.78094594E-02,   1.77770591E-12,   4.79464523E-12, ]
+force_length_stats: {min:   4.78094594E-02, max:   4.78094594E-02, mean:   4.78094594E-02, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -2185,28 +2256,26 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.01066085656470E+00
-    Hartree energy  =  1.59022434261689E+00
-    XC energy       = -1.46333929489207E+00
-    Ewald energy    = -1.58784060306204E+00
-    PspCore energy  =  5.02654824574367E-07
-    Loc. psp. energy= -7.34315544414638E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -4.79344964026408E+00
-
- Other information on the energy :
-    Total energy(eV)= -1.30436398174805E+02 ; Band energy (Ha)=  -2.0709953479E+00
-
  Calculation was performed for a charged system with PBC
  You may consider including the monopole correction to the total energy
  The correction is to be divided by the dielectric constant
-    Monopole correction (Ha)= 2.22440061134641E-01
-    Monopole correction (eV)= 6.05290188937659E+00
---------------------------------------------------------------------------------
 
+--- !EnergyTerms
+iteration_state     : {dtset: 21, }
+comment             : Components of total free energy in Hartree
+kinetic             :  4.01066085656470E+00
+hartree             :  1.59022434261689E+00
+xc                  : -1.46333929489207E+00
+Ewald energy        : -1.58784060306204E+00
+psp_core            :  5.02654824574367E-07
+local_psp           : -7.34315544414638E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -4.79344964026408E+00
+total_energy_eV     : -1.30436398174805E+02
+band_energy         : -2.07099534794961E+00
+monopole_correction :  2.22440061134641E-01
+monopole_correction_eV:  6.05290188937659E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2221,7 +2290,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
 
 ================================================================================
 == DATASET 22 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  21.
 
@@ -2262,6 +2331,27 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
+
+--- !ResultsGS
+iteration_state: {dtset: 22, }
+comment   : Summary of ground state results
+rprimd    :
+- [  8.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   5.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   5.0000000, ]
+lattice_lengths: [   8.00000,    5.00000,    5.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   2.0000000E+02
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.041E-23, diffor:  0.000E+00, }
+etotal    :  -4.79344964E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.70190909E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
  Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
@@ -2300,7 +2390,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
 
 ================================================================================
 == DATASET 23 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  22.
 
@@ -2535,7 +2625,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
 
 ================================================================================
 == DATASET 24 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  22.
 
@@ -3413,7 +3503,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     783.200     783.149
 
 ================================================================================
 == DATASET 25 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  22.
 
@@ -3994,7 +4084,35 @@ P          mk1mem           5
 - Comment: to be cited for non-linear response calculations, with optdriver=5.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#veithen2005
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [3] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
+-
+- [4] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- interatomic force constants from density-functional perturbation theory,
+- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
+-
+- [5] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -4008,22 +4126,11 @@ P          mk1mem           5
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
-- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
--
-- [4] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
-- interatomic force constants from density-functional perturbation theory,
-- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
--
-- [5] ABINIT: First-principles approach of materials and nanosystem properties.
+- [6] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -4032,27 +4139,14 @@ P          mk1mem           5
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
--
-- [6] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
 - Proc.   0 individual time (sec): cpu=         16.4  wall=         19.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered 211 WARNINGs and  59 COMMENTs to log file.
+.Delivered 197 WARNINGs and  59 COMMENTs to log file.
 +Overall time at end (sec) : cpu=         16.4  wall=         19.2

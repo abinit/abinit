@@ -672,7 +672,7 @@ subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
  integer :: ia,ii,itypat,jj
 ! *************************************************************************
 
- !  Fill the symbols array
+ ! Fill the symbols array
  do ia=1,natom
    symbols(ia) = adjustl(znucl2symbol(znucl(typat(ia))))
  end do
@@ -781,11 +781,9 @@ end function isymmorphic
 !!
 !! SOURCE
 
-pure function isalchemical(Cryst) result(ans)
+pure logical function isalchemical(Cryst) result(ans)
 
 !Arguments ------------------------------------
-!scalars
- logical :: ans
  class(crystal_t),intent(in) :: Cryst
 
 ! *************************************************************************
@@ -808,13 +806,12 @@ end function isalchemical
 !!
 !! SOURCE
 
-function adata_type(crystal, itypat) result(atom)
+type(atomdata_t) function adata_type(crystal, itypat) result(atom)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itypat
  class(crystal_t),intent(in) :: crystal
- type(atomdata_t) :: atom
 
 ! *************************************************************************
 
@@ -1036,7 +1033,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
 ! *************************************************************************
 
- ! TODO alchemy not treated correctly
+ ! TODO alchemy not treated correctly by ETSF_IO specs.
  if (cryst%isalchemical()) then
    write(msg,"(3a)")&
     "Alchemical crystals are not fully supported by the netcdf format",ch10,&
@@ -1090,7 +1087,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
  ! Set-up atomic symbols.
  do itypat=1,cryst%ntypat
-   call atomdata_from_znucl(atom,cryst%znucl(itypat))
+   call atomdata_from_znucl(atom, cryst%znucl(itypat))
    symbols(itypat) = atom%symbol
    write(symbols_long(itypat),'(a2,a78)') symbols(itypat),REPEAT(CHAR(0),78)
    write(psp_desc(itypat),'(2a)') &

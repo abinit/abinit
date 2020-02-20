@@ -1249,8 +1249,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        if(dmft_ldaocc==0) then
          if(dtset%occopt/=3) then
-           message = ' occopt should be equal to 3 in dmft'
-           MSG_ERROR(message)
+           MSG_ERROR('occopt should be equal to 3 in dmft')
          end if
 !        ==  initialise edmft
          if(paw_dmft%use_dmft>=1) edmft = zero

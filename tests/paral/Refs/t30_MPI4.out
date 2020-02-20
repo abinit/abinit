@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h51 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 18h30 )
   
-- input  file    -> t30.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t30_MPI4/t30.in
 - output file    -> t30_MPI4.out
 - root for input  files -> t30_MPI4i
 - root for output files -> t30_MPI4o
@@ -117,168 +117,6 @@ P           mkmem           1
 ================================================================================
 
  chkinp: Checking input parameters for consistency.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
  This is a calculation with spin-up and spin-down wavefunctions,         ... nsppol=  2
  in which the target spin-polarization is zero.                  ... spinmagntarget=   0.00
  Tip ... It might be possible that the ground state is either non-spin-polarized, or antiferromagnetic.
@@ -287,7 +125,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    4
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -319,8 +157,8 @@ P           mkmem           1
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c_lda.paw
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c_lda.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -363,6 +201,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      64.000      64.000
  scprqt:  WARNING -
   nstep=    4 was not enough SCF cycles to converge;
   maximum energy difference=  9.075E-05 exceeds toldfe=  1.000E-10
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  0.0000000,   3.5000000,   3.5000000, ]
+- [  3.5000000,   0.0000000,   3.5000000, ]
+- [  3.5000000,   3.5000000,   0.0000000, ]
+lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_volume:   8.5750000E+01
+convergence: {deltae: -9.075E-05, res2:  4.216E-02, residm:  5.445E-04, diffor: null, }
+etotal    :  -1.04179772E+01
+entropy   :   0.00000000E+00
+fermie    :   4.71364953E-01
+cartesian_stress_tensor:
+- [ -8.04497474E-03,  -1.71906406E-03,  -1.71906406E-03, ]
+- [ -1.71906406E-03,  -8.04497474E-03,  -1.71906406E-03, ]
+- [ -1.71906406E-03,  -1.71906406E-03,  -8.04497474E-03, ]
+pressure_GPa:   2.3669E+02
+cartesian_forces:
+- [ -2.35460426E-01,  -2.35460426E-01,  -2.35460426E-01, ]
+- [  2.35460426E-01,   2.35460426E-01,   2.35460426E-01, ]
+force_length_stats: {min:   4.07829421E-01, max:   4.07829421E-01, mean:   4.07829421E-01, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -545,30 +409,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      64.000      64.000
   -9.77884    8.09477   12.82649   12.82649   14.21520   14.21520   18.84174   21.97041
   26.87396   34.26122   34.34398   35.62238
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.72089386719913E+00
+hartree             :  1.50584692574724E+00
+xc                  : -3.89960298461793E+00
+Ewald energy        : -1.22408856604630E+01
+psp_core            :  5.49532697036699E-01
+local_psp           : -6.80730932304570E+00
+spherical_terms     :  1.78020044132692E+00
+total_energy        : -1.03913240368166E+01
+total_energy_eV     : -2.82762307179462E+02
+...
 
-    Kinetic energy  =  8.72089386719913E+00
-    Hartree energy  =  1.50584692574724E+00
-    XC energy       = -3.89960298461793E+00
-    Ewald energy    = -1.22408856604630E+01
-    PspCore energy  =  5.49532697036699E-01
-    Loc. psp. energy= -6.80730932304570E+00
-    Spherical terms =  1.78020044132692E+00
-    >>>>>>>>> Etotal= -1.03913240368166E+01
 
- "Double-counting" decomposition of free energy:
-    Band energy     =  1.76168310107143E+00
-    Ewald energy    =-1.22408856604630E+01
-    PspCore energy  =  5.49532697036699E-01
-    Dble-C XC-energy= -6.16767440503136E-01
-    Spherical terms =  1.28460073272997E-01
-    >>>> Etotal (DC)= -1.04179772295850E+01
-
-  >Total energy in eV           = -2.82762307179462E+02
-  >Total DC energy in eV        = -2.83487577438976E+02
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+iteration_state     : {dtset: 1, }
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         :  1.76168310107143E+00
+Ewald energy        : -1.22408856604630E+01
+psp_core            :  5.49532697036699E-01
+xc_dc               : -6.16767440503136E-01
+spherical_terms     :  1.28460073272997E-01
+total_energy_dc     : -1.04179772295850E+01
+total_energy_dc_eV  : -2.83487577438976E+02
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -684,7 +550,24 @@ P           mkmem           1
 - Comment: PAW calculations. Strong suggestion to cite this paper.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
-- [3] Recent developments in the ABINIT software package.
+- [3] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -698,11 +581,11 @@ P           mkmem           1
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -711,27 +594,14 @@ P           mkmem           1
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [5] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.9
+- Proc.   0 individual time (sec): cpu=          0.9  wall=          4.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  19 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.3  wall=          3.4
++Overall time at end (sec) : cpu=         12.9  wall=         16.2
