@@ -83,15 +83,12 @@ subroutine calc_rdm(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
  DBG_ENTER("COLL")
 
  tol=1.0d-8
- if(isgn==0) then !Vxc
-   sgn_spin=-2.0d0
-   msg2='Vxc    '
- else if(isgn==1) then !Sigma_x
-   sgn_spin=2.0d0       
-   msg2='Sx     '
- else ! Both: Sigma_x - Vxc
-   sgn_spin=2.0d0       
+ if(isgn==0) then ! Sigma_x - Vxc
+   sgn_spin=2.0d0
    msg2='Sx-Vxc '
+ else ! Vxc
+   sgn_spin=-2.0d0       
+   msg2='Vxc    '
  endif
 
  if(iinfo==0) then 
@@ -230,7 +227,14 @@ subroutine natoccs(ib1,ib2,dm1,BSt,kpoint,iinfo)
    endif 
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
-   write(msg,'(a2,*(f10.5))') '  ',occs(1:)
+   ib1dm=ndim-(ndim/10)*10
+   do ib2dm=1,(ndim/10)*10,10
+     write(msg,'(10f10.5)') occs(ib2dm:ib2dm+9)
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
+   enddo  
+   ib1dm=(ndim/10)*10+1
+   write(msg,'(*(f10.5))') occs(ib1dm:)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  else
@@ -244,7 +248,7 @@ subroutine natoccs(ib1,ib2,dm1,BSt,kpoint,iinfo)
    toccs_k=toccs_k+occs(ib1dm)
  enddo
 
- write(msg,'(a21,i5,a3,i5,a21,f10.5)') 'Total occ. from band ',ib1,' to', ib2,' at current k-point: ',toccs_k
+ write(msg,'(a22,i5,a3,i5,a21,f10.5)') ' Total occ. from band ',ib1,' to', ib2,' at current k-point: ',toccs_k
  call wrtout(std_out,msg,'COLL')
  call wrtout(ab_out,msg,'COLL')
  write(msg,'(a5)') ' '
@@ -261,7 +265,7 @@ subroutine natoccs(ib1,ib2,dm1,BSt,kpoint,iinfo)
 end subroutine natoccs
 !!***
 
-subroutine printdm1(ib1,ib2,dm1) ! Basically used for debug
+subroutine printdm1(ib1,ib2,dm1) ! Basically used for debug, do not use it with large arrays
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ib1,ib2

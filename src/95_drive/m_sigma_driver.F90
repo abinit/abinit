@@ -234,7 +234,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,order_int,ifreqs,iinfo,gw1rdm !MRM
+ integer :: ib1dm,order_int,ifreqs,iinfo!,gw1rdm -> to be used with gwcalctyp !MRM
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
@@ -1507,6 +1507,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &   Dtset%ixc_sigma==-456 .or. Dtset%ixc_sigma==41 .or. Dtset%ixc_sigma==42)) then
      QP_mflags%has_vxcval_hybrid=1
    end if
+
 !  if (Sigp%use_sigxcore==1) QP_mflags%has_sxcore =1
 !  if (Dtset%usepawu/=0)    QP_mflags%has_vu     =1
 !  if (Dtset%useexexch/=0)  QP_mflags%has_lexexch=1
@@ -2152,7 +2153,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  else
    if(gwcalctyp==21) then  !! MRM allocate the 1-RDM correction info if gwcalctyp=21
-     iinfo=1  !! This should be input parameter 
+     if(Sigp%nsppol/=1) MSG_WARNING("1-RDM GW correction only implemented for restricted closed-shell calculations!")
+     iinfo=1  !! This should be input parameter, verbose mode 
      ABI_MALLOC(dm1,(b1gw:b2gw,b1gw:b2gw,Sigp%nkptgw))
      ABI_MALLOC(dm1k,(b1gw:b2gw,b1gw:b2gw)) 
      ABI_MALLOC(potk,(b1gw:b2gw,b1gw:b2gw))
@@ -2192,18 +2194,19 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
       ! MRM compute 1-RDM correction?
       if(gwcalctyp==21) then 
 !       Compute for Sigma_x - Vxc
-        potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) 
+        potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
+        !call printdm1(ib1,ib2,potk)
         dm1k=0.0d0 
-        call calc_rdm(ib1,ib2,ikcalc,3,iinfo,potk,dm1k,KS_BSt)
+        call calc_rdm(ib1,ib2,ikcalc,0,iinfo,potk,dm1k,KS_BSt) ! Only restricted calcs 
 !       Print the exchange correction for debug?
         !call printdm1(ib1,ib2,dm1k)
 !       Update the full 1RDM with the exchange (k-point) one
         dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
 !       Compute NAT ORBS for exchange corrected 1-RDM?
-        !do ib1dm=ib1,ib2
-        !  dm1k(ib1dm,ib1dm)=dm1k(ib1dm,ib1dm)+KS_BSt%occ(ib1dm,ikcalc,1)
-        !enddo
-        !call natoccs(ib1,ib2,dm1k,KS_BSt,ikcalc,0)
+        do ib1dm=ib1,ib2
+          dm1k(ib1dm,ib1dm)=dm1k(ib1dm,ib1dm)+KS_BSt%occ(ib1dm,ikcalc,1) ! Only restricted calcs 
+        enddo
+        call natoccs(ib1,ib2,dm1k,KS_BSt,ikcalc,0) ! Only restricted calcs 
       endif 
    end do
 
@@ -2246,19 +2249,19 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ! MRM compute 1-RDM correction and update dm1
        if(gwcalctyp==21) then
          dm1k=0.0d0 
-         call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,iinfo,Sr,weights,sigcme_k,KS_BSt,dm1k)
+         call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,iinfo,Sr,weights,sigcme_k,KS_BSt,dm1k) ! Only restricted calcs 
 !        Update the full 1RDM with the correlation (k-point) one
          dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
 !        Print for debug?
          !call printdm1(ib1,ib2,dm1k)
          dm1k(ib1:ib2,ib1:ib2)=dm1(ib1:ib2,ib1:ib2,ikcalc) 
 !        Compute nat orbs and occ numbers
-         call natoccs(ib1,ib2,dm1k,KS_BSt,ikcalc,1)
+         call natoccs(ib1,ib2,dm1k,KS_BSt,ikcalc,1) ! Only restricted calcs 
        endif
        ABI_DEALLOCATE(sigcme_k)
      end do
    end if
-   !! MRM deallocate the 1-RDM
+   !! MRM deallocate the 1-RDM arrays
    if(gwcalctyp==21) then
      ABI_FREE(dm1) 
      ABI_FREE(freqs)
@@ -2269,7 +2272,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
    call xmpi_barrier(Wfd%comm)
 
-  !MRM jump the rest for gwcalctyp=21, why not? 
+  !MRM skip the rest for gwcalctyp=21  
   if(gwcalctyp/=21) then 
    !  =====================================================
    !  ==== Solve Dyson equation storing results in Sr% ====

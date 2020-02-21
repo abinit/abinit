@@ -569,7 +569,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 &            ur_ibz        ,iik,ktabr(:,ik_bz),ph_mkt  ,spinrot_kbz, &
 &            wfr_bdgw(:,jb),jik,ktabr(:,jk_bz),ph_mkgwt,spinrot_kgw, &
 &            nspinor,rhotwg_ki(:,jb))
-
+               
            if (Psps%usepaw==1.and.use_pawnhat==0) then
              ! Add on-site contribution, projectors are already in BZ.
              i2=jb; if (nspinor==2) i2=(2*jb-1)
@@ -627,7 +627,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
        do kb=ib1,ib2
          ! Compute the ket Sigma_x |phi_{k,kb}>.
          rhotwgp(:) = rhotwg_ki(:,kb)
-
          ! Loop over the non-zero row elements of this column.
          ! If gwcalctyp <  20: only diagonal elements since QP == KS.
          ! If gwcalctyp >= 20:
@@ -636,14 +635,12 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
          do irow=1,Sigxij_tab(spin)%col(kb)%size1
            jb = Sigxij_tab(spin)%col(kb)%bidx(irow)
            rhotwg = rhotwg_ki(:,jb)
-
            ! Calculate bare exchange <phi_j|Sigma_x|phi_k>.
            ! Do the scalar product only if ib_sum is occupied.
            if (theta_mu_minus_esum/fact_sp >= tol_empty) then
              do iab=1,Sigp%nsig_ab
                spadx1 = spinor_padx(1, iab); spadx2 = spinor_padx(2, iab)
                gwpc_sigxme = -XDOTC(npwx, rhotwg(spadx1+1:), 1, rhotwgp(spadx2+1:), 1) * theta_mu_minus_esum
-
                ! Accumulate and symmetrize Sigma_x
                ! -wtqm comes from time-reversal (exchange of band indeces)
                is_idx = spin; if (nspinor == 2) is_idx = iab
@@ -655,7 +652,6 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
              end do
            end if
          end do ! jb used to calculate matrix elements of Sigma_x
-
        end do ! kb to calculate matrix elements of Sigma_x
      end do ! ib_sum
 
@@ -778,6 +774,7 @@ subroutine calc_sigx_me(sigmak_ibz,ikcalc,minbnd,maxbnd,Cryst,QP_BSt,Sigp,Sr,Gsp
 
  ! Save full exchange matrix in Sr%
  Sr%x_mat(minbnd:maxbnd,minbnd:maxbnd,jk_ibz,:) = sigxme_tmp(minbnd:maxbnd,minbnd:maxbnd,:)
+
  ABI_FREE(sigxme_tmp)
 
  ! ===========================
