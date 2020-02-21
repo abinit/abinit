@@ -16,7 +16,9 @@ fit_coeff = 1
 fit_rangePower = 3 3
 fit_cutoff = 5.4
 fit_ncoeff = 2
-fit_SPCoupling = 0
+fit_SPCoupling = 1
+fit_SPC_maxS = 2
+fit_anhaStrain = 1 
 fit_iatom = 0 
 
 #%%<BEGIN TEST_INFO>
