@@ -2371,6 +2371,7 @@ if(need_compute_symmetric)then
        index_irred = 1
        !We count only here
        compute_sym = .false.
+       !write(std_out,*) "my_list_combination_tmp(", i,"): ", my_list_combination_tmp(:,i)
        do ii = 1,power_disps(2)
           if(my_list_combination_tmp(ii,i) > 0 .and.&
 &            my_list_combination_tmp(ii,i) <= ncoeff_symsym)then
@@ -2379,12 +2380,17 @@ if(need_compute_symmetric)then
              nstrain = nstrain + 1
           endif
        enddo
-       my_index_irredcomb(i) = my_ncombi + 1
-       call computeSymmetricCombinations(my_ncombi,my_list_combination_tmp,list_symcoeff,list_symstr,1,1,ndisp,nsym,&
+       my_index_irredcomb(i) = my_ncombi + 1       
+       if(nstrain < power_disps(1))then
+         call computeSymmetricCombinations(my_ncombi,my_list_combination_tmp,list_symcoeff,list_symstr,1,1,ndisp,nsym,&
 &                                        dummylist,my_list_combination_tmp(:,i),power_disps(2),&
 &                                        my_nirred,ncoeff_symsym,nstr_sym,nstrain,my_ncombi+1,&
 &                                        compatibleCoeffs,index_irred,compute_sym,comm,only_even=need_only_even_power)
-
+       else 
+         my_ncombi = my_ncombi + 1
+       endif
+       !write(std_out,*) "my_ncombi:", my_ncombi 
+       !write(std_out,*) "my_index_irredcomb(i)", my_index_irredcomb(i)
        ABI_DEALLOCATE(dummylist)
        ABI_DEALLOCATE(index_irred)
   enddo !i=1,my_nirred
