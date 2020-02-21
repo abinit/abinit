@@ -39,6 +39,7 @@ module m_fock_getghc
  use m_kg,           only : mkkpg
  use m_fftcore,      only : sphereboundary
  use m_fft,          only : fftpac, fourwf, fourdp
+ use m_fstrings,     only : sjoin, itoa
  use m_hamiltonian,  only : gs_hamiltonian_type, K_H_KPRIME, init_hamiltonian
  use m_pawdij,       only : pawdijhat
  use m_paw_nhat,     only : pawmknhat_psipsi
@@ -1101,6 +1102,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 
 ! Cholesky factorisation of -mkl=Lx(trans(L)*. On output mkl=L
      call zpotrf("L",nband_k,mkl,nband_k,ierr)
+     ABI_CHECK(ierr == 0, sjoin("ZPOTRF returned:", itoa(ierr)))
 
 ! calculate trans(L-1)
      ABI_ALLOCATE(bb,(2,nband_k,nband_k))
@@ -1109,6 +1111,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
        bb(1,kk,kk)=one
      end do
      call ztrtrs("L","T","N",nband_k,nband_k,mkl,nband_k,bb,nband_k,ierr)
+     ABI_CHECK(ierr == 0, sjoin("ZTRTRS returned:", itoa(ierr)))
      fock%fockACE(ikpt,isppol)%xi=zero
 
 ! Calculate ksi
