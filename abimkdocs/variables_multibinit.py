@@ -208,7 +208,7 @@ Variable(
     text=r"""
 Flag to activate the generation of the anharmonic coefficient for the fit process
 
-**Related variables:** The  power range of the coefficients ([[multibinit:fit_rangePower]]), the cut off of the interactions ([[multibinit:fit_cutoff]]), the flag to add ahnarmonic strain ([[multibinit:fit_anhaStrain]]), the flag to add phonon strain coupling ([[multibinit:fit_SPCoupling]])
+**Related variables:** The  power range of the coefficients ([[multibinit:fit_rangePower]]), the cut off of the interactions ([[multibinit:fit_cutoff]]), the flag to add anharmonic strain ([[multibinit:fit_anhaStrain]]), the flag to add phonon strain coupling ([[multibinit:fit_SPCoupling]])
 """,
 ),
 

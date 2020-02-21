@@ -19767,7 +19767,7 @@ Variable(
     mnemonics="EPH TOLeranceS on Integral of DELTA.",
     text=r"""
 This variable can be used to introduce a cutoff on the q-points when computing the imaginary
-part of the electron-phonon self-energy ([[eph_task]] = -4) with the tetrahedron method ([[eph_intmeth]] = 2)
+part of the electron-phonon self-energy ([[eph_task]] = -4) with the tetrahedron method ([[eph_intmeth]] = 2).
 The first entry refers to phonon absorption while the second one is associated to phonon emission.
 A q-point is included in the sum of the tetrahedron weights for phonon absorption/emission are larger that these values.
 """,
@@ -19834,7 +19834,7 @@ The number of line minimisations for the Sternheimer solver is defined by [[nlin
     replaced by $\Sigma_{n\kk}(\ee_{n\kk})$.
     This approximation is valid provided that **enough** bands above the states of interest are explicitly included.
     The calculation should therefore be converged with respect to the value of [[nband]].
-    Note however that the memory requirements and the computational cost of the Sternheimer solver increases with **nband**.
+    Note however that the memory requirements and the computational cost of the Sternheimer solver increases with **nband**
     as this part is not yet parallelized.
 """,
 ),
@@ -19932,7 +19932,7 @@ the discussion to the different calculations activated by [[eph_task]].
 
 The parallelization over perturbations (**np**) is network intensive but it allows one to decrease the memory
 needed for the DFPT potentials especially when computing the e-ph self-energy.
-The maximum valus for **np** is 3 * [[natom]] and the workload is equally distributed provided **np**
+The maximum value for **np** is 3 * [[natom]] and the workload is equally distributed provided **np**
 divides 3 * [[natom]] equally.
 Using **np** == [[natom]] usually gives good parallel efficiency.
 
@@ -19984,11 +19984,11 @@ Variable(
     defaultval=0,
     mnemonics="EPH FORCE Fourier Transform Interpolation of DFPT potentials.",
     text=r"""
-This is an *advanced option* used for testing/debugging the interpolation of the DFPT potentials when [[eph_task]] in (2, -2)
+This is an *advanced option* used for testing/debugging the interpolation of the DFPT potentials when [[eph_task]] in (2, -2).
 By default, the code seeks for the q-point in the input DVDB file when *eph_use_ftinterp* is set to zero (default)
 and stops is the q-point in not found in the file.
 When *eph_use_ftinterp* is set to 1, the input DVDB file (assumed to contain the [[ddb_ngqpt]] q-mesh)
-will be used to generate the real-space representation of the DFPT potentials and interpolated the potential
+will be used to generate the real-space representation of the DFPT potentials and interpolate the potential
 at the input [[qpt]].
 """,
 ),

@@ -41,6 +41,7 @@ A.1 At the occasion of the switch from ABINITv8 to ABINITv9, many improvements o
 ### B. Most noticeable achievements
 
 B.1 Electron-phonon self energy (for mobility, temperature-dependent electronic structure -incl. zero-point motion-, ...)
+Treatment of the long-range potential (Frohlich long-range)
 v9#50-61  
 #50 Preparatory run for the calculation of the Fan-Migdal self-energy
 #%%   C in diamond structure. Very rough 2x2x2 q-point grid (3 qpoints); low ecut.
@@ -57,7 +58,18 @@ v9#50-61
 #58   Merge the DDB files produced in t57.in
 #59  Merge the DFPT POT files produced in t57.in
 #60  Calculation of the Fan-Migdal self-energy matrix elements in LiF.
+       Show the usage of dvdb_add_lr, eph_tols_idelta, eph_restart
 #61  Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
+
+New input variables :
+- dvdb_qcache_mb , tested in v8#44
+- eph_phrange, NOT TESTED
+- eph_tols_idelta  v9#60
+- eph_ecut_osc NOT TESTED
+- eph_np_pqbks NOT TESTED
+- eph_restart  v9#60
+- eph_stern v8#44
+- eph_use_interp NOT TESTED
 By G. Brunin, H. Miranda, M. Giantomassi
 
 B.2 DFT+DMFT
@@ -66,6 +78,9 @@ paral#84   DFT+DMFT for Vanadium using off diag CTQMC code with KGB parallelism
 #85    DFT+DMFT for Gadolinium using Hubbard 1 code with KGB parallelism  with Self-consistency over Green function and density
 # and Spin Orbit Coupling.
 #86    DFT+DMFT for SrVO3 using Hubard I code with KGB parallelism
+New input variables : dmft_charge_prec, tested in paral#84 and 86.
+dmft_occnd_imag, tested in mpiio#99, paral#91,92,99, v6#07, 45, 46, 47, v7#27-30, v8#01. Only for keeping backward compatilibity for tests.
+
 
 By T. Cavignac and B. Amadon
 
@@ -97,6 +112,7 @@ X.Gonze
 v8#24-29  Constrained DFT
 v8#95-97  CDFT + test recognition of symmetry in the non-collinear case
 v9#1-3  CDFT PAW
+New input variables : chrgat, constrained_kind
 
 * * *
 
@@ -130,6 +146,7 @@ D.3  Multibinit
 Improvements from M. Schmitt
 #38 Multibinit Restart a Molecular-Dynamics run from a _HIST.nc file with one step in it.
 #98 Test the test set option. Evaluate a given effective potential on a set of configurations.
+      Test for new input variable analyze_anh_pot
 #99 Test the optimize effective potential option. Optimize the value of 2 coefficients with respect
 #%%    to a training set.
 
