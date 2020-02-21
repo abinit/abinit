@@ -28,6 +28,7 @@ module m_d2frnl
  use defs_basis
  use m_abicore
  use m_xmpi
+ use m_mpinfo
  use m_errors
  use m_cgtools
  use m_nctk
@@ -57,7 +58,6 @@ module m_d2frnl
  use m_paw_dfpt, only : pawgrnl
  use m_kg,       only : mkkin, mkkpg
  use m_mkffnl,   only : mkffnl
- use m_mpinfo,   only : proc_distrb_cycle
  use m_nonlop,   only : nonlop
  use m_paw_occupancies, only : pawaccrhoij
 
@@ -177,7 +177,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  integer,intent(in) :: indsym(4,dtset%nsym,natom),kg(3,dtset%mpw*dtset%mkmem)
  integer,intent(in) :: ngfft(18),ngfftf(18),npwarr(dtset%nkpt)
  integer,intent(in) :: symrec(3,3,dtset%nsym)
- real(dp),intent(in) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol)
+ real(dp),intent(in) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband_mem*dtset%mkmem*dtset%nsppol)
  real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*natom)
@@ -211,16 +211,19 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  integer :: nnlout_piez1,nnlout_piez2,nnlout_phon,nnlout_strs,npw_,npw_k,nsp,nsploop,nu
  integer :: optgr,optgr2,option,option_rhoij,optstr,optstr2,paw_opt,paw_opt_1,paw_opt_3,paw_opt_efmas
  integer :: shift_rhoij,signs,signs_field,spaceworld,sz2,sz3,tim_nonlop
+ integer :: iband_, iband_me, jband_me, nband_me
  real(dp) :: arg,eig_k,enl,enlk,occ_k,ucvol,wtk_k
  logical :: has_ddk_file,need_becfr,need_efmas,need_piezofr,paral_atom,t_test,usetimerev
  character(len=500) :: msg
  type(gs_hamiltonian_type) :: gs_ham
 !arrays
  integer :: ik_ddk(3),ddkfil(3)
+ integer :: bands_treated_now(dtset%mband), band_procs(dtset%mband)
  integer,allocatable :: dimlmn(:),kg_k(:,:),l_size_atm(:)
  integer,pointer :: my_atmtab(:)
  real(dp) :: dotprod(2),dummy(0),gmet(3,3),gprimd(3,3),grhoij(3),kpoint(3),nonlop_dum(1,1)
  real(dp) :: rmet(3,3),tsec(2)
+ complex(dp) :: ch2c_tmp(dtset%mband)
  real(dp),allocatable :: becfrnl_tmp(:,:,:),becfrnlk(:,:,:),becij(:,:,:,:,:),cg_left(:,:)
  real(dp),allocatable :: cwavef(:,:),ddk(:,:),ddkinpw(:,:,:),dyfrnlk(:,:)
  real(dp),allocatable :: elt_work(:,:),eltfrnlk(:,:),enlout_bec1(:),enlout_bec2(:),enlout_efmas(:)
@@ -252,6 +255,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  paral_atom=(my_natom/=natom)
  my_comm_atom=mpi_enreg%comm_atom
  my_atmtab=>mpi_enreg%my_atmtab
+
+
 
 !Compute gmet, gprimd and ucvol from rprimd
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
@@ -482,6 +487,10 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  Loop over k points
    do ikpt=1,dtset%nkpt
      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
+     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+     call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ikpt,isppol,dtset%mband,&
+&      mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
+
      istwf_k=dtset%istwfk(ikpt)
      npw_k=npwarr(ikpt)
      wtk_k=dtset%wtk(ikpt)
@@ -635,14 +644,15 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      end if
 
 !    Loop over bands
+     iband_me = 0
      do iband=1,nband_k
 
-       if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me)) then
-         cycle
-       end if
+       if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me)) cycle
+       iband_me = iband_me + 1
 
        occ_k=occ(iband+bdtot_index)
-       cwavef(:,1:npw_k*dtset%nspinor) = cg(:,1+(iband-1)*npw_k*dtset%nspinor+icg:iband*npw_k*dtset%nspinor+icg)
+       cwavef(:,1:npw_k*dtset%nspinor) = cg(:,1+(iband_me-1)*npw_k*dtset%nspinor+icg: &
+&                                                iband_me   *npw_k*dtset%nspinor+icg)
 
 !      Compute non-local contributions from n,k
        if (psps%usepaw==1) eig_k=eigen(iband+bdtot_index)
@@ -769,38 +779,66 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
        if(need_efmas) then
          bandmin=efmasdeg(ikpt)%degs_bounds(1, efmasdeg(ikpt)%deg_range(1) )
          bandmax=efmasdeg(ikpt)%degs_bounds(2, efmasdeg(ikpt)%deg_range(2) )
-         if ( iband>=bandmin .and. iband<=bandmax ) then
-           choice_efmas=8; signs=2
-           cpopt=-1  !To prevent re-use of stored dgxdt, which are not for all direction required for EFMAS.
-           paw_opt_efmas=0; if(psps%usepaw/=0) paw_opt_efmas=4 !To get both gh2c and gs2c
-           nnlout_efmas=0; tim_nonlop=0 ! No tim_nonlop for efmas, currently.
+
+         choice_efmas=8; signs=2
+         cpopt=-1  !To prevent re-use of stored dgxdt, which are not for all direction required for EFMAS.
+         paw_opt_efmas=0; if(psps%usepaw/=0) paw_opt_efmas=4 !To get both gh2c and gs2c
+         nnlout_efmas=0; tim_nonlop=0 ! No tim_nonlop for efmas, currently.
+
+! find list of iband which are running now:
+         bands_treated_now = 0
+         bands_treated_now(iband) = 1
+         call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
+
+! for all iband running right now
+         do iband_ = bandmin, bandmax
+           if (bands_treated_now(iband_) == 0) cycle
+
            do mu=1,3
              do nu=1,3
-               idir=3*(mu-1)+nu !xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9, (xyz,xyz)=(mu,nu)
-               gh2c=zero; gs2c=zero
-               call nonlop(choice_efmas,cpopt,cwaveprj,enlout_efmas,gs_ham,idir,(/eig_k/),mpi_enreg,&
-               1,nnlout_efmas,paw_opt_efmas,signs,gs2c,tim_nonlop,cwavef,gh2c)
-               do ispinor=1,dtset%nspinor
-                 ii = 1+(ispinor-1)*npw_k
-                 do icplx=1,2
-                   gh2c(icplx,ii:ispinor*npw_k) = gh2c(icplx,ii:ispinor*npw_k) +  &
-&                   ddkinpw(1:npw_k,mu,nu)*cwavef(icplx,ii:ispinor*npw_k)
+! if I have iband_ prepare things
+               if (iband_ == iband) then
+                 idir=3*(mu-1)+nu !xx=1, xy=2, xz=3, yx=4, yy=5, yz=6, zx=7, zy=8, zz=9, (xyz,xyz)=(mu,nu)
+                 gh2c=zero; gs2c=zero
+                 call nonlop(choice_efmas,cpopt,cwaveprj,enlout_efmas,gs_ham,idir,(/eig_k/),mpi_enreg,&
+                 1,nnlout_efmas,paw_opt_efmas,signs,gs2c,tim_nonlop,cwavef,gh2c)
+                 do ispinor=1,dtset%nspinor
+                   ii = 1+(ispinor-1)*npw_k
+                   do icplx=1,2
+                     gh2c(icplx,ii:ispinor*npw_k) = gh2c(icplx,ii:ispinor*npw_k) +  &
+&                     ddkinpw(1:npw_k,mu,nu)*cwavef(icplx,ii:ispinor*npw_k)
+                   end do
                  end do
-               end do
-               gh2c = gh2c - eig_k*gs2c
+                 gh2c = gh2c - eig_k*gs2c
+               end if
                ideg = efmasdeg(ikpt)%ideg(iband)
-               do jband=efmasdeg(ikpt)%degs_bounds(1,ideg),efmasdeg(ikpt)%degs_bounds(2,ideg)
-                 cg_left(:,1:npw_k*dtset%nspinor) = cg(:,1+(jband-1)*npw_k*dtset%nspinor+icg:jband*npw_k*dtset%nspinor+icg)
+! share gh2c
+               call xmpi_bcast(gh2c, band_procs(iband), mpi_enreg%comm_band,ierr)
+
+               jband_me = 0
+               do jband=1,efmasdeg(ikpt)%degs_bounds(2,ideg)
+! jband treated on current proc?
+                 if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,jband,jband,isppol,me)) cycle
+! if so, indexing of the bands in my cg array
+                 jband_me = jband_me + 1
+! if we do not need to treat it for efmas, skip
+                 if (jband < efmasdeg(ikpt)%degs_bounds(1,ideg)) cycle
+
+                 cg_left(:,1:npw_k*dtset%nspinor) = cg(:,1+(jband_me-1)*npw_k*dtset%nspinor+icg:jband_me*npw_k*dtset%nspinor+icg)
                  dotprod=0
                  call dotprod_g(dotprod(1),dotprod(2),istwf_k,npw_k*dtset%nspinor,2,cg_left,gh2c,mpi_enreg%me_g0,&
 &                 mpi_enreg%comm_spinorfft)
                  isub = iband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
                  jsub = jband-efmasdeg(ikpt)%degs_bounds(1,ideg)+1
-                 efmasval(ideg,ikpt)%ch2c(mu,nu,jsub,isub)=cmplx(dotprod(1),dotprod(2),kind=dpc)
-               end do
-             end do
-           end do
-         end if
+
+                 ch2c_tmp(jsub)=cmplx(dotprod(1),dotprod(2),kind=dpc)
+               end do ! jband
+               !mpi_sum ch2c_tmp to get all jband contribs 
+               call xmpi_sum(ch2c_tmp,mpi_enreg%comm_band,ierr)
+               efmasval(ideg,ikpt)%ch2c(mu,nu,:,isub)=ch2c_tmp(:)
+             end do ! nu
+           end do ! mu
+         end do ! iband_
        end if
 
      end do ! End of loop on bands
@@ -829,7 +867,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      bdtot_index=bdtot_index+nband_k
      if (dtset%mkmem/=0) then
        ibg=ibg+nband_k*dtset%nspinor
-       icg=icg+npw_k*dtset%nspinor*nband_k
+       icg=icg+npw_k*dtset%nspinor*nband_me
        ikg=ikg+npw_k
      end if
 

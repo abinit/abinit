@@ -56,7 +56,7 @@ module m_respfn_driver
  use m_ddb_interpolate, only : outddbnc
  use m_occ,         only : newocc
  use m_efmas,       only : efmasdeg_free_array, efmasval_free_array
- use m_wfk,         only : wfk_read_eigenvalues
+ use m_wfk,         only : wfk_read_eigenvalues, wfk_read_my_kptbands
  use m_ioarr,       only : read_rhor
  use m_pawang,      only : pawang_type
  use m_pawrad,      only : pawrad_type
@@ -249,6 +249,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer :: rfasr,rfddk,rfelfd,rfphon,rfstrs,rfuser,rf2_dkdk,rf2_dkde,rfmagn
  integer :: spaceworld,sumg0,sz1,sz2,tim_mkrho,timrev,usecprj,usevdw
  integer :: usexcnhat,use_sym,vloc_method,zero_by_symm
+ integer :: mcg_tmp
  logical :: has_full_piezo,has_allddk,is_dfpt=.true.,non_magnetic_xc
  logical :: paral_atom,qeq0,use_nhat_gga,call_pawinit
  real(dp) :: boxcut,compch_fft,compch_sph,cpus,ecore,ecut_eff,ecutdg_eff,ecutf
@@ -272,6 +273,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,allocatable :: blkflg2(:,:,:,:),carflg(:,:,:,:),clflg(:,:),indsym(:,:,:)
  integer,allocatable :: irrzon(:,:,:),kg(:,:),l_size_atm(:),nattyp(:),npwarr(:)
  integer,allocatable :: pertsy(:,:),rfpert(:),rfpert_nl(:,:,:,:,:,:),symq(:,:,:),symrec(:,:,:)
+ logical,allocatable :: distrb_flags(:,:,:)
  real(dp) :: dum_gauss(0),dum_dyfrn(0),dum_dyfrv(0),dum_eltfrxc(0)
  real(dp) :: dum_grn(0),dum_grv(0),dum_rhog(0),dum_vg(0)
  real(dp) :: dummy6(6),gmet(3,3),gmet_for_kg(3,3),gprimd(3,3),gprimd_for_kg(3,3),qphon(3)
@@ -298,6 +300,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  real(dp),allocatable :: vxc(:,:),work(:),xccc3d(:),ylm(:,:),ylmgr(:,:,:)
  real(dp),pointer :: eigenq_fine(:,:,:),eigen1_pert(:,:,:)
  real(dp),allocatable :: eigen0_pert(:),eigenq_pert(:),occ_rbz_pert(:)
+ real(dp), allocatable :: cg_tmp(:,:)
+ real(dp), allocatable :: eigen0_tmp(:)
+ real(dp), allocatable :: occ_tmp(:)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
  type(efmasval_type),allocatable :: efmasval(:,:)
  type(paw_an_type),allocatable :: paw_an(:)
@@ -403,9 +408,15 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Set up the basis sphere of planewaves
  ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
  ABI_ALLOCATE(npwarr,(dtset%nkpt))
+print *, 'before kpgio', npwtot, dtset%nsppol, dtset%mpw, ' npwarr ', npwarr
+print *, ' dtset%istwfk ',  dtset%istwfk
+print *, ' kg ',  shape(kg), '   ', kg 
+print *, ' dtset%kptns ',  dtset%kptns
+print *, ' dtset%istwfk ',  dtset%istwfk
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet_for_kg,dtset%istwfk,kg,&
 & dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,dtset%mpw,npwarr,npwtot,&
 & dtset%nsppol)
+print *, 'after kpgio', npwtot, dtset%nsppol, dtset%mpw, ' npwarr ', npwarr
 
 !Set up the Ylm for each k point
  ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
@@ -465,19 +476,34 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Initialize wavefunction files and wavefunctions.
  ireadwf0=1
 
- mcg=dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
+!TODO: parallelize mband_mem here as well
+ mcg=dtset%mpw*dtset%nspinor*dtset%mband_mem*dtset%mkmem*dtset%nsppol
  ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
 
  ABI_ALLOCATE(eigen0,(dtset%mband*dtset%nkpt*dtset%nsppol))
  eigen0(:)=zero ; ask_accurate=1
  optorth=0
 
+! Initialize the wave function type and read GS WFK
+ ABI_ALLOCATE(distrb_flags,(nkpt_rbz,dtset%mband,dtset%nsppol))
+ distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
+ call wfk_read_my_kptbands(dtfil%fnamewffk, dtset, distrb_flags, spaceworld, &
+&            formeig, dtset%istwfk, dtset%kptns, dtset%nkpt, npwarr, &
+&            cg, eigen=eigen0)
+ ABI_DEALLOCATE(distrb_flags)
+
+!DEBUG
+ mcg=dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
+ ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg), ierr)
+ ABI_MALLOC(eigen0_tmp,(dtset%mband*dtset%nkpt*dtset%nsppol))
+ ABI_MALLOC(occ_tmp,(dtset%mband*dtset%nkpt*dtset%nsppol))
+
  hdr%rprimd=rprimd_for_kg ! We need the rprimd that was used to generate de G vectors
- call inwffil(ask_accurate,cg,dtset,dtset%ecut,ecut_eff,eigen0,dtset%exchn2n3d,&
+ call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen0_tmp,dtset%exchn2n3d,&
 & formeig,hdr,ireadwf0,dtset%istwfk,kg,dtset%kptns,&
 & dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,&
 & dtset%nband,ngfft,dtset%nkpt,npwarr,dtset%nsppol,dtset%nsym,&
-& occ,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
+& occ_tmp,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
 & dtfil%unkg,wffgs,wfftgs,dtfil%unwffgs,dtfil%fnamewffk,wvl)
  hdr%rprimd=rprimd
 
@@ -485,6 +511,11 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if (ireadwf0==1) then
    call WffClose(wffgs,ierr)
  end if
+ABI_DEALLOCATE(cg_tmp)
+ABI_DEALLOCATE(eigen0_tmp)
+ABI_DEALLOCATE(occ_tmp)
+!ENDDEBUG
+
 
  if (psps%usepaw==1.and.ireadwf0==1) then
 !  if parallelism, pawrhoij is distributed, hdr%pawrhoij is not
@@ -611,6 +642,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  end if
 
  call getcut(boxcut,ecutf,gmet,gsqcut,dtset%iboxcut,std_out,k0,ngfftf)
+print *, 'past getcut'
 
 !PAW: 1- Initialize values for several arrays depending only on atomic data
 !2- Check overlap
@@ -719,7 +751,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_DATATYPE_ALLOCATE(paw_an,(0))
    ABI_DATATYPE_ALLOCATE(paw_ij,(0))
    ABI_DATATYPE_ALLOCATE(pawfgrtab,(0))
- end if
+ end if ! paw
 
  ABI_ALLOCATE(rhog,(2,nfftf))
  ABI_ALLOCATE(rhor,(nfftf,dtset%nspden))
@@ -767,11 +799,13 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    tim_mkrho=4
    paw_dmft%use_sc_dmft=0 ! respfn with dmft not implemented
    paw_dmft%use_dmft=0 ! respfn with dmft not implemented
+print *, ' call mkrho '
    if (psps%usepaw==1) then
      ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
      ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
+
      call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,rhog,rhowfr,rhor)
      ABI_DEALLOCATE(rhowfg)
      ABI_DEALLOCATE(rhowfr)
@@ -779,6 +813,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
    end if
+print *, ' after call mkrho '
  end if ! getden
 
 !In PAW, compensation density has eventually to be added
@@ -1046,7 +1081,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !  Calculate the kinetic part of the elastic tensor
    call dfpt_eltfrkin(cg,eltfrkin,dtset%ecut,dtset%ecutsm,dtset%effmass_free,&
-&   dtset%istwfk,kg,dtset%kptns,dtset%mband,dtset%mgfft,dtset%mkmem,mpi_enreg,&
+&   dtset%istwfk,kg,dtset%kptns,dtset%mband,dtset%mband_mem,dtset%mgfft,dtset%mkmem,mpi_enreg,&
 &   dtset%mpw,dtset%nband,dtset%nkpt,ngfft,npwarr,&
 &   dtset%nspinor,dtset%nsppol,occ,rprimd,dtset%wtk)
 

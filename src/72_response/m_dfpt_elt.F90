@@ -29,6 +29,7 @@ module m_dfpt_elt
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_mpinfo
  use m_dtset
 
  use defs_datatypes, only : pseudopotential_type
@@ -1357,7 +1358,7 @@ end subroutine dfpt_eltfrloc
 !! elastic tensor
 !!
 !! INPUTS
-!!  cg(2,mpw*nspinor*mband*mkmem*nsppol)=<G|Cnk>=Fourier coefficients of wavefunction
+!!  cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)=<G|Cnk>=Fourier coefficients of wavefunction
 !!  ecut=cut-off energy for plane wave basis sphere (Ha)
 !!  ecutsm=smearing energy for plane wave kinetic energy (Ha) (NOT NEEDED !)
 !!  effmass_free=effective mass for electrons (1. in common case)
@@ -1366,6 +1367,7 @@ end subroutine dfpt_eltfrloc
 !!  kptns(3,nkpt)=coordinates of k points in terms of reciprocal space
 !!   primitive translations
 !!  mband=maximum number of bands
+!!  mband_mem=maximum number of bands in memory
 !!  mgfft=maximum size of 1D FFTs
 !!  mkmem=number of k points treated by this node.
 !!  mpi_enreg=information about MPI parallelization
@@ -1395,18 +1397,18 @@ end subroutine dfpt_eltfrloc
 !! SOURCE
 
 subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
-&  istwfk,kg,kptns,mband,mgfft,mkmem,mpi_enreg,&
+&  istwfk,kg,kptns,mband,mband_mem,mgfft,mkmem,mpi_enreg,&
 &  mpw,nband,nkpt,ngfft,npwarr,nspinor,nsppol,occ,rprimd,wtk)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: mband,mgfft,mkmem,mpw,nkpt,nspinor,nsppol
+ integer,intent(in) :: mband,mband_mem,mgfft,mkmem,mpw,nkpt,nspinor,nsppol
  real(dp),intent(in) :: ecut,ecutsm,effmass_free
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: istwfk(nkpt),kg(3,mpw*mkmem),nband(nkpt*nsppol)
  integer,intent(in) :: ngfft(18),npwarr(nkpt)
- real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol),kptns(3,nkpt)
+ real(dp),intent(in) :: cg(2,mpw*nspinor*mband_mem*mkmem*nsppol),kptns(3,nkpt)
  real(dp),intent(in) :: occ(mband*nkpt*nsppol),rprimd(3,3),wtk(nkpt)
  real(dp),intent(out) :: eltfrkin(6,6)
 
@@ -1415,6 +1417,7 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
  integer :: bdtot_index,iband,icg,ierr,ii,ikg
  integer :: ikpt,index,ipw,isppol,istwf_k,jj,master,me,n1,n2
  integer :: n3,nband_k,nkinout,npw_k,spaceComm
+ integer :: nband_me, iband_me
  real(dp) :: ucvol
 !arrays
  integer,allocatable :: gbound(:,:),kg_k(:,:)
@@ -1463,10 +1466,14 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
        cycle
      end if
 
+! find number of bands I will actually treat
+     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+
      ABI_ALLOCATE(gbound,(2*mgfft+8,2))
      kpoint(:)=kptns(:,ikpt)
 
      kg_k(:,:) = 0
+
 
 !$OMP PARALLEL DO PRIVATE(ipw) SHARED(ikg,kg,kg_k,npw_k)
      do ipw=1,npw_k
@@ -1485,11 +1492,13 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
      ABI_ALLOCATE(ekinout,(nkinout))
      ekinout(:)=zero
 
+     iband_me = 0
      do iband=1,nband_k
 
        if(mpi_enreg%proc_distrb(ikpt,iband,isppol) /= me) cycle
+       iband_me = iband_me + 1
 
-       cwavef(:,1:npw_k*nspinor)=cg(:,1+(iband-1)*npw_k*nspinor+icg:iband*npw_k*nspinor+icg)
+       cwavef(:,1:npw_k*nspinor)=cg(:,1+(iband_me-1)*npw_k*nspinor+icg:iband_me*npw_k*nspinor+icg)
 
        call d2kindstr2(cwavef,ecut,ecutsm,effmass_free,ekinout,gmet,gprimd,&
 &       istwf_k,kg_k,kpoint,npw_k,nspinor)
@@ -1508,7 +1517,7 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
 
      if (mkmem/=0) then
 !      Handle case in which kg, cg, are kept in core
-       icg=icg+npw_k*nspinor*nband_k
+       icg=icg+npw_k*nspinor*nband_me
        ikg=ikg+npw_k
      end if
 

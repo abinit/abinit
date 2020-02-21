@@ -3126,6 +3126,7 @@ print *, 'calling wfk_open_read with formeig = ', formeig, ' path ', trim(inpath
 #ifdef DEV_MJV
 print *, 'wfk_disk%mband, dtset%mband ', wfk_disk%mband, dtset%mband
 print *, 'wfk_disk%Hdr%npwarr ',wfk_disk%Hdr%npwarr
+print *, 'npwarr ',npwarr
 #endif
 ! ABI_CHECK(wfk_disk%mband >= dtset%mband, "input mband too large for this file")
  mband = wfk_disk%mband;

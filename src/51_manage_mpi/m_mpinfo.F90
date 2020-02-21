@@ -2570,7 +2570,8 @@ print *, 'no band paral now'
          ind=mod(ind0,nproc)
          do iiband=1,nband_k
            mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
-           if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc-ind-1
+           if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=ind
+           !if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc-ind-1
          end do
          ind0=ind0+1
        end do
@@ -2597,7 +2598,8 @@ print *, 'yes band paral now'
          do iiband=1,nband_k
            ind=(iiband-1)/inb1+ind0
            mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
-           if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc-ind-1
+           if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=ind
+           !if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc-ind-1
          end do
          ind0=ind+1
        end do

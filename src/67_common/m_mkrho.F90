@@ -171,6 +171,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
  integer :: isppol,istwf_k,jspinor_index
  integer :: me,my_nspinor,n1,n2,n3,n4,n5,n6,nalpha,nband_k,nbandc1,nbdblock,nbeta
  integer :: ndat,nfftot,npw_k,spaceComm,tim_fourwf
+ integer :: iband_me
  real(dp) :: kpt_cart,kg_k_cart,gp2pi1,gp2pi2,gp2pi3,cwftmp
  real(dp) :: weight,weight_i
  !character(len=500) :: message
@@ -328,6 +329,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
 !        Shoulb be changed to treat bands by batch always
 
          if(mpi_enreg%paral_kgb /= 1) then  ! Not yet parallelized on spinors
+           iband_me = 0
            do iband=1,nband_k
 !            if(paw_dmft%use_sc_dmft==1) then
 !            write(std_out,*) 'iband  ',iband,occ(iband+bdtot_index),paw_dmft%occnd(iband,iband,ikpt,isppol)
@@ -337,6 +339,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
              if(mpi_enreg%paralbd==1)then
                if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,iband,iband,isppol,me)) cycle
              end if
+             iband_me = iband_me + 1
              do ibandc1=1,nbandc1 ! in case of DMFT
 !              Check if DMFT and only treat occupied states (check on occ.)
                if(paw_dmft%use_sc_dmft == 1) then
@@ -360,7 +363,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                if (locc_test) then
 !                Obtain Fourier transform in fft box and accumulate the density or the kinetic energy density
 !                Not yet parallise on nspinor if paral_kgb non equal to 1
-                 ipwsp=(iband-1)*npw_k*my_nspinor +icg
+                 ipwsp=(iband_me-1)*npw_k*my_nspinor +icg
                  cwavef(:,1:npw_k,1)=cg(:,1+ipwsp:ipwsp+npw_k)
                  if (my_nspinor==2) cwavef(:,1:npw_k,2)=cg(:,ipwsp+npw_k+1:ipwsp+2*npw_k)
 
@@ -381,6 +384,7 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
                  end if
 
 !                Non diag occupation in DMFT.
+! TODO : this will break in full distrib of band memory
                  if(use_nondiag_occup_dmft==1) then
                    ipwsp=(iband1-1)*npw_k*my_nspinor +icg
                    cwavefb(:,1:npw_k,1)=cg(:,1+ipwsp:ipwsp+npw_k)

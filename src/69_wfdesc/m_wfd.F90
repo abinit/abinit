@@ -970,6 +970,7 @@ subroutine wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,nkibz,nsppol,bks_m
 
  ! TODO Here we should use ecut_eff instead of ecut
  exchn2n3d=0
+print *, 'in wfd_init call kpgsph'
  do ik_ibz=1,Wfd%nkibz
    istwf_k = Wfd%istwfk(ik_ibz)
    kpoint  = Wfd%kibz(:,ik_ibz)
