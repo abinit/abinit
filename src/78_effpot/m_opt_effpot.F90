@@ -115,6 +115,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh)
  real(dp), allocatable :: strten_coeffs(:,:,:)
 !Logicals
  logical :: need_print_anh,file_opened,iam_master
+ logical :: fit_on(3)
 !Strings 
  character(len=1000) :: message
  character(len=1000) :: frmt
@@ -125,6 +126,10 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh)
  nproc = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
  iam_master = (my_rank == master)
 
+ !fit_on !TODO set up keyword opt_on
+  fit_on(1) = .FALSE. 
+  fit_on(2) = .TRUE. 
+  fit_on(3) = .TRUE. 
 
  !Setting/Initializing Variables
   ntime = hist%mxhist
@@ -252,7 +257,7 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh)
 &                                  energy_coeffs,fit_data%energy_diff,info,&
 &                                  coeff_inds,natom_sc,opt_ncoeff,opt_ncoeff,ntime,&
 &                                  strten_coeffs,fit_data%strten_diff,&
-&                                  fit_data%training_set%sqomega)
+&                                  fit_data%training_set%sqomega,fit_on)
 
   if (info /= 0 .and. all(coeff_values < tol16))then
     write(frmt,*) opt_ncoeff  

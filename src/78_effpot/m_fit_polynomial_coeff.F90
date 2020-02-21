@@ -127,7 +127,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS,&
 &                                   positive,verbose,anharmstr,spcoupling,&
 &                                   only_odd_power,only_even_power,prt_names,prt_anh,& 
-&                                   fit_iatom,prt_files)
+&                                   fit_iatom,prt_files,fit_on,sel_on)
 
  implicit none
 
@@ -145,6 +145,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
  logical,optional,intent(in) :: only_odd_power,only_even_power
  logical,optional,intent(in) :: initialize_data,prt_files
+ logical,optional,intent(in) :: fit_on(3), sel_on(3)
 !Local variables-------------------------------
 !scalar
  integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff
@@ -741,7 +742,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                      energy_coeffs_tmp,fit_data%energy_diff,info,&
 &                                      list_coeffs_tmp(1:icycle),natom_sc,icycle,ncycle_max,ntime,&
 &                                      strten_coeffs_tmp,fit_data%strten_diff,&
-&                                      fit_data%training_set%sqomega)
+&                                      fit_data%training_set%sqomega,fit_on)
        if(info==0)then
          if (need_positive.and.any(coeff_values(ncoeff_fix+1:icycle) < zero)) then
            write(message, '(a)') ' Negative value detected...'
@@ -776,7 +777,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
      do icoeff=1,my_ncoeff
        if(gf_values(1,icoeff) < zero) cycle
        if(abs(gf_values(1,icoeff)) <tol16) cycle
-       if(gf_values(1,icoeff) < mingf(1) ) then
+       if(sum(gf_values(2:4,icoeff),MASK=sel_on) < sum(mingf(2:4),MASK=sel_on))then
          mingf(:) = gf_values(:,icoeff)
          index_min = my_coeffindexes(icoeff)
        end if
@@ -794,7 +795,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
        do icoeff=1,nproc
          if(gf_mpi(2,icoeff) < zero) cycle
          if(abs(gf_mpi(2,icoeff)) < tol16) cycle
-         if(gf_mpi(2,icoeff) < mingf(1) ) then
+         if(sum(gf_mpi(3:5,icoeff),MASK=sel_on) < sum(mingf(2:4),MASK=sel_on))then
            mingf(:) = gf_mpi(2:5,icoeff)
            index_min = int(gf_mpi(1,icoeff))
          end if
@@ -974,7 +975,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                      energy_coeffs_tmp,fit_data%energy_diff,info,&
 &                                      list_coeffs_tmp(1:icycle_tmp),natom_sc,icycle_tmp,ncycle_max,&
 &                                      ntime,strten_coeffs_tmp,fit_data%strten_diff,&
-&                                      fit_data%training_set%sqomega)
+&                                      fit_data%training_set%sqomega,fit_on)
        if(info==0)then
          call fit_polynomial_coeff_computeGF(coeff_values(1:icycle_tmp),energy_coeffs_tmp,&
 &                                            fit_data%energy_diff,fcart_coeffs_tmp,fit_data%fcart_diff,&
@@ -1068,7 +1069,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                  energy_coeffs_tmp,fit_data%energy_diff,info,&
 &                                  list_coeffs_tmp(1:ncycle_tot),natom_sc,&
 &                                  ncycle_tot,ncycle_max,ntime,strten_coeffs_tmp,&
-&                                  fit_data%strten_diff,fit_data%training_set%sqomega)
+&                                  fit_data%strten_diff,fit_data%training_set%sqomega,fit_on)
 
    if(need_verbose) then
      write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit process: '
@@ -1265,6 +1266,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
  type(polynomial_coeff_type),allocatable :: coeffs_in(:)
  type(fit_data_type) :: fit_data
  character(len=500) :: message
+ logical :: fit_on(3)
 ! *************************************************************************
 
 !MPI variables
@@ -1275,6 +1277,10 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
 !Initialisation of optional arguments
  need_verbose = .TRUE.
  if(present(verbose)) need_verbose = verbose
+
+ fit_on(1) = .FALSE. 
+ fit_on(2) = .TRUE.
+ fit_on(3) = .TRUE. 
 
 !Get the list of coefficients from the eff_pot
  if(eff_pot%anharmonics_terms%ncoeff > 0)then
@@ -1378,7 +1384,7 @@ subroutine fit_polynomial_coeff_getPositive(eff_pot,hist,coeff_values,isPositive
 &                                  energy_coeffs,fit_data%energy_diff,info,&
 &                                  list_coeff(imodel,1:ncoeff),natom_sc,ncoeff,&
 &                                  ncoeff_tot,ntime,strten_coeffs,fit_data%strten_diff,&
-&                                  fit_data%training_set%sqomega)
+&                                  fit_data%training_set%sqomega,fit_on)
 
    if(info==0)then
 
@@ -1705,7 +1711,7 @@ end subroutine fit_polynomial_coeff_getCoeffBound
 
 subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energy_coeffs,energy_diff,&
 &                                     info_out,list_coeffs,natom,ncoeff_fit,ncoeff_max,ntime,&
-&                                     strten_coeffs,strten_diff,sqomega)
+&                                     strten_coeffs,strten_diff,sqomega,fit_on)
 
  implicit none
 
@@ -1722,6 +1728,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
  real(dp),intent(in) :: strten_coeffs(6,ntime,ncoeff_max)
  real(dp),intent(in) :: strten_diff(6,ntime),sqomega(ntime)
  real(dp),intent(out):: coefficients(ncoeff_fit)
+ logical,intent(in)  :: fit_on(3)
 !Local variables-------------------------------
 !scalar
  integer :: ia,itime,icoeff,jcoeff,icoeff_tmp,jcoeff_tmp,mu,LDA,LDB,LDX,LDAF,N,NRHS
@@ -1781,12 +1788,16 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
      do jcoeff=1,ncoeff_fit
        jcoeff_tmp = list_coeffs(jcoeff)
        enu = energy_coeffs(jcoeff_tmp,itime)
-!       etmpA =  emu*enu
-!       A(icoeff,jcoeff) = A(icoeff,jcoeff) + efact*etmpA
+       if(fit_on(3))then
+         etmpA =  emu*enu
+         A(icoeff,jcoeff) = A(icoeff,jcoeff) + efact*etmpA
+       endif
      end do
-     etmpB = etmpB + energy_diff(itime)*emu / (sqomega(itime)**3)
-     etmpB = zero ! REMOVE THIS LINE TO TAKE INTO ACOUNT THE ENERGY     
-
+     if(fit_on(3))then 
+        etmpB = etmpB + energy_diff(itime)*emu !/ (sqomega(itime)**3)
+     else 
+        etmpB = zero ! REMOVE THIS LINE TO TAKE INTO ACOUNT THE ENERGY     
+     endif
 !    Fill forces
      do ia=1,natom
        do mu=1,3
@@ -1795,9 +1806,13 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
            jcoeff_tmp = list_coeffs(jcoeff)
            fnu = fcart_coeffs(mu,ia,jcoeff_tmp,itime)
            ftmpA =  fmu*fnu
-           A(icoeff,jcoeff) = A(icoeff,jcoeff) + ffact*ftmpA
+           if(fit_on(1))A(icoeff,jcoeff) = A(icoeff,jcoeff) + ffact*ftmpA
          end do
-         ftmpB = ftmpB + fcart_diff(mu,ia,itime)*fmu
+         if(fit_on(1))then 
+           ftmpB = ftmpB + fcart_diff(mu,ia,itime)*fmu
+         else 
+           ftmpB = zero 
+         endif
        end do !End loop dir
      end do !End loop natom
 !    Fill stresses
@@ -1807,9 +1822,13 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
          jcoeff_tmp = list_coeffs(jcoeff)
          snu = strten_coeffs(mu,itime,jcoeff_tmp)
          stmpA =  sqomega(itime)*smu*snu
-         A(icoeff,jcoeff) = A(icoeff,jcoeff) + sfact*stmpA
+         if(fit_on(2))A(icoeff,jcoeff) = A(icoeff,jcoeff) + sfact*stmpA
        end do
-       stmpB = stmpB + sqomega(itime)*strten_diff(mu,itime)*smu
+        if(fit_on(2))then
+          stmpB = stmpB + sqomega(itime)*strten_diff(mu,itime)*smu
+        else 
+          stmpB = zero 
+        endif
      end do !End loop stress dir
    end do ! End loop time
    B(icoeff,1) = B(icoeff,1) + ffact*ftmpB + sfact*stmpB + efact*etmpB

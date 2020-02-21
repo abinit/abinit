@@ -422,7 +422,7 @@ elec_eval = .FALSE.
                     &         verbose=.true.,positive=.false.,&
                     &         anharmstr=inp%fit_anhaStrain==1,&
                     &         spcoupling=inp%fit_SPCoupling==1,prt_names=inp%prt_names,prt_anh=inp%analyze_anh_pot,& 
-                    &         fit_iatom=inp%fit_iatom,prt_files=.TRUE.)
+                    &         fit_iatom=inp%fit_iatom,prt_files=.TRUE.,fit_on=inp%fit_on,sel_on=inp%sel_on)
              else 
                 inp%fit_nfixcoeff = -1
                 need_prt_files=.FALSE.
@@ -438,7 +438,7 @@ elec_eval = .FALSE.
                        &         verbose=.true.,positive=.false.,&
                        &         anharmstr=inp%fit_anhaStrain==1,&
                        &         spcoupling=inp%fit_SPCoupling==1,prt_names=inp%prt_names,prt_anh=inp%analyze_anh_pot,& 
-                       &         fit_iatom=ii,prt_files=need_prt_files)
+                       &         fit_iatom=ii,prt_files=need_prt_files,fit_on=inp%fit_on,sel_on=inp%sel_on)
                 enddo 
              endif 
           end if
