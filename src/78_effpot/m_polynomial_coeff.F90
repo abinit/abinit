@@ -3407,9 +3407,9 @@ if(isym_in <= nsym .and. idisp_in <= ndisp)then
             enddo
          endif
          if(any(index_coeff_tmp == 0))then ! If symmetry doesn't point to another term or isn't allowed due to distance write zeros to filter after
-	    possible = .FALSE.
+            possible = .FALSE.
          else   
-	    ncombi = ncombi + 1
+            ncombi = ncombi + 1
             possible = .TRUE. 
          endif
          if(need_compute .and. possible)then

@@ -137,7 +137,7 @@ subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 !integer,save :: paw_size_old=-1
  real(dp):: cutoff,freq_q,freq_b,qmass,bmass,tolsym
 ! real(dp):: time_q,time_b
- logical :: iam_master,need_chksym,isVused,isARused,readOnlyLast
+ logical :: iam_master,isVused,isARused,readOnlyLast
  integer, parameter:: master=0
  logical :: verbose,writeHIST,file_opened
  !type 
@@ -1069,7 +1069,7 @@ ABI_DEALLOCATE(xcart)
 end subroutine mover_effpot
 !!***
 
-!!****f* ABINIT/mover_effpot
+!!****f* ABINIT/chksymmetrygroup
 !! NAME
 !! checksymmetrygroup
 !!
@@ -1158,6 +1158,7 @@ tnons_out  = tnons
 
 
 end subroutine checksymmetrygroup
+!!***
 
 end module m_mover_effpot
 !!***

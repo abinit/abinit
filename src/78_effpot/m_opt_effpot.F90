@@ -640,7 +640,7 @@ subroutine opt_effpotbound(eff_pot,order_ran,hist,comm,print_anh)
  &                                              natom_sc,ntime,fit_data%training_set%sqomega,comm,&
  &                                              compute_anharmonic=.TRUE.,print_file=.FALSE.)
  
-                  write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses)/(msef_ini+mses_ini): ", (msef+mses)/(msef_ini+mses_ini)
+                  write(message,'(a,I2,a,ES24.16)') "cycle ",i," (msef+mses)/(msef_ini+mses_ini): ",(msef+mses)/(msef_ini+mses_ini)
                   call wrtout(std_out,message,'COLL')
                   write(message,'(a,I2,a,ES24.16)') "cycle ", i ," (msef+mses): ", (msef+mses)
                   call wrtout(std_out,message,'COLL')
@@ -1331,7 +1331,7 @@ subroutine opt_getHOstrain(terms,ncombi,nterm_start,eff_pot,power_strain,comm)
 !Strings 
 !Local variables ------------------------------
 !scalars
- integer ::  nterm_tot_tmp,icombi 
+ integer ::  nterm_tot_tmp 
  integer :: i,ii
  real(dp) :: coeff_ini 
 !reals 

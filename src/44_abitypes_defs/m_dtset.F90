@@ -3220,8 +3220,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' spnorbscl stmbias strfact string_algo strprecon strtarget'
  list_vars=trim(list_vars)//' supercell_latt symafm symchi symdynmat symmorphi symrel symsigma symv1scf'
 !T
- list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt tl_nprccg tl_radius'
- list_vars=trim(list_vars)//' tmesh tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
+ list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
+ list_vars=trim(list_vars)//' tl_nprccg tl_radiustmesh tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
  list_vars=trim(list_vars)//' tolvrs tolwfr tphysel transport_ngkpt ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
