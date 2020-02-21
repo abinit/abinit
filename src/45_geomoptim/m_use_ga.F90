@@ -72,12 +72,13 @@ MODULE m_use_ga
  use m_geometry,       only : mkradim, mkrdim, metric, dist2
  use m_results_img,    only : results_img_type,gather_array_img
  use m_numeric_tools,  only : uniformrandom
-
+ use m_symtk,          only : matr3inv
  implicit none
 
  private
 
  public :: predict_ga
+ public :: checksymmetrygroup
 
 
 CONTAINS
@@ -679,7 +680,7 @@ INTEGER FUNCTION checkatomicdist(natom,coord,rprimd)
 
 END FUNCTION checkatomicdist
 
-SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
+SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup,symrel_out,tnons_out)
 
   implicit none
 
@@ -690,10 +691,12 @@ SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
   integer,intent(out) :: ptgroupma,spgroup
 ! Arrays
   real(dp),intent(in) :: rprimd(3,3),xred(3,natom)
+  integer,optional,intent(out) :: symrel_out(3,3,msym)
+  real(dp),optional,intent(out) :: tnons_out(3,msym)
 
 !Local variables ---------------------------------------
 !scalars
-  integer :: berryopt,jellslab=0,noncoll,nptsym,nzchempot=0,use_inversion
+  integer :: berryopt,jellslab=0,noncoll=0,nptsym,nzchempot=0,use_inversion
   integer :: chkprim,nsym
 ! Arrays
   integer :: bravais(11),ptsymrel(3,3,msym)
@@ -705,12 +708,21 @@ SUBROUTINE checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup)
 ! given the acel, rprim and coor
 ! this suroutine find the symmetry group
 
+write(std_out,*) 'symlatt'
   call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tol3)
 
+call matr3inv(rprimd,gprimd)
+
+write(std_out,*) 'symfind'
   call symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
 &           nzchempot,0,ptsymrel,spinat,symafm,symrel,tnons,tol3,typat,use_inversion,xred)
 
+write(std_out,*) 'symanal'
   call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tol3)
+
+  if(present(symrel_out))symrel_out = symrel 
+  if(present(tnons_out)) tnons_out  = tnons
+
 
 END SUBROUTINE checksymmetrygroup
 

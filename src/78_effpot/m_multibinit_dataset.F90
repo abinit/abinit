@@ -95,6 +95,7 @@ module m_multibinit_dataset
   ! TODO hexu: why integer dtion?
   integer :: dtion
   integer :: dynamics
+  integer :: dyn_chksym
   integer :: natifc
   integer :: natom
   integer :: ncoeff
@@ -116,7 +117,8 @@ module m_multibinit_dataset
   integer :: rfmeth
   integer :: restartxf
   integer :: symdynmat
-  integer :: test_effpot ! TODO MARCUS add test_effpot for test-set implementation
+  integer :: test_effpot 
+  integer :: test_prt_ph 
   integer :: dipdip_range(3)
   integer :: fit_grid(3)
   integer :: fit_rangePower(2)
@@ -165,6 +167,7 @@ module m_multibinit_dataset
   real(dp) :: temperature
   real(dp) :: rifcsph
   real(dp) :: conf
+  real(dp) :: tolmxf
   real(dp) :: acell(3)
   real(dp) :: strten_reference(6)
   real(dp) :: strtarget(6)
@@ -311,6 +314,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%dipdip_prt=0
  multibinit_dtset%dtion=100
  multibinit_dtset%dynamics=0
+ multibinit_dtset%dyn_chksym=0
  multibinit_dtset%eivec=0
  multibinit_dtset%energy_reference= zero
  multibinit_dtset%enunit=0
@@ -373,6 +377,8 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%symdynmat=1
  multibinit_dtset%temperature=325
  multibinit_dtset%test_effpot=0 
+ multibinit_dtset%test_prt_ph=0 
+ multibinit_dtset%tolmxf=2.0d-5
  
  multibinit_dtset%spin_calc_traj_obs=0
  multibinit_dtset%spin_calc_thermo_obs=1
@@ -928,6 +934,15 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
     MSG_WARNING(message)
  end if
 
+ multibinit_dtset%dyn_chksym=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dyn_chksym',tread,'INT')
+ if(tread==1) multibinit_dtset%dyn_chksym=intarr(1)
+ if(multibinit_dtset%dyn_chksym<0 .or. multibinit_dtset%dyn_chksym>1)then
+   write(message, '(a,i0,a,a,a)' )&
+&   'dyn_chksym is',multibinit_dtset%ntime,', but the only allowed values are 0 and 1.',ch10,&
+&   'Action: correct dyn_chksym in your input file.'
+   MSG_ERROR(message)
+ end if
 
 !L
  multibinit_dtset%latt_compressibility=0.0
@@ -1617,8 +1632,28 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
 &   'Action: correct test_effpot in your input file.'
    MSG_ERROR(message)
  end if
+ 
+ multibinit_dtset%test_prt_ph=0
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'test_prt_ph',tread,'DPR')
+ if(tread==1) multibinit_dtset%test_prt_ph=dprarr(1)
+ if(multibinit_dtset%test_prt_ph<0 .or. multibinit_dtset%test_prt_ph>1)then
+   write(message, '(a,i0,a,a,a,a,a)' )&
+&   'test_prt_ph is ',multibinit_dtset%test_prt_ph,'. The only allowed values',ch10,&
+&   'are 0 and 1.',ch10,&
+&   'Action: correct test_prt_ph in your input file.'
+   MSG_ERROR(message)
+ end if
 
-
+ multibinit_dtset%tolmxf=2.0d-5
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolmxf',tread,'DPR')
+ if(tread==1) multibinit_dtset%tolmxf=dprarr(1)
+ if(multibinit_dtset%tolmxf<0)then
+   write(message, '(a,i0,a,a,a,a,a)' )&
+&   'tolmxf is ',multibinit_dtset%tolmxf,'. The only allowed values',ch10,&
+&   'are positiv.',ch10,&
+&   'Action: correct tolmxf in your input file.'
+   MSG_ERROR(message)
+ end if
 
 !U
 
@@ -2557,6 +2592,7 @@ subroutine outvars_multibinit (multibinit_dtset,nunit)
  if(multibinit_dtset%dynamics/=0)then
    write(nunit,'(a)')' Molecular Dynamics :'
    write(nunit,'(3x,a9,3I10.1)')' dynamics',multibinit_dtset%dynamics
+   write(nunit,'(3x,a9,3I10.1)')' dyn_chksym',multibinit_dtset%dyn_chksym
    write(nunit,'(3x,a9,3F10.1)')'     temp',multibinit_dtset%temperature
    write(nunit,'(3x,a9,3I10.1)')'    ntime',multibinit_dtset%ntime
    if (multibinit_dtset%nctime /=1)then

@@ -57,12 +57,17 @@ module m_polynomial_coeff
  public :: polynomial_coeff_setCoefficient
  public :: polynomial_coeff_writeXML
  public :: polynomial_coeff_getEvenAnhaStrain
+ public :: coeffs_list_copy 
+ public :: coeffs_list_conc
  private :: computeNorder
  private :: computeCombinationFromList
  private :: computeSymmetricCombinations
  private :: getCoeffFromList
  private :: generateTermsFromList
  private :: reduce_zero_combinations
+ private :: check_irreducibility 
+ private :: sort_combination_list 
+ private :: sort_combination 
 !!***
 
 !!****t* m_polynomial_coeff/polynomial_coeff_type
@@ -2092,7 +2097,7 @@ subroutine polynomial_coeff_getNorder(coefficients,crystal,cutoff,ncoeff,ncoeff_
  else
     fit_iatom_in = -1
  endif
-
+ 
  natom  = crystal%natom
  nsym   = crystal%nsym
  rprimd = crystal%rprimd
@@ -2365,6 +2370,7 @@ if(need_compute_symmetric)then
        index_irred = 1
        !We count only here
        compute_sym = .false.
+       !write(std_out,*) "my_list_combination_tmp(", i,"): ", my_list_combination_tmp(:,i)
        do ii = 1,power_disps(2)
           if(my_list_combination_tmp(ii,i) > 0 .and.&
 &            my_list_combination_tmp(ii,i) <= ncoeff_symsym)then
@@ -2373,12 +2379,17 @@ if(need_compute_symmetric)then
              nstrain = nstrain + 1
           endif
        enddo
-       my_index_irredcomb(i) = my_ncombi + 1
-       call computeSymmetricCombinations(my_ncombi,my_list_combination_tmp,list_symcoeff,list_symstr,1,1,ndisp,nsym,&
+       my_index_irredcomb(i) = my_ncombi + 1       
+       if(nstrain < power_disps(1))then
+         call computeSymmetricCombinations(my_ncombi,my_list_combination_tmp,list_symcoeff,list_symstr,1,1,ndisp,nsym,&
 &                                        dummylist,my_list_combination_tmp(:,i),power_disps(2),&
 &                                        my_nirred,ncoeff_symsym,nstr_sym,nstrain,my_ncombi+1,&
 &                                        compatibleCoeffs,index_irred,compute_sym,comm,only_even=need_only_even_power)
-
+       else 
+         my_ncombi = my_ncombi + 1
+       endif
+       !write(std_out,*) "my_ncombi:", my_ncombi 
+       !write(std_out,*) "my_index_irredcomb(i)", my_index_irredcomb(i)
        ABI_DEALLOCATE(dummylist)
        ABI_DEALLOCATE(index_irred)
   enddo !i=1,my_nirred
@@ -3854,7 +3865,7 @@ integer,intent(in) :: comm
 !scalars
 !arrays
 !Local variables-------------------------------
-real(dp) :: cutoff
+real(dp) :: cutoff,coeff_ini
 integer :: ncoeff
 integer :: power_strph
 integer :: option
@@ -3872,6 +3883,7 @@ cutoff = zero
 power_strph = zero
 option = 0
 sc_size = (/1,1,1/)
+coeff_ini = 1000000
 
 
 call polynomial_coeff_getNorder(strain_terms_tmp,crystal,cutoff,ncoeff,ncoeff_out,power_strain,&
@@ -3902,7 +3914,8 @@ icoeff1=0
 do icoeff1=1,ncoeff_out
         if(.not.same(icoeff1))then
                 icoeff2=icoeff2 + 1
-                strain_terms(icoeff2) = strain_terms_tmp(icoeff1)
+                call polynomial_coeff_init(coeff_ini,strain_terms_tmp(icoeff1)%nterm,strain_terms(icoeff2),&
+&               strain_terms_tmp(icoeff1)%terms,strain_terms_tmp(icoeff1)%name,check=.TRUE.)
         endif
 enddo
 
