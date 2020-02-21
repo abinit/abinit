@@ -117,7 +117,7 @@
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [extra_info]
-#%% authors = G. BRunin, M. Giantomassi
+#%% authors = G. Brunin, M. Giantomassi
 #%% keywords = NC, DFPT, EPH
 #%% description = 
 #%%   E-ph for the mobility in semiconductors

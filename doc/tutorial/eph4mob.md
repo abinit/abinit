@@ -26,6 +26,8 @@ Only the final results are printed in the log and output files.
 
 [TUTORIAL_README]
 
+pseudos   "../../../Psps_for_tests/13al.981214.fhi, ../../../Psps_for_tests/33as.pspnc"
+
 This tutorial should take about 1 hour. It is strongly recommended to read [[cite:Brunin2020]]
 before running the tutorial in order to understand it correctly.
 
@@ -43,23 +45,32 @@ It is presumed that the user has already followed the Tutorials [RF1](rf1) and [
 and understands the calculation of ground state and response (phonons using density-functional
 perturbation theory (DFPT)) properties with ABINIT.
 
-The file *teph4mob_1.files* lists the file names and root names for the first run (GS+perturbations).
-You can copy it to the working directory. You can also copy the file *teph4mob_1.in* to your working directory.
+The file *teph4mob_1.in* is the input file for the first run (GS+perturbations).
+You can copy it to the working directory. 
 
 ```sh
 cd $ABI_TUTORESPFN/Input
 mkdir Work_eph4mob
 cd Work_eph4mob
-cp ../teph4mob_1.file .
 cp ../teph4mob_1.in .
 ```
 
 {% dialog tests/tutorespfn/Input/teph4mob_1.in %}
 
+Since ABINIT 9, the use of the files file is deprecated. The input file will be used instead,
+with an additional input variable listing the pseudopotentials used in the computation.
+You should edit this file *teph4mob_1.in* to include the pseudopotentials, see [[pseudos]].
+This variable gives the different paths to the pseudopotentials. For instance, use
+
+     pseudos   "../../../Psps_for_tests/13al.981214.fhi, ../../../Psps_for_tests/33as.pspnc"
+
+in standard installation and tests following the recommendations. You should adapt it
+depending on your *$ABI_PSPDIR*.
+
 This tutorial starts by the generation of a database, that might be quite time-consuming.
 You can immediately start this run. 
 
-    abinit < teph4mob_1.files > teph4mob_1.log 2> err &
+    abinit < teph4mob_1.in > teph4mob_1.log 2> err &
 
 The calculation is done for AlAs, the same crystalline material as for the first two tutorials on DFPT.
 Many input parameters are also quite similar. For more details about this first step, please refer to
@@ -91,7 +102,7 @@ You can copy it in the *Work_eph4mob* directory, and run the merge as follows:
 
 You now have the phonon-related files that are needed for the computation of the mobility.
 The DDB will be used to interpolate the phonon frequencies on the dense q-mesh, and
-the DVDB file will be used to Fourier interpolate the scattering potentials and 
+the DVDB will be used to Fourier interpolate the scattering potentials and 
 compute the e-ph matrix elements that we will need to compute the lifetimes. The only 
 ingredient left is the wavefunction on the dense mesh, which is the next step.
 
@@ -119,7 +130,9 @@ We want to compute the mobility of electrons in the conduction band, therefore
 we need to consider conduction bands in the computation of the WFK ([[nband]] = 8).
 You can copy it in the *Work_eph4mob* directory, and run ABINIT:
 
-    abinit < teph4mob_4.files > teph4mob_4.log 2> err &
+    abinit < teph4mob_4.in > teph4mob_4.log 2> err &
+
+*Note: do not forget to add the [[pseudos]] variable to this input file !*
 
 ## 4 Calculation of the mobility
 
@@ -139,7 +152,7 @@ You can give the paths to these files using:
 
 You can copy the input file in the *Work_eph4mob* directory, and run ABINIT:
 
-    abinit < teph4mob_5.files > teph4mob_5.log 2> err &
+    abinit < teph4mob_5.in > teph4mob_5.log 2> err &
 
 This run should take $\sim$15 seconds on a recent CPU. 
 
@@ -278,7 +291,7 @@ The file *$\$ABI_TUTORESPFN/Input/teph4mob_6.in* is an example of such computati
 
 You can copy the input file in the *Work_eph4mob* directory, and run ABINIT:
 
-    abinit < teph4mob_6.files > teph4mob_6.log 2> err &
+    abinit < teph4mob_6.in > teph4mob_6.log 2> err &
 
 This run should take a few minutes.
 You can then analyze the variation of the mobility with the value of [[sigma_erange]]. Once
@@ -339,7 +352,7 @@ The file *$\$ABI_TUTORESPFN/Input/teph4mob_7.in* is an example of such computati
 
 You can copy the input file in the *Work_eph4mob* directory, and run ABINIT:
 
-    abinit < teph4mob_7.files > teph4mob_7.log 2> err &
+    abinit < teph4mob_7.in > teph4mob_7.log 2> err &
 
 In the log file, you will now find information about the double-grid method:
 
