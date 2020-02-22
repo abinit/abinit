@@ -835,7 +835,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
                end do ! jband
                !mpi_sum ch2c_tmp to get all jband contribs 
                call xmpi_sum(ch2c_tmp,mpi_enreg%comm_band,ierr)
-               efmasval(ideg,ikpt)%ch2c(mu,nu,:,isub)=ch2c_tmp(:)
+               efmasval(ideg,ikpt)%ch2c(mu,nu,:,isub)=ch2c_tmp(1:bandmax-bandmin+1)
              end do ! nu
            end do ! mu
          end do ! iband_

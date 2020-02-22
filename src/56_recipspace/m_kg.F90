@@ -274,7 +274,6 @@ subroutine getmpw(ecut,exchn2n3d,gmet,istwfk,kptns,mpi_enreg,mpw,nkpt)
  mpw = 0
 
 !Might be parallelized over k points ? !
-print *, 'in getmpw call kpgsph'
  do ikpt = 1,nkpt
 !  Do computation of G sphere, returning npw
    kpoint(:)=kptns(:,ikpt)
@@ -557,7 +556,6 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 
    kpoint(:)=kptns(:,ikpt)
    istwf_k=istwfk(ikpt)
-print *, 'in kpgio call kpgsph', ikpt, ikg, mkmem, mpw
    call kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpoint,mkmem,mpi_enreg,mpw,npw1)
 
    test_npw=.true.
@@ -1092,7 +1090,6 @@ subroutine mkpwind_k(dk,dtset,fnkpt,fkptns,gmet,indkk_f2ibz,ikpt,ikpt1,&
   ABI_ALLOCATE(kg_k,(3,dtset%mpw))
   kg_k(:,:) = 0
   kpt(:) = dtset%kptns(:,ikpti)
-print *, 'in mkpwind_k call kpgsph'
   call kpgsph(ecut_eff,exchn2n3d,gmet,ikg1,ikpt,istwf_k,kg_k,kpt,1,mpi_enreg,dtset%mpw,npw_k)
 
   ! Build basis sphere of plane waves for the nearest neighbour of the k-point
