@@ -358,7 +358,7 @@ Variable(
     defaultval=0,
     mnemonics="FIT FIXed COEFFicients",
     text=r"""
-Indexes of the imposed coefficients during the fit process for the model:
+Indices of the imposed coefficients during the fit process for the model:
 """,
 ),
 
@@ -389,7 +389,7 @@ Variable(
     defaultval=0,
     mnemonics="FIT BANed COEFFicients",
     text=r"""
-Indexes of the banned coefficients during the fit process of the model
+Indices of the banned coefficients during the fit process of the model
 """,
 ),
 
@@ -642,7 +642,7 @@ Variable(
     topics=['DynamicsMultibinit_basic'],
     dimensions="scalar",
     defaultval=1000,
-    mnemonics="LATTice dynamics relaxation time TAUT",
+    mnemonics="LATTice dynamics relaxation time TAUP",
     text=r"""
     Parameter used in Berendsen lattice dynamcis [[multibinit:dynamics]] =103, in which the pressure is relaxed exponentially to the target temperature, with the characteristic time of latt_taup.
     The unit is atomic unit, same as [[dtion]].
@@ -1072,7 +1072,7 @@ Variable(
     defaultval=0,
     mnemonics="SPIN Single Ion Anistropy ADD",
     text=r"""
-Add single ion anistropy term to the spin model hamiltonian.
+Add single ion anisotropy term to the spin model hamiltonian.
 with user defined values (see [[multibinit:spin_sia_k1amp]] and [[multibinit:spin_sia_k1dir]].
 
 * 0 --> Do not add, use the term defined in the spin model xml file.
@@ -1228,7 +1228,7 @@ abivarname="analyze_anh_pot@multibinit",
     defaultval=0,
     mnemonics="ANALYZE ANHarmonic POTential",
     text=r"""
-* 0 --> nothing.
+* 0 --> Nothing.
 * 1 --> Print energy contribution of each anharmonic term in the effective Potential. 
         If it is a Molecular Dynamics (MD) run, the contribution of each term is printed for each MD-step into MD_anharmonic_terms_energy.dat .
         If the effective potential is tested against a test set the contribution of each term for each configuration in the test set is printed in TES_anharmonic_terms_energy.dat .
@@ -1246,11 +1246,11 @@ Variable(
     defaultval=0,
     mnemonics="OPTimize EFFective POTential",
     text=r"""
-* 0 --> nothing.
-* 1 --> Turn on reading of optimization of effective potential keywords (opt_)
+* 0 --> Nothing.
+* 1 --> Turn on reading of optimization of effective potential keywords (opt_).
         The optimization process gives the user the ability to refit the coefficients of specified terms with respect to the training set while keeping the rest fixed.
 
-**Related variables:** The number of coefficients to refit ([[multibinit:opt_ncoeff]]), the  indexes of the coefficients to optimize ([[multibinit:opt_coeff]])
+**Related variables:** The number of coefficients to refit ([[multibinit:opt_ncoeff]]), the  indices of the coefficients to optimize ([[multibinit:opt_coeff]]).
 """,
 ),
 
@@ -1263,7 +1263,8 @@ Variable(
     defaultval=0,
     mnemonics="OPTimize NUMBER of COEFFicients",
     text=r"""
-* Number of anharmonic terms to refit in the effective potential
+* Number of anharmonic terms to refit in the effective potential. 
+**Related variables:** [[multibinit:opt_coeff]]
 """, 
 ),
 
@@ -1276,7 +1277,7 @@ Variable(
     defaultval=0,
     mnemonics="OPTimize Cofficients",
     text=r"""
-Indexes of the terms to refit in the effective potential. 
+Indices of the terms to refit in the effective potential. 
 """,
 ),
 

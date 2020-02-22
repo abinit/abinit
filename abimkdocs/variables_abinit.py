@@ -9166,7 +9166,7 @@ This option **requires** the linkage with external FFT libraries (FFTW3 or MKL-D
 Tests showed a speedup of ~25% in calculations in which FFTs (in particular fourwf%pot) represent the dominant part.
 Typical examples are EPH calculation with [[optdriver]] = 7.
 
-At present (|today|), only selected kernels support mixed-precision, in particular MPI-FFTs
+At present ( |today| ), only selected kernels support mixed-precision, in particular MPI-FFTs
 in mixed precision **are not yet supported**.
 """,
 ),
@@ -19864,7 +19864,7 @@ Variable(
     mnemonics="SYMmetrize V1 DFPT SCF potentials",
     text=r"""
 If *symv1scf* is equal to 1, the spatial-symmetry on the first-order DFPT potentials
-is enforced every time a set of potentials in the BZ is recostructed by symmetry
+is enforced every time a set of potentials in the BZ is reconstructed by symmetry
 starting from the initial values in the IBZ.
 This option is similar to [[symdynmat]] but it acts on the DFPT potentials instead of
 the dynamical matrix.
@@ -20200,7 +20200,7 @@ Variable(
     defaultval=None,
     mnemonics="INput DATA PREFIX",
     text=r"""
-Prefix for input files. Replaces the analogous entry in the obsolete *files_file*
+Prefix for input files. Replaces the analogous entry in the obsolete *files_file* .
 This variable is used when Abinit is executed with the new syntax:
 
     abinit run.abi > run.log 2> run.err &
@@ -20213,7 +20213,7 @@ If the input file does not have a file extension, a default is provided.
 ),
 
 Variable(
-    abivarname="outdata_file",
+    abivarname="outdata_prefix",
     varset="files",
     vartype="string",
     topics=['Control_useful'],
@@ -20221,7 +20221,7 @@ Variable(
     defaultval=None,
     mnemonics="OUTput DATA PREFIX",
     text=r"""
-Prefix for output files. Replaces the analogous entry in the obsolete *files_file*
+Prefix for output files. Replaces the analogous entry in the obsolete *files_file* .
 This variable is used when Abinit is executed with the new syntax:
 
     abinit run.abi > run.log 2> run.err &
@@ -20242,7 +20242,7 @@ Variable(
     defaultval=None,
     mnemonics="TeMPorary DATA PREFIX",
     text=r"""
-Prefix for temporary files. Replaces the analogous entry in the obsolete *files_file*
+Prefix for temporary files. Replaces the analogous entry in the obsolete *files_file* .
 This variable is used when Abinit is executed with the new syntax:
 
     abinit run.abi > run.log 2> run.err &

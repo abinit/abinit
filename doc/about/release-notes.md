@@ -24,7 +24,7 @@ This might take some time ...
 
 Xavier
 
-### A. Important remark and warnings.
+### A. Important remarks and warnings.
 
 A.1 At the occasion of the switch from ABINITv8 to ABINITv9, many improvements of the formats and content of files
     have been made, so the backward compatibility of ABINITv9 is often broken. 
@@ -70,7 +70,19 @@ New input variables :
 - eph_restart  v9#60
 - eph_stern v8#44
 - eph_use_interp NOT TESTED
-By G. Brunin, H. Miranda, M. Giantomassi
+- frohl_params IN DEVELOPMENT, NOT REALLY DOCUMENTED, NOT TESTED
+- getdvdb v7#88, v8#44, v9#54,60,61.
+- getdvdb_path v8#44, v9#60
+- getkerange_path v9#61
+- irddvdb NOT TESTED
+- prteliash v8#44, v9#60 and 61
+- sigma_bsum_range v9#60
+- sigma_erange v9#57, 60, 61
+- sigma_ngkpt v9#57, 60
+- sigma_nshiftk v9#57
+- sigma_shiftk v9#57
+- symv1scf v9#60
+By G. Brunin, H. Miranda, M. Giantomassi, GM Rignanese, G Hautier
 
 B.2 DFT+DMFT
 
@@ -103,6 +115,21 @@ v8#23
 wannier90#04 Wannier function for bcc Fe.
 #%%   To check whether wannier90 interface works properly with nsppol=2 and nspden=2.
 
+New input variables :
+- slc_coupling : NOT TESTED, NOT DOCUMENTED
+spin_calc_correlation_obs NOT TESTED
+spin_calc_thermo_obs  tmulti5_2
+spin_calc_traj_obs NOT TESTED
+spin_damping NOT TESTED
+spin_init_orientation  NOT TESTED
+spin_init_qpoint NOT TESTED
+spin_init_rotate_axis  NOT TESTED
+spin_init_state tmulti5_1, tmulti5_2, tmulti5_3, v8#16, v8#23
+spin_ntime_pre tmulti5_1, tmulti5_2, tmulti5_3, v8#23
+spin_sia_add spin_sia_k1amp spin_sia_k1dir   tmulti5_2, tmulti5_3
+spin_temperature_start spin_temperature_end spin_temperature_nstep spin_var_temperature   tmulti5_2
+spin_write_traj tmulti5_1, v8#23
+
 By He Xu, Ph. Ghosez, M. Verstraete + ... ?
 
 
@@ -112,7 +139,46 @@ X.Gonze
 v8#24-29  Constrained DFT
 v8#95-97  CDFT + test recognition of symmetry in the non-collinear case
 v9#1-3  CDFT PAW
-New input variables : chrgat, constrained_kind
+New input variables : chrgat, constrained_kind, ratsm
+
+B.5 There is a new syntax to run ABINIT, without the "files" file :
+abinit run.abi
+or
+abinit run.abi > run.log 2> run.err &
+The user can specify the output file thanks to the [[output_file]] input variable,
+the list of pseudopotentials thanks to the [[pseudos]] input variable.
+The prefix for other input, output or temporary files are constructed from [[indata_prefix]], [[outdata_prefix]] and [[tmpdata_files]].
+See [[topic:Control]].
+
+By Matteo
+
+
+B.6 Strings in the input file
+A handful of new input keywords are readig strings as data, and, often, can be used alternatively to similar input keywords
+that were expecting numerical values.
+List of new input variables
+- getddb_path, an alternative to getddb or irdddb, see test v9#60
+- getden_path, an alternative to getden or irdden, see test v8#36, 41
+- getscr_path, an alternative to getscr or irdscr, see test v67mbpt#51
+- getwfkfine_path, an alternative to getwfkfine or irdwfkfine, see test v9#55,56
+- getwfk_path, an alternative to getwfk or irdwfk, see test v9#60
+- getwfq_path, an alternative to getwfq or irdwfq, NOT TESTED
+- getkerange_path, see test v9#60
+- getpot_path, see test v8#44
+- pseudos, see tests mpiio#27,51, tutoplugs#tw90_1,tw90_4, v4#20, v5#54, v67mbpt#40, v7#45, v8#90.
+- output_file NOT TESTED
+- outdata_prefix NOT TESTED NOT DOCUMENTED
+- indata_prefix NOT TESTED 
+- tmpata_prefix NOT TESTED 
+
+By Matteo G.
+
+
+B.7 YAML sections are now generated in the output file, sometimes replacing text sections, sometime providing new information.
+Input variable use_yaml paral#86, v67mbpt#2
+By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze
+
+
 
 * * *
 
@@ -149,6 +215,17 @@ Improvements from M. Schmitt
       Test for new input variable analyze_anh_pot
 #99 Test the optimize effective potential option. Optimize the value of 2 coefficients with respect
 #%%    to a training set.
+New input variables : 
+- analyze_anh_pot v8#98
+- fit_anhaStrain NOT TESTED
+- fit_iatom, tests in paral#81, 82, v8#13-15, but not documented. The tests were already existing.
+- latt_friction, NOT TESTED, NOT DOCUMENTED
+- opt_effpot, test in v8#99
+- opt_ncoeff, test in v8#99
+- opt_coeff, test in v8#99
+- prt_names, NOT TESTED, NOT DOCUMENTED
+- test_effpot  v8#98
+
 
 D.4 J. Zwanziger
 #39 Test Chern number and orbital magnetization calculation
@@ -170,6 +247,18 @@ v8#94   test supercell_latt construction
 D.9 He Xu
 wannier90#4
 test wannier90 interface with nsppol=2 and nspden=2
+
+D.10 Mixed precision calculations
+New input variable mixprec
+v8#44, v9#57, 60, 61.
+From GMatteo
+
+D.11 Multibinit interface with scale-up
+A whole set of new input variables, however not tested, not documented !
+
+D.12 The following units are also allowed in the input file :
+- S Sec Second 
+- nm (for nanometer)
 
 
 * * *
