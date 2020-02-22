@@ -14,12 +14,9 @@ MISSING 502-508, perhaps a bit more ...
 <ETBU>
 
 The list of contributors includes:
-<TO BE UPDATED>
-B. Amadon, G. Antonius, L. Baguet, J.-M. Beuken, J. Bieder, E. Bousquet, F. Bruneval, Wei Chen, M. Cote,
-J. Denier, G. Geneste, Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault, Xu He, Y. Jia, F. Jollet,
-A. Lherbier, A. Martin, H. Miranda, F. Naccarato, G. Petretto, N. Pike,
-S. Ponce, Y. Pouillon, S. Prokhorenko, F. Ricci, M. Torrent, M. van Setten, B. Van Troeye, M. Verstraete, J. Zwanziger.
-<END OF TO BE UPDATED>
+B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, J. Bouchet, E. Bousquet, F. Bruneval, G. Brunin, Wei Chen, 
+Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault, G. Hautier, Xu He, F. Jollet,
+H. Miranda, G. Petretto, N. Pike, Y. Pouillon, F. Ricci, M. Torrent, J. Van Bever, M. Verstraete, J. Zwanziger.
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases.
@@ -315,19 +312,20 @@ D.9 He Xu
 wannier90#4
 test wannier90 interface with nsppol=2 and nspden=2
 
-MR491 D.10 Mixed precision calculations
-
-
+D.10 Mixed precision calculations
+MR491 
 New input variable mixprec
 v8#44, v9#57, 60, 61.
 From GMatteo
 
 D.11 Multibinit interface with scale-up
 A whole set of new input variables, however not tested, not documented !
+By ??
 
 D.12 The following units are also allowed in the input file :
 - S Sec Second 
 - nm (for nanometer)
+By ??
 
 D.13 ?? Merge phDOS branch from Matteo ?
 MR 604, 591, 553, 548, 544, 542, 508, 485, 453
@@ -422,7 +420,7 @@ Added a preview for the toptic_4.in files in the optic tutorial.
 
 
 D.34 Miscellaneous additional bug fixes and improvements of documentation.
-JM Beuken, J. Bieder, F. Bruneval, T. Cavignac, M. Giantomassi,  X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, He Xu
+L. Baguet, JM Beuken, J. Bieder, F. Bruneval, T. Cavignac, M. Giantomassi,  X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, He Xu
 
 
 * * *
