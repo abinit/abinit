@@ -11257,7 +11257,7 @@ Variable(
     text=r"""
 Gives the maximum number of molecular dynamics time steps or structural
 optimization steps to be done if [[ionmov]] is non-zero.
-Starting with Abinit9, ntime is automatically set to 1000 if [[ionvmov]] is non-zero,
+Starting with Abinit9, ntime is automatically set to 1000 if [[ionmov]] is non-zero,
 [[ntimimage]] is zero and [[ntime]] is not specified in the input file.
 Users are encouraged to pass a **timelimit** to Abinit using the command line and the syntax:
 
