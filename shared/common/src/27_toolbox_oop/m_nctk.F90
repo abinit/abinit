@@ -43,6 +43,7 @@ MODULE m_nctk
 
  use m_fstrings,  only : itoa, sjoin, lstrip, char_count, strcat, endswith, startswith, ltoa
  use m_io_tools,  only : pick_aname, delete_file, file_exists
+ use m_yaml,      only : DTSET_IDX
 
  implicit none
 
@@ -722,6 +723,9 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  integer,intent(in) :: comm
  character(len=*),intent(in) :: path
 
+!Local variables-------------------------------
+ !character(len=strlen) :: my_string
+
 ! *********************************************************************
 
  ! Always use mpiio mode (i.e. hdf5) if available so that one perform parallel parallel IO
@@ -753,6 +757,18 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
 
  ! Define the basic dimensions used in ETSF-IO files.
  NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
+
+ !if (len_trim(INPUT_STRING) /= 0) then
+   ! Write string with input.
+   !NCF_CHECK(nctk_def_dims(ncid, nctkdim_t("input_maxlen", strlen))
+   !my_string = ""
+   !if (DTSET_IDX /= -1) then
+   !  my_string = "jdtset " // itoa(DTSET_IDX)) // ch10 // trim(INPUT_STRING)
+   !else
+   !  my_string = trim(INPUT_STRING)
+   !end if
+   !NCF_CHECK(nf90_put_var(ncid, nctk_idname("input_string"), my_string))
+ !end if
 
 end function nctk_open_create
 !!***

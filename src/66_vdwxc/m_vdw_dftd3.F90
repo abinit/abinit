@@ -139,7 +139,7 @@ implicit none
  integer,parameter :: vdw_nspecies=94
  integer:: alpha,beta,ia,ii,indi,indj,index_ia,index_ja,index_ka
  integer :: is1,is2,is3,itypat,ja,jj,js1,js2,js3
- integer :: jtypat,ka,kk,ktypat,la,ll
+ integer :: jtypat,ka,kk,ktypat,la,ll,ierr
  integer :: nline,npairs,nshell
  integer :: refi,refj,refmax
  logical :: bol_3bt,found
@@ -484,7 +484,7 @@ real(dp),parameter:: rcov(vdw_nspecies)=&
  ABI_ALLOCATE(dcn,(3,natom,natom))
  ABI_ALLOCATE(dcn_cart,(3,natom,natom))
  ABI_ALLOCATE(str_dcn,(6,natom))
- ABI_ALLOCATE(d2cn,(2,3,natom,3,natom,natom))
+ ABI_MALLOC_OR_DIE(d2cn, (2,3,natom,3,natom,natom), ierr)
  ABI_ALLOCATE(fdcn,(2,3,natom,natom))
  ABI_ALLOCATE(cfdcn,(2,3,natom,natom))
  ABI_ALLOCATE(elt_cn,(6+3*natom,6,natom))

@@ -183,7 +183,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  integer :: spgroupma,tacell,tangdeg,tgenafm,tnatrd,tread,trprim,tscalecart,tspgroupma
  integer :: txangst,txcart,txred,txrandom,use_inversion
  real(dp) :: amu_default,a2,aa,cc,cosang,ucvol,sumalch
- character(len=500) :: message
+ character(len=500) :: msg
  type(atomdata_t) :: atom
 !arrays
  integer,allocatable :: ptsymrel(:,:,:),typat_read(:),symrec(:,:,:),indsym(:,:,:)
@@ -214,11 +214,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  ! Check that input length scales acell(3) are > 0
  do mu=1,3
    if(acell(mu)<=zero) then
-     write(message, '(a,i0,a, 1p,e14.6,a,a,a,a)' )&
+     write(msg, '(a,i0,a, 1p,e14.6,a,a,a,a)' )&
       'Length scale ',mu,' is input as acell=',acell(mu),ch10,&
       'However, length scales must be > 0 ==> stop',ch10,&
       'Action: correct acell in input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
  end do
 
@@ -228,33 +228,33 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  if(trprim==1)rprim(:,:)=reshape( dprarr(1:9) , (/3,3/) )
  call intagm_img(rprim,iimage,jdtset,lenstr,nimage,3,3,string,"rprim",trprim,'DPR')
 
- ! If none of the rprim were read ...
  if(trprim==0)then
+   ! If none of the rprim were read ...
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'angdeg',tangdeg,'DPR')
    angdeg(:)=dprarr(1:3)
    call intagm_img(angdeg,iimage,jdtset,lenstr,nimage,3,string,"angdeg",tangdeg,'DPR')
 
    if(tangdeg==1)then
-     call wrtout(std_out,' ingeo: use angdeg to generate rprim.',"COLL")
+     call wrtout(std_out,' ingeo: use angdeg to generate rprim.')
 
      ! Check that input angles are positive
      do mu=1,3
        if(angdeg(mu)<=0.0_dp) then
-         write(message, '(a,i0,a,1p,e14.6,a,a,a,a)' )&
+         write(msg, '(a,i0,a,1p,e14.6,a,a,a,a)' )&
           'Angle number ',mu,' is input as angdeg=',angdeg(mu),ch10,&
           'However, angles must be > 0 ==> stop',ch10,&
           'Action: correct angdeg in input file.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
      end do
 
      ! Check that the sum of angles is smaller than 360 degrees
      if(angdeg(1)+angdeg(2)+angdeg(3)>=360.0_dp) then
-       write(message, '(a,a,a,es14.4,a,a,a)' )&
+       write(msg, '(a,a,a,es14.4,a,a,a)' )&
         'The sum of input angles (angdeg(1:3)) must be lower than 360 degrees',ch10,&
         'while it is ',angdeg(1)+angdeg(2)+angdeg(3),'.',ch10,&
         'Action: correct angdeg in input file.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
 
      if( abs(angdeg(1)-angdeg(2))<tol12 .and. &
@@ -293,8 +293,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  ! Compute the multiplicity of the supercell
  call mati3det(supercell_lattice,multiplicity)
 
- ! Get the number of atom in the unit cell
- ! Read natom from string
+ ! Get the number of atom in the unit cell. Read natom from string
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natom',tread,'INT')
 
  ! Might initialize natom from XYZ file
@@ -305,6 +304,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  ! Store the rprimd of the unit cell
  call mkrdim(acell,rprim,rprimd_read)
+
  ! Multiply the rprim to get the rprim of the supercell
  if(multiplicity > 1)then
    rprim(:,1) = rprim(:,1) * supercell_lattice(1,1)
@@ -352,23 +352,23 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  if(natrd<1 .or. natrd>natom)then
    if(natrd>1 .and. multiplicity > 1) then
      if(natrd < natom)then
-       write(message, '(3a)' )&
+       write(msg, '(3a)' )&
         'The number of atoms to be read (natrd) can not be used with supercell_latt.',ch10,&
         'Action: Remove natrd or supercell_latt in your input file.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      else
-       write(message,'(3a,I0,a,I0,a,I0,2a)')&
+       write(msg,'(3a,I0,a,I0,a,I0,2a)')&
        'The input variable supercell_latt is present',ch10,&
        'thus a supercell of ',supercell_lattice(1,1),' ',supercell_lattice(2,2),&
        ' ',supercell_lattice(3,3),' is generated',ch10
-       MSG_WARNING(message)
+       MSG_WARNING(msg)
      end if
    else
-     write(message, '(3a,i0,a,i0,2a,a)' )&
+     write(msg, '(3a,i0,a,i0,2a,a)' )&
       'The number of atoms to be read (natrd) must be positive and not bigger than natom.',ch10,&
       'This is not the case: natrd=',natrd,', natom=',natom,ch10,&
       'Action: correct natrd or natom in your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
  end if
 
@@ -386,11 +386,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  do iatom=1,natrd
    if(typat_read(iatom)<1 .or. typat_read(iatom)>ntypat )then
-     write(message,'(a,i0,a,i0,a,a,a,i0,a,a,a)')&
+     write(msg,'(a,i0,a,i0,a,a,a,i0,a,a,a)')&
       'The input type of atom number ',iatom,' is equal to ',typat_read(iatom),',',ch10,&
       'while it should be between 1 and ntypat= ',ntypat,'.',ch10,&
       'Action: change either the variable typat or the variable ntypat.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
  end do
 
@@ -403,10 +403,10 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'random_atpos',txrandom,'INT')
  if(txrandom==1) random_atpos=intarr(1)
  if (random_atpos < 0 .or. random_atpos > 5) then
-   write(message,'(3a)')&
+   write(msg,'(3a)')&
     'Random positions is a variable defined between 0 and 5. Error in the input file. ',ch10,&
     'Action: define one of these in your input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  !if(nimage/=1 .and. iimage/=1)then
@@ -438,24 +438,24 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  end if
 
  if (txred+txcart+txangst+txrandom==0) then
-   write(message, '(3a)' )&
+   write(msg, '(3a)' )&
     'Neither xred nor xangst nor xcart are present in input file. ',ch10,&
     'Action: define one of these in your input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
- if (txred==1)   write(message, '(a)' ) '  xred   is defined in input file'
- if (txangst==1) write(message, '(a)' ) '  xangst is defined in input file'
- if (txcart ==1) write(message, '(a)' ) '  xcart  is defined in input file'
- if (txrandom ==1) write(message, '(a)' ) '  xred  as random positions in the unit cell'
- if (txrandom ==1) write(message, '(a)' ) '  xcart  are defined from a random distribution '
- call wrtout(std_out,message)
+ if (txred==1)   write(msg, '(a)' ) '  xred   is defined in input file'
+ if (txangst==1) write(msg, '(a)' ) '  xangst is defined in input file'
+ if (txcart ==1) write(msg, '(a)' ) '  xcart  is defined in input file'
+ if (txrandom ==1) write(msg, '(a)' ) '  xred  as random positions in the unit cell'
+ if (txrandom ==1) write(msg, '(a)' ) '  xcart  are defined from a random distribution '
+ call wrtout(std_out, msg)
 
  if (txred+txcart+txangst+txrandom>1)then
-   write(message, '(3a)' )&
+   write(msg, '(3a)' )&
     'Too many input channels for atomic positions are defined.',ch10,&
     'Action: choose to define only one of these.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  if(txred==1 .or. txrandom /=0 )then
@@ -484,19 +484,19 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  ! Check that nsym is not negative
  if (nsym<0) then
-   write(message, '(a,i0,a,a,a,a)' )&
+   write(msg, '(a,i0,a,a,a,a)' )&
     'Input nsym must be positive or 0, but was ',nsym,ch10,&
     'This is not allowed.',ch10,&
     'Action: correct nsym in your input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
  ! Check that nsym is not bigger than msym
  if (nsym>msym) then
-   write(message, '(2(a,i0),5a)')&
+   write(msg, '(2(a,i0),5a)')&
     'Input nsym = ',nsym,' exceeds msym = ',msym,'.',ch10,&
     'This is not allowed.',ch10,&
     'Action: correct nsym in your input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
  if (multiplicity>1) then
    nsym = 1
@@ -511,10 +511,10 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  if(nsym>0)then
    call intagm(dprarr,intarr,jdtset,marr,9*nsym,string(1:lenstr),'symrel',tread,'INT')
    if(nsym>1 .and. tread==0)then
-     write(message,'(3a)')&
+     write(msg,'(3a)')&
        'When nsym>1, symrel must be defined in the input file.',ch10,&
        'Action: either change nsym, or define symrel in your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
    if(tread==1) symrel(:,:,1:nsym)=reshape( intarr(1:9*nsym) , [3, 3, nsym])
 
@@ -526,12 +526,12 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    if(symmorphi==0)then
      do isym=1,nsym
        if(sum(tnons(:,isym)**2)>tol6)then
-         write(message, '(5a,i0,a,3f8.4,3a)' )&
+         write(msg, '(5a,i0,a,3f8.4,3a)' )&
          'When symmorphi /= 1, the vectors of translation (tnons)',ch10,&
          'a symmetry operation must vanish.',ch10,&
          'However, for the symmetry operation number ',isym,', tnons =',tnons(:,isym),'.',ch10,&
          'Action: either change your list of allowed symmetry operations, or use the symmetry finder (nsym=0).'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
      end do
    end if
@@ -552,10 +552,10 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nobj',tread,'INT')
  if(tread==1) nobj=intarr(1)
  if(nobj /= 0 .and. multiplicity > 1)then
-   write(message, '(3a)' )&
+   write(msg, '(3a)' )&
     'nobj can not be used with supercell_latt.',ch10,&
     'Action: Remove nobj or supercell_latt in your input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  ! If there are objects, chkprim will not be used immediately
@@ -577,11 +577,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    if(tread==1) then
      spinat(1:3,1:natom) = reshape( dprarr(1:3*natom) , [3, natom])
    else if (nspden==4.or.(nspden==2.and.nsppol==1)) then
-     write(message, '(5a)' )&
+     write(msg, '(5a)' )&
       'When nspden=4 or (nspden==2 and nsppol==1), the input variable spinat must be',ch10,&
       'defined in the input file, which is apparently not the case.',ch10,&
       'Action: define spinat or use nspden=1 in your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    ! nucdipmom is read for each atom, from 1 to natom
@@ -592,19 +592,19 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
    ! Will use the geometry builder
    if(tnatrd/=1 .and. nobj/=0)then
-     write(message, '(a,a,a,i0,a,a,a,a,a)' )&
+     write(msg, '(a,a,a,i0,a,a,a,a,a)' )&
       'The number of atoms to be read (natrd) must be initialized',ch10,&
       'in the input file, when nobj= ',nobj,'.',ch10,&
       'This is not the case.',ch10,&
       'Action: initialize natrd in your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    if(jellslab/=0)then
-     write(message, '(a,i0,3a)' )&
+     write(msg, '(a,i0,3a)' )&
       'A jellium slab cannot be used when nobj= ',nobj,'.',ch10,&
       'Action: change one of the input variables jellslab or nobj in your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    call ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read,xcart,xcart_read)
@@ -612,7 +612,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    ! Finalize the computation of coordinates: produce xred.
    call xcart2xred(natom,rprimd,xcart,xred)
 
- else ! nobj==0
+ else
+   ! nobj==0
 
    ! chrgat is read for each irreducible atom, from 1 to natrd
    call intagm(dprarr,intarr,jdtset,marr,natrd,string(1:lenstr),'chrgat',tread,'DPR')
@@ -656,32 +657,32 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    if(spgroup/=0 .or. nsym/=0)then
 
      if(jellslab/=0 .and. nsym/=1 .and. spgroup/=1)then
-       write(message, '(5a)' )&
+       write(msg, '(5a)' )&
         'For the time being, a jellium slab can only be used',ch10,&
         'either with the symmetry finder (nsym=0) or with the space group 1 (nsym=1)',ch10,&
         'Action: change one of the input variables jellslab or nsym or spgroup in your input file.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
 
      if(nzchempot/=0 .and. nsym/=1 .and. spgroup/=1)then
-       write(message, '(5a)' )&
+       write(msg, '(5a)' )&
         'For the time being, a spatially-varying chemical potential can only be used',ch10,&
         'either with the symmetry finder (nsym=0) or with the space group 1 (nsym=1)',ch10,&
         'Action: change one of the input variables nzchempot or nsym or spgroup in your input file.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
 
      typat(1:natrd)=typat_read(1:natrd)
 
      if(spgroup/=0 .and. nsym/=0)then
-       write(message, '(a,i0,a,a,i0,a,a,a,a,a,a,a,a)' )&
+       write(msg, '(a,i0,a,a,i0,a,a,a,a,a,a,a,a)' )&
          'The spatial group number spgroup= ',spgroup,ch10,&
          'is specified, as well as the number of symmetries nsym= ',nsym,ch10,&
          'This is not allowed, as you can define the symmetries',ch10,&
          'either using spgroup OR using nsym, but not both.',ch10,&
          'Action: modify your input file',ch10,&
          '(either set spgroup to 0, or nsym to 0)'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
 
      brvltt=0
@@ -705,14 +706,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'genafm',tgenafm,'DPR')
        if(tgenafm==1) genafm(1:3)=dprarr(1:3)
        if(tspgroupma/=0 .and. tgenafm/=0)then
-         write(message, '(a,i0,a,a,3es9.2,a,a,a,a,a,a,a,a)' )&
+         write(msg, '(a,i0,a,a,3es9.2,a,a,a,a,a,a,a,a)' )&
            'The spatial group number spgroupma= ',spgroupma,ch10,&
            'is specified, as well as the antiferromagnetic generator genafm=',genafm(1:3),ch10,&
            'This is not allowed, as you can define the magnetic space group',ch10,&
            'either using spgroupma OR using genafm, but not both.',ch10,&
            'Action: modify your input file',ch10,&
            '(either define spgroupma or genafm)'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
 
        ! TODO: all the symmetry generation operations should be in one big routine
@@ -843,14 +844,15 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
      call chkorthsy(gprimd,iexit,nsym,rmet,rprimd,symrel)
 
-   else ! spgroup==0 and nsym==0
+   else
+     ! spgroup==0 and nsym==0
 
      ! Here, spgroup==0 as well as nsym==0, so must generate
      ! the spatial group of symmetry. However, all the atom
      ! positions must be known, so the number
      ! of atoms to be read must equal the total number of atoms.
      if(natrd/=natom .and. multiplicity== 1)then
-       write(message, '(a,i0,a,a,i0,a,a,a,a,a,a,a,a,a)' )&
+       write(msg, '(a,i0,a,a,i0,a,a,a,a,a,a,a,a,a)' )&
          'The number of atoms to be read (natrd)= ',natrd,ch10,&
          'differs from the total number of atoms (natom)= ',natom,ch10,&
          'while spgroup=0 and nsym=0.',&
@@ -858,13 +860,13 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          'generate the missing atomic coordinates is not available.',ch10,&
          'Action: modify your input file',ch10,&
          '(either natrd, or natom, or spgroup, or nsym)'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      else
 
        if (multiplicity==1) typat(:)=typat_read(:)
        ! Find the symmetry operations: nsym, symafm, symrel and tnons.
        ! Use nptsym and ptsymrel, as determined by symlatt
-       noncoll=0;if (nspden==4) noncoll=1
+       noncoll=0; if (nspden == 4) noncoll=1
        use_inversion=1
        if (dtset%usepaw == 1 .and. (nspden==4.or.pawspnorb>0)) then
          MSG_COMMENT("Removing inversion and improper rotations from initial space group because of PAW + SOC")
@@ -915,14 +917,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
          ABI_DEALLOCATE(indsym)
          ABI_DEALLOCATE(symrec)
 
-         write(message,'(a,es14.6,10a)')&
+         write(msg,'(a,es14.6,10a)')&
           'The tolerance on symmetries =',tolsym,ch10,&
           'is bigger than the usual tolerance, i.e. 1.0e-8 .',ch10,&
           'In order to avoid spurious effect, the atomic coordinates have been',ch10,&
           'symmetrized before storing them in the dataset internal variable.',ch10,&
           'So, do not be surprised by the fact that your input variables (xcart, xred, ...)',ch10,&
           'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.'
-         MSG_WARNING(message)
+         MSG_WARNING(msg)
        end if
 
      end if
@@ -965,8 +967,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      tnons(:,isym)=matmul(symrel(:,:,isym),rcm(:))-rcm(:)+tnons(:,isym)
    end do
 
-   message = ' Because icoulomb is 1, the average center of coordinates of the system has been translated to (0.5,0.5,0.5) '
-   MSG_WARNING(message)
+   MSG_WARNING('icoulomb is 1 --> the average center of coordinates has been translated to (0.5,0.5,0.5)')
  end if
 
 !========================================================================================================
@@ -988,14 +989,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    if(iexit==-1)then
      call symmetrize_rprimd(bravais,nsym,rprimd,symrel,tolsym)
      call mkradim(acell,rprim,rprimd)
-     write(message,'(a,es14.6,10a)')&
-       'The tolerance on symmetries =',tolsym,ch10,&
+     write(msg,'(a,es14.6,10a)')&
+       'The tolerance on symmetries: ',tolsym,ch10,&
        'is bigger than the usual tolerance, i.e. 1.0e-8 .',ch10,&
        'In order to avoid spurious effect, the primitive vectors have been',ch10,&
        'symmetrized before storing them in the dataset internal variable.',ch10,&
        'So, do not be surprised by the fact that your input variables (acell, rprim, xcart, xred, ...)',ch10,&
        'do not correspond to the ones echoed by ABINIT, the latter being used to do the calculations.'
-     MSG_WARNING(message)
+     MSG_WARNING(msg)
    end if
 
  end if
@@ -1053,11 +1054,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
    ! Checks the validity of natfix
    if (natfix<0 .or. natfix>natom) then
-     write(message, '(a,a,a,i0,a,i4,a,a,a)' )&
+     write(msg, '(a,a,a,i0,a,i4,a,a,a)' )&
        'The input variables natfix, natfixx, natfixy and natfixz must be',ch10,&
        'between 0 and natom (= ',natom,'), while one of them is ',natfix,'.',ch10,&
        'Action: correct that occurence in your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    ! Read iatfix
@@ -1073,31 +1074,31 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
    ! If some iatfix was read, natfix must vanish
    if (natfix==0 .and. tread==1)then
-     write(message, '(a,i1,5a)' )&
+     write(msg, '(a,i1,5a)' )&
        'For direction ',idir,' the corresponding natfix is zero,',ch10,&
        'while iatfix specifies some atoms to be fixed.',ch10,&
        'Action: either specify a non-zero natfix(x,y,z) or suppress iatfix(x,y,z).'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    ! If natfix is non-zero, iatfix must be defined
    if (natfix>0 .and. tread==0)then
-     write(message, '(a,i1,3a,i0,3a)' )&
+     write(msg, '(a,i1,3a,i0,3a)' )&
        'For direction ',idir,' no iatfix has been specified,',ch10,&
        'while natfix specifies that some atoms to be fixed, natfix= ',natfix,'.',ch10,&
        'Action: either set natfix(x,y,z) to zero or define iatfix(x,y,z).'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    if(tread==1)then
      do ii=1,natfix
        ! Checks the validity of the input iatfix
        if (intarr(ii)<1 .or. intarr(ii)>natom) then
-         write(message, '(a,a,a,i0,a,a,a)' )&
+         write(msg, '(a,a,a,i0,a,a,a)' )&
            'The input variables iatfix, iatfixx, iatfixy and iatfixz must be',ch10,&
            'between 1 and natom, while one of them is ',intarr(ii),'.',ch10,&
            'Action: correct that occurence in your input file.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
        ! Finally set the value of the internal iatfix array
        do iatom=1,natom
@@ -1127,12 +1128,12 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    do itypat=1,ntypalch
      sumalch=sum(mixalch(1:npspalch,itypat))
      if(abs(sumalch-one)>tol10)then
-       write(message, '(a,i0,2a,f8.2,4a)' )&
+       write(msg, '(a,i0,2a,f8.2,4a)' )&
          'For the alchemical atom number ',itypat,ch10,&
          'the sum of the pseudopotential coefficients is',sumalch,ch10,&
          'while it should be one.',ch10,&
          'Action: check the content of the input variable mixalch.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
    end do
    call intagm_img(mixalch,iimage,jdtset,lenstr,nimage,npspalch,ntypalch,string,"mixalch",tread,'DPR')
@@ -1225,7 +1226,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
  integer :: belonga,belongb,iatom,iatrd,ii,irep,irep1,irep2,irep3,ivac,marr
  integer :: natom_toberead,nread,objan,objbn,rotate,shift,tread,vacnum
  real(dp) :: angle,cosine,norm2per,norma,normb,normper,project,sine
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: objarf(3),objbrf(3)
  integer,allocatable :: objaat(:),objbat(:),typat_full(:),vaclst(:)
@@ -1255,11 +1256,11 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
    call intagm(dprarr,intarr,jdtset,marr,vacnum,string(1:lenstr),'vaclst',tread,'INT')
    if(tread==1) vaclst(:)=intarr(1:vacnum)
    if(tread/=1)then
-     write(message, '(a,a,a,a,a)' )&
+     write(msg, '(a,a,a,a,a)' )&
 &     'The array vaclst MUST be initialized in the input file',ch10,&
 &     'when vacnum is non-zero.',ch10,&
 &     'Action: initialize vaclst in your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
  end if
 
@@ -1268,13 +1269,13 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 !2) Set up list and number of atoms in objects, and the --------------
 !operations to be performed on objects.
 
- write(message,'(80a,a)')('=',ii=1,80),ch10
- call wrtout(std_out,message,'COLL')
- call wrtout(iout,message,'COLL')
+ write(msg,'(80a,a)')('=',ii=1,80),ch10
+ call wrtout(std_out,msg)
+ call wrtout(iout,msg)
 
- write(message, '(a,a)' )'--ingeobld: echo values of variables connected to objects --------',ch10
- call wrtout(std_out,message,'COLL')
- call wrtout(iout,message,'COLL')
+ write(msg, '(a,a)' )'--ingeobld: echo values of variables connected to objects --------',ch10
+ call wrtout(std_out,msg)
+ call wrtout(iout,msg)
 
  if(vacnum>0)then
    write(iout,format01110) 'vacnum',vacnum
@@ -1289,11 +1290,11 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
  write(std_out,format01110) 'nobj',nobj
 
  if(nobj/=1 .and. nobj/=2)then
-   write(message, '(a,a,a,i8,a,a,a)' )&
+   write(msg, '(a,a,a,i8,a,a,a)' )&
 &   'The number of object (nobj) must be either 1 or 2,',ch10,&
 &   'while the input file has  nobj=',nobj,'.',ch10,&
 &   'Action: correct nobj in your input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  if(nobj==1 .or. nobj==2)then
@@ -1303,12 +1304,12 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
    if(tread==1) objan=intarr(1)
 
    if(tread/=1)then
-     write(message, '(a,a,a,i8,a,a,a,a,a)' )&
+     write(msg, '(a,a,a,i8,a,a,a,a,a)' )&
 &     'The number of atoms in object a (objan) must be initialized',ch10,&
 &     'in the input file, when nobj=',nobj,'.',ch10,&
 &     'This is not the case.',ch10,&
 &     'Action: correct objan in your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    write(iout, '(a)' ) ' '
@@ -1317,12 +1318,12 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
    write(std_out,format01110) 'objan',objan
 
    if(objan<=1 .or. objan>natom)then
-     write(message, '(a,a,a,a,a,i8,a,a,a)' )&
+     write(msg, '(a,a,a,a,a,i8,a,a,a)' )&
 &     'The number of atoms in object a (objan) must be larger than 0',ch10,&
 &     'and smaller than natom.',ch10,&
 &     'It is equal to ',objan,', an unacceptable value.',ch10,&
 &     'Action: correct objan in your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
 !  Read list of atoms in object a
@@ -1331,12 +1332,12 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
    if(tread==1) objaat(1:objan)=intarr(1:objan)
 
    if(tread/=1)then
-     write(message, '(a,a,a,i8,a,a,a,a,a)' )&
+     write(msg, '(a,a,a,i8,a,a,a,a,a)' )&
 &     'The list of atoms in object a (objaat) must be initialized',ch10,&
 &     'in the input file, when nobj=',nobj,'.',ch10,&
 &     'This is not the case.',ch10,&
 &     'Action: initialize objaat in your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    write(iout,'(1x,a6,1x,(t9,20i3))') 'objaat',objaat(:)
@@ -1344,24 +1345,24 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 
    do iatom=1,objan
      if(objaat(iatom)<1 .or. objaat(iatom)>natom)then
-       write(message, '(a,i8,a,a,i8,4a)' )&
+       write(msg, '(a,i8,a,a,i8,4a)' )&
 &       'The input value of objaat for atom number ',iatom,ch10,&
 &       'is equal to ',objaat(iatom),', an unacceptable value :',ch10,&
 &       'it should be between 1 and natom. ',&
 &       'Action: correct the array objaat in your input file.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
    end do
 
    if(objan>1)then
      do iatom=1,objan-1
        if( objaat(iatom)>=objaat(iatom+1) )then
-         write(message, '(a,i8,a,a,a,a,a,a)' )&
+         write(msg, '(a,i8,a,a,a,a,a,a)' )&
 &         'The input value of objaat for atom number ',iatom,ch10,&
 &         'is larger or equal to the one of the next atom,',ch10,&
 &         'while this list should be ordered, and an atom cannot be repeated.',ch10,&
 &         'Action: correct the array objaat in your input file.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
      end do
    end if
@@ -1376,11 +1377,11 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
    if(tread==1)then
      do irep=1,3
        if(objarf(irep)<1)then
-         write(message, '(a,a,a,3i8,a,a,a)' )&
+         write(msg, '(a,a,a,3i8,a,a,a)' )&
 &         'The input values of objarf(1:3) must be positive,',ch10,&
 &         'while it is ',objarf(1:3),'.',ch10,&
 &         'Action: correct objarf in your input file.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
      end do
    end if
@@ -1417,12 +1418,12 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
      call intagm(dprarr,intarr,jdtset,marr,6,string(1:lenstr),'objaax',tread,'LEN')
      if(tread==1) objaax(1:6)=dprarr(1:6)
      if(tread/=1)then
-       write(message, '(a,a,a,a,a,a,a)' )&
+       write(msg, '(a,a,a,a,a,a,a)' )&
 &       'The axis of object a (objaax) must be initialized',ch10,&
 &       'in the input file, when rotations (objaro) are present.',ch10,&
 &       'This is not the case.',ch10,&
 &       'Action: initialize objaax in your input file.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
      write(iout,format01160) 'objaax',objaax(1:6)
      write(std_out,format01160) 'objaax',objaax(1:6)
@@ -1432,11 +1433,11 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
    norma=axisa(1)**2+axisa(2)**2+axisa(3)**2
 
    if(norma<1.0d-10)then
-     write(message, '(5a)' )&
+     write(msg, '(5a)' )&
 &     'The two points defined by the input array objaax are too',ch10,&
 &     'close to each other, and will not be used to define an axis.',ch10,&
 &     'Action: correct objaax in your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
    axisa(1:3)=axisa(1:3)/sqrt(norma)
  end if !  End condition of existence of a first object
@@ -1448,12 +1449,12 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
    if(tread==1) objbn=intarr(1)
 
    if(tread/=1)then
-     write(message, '(a,a,a,i8,a,a,a,a,a)' )&
+     write(msg, '(a,a,a,i8,a,a,a,a,a)' )&
 &     'The number of atoms in object b (objbn) must be initialized',ch10,&
 &     'in the input file, when nobj=',nobj,'.',ch10,&
 &     'This is not the case.',ch10,&
 &     'Action: initialize objbn in your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    write(iout, '(a)' ) ' '
@@ -1462,12 +1463,12 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
    write(std_out,format01110) 'objbn',objbn
 
    if(objbn<=1 .or. objbn>natom)then
-     write(message, '(a,a,a,a,a,i8,a,a,a)' )&
+     write(msg, '(a,a,a,a,a,i8,a,a,a)' )&
 &     'The number of atoms in object b (objbn) must be larger than 0',ch10,&
 &     'and smaller than natom.',ch10,&
 &     'It is equal to ',objbn,', an unacceptable value.',ch10,&
 &     'Action: correct objbn in your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
 !  Read list of atoms in object b
@@ -1476,12 +1477,12 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 
    if(tread==1) objbat(1:objbn)=intarr(1:objbn)
    if(tread/=1)then
-     write(message, '(a,a,a,i8,a,a,a,a,a)' )&
+     write(msg, '(a,a,a,i8,a,a,a,a,a)' )&
 &     'The list of atoms in object b (objbat) must be initialized',ch10,&
 &     'in the input file, when nobj=',nobj,'.',ch10,&
 &     'This is not the case.',ch10,&
 &     'Action: initialize objbat in your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
 
    write(iout,'(1x,a6,1x,(t9,20i3))') 'objbat',objbat(:)
@@ -1489,24 +1490,24 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 
    do iatom=1,objbn
      if(objbat(iatom)<1 .or. objbat(iatom)>natom)then
-       write(message, '(a,i8,a,a,i8,a,a,a,a,a)' )&
+       write(msg, '(a,i8,a,a,i8,a,a,a,a,a)' )&
 &       'The input value of objbat for atom number ',iatom,ch10,&
 &       'is equal to ',objbat(iatom),', an unacceptable value :',ch10,&
 &       'it should be between 1 and natom. ',ch10,&
 &       'Action: correct objbat in your input file.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
    end do
 
    if(objbn>1)then
      do iatom=1,objbn-1
        if( objbat(iatom)>=objbat(iatom+1) )then
-         write(message, '(a,i8,a,a,a,a,a,a)' )&
+         write(msg, '(a,i8,a,a,a,a,a,a)' )&
 &         'The input value of objbat for atom number ',iatom,ch10,&
 &         'is larger or equal to the one of the next atom,',ch10,&
 &         'while this list should be ordered, and an atom cannot be repeated.',ch10,&
 &         'Action: correct the array objbat in the input file.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
      end do
    end if
@@ -1521,11 +1522,11 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
    if(tread==1)then
      do irep=1,3
        if(objbrf(irep)<1)then
-         write(message, '(a,a,a,3i8,a,a,a)' )&
+         write(msg, '(a,a,a,3i8,a,a,a)' )&
 &         'The input values of objbrf(1:3) must be positive,',ch10,&
 &         'while it is ',objbrf(1:3),'.',ch10,&
 &         'Action: correct objbrf in your input file.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
      end do
    end if
@@ -1561,12 +1562,12 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
      call intagm(dprarr,intarr,jdtset,marr,6,string(1:lenstr),'objbax',tread,'LEN')
      if(tread==1) objbax(1:6)=dprarr(1:6)
      if(tread/=1)then
-       write(message, '(a,a,a,a,a,a,a)' )&
+       write(msg, '(a,a,a,a,a,a,a)' )&
 &       'The axis of object b (objbax) must be initialized',ch10,&
 &       'in the input file, when rotations (objbro) are present.',ch10,&
 &       'This is not the case.',ch10,&
 &       'Action: initialize objbax in your input file.'
-       MSG_ERROR(message)
+       MSG_ERROR(msg)
      end if
      write(iout,format01160) 'objbax',objbax(1:6)
      write(std_out,format01160) 'objbax',objbax(1:6)
@@ -1574,11 +1575,11 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
    axisb(1:3)=objbax(4:6)-objbax(1:3)
    normb=axisb(1)**2+axisb(2)**2+axisb(3)**2
    if(normb<1.0d-10)then
-     write(message, '(5a)' )&
+     write(msg, '(5a)' )&
 &     'The two points defined by the input array objbax are too',ch10,&
 &     'close to each other, and will not be used to define an axis.',ch10,&
 &     'Action: correct objbax in your input file.'
-     MSG_ERROR(message)
+     MSG_ERROR(msg)
    end if
    axisb(1:3)=axisb(1:3)/sqrt(normb)
 
@@ -1586,13 +1587,13 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
    do iatom=1,objan
      do ii=1,objbn
        if(objaat(iatom)==objbat(ii))then
-         write(message, '(6a,i8,a,i8,3a)' )&
+         write(msg, '(6a,i8,a,i8,3a)' )&
 &         'The objects a and b cannot have a common atom, but it is',ch10,&
 &         'found that the values of objaat and objbat ',&
 &         ' are identical, for their',ch10,&
 &         'atoms number ',iatom,' and ',ii,'.',ch10,&
 &         'Action: change objaat and/or objbat so that they have no common atom anymore.'
-         MSG_ERROR(message)
+         MSG_ERROR(msg)
        end if
      end do
    end do
@@ -1601,7 +1602,7 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 !Check whether the number of atoms to be read obtained by relying
 !on natom, vacnum and the object definitions, or from natrd coincide
  if(natrd/=natom_toberead)then
-   write(message,'(11a,i0,a,i0,2a,i0,a)' )&
+   write(msg,'(11a,i0,a,i0,2a,i0,a)' )&
 &   ' ingeobld : ERROR -- ',ch10,&
 &   '  The number of atoms to be read (natrd) must be equal',ch10,&
 &   '  to the total number of atoms (natom), plus',ch10,&
@@ -1609,26 +1610,26 @@ subroutine ingeobld (iout,jdtset,lenstr,natrd,natom,nobj,string,typat,typat_read
 &   '  the number of atoms added by the repetition of objects.',ch10,&
 &   '  This is not the case : natrd= ',natrd,', natom= ',natom,ch10,&
 &   ', vacnum= ',vacnum,';'
-   call wrtout(std_out,message,"COLL")
+   call wrtout(std_out,msg)
 
    if(nobj==1 .or. nobj==2) then
-     write(message,'(a,i3,a,3i3,a,i5,a)' )&
+     write(msg,'(a,i3,a,3i3,a,i5,a)' )&
 &     '   object a : objan=',objan,', objarf(1:3)=',objarf(1:3),&
 &     ' => adds ',objan*(objarf(1)*objarf(2)*objarf(3)-1),' atoms.'
-     call wrtout(std_out,message,"COLL")
+     call wrtout(std_out,msg)
    end if
 
    if(nobj==2) then
-     write(message,'(a,i3,a,3i3,a,i5,a)' )&
+     write(msg,'(a,i3,a,3i3,a,i5,a)' )&
 &     '   object b : objbn=',objbn,', objbrf(1:3)=',objbrf(1:3),&
 &     ' => adds ',objbn*(objbrf(1)*objbrf(2)*objbrf(3)-1),' atoms.'
-     call wrtout(std_out,message,"COLL")
+     call wrtout(std_out,msg)
    end if
 
-   write(message,'(3a)' )&
+   write(msg,'(3a)' )&
 &   '  Action : check the correspondence between natom+vacnum on one side,',ch10,&
 &   '           and natrd, objan, objbn, objarf and objbrf on the other side.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
 !6) Produce full set of atoms
@@ -1873,7 +1874,7 @@ subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons
 !Local variables ------------------------------
 !scalars
  integer :: curat,flagch,flageq,ii,iij,jj,kk
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer :: bcktypat(nsym*natrd)
  real(dp) :: bckat(3),bcknucdipmom(3,nsym*natrd)
@@ -1945,21 +1946,21 @@ subroutine fillcell(chrgat,natom,natrd,nsym,nucdipmom,spinat,symafm,symrel,tnons
 !ENDDEBUG
 
  if (curat>natom) then
-   write(message, '(a,i3,a,a,i7,a,a,a,a)' )&
+   write(msg, '(a,i3,a,a,i7,a,a,a,a)' )&
 &   'The number of atoms obtained from symmetries, ',curat,ch10,&
 &   'is greater than the input number of atoms, natom=',natom,ch10,&
 &   'This is not allowed.',ch10,&
 &   'Action: modify natom or the symmetry data in the input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
  if (curat<natom) then
-   write(message, '(a,i3,a,a,i7,a,a,a,a)' )&
+   write(msg, '(a,i3,a,a,i7,a,a,a,a)' )&
 &   'The number of atoms obtained from symmetries, ',curat,ch10,&
 &   'is lower than the input number of atoms, natom=',natom,ch10,&
 &   'This is not allowed.',ch10,&
 &   'Action: modify natom or the symmetry data in the input file.'
-   MSG_ERROR(message)
+   MSG_ERROR(msg)
  end if
 
 !Assignment of symmetry to xred
