@@ -223,7 +223,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  integer,pointer :: my_atmtab(:)
  real(dp) :: dotprod(2),dummy(0),gmet(3,3),gprimd(3,3),grhoij(3),kpoint(3),nonlop_dum(1,1)
  real(dp) :: rmet(3,3),tsec(2)
- complex(dp) :: ch2c_tmp(dtset%mband)
+ complex(dp), allocatable :: ch2c_tmp(:)
  real(dp),allocatable :: becfrnl_tmp(:,:,:),becfrnlk(:,:,:),becij(:,:,:,:,:),cg_left(:,:)
  real(dp),allocatable :: cwavef(:,:),ddk(:,:),ddkinpw(:,:,:),dyfrnlk(:,:)
  real(dp),allocatable :: elt_work(:,:),eltfrnlk(:,:),enlout_bec1(:),enlout_bec2(:),enlout_efmas(:)
@@ -812,6 +812,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
                  gh2c = gh2c - eig_k*gs2c
                end if
                ideg = efmasdeg(ikpt)%ideg(iband)
+               ABI_ALLOCATE( ch2c_tmp, (size(efmasval(ideg,ikpt)%ch2c, dim=3)) )
+
 ! share gh2c
                call xmpi_bcast(gh2c, band_procs(iband), mpi_enreg%comm_band,ierr)
 
@@ -835,7 +837,8 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
                end do ! jband
                !mpi_sum ch2c_tmp to get all jband contribs 
                call xmpi_sum(ch2c_tmp,mpi_enreg%comm_band,ierr)
-               efmasval(ideg,ikpt)%ch2c(mu,nu,:,isub)=ch2c_tmp(1:bandmax-bandmin+1)
+               efmasval(ideg,ikpt)%ch2c(mu,nu,:,isub)=ch2c_tmp(:)
+               ABI_DEALLOCATE( ch2c_tmp )
              end do ! nu
            end do ! mu
          end do ! iband_
