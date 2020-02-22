@@ -85,7 +85,7 @@ module defs_basis
 
  ! The input file used to run the code, set by parsefile.
  ! It will be added to the netcdf files in ntck_open_create
- !character(len=strlen), save :: INPUT_STRING = ""
+ character(len=strlen), save :: INPUT_STRING = ""
 
  integer, parameter :: md5_slen = 32 ! lenght of strings storing the pseudos' md5 checksum.
  character(len=md5_slen),parameter :: md5_none = "None"

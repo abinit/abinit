@@ -204,10 +204,11 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
    call xmpi_bcast(lenstr, master, comm, ierr)
    call xmpi_bcast(ndtset, master, comm, ierr)
    call xmpi_bcast(string, master, comm, ierr)
-   !call xmpi_bcast(string_raw, master, comm, ierr)
+   call xmpi_bcast(string_raw, master, comm, ierr)
  end if
 
- !INPUT_STRING = string_raw
+ ! Save input string in global variable so that we can access it in ntck_open_create
+ INPUT_STRING = string_raw
 
 end subroutine parsefile
 !!***
