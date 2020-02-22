@@ -8,6 +8,9 @@ October 2018 and March 2020. These release notes
 are relative to modifications/improvements of ABINIT v9.0 with respect to v8.10.
 <TBU>
 The merge request #408 is the first MR not reported in these release notes. Then, #410-411, #413-416 have also been included.
+
+
+MISSING 502-508, perhaps a bit more ...
 <ETBU>
 
 The list of contributors includes:
@@ -35,6 +38,14 @@ A.1 At the occasion of the switch from ABINITv8 to ABINITv9, many improvements o
     (2) ABINITv9 does not build the dependencies (Linalg, NetCDF, LibXC, ...) anymore, as this was not sustainable (see XX).
     (3) The output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information),
     which means that some user-developed parsing tools might not work anymore, they have to be adapted to the new ABINITv9 output file. (see XX).
+    (4) Several default values have been changed, see A.2
+
+A.2 The default values of the following input variables have been changed:
+    [[ixcrot]], [[chneut]], [[symsigma]], [[prtkden]]
+
+A.3 Change the initialization of WF when paral_kgb=1 and nspinor=2 (previous could prevent the code to converge)
+    MR 562
+    By M Torrent
 
 * * *
 
@@ -42,6 +53,10 @@ A.1 At the occasion of the switch from ABINITv8 to ABINITv9, many improvements o
 
 B.1 Electron-phonon self energy (for mobility, temperature-dependent electronic structure -incl. zero-point motion-, ...)
 Treatment of the long-range potential (Frohlich long-range)
+Double grid MR541
+Tetrahedron MR524
+
+
 v9#50-61  
 #50 Preparatory run for the calculation of the Fan-Migdal self-energy
 #%%   C in diamond structure. Very rough 2x2x2 q-point grid (3 qpoints); low ecut.
@@ -86,6 +101,8 @@ By G. Brunin, H. Miranda, M. Giantomassi, GM Rignanese, G Hautier
 
 B.2 DFT+DMFT
 
+NOTE : MR 612 (NOT YET MERGED) DMFT Tutorial
+
 paral#84   DFT+DMFT for Vanadium using off diag CTQMC code with KGB parallelism
 #85    DFT+DMFT for Gadolinium using Hubbard 1 code with KGB parallelism  with Self-consistency over Green function and density
 # and Spin Orbit Coupling.
@@ -93,12 +110,21 @@ paral#84   DFT+DMFT for Vanadium using off diag CTQMC code with KGB parallelism
 New input variables : dmft_charge_prec, tested in paral#84 and 86.
 dmft_occnd_imag, tested in mpiio#99, paral#91,92,99, v6#07, 45, 46, 47, v7#27-30, v8#01. Only for keeping backward compatilibity for tests.
 
+Continued development of TRIQS (Python).
+
+DMFT k-resolved spectral function   MR 529, 490
+
+KGB+DMFT Use MPI asynchronous transfer and remove unnecessary communications MR 438
 
 By T. Cavignac and B. Amadon
+By O. Gingras ? See MR 568, 569, 561, 549
 
 
 B.3 Multibinit for spin
 
+Production version of Multibinit ? MR496
+
+MR 432
 tutomultibinit tmulti5
 #1  multibinit, just read xml and run spin dynamics
 #2  LaFeO3 Pnma with U(Fe)=4 eV; PBEsol; exchange parameter generated with TB2J.
@@ -141,19 +167,25 @@ v8#95-97  CDFT + test recognition of symmetry in the non-collinear case
 v9#1-3  CDFT PAW
 New input variables : chrgat, constrained_kind, ratsm
 
-B.5 There is a new syntax to run ABINIT, without the "files" file :
+B.5 Large modifications of the build system + split of the source tree.
+MR 598, 517, 514, 477, 476
+By Y. Pouillon and JM Beuken
+
+B.6 There is a new command line interface to run ABINIT, without the "files" file :
 abinit run.abi
 or
 abinit run.abi > run.log 2> run.err &
 The user can specify the output file thanks to the [[output_file]] input variable,
 the list of pseudopotentials thanks to the [[pseudos]] input variable.
 The prefix for other input, output or temporary files are constructed from [[indata_prefix]], [[outdata_prefix]] and [[tmpdata_files]].
+The old interface is still operational.
+MR 586
 See [[topic:Control]].
 
 By Matteo
 
 
-B.6 Strings in the input file
+B.7 Strings in the input file
 A handful of new input keywords are readig strings as data, and, often, can be used alternatively to similar input keywords
 that were expecting numerical values.
 List of new input variables
@@ -174,9 +206,21 @@ List of new input variables
 By Matteo G.
 
 
-B.7 YAML sections are now generated in the output file, sometimes replacing text sections, sometime providing new information.
+B.8 YAML sections are now generated in the output file, sometimes replacing text sections, sometime providing new information.
+Merge request 611, 559, 538, 535, 534, 530, 525, 504
 Input variable use_yaml paral#86, v67mbpt#2
+fldiff.py replacing PERL fldiff 
 By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze
+
+B.9 New capabilities of abipy and abiflows ?
+
+B.10 New capabilities of abisrc ?
+MR 572
+MR 495 Activate automatic generation of binaries.conf by abisrc.py
+
+B.11 Computation of Gruneisen parameters
+MR 478
+By M. Giantomassi
 
 
 
@@ -188,6 +232,25 @@ C.1 unitary ttransposer#1
 Test the transposer for linear algebra to KGB parallelisation.
 By J. Bieder
 
+C.2 Test farm: new and obsolete bots
+    MR 515, 451
+    The following builders have been introduced in the test farm:
+    The following builders have been upgraded:
+    The following builders have been removed
+By JM Beuken
+
+C.3 Supported compilers
+    The following versions of the gfort (GNU) compiler are now supported :
+    The following versions of the gfort (GNU) compiler are not supported anymore :
+    The following versions of the ifort (INTEL) compiler are now supported :
+    The following versions of the ifort (INTEL) compiler are not supported anymore :
+    Other changes
+By JM Beuken
+
+C.4 Reenabling linkchecker, only for internal link checking.
+MR 513
+By JM Beuken
+
 * * *
 
 ### D.  Other changes (or on-going developments, not yet finalized)
@@ -197,7 +260,7 @@ D.1 Test of linear electro-optical coefficient
 tutorespfn toptic#5-6
 #5 is exactly the same as #3 - should be rationalized !
 #6 (from N Pike) is claimed to be about the linear electro-optical coefficient ?!
-
+MR 581, 575
 By N. Pike
 
 D.2
@@ -210,6 +273,7 @@ v7#73
 
 D.3  Multibinit
 Improvements from M. Schmitt
+MR 440 Develop - Adding useful utilities to Multibinit III
 #38 Multibinit Restart a Molecular-Dynamics run from a _HIST.nc file with one step in it.
 #98 Test the test set option. Evaluate a given effective potential on a set of configurations.
       Test for new input variable analyze_anh_pot
@@ -228,6 +292,9 @@ New input variables :
 
 
 D.4 J. Zwanziger
+MR 588 Extensive update of the orbmag code
+MR 545, 500
+MR 469 chern_number parallelized over k pts
 #39 Test Chern number and orbital magnetization calculation
 
 D.5 Miranda Giantomassi
@@ -248,7 +315,9 @@ D.9 He Xu
 wannier90#4
 test wannier90 interface with nsppol=2 and nspden=2
 
-D.10 Mixed precision calculations
+MR491 D.10 Mixed precision calculations
+
+
 New input variable mixprec
 v8#44, v9#57, 60, 61.
 From GMatteo
@@ -259,6 +328,101 @@ A whole set of new input variables, however not tested, not documented !
 D.12 The following units are also allowed in the input file :
 - S Sec Second 
 - nm (for nanometer)
+
+D.13 ?? Merge phDOS branch from Matteo ?
+MR 604, 591, 553, 548, 544, 542, 508, 485, 453
+
+D.14 Updates for NLO calculations
+MR599
+By G. Petretto, 
+
+D.15 MetaGGA + PAW
+MR 587, 558
+By M. Torrent, JB Charraud
+
+D.16 Implement an alternate version of MPI reductions valid when the number of data exceeds 2^32
+MR 578
+By M. Torrent
+
+D.17 Build system and src support for llvm (clang/flang) and ARM (armflang/armclang/armpl).
+MR 571
+By M Torrent
+
+D.18 Improvement of core WF reading (optics + electron-positron)
+MR 557
+By M Torrent
+
+D.19 Fix bootstrap kernel convergence issues
+MR 546
+By Wei Chen
+
+D.20
+Upgrade atompaw to 4.1.0.6
+Upgrade Libxc to 4+
+MR 532, 470, 465, 441
+By M. Torrent, JM Beuken
+
+D.21
+MR 527 ?? Develop2
+By E. Bousquet
+
+D.22
+HTML diff to help solve fldiff line count error
+MR 526
+By T. Cavignac
+
+D.23
+Fatbands TDEP   MR510
+By J. Bieder
+
+D.24
+Rationnalize usepawu usage, debug usepawu=4, correct DFPT+PAW+U
+MR499
+By M. Torrent
+
+D.25
+New weight distribution of the Fourier components of the force constants
+MR271, 450
+By H. Miranda
+
+D.26 (perhaps B ??)
+MR491 Added user guide, topic, variables for TDEP utility (from F. Bottin, J. Bouchet)
+
+D.27
+MR 462 Write polarization vectors in GSR.nc
+By H. Miranda
+
+D.28
+MR 460
+Updated user interface of Raman_spec.py
+By N. Pike
+
+D.29 
+NCPP Wavefunction mixing with Variational Energy
+MR 444, 434
+445 Minor improvements to prepare PAW+Hybrid variational energy
+By X. Gonze
+
+D.30
+XML format for core wavefunctions
+MR 423
+By F. Jollet
+
+D.31
+TDEP MR422
+J. Bieder
+
+D.32
+MR 412 wavefunction prediction for molecular dynamics
+By F. Jollet
+
+D.33
+Added a preview for the toptic_4.in files in the optic tutorial.
+!408 · opened 1 year ago by Felix Goudreault   develop
+
+
+D.34 Miscellaneous additional bug fixes and improvements of documentation.
+JM Beuken, J. Bieder, F. Bruneval, T. Cavignac, M. Giantomassi,  X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, He Xu
 
 
 * * *
