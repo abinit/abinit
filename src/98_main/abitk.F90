@@ -135,6 +135,9 @@ program abitk
    call poscar%print_abivars(std_out)
    call poscar%free()
 
+ !case ("wfk_downsample")
+ ! e.g. go from a 8x8x8 WFK to a 4x4x4
+
  case ("hdr_print")
    ABI_CHECK(nargs > 1, "FILE argument is required.")
    call get_command_argument(2, path)

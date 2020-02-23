@@ -336,8 +336,8 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
-& zion,znucl,timrev,use_antiferro,remove_inv,title,&
-& symrel,tnons,symafm) ! Optional
+   zion,znucl,timrev,use_antiferro,remove_inv,title,&
+   symrel,tnons,symafm) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -1439,8 +1439,8 @@ end subroutine symrel2string
 !! FUNCTION
 !!  output VASP style POSCAR and FORCES files for use with frozen phonon codes, like
 !!  PHON from Dario Alfe' or frophon
-!!  IMPORTANT: the order of atoms is fixed such that typat is re-grouped. First typat=1
-!!  then typat=2, etc...
+!!  IMPORTANT: the order of atoms is fixed such that typat is re-grouped.
+!!  First typat=1 then typat=2, etc...
 !!
 !! INPUTS
 !!  fcart = forces on atoms in cartesian coordinates
@@ -1565,6 +1565,7 @@ end subroutine prtposcar
 !!  poscar_free
 !!
 !! FUNCTION
+!!  Free memory in poscar_t object.
 !!
 !! SOURCE
 
@@ -1587,6 +1588,7 @@ end subroutine poscar_free
 !!  poscar_from_abistring
 !!
 !! FUNCTION
+!!  Build object from string with seperator `sep`. Usually sep = newline = ch10
 !!
 !! SOURCE
 
