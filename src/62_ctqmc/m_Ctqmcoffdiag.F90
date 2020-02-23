@@ -1459,23 +1459,23 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
          END DO
        END DO
      END DO
-     open (unit=436,file='G0tau_fromF',status='unknown',form='formatted')
-     rewind(436)
-     !IF ( op%rank .EQ. 0 ) THEN
-     !  DO iflavor = 1, flavors
-     !    DO iflavor2 = 1, flavors
-     !        write(436,*) "#",iflavor,iflavor2
-     !      do  itau=1,op%samples+1
-     !        write(436,*) (itau-1)*op%beta/(op%samples),real(F(itau,iflavor,iflavor2))
-     !      enddo
-     !        write(436,*) 
-     !    END DO
-     !  !sui!write(std_out,'(5x,14(2f9.5,2x))') (F(op%samples+1,iflavor,iflavor2),iflavor2=1,flavors)
-     !  END DO
-     !ENDIF
+     open (unit=4367,file='G0tau_fromF',status='unknown',form='formatted')
+     rewind(4367)
+     IF ( op%rank .EQ. 0 ) THEN
+       DO iflavor = 1, flavors
+         DO iflavor2 = 1, flavors
+             write(4367,*) "#",iflavor,iflavor2
+           do  itau=1,op%samples+1
+             write(4367,*) (itau-1)*op%beta/(op%samples),real(F(itau,iflavor,iflavor2))
+           enddo
+             write(4367,*) 
+         END DO
+       !sui!write(std_out,'(5x,14(2f9.5,2x))') (F(op%samples+1,iflavor,iflavor2),iflavor2=1,flavors)
+       END DO
+     ENDIF
      !call flush(436)
      !call flush(437)
-     close(436)
+     close(4367)
      !call flush(6)
      
      call xmpi_barrier(op%MY_COMM)
@@ -1613,9 +1613,9 @@ SUBROUTINE Ctqmcoffdiag_computeF(op, Gomega, F, opt_fk)
   ! --- For all iflavor and iflavor2, do the Fourier transformation to
   ! --- have (F(\tau))
   !CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=op%opt_hybri_limit)
-   write(std_out,*) "WARNING opt_hybri_limit==1"
- ! CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=0)
-  CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=1)
+   write(std_out,*) "WARNING opt_hybri_limit==0"
+  CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=0)
+!  CALL GreenHyboffdiag_backFourier(F_tmp,hybri_limit=op%hybri_limit,opt_hybri_limit=1)
  ! CALL GreenHyboffdiag_backFourier(F_tmp)
 
   ! --- Put the result in F

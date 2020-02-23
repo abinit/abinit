@@ -11252,11 +11252,20 @@ Variable(
     vartype="integer",
     topics=['MolecularDynamics_basic', 'GeoOpt_basic'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval="0 if ionmvov == 0, set to 1000 if ionvmov != 0 and imgmov != 0 and the variable is not specified.",
     mnemonics="Number of TIME steps",
     text=r"""
-Gives the number of molecular dynamics time steps or Broyden structural
+Gives the maximum number of molecular dynamics time steps or structural
 optimization steps to be done if [[ionmov]] is non-zero.
+Starting with Abinit9, ntime is automatically set to 1000 if [[ionmov]] is non-zero,
+[[ntimimage]] is zero and [[ntime]] is not specified in the input file.
+Users are encouraged to pass a **timelimit** to Abinit using the command line and the syntax:
+
+        abinit --timelimit hours:minutes:seconds
+
+so that the code will try to stop smoothly before the timelimit and produce the DEN and the WFK files
+that may be used to restart the calculation.
+
 Note that at the present the option [[ionmov]] = 1 is initialized with four
 Runge-Kutta steps which costs some overhead in the startup. By contrast, the
 initialisation of other [[ionmov]] values is only one SCF call.
