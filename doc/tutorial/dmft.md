@@ -601,7 +601,6 @@ acell  | Internal energy LDA  |  Internal energy DMFT
 and then plot DMFT and LDA energies as a function of acell. You will notice
 that the equilibrium volume is very weakly modified by the strong correlations is this case.
 
-<<<<<<< HEAD
 ## 7 Electronic Structure of SrVO3: k-resolved Spectral function
 
 We are going to use OmegaMaxEnt to do the direct analytical continuation of the self-energy in Matsubara frequencies to real frequencies.
