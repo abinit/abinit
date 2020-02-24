@@ -31,14 +31,25 @@ make clean
   FC="@FC@"
 
 make -j 4 install
+rc=`echo $?`
 
-if test "`echo $?`" = "0"; then
-  if test "`${fallbacks_prefix}/bin/abinit-fallbacks-config --enabled libxc`" = "yes"; then
-    Prefix=`${fallbacks_prefix}/bin/abinit-fallbacks-config --incs libxc`
-    echo "with_libxc=${Prefix}" | sed '-e s/-I//;  s/include$//'
-  fi
+if test "$rc" = "0"; then
+  printf "$(tput bold)----------------------------------------------------------------------$(tput sgr0)\n"
+  echo "The fallbacks are now ready to use."; \
+  echo "You can tell Abinit by copying the options to your ac file.";
+
+  list_of_fbks=( libxc netcdf4 netcdf4_fortran linalg )
+  for i in "${list_of_fbks[@]}"; do
+    if test "`${fallbacks_prefix}/bin/abinit-fallbacks-config --enabled ${i}`" = "yes"; then
+      Prefix=`${fallbacks_prefix}/bin/abinit-fallbacks-config --incs ${i}`
+      printf "\n$(tput bold)"
+      echo "with_${i}=${Prefix}" | sed '-e s/-I//;  s/include$//'
+      printf "$(tput sgr0)"
+    fi
+  done
+  printf "\n"
 else
-  echo "problem"
+  printf "We have detected a problem while generating fallbacks : contact Abinit's team\n"
 fi
 
 exit
