@@ -21,7 +21,7 @@ This might take some time ...
 
 Xavier
 
-### **A** Important remarks and warnings.
+### **A.** Important remarks and warnings.
 
 **A.1** At the occasion of the switch from ABINITv8 to ABINITv9, many improvements of the formats and content of files written
     by ABINIT have been made, so the backward compatibility of ABINITv9 is often broken. 
@@ -147,7 +147,7 @@ In particular, a spin model, described specifically in Sec. 4.1.2 of [[cite:Gonz
 >forthcoming version of abinit, and continue to be developed.
 
 A tutorial for the multibinit spin model has been written, [[tutorial:spin_model]].
-List of tests in addition to those of the tutorial: v8#16, v8#23, wannier90#04. 
+List of tests in addition to those of the tutorial: v8#16, v8#23.
 New input variables: slc_coupling,
 [[spin_calc_correlation_obs@multibinit|spin_calc_correlation_obs]], 
 [[spin_calc_thermo_obs@multibinit|spin_calc_thermo_obs]], 
@@ -200,18 +200,20 @@ or
 
 The user can specify the output file thanks to the [[output_file]] input variable,
 the list of pseudopotentials thanks to the [[pseudos]] input variable.
-The prefix for other input, output or temporary files are constructed from [[indata_prefix]], [[outdata_prefix]] and [[tmpdata_files]].
+The prefix for other input, output or temporary files are constructed from [[indata_prefix]], [[outdata_prefix]] and tmpdata_files.
 The old interface is still operational.
 See [[topic:Control]].
 
 By M. Giantomassi (MR 586).
 
 
-**B.7** Reading strings in the input file
+**B.7** Reading strings from the input file
 
-A handful of new input keywords are reading strings as data, and, often, can be used alternatively to similar input keywords
+A new mechanism to read strings from the input file has been activated. 
+So, many new input keywords are reading strings as data, and, often, can be used alternatively to similar input keywords
 that were expecting numerical values.
 List of new input variables :
+
 - [[getddb_path]], an alternative to [[getddb]] or [[irdddb]], see test v9#60
 - [[getden_path]], an alternative to [[getden]] or [[irdden]], see test v8#36, 41
 - [[getscr_path]], an alternative to [[getscr]] or [[irdscr]], see test v67mbpt#51
@@ -222,9 +224,9 @@ List of new input variables :
 - [[getpot_path]], see test v8#44
 - [[pseudos]], see tests mpiio#27,51, tutoplugs#tw90_1,tw90_4, v4#20, v5#54, v67mbpt#40, v7#45, v8#90.
 - [[output_file]] NOT TESTED
-- [[outdata_prefix]] NOT TESTED NOT DOCUMENTED
+- [[outdata_prefix]] NOT TESTED 
 - [[indata_prefix]] NOT TESTED 
-- [[tmpata_prefix]] NOT TESTED 
+- tmpata_prefix NOT TESTED NOT DOCUMENTED
 
 By M. Giantomassi
 
@@ -232,228 +234,212 @@ By M. Giantomassi
 **B.8** YAML sections in the output file 
 
 YAML sections are now generated in the output file, sometimes replacing text sections, sometime providing new information.
-Merge request 611, 559, 538, 535, 534, 530, 525, 504
-Input variable use_yaml paral#86, v67mbpt#2
-fldiff.py replacing PERL fldiff 
+At present there is a YAML section for the components of the total energy, as well as a YAML section for GW calculations.
+List of tests: paral#86, v67mbpt#2. See the input variable [[use_yaml]].
+At the occasion of the development of this capability, and its adaptation to the test farm, the
+PERL script fldiff.pl has been replaced by a Python fldiff.py script. 
+
 By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze
 
 
 **B.9** New capabilities of abipy and abiflows ?
 
-**B.10** New capabilities of abisrc ?
-MR 572
-MR 495 Activate automatic generation of binaries.conf by abisrc.py
-
-**B.11** Computation of Gruneisen parameters
-MR 478
-By M. Giantomassi
-
-
-
 * * *
 
-### C. Changes for the developers (also compilers)
+### **C.** Changes for the developers (also compilers)
 
-C.1 unitary ttransposer#1
-Test the transposer for linear algebra to KGB parallelisation.
-By J. Bieder
+**C.1** A python script to help ABINIT developers and ABINIT development.
 
-C.2 Test farm: new and obsolete bots
-    MR 515, 451
-    The following builders have been introduced in the test farm:
-    The following builders have been upgraded:
-    The following builders have been removed
+The new python script abisrc.py located in the top directory of the ABINIT package has been developed.
+It has superceded abilink in the */*/makemake procedure. 
+Try
+
+    ./abisrc.py --help
+
+then follow the suggestions, to get info about files, directories, interfaces, to vizualize dependencies,
+... 
+
+Note that there are dependencies, to be installed prior being able to use some capabilities of abisrc.py .
+
+By M Giantomassi
+
+
+**C.2** Test farm: new and obsolete bots
+
+* Bots introduced in the test farm: atlas_gnu_9.1_openmpi, buda2_gnu_8.2_cuda, cronos2_gnu_7.4_paral.
+* Bots upgraded: abiref_gnu_5.3_* to abiref_gnu_9.2_* ; abiref_nag_6.2_openmpi to
+    abiref_nag_7.0_openmpi; bob_gnu_5.3_openmp to bob_gnu_7.5_openmp; buda2_gnu_8.1_mpich3 
+    to buda2_gnu_8.2_mpich3; graphene_gnu_6.4_macports to graphene_gnu_9.2_macports; max2_gnu_5.3_* to max2_gnu_6.5_*; ubu_gnu_5.3_openmpi to ubu_gnu_9.2_openmpi.
+* Bots removed: atlas_gnu_7.2_fb.ac (no nightly test of the fallbacks anymore), cronos_gnu_5.3_paral(remplaced by cronos2), inca_gnu_6.3_py3k (inca too old), tikal_gnu_* (tikal too old).
+Working also on a cronos-cronos2 cluster.
+
 By JM Beuken
 
-C.3 Supported compilers
-    The following versions of the gfort (GNU) compiler are now supported :
-    The following versions of the gfort (GNU) compiler are not supported anymore :
-    The following versions of the ifort (INTEL) compiler are now supported :
-    The following versions of the ifort (INTEL) compiler are not supported anymore :
-    Other changes
+**C.3** Supported compilers
+
+* gfort (GNU) compiler: v9 newly supported, v4 obsolete
+* ifort (INTEL) compiler : v19 newly supported.
+* NAG 7.0 instead of 6.2
+
 By JM Beuken
 
-C.4 Reenabling linkchecker, only for internal link checking.
-MR 513
-By JM Beuken
+**C.4** Unitary ttransposer#1 . Test of the transposer for linear algebra to KGB parallelisation.
+
+By J. Bieder.
+
+**C.5** Linkchecker has been reenabled, only for internal link checking.
+
+By JM Beuken (MR 513).
+
+**C.6** Enable the generation of a HTML side-by-side diff on the test farm when fldiff fail with a line count error and it was not caused by a crash of Abinit. The diff use a specialized heuristic to improve line synchronization and prevent weird matching.
+
+By Th. Cavignac (MR 526)
 
 * * *
 
 ### D.  Other changes (or on-going developments, not yet finalized)
 
-D.1 Test of linear electro-optical coefficient
+**D.1**  Miscellaneous improvements of Multibinit (lattice part)
 
-tutorespfn toptic#5-6
-#5 is exactly the same as #3 - should be rationalized !
-#6 (from N Pike) is claimed to be about the linear electro-optical coefficient ?!
-MR 581, 575
-By N. Pike
+Miscellaneous improvements have been made to the lattice part of Multibinit.
+See the new input variables below, also see the Sec. 4.1.1 of [[cite:Gonze2020]].
+Test of the supercell_latt input variable (NOT DOCUMENTED).
 
-D.2
-v7#73
-#%% authors = X. Gonze
-#%% description =
-#%%   Helium atom in a box. NC, only local potential (too smooth to reproduce experiment).
-#%%   Simple system for testing Hartree-Fock and the SCF algorithms. Start from PBE.
+New tests: v8#38, v8#94, v8#98, v8#99.
+New input variables :
 
-
-D.3  Multibinit
-Improvements from M. Schmitt
-MR 440 Develop - Adding useful utilities to Multibinit III
-#38 Multibinit Restart a Molecular-Dynamics run from a _HIST.nc file with one step in it.
-#98 Test the test set option. Evaluate a given effective potential on a set of configurations.
-      Test for new input variable analyze_anh_pot
-#99 Test the optimize effective potential option. Optimize the value of 2 coefficients with respect
-#%%    to a training set.
-New input variables : 
-- analyze_anh_pot v8#98
-- fit_anhaStrain NOT TESTED
+- [[analyze_anh_pot@multibinit|analyze_anh_pot]] v8#98
+- [[fit_anhaStrain@multibinit|fit_anhaStrain]] NOT TESTED
 - fit_iatom, tests in paral#81, 82, v8#13-15, but not documented. The tests were already existing.
 - latt_friction, NOT TESTED, NOT DOCUMENTED
-- opt_effpot, test in v8#99
-- opt_ncoeff, test in v8#99
-- opt_coeff, test in v8#99
+- [[opt_effpot@multibinit|opt_effpot]], test in v8#99
+- [[opt_ncoeff@multibinit|opt_ncoeff]], test in v8#99
+- [[opt_coeff@multibinit|opt_coeff]], test in v8#99
 - prt_names, NOT TESTED, NOT DOCUMENTED
-- test_effpot  v8#98
+- [[test_effpot@multibinit|test_effpot]] v8#98
+
+By M. Schmitt, F. Ricci, who else ?
 
 
-D.4 J. Zwanziger
-MR 588 Extensive update of the orbmag code
-MR 545, 500
-MR 469 chern_number parallelized over k pts
-#39 Test Chern number and orbital magnetization calculation
+**D.2** Miscellaneous improvements in the Chern number and orbital magnetization calculations,
+including parallelization over k points of the Chern number calculation.
+New test : v8#39.
 
-D.5 Miranda Giantomassi
-v8#52-54 ANADDB input for phonon bands and DOS, Test tolerance in the new inteergration weights
+By J. Zwanziger (MR 469, 500, 545, 588)
 
-D.6 Gmatteo
-v8#58  Calculation of Debye-Waller tensor.
+**D.3** Calculation of Debye-Waller tensor. New test v8#58.
 
-D.7 Gmatteo
-Gmatteo
-v8#59  Calculation of velocity matrix elements (DDK) with
-#%%   optdriver 8 and wfk_task4 "wfk_ddk”.
+By M. Giantomassi
 
-D.8 F Ricci
-v8#94   test supercell_latt construction
 
-D.9 He Xu
-wannier90#4
-test wannier90 interface with nsppol=2 and nspden=2
+**D.4** Test of linear electro-optical coefficient, tutorespfn toptic#5-6.
+NOTE : #5 is exactly the same as #3 - should be rationalized !
 
-D.10 Mixed precision calculations
-MR491 
-New input variable mixprec
-v8#44, v9#57, 60, 61.
-From GMatteo
+By N. Pike (MR 581, 575).
 
-D.11 Multibinit interface with scale-up
+**D.5** NCPP Wavefunction mixing with Variational Energy
+and minor improvements to prepare PAW+Hybrid variational energy.
+New test v7#73, simple system for testing Hartree-Fock and the SCF algorithms.
+
+By X. Gonze (MR 434, 444, 445).
+
+**D.6** New weight distribution of the Fourier components of the force constants.
+Test tolerance in the new integration weights, v8#52-54.
+
+By H. Miranda and M. Giantomassi
+
+**D.7** Test Calculation of velocity matrix elements (DDK) with
+ optdriver 8 and wfk_task4 "wfk_ddk”, v8#59.
+
+By G. Matteo
+
+**D.8** New para_gspw tutorial, new version of auto paral (with threads)
+
+By M. Torrent (MR502).
+
+**D.9** Test wannier90 interface with nsppol=2 and nspden=2, wannier90#4.
+
+By He Xu
+
+**D.10** Mixed precision calculations. New input variable [[mixprec]]
+see v8#44, v9#57, 60, 61.
+
+From M. GIantomassi (MR491).
+
+**D.11** Multibinit interface with scale-up
 A whole set of new input variables, however not tested, not documented !
 By ??
 
-D.12 The following units are also allowed in the input file :
+**D.12** The following units are also allowed in the input file :
+
 - S Sec Second 
 - nm (for nanometer)
-By ??
 
-D.13 ?? Merge phDOS branch from Matteo ?
-MR 604, 591, 553, 548, 544, 542, 508, 485, 453
+**D.13** TDEP utility :
+added [[guide:tdep|A-TDep user guide]],
+[[topic:Tdep|TDep topic]], and corresponding input variable documentation.
+References: [[pdf:TDEP_Paper|TDEP paper]].
+Also, see Sec. 4.2 of [[cite:Gonze2020]].
 
-D.14 Updates for NLO calculations
-MR599
-By G. Petretto, 
+By F. Bottin, J. Bouchet, J. Bieder (MR491,422).
 
-D.15 MetaGGA + PAW
-MR 587, 558
-By M. Torrent, JB Charraud
+**D.14** Improvements of NLO calculations.
+Optimize memory allocation. In particular for usepead=1.
+Write Raman susceptibilities to netcdf in anaddb.
 
-D.16 Implement an alternate version of MPI reductions valid when the number of data exceeds 2^32
-MR 578
-By M. Torrent
+By G. Petretto  (MR 599).
 
-D.17 Build system and src support for llvm (clang/flang) and ARM (armflang/armclang/armpl).
-MR 571
-By M Torrent
+**D.15** MetaGGA + PAW in progress.
 
-D.18 Improvement of core WF reading (optics + electron-positron)
-MR 557
-By M Torrent
+By M. Torrent, JB Charraud (MR 587, 558).
 
-D.19 Fix bootstrap kernel convergence issues
-MR 546
-By Wei Chen
+**D.16** Implementation of an alternate version of MPI reductions valid when the number of data exceeds 2^32.
 
-D.20
-Upgrade atompaw to 4.1.0.6
-Upgrade Libxc to 4+
-MR 532, 470, 465, 441
-By M. Torrent, JM Beuken
+By M. Torrent (MR 587)
 
-D.21
-MR 527 ?? Develop2
-By E. Bousquet
+**D.17** Build system and src support for llvm (clang/flang) and ARM (armflang/armclang/armpl).
 
-D.22
-HTML diff to help solve fldiff line count error
-MR 526
-By T. Cavignac
+By M Torrent (MR 571)
 
-D.23
-Fatbands TDEP   MR510
-By J. Bieder
+**D.18** Improvement of core WF reading (optics + electron-positron)
 
-D.24
-Rationnalize usepawu usage, debug usepawu=4, correct DFPT+PAW+U
-MR499
-By M. Torrent
+By M Torrent (MR 557)
 
-D.25
-New weight distribution of the Fourier components of the force constants
-MR271, 450
-By H. Miranda
+**D.19** Fix bootstrap kernel convergence issues
 
-D.26 (perhaps B ??)
-MR491 Added user guide, topic, variables for TDEP utility (from F. Bottin, J. Bouchet)
+By Wei Chen (MR 546)
 
-D.27
-MR 462 Write polarization vectors in GSR.nc
-By H. Miranda
+**D.20** Upgrade versions of libraries used with ABINIT.
+Upgrade atompaw to 4.1.0.6. Upgrade Libxc to 4+.
 
-D.28
-MR 460
-Updated user interface of Raman_spec.py
-By N. Pike
+By M. Torrent, JM Beuken (MR 532, 470, 465, 441)
 
-D.29 
-NCPP Wavefunction mixing with Variational Energy
-MR 444, 434
-445 Minor improvements to prepare PAW+Hybrid variational energy
-By X. Gonze
+**D.21** Write yaml file for fatbands (phonopy format) with TDEP
 
-D.30
-XML format for core wavefunctions
-MR 423
-By F. Jollet
+By J. Bieder (MR510)
 
-D.31
-TDEP MR422
-J. Bieder
+**D.22** Write polarization vectors in GSR.nc.
 
-D.32
-MR 412 wavefunction prediction for molecular dynamics
-By F. Jollet
+By H. Miranda (MR 462).
 
-D.33
-Added a preview for the toptic_4.in files in the optic tutorial.
-!408 · opened 1 year ago by Felix Goudreault   develop
+**D.23** Updated user interface of Raman_spec.py
 
-D.34
-New para_gspw tutorial, new version of auto paral (with threads)
-MR 502
-By M. Torrent
+By N. Pike (MR 460)
 
-D.35 Miscellaneous additional bug fixes and improvements of documentation.
-L. Baguet, JM Beuken, J. Bieder, F. Bruneval, T. Cavignac, M. Giantomassi,  X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, He Xu
+**D.24** XML format for core wavefunctions
+
+By F. Jollet (MR 423)
+
+**D.25** Wavefunction prediction for molecular dynamics.
+
+By F. Jollet (MR 412)
+
+**D.26** Added a preview for the toptic_4.in files in the optic tutorial.
+
+By F. Goudreault (MR 408)
+
+**D.27** Miscellaneous additional bug fixes and improvements of documentation.
+L. Baguet, JM Beuken, J. Bieder, E. Bousquet, F. Bruneval, T. Cavignac, M. Giantomassi,  X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, He Xu.
 
 
 * * *
