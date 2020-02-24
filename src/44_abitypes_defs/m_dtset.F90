@@ -714,7 +714,7 @@ type, public :: dataset_type
  real(dp) :: vdw_df_qratio
  real(dp) :: vdw_df_rcut
  real(dp) :: vdw_df_rsoft
- real(dp) :: vdw_df_threshold
+ real(dp) :: vdw_df_threshold = zero
  real(dp) :: vdw_df_tolerance
  real(dp) :: vdw_df_zab
  real(dp) :: vis
