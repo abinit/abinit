@@ -837,11 +837,11 @@ subroutine results_gs_yaml_write(results, unit, cryst, with_conv, info)
  end if
 
  ! Write lattice parameters
- call ydoc%add_real2d('rprimd', cryst%rprimd, real_fmt="(f11.7)")
- !call ydoc%add_real2d('lattice_vectors', cryst%rprimd, real_fmt="(f11.7)")
+ !call ydoc%add_real2d('rprimd', cryst%rprimd, real_fmt="(f11.7)")
+ call ydoc%add_real2d('lattice_vectors', cryst%rprimd, real_fmt="(f11.7)")
  abc = [(sqrt(sum(cryst%rprimd(:, ii) ** 2)), ii=1,3)]
  call ydoc%add_real1d('lattice_lengths', abc, real_fmt="(f10.5)")
- call ydoc%add_real1d('lattice_angles', cryst%angdeg, real_fmt="(f7.3)") ! , comment="degrees, (23, 13, 12)")
+ call ydoc%add_real1d('lattice_angles', cryst%angdeg, real_fmt="(f7.3)", comment="degrees, (23, 13, 12)")
  call ydoc%add_real('lattice_volume', cryst%ucvol + tol10, real_fmt="(es15.7)")
 
  ! Write convergence degree.
@@ -872,7 +872,7 @@ subroutine results_gs_yaml_write(results, unit, cryst, with_conv, info)
  strten(2,1) = results%strten(6)
 
  if (strten(1,1) /= MAGIC_UNDEF) then
-   call ydoc%add_real2d('cartesian_stress_tensor', strten) !, comment="hartree/bohr^3")
+   call ydoc%add_real2d('cartesian_stress_tensor', strten, comment="hartree/bohr^3")
    call ydoc%add_real('pressure_GPa', - get_trace(strten) * HaBohr3_GPa / three, real_fmt="(es12.4)")
  else
    call ydoc%set_keys_to_string("cartesian_stress_tensor, pressure_GPa", "null")
@@ -880,7 +880,7 @@ subroutine results_gs_yaml_write(results, unit, cryst, with_conv, info)
 
  species = [(cryst%symbol_iatom(ii), ii=1,cryst%natom)]
 
- !call ydoc%add_real2d('xred', cryst%xred, slist=species, real_fmt="(es12.4)")
+ call ydoc%add_real2d('xred', cryst%xred, slist=species, real_fmt="(es12.4)")
  !call ydoc%add_paired_real2d('xred_xcart_specie', &
  !  cryst%xred, cryst%xcart, slist=species, real_fmt="(es12.4)")
 
@@ -888,7 +888,7 @@ subroutine results_gs_yaml_write(results, unit, cryst, with_conv, info)
    !call ydoc%add_paired_real2d('cartesian_forces_and_xred', &
    !  results%fcart, cryst%xred, chars=species, real_fmt="(es12.4)")
 
-   call ydoc%add_real2d('cartesian_forces', results%fcart) !, comment="hartree/bohr")
+   call ydoc%add_real2d('cartesian_forces', results%fcart, comment="hartree/bohr")
    fnorms = [(sqrt(sum(results%fcart(:, ii) ** 2)), ii=1,results%natom)]
    ! Write force statistics
    call ydoc%add_reals('min, max, mean', &

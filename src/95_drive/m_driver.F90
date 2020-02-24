@@ -363,11 +363,11 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        MSG_ERROR(msg)
      end select
 
-     if (dtset%use_yaml == 1) then
-       call ydoc%write_and_free(ab_out)
-     else
-       call ydoc%write_and_free(std_out)
-     end if
+     !if (dtset%use_yaml == 1) then
+     call ydoc%write_and_free(ab_out)
+     !else
+     !  call ydoc%write_and_free(std_out)
+     !end if
    end if
 
    if ( dtset%np_slk == 0 ) then
