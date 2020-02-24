@@ -2168,6 +2168,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      write(msg,'(a45,i9)')' number of imaginary frequencies for Sigma_c ',order_int
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
+     write(msg,'(a1)')' '
+     call wrtout(std_out,msg,'COLL')
+     call wrtout(ab_out,msg,'COLL')
      order_int=Sigp%nomegasi 
      ABI_MALLOC(freqs,(order_int))
      ABI_MALLOC(weights,(order_int))
