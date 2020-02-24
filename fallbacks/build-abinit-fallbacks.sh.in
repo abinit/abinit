@@ -32,4 +32,13 @@ make clean
 
 make -j 4 install
 
+if test "`echo $?`" = "0"; then
+  if test "`${fallbacks_prefix}/bin/abinit-fallbacks-config --enabled libxc`" = "yes"; then
+    Prefix=`${fallbacks_prefix}/bin/abinit-fallbacks-config --incs libxc`
+    echo "with_libxc=${Prefix}" | sed '-e s/-I//;  s/include$//'
+  fi
+else
+  echo "problem"
+fi
+
 exit

@@ -917,56 +917,62 @@ ABI_TRIGGERS_SUMMARY
 # Check status of mandatory fallbacks
 
 status=""
+mandatory=""
 
 # Check linalg
-if test "${sd_linalg_flavor}" != "${sd_linalg_flavor_req}"; then
+if test "${sd_linalg_flavor_req}" != "auto"; then
+   if test "${sd_linalg_flavor}" != "${sd_linalg_flavor_req}"; then
       ABI_MSG_NOTICE_L([linalg-flavor],[__INFO__ : the linalg flavor is not the one requested!])
+   fi
 fi
 
 if test "${sd_linalg_enable}" != "yes"; then
-      ABI_MSG_NOTICE_S([CAUTION : LinAlg is MANDATORY !],
-		       [   suggestion : use 'with_linalg_flavor' in the ac file])
-      status="#"
+      #ABI_MSG_NOTICE_S([CAUTION : LinAlg is MANDATORY !],
+	  #	       [   suggestion : use 'with_linalg_flavor' in the ac file])
+      ABI_MSG_NOTICE_L([linalg-mandatory],[CAUTION : linalg is __MANDATORY__ !])
+      mandatory="#"
 fi
 
 # Check NetCDF
 if test "${sd_netcdf_enable}" = "no"; then
-      ABI_MSG_NOTICE_S([CAUTION : NetCDF is __MANDATORY__ !],
-		       [   suggestion : use 'with_netcdf' in the ac file])
-      status="#"
+      #ABI_MSG_NOTICE_S([CAUTION : NetCDF is __MANDATORY__ !],
+	  #	       [   suggestion : use 'with_netcdf' in the ac file])
+      ABI_MSG_NOTICE_L([netcdf-mandatory],[CAUTION : NetCDF is __MANDATORY__ !])
+      mandatory="#"
 else
   if test "${sd_netcdf_ok}" != "yes";then
-      ABI_MSG_NOTICE_L([netcdf_nw],[__WARNING__ : NetCDF is not WORKING])
+      ABI_MSG_NOTICE_L([netcdf-nw],[__WARNING__ : NetCDF is not WORKING])
       status="#"
   fi
 fi
 
 # Check NetCDF_fortran
 if test "${sd_netcdf_fortran_enable}" = "no"; then
-      ABI_MSG_NOTICE_S([CAUTION : NetCDF Fortran is __MANDATORY__ !],
-		       [   suggestion : use 'with_netcdf_fortran' in the ac file])
-      status="#"
+      #ABI_MSG_NOTICE_S([CAUTION : NetCDF Fortran is __MANDATORY__ !],
+	  #	       [   suggestion : use 'with_netcdf_fortran' in the ac file])
+      ABI_MSG_NOTICE_L([netcdf_fortran-mandatory],[CAUTION : NetCDF Fortran is __MANDATORY__ !])
+      mandatory="#"
 else
   if test "${sd_netcdf_fortran_ok}" != "yes";then
-      ABI_MSG_NOTICE_L([netcdf_fortran_nw],[WARNING : NetCDF Fortran is not __WORKING__])
+      ABI_MSG_NOTICE_L([netcdf_fortran-nw],[WARNING : NetCDF Fortran is not __WORKING__])
       status="#"
   fi
 fi
 
 # Check LibXC
 if test "${sd_libxc_enable}" = "no"; then
-      ABI_MSG_NOTICE_S([CAUTION : LibXC is __MANDATORY__ !],
-		       [   suggestion : use 'with_libxc' in the ac file])
-      status="#"
+      #ABI_MSG_NOTICE_S([CAUTION : LibXC is __MANDATORY__ !],
+	  #	       [   suggestion : use 'with_libxc' in the ac file])
+      ABI_MSG_NOTICE_L([libxc-mandatory],[CAUTION : LibXC is __MANDATORY__ !])
+      mandatory="#"
 else
   if test "${sd_libxc_ok}" != "yes";then
-      ABI_MSG_NOTICE_L([libxc_nw],[WARNING : LibXC is not __WORKING__])
+      ABI_MSG_NOTICE_L([libxc-nw],[WARNING : LibXC is not __WORKING__])
       status="#"
   fi
 fi
 
 # Check Wannier90
-
 if test "${sd_wannier90_enable}" = "yes"; then
    if test "${sd_wannier90_ok}" != "yes"; then
       ABI_MSG_NOTICE_S([CAUTION : Wannier90 is not __WORKING__ !],
@@ -975,7 +981,12 @@ if test "${sd_wannier90_enable}" = "yes"; then
    fi
 fi
 
-if test ! -z "${status}"; then
+# Help to produce libraires
+if test ! -z "${mandatory}"; then
+      ABI_MSG_NOTICE_L([help-fb],[We can __help__ you !])
+fi 
+
+if test ! -z "${status}" -o ! -z "${mandatory}"; then
       ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
 fi
 
@@ -985,7 +996,6 @@ chmod +x fallbacks/build-abinit-fallbacks.sh
 
 # Check that we have all required fallbacks
 ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
-printf "${abi_fbk_required}\n"
 
 
 # Report situation
@@ -996,7 +1006,7 @@ printf "${abi_fbk_required}\n"
 #fi
 
 # Check exit
-if test ! -z "${status}"; then
+if test ! -z "${status}" -o ! -z "${mandatory}"; then
       exit
 fi
 

@@ -72,7 +72,8 @@ Core build parameters
 
   * LibXML2 enabled  : ${abi_libxml2_enable}
   * HDF5 enabled     : ${sd_hdf5_enable} (MPI support: ${sd_hdf5_mpi_ok})
-  * NetCDF enabled   : ${sd_netcdf_enable} (MPI support: C=${sd_netcdf_mpi_ok}, Fortran=${sd_netcdf_fortran_mpi_ok})
+  * NetCDF enabled   : ${sd_netcdf_enable} (MPI support: ${sd_netcdf_mpi_ok})
+  * NetCDF-F enabled : ${sd_netcdf_fortran_enable}  (MPI support: ${sd_netcdf_fortran_mpi_ok})
 
   * FFT flavor       : ${sd_fft_flavor} (libs: ${tmp_rep_fft_libs})
   * LINALG flavor    : ${sd_linalg_flavor} (libs: ${tmp_rep_linalg_libs})
