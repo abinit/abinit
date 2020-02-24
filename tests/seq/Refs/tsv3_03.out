@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 19h36 )
+.Starting date : Tue 25 Feb 2020.
+- ( at 00h22 )
   
 - input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/gmatteo_phdos/tests/Test_suite/seq_tsv3_03/tsv3_03.in
 - output file    -> tsv3_03.out
@@ -501,6 +501,15 @@ P           mkmem8         16
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 3, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 8, }
+cutoff_energies: {ecut:   1.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -583,6 +592,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      14.125      14.121
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 200, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-12, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -7.9100523247053    -7.910E+00 5.008E-05 1.645E+00
  ETOT  2  -7.9247963264216    -1.474E-02 2.183E-07 7.966E-02
@@ -606,23 +621,26 @@ _setup2: Arith. and geom. avg. npw (full set) are      14.125      14.121
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.3384784,   5.3384784, ]
 - [  5.3384784,   0.0000000,   5.3384784, ]
 - [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0428635E+02
 convergence: {deltae:  8.882E-16, res2:  1.283E-16, residm:  1.630E-18, diffor: null, }
 etotal    :  -7.92532866E+00
 entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  9.39941791E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   9.39941791E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   9.39941791E-04, ]
 pressure_GPa:  -2.7654E+01
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ga]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
@@ -698,6 +716,15 @@ band_energy         : -1.40550457644689E-01
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 16, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 15, }
+cutoff_energies: {ecut:   1.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
+
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
  Exchange-correlation functional for the present dataset will be:
@@ -751,12 +778,12 @@ band_energy         : -1.40550457644689E-01
 --- !ResultsGS
 iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.3384784,   5.3384784, ]
 - [  5.3384784,   0.0000000,   5.3384784, ]
 - [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0428635E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.220E-13, diffor:  0.000E+00, }
 etotal    :  -7.92532866E+00
@@ -764,6 +791,9 @@ entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ga]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -797,6 +827,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 16, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 15, }
+cutoff_energies: {ecut:   1.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -851,12 +890,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !ResultsGS
 iteration_state: {dtset: 3, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.3384784,   5.3384784, ]
 - [  5.3384784,   0.0000000,   5.3384784, ]
 - [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0428635E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.220E-13, diffor:  0.000E+00, }
 etotal    :  -7.92532866E+00
@@ -864,6 +903,9 @@ entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ga]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -897,6 +939,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 ================================================================================
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 12, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 15, }
+cutoff_energies: {ecut:   1.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -951,12 +1002,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !ResultsGS
 iteration_state: {dtset: 4, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.3384784,   5.3384784, ]
 - [  5.3384784,   0.0000000,   5.3384784, ]
 - [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0428635E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.220E-13, diffor:  0.000E+00, }
 etotal    :  -7.92532866E+00
@@ -964,6 +1015,9 @@ entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ga]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -997,6 +1051,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 ================================================================================
 == DATASET  5 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 12, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 15, }
+cutoff_energies: {ecut:   1.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -1051,12 +1114,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !ResultsGS
 iteration_state: {dtset: 5, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.3384784,   5.3384784, ]
 - [  5.3384784,   0.0000000,   5.3384784, ]
 - [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0428635E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.220E-13, diffor:  0.000E+00, }
 etotal    :  -7.92532866E+00
@@ -1064,6 +1127,9 @@ entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ga]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -1098,6 +1164,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 == DATASET  6 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 6, }
+dimensions: {natom: 2, nkpt: 3, mband: 5, nsppol: 2, nspinor: 1, nspden: 2, mpw: 8, }
+cutoff_energies: {ecut:   1.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -1125,6 +1200,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      14.125      14.121
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 200, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-12, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -7.9100523247053    -7.910E+00 5.008E-05 3.290E+00
  ETOT  2  -7.9247963264216    -1.474E-02 2.183E-07 1.593E-01
@@ -1148,23 +1229,26 @@ _setup2: Arith. and geom. avg. npw (full set) are      14.125      14.121
 --- !ResultsGS
 iteration_state: {dtset: 6, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.3384784,   5.3384784, ]
 - [  5.3384784,   0.0000000,   5.3384784, ]
 - [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0428635E+02
 convergence: {deltae:  1.776E-15, res2:  2.565E-16, residm:  1.630E-18, diffor: null, }
 etotal    :  -7.92532866E+00
 entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  9.39941791E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   9.39941791E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   9.39941791E-04, ]
 pressure_GPa:  -2.7654E+01
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ga]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
@@ -1250,6 +1334,15 @@ band_energy         : -1.40550457644689E-01
 == DATASET  7 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 7, }
+dimensions: {natom: 2, nkpt: 16, mband: 4, nsppol: 2, nspinor: 1, nspden: 2, mpw: 15, }
+cutoff_energies: {ecut:   1.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
+
  mkfilename : getden/=0, take file _DEN from output of DATASET   6.
 
  Exchange-correlation functional for the present dataset will be:
@@ -1313,12 +1406,12 @@ band_energy         : -1.40550457644689E-01
 --- !ResultsGS
 iteration_state: {dtset: 7, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.3384784,   5.3384784, ]
 - [  5.3384784,   0.0000000,   5.3384784, ]
 - [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0428635E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.220E-13, diffor:  0.000E+00, }
 etotal    :  -7.92532866E+00
@@ -1326,6 +1419,9 @@ entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ga]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -1369,6 +1465,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 ================================================================================
 == DATASET  8 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 8, }
+dimensions: {natom: 2, nkpt: 16, mband: 4, nsppol: 2, nspinor: 1, nspden: 2, mpw: 15, }
+cutoff_energies: {ecut:   1.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   6.
 
@@ -1433,12 +1538,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !ResultsGS
 iteration_state: {dtset: 8, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.3384784,   5.3384784, ]
 - [  5.3384784,   0.0000000,   5.3384784, ]
 - [  5.3384784,   5.3384784,   0.0000000, ]
 lattice_lengths: [   7.54975,    7.54975,    7.54975, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0428635E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.220E-13, diffor:  0.000E+00, }
 etotal    :  -7.92532866E+00
@@ -1446,6 +1551,9 @@ entropy   :   0.00000000E+00
 fermie    :   1.46219237E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ga]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -1798,54 +1906,54 @@ P           mkmem8         16
 ================================================================================
 
 - Total cpu        time (s,m,h):          2.8        0.05      0.001
-- Total wall clock time (s,m,h):          3.2        0.05      0.001
+- Total wall clock time (s,m,h):          3.1        0.05      0.001
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            2.8, wall_time =            3.2
+- cpu_time =            2.8, wall_time =            3.1
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- ewald                          0.667  24.1      0.667  20.9              8      -1.00        1.00       1.00
-- invars2                        0.507  18.3      0.513  16.1              8      -1.00        0.99       0.99
-- fourwf%(pot)                   0.417  15.0      0.418  13.1           9247      -1.00        1.00       1.00
-- nonlop(apply)                  0.149   5.4      0.148   4.6           9247      -1.00        1.01       1.01
-- timing timab                   0.133   4.8      0.133   4.2              9      -1.00        1.00       1.00
-- abinit(2)                      0.095   3.4      0.099   3.1              1      -1.00        0.96       0.96
-- stress                         0.092   3.3      0.092   2.9              2      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.092   3.3      0.092   2.9              2      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.085   3.1      0.088   2.8             -1      -1.00        0.97       0.97
-- getghc-other                   0.085   3.1      0.084   2.6             -1      -1.00        1.01       1.01
-- projbd                         0.050   1.8      0.060   1.9          13664      -1.00        0.83       0.83
-- others (123)                   0.052   1.9      0.040   1.3             -1      -1.00        1.30       1.30
+- ewald                          0.675  23.7      0.680  21.6              8      -1.00        0.99       0.99
+- invars2                        0.562  19.7      0.572  18.2              8      -1.00        0.98       0.98
+- fourwf%(pot)                   0.404  14.2      0.394  12.5           9247      -1.00        1.03       1.03
+- nonlop(apply)                  0.149   5.2      0.156   5.0           9247      -1.00        0.96       0.96
+- timing timab                   0.116   4.1      0.116   3.7              9      -1.00        1.00       1.00
+- abinit(2)                      0.098   3.4      0.103   3.3              1      -1.00        0.95       0.95
+- stress                         0.094   3.3      0.094   3.0              2      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.093   3.3      0.094   3.0              2      -1.00        0.99       0.99
+- getghc-other                   0.083   2.9      0.067   2.1             -1      -1.00        1.23       1.23
+- vtowfk(ssdiag)                 0.081   2.9      0.077   2.5             -1      -1.00        1.06       1.06
+- projbd                         0.047   1.7      0.060   1.9          13664      -1.00        0.78       0.78
+- others (123)                   0.053   1.8      0.055   1.8             -1      -1.00        0.96       0.96
 -<END_TIMER>
 -
-- subtotal                       2.423  87.5      2.434  76.3                                  1.00       1.00
+- subtotal                       2.456  86.2      2.468  78.6                                  1.00       1.00
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =           2.8, wall_time =           3.2
+- cpu_time =           2.8, wall_time =           3.1
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- ewald                          0.667  24.1      0.667  20.9              8      -1.00        1.00       1.00
-- invars2                        0.507  18.3      0.513  16.1              8      -1.00        0.99       0.99
-- fourwf%(pot)                   0.417  15.0      0.418  13.1           9247      -1.00        1.00       1.00
-- nonlop(apply)                  0.149   5.4      0.148   4.6           9247      -1.00        1.01       1.01
-- timing timab                   0.133   4.8      0.133   4.2              9      -1.00        1.00       1.00
-- abinit(2)                      0.095   3.4      0.099   3.1              1      -1.00        0.96       0.96
-- stress                         0.092   3.3      0.092   2.9              2      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.092   3.3      0.092   2.9              2      -1.00        1.00       1.00
-- vtowfk(ssdiag)                 0.085   3.1      0.088   2.8             -1      -1.00        0.97       0.97
-- getghc-other                   0.085   3.1      0.084   2.6             -1      -1.00        1.01       1.01
-- projbd                         0.050   1.8      0.060   1.9          13664      -1.00        0.83       0.83
-- others (123)                   0.052   1.9      0.040   1.3             -1      -1.00        1.30       1.30
+- ewald                          0.675  23.7      0.680  21.6              8      -1.00        0.99       0.99
+- invars2                        0.562  19.7      0.572  18.2              8      -1.00        0.98       0.98
+- fourwf%(pot)                   0.404  14.2      0.394  12.5           9247      -1.00        1.03       1.03
+- nonlop(apply)                  0.149   5.2      0.156   5.0           9247      -1.00        0.96       0.96
+- timing timab                   0.116   4.1      0.116   3.7              9      -1.00        1.00       1.00
+- abinit(2)                      0.098   3.4      0.103   3.3              1      -1.00        0.95       0.95
+- stress                         0.094   3.3      0.094   3.0              2      -1.00        1.00       1.00
+- ewald2 (+vdw_dftd)             0.093   3.3      0.094   3.0              2      -1.00        0.99       0.99
+- getghc-other                   0.083   2.9      0.067   2.1             -1      -1.00        1.23       1.23
+- vtowfk(ssdiag)                 0.081   2.9      0.077   2.5             -1      -1.00        1.06       1.06
+- projbd                         0.047   1.7      0.060   1.9          13664      -1.00        0.78       0.78
+- others (123)                   0.053   1.8      0.055   1.8             -1      -1.00        0.96       0.96
 -<END_TIMER>
 
-- subtotal                       2.423  87.5      2.434  76.3                                  1.00       1.00
+- subtotal                       2.456  86.2      2.468  78.6                                  1.00       1.00
 
 ================================================================================
 
@@ -1925,10 +2033,10 @@ P           mkmem8         16
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.8  wall=          3.2
+- Proc.   0 individual time (sec): cpu=          2.9  wall=          3.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  38 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.8  wall=          3.2
++Overall time at end (sec) : cpu=          2.9  wall=          3.1
