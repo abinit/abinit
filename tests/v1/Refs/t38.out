@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h32 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h14 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t38/t38.in
 - output file    -> t38.out
@@ -119,6 +119,15 @@ P           mkmem           2
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 1, nkpt: 2, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 274, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   0.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -167,6 +176,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     267.250     267.222
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 1, nline: 3, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-14, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
 
  ETOT  1  -70.718639974456    -7.072E+01 2.583E-01 1.447E+01
@@ -199,23 +214,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     267.250     267.222
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.0000000,   5.0000000, ]
 - [  5.0000000,   0.0000000,   5.0000000, ]
 - [  5.0000000,   5.0000000,   0.0000000, ]
 lattice_lengths: [   7.07107,    7.07107,    7.07107, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.5000000E+02
 convergence: {deltae: -7.072E+01, res2:  1.447E+01, residm:  2.583E-01, diffor: null, }
 etotal    :  -7.07186400E+01
 entropy   :   0.00000000E+00
 fermie    :   7.37976929E-02
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  8.85959458E-03,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   8.85959458E-03,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   8.85959458E-03, ]
 pressure_GPa:  -2.6066E+02
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Yb]
+cartesian_forces: # hartree/bohr
 - [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...

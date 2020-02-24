@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h54 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h34 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t67-t68-t69-t70/t68.in
 - output file    -> t68.out
@@ -134,6 +134,15 @@ P          mk1mem           8
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 1, nkpt: 8, mband: 16, nsppol: 1, nspinor: 2, nspden: 4, mpw: 630, }
+cutoff_energies: {ecut:  30.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfmagn: 1, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
@@ -247,6 +256,12 @@ P newkpt: treating     16 bands with npw=     630 for ikpt=   5 by node    0
 P newkpt: treating     16 bands with npw=     630 for ikpt=   6 by node    0
 P newkpt: treating     16 bands with npw=     610 for ikpt=   7 by node    0
 P newkpt: treating     16 bands with npw=     630 for ikpt=   8 by node    0
+
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-03, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   6.0303720247550      6.030E+00 4.111E+00 1.109E+04
@@ -478,10 +493,10 @@ P          mk1mem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         58.0  wall=         58.1
+- Proc.   0 individual time (sec): cpu=         57.8  wall=         58.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  17 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         58.0  wall=         58.1
++Overall time at end (sec) : cpu=         57.8  wall=         58.0

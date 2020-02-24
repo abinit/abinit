@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h47 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h45 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tnuc_1/tnuc_1.in
 - output file    -> tnuc_1.out
@@ -161,6 +161,15 @@ P           mkmem          30
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 6, nkpt: 30, mband: 17, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1356, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  25.0, }
+electrons: {nelect:   3.20000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
@@ -239,6 +248,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1341.500    1341.475
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 17, nstep: 10, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-18, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -72.873189248813    -7.287E+01 1.634E-01 2.280E+01
  ETOT  2  -72.790564459760     8.262E-02 9.354E-03 5.772E+00
@@ -265,23 +280,30 @@ _setup2: Arith. and geom. avg. npw (full set) are    1341.500    1341.475
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  7.8971655,   0.0000000,   0.0000000, ]
 - [  0.0000000,   7.8971655,   0.0000000, ]
 - [  0.0000000,   0.0000000,   5.0359312, ]
 lattice_lengths: [   7.89717,    7.89717,    5.03593, ]
-lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.1406697E+02
 convergence: {deltae:  2.936E-11, res2:  3.607E-10, residm:  1.519E-04, diffor: null, }
 etotal    :  -7.27702025E+01
 entropy   :   0.00000000E+00
 fermie    :   3.00006997E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [ -5.14809873E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,  -5.14809873E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,  -6.66805576E-04, ]
 pressure_GPa:   1.6637E+01
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  3.0620E-01,   3.0620E-01,   0.0000E+00,  O]
+- [  5.0000E-01,   5.0000E-01,   5.0000E-01, Si]
+- [  1.9380E-01,   8.0620E-01,   5.0000E-01,  O]
+- [  6.9380E-01,   6.9380E-01,   0.0000E+00,  O]
+- [  8.0620E-01,   1.9380E-01,   5.0000E-01,  O]
+cartesian_forces: # hartree/bohr
 - [ -7.22801448E-20,   2.16840434E-19,  -8.13655302E-36, ]
 - [ -3.73722286E-03,  -3.73722286E-03,   4.57677801E-19, ]
 - [ -7.22801448E-20,   2.16840434E-19,  -8.13655302E-36, ]
@@ -802,10 +824,10 @@ P           mkmem          30
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         37.0  wall=         39.1
+- Proc.   0 individual time (sec): cpu=         37.1  wall=         37.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         37.0  wall=         39.1
++Overall time at end (sec) : cpu=         37.1  wall=         37.6

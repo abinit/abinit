@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h50 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h22 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t32/t32.in
 - output file    -> t32.out
@@ -193,6 +193,15 @@ P           mkmem         256
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 256, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 168, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  10.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
@@ -278,6 +287,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-12, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -8.5656447878961    -8.566E+00 2.841E-02 4.535E-01
  ETOT  2  -8.5638229580790     1.822E-03 4.740E-07 6.913E-02
@@ -296,12 +311,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.3495000,   5.3495000, ]
 - [  5.3495000,   0.0000000,   5.3495000, ]
 - [  5.3495000,   5.3495000,   0.0000000, ]
 lattice_lengths: [   7.56534,    7.56534,    7.56534, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0617489E+02
 convergence: {deltae: -8.278E-13, res2:  3.942E-13, residm:  6.979E-15, diffor:  0.000E+00, }
 etotal    :  -8.56369469E+00
@@ -309,6 +324,9 @@ entropy   :   0.00000000E+00
 fermie    :   4.81303048E-02
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -451,6 +469,15 @@ total_energy_dc_eV  : -2.33029983350501E+02
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 256, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 168, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  10.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
@@ -485,6 +512,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 17, nstep: 20, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-12, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -8.5656446946231    -8.566E+00 2.841E-02 4.535E-01
  ETOT  2  -8.5638230000299     1.822E-03 4.737E-07 6.913E-02
@@ -503,12 +536,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 --- !ResultsGS
 iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.3495000,   5.3495000, ]
 - [  5.3495000,   0.0000000,   5.3495000, ]
 - [  5.3495000,   5.3495000,   0.0000000, ]
 lattice_lengths: [   7.56534,    7.56534,    7.56534, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0617489E+02
 convergence: {deltae: -1.053E-12, res2:  3.948E-13, residm:  6.945E-15, diffor:  0.000E+00, }
 etotal    :  -8.56369472E+00
@@ -516,6 +549,9 @@ entropy   :   0.00000000E+00
 fermie    :   4.81322973E-02
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -892,10 +928,10 @@ P           mkmem         256
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         38.5  wall=         38.7
+- Proc.   0 individual time (sec): cpu=         38.6  wall=         38.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   5 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         38.5  wall=         38.7
++Overall time at end (sec) : cpu=         38.6  wall=         38.9

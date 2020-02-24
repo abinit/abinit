@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 18h30 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 17h21 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t51_MPI4-t52_MPI4-t53_MPI4/t52.in
 - output file    -> t52_MPI4.out
@@ -198,6 +198,15 @@ P           mkmem          64
 == DATASET  1 ==================================================================
 -   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 1, nkpt: 256, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 168, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -280,12 +289,12 @@ P           mkmem          64
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   3.7800000,   3.7800000, ]
 - [  3.7800000,   0.0000000,   3.7800000, ]
 - [  3.7800000,   3.7800000,   0.0000000, ]
 lattice_lengths: [   5.34573,    5.34573,    5.34573, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0802030E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.210E-07, diffor:  0.000E+00, }
 etotal    :  -2.09313441E+00
@@ -293,6 +302,8 @@ entropy   :   0.00000000E+00
 fermie    :   3.55003332E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -328,6 +339,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 1, nkpt: 256, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 168, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -387,12 +407,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 --- !ResultsGS
 iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   3.7800000,   3.7800000, ]
 - [  3.7800000,   0.0000000,   3.7800000, ]
 - [  3.7800000,   3.7800000,   0.0000000, ]
 lattice_lengths: [   5.34573,    5.34573,    5.34573, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0802030E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.210E-07, diffor:  0.000E+00, }
 etotal    :  -2.09313441E+00
@@ -400,6 +420,8 @@ entropy   :   0.00000000E+00
 fermie    :   3.55003332E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -559,47 +581,47 @@ P           mkmem          64
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         15.8        0.26      0.004
-- Total wall clock time (s,m,h):         16.6        0.28      0.005
+- Total cpu        time (s,m,h):         16.4        0.27      0.005
+- Total wall clock time (s,m,h):         17.5        0.29      0.005
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =            3.6, wall_time =            4.2
+- cpu_time =            3.5, wall_time =            4.5
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   2.125  13.4      2.158  13.0          21278      -1.00        0.98       0.98
-- nonlop(apply)                  0.316   2.0      0.322   1.9          21278      -1.00        0.98       0.98
-- projbd                         0.202   1.3      0.205   1.2          30806      -1.00        0.99       0.99
-- vtorho(MPI)                    0.139   0.9      0.143   0.9              2      -1.00        0.98       0.98
-- getghc-other                   0.128   0.8      0.118   0.7             -1      -1.00        1.08       1.08
-- vtowfk(ssdiag)                 0.122   0.8      0.127   0.8             -1      -1.00        0.96       0.96
-- others (128)                   0.131   0.8      0.134   0.8             -1      -1.00        0.98       0.98
+- fourwf%(pot)                   1.999  12.2      2.016  11.5          21278      -1.00        0.99       0.99
+- nonlop(apply)                  0.301   1.8      0.307   1.8          21278      -1.00        0.98       0.98
+- vtorho(MPI)                    0.236   1.4      0.236   1.4              2      -1.00        1.00       1.00
+- projbd                         0.193   1.2      0.195   1.1          30806      -1.00        0.99       0.99
+- getghc-other                   0.119   0.7      0.110   0.6             -1      -1.00        1.08       1.08
+- vtowfk(ssdiag)                 0.111   0.7      0.116   0.7             -1      -1.00        0.96       0.96
+- others (128)                   0.119   0.7      0.125   0.7             -1      -1.00        0.96       0.96
 -<END_TIMER>
 -
-- subtotal                       3.163  20.0      3.205  19.3                                  0.99       0.99
+- subtotal                       3.079  18.8      3.105  17.8                                  0.99       0.99
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          15.8, wall_time =          16.6
+- cpu_time =          16.4, wall_time =          17.5
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   8.632  54.5      8.794  53.0          87909      -1.00        0.98       0.98
-- nonlop(apply)                  1.290   8.1      1.316   7.9          87909      -1.00        0.98       0.98
-- projbd                         0.829   5.2      0.845   5.1         126648      -1.00        0.98       0.98
-- getghc-other                   0.522   3.3      0.488   2.9             -4      -1.00        1.07       1.07
-- vtowfk(ssdiag)                 0.478   3.0      0.490   3.0             -4      -1.00        0.98       0.98
-- vtorho(MPI)                    0.324   2.0      0.328   2.0              8      -1.00        0.99       0.99
-- invars2                        0.245   1.5      0.253   1.5              8      -1.00        0.97       0.97
-- ewald                          0.118   0.7      0.119   0.7              8      -1.00        0.99       0.99
-- others (126)                   0.158   1.0      0.162   1.0             -1      -1.00        0.97       0.97
+- fourwf%(pot)                   8.278  50.5      8.352  47.8          87909      -1.00        0.99       0.99
+- nonlop(apply)                  1.265   7.7      1.286   7.4          87909      -1.00        0.98       0.98
+- projbd                         0.790   4.8      0.801   4.6         126648      -1.00        0.99       0.99
+- vtorho(MPI)                    0.541   3.3      0.542   3.1              8      -1.00        1.00       1.00
+- getghc-other                   0.499   3.0      0.463   2.6             -4      -1.00        1.08       1.08
+- vtowfk(ssdiag)                 0.448   2.7      0.454   2.6             -4      -1.00        0.99       0.99
+- invars2                        0.241   1.5      0.246   1.4              8      -1.00        0.98       0.98
+- ewald                          0.102   0.6      0.106   0.6              8      -1.00        0.96       0.96
+- others (126)                   0.128   0.8      0.131   0.7             -1      -1.00        0.98       0.98
 -<END_TIMER>
 
-- subtotal                      12.595  79.5     12.795  77.1                                  0.98       0.98
+- subtotal                      12.293  75.0     12.381  70.8                                  0.99       0.99
 
 ================================================================================
 
@@ -679,10 +701,10 @@ P           mkmem          64
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          3.6  wall=          4.2
+- Proc.   0 individual time (sec): cpu=          3.5  wall=          4.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.0  wall=         16.8
++Overall time at end (sec) : cpu=         16.9  wall=         18.0

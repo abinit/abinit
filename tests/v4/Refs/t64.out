@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h35 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h16 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v4_t64/t64.in
 - output file    -> t64.out
@@ -237,6 +237,15 @@ P          mk1mem2         16
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 1, nkpt: 2, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 77, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   4.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -283,6 +292,12 @@ P newkpt: treating      8 bands with npw=      74 for ikpt=   2 by node    0
 _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-18, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
 
@@ -423,23 +438,25 @@ _setup2: Arith. and geom. avg. npw (full set) are      76.250      76.239
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   3.8000000,   3.8000000, ]
 - [  3.8000000,   0.0000000,   3.8000000, ]
 - [  3.8000000,   3.8000000,   0.0000000, ]
 lattice_lengths: [   5.37401,    5.37401,    5.37401, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0974400E+02
 convergence: {deltae:  1.688E-14, res2:  1.441E-20, residm:  1.286E-11, diffor: null, }
 etotal    :  -2.12262444E+00
 entropy   :   0.00000000E+00
 fermie    :   3.41789823E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [ -3.37316230E-05,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,  -3.37316230E-05,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,  -3.37316230E-05, ]
 pressure_GPa:   9.9242E-01
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
@@ -534,6 +551,15 @@ band_energy         :  5.70320848798502E-01
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 1, nkpt: 16, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 77, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   4.00000000E-02, }
+meta: {optdriver: 1, rfstrs: 3, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  Exchange-correlation functional for the present dataset will be:
@@ -601,6 +627,12 @@ band_energy         :  5.70320848798502E-01
 P newkpt: treating      8 bands with npw=      77 for ikpt=   1 by node    0
 P newkpt: treating      8 bands with npw=      74 for ikpt=   2 by node    0
 P newkpt: treating      8 bands with npw=      77 for ikpt=   3 by node    0
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-12, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
@@ -680,6 +712,12 @@ P newkpt: treating      8 bands with npw=      74 for ikpt=   3 by node    0
 P newkpt: treating      8 bands with npw=      77 for ikpt=   4 by node    0
 P newkpt: treating      8 bands with npw=      74 for ikpt=   5 by node    0
 P newkpt: treating      8 bands with npw=      77 for ikpt=   6 by node    0
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-12, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
@@ -1334,10 +1372,10 @@ P          mk1mem2         16
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          0.6  wall=          1.0
+- Proc.   0 individual time (sec): cpu=          0.7  wall=          1.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.6  wall=          1.0
++Overall time at end (sec) : cpu=          0.7  wall=          1.1

@@ -329,7 +329,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      case(RUNL_RESPFN)
        call ydoc%add_ints("optdriver, rfddk, rfelfd, rfmagn, rfphon, rfstrs", &
          [dtset%optdriver, dtset%rfddk, dtset%rfelfd, dtset%rfmagn, dtset%rfphon, dtset%rfstrs], &
-         dict_key="meta")
+         ignore=0, dict_key="meta")
          ! dtset%rfdir ??
 
      case(RUNL_NONLINEAR)

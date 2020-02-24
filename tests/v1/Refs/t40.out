@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h32 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h14 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t40/t40.in
 - output file    -> t40.out
@@ -350,6 +350,15 @@ P           mkmem           1
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 63, nkpt: 1, mband: 130, nsppol: 1, nspinor: 1, nspden: 1, mpw: 3824, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   2.52000000E+02, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -388,6 +397,12 @@ P newkpt: treating    130 bands with npw=    3824 for ikpt=   1 by node    0
 _setup2: Arith. and geom. avg. npw (full set) are    3824.000    3824.000
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
 
@@ -448,23 +463,87 @@ _setup2: Arith. and geom. avg. npw (full set) are    3824.000    3824.000
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [ 13.6000000,   0.0000000,   0.0000000, ]
 - [  0.0000000,  13.6000000,   0.0000000, ]
 - [  0.0000000,   0.0000000,  13.6000000, ]
 lattice_lengths: [  13.60000,   13.60000,   13.60000, ]
-lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.5154560E+03
 convergence: {deltae: -3.310E+02, res2:  1.417E+03, residm:  6.524E-01, diffor: null, }
 etotal    :  -3.31012733E+02
 entropy   :   0.00000000E+00
 fermie    :   8.81992850E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [ -1.91722259E-03,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,  -2.00940022E-03,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,  -1.85200967E-03, ]
 pressure_GPa:   5.6671E+01
-cartesian_forces:
+xred      :
+- [  5.0000E-01,   0.0000E+00,   0.0000E+00,  C]
+- [  0.0000E+00,   5.0000E-01,   0.0000E+00,  C]
+- [  5.0000E-01,   5.0000E-01,   0.0000E+00,  C]
+- [  0.0000E+00,   0.0000E+00,   5.0000E-01,  C]
+- [  5.0000E-01,   0.0000E+00,   5.0000E-01,  C]
+- [  0.0000E+00,   5.0000E-01,   5.0000E-01,  C]
+- [  5.0000E-01,   5.0000E-01,   5.0000E-01,  C]
+- [  1.2500E-01,   1.2500E-01,   1.2500E-01,  C]
+- [  6.2500E-01,   1.2500E-01,   1.2500E-01,  C]
+- [  1.2500E-01,   6.2500E-01,   1.2500E-01,  C]
+- [  6.2500E-01,   6.2500E-01,   1.2500E-01,  C]
+- [  1.2500E-01,   1.2500E-01,   6.2500E-01,  C]
+- [  6.2500E-01,   1.2500E-01,   6.2500E-01,  C]
+- [  1.2500E-01,   6.2500E-01,   6.2500E-01,  C]
+- [  6.2500E-01,   6.2500E-01,   6.2500E-01,  C]
+- [  2.5000E-01,   2.5000E-01,   0.0000E+00,  C]
+- [  7.5000E-01,   2.5000E-01,   0.0000E+00,  C]
+- [  2.5000E-01,   7.5000E-01,   0.0000E+00,  C]
+- [  7.5000E-01,   7.5000E-01,   0.0000E+00,  C]
+- [  2.5000E-01,   2.5000E-01,   5.0000E-01,  C]
+- [  7.5000E-01,   2.5000E-01,   5.0000E-01,  C]
+- [  2.5000E-01,   7.5000E-01,   5.0000E-01,  C]
+- [  7.5000E-01,   7.5000E-01,   5.0000E-01,  C]
+- [  2.5000E-01,   0.0000E+00,   2.5000E-01,  C]
+- [  7.5000E-01,   0.0000E+00,   2.5000E-01,  C]
+- [  2.5000E-01,   5.0000E-01,   2.5000E-01,  C]
+- [  7.5000E-01,   5.0000E-01,   2.5000E-01,  C]
+- [  2.5000E-01,   0.0000E+00,   7.5000E-01,  C]
+- [  7.5000E-01,   0.0000E+00,   7.5000E-01,  C]
+- [  2.5000E-01,   5.0000E-01,   7.5000E-01,  C]
+- [  7.5000E-01,   5.0000E-01,   7.5000E-01,  C]
+- [  0.0000E+00,   2.5000E-01,   2.5000E-01,  C]
+- [  5.0000E-01,   2.5000E-01,   2.5000E-01,  C]
+- [  0.0000E+00,   7.5000E-01,   2.5000E-01,  C]
+- [  5.0000E-01,   7.5000E-01,   2.5000E-01,  C]
+- [  0.0000E+00,   2.5000E-01,   7.5000E-01,  C]
+- [  5.0000E-01,   2.5000E-01,   7.5000E-01,  C]
+- [  0.0000E+00,   7.5000E-01,   7.5000E-01,  C]
+- [  5.0000E-01,   7.5000E-01,   7.5000E-01,  C]
+- [  3.7500E-01,   3.7500E-01,   1.2500E-01,  C]
+- [  8.7500E-01,   3.7500E-01,   1.2500E-01,  C]
+- [  3.7500E-01,   8.7500E-01,   1.2500E-01,  C]
+- [  8.7500E-01,   8.7500E-01,   1.2500E-01,  C]
+- [  3.7500E-01,   3.7500E-01,   6.2500E-01,  C]
+- [  8.7500E-01,   3.7500E-01,   6.2500E-01,  C]
+- [  3.7500E-01,   8.7500E-01,   6.2500E-01,  C]
+- [  8.7500E-01,   8.7500E-01,   6.2500E-01,  C]
+- [  3.7500E-01,   1.2500E-01,   3.7500E-01,  C]
+- [  8.7500E-01,   1.2500E-01,   3.7500E-01,  C]
+- [  3.7500E-01,   6.2500E-01,   3.7500E-01,  C]
+- [  8.7500E-01,   6.2500E-01,   3.7500E-01,  C]
+- [  3.7500E-01,   1.2500E-01,   8.7500E-01,  C]
+- [  8.7500E-01,   1.2500E-01,   8.7500E-01,  C]
+- [  3.7500E-01,   6.2500E-01,   8.7500E-01,  C]
+- [  8.7500E-01,   6.2500E-01,   8.7500E-01,  C]
+- [  1.2500E-01,   3.7500E-01,   3.7500E-01,  C]
+- [  6.2500E-01,   3.7500E-01,   3.7500E-01,  C]
+- [  1.2500E-01,   8.7500E-01,   3.7500E-01,  C]
+- [  6.2500E-01,   8.7500E-01,   3.7500E-01,  C]
+- [  1.2500E-01,   3.7500E-01,   8.7500E-01,  C]
+- [  6.2500E-01,   3.7500E-01,   8.7500E-01,  C]
+- [  1.2500E-01,   8.7500E-01,   8.7500E-01,  C]
+- [  6.2500E-01,   8.7500E-01,   8.7500E-01,  C]
+cartesian_forces: # hartree/bohr
 - [ -4.40564692E-19,   4.68099986E-19,   5.50705865E-20, ]
 - [ -4.40564692E-19,   4.68099986E-19,   5.50705865E-20, ]
 - [ -4.40564692E-19,   4.68099986E-19,   5.50705865E-20, ]
@@ -1744,10 +1823,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         26.0  wall=         26.2
+- Proc.   0 individual time (sec): cpu=         26.1  wall=         27.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         26.0  wall=         26.2
++Overall time at end (sec) : cpu=         26.1  wall=         27.1
