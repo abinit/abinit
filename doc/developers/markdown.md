@@ -25,7 +25,7 @@ state:
 > For any markup that is not covered by Markdown’s syntax, you simply use HTML itself.
 
 Basic Markdown syntax already covers most of our needs and the *Abinit extensions* 
-([wiki links](#wiki-links) and [Abinit plugins](#abinit-extensions))
+([wikilinks](#wikilinks) and [Abinit plugins](#abinit-extensions))
 facilitate the integration between the documentation on the website and the new developments done in the gilab branch.
 This page, for example, is entirely written in Markdown with the exception of the last 
 two sections in which we discuss advanced features requiring some HTML code.
@@ -160,7 +160,7 @@ For figures with a caption use the [markdown-figures extension](https://github.c
 :   Convergenge of BSE optical spectrum wrt $\kk$-point sampling.
     See also [[ngkpt]] and [[shiftk]].
 
-The caption can contain Latex equations as well as [Abinit wiki links](#wiki-links).
+The caption can contain Latex equations as well as [Abinit wikilinks](#wikilinks).
 `#!html <img>` and `#!html <figure>` elements are automatically centered via CSS directives declared in `extra.css`.
 
 <!--
@@ -179,7 +179,7 @@ The caption can contain Latex equations as well as [Abinit wiki links](#wiki-lin
 ### Pdf Files
 
 Links to internal pdf files shipped with the Abinit documentation are inserted using the
-base name of the pdf file and the [wikilink syntax](#wiki-links):
+base name of the pdf file and the [wikilink syntax](#wikilinks):
 
 ```
     Please consult the [[pdf:howto_chebfi]] document.
@@ -239,7 +239,7 @@ The Markdown syntax for links is:
 | `<https://www.abinit.org>` | <https://www.abinit.org> | --
 
 This is the **recommended** approach to create links to external resources, or internal links to other pages 
-of the website, especially when there's no shortcut is made available by the [wikilink syntax](#wiki-links).
+of the website, especially when there's no shortcut is made available by the [wikilink syntax](#wikilinks).
 Links to external websites are signaled with the [fontawesome](http://fontawesome.io/) icon:
 <i class="fa fa-external-link" aria-hidden="true"></i> (see CSS rules in *extra.css*).
 
@@ -426,7 +426,7 @@ As for dokuwiki, some external links are also recognized. The following case are
 | `[[https://www.abinit.org]]` | [[https://www.abinit.org]]
 | `https://www.abinit.org` | https://www.abinit.org
 
-It's also possible to specify the name of the link with the `|` separator:
+It is also possible to specify the name of the link with the `|` separator:
 For example, `[[https://wiki.abinit.org|The ABINIT Wiki]]` produces [[https://wiki.abinit.org|The ABINIT Wiki]]
 
 The markdown parser supports aliases for commonly used links.
@@ -450,14 +450,14 @@ The extension inserts an anchor at the end of each headline, which makes it poss
 By default, all headers will automatically have unique id attributes generated based upon the text of the header.
 The name of the anchor is constructed from the header by converting the string to lower-case ASCII, 
 removing dots and other symbols such as `&` and replacing white spaces with a dash `-`.
-For instance, `#wiki-links` is the anchor associated to the "Wiki Links" section
+For instance, `#pdf-files` is the anchor associated to the "Pdf Files" section
 in this page and we can thus refer to it with the Markdown syntax:
 
 ```md
-As we have seen in the [previous section](#wiki-links)
+As we have seen in the [previous section](#pdf-files)
 ```
 
-that produces: As we have seen in the [previous section](#wiki-links)
+that produces: As we have seen in the [previous section](#pdf-files)
 
 !!! tip
     Hover with the mouse on the header in the HTML page to show the permalink in the browser.

@@ -8,9 +8,6 @@ October 2018 and March 2020. These release notes
 are relative to modifications/improvements of ABINIT v9.0 with respect to v8.10.
 <TBU>
 The merge request #408 is the first MR not reported in these release notes. Then, #410-411, #413-416 have also been included.
-
-
-MISSING 502-508, perhaps a bit more ...
 <ETBU>
 
 The list of contributors includes:
@@ -26,23 +23,22 @@ Xavier
 
 ### A. Important remarks and warnings.
 
-A.1 At the occasion of the switch from ABINITv8 to ABINITv9, many improvements of the formats and content of files
-    have been made, so the backward compatibility of ABINITv9 is often broken. 
+A.1 At the occasion of the switch from ABINITv8 to ABINITv9, many improvements of the formats and content of files written
+    by ABINIT have been made, so the backward compatibility of ABINITv9 is often broken. 
     The present ABINITv9.0 is NOT to be considered a production version. It is a beta release, allowing to get feedback
     from the users. Many features will work correctly, of course. Still, beginners are advised
     to stick to ABINITv8.10.3 except if ABINITv8.10.3 is not appropriate (or not working) for them.
     In particular, (1) the build system relies on new <hostname>.ac9 files (see XX), superceeding the v8 <hostname>.ac files.
-    (2) ABINITv9 does not build the dependencies (Linalg, NetCDF, LibXC, ...) anymore, as this was not sustainable (see XX).
-    (3) The output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information),
-    which means that some user-developed parsing tools might not work anymore, they have to be adapted to the new ABINITv9 output file. (see XX).
+    (2) the build system of ABINITv9 does not build the dependencies (Linalg, NetCDF, LibXC, ...) anymore, as this was not sustainable (see XX).
+    (3) The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
+    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file. (see XX).
     (4) Several default values have been changed, see A.2
 
 A.2 The default values of the following input variables have been changed:
     [[ixcrot]], [[chneut]], [[symsigma]], [[prtkden]]
 
-A.3 Change the initialization of WF when paral_kgb=1 and nspinor=2 (previous could prevent the code to converge)
-    MR 562
-    By M Torrent
+A.3 The initialization of WF when paral_kgb=1 and nspinor=2 has been changed, since the previous one could prevent the code to converge.
+    By M Torrent (MR 562)
 
 * * *
 
@@ -418,8 +414,12 @@ D.33
 Added a preview for the toptic_4.in files in the optic tutorial.
 !408 · opened 1 year ago by Felix Goudreault   develop
 
+D.34
+New para_gspw tutorial, new version of auto paral (with threads)
+MR 502
+By M. Torrent
 
-D.34 Miscellaneous additional bug fixes and improvements of documentation.
+D.35 Miscellaneous additional bug fixes and improvements of documentation.
 L. Baguet, JM Beuken, J. Bieder, F. Bruneval, T. Cavignac, M. Giantomassi,  X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, He Xu
 
 
