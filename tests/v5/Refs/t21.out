@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 24 Feb 2020.
-- ( at 16h19 )
+- ( at 21h15 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t21/t21.in
 - output file    -> t21.out
@@ -845,7 +845,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --- !BeginCycle
 iteration_state: {dtset: 3, }
 solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
-tolerances: {tolvrs: 1.00E-08, vdw_df_threshold: 6.93-310, }
+tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -1528,7 +1528,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --- !BeginCycle
 iteration_state: {dtset: 4, }
 solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
-tolerances: {tolvrs: 1.00E-08, vdw_df_threshold: 6.93-310, }
+tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -1880,7 +1880,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --- !BeginCycle
 iteration_state: {dtset: 13, }
 solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
-tolerances: {tolvrs: 1.00E-08, vdw_df_threshold: 6.93-310, }
+tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -2192,7 +2192,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --- !BeginCycle
 iteration_state: {dtset: 14, }
 solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
-tolerances: {tolvrs: 1.00E-08, vdw_df_threshold: 6.93-310, }
+tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -2757,10 +2757,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         23.6  wall=         25.6
+- Proc.   0 individual time (sec): cpu=         24.2  wall=         26.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered  19 WARNINGs and  38 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         23.6  wall=         25.6
++Overall time at end (sec) : cpu=         24.2  wall=         26.1

@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 24 Feb 2020.
-- ( at 16h33 )
+- ( at 21h29 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t83-t84/t83.in
 - output file    -> t83.out
@@ -2064,10 +2064,10 @@ P          mk1mem4         16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         15.3  wall=         16.2
+- Proc.   0 individual time (sec): cpu=         18.1  wall=         20.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.3  wall=         16.2
++Overall time at end (sec) : cpu=         18.1  wall=         20.8

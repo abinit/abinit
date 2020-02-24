@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 24 Feb 2020.
-- ( at 16h15 )
+- ( at 21h11 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v3_t06/t06.in
 - output file    -> t06.out
@@ -575,7 +575,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --- !BeginCycle
 iteration_state: {dtset: 3, }
 solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
-tolerances: {tolwfr: 1.00E-15, vdw_df_threshold: 6.94-310, }
+tolerances: {tolwfr: 1.00E-15, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2

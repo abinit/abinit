@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 24 Feb 2020.
-- ( at 16h15 )
+- ( at 20h55 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v2_t30-t31-t32/t30.in
 - output file    -> t30.out
@@ -4553,7 +4553,7 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 --- !BeginCycle
 iteration_state: {dtset: 10, }
 solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
-tolerances: {tolwfr: 1.00E-16, vdw_df_threshold: 6.94-310, }
+tolerances: {tolwfr: 1.00E-16, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -4608,7 +4608,7 @@ tolerances: {tolwfr: 1.00E-16, vdw_df_threshold: 6.94-310, }
 --- !BeginCycle
 iteration_state: {dtset: 10, }
 solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
-tolerances: {tolwfr: 1.00E-16, vdw_df_threshold: 6.94-310, }
+tolerances: {tolwfr: 1.00E-16, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -4663,7 +4663,7 @@ tolerances: {tolwfr: 1.00E-16, vdw_df_threshold: 6.94-310, }
 --- !BeginCycle
 iteration_state: {dtset: 10, }
 solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
-tolerances: {tolwfr: 1.00E-16, vdw_df_threshold: 6.94-310, }
+tolerances: {tolwfr: 1.00E-16, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -5684,10 +5684,10 @@ P          mk1mem10        32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          7.1  wall=          9.2
+- Proc.   0 individual time (sec): cpu=          7.7  wall=         13.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  22 WARNINGs and  98 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.1  wall=          9.2
++Overall time at end (sec) : cpu=          7.7  wall=         13.3

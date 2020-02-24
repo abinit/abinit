@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 24 Feb 2020.
-- ( at 16h33 )
+- ( at 21h29 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t83-t84/t84.in
 - output file    -> t84.out
@@ -599,7 +599,7 @@ meta: {optdriver: 1, }
 --- !BeginCycle
 iteration_state: {dtset: 6, }
 solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
-tolerances: {tolwfr: 1.00E-28, vdw_df_threshold: 6.01-154, }
+tolerances: {tolwfr: 1.00E-28, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -641,7 +641,7 @@ tolerances: {tolwfr: 1.00E-28, vdw_df_threshold: 6.01-154, }
 --- !BeginCycle
 iteration_state: {dtset: 6, }
 solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
-tolerances: {tolwfr: 1.00E-28, vdw_df_threshold: 6.01-154, }
+tolerances: {tolwfr: 1.00E-28, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -684,7 +684,7 @@ tolerances: {tolwfr: 1.00E-28, vdw_df_threshold: 6.01-154, }
 --- !BeginCycle
 iteration_state: {dtset: 6, }
 solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
-tolerances: {tolwfr: 1.00E-28, vdw_df_threshold: 6.01-154, }
+tolerances: {tolwfr: 1.00E-28, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -727,7 +727,7 @@ tolerances: {tolwfr: 1.00E-28, vdw_df_threshold: 6.01-154, }
 --- !BeginCycle
 iteration_state: {dtset: 6, }
 solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
-tolerances: {tolwfr: 1.00E-28, vdw_df_threshold: 6.01-154, }
+tolerances: {tolwfr: 1.00E-28, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -770,7 +770,7 @@ tolerances: {tolwfr: 1.00E-28, vdw_df_threshold: 6.01-154, }
 --- !BeginCycle
 iteration_state: {dtset: 6, }
 solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
-tolerances: {tolwfr: 1.00E-28, vdw_df_threshold: 6.01-154, }
+tolerances: {tolwfr: 1.00E-28, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -813,7 +813,7 @@ tolerances: {tolwfr: 1.00E-28, vdw_df_threshold: 6.01-154, }
 --- !BeginCycle
 iteration_state: {dtset: 6, }
 solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
-tolerances: {tolwfr: 1.00E-28, vdw_df_threshold: 6.01-154, }
+tolerances: {tolwfr: 1.00E-28, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -1535,10 +1535,10 @@ P          mk1mem          16
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          7.0  wall=          8.6
+- Proc.   0 individual time (sec): cpu=          7.3  wall=          8.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          7.0  wall=          8.6
++Overall time at end (sec) : cpu=          7.3  wall=          8.2

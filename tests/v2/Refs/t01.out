@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 24 Feb 2020.
-- ( at 16h15 )
+- ( at 20h55 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v2_t01/t01.in
 - output file    -> t01.out
@@ -575,7 +575,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --- !BeginCycle
 iteration_state: {dtset: 3, }
 solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
-tolerances: {tolwfr: 1.00E-15, vdw_df_threshold: 6.92-310, }
+tolerances: {tolwfr: 1.00E-15, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -829,10 +829,10 @@ P          mk1mem           4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.7  wall=          0.9
+- Proc.   0 individual time (sec): cpu=          0.8  wall=         10.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  57 WARNINGs and  32 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          0.7  wall=          0.9
++Overall time at end (sec) : cpu=          0.8  wall=         10.9

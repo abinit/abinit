@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Mon 24 Feb 2020.
-- ( at 16h21 )
+- ( at 21h19 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t62/t62.in
 - output file    -> t62.out
@@ -1516,7 +1516,7 @@ meta: {optdriver: 1, rfphon: 1, }
 --- !BeginCycle
 iteration_state: {dtset: 4, }
 solver: {iscf: 7, nstep: 25, nline: 4, wfoptalg: 10, }
-tolerances: {tolvrs: 1.00E-08, vdw_df_threshold: 4.45-323, }
+tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -1581,7 +1581,7 @@ tolerances: {tolvrs: 1.00E-08, vdw_df_threshold: 4.45-323, }
 --- !BeginCycle
 iteration_state: {dtset: 4, }
 solver: {iscf: 7, nstep: 25, nline: 4, wfoptalg: 10, }
-tolerances: {tolvrs: 1.00E-08, vdw_df_threshold: 4.45-323, }
+tolerances: {tolvrs: 1.00E-08, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
@@ -3289,10 +3289,10 @@ P          mk1mem6        256
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         87.3  wall=         89.1
+- Proc.   0 individual time (sec): cpu=         90.2  wall=        107.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and 120 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         87.3  wall=         89.1
++Overall time at end (sec) : cpu=         90.2  wall=        107.8
