@@ -724,6 +724,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  character(len=*),intent(in) :: path
 
 !Local variables-------------------------------
+ integer :: input_len
  character(len=strlen) :: my_string
 
 ! *********************************************************************
@@ -765,13 +766,15 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
      my_string = "jdtset " // itoa(DTSET_IDX) // ch10 // trim(INPUT_STRING)
    end if
 
-   NCF_CHECK(nctk_def_dims(ncid, nctkdim_t("input_len", len_trim(my_string))))
+   input_len = len_trim(my_string)
+   NCF_CHECK(nctk_def_dims(ncid, nctkdim_t("input_len", input_len)))
    NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("input_string", "c", "input_len")))
    !print *, trim(INPUT_STRING)
 
    if (xmpi_comm_rank(comm) == 0) then
      NCF_CHECK(nctk_set_datamode(ncid))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "input_string"), trim(my_string)))
+     ! Pass my_string(1:input_len)) instead from trim(string) to avoid SIGSEV on higgs_intel_19.0_serial
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "input_string"), my_string(1:input_len)))
      NCF_CHECK(nctk_set_defmode(ncid))
    end if
  end if
