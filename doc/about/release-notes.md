@@ -21,197 +21,230 @@ This might take some time ...
 
 Xavier
 
-### A. Important remarks and warnings.
+### **A** Important remarks and warnings.
 
-A.1 At the occasion of the switch from ABINITv8 to ABINITv9, many improvements of the formats and content of files written
+**A.1** At the occasion of the switch from ABINITv8 to ABINITv9, many improvements of the formats and content of files written
     by ABINIT have been made, so the backward compatibility of ABINITv9 is often broken. 
     The present ABINITv9.0 is NOT to be considered a production version. It is a beta release, allowing to get feedback
     from the users. Many features will work correctly, of course. Still, beginners are advised
     to stick to ABINITv8.10.3 except if ABINITv8.10.3 is not appropriate (or not working) for them.
-    In particular, (1) the build system relies on new <hostname>.ac9 files (see XX), superceeding the v8 <hostname>.ac files.
-    (2) the build system of ABINITv9 does not build the dependencies (Linalg, NetCDF, LibXC, ...) anymore, as this was not sustainable (see XX).
-    (3) The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
+
+In particular: 
+
+1. The build system relies on new <hostname>.ac9 files (see XX), superceeding the v8 <hostname>.ac files.
+2. The build system of ABINITv9 does not build the dependencies (Linalg, NetCDF, LibXC, ...), as this was not sustainable anymore (see XX), but nowadays most users install themselves prerequised libraries.
+3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
     This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file. (see XX).
-    (4) Several default values have been changed, see A.2
+4. Several default values have been changed, see A.2.
 
-A.2 The default values of the following input variables have been changed:
-    [[ixcrot]], [[chneut]], [[symsigma]], [[prtkden]]
+**A.2** The default values of the following input variables have been changed:
+    [[ixcrot]], [[chneut]], [[symsigma]], [[prtkden]].
 
-A.3 The initialization of WF when paral_kgb=1 and nspinor=2 has been changed, since the previous one could prevent the code to converge.
-    By M Torrent (MR 562)
+**A.3** The initialization of WF when paral_kgb=1 and nspinor=2 has been changed, since the previous one could prevent the code to converge.
+    By M Torrent (MR 562).
 
 * * *
 
-### B. Most noticeable achievements
+### **B.** Most noticeable achievements
 
-B.1 Electron-phonon self energy (for mobility, temperature-dependent electronic structure -incl. zero-point motion-, ...)
-Treatment of the long-range potential (Frohlich long-range)
-Double grid MR541
-Tetrahedron MR524
+**B.1** Electron-phonon interaction (for mobility, temperature-dependent electronic structure -incl. zero-point motion-, ...)
+
+The new capabilities of ABINITv9 related to electron-phonon calculations are described 
+fully in the Sec. 3.3.2 of [[cite:Gonze2020]], as follows.
+
+>In abinit v9, it is possible to compute the EPH selfenergy
+>in the Kohn–Sham representation using the EPH matrix
+>elements. The code employs optimized algorithms to compute
+>either the full self-energy (needed for QP corrections and spectral
+>functions) or just the imaginary part that is then used to evaluate
+>mobilities within the self-energy relaxation time approximation
+>(SERTA). The computation of the mobility is fully
+>integrated inside abinit, and is an automatic output of the
+>computation of the imaginary part of the self-energy, bypassing
+>the need to post-process results. When computing the full selfenergy,
+>it is possible to reduce the number of empty states
+>required for convergence by using the first-order wavefunctions
+>obtained by solving the relevant Sternheimer equation. In the
+>case of lifetime computations, the code takes advantage of the
+>tetrahedron method to filter contributing q-points, a double-grid
+>integration technique to accelerate the convergence at marginal
+>additional computational cost, and samples the relevant regions
+>in the Brillouin zone contributing to transport properties thus
+>leading to a significant reduction of the computational effort.
+>Crystalline symmetries are used throughout the code in order to
+>reduce the number of k- and q-points that must be explicitly
+>included in the integrals. To achieve good parallel efficiently, the
+>most CPU demanding parts are parallelized with MPI employing a
+>distribution schemes over q-points, perturbations and bands (the
+>band level is available only when computing the full self-energy).
+
+Moreover, the potential interpolation, described in Sec. 3.3.1 of [[cite:Gonze2020]] is fully operational,
+with many tests provided.
+
+List of tests: v9#50-61 and v8#44. New input variables: [[dvdb_qcache_mb]], 
+[[eph_phrange]], [[eph_tols_idelta]], [[eph_tols_idelta]], 
+eph_ecut_osc, [[eph_np_pqbks]], [[eph_restart]], 
+[[eph_stern]], eph_use_interp, [[frohl_params]], 
+[[getdvdb]], [[getdvdb_path]], [[getkerange_path]],
+[[irddvdb]], [[prteliash]], [[sigma_bsum_range]], [[sigma_erange]],
+[[sigma_ngkpt]], [[sigma_nshiftk]], [[sigma_shiftk]], [[symv1scf]].
+
+By G. Brunin, H. Miranda, M. Giantomassi, G.-M. Rignanese, G. Hautier.
+
+**B.2** DFT+DMFT
+
+The new capabilities of ABINITv9 related to DFT+DMFT calculations are described
+fully in the Sec. 3.7 of [[cite:Gonze2020]], as follows.
+
+>The DFT+DMFT parallelism was improved for large
+>systems. In particular, it is now possible to parallelize the calculation
+>on both k-points and bands/g-vectors by using the input
+>variable [[paral_kgb]] = 1 and related input variables.
+>
+>Two new approaches to CT-QMC have been added to
+>solve the AIM. In the first one, the density–density CT-QMC code
+>available in abinit [[cite:Gonze2016]], [[cite:Bieder2014]] was generalized in order to take into
+>account off-diagonal elements of the hybridization function. This
+>implementation is activated with the input variable [[dmft_solv]]
+>= 8. Spin–orbit coupling calculations are possible, but using a
+>real valued imaginary time hybridization function. This solver was
+>used in Refs. [[cite:Amadon2015]], [[cite:Amadon2016]].
+>
+>In the second approach, we use the Toolbox for Research
+>on Interacting Quantum System (TRIQS)library [[cite:Parcollet2015]], which is an
+>open-source project that provides a framework for many-body
+>quantum physics and more specifically for strongly-correlated
+>electronic systems. TRIQS provides an open source implementation
+>of the continuous-time hybridization expansion quantum
+>impurity solver (CT-HYB) [[cite:Seth2016]], considered a state-of-the art
+>solver for multi-orbital AIM. An interface between abinit and
+>the impurity solver TRIQS/CT-HYB is now available and will make
+>use of the independent progress made by the TRIQS library. <...>
+
+Also, the DMFT k-resolved spectral function is available (MR 529, 490).
+
+List of tests: paral#84,85,86,99, v8#01.
+New input variables : [[dmft_charge_prec]]. Also [[dmft_occnd_imag]], but only for keeping backward compatibility for tests.
+
+By T. Cavignac, B. Amadon and O. Gingras.
 
 
-v9#50-61  
-#50 Preparatory run for the calculation of the Fan-Migdal self-energy
-#%%   C in diamond structure. Very rough 2x2x2 q-point grid (3 qpoints); low ecut.
-#51   Merge the DDB files produced in t50.in
-#52 Merge the DFPT POT files produced in t50.in
-#53  Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
-#54 Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
-#%%   Use of the tetrahedron method for the electron linewidth
-#55  Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
-#%%   Use of the two-grids technique
-#56   Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
-#%%   Test of the calculation of the fermi level under different conditions
-#57   Calculation of the Fan-Migdal + Debye-Waller self-energy matrix elements.
-#58   Merge the DDB files produced in t57.in
-#59  Merge the DFPT POT files produced in t57.in
-#60  Calculation of the Fan-Migdal self-energy matrix elements in LiF.
-       Show the usage of dvdb_add_lr, eph_tols_idelta, eph_restart
-#61  Calculation of the imaginary part of the Fan-Migdal self-energy matrix elements.
+**B.3** Spin model within Multibinit 
 
-New input variables :
-- dvdb_qcache_mb , tested in v8#44
-- eph_phrange, NOT TESTED
-- eph_tols_idelta  v9#60
-- eph_ecut_osc NOT TESTED
-- eph_np_pqbks NOT TESTED
-- eph_restart  v9#60
-- eph_stern v8#44
-- eph_use_interp NOT TESTED
-- frohl_params IN DEVELOPMENT, NOT REALLY DOCUMENTED, NOT TESTED
-- getdvdb v7#88, v8#44, v9#54,60,61.
-- getdvdb_path v8#44, v9#60
-- getkerange_path v9#61
-- irddvdb NOT TESTED
-- prteliash v8#44, v9#60 and 61
-- sigma_bsum_range v9#60
-- sigma_erange v9#57, 60, 61
-- sigma_ngkpt v9#57, 60
-- sigma_nshiftk v9#57
-- sigma_shiftk v9#57
-- symv1scf v9#60
-By G. Brunin, H. Miranda, M. Giantomassi, GM Rignanese, G Hautier
+The new capabilities of Multibinit within ABINITv9 are described
+fully in the Sec. 4.1 of [[cite:Gonze2020]]. See also items XX and YY.
+In particular, a spin model, described specifically in Sec. 4.1.2 of [[cite:Gonze2020]], is available, as follows.
 
-B.2 DFT+DMFT
+>Multibinit implements the most commonly used model for spin systems, 
+>via the Heisenberg Hamiltonian including magnetic exchange and Dzyaloshinskii Moriya interactions. 
+>Single ion anisotropy and dipole–dipole interactions are also included, 
+>and all terms bear a very strong similarity to the quadratic part of the lattice model Hamiltonian.
+>A number of open source spin dynamics codes already exist, such as UPPASD, VAMPIR, OOMF; 
+>the distinguishing features of multibinit are the integration with abinit,
+>to fit parameters, and the simultaneous dynamics with other
+>degrees of freedom (in particular using the inter-atomic force constants). 
+>The spin features of multibinit are functional in the
+>forthcoming version of abinit, and continue to be developed.
 
-NOTE : MR 612 (NOT YET MERGED) DMFT Tutorial
-
-paral#84   DFT+DMFT for Vanadium using off diag CTQMC code with KGB parallelism
-#85    DFT+DMFT for Gadolinium using Hubbard 1 code with KGB parallelism  with Self-consistency over Green function and density
-# and Spin Orbit Coupling.
-#86    DFT+DMFT for SrVO3 using Hubard I code with KGB parallelism
-New input variables : dmft_charge_prec, tested in paral#84 and 86.
-dmft_occnd_imag, tested in mpiio#99, paral#91,92,99, v6#07, 45, 46, 47, v7#27-30, v8#01. Only for keeping backward compatilibity for tests.
-
-Continued development of TRIQS (Python).
-
-DMFT k-resolved spectral function   MR 529, 490
-
-KGB+DMFT Use MPI asynchronous transfer and remove unnecessary communications MR 438
-
-By T. Cavignac and B. Amadon
-By O. Gingras ? See MR 568, 569, 561, 549
-
-
-B.3 Multibinit for spin
-
-Production version of Multibinit ? MR496
-
-MR 432
-tutomultibinit tmulti5
-#1  multibinit, just read xml and run spin dynamics
-#2  LaFeO3 Pnma with U(Fe)=4 eV; PBEsol; exchange parameter generated with TB2J.
-#%%   Parameters in this file does not give reasonable results and should be
-#%%   tuned, which is designed for the tutorial. It also serve the purpose  of
-#%%   limiting the test run to a short enough time.
-#3 1-D spin chain, with 1st nearest neighbor AFM exchange and DMI.
-#%%   1NN J=5 meV, 1NN D=(0, 0, 2) meV with two neighboring D opposite.
-#%%   This is to show how to see the spin canting.
-
-v8#23
-#23 This is to test spin_dynamics=2 (Depondt-Mertens method of spin rotation.)
-#%%   The ncell, spin_ntime_pre, spin_ntime parameters are small.
-wannier90#04 Wannier function for bcc Fe.
-#%%   To check whether wannier90 interface works properly with nsppol=2 and nspden=2.
-
-New input variables :
-- slc_coupling : NOT TESTED, NOT DOCUMENTED
-spin_calc_correlation_obs NOT TESTED
-spin_calc_thermo_obs  tmulti5_2
-spin_calc_traj_obs NOT TESTED
-spin_damping NOT TESTED
-spin_init_orientation  NOT TESTED
-spin_init_qpoint NOT TESTED
-spin_init_rotate_axis  NOT TESTED
-spin_init_state tmulti5_1, tmulti5_2, tmulti5_3, v8#16, v8#23
-spin_ntime_pre tmulti5_1, tmulti5_2, tmulti5_3, v8#23
-spin_sia_add spin_sia_k1amp spin_sia_k1dir   tmulti5_2, tmulti5_3
-spin_temperature_start spin_temperature_end spin_temperature_nstep spin_var_temperature   tmulti5_2
-spin_write_traj tmulti5_1, v8#23
+A tutorial for the multibinit spin model has been written, [[tutorial:spin_model]].
+List of tests in addition to those of the tutorial: v8#16, v8#23, wannier90#04. 
+New input variables: slc_coupling,
+[[spin_calc_correlation_obs@multibinit|spin_calc_correlation_obs]], 
+[[spin_calc_thermo_obs@multibinit|spin_calc_thermo_obs]], 
+[[spin_calc_traj_obs@multibinit|spin_calc_traj_obs]], 
+[[spin_damping@multibinit|spin_damping]], 
+[[spin_init_orientation@multibinit|spin_init_orientation]], 
+[[spin_init_qpoint@multibinit|spin_init_qpoint]],
+[[spin_init_rotate_axis@multibinit|spin_init_rotate_axis]], 
+[[spin_init_state@multibinit|spin_init_state]], 
+[[spin_ntime_pre@multibinit|spin_ntime_pre]], 
+[[spin_sia_add@multibinit|spin_sia_add]], 
+[[spin_sia_k1amp@multibinit|spin_sia_k1amp]], 
+[[spin_sia_k1dir@multibinit|spin_sia_k1dir]], 
+[[spin_temperature_start@multibinit|spin_temperature_start]], 
+[[spin_temperature_end@multibinit|spin_temperature_end]],
+[[spin_temperature_nstep@multibinit|spin_temperature_nstep]], 
+[[spin_var_temperature@multibinit|spin_var_temperature]], 
+[[spin_write_traj@multibinit|spin_write_traj]].
 
 By He Xu, Ph. Ghosez, M. Verstraete + ... ?
 
 
-B.4 Constrained DFT
+**B.4** Constrained DFT
 
-X.Gonze
-v8#24-29  Constrained DFT
-v8#95-97  CDFT + test recognition of symmetry in the non-collinear case
-v9#1-3  CDFT PAW
-New input variables : chrgat, constrained_kind, ratsm
+Constrained Density-Functional Theory (see [[topic:ConstrainedDFT]]) is available,
+with a new algorithm allowing to impose the constraints to arbitrary precision,
+whether it relates to the charge, magnetization, magnetization direction, or magnetisation size,
+or a combination thereof for different atoms. The constraints are smeared spherical integrals
+with ajustable sphere radius, centered on atoms. The algorithms has been demonstrated for norm-conserving pseudopotentials
+as well as PAW.
 
-B.5 Large modifications of the build system + split of the source tree.
+New tests : v8#24-29, v8#95-97 and v9#1-3.
+New input variables : [[chrgat]], [[constraint_kind]], [[ratsm]].
+
+By X. Gonze.
+
+**B.5** Large modifications of the build system + split of the source tree.
 MR 598, 517, 514, 477, 476
 By Y. Pouillon and JM Beuken
 
-B.6 There is a new command line interface to run ABINIT, without the "files" file :
-abinit run.abi
+**B.6** New command line interface
+
+There is a new command line interface to run ABINIT, without the "files" file :
+
+    abinit run.abi
+
 or
-abinit run.abi > run.log 2> run.err &
+
+    abinit run.abi > run.log 2> run.err &
+
 The user can specify the output file thanks to the [[output_file]] input variable,
 the list of pseudopotentials thanks to the [[pseudos]] input variable.
 The prefix for other input, output or temporary files are constructed from [[indata_prefix]], [[outdata_prefix]] and [[tmpdata_files]].
 The old interface is still operational.
-MR 586
 See [[topic:Control]].
 
-By Matteo
+By M. Giantomassi (MR 586).
 
 
-B.7 Strings in the input file
-A handful of new input keywords are readig strings as data, and, often, can be used alternatively to similar input keywords
+**B.7** Reading strings in the input file
+
+A handful of new input keywords are reading strings as data, and, often, can be used alternatively to similar input keywords
 that were expecting numerical values.
-List of new input variables
-- getddb_path, an alternative to getddb or irdddb, see test v9#60
-- getden_path, an alternative to getden or irdden, see test v8#36, 41
-- getscr_path, an alternative to getscr or irdscr, see test v67mbpt#51
-- getwfkfine_path, an alternative to getwfkfine or irdwfkfine, see test v9#55,56
-- getwfk_path, an alternative to getwfk or irdwfk, see test v9#60
-- getwfq_path, an alternative to getwfq or irdwfq, NOT TESTED
-- getkerange_path, see test v9#60
-- getpot_path, see test v8#44
-- pseudos, see tests mpiio#27,51, tutoplugs#tw90_1,tw90_4, v4#20, v5#54, v67mbpt#40, v7#45, v8#90.
-- output_file NOT TESTED
-- outdata_prefix NOT TESTED NOT DOCUMENTED
-- indata_prefix NOT TESTED 
-- tmpata_prefix NOT TESTED 
+List of new input variables :
+- [[getddb_path]], an alternative to [[getddb]] or [[irdddb]], see test v9#60
+- [[getden_path]], an alternative to [[getden]] or [[irdden]], see test v8#36, 41
+- [[getscr_path]], an alternative to [[getscr]] or [[irdscr]], see test v67mbpt#51
+- [[getwfkfine_path]], an alternative to [[getwfkfine]] or [[irdwfkfine]], see test v9#55,56
+- [[getwfk_path]], an alternative to [[getwfk]] or [[irdwfk]], see test v9#60
+- [[getwfq_path]], an alternative to [[getwfq]] or [[irdwfq]], NOT TESTED
+- [[getkerange_path]], see test v9#60
+- [[getpot_path]], see test v8#44
+- [[pseudos]], see tests mpiio#27,51, tutoplugs#tw90_1,tw90_4, v4#20, v5#54, v67mbpt#40, v7#45, v8#90.
+- [[output_file]] NOT TESTED
+- [[outdata_prefix]] NOT TESTED NOT DOCUMENTED
+- [[indata_prefix]] NOT TESTED 
+- [[tmpata_prefix]] NOT TESTED 
 
-By Matteo G.
+By M. Giantomassi
 
 
-B.8 YAML sections are now generated in the output file, sometimes replacing text sections, sometime providing new information.
+**B.8** YAML sections in the output file 
+
+YAML sections are now generated in the output file, sometimes replacing text sections, sometime providing new information.
 Merge request 611, 559, 538, 535, 534, 530, 525, 504
 Input variable use_yaml paral#86, v67mbpt#2
 fldiff.py replacing PERL fldiff 
 By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze
 
-B.9 New capabilities of abipy and abiflows ?
 
-B.10 New capabilities of abisrc ?
+**B.9** New capabilities of abipy and abiflows ?
+
+**B.10** New capabilities of abisrc ?
 MR 572
 MR 495 Activate automatic generation of binaries.conf by abisrc.py
 
-B.11 Computation of Gruneisen parameters
+**B.11** Computation of Gruneisen parameters
 MR 478
 By M. Giantomassi
 

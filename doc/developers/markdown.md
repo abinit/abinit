@@ -67,19 +67,19 @@ For example, after a blank line, the following Markdown text:
 * List item B
 ```
 
-produces
+This produces
 
 * List item A
 * List item B
 
-For numbered list, start with the numbers ...
+For numbered list, start with the numbers instead of stars:
 
 ```md
 1. List item 1
 2. List item 2
 ```
 
-produces
+This produces
 
 1. List item 1
 2. List item 2
