@@ -1291,8 +1291,14 @@ print *, ' ik_ibz,spin ', ik_ibz,spin
 
        read(Wfk%fh, err=10, iomsg=errmsg) tmp_eigk, tmp_occk
 
-       if (present(eig_k)) eig_k = tmp_eigk(1:Wfk%mband)
-       if (present(occ_k)) occ_k = tmp_occk(1:Wfk%mband)
+       if (present(eig_k)) then
+         eig_k = zero
+         eig_k(1:nband_disk) = tmp_eigk(1:nband_disk)
+       end if
+       if (present(occ_k)) then
+         occ_k = zero
+         occ_k(1:nband_disk) = tmp_occk(1:nband_disk)
+       end if
 
        ABI_FREE(tmp_eigk)
        ABI_FREE(tmp_occk)
@@ -1329,7 +1335,7 @@ print *, ' ik_ibz,spin ', ik_ibz,spin
        if (present(eig_k)) then
          ! Read column matrix of size (2*nband_k)
          base = 2*(band-1)*nband_disk
-         read(Wfk%fh, err=10, iomsg=errmsg) eig_k(base+1:base+2*Wfk%mband)
+         read(Wfk%fh, err=10, iomsg=errmsg) eig_k(base+1:base+2*nband_disk)
        else
          read(Wfk%fh, err=10, iomsg=errmsg ) ! eig_k(2*nband_disk)
        end if
