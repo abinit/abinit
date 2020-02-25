@@ -1,6 +1,6 @@
 
-.Version 8.11.14 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.0.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Jan 2020.
-- ( at 23h44 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h47 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mverstra_develop/tests/Test_suite/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_3.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tgw2_1-tgw2_2-tgw2_3-tgw2_4/tgw2_3.in
 - output file    -> tgw2_3.out
 - root for input  files -> tgw2_3i
 - root for output files -> tgw2_3o
@@ -176,7 +176,7 @@ P           mkmem           8
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -197,8 +197,8 @@ P           mkmem           8
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -310,6 +310,7 @@ P           mkmem           8
  Self-Consistent on Energies only
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    0.000
@@ -320,7 +321,9 @@ data: !SigmaeeData |
         1    -3.762    -9.451    -3.762     5.689   -15.617     5.940     0.761    -0.313    -9.623    -0.173    -3.934    -3.988
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
 kpoint     : [   0.250,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    0.000
@@ -331,7 +334,9 @@ data: !SigmaeeData |
         2    10.716    -9.474    10.716    20.190    -5.126    -4.535     0.689    -0.452    -9.603    -0.128    10.587    10.529
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    0.000
@@ -343,7 +348,9 @@ data: !SigmaeeData |
         2     2.924    -9.503     2.924    12.427   -11.766     2.109     0.689    -0.451    -9.608    -0.106     2.818     2.771
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
 kpoint     : [   0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :    0.000
@@ -354,7 +361,9 @@ data: !SigmaeeData |
         1    -1.525    -9.451    -1.525     7.926   -14.491     4.774     0.685    -0.459    -9.633    -0.182    -1.707    -1.790
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
 kpoint     : [   0.500,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :    4.360
@@ -367,7 +376,9 @@ data: !SigmaeeData |
         3    10.919    -9.434    10.919    20.353    -4.981    -4.608     0.700    -0.429    -9.543    -0.109    10.810    10.763
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :    7.879
@@ -380,7 +391,9 @@ data: !SigmaeeData |
         3     9.995    -9.387     9.995    19.382    -5.372    -4.179     0.699    -0.430    -9.501    -0.115     9.881     9.831
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :    6.920
@@ -395,7 +408,9 @@ data: !SigmaeeData |
         5    12.803    -9.478    12.803    22.281    -4.316    -5.437     0.678    -0.474    -9.664    -0.187    12.617    12.531
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :    1.050
@@ -408,6 +423,7 @@ data: !SigmaeeData |
         3     7.537    -9.292     7.537    16.829    -7.339    -2.085     0.694    -0.441    -9.384    -0.092     7.445     7.405
         4     8.261    -9.468     8.261    17.728    -6.722    -2.926     0.690    -0.449    -9.592    -0.124     8.136     8.080
 ...
+
 
  New Fermi energy :        2.558310E-01 Ha ,    6.961515E+00 eV
 
@@ -633,10 +649,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          2.9  wall=          2.9
+- Proc.   0 individual time (sec): cpu=          7.8  wall=          9.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.6  wall=          6.7
++Overall time at end (sec) : cpu=          7.8  wall=          9.3

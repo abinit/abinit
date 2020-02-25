@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h21 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h47 )
   
-- input  file    -> tbase2_5.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tbase2_5/tbase2_5.in
 - output file    -> tbase2_5.out
 - root for input  files -> tbase2_5i
 - root for output files -> tbase2_5o
@@ -206,7 +206,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET 11 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -224,8 +224,8 @@ P           mkmem           1
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.02789
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.pspgth
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.pspgth
 - Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -275,6 +275,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   13517.000   13517.000
   sigma(2 2)=  5.01292984E-06  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.01292984E-06  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 11, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  12.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  12.0000000, ]
+lattice_lengths: [  12.00000,   12.00000,   12.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   1.7280000E+03
+convergence: {deltae: -1.881E-09, res2:  2.313E-04, residm:  2.161E-12, diffor:  1.541E-05, }
+etotal    :  -1.16203734E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.76168397E-01
+cartesian_stress_tensor:
+- [ -3.33733643E-06,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   5.01292984E-06,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   5.01292984E-06, ]
+pressure_GPa:  -6.5594E-02
+cartesian_forces:
+- [ -8.89298017E-03,  -0.00000000E+00,  -0.00000000E+00, ]
+- [  8.89298017E-03,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   8.89298017E-03, max:   8.89298017E-03, mean:   8.89298017E-03, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -316,6 +342,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   13517.000   13517.000
   sigma(1 1)=  2.00020333E-06  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  4.95344908E-06  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.95344908E-06  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 11, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  12.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  12.0000000, ]
+lattice_lengths: [  12.00000,   12.00000,   12.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   1.7280000E+03
+convergence: {deltae: -2.546E-11, res2:  4.480E-06, residm:  1.510E-14, diffor:  8.315E-07, }
+etotal    :  -1.16213580E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.74532531E-01
+cartesian_stress_tensor:
+- [  2.00020333E-06,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.95344908E-06,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.95344908E-06, ]
+pressure_GPa:  -1.1677E-01
+cartesian_forces:
+- [ -2.25058875E-03,  -0.00000000E+00,  -0.00000000E+00, ]
+- [  2.25058875E-03,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   2.25058875E-03, max:   2.25058875E-03, mean:   2.25058875E-03, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -361,6 +413,32 @@ _setup2: Arith. and geom. avg. npw (full set) are   13517.000   13517.000
   sigma(1 1)=  3.76788601E-06  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  4.93351781E-06  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.93351781E-06  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 11, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  12.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  12.0000000, ]
+lattice_lengths: [  12.00000,   12.00000,   12.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   1.7280000E+03
+convergence: {deltae: -9.552E-11, res2:  7.489E-06, residm:  1.083E-13, diffor:  1.600E-06, }
+etotal    :  -1.16214284E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.73973862E-01
+cartesian_stress_tensor:
+- [  3.76788601E-06,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.93351781E-06,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.93351781E-06, ]
+pressure_GPa:  -1.3372E-01
+cartesian_forces:
+- [ -9.42083846E-05,  -0.00000000E+00,  -0.00000000E+00, ]
+- [  9.42083846E-05,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   9.42083846E-05, max:   9.42083846E-05, mean:   9.42083846E-05, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -424,22 +502,20 @@ _setup2: Arith. and geom. avg. npw (full set) are   13517.000   13517.000
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.37397
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  1.10725954861019E+00
-    Hartree energy  =  8.40322665264571E-01
-    XC energy       = -6.83956460165059E-01
-    Ewald energy    =  2.31965451201194E-01
-    PspCore energy  = -1.11193990319380E-05
-    Loc. psp. energy= -2.65772292307347E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.16214283756161E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.16235148530385E+01 ; Band energy (Ha)=  -7.4794772398E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 11, itime: 3, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  1.10725954861019E+00
+hartree             :  8.40322665264571E-01
+xc                  : -6.83956460165059E-01
+Ewald energy        :  2.31965451201194E-01
+psp_core            : -1.11193990319380E-05
+local_psp           : -2.65772292307347E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.16214283756161E+00
+total_energy_eV     : -3.16235148530385E+01
+band_energy         : -7.47947723983285E-01
+...
 
  rms coord change=  5.7283E-04   atom, delta coord (reduced):
      1       -0.000992176504      0.000000000000      0.000000000000
@@ -457,7 +533,7 @@ _setup2: Arith. and geom. avg. npw (full set) are   13517.000   13517.000
 
 ================================================================================
 == DATASET 12 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -494,6 +570,31 @@ _setup2: Arith. and geom. avg. npw (full set) are   13517.000   13517.000
   sigma(1 1)=  2.45162781E-06  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.45162781E-06  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.45162781E-06  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 12, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  12.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,  12.0000000, ]
+lattice_lengths: [  12.00000,   12.00000,   12.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   1.7280000E+03
+convergence: {deltae: -5.735E-08, res2:  1.023E-01, residm:  6.347E-09, diffor: null, }
+etotal    :  -4.98696319E-01
+entropy   :   0.00000000E+00
+fermie    :  -2.75999599E-01
+cartesian_stress_tensor:
+- [  2.45162781E-06,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.45162781E-06,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.45162781E-06, ]
+pressure_GPa:  -7.2129E-02
+cartesian_forces:
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -535,22 +636,20 @@ _setup2: Arith. and geom. avg. npw (full set) are   13517.000   13517.000
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
    0.01529
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.81837198173599E-01
-    Hartree energy  =  1.89463848048470E-01
-    XC energy       = -3.04462819442412E-01
-    Ewald energy    = -1.18220728311694E-01
-    PspCore energy  = -2.77984975798451E-06
-    Loc. psp. energy= -7.47311037784817E-01
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -4.98696319166612E-01
-
- Other information on the energy :
-    Total energy(eV)= -1.35702169704118E+01 ; Band energy (Ha)=  -2.7599959895E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 12, }
+comment             : Components of total free energy in Hartree
+kinetic             :  4.81837198173599E-01
+hartree             :  1.89463848048470E-01
+xc                  : -3.04462819442412E-01
+Ewald energy        : -1.18220728311694E-01
+psp_core            : -2.77984975798451E-06
+local_psp           : -7.47311037784817E-01
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -4.98696319166612E-01
+total_energy_eV     : -1.35702169704118E+01
+band_energy         : -2.75999598948566E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -729,7 +828,24 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -743,11 +859,11 @@ P           mkmem           1
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT: First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -756,11 +872,13 @@ P           mkmem           1
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -768,24 +886,15 @@ P           mkmem           1
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [4] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=          5.8  wall=          6.0
+- Proc.   0 individual time (sec): cpu=          5.8  wall=          5.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   8 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.8  wall=          6.0
++Overall time at end (sec) : cpu=          5.8  wall=          5.9

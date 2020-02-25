@@ -8604,6 +8604,8 @@ k-point lattice, as well as its shift with respect to the origin: [[ngkpt]] or
 
 A global additional shift can be provided by [[qptn]]
 
+The use of symmetries (spatial and/or time-reversal) is crucial to determine the action of [[kptopt]].
+
   * 0 --> read directly [[nkpt]], [[kpt]], [[kptnrm]] and [[wtk]].
   * 1 --> rely on [[ngkpt]] or [[kptrlatt]], as well as on [[nshiftk]] and [[shiftk]] to set up the k points.
     Take fully into account the symmetry to generate the k points in the Irreducible Brillouin Zone only,
@@ -8612,11 +8614,11 @@ A global additional shift can be provided by [[qptn]]
   * 2 --> rely on [[ngkpt]] or [[kptrlatt]], as well as on [[nshiftk]] and [[shiftk]] to set up the k points.
     Take into account only the time-reversal symmetry: k points will be generated in half the Brillouin zone,
     with the appropriate weights.
-    (This is to be used when preparing or executing a RF calculation at q=(0 0 0))
+    (This is the usual mode when preparing or executing a RF calculation at q=(0 0 0) without non-collinear magnetism)
 
   * 3 --> rely on [[ngkpt]] or [[kptrlatt]], as well as on [[nshiftk]] and [[shiftk]] to set up the k points.
     Do not take into account any symmetry: k points will be generated in the full Brillouin zone, with the appropriate weights.
-    (This is to be used when preparing or executing a RF calculation at non-zero q)
+    (This is the usual mode when preparing or executing a RF calculation at non-zero q, or with non-collinear magnetism)
 
   * 4 --> rely on [[ngkpt]] or [[kptrlatt]], as well as on [[nshiftk]] and [[shiftk]] to set up the k points.
    Take into account all the symmetries EXCEPT the time-reversal symmetry to generate the k points
@@ -11250,11 +11252,20 @@ Variable(
     vartype="integer",
     topics=['MolecularDynamics_basic', 'GeoOpt_basic'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval="0 if ionmvov == 0, set to 1000 if ionvmov != 0 and imgmov != 0 and the variable is not specified.",
     mnemonics="Number of TIME steps",
     text=r"""
-Gives the number of molecular dynamics time steps or Broyden structural
+Gives the maximum number of molecular dynamics time steps or structural
 optimization steps to be done if [[ionmov]] is non-zero.
+Starting with Abinit9, ntime is automatically set to 1000 if [[ionmov]] is non-zero,
+[[ntimimage]] is zero and [[ntime]] is not specified in the input file.
+Users are encouraged to pass a **timelimit** to Abinit using the command line and the syntax:
+
+        abinit --timelimit hours:minutes:seconds
+
+so that the code will try to stop smoothly before the timelimit and produce the DEN and the WFK files
+that may be used to restart the calculation.
+
 Note that at the present the option [[ionmov]] = 1 is initialized with four
 Runge-Kutta steps which costs some overhead in the startup. By contrast, the
 initialisation of other [[ionmov]] values is only one SCF call.
@@ -17737,18 +17748,6 @@ Variable(
     text=r"""
 If set to 1, enable the use of ScaLapack within LOBPCG.
 """,
-),
-
-Variable(
-    abivarname="use_yaml",
-    varset="dev",
-    vartype="integer",
-    topics=[],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="USE YAML",
-    characteristics=['[[DEVELOP]]'],
-    text="If set to 1, enable the printing of YAML document in ouput.",
 ),
 
 Variable(
