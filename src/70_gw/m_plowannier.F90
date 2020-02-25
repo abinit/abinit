@@ -1472,29 +1472,28 @@ endif
    write(message,'(4a)') ch10,&
 &   '  == Write hamiltonian in real space Wannier function to file ',trim(owrfile),' =='
    call wrtout(std_out,message,'COLL')
-
-   if (open_file(owrfile, message, newunit=owrunt, form="unformatted", status="unknown", action="write") /= 0) then
-     MSG_ERROR(message)
-   end if
-
-   rewind(owrunt)
-   do isppol = 1,wan%nsppol
-     do iatom1 = 1,wan%natom_wan
-       do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
-         do il1 = 1,wan%nbl_atom_wan(iatom1)
-           do iatom2 = 1,wan%natom_wan
-             do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
-               do il2 = 1,wan%nbl_atom_wan(iatom2)
-                 write(owrunt) operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(:,:,isppol,1,1)
+   if (me.eq.0) then
+     if (open_file(owrfile, message, newunit=owrunt, form="unformatted", status="unknown", action="write") /= 0) then
+       MSG_ERROR(message)
+     end if
+     rewind(owrunt)
+     do isppol = 1,wan%nsppol
+       do iatom1 = 1,wan%natom_wan
+         do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+           do il1 = 1,wan%nbl_atom_wan(iatom1)
+             do iatom2 = 1,wan%natom_wan
+               do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+                 do il2 = 1,wan%nbl_atom_wan(iatom2)
+                   write(owrunt) operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(:,:,isppol,1,1)
+                 end do
                end do
              end do
            end do
          end do
        end do
      end do
-   end do
-   close(owrunt)
-
+     close(owrunt)
+   end if
  end if ! plotwan_realspace>0 and kptopt>0
 
  !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1602,7 +1601,6 @@ endif
    if (open_file(owrfile, message, newunit=owrunt, form="unformatted", status="old", action="read") /= 0) then
      MSG_ERROR(message)
    end if
-
    rewind(owrunt)
    do isppol = 1,wan%nsppol
      do iatom1 = 1,wan%natom_wan
@@ -1843,7 +1841,7 @@ endif
    do iatom1 = 1,wan%natom_wan
      i2s = '(I0)'               ! trick to add the atom number
      write(x1,i2s) iatom1       ! at the end of the filename
-     if (wan%nsppol .eq. 1) then
+     if (wan%nsppol .eq. 1 .and. me.eq.0 ) then
        if (open_file(trim(dtfil%filnam_ds(4))//"_BANDSTRUCT"//trim(x1),message,newunit=unt) /= 0) then
          MSG_ERROR(message)
        end if
@@ -1918,7 +1916,7 @@ endif
 
  !!Here we only study the first atom
 
- if (plowan_computegreen .eq. 1) then
+ if (plowan_computegreen .eq. 1 .and. me.eq.0 ) then
    if (dos .ge. 1) then ! compute partial DOS for l=dos
      if (open_file(trim(dtfil%filnam_ds(4))//"_dosfromgreen",message,newunit=dos_unt) /= 0) then
        MSG_ERROR(message)
@@ -2111,7 +2109,7 @@ endif
 
 
 
- if (plowan_computegreen .eq. 2) then !! Not working ! not tested, not up to date with the code
+ if (plowan_computegreen .eq. 2 .and. me.eq.0 ) then !! Not working ! not tested, not up to date with the code
    !Method 1
    ABI_ALLOCATE(energies,(7,wan%nsppol))
    ABI_ALLOCATE(Ffftable,(7,wan%nsppol))
