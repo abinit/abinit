@@ -264,7 +264,7 @@ The Markdown syntax for links is:
 | `<https://www.abinit.org>` | <https://www.abinit.org> | --
 
 This is the **recommended** approach to create links to external resources, or internal links to other pages 
-of the website, especially when there's no shortcut is made available by the [wikilink syntax](#wikilinks).
+of the website, especially when there is no shortcut available based on the [wikilink syntax](#wikilinks).
 Links to external websites are signaled with the [fontawesome](http://fontawesome.io/) &nbsp; icon:
 <i class="fa fa-external-link" aria-hidden="true"></i> (see CSS rules in *extra.css*).
 

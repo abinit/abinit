@@ -5,10 +5,8 @@ List of changes with respect to version 8.10.
 
 Many thanks to the contributors to the ABINIT project between
 October 2018 and March 2020. These release notes
-are relative to modifications/improvements of ABINIT v9.0 with respect to v8.10.
-<TBU>
-The merge request #408 is the first MR not reported in these release notes. Then, #410-411, #413-416 have also been included.
-<ETBU>
+are relative to modifications/improvements of ABINIT v9.0 with respect to v8.10
+(merge requests up to, and including, MR613 are taken into account).
 
 The list of contributors includes:
 B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, J. Bouchet, E. Bousquet, F. Bruneval, G. Brunin, Wei Chen, 
@@ -31,16 +29,26 @@ Xavier
 
 In particular: 
 
-1. The build system relies on new <hostname>.ac9 files (see XX), superceeding the v8 <hostname>.ac files.
-2. The build system of ABINITv9 does not build the dependencies (Linalg, NetCDF, LibXC, ...), as this was not sustainable anymore (see XX), but nowadays most users install themselves prerequised libraries.
+1. The build system relies on new <hostname>.ac9 files (see [B.5](#B.5)), superceeding the v8 <hostname>.ac files.
+2. The build system of ABINITv9 does not build the dependencies (Linalg, NetCDF, LibXC, ...), 
+as this was not sustainable anymore (see [B.5](#B.5)), but nowadays most users install themselves prerequised libraries.
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
-    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file. (see XX).
-4. Several default values have been changed, see A.2.
+    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file. (see [B.8](#B.8)).
+4. Several default values have been changed, see [A.3](#A.3).
+<a name="A.3"></a>
 
-**A.2** The default values of the following input variables have been changed:
-    [[ixcrot]], [[chneut]], [[symsigma]], [[prtkden]].
+**A.2** 
+A new account of the ABINIT effort has been published [[cite:Gonze2020]], and provides description
+of several new features.
+A version of this paper, that is not formatted for Computer Phys. Comm., is also 
+[available](https://www.abinit.org/sites/default/files/ABINIT20.pdf).
+The licence allows the authors to put it on the Web.
+Other specific publications are mentioned in the [Suggested acknowledgment page](../theory/acknowledgments).
 
-**A.3** The initialization of WF when paral_kgb=1 and nspinor=2 has been changed, since the previous one could prevent the code to converge.
+**A.3** The default values of the following input variables have been changed:
+    [[ixcrot]], [[chneut]], [[ntime]], [[symsigma]], [[prtkden]].
+
+**A.4** The initialization of WF when [[paral_kgb]]=1 and [[nspinor]]=2 has been changed, since the previous one could prevent the code to converge.
     By M Torrent (MR 562).
 
 * * *
@@ -132,7 +140,7 @@ By T. Cavignac, B. Amadon and O. Gingras.
 **B.3** Spin model within Multibinit 
 
 The new capabilities of Multibinit within ABINITv9 are described
-fully in the Sec. 4.1 of [[cite:Gonze2020]]. See also items XX and YY.
+fully in the Sec. 4.1 of [[cite:Gonze2020]]. See also Sec. [D.1](#D.1).
 In particular, a spin model, described specifically in Sec. 4.1.2 of [[cite:Gonze2020]], is available, as follows.
 
 >Multibinit implements the most commonly used model for spin systems, 
@@ -143,8 +151,6 @@ In particular, a spin model, described specifically in Sec. 4.1.2 of [[cite:Gonz
 >the distinguishing features of multibinit are the integration with abinit,
 >to fit parameters, and the simultaneous dynamics with other
 >degrees of freedom (in particular using the inter-atomic force constants). 
->The spin features of multibinit are functional in the
->forthcoming version of abinit, and continue to be developed.
 
 A tutorial for the multibinit spin model has been written, [[tutorial:spin_model]].
 List of tests in addition to those of the tutorial: v8#16, v8#23.
@@ -183,8 +189,11 @@ New tests : v8#24-29, v8#95-97 and v9#1-3.
 New input variables : [[chrgat]], [[constraint_kind]], [[ratsm]].
 
 By X. Gonze.
+<a name="B.5"></a>
 
 **B.5** Large modifications of the build system + split of the source tree.
+The build system relies on new <hostname>.ac9 files, superceeding the v8 <hostname>.ac files.
+The build system of ABINITv9 does not build the dependencies (Linalg, NetCDF, LibXC, ...), as this was not sustainable anymore (see B.5),
 MR 598, 517, 514, 477, 476
 By Y. Pouillon and JM Beuken
 
@@ -199,10 +208,11 @@ or
     abinit run.abi > run.log 2> run.err &
 
 The user can specify the output file thanks to the [[output_file]] input variable,
-the list of pseudopotentials thanks to the [[pseudos]] input variable.
-The prefix for other input, output or temporary files are constructed from [[indata_prefix]], [[outdata_prefix]] and tmpdata_files.
+the list of pseudopotentials thanks to the [[pseudos]] input variable (and path [[pp_dirpath]]).
+The prefix for other input, output or temporary files are constructed from [[indata_prefix]], [[outdata_prefix]] and tmpdata_prefix.
 The old interface is still operational.
-See [[topic:Control]].
+
+For some examples, see tests v8#90, v7#45, v5#54. See also [[topic:Control]]. 
 
 By M. Giantomassi (MR 586).
 
@@ -212,7 +222,7 @@ By M. Giantomassi (MR 586).
 A new mechanism to read strings from the input file has been activated. 
 So, many new input keywords are reading strings as data, and, often, can be used alternatively to similar input keywords
 that were expecting numerical values.
-List of new input variables :
+List of new input variables that rely on this feature :
 
 - [[getddb_path]], an alternative to [[getddb]] or [[irdddb]], see test v9#60
 - [[getden_path]], an alternative to [[getden]] or [[irdden]], see test v8#36, 41
@@ -222,24 +232,28 @@ List of new input variables :
 - [[getwfq_path]], an alternative to [[getwfq]] or [[irdwfq]], NOT TESTED
 - [[getkerange_path]], see test v9#60
 - [[getpot_path]], see test v8#44
-- [[pseudos]], see tests mpiio#27,51, tutoplugs#tw90_1,tw90_4, v4#20, v5#54, v67mbpt#40, v7#45, v8#90.
+- [[indata_prefix]] NOT TESTED 
+- [[output@anaddb]], DOCUMENTED, BUT THE MENTIONED TESTS DO NOT PROVIDE EXAMPLES ?!
 - [[output_file]] NOT TESTED
 - [[outdata_prefix]] NOT TESTED 
-- [[indata_prefix]] NOT TESTED 
+- [[pp_dirpath]] NOT TESTED
+- [[pseudos]], see tests mpiio#27,51, tutoplugs#tw90_1,tw90_4, v4#20, v5#54, v67mbpt#40, v7#45, v8#90.
 - tmpata_prefix NOT TESTED NOT DOCUMENTED
 
 By M. Giantomassi
-
+<a name="B.8"></a>
 
 **B.8** YAML sections in the output file 
 
 YAML sections are now generated in the output file, sometimes replacing text sections, sometime providing new information.
-At present there is a YAML section for the components of the total energy, as well as a YAML section for GW calculations.
-List of tests: paral#86, v67mbpt#2. See the input variable [[use_yaml]].
+At present there is a YAML section for the components of the total energy, as well as a YAML section for GW calculations,
+and some YAML sections giving information about the iteration status..
+
+Example of tests: paral#86, v67mbpt#2. See the input variable [[use_yaml]].
 At the occasion of the development of this capability, and its adaptation to the test farm, the
 PERL script fldiff.pl has been replaced by a Python fldiff.py script. 
 
-By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze
+By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze.
 
 
 **B.9** New capabilities of abipy and abiflows ?
@@ -251,15 +265,15 @@ By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze
 **C.1** A python script to help ABINIT developers and ABINIT development.
 
 The new python script abisrc.py located in the top directory of the ABINIT package has been developed.
-It has superceded abilink in the */*/makemake procedure. 
+It has superceded abilink in the makemake procedure. 
 Try
 
     ./abisrc.py --help
 
-then follow the suggestions, to get info about files, directories, interfaces, to vizualize dependencies,
-... 
+then follow the suggestions, to get info about files, directories, interfaces, to vizualize dependencies of the ABINIT subroutines,
+etc.
 
-Note that there are dependencies, to be installed prior being able to use some capabilities of abisrc.py .
+Note that there are dependencies of abisrc.py, to be installed prior being able to use some of its capabilities.
 
 By M Giantomassi
 
@@ -297,13 +311,14 @@ By Th. Cavignac (MR 526)
 
 * * *
 
-### D.  Other changes (or on-going developments, not yet finalized)
+<a name="D.1"></a>
+### **D.**  Other changes (or on-going developments, not yet finalized)
 
 **D.1**  Miscellaneous improvements of Multibinit (lattice part)
 
 Miscellaneous improvements have been made to the lattice part of Multibinit.
 See the new input variables below, also see the Sec. 4.1.1 of [[cite:Gonze2020]].
-Test of the supercell_latt input variable (NOT DOCUMENTED).
+See also v8#94, test of the supercell_latt input variable (NOT DOCUMENTED).
 
 New tests: v8#38, v8#94, v8#98, v8#99.
 New input variables :
@@ -348,7 +363,7 @@ Test tolerance in the new integration weights, v8#52-54.
 
 By H. Miranda and M. Giantomassi
 
-**D.7** Test Calculation of velocity matrix elements (DDK) with
+**D.7** Test calculation of velocity matrix elements (DDK) with
  optdriver 8 and wfk_task4 "wfk_ddk”, v8#59.
 
 By G. Matteo
@@ -367,10 +382,11 @@ see v8#44, v9#57, 60, 61.
 From M. GIantomassi (MR491).
 
 **D.11** Multibinit interface with scale-up
-A whole set of new input variables, however not tested, not documented !
+A whole set of new input variables... However not tested, not documented !
+
 By ??
 
-**D.12** The following units are also allowed in the input file :
+**D.12** The following units are now also allowed in the input file :
 
 - S Sec Second 
 - nm (for nanometer)
