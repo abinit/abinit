@@ -418,6 +418,15 @@ P           mkmem2          4
 -   mpi_nproc: 24, omp_nthreads: -1 (-1 if OMP is not activated)
 -    --> not optimal distribution: autoparal keyword recommended in input file <--
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 5, nkpt: 32, mband: 30, nsppol: 1, nspinor: 1, nspden: 1, mpw: 762, }
+cutoff_energies: {ecut:  12.0, pawecutdg:  20.0, }
+electrons: {nelect:   4.10000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   3.80017850E-03, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
+...
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.2605000  0.0000000  0.0000000  G(1)=  0.1377316  0.0000000  0.0000000
  R(2)=  0.0000000  7.2605000  0.0000000  G(2)=  0.0000000  0.1377316  0.0000000
@@ -503,6 +512,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 17, nstep: 40, nline: 3, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-15, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -152.11582256306    -1.521E+02 7.159E-02 1.857E+01
  ETOT  2  -152.31485996925    -1.990E-01 8.393E-03 1.326E+02
@@ -559,23 +574,29 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  7.2605000,   0.0000000,   0.0000000, ]
 - [  0.0000000,   7.2605000,   0.0000000, ]
 - [  0.0000000,   0.0000000,   7.2605000, ]
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
-lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.8273624E+02
 convergence: {deltae: -3.695E-13, res2:  3.609E-20, residm:  3.735E-07, diffor: null, }
 etotal    :  -1.51928525E+02
 entropy   :   0.00000000E+00
 fermie    :   2.85506715E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  2.09025506E-03,   3.41980221E-12,   2.24049585E-12, ]
 - [  3.41980221E-12,   2.09025501E-03,  -4.16237044E-12, ]
 - [  2.24049585E-12,  -4.16237044E-12,   2.09025499E-03, ]
 pressure_GPa:  -6.1497E+01
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  V]
+- [  5.0000E-01,   5.0000E-01,   5.0000E-01, Sr]
+- [  5.0000E-01,   0.0000E+00,   0.0000E+00,  O]
+- [  0.0000E+00,   5.0000E-01,   0.0000E+00,  O]
+- [  0.0000E+00,   0.0000E+00,   5.0000E-01,  O]
+cartesian_forces: # hartree/bohr
 - [ -7.79318497E-10,   2.34547917E-09,   1.33042909E-09, ]
 - [  1.55610097E-10,  -6.73892019E-10,  -1.57341296E-10, ]
 - [  7.44884714E-11,  -9.55727856E-10,  -5.49328789E-10, ]
@@ -756,6 +777,15 @@ total_energy_dc_eV  : -4.13418541519410E+03
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 24, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 5, nkpt: 87, mband: 30, nsppol: 1, nspinor: 1, nspden: 1, mpw: 780, }
+cutoff_energies: {ecut:  12.0, pawecutdg:  20.0, }
+electrons: {nelect:   4.10000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   3.80017850E-03, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -1744,12 +1774,12 @@ total_energy_dc_eV  : -4.13418541519410E+03
 --- !ResultsGS
 iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  7.2605000,   0.0000000,   0.0000000, ]
 - [  0.0000000,   7.2605000,   0.0000000, ]
 - [  0.0000000,   0.0000000,   7.2605000, ]
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
-lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.8273624E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  1.282E-15, diffor:  0.000E+00, }
 etotal    :  -1.51928525E+02
@@ -1757,6 +1787,12 @@ entropy   :   0.00000000E+00
 fermie    :   2.85506715E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  V]
+- [  5.0000E-01,   5.0000E-01,   5.0000E-01, Sr]
+- [  5.0000E-01,   0.0000E+00,   0.0000E+00,  O]
+- [  0.0000E+00,   5.0000E-01,   0.0000E+00,  O]
+- [  0.0000E+00,   0.0000E+00,   5.0000E-01,  O]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...

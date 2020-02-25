@@ -211,6 +211,15 @@ P           mkmem           1
 == DATASET  1 ==================================================================
 -   mpi_nproc: 24, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 29, nkpt: 4, mband: 120, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1405, }
+cutoff_energies: {ecut:  15.0, pawecutdg:  -1.0, }
+electrons: {nelect:   2.32000000E+02, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 1, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
 
@@ -283,6 +292,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1399.000    1398.994
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 114, }
+tolerances: {tolwfr: 1.00E-22, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -787.56806072793    -7.876E+02 1.871E-02 7.805E+04
  ETOT  2  -791.22885573402    -3.661E+00 3.289E-03 8.040E+02
@@ -349,23 +364,53 @@ _setup2: Arith. and geom. avg. npw (full set) are    1399.000    1398.994
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  7.5589045,   0.0000000,   0.0000000, ]
 - [  0.0000000,   7.5589045,   0.0000000, ]
 - [  0.0000000,   0.0000000,  52.9123317, ]
 lattice_lengths: [   7.55890,    7.55890,   52.91233, ]
-lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0232539E+03
 convergence: {deltae:  4.093E-12, res2:  3.123E-22, residm:  4.249E-08, diffor: null, }
 etotal    :  -7.91536712E+02
 entropy   :   0.00000000E+00
 fermie    :   2.14893685E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  7.13508309E-03,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   7.55157965E-03,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   6.95795080E-03, ]
 pressure_GPa:  -2.1227E+02
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,  -8.0574E-02,  O]
+- [  5.0000E-01,   5.0000E-01,  -6.1996E-02,  O]
+- [  0.0000E+00,   5.0000E-01,  -6.9223E-02, Ti]
+- [  5.0000E-01,   0.0000E+00,   1.2332E-02,  O]
+- [  0.0000E+00,   5.0000E-01,  -1.9948E-03,  O]
+- [  5.0000E-01,   5.0000E-01,   6.1767E-03, Ti]
+- [  0.0000E+00,   0.0000E+00,   7.5249E-02, Ba]
+- [  5.0000E-01,   5.0000E-01,   7.5914E-02,  O]
+- [  5.0000E-01,   0.0000E+00,   1.4655E-01,  O]
+- [  0.0000E+00,   5.0000E-01,   1.4489E-01,  O]
+- [  5.0000E-01,   5.0000E-01,   1.4587E-01, Ti]
+- [  0.0000E+00,   0.0000E+00,   2.1569E-01, Ba]
+- [  5.0000E-01,   5.0000E-01,   2.1576E-01,  O]
+- [  5.0000E-01,   0.0000E+00,   2.8571E-01,  O]
+- [  0.0000E+00,   5.0000E-01,   2.8571E-01,  O]
+- [  5.0000E-01,   5.0000E-01,   2.8571E-01, Ti]
+- [  0.0000E+00,   0.0000E+00,   3.5573E-01, Ba]
+- [  5.0000E-01,   5.0000E-01,   3.5566E-01,  O]
+- [  5.0000E-01,   0.0000E+00,   4.2488E-01,  O]
+- [  0.0000E+00,   5.0000E-01,   4.2654E-01,  O]
+- [  5.0000E-01,   5.0000E-01,   4.2556E-01, Ti]
+- [  0.0000E+00,   0.0000E+00,   4.9618E-01, Ba]
+- [  5.0000E-01,   5.0000E-01,   4.9551E-01,  O]
+- [  5.0000E-01,   0.0000E+00,   5.5910E-01,  O]
+- [  0.0000E+00,   5.0000E-01,   5.7342E-01,  O]
+- [  5.0000E-01,   5.0000E-01,   5.6525E-01, Ti]
+- [  0.0000E+00,   0.0000E+00,   6.5200E-01,  O]
+- [  5.0000E-01,   5.0000E-01,   6.3342E-01,  O]
+- [  0.0000E+00,   5.0000E-01,   6.4065E-01, Ti]
+cartesian_forces: # hartree/bohr
 - [  7.19736572E-33,  -0.00000000E+00,   2.00999380E-03, ]
 - [  7.19736572E-33,  -0.00000000E+00,  -4.94969590E-02, ]
 - [  7.19736572E-33,  -0.00000000E+00,  -5.13639026E-02, ]
