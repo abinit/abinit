@@ -25,18 +25,18 @@ module m_gwrdm
  use m_errors
  use m_hide_blas
  use m_time
- use m_wfd
+ use m_wfd           
  use m_dtset
 
  use defs_datatypes,   only : ebands_t
- use m_sigma,         only : sigma_t
-
+ use m_sigma,          only : sigma_t
+ 
  implicit none
 
  private
 !!***
 
- public :: calc_rdm,calc_rdmc,natoccs,printdm1
+ public :: calc_rdm,calc_rdmc,natoccs,printdm1,print_wfk_gw_rdm
 !!***
 
 contains
@@ -180,13 +180,14 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
 end subroutine calc_rdmc
 !!***
 
-subroutine natoccs(ib1,ib2,dm1,BSt,kpoint,iinfo)
+subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ib1,ib2,kpoint,iinfo
  type(ebands_t),target,intent(in) :: BSt
 !arrays
- complex(dpc),intent(inout) :: dm1(:,:)
+ real(dp),intent(inout) :: occs_ks(:,:)
+ complex(dpc),intent(inout) :: dm1(:,:),nateigv(:,:,:)
 !Local variables ------------------------------
 !scalars
  integer::ndim,ib1dm,ib2dm,lwork,info
@@ -242,9 +243,14 @@ subroutine natoccs(ib1,ib2,dm1,BSt,kpoint,iinfo)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  endif
- 
+
+ ! Store natural orbital eigenvectors matrix and occs. Also compute total number of electrons for this k value
  toccs_k=0.0d0
  do ib1dm=1,ndim
+   do ib2dm=1,ndim
+     nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),kpoint)=dm1_tmp(ib2dm,ib1dm)
+   enddo
+   occs_ks(ib1+(ib1dm-1),kpoint)=occs(ib1dm)
    toccs_k=toccs_k+occs(ib1dm)
  enddo
 
@@ -265,7 +271,23 @@ subroutine natoccs(ib1,ib2,dm1,BSt,kpoint,iinfo)
 end subroutine natoccs
 !!***
 
-subroutine printdm1(ib1,ib2,dm1) ! Basically used for debug, do not use it with large arrays
+subroutine print_wfk_gw_rdm(wfd,nateigv,occs)
+!Arguments ------------------------------------
+!scalars
+type(wfd_t),intent(in) :: wfd
+!arrays
+real(dp),intent(in) :: occs(:,:)
+complex(dpc),intent(in) :: nateigv(:,:,:)
+!Local variables ------------------------------
+!scalars
+!arrays
+!************************************************************************
+ write(*,*) wfd%Wave(1,2,1)%ug(1) ! see m_sigma_driver.F90 
+
+end subroutine print_wfk_gw_rdm        
+!!***
+
+subroutine printdm1(ib1,ib2,dm1) ! Only used for debug of this file, do not use it with large arrays
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ib1,ib2

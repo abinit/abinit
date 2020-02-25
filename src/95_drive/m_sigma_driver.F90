@@ -113,7 +113,7 @@ module m_sigma_driver
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
 ! MRM density matrix module and Gaussian quadrature one
- use m_gwrdm,         only : calc_rdm, calc_rdmc, natoccs, printdm1
+ use m_gwrdm,         only : calc_rdm, calc_rdmc, natoccs, printdm1, print_wfk_gw_rdm
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre
 
  implicit none
@@ -261,7 +261,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  type(ppmodel_t) :: PPm
  type(sigparams_t) :: Sigp
  type(sigma_t) :: Sr
- type(wfd_t),target :: Wfd,Wfdf
+ type(wfd_t),target :: Wfd,Wfdf,Wfd_dm ! MRM use Wfd_dm 
  type(wvl_data) :: Wvl
 !arrays
  integer :: gwc_ngfft(18),ngfftc(18),ngfftf(18),gwx_ngfft(18)
@@ -270,7 +270,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
- real(dp),allocatable :: weights(:),freqs(:) ! MRM
+ real(dp),allocatable :: weights(:),freqs(:),occs(:,:) ! MRM
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
@@ -288,7 +288,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc),allocatable :: ctmp(:,:),hbare(:,:,:,:)
  complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
  complex(dpc),allocatable :: hlda(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
- complex(dpc),allocatable :: dm1(:,:,:),dm1k(:,:),potk(:,:) ! MRM
+ complex(dpc),allocatable :: dm1(:,:,:),dm1k(:,:),potk(:,:),nateigv(:,:,:) ! MRM
  complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
 !complex(dpc),pointer :: sigcme_p(:,:,:,:)
@@ -723,6 +723,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
    Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
    Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
+ 
+ ! MRM also initialize the Wfd_dm for GW 1-RDM if required 
+ if (gwcalctyp==21) then 
+   call wfd_init(Wfd_dm,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
+     Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
+     Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
+   call wfd_dm%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
+ endif
 
  if (Dtset%pawcross==1) then
    call wfd_init(Wfdf,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
@@ -2156,9 +2164,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      if(Sigp%nsppol/=1) MSG_WARNING("1-RDM GW correction only implemented for restricted closed-shell calculations!")
      iinfo=1  !! This should be input parameter, verbose mode 
      ABI_MALLOC(dm1,(b1gw:b2gw,b1gw:b2gw,Sigp%nkptgw))
+     ABI_MALLOC(nateigv,(b1gw:b2gw,b1gw:b2gw,Sigp%nkptgw))
      ABI_MALLOC(dm1k,(b1gw:b2gw,b1gw:b2gw)) 
      ABI_MALLOC(potk,(b1gw:b2gw,b1gw:b2gw))
+     ABI_MALLOC(occs,(b1gw:b2gw,Sigp%nkptgw))
      dm1=0.0d0
+     nateigv=0.0d0
      do ikcalc=1,Sigp%nkptgw
        do ib=b1gw,b2gw
          dm1(ib,ib,ikcalc)=KS_BSt%occ(ib,ikcalc,1)
@@ -2209,7 +2220,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
         do ib1dm=ib1,ib2
           dm1k(ib1dm,ib1dm)=dm1k(ib1dm,ib1dm)+KS_BSt%occ(ib1dm,ikcalc,1) ! Only restricted calcs 
         enddo
-        call natoccs(ib1,ib2,dm1k,KS_BSt,ikcalc,0) ! Only restricted calcs 
+        call natoccs(ib1,ib2,dm1k,nateigv,occs,KS_BSt,ikcalc,0) ! Only restricted calcs 
       endif 
    end do
 
@@ -2259,18 +2270,29 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          !call printdm1(ib1,ib2,dm1k)
          dm1k(ib1:ib2,ib1:ib2)=dm1(ib1:ib2,ib1:ib2,ikcalc) 
 !        Compute nat orbs and occ numbers
-         call natoccs(ib1,ib2,dm1k,KS_BSt,ikcalc,1) ! Only restricted calcs 
+         call natoccs(ib1,ib2,dm1k,nateigv,occs,KS_BSt,ikcalc,1) ! Only restricted calcs 
        endif
        ABI_DEALLOCATE(sigcme_k)
      end do
    end if
    !! MRM deallocate the 1-RDM arrays
    if(gwcalctyp==21) then
+     iinfo=1 ! Should be an input parameter
+     if(iinfo==1) then
+
+       write(*,*) Wfd%Wave(1,2,1)%ug(1) !       MO COEF BAND 1 , K POINT 2, SPIN 1, UG=AO 1  
+       call print_wfk_gw_rdm(Wfd_dm,nateigv,occs) 
+
+       Wfd_dm%bks_comm = xmpi_comm_null
+       call Wfd_dm%free()
+     endif
      ABI_FREE(dm1) 
+     ABI_FREE(nateigv) 
      ABI_FREE(freqs)
      ABI_FREE(weights) 
      ABI_FREE(potk)     
-     ABI_FREE(dm1k)  
+     ABI_FREE(dm1k) 
+     ABI_FREE(occs) 
    endif  
 
    call xmpi_barrier(Wfd%comm)
@@ -2412,7 +2434,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      NCF_CHECK(nf90_close(ncid))
    end if
 #endif
-  end if ! MRM 1-RDM 
+  end if ! MRM skip if GW 1-RDM 
  end if ! ucrpa
 
  !----------------------------- END OF THE CALCULATION ------------------------
