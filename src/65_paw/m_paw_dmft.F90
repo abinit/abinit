@@ -776,6 +776,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
      tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realfrequencygrid'
      inquire(file=trim(tmpfil),exist=lexist)!,recl=nrecl)
    !  write(6,*) "inquire",lexist
+   grid_unt=2000
      if((.not.lexist)) then
        iexist2=0
        write(message,'(4x,a,i5,3a)') "File number",grid_unt,&
