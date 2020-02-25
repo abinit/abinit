@@ -11,7 +11,7 @@ are relative to modifications/improvements of ABINIT v9.0 with respect to v8.10
 The list of contributors includes:
 B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, J. Bouchet, E. Bousquet, F. Bruneval, G. Brunin, Wei Chen, 
 Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault, G. Hautier, Xu He, F. Jollet,
-H. Miranda, G. Petretto, N. Pike, Y. Pouillon, F. Ricci, M. Torrent, J. Van Bever, M. Verstraete, J. Zwanziger.
+H. Miranda, F. Naccarato, G. Petretto, N. Pike, Y. Pouillon, F. Ricci, M. Torrent, J. Van Bever, M. Verstraete, J. Zwanziger.
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases.
@@ -259,11 +259,19 @@ and some YAML sections giving information about the iteration status..
 Example of tests: paral#86, v67mbpt#2. See the input variable [[use_yaml]].
 At the occasion of the development of this capability, and its adaptation to the test farm, the
 PERL script fldiff.pl has been replaced by a Python fldiff.py script. 
+See related information in Sec. 5.5 of [[cite:Gonze2020]].
 
 By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze.
 
 
-**B.9** New capabilities of abipy and abiflows ?
+**B.9** New capabilities of abipy and abiflows 
+
+The abipy and abiflows projects have been significantly extended.
+See Sec. 6 of [[cite:Gonze2020]], as well as the [gallery of plotting scripts](http://abinit.github.io/abipy/gallery/index.html) &nbsp;
+and the [gallery of abipy workflows](http://abinit.github.io/abipy/flow_gallery/index.html) &nbsp;.
+
+By M. Giantomassi, G. Petretto, F. Naccarato.
+
 
 * * *
 
@@ -317,9 +325,11 @@ By JM Beuken (MR 513).
 By Th. Cavignac (MR 526)
 
 **C.7** Split of the source tree (ongoing).
+
 In view of increased modularity, the source tree must be split in two parts, one for low-level routines, largely independent of ABINIT,
 and one for more specific routines to ABINIT. The low-level routines should become a separate library, with its own build system and make.. 
 At present the low-level library have been moved out of src, inside the shared/common/src directory.
+See related information in Sec. 5.4 of [[Gonze2020]].
 
 * * *
 
