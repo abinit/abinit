@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_eprenorms
 !! NAME
 !! m_eprenorms
@@ -12,7 +11,7 @@
 !! Contact gmatteo
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (YG)
+!! Copyright (C) 2001-2020 ABINIT group (YG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,8 +27,7 @@
 module m_eprenorms
 
  use defs_basis
- use defs_abitypes
- use defs_datatypes
+ use m_abicore
  use m_errors
  use m_xmpi
 #ifdef HAVE_NETCDF
@@ -37,8 +35,9 @@ module m_eprenorms
 #endif
  use m_nctk
 
- use m_crystal,  only : crystal_t
- use m_kpts,     only : listkk
+ use defs_datatypes, only : ebands_t
+ use m_crystal,      only : crystal_t
+ use m_kpts,         only : listkk
 
  implicit none
 
@@ -129,16 +128,10 @@ CONTAINS  !=====================================================================
 
 subroutine eprenorms_init(Epren,nkpt,nsppol,mband,ntemp)
 
- implicit none
-
 !Arugments -----------------------------------
 !scalars
  integer,intent(in) :: nkpt, nsppol, mband, ntemp
  type(eprenorms_t) :: Epren
-!arrays
-
-!Local variables------------------------------
-!scalars
 !arrays
 
 !*************************************************************************
@@ -184,32 +177,18 @@ end subroutine eprenorms_init
 
 subroutine eprenorms_free(Epren)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  type(eprenorms_t),intent(inout) :: Epren
 
 !*********************************************************************
 
- if (allocated(Epren%temps)) then
-   ABI_FREE(Epren%temps)
- end if
- if (allocated(Epren%kpts)) then
-   ABI_FREE(Epren%kpts)
- end if
- if (allocated(Epren%eigens)) then
-   ABI_FREE(Epren%eigens)
- end if
- if (allocated(Epren%occs)) then
-   ABI_FREE(Epren%occs)
- end if
- if (allocated(Epren%renorms)) then
-   ABI_FREE(Epren%renorms)
- end if
- if (allocated(Epren%linewidth)) then
-   ABI_FREE(Epren%linewidth)
- end if
+ ABI_SFREE(Epren%temps)
+ ABI_SFREE(Epren%kpts)
+ ABI_SFREE(Epren%eigens)
+ ABI_SFREE(Epren%occs)
+ ABI_SFREE(Epren%renorms)
+ ABI_SFREE(Epren%linewidth)
 
 end subroutine eprenorms_free
 !!***
@@ -238,8 +217,6 @@ end subroutine eprenorms_free
 !! SOURCE
 
 subroutine eprenorms_from_epnc(Epren,filename)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars
@@ -305,8 +282,6 @@ end subroutine eprenorms_from_epnc
 
 subroutine eprenorms_bcast(Epren,master,comm)
 
- implicit none
-
 !Arguments -----------------------------------
 !scalars
  integer,intent(in) :: master, comm
@@ -366,8 +341,6 @@ end subroutine eprenorms_bcast
 !! SOURCE
 
 subroutine renorm_bst(Epren,Bst,Cryst,itemp,do_lifetime,do_check)
-
- implicit none
 
 !Arguments -----------------------------------
 !scalars

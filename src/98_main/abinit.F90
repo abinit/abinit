@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/abinit
 !! NAME
 !! abinit
@@ -7,7 +6,7 @@
 !! Main routine for conducting Density-Functional Theory calculations or Many-Body Perturbation Theory calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MKV, MT)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MKV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -88,12 +87,11 @@
 program abinit
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_build_info
  use m_cppopts_dumper
  use m_optim_dumper
  use m_abicore
+ use m_dtset
  use m_results_out
  use m_xmpi
  use m_xomp
@@ -105,9 +103,12 @@ program abinit
  use mpi
 #endif
 
+ use defs_datatypes, only : pspheader_type
+ use defs_abitypes, only : MPI_type
+ use m_parser,      only : ab_dimensions
  use m_time ,       only : asctime, sec2str, timein, time_set_papiopt, timab
  use m_fstrings,    only : sjoin, strcat, itoa, yesno, ljust
- use m_io_tools,    only : open_file, flush_unit, delete_file, num_opened_units, show_units
+ use m_io_tools,    only : flush_unit, delete_file
  use m_specialmsg,  only : specialmsg_getcount, herald
  use m_exit,        only : get_timelimit_string
  use m_atomdata,    only : znucl2symbol
@@ -115,7 +116,6 @@ program abinit
  use m_mpinfo,      only : destroy_mpi_enreg, clnmpi_img, clnmpi_grid, clnmpi_atom, clnmpi_pert
  use m_memeval,     only : memory_eval
  use m_chkinp,      only : chkinp
- use m_dtset,       only : chkvars, dtset_free
  use m_dtfil,       only : iofn1
  use m_outxml,      only : outxml_open, outxml_finalise
  use m_out_acknowl, only : out_acknowl
@@ -233,7 +233,7 @@ program abinit
 !create the name of the status file, initialize the status subroutine.
 
  call timab(41,3,tsec)
- call iofn1(filnam,filstat,xmpi_world)
+ call iofn1(args%input_path, filnam, filstat, xmpi_world)
 
 !------------------------------------------------------------------------------
 
@@ -267,7 +267,8 @@ program abinit
  ! Test if the netcdf library supports MPI-IO
  call nctk_test_mpiio()
 
- call get_dtsets_pspheads(filnam(1), ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, xmpi_world)
+ call get_dtsets_pspheads(args%input_path, filnam(1), ndtset, lenstr, string, &
+                          timopt, dtsets, pspheads, mx, dmatpuflag, xmpi_world)
 
  ndtset_alloc = size(dtsets) - 1
  npsp = size(pspheads)
@@ -278,7 +279,7 @@ program abinit
  call bigdft_init_timing_categories()
 #endif
 
- ABI_DATATYPE_ALLOCATE(mpi_enregs,(0:max(1,ndtset)))
+ ABI_MALLOC(mpi_enregs, (0:max(1,ndtset)))
  call mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 
  call memory_eval(dtsets,ab_out,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
@@ -288,7 +289,7 @@ program abinit
 !12) Echo input data to output file and log file
 
  ! For evolving variables, and results
- ABI_DATATYPE_ALLOCATE(results_out,(0:ndtset_alloc))
+ ABI_MALLOC(results_out, (0:ndtset_alloc))
 
  ! Initialize results_out datastructure
  call init_results_out(dtsets,1,1,mpi_enregs, mx%natom, mx%mband_upper, mx%nkpt,npsp,&
@@ -299,8 +300,8 @@ program abinit
  use_results_all=.false.
  if (test_img) then
    use_results_all=(me==0)
-   if (use_results_all)  then
-     ABI_DATATYPE_ALLOCATE(results_out_all,(0:ndtset_alloc))
+   if (use_results_all) then
+     ABI_MALLOC(results_out_all, (0:ndtset_alloc))
    end if
 
    call gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_results_all, allgather=.false.,master=0)
@@ -332,7 +333,7 @@ program abinit
  ! Clean memory
  if (test_img.and.me==0) then
    call destroy_results_out(results_out_all)
-   ABI_DATATYPE_DEALLOCATE(results_out_all)
+   ABI_FREE(results_out_all)
  end if
 
 !This synchronization is not strictly needed, but without it,
@@ -345,7 +346,7 @@ program abinit
 
 !13) Perform additional checks on input data
  call timab(45,3,tsec)
- call chkinp(dtsets,ab_out,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads)
+ call chkinp(dtsets, ab_out, mpi_enregs, ndtset, ndtset_alloc, npsp, pspheads, xmpi_world)
 
 !Check whether the string only contains valid keywords
  call chkvars(string)
@@ -389,8 +390,7 @@ program abinit
  end if
 
  if(.not.test_exit)then
-   call driver(abinit_version,tcpui,dtsets,filnam,filstat,&
-&   mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,results_out)
+   call driver(abinit_version,tcpui,dtsets,filnam,filstat, mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,results_out)
  end if
 
 !------------------------------------------------------------------------------
@@ -404,7 +404,7 @@ program abinit
  ! Gather contributions to results_out from images of the cell, if needed
  if (test_img) then
    if (use_results_all)  then
-     ABI_DATATYPE_ALLOCATE(results_out_all,(0:ndtset_alloc))
+     ABI_MALLOC(results_out_all,(0:ndtset_alloc))
    end if
 
    call gather_results_out(dtsets,mpi_enregs,results_out,results_out_all,use_results_all,allgather=.false.,master=0)
@@ -430,7 +430,7 @@ program abinit
  ! Clean memory
  if (test_img.and.me==0) then
    call destroy_results_out(results_out_all)
-   ABI_DATATYPE_DEALLOCATE(results_out_all)
+   ABI_FREE(results_out_all)
  else
    nullify(results_out_all)
  end if
@@ -439,10 +439,12 @@ program abinit
  ! They concern the case ndtset<2, and nimage=1 so take first value.
  natom=dtsets(1)%natom ; nkpt=dtsets(1)%nkpt ; nsppol=dtsets(1)%nsppol
  nfft=dtsets(1)%nfft
- ABI_ALLOCATE(nband,(nkpt*nsppol))
- ABI_ALLOCATE(npwtot,(nkpt))
- ABI_ALLOCATE(fred,(3,natom))
- ABI_ALLOCATE(xred,(3,natom))
+
+ ABI_MALLOC(nband,(nkpt*nsppol))
+ ABI_MALLOC(npwtot,(nkpt))
+ ABI_MALLOC(fred,(3,natom))
+ ABI_MALLOC(xred,(3,natom))
+
  etotal=results_out(1)%etotal(1)
  fred(:,:)  =results_out(1)%fred(:,1:natom,1)
  nband(:)   =dtsets(1)%nband(1:nkpt*nsppol)
@@ -491,11 +493,11 @@ program abinit
  ! One should have here the explicit deallocation of all arrays
  call destroy_results_out(results_out)
 
- ABI_DEALLOCATE(fred)
- ABI_DEALLOCATE(nband)
- ABI_DEALLOCATE(npwtot)
- ABI_DATATYPE_DEALLOCATE(results_out)
- ABI_DEALLOCATE(xred)
+ ABI_FREE(fred)
+ ABI_FREE(nband)
+ ABI_FREE(npwtot)
+ ABI_FREE(results_out)
+ ABI_FREE(xred)
 
  ! 20) Write the final timing, close the output file, and write a final line to the log file
  call timein(tsec(1),tsec(2))
@@ -580,7 +582,7 @@ program abinit
  do ii=0,max(1,ndtset)
    call destroy_mpi_enreg(mpi_enregs(ii))
  end do
- ABI_DATATYPE_DEALLOCATE(mpi_enregs)
+ ABI_FREE(mpi_enregs)
 
  ! If memory profiling is activated, check if bigdft plugin is used or not
  print_mem_report = 1
@@ -593,7 +595,7 @@ program abinit
 
  ! Here we deallocate dtsets. Do not access dtsets after this line!
  do ii=0,size(dtsets)-1,1
-   call dtset_free(dtsets(ii))
+   call dtsets(ii)%free()
  end do
  ABI_FREE(dtsets)
  ABI_FREE(pspheads)

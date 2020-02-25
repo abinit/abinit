@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_scfcv
 !! NAME
 !!  m_dfpt_scfcv
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XG, DRH, MB, XW, MT, SPr, XW, MV, MM, AR)
+!!  Copyright (C) 1999-2020 ABINIT group (XG, DRH, MB, XW, MT, SPr, XW, MV, MM, AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,21 +25,24 @@
 module m_dfpt_scfcv
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_ab7_mixing
  use m_efield
  use m_errors
+ use m_dtset
  use m_abicore
  use m_wfk
  use m_wffile
  use m_xmpi
  use m_nctk
  use m_hdr
+ use m_dtfil
+ use m_hamiltonian
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_cgtools,  only : mean_fftr, overlap_g, dotprod_vn, dotprod_vn, dotprod_g
  use m_fstrings, only : int2char4, sjoin
  use m_geometry, only : metric, stresssym
@@ -50,6 +52,14 @@ module m_dfpt_scfcv
  use m_mpinfo,   only : iwrite_fftdatar, proc_distrb_cycle
  use m_kg,       only : getcut, mkkin, kpgstr, mkkpg
  use m_fft,      only : fftpac, fourdp
+ use m_symtk,     only : mati3inv
+ use m_dynmat,    only : dfpt_sygra
+ use m_occ,         only : occeig
+ use m_paw_mkrho,   only : pawmkrho
+ use m_mkffnl,      only : mkffnl
+ use m_getgh1c,     only : getgh1c
+ use m_dfpt_mkrho,  only : dfpt_accrho
+ use m_nonlop,      only : nonlop
  use m_ioarr,    only : ioarr, fftdatar_write_from_hdr, fort_denpot_skip
  use m_pawang,   only : pawang_type
  use m_pawrad,   only : pawrad_type
@@ -57,7 +67,9 @@ module m_dfpt_scfcv
  use m_paw_an,   only : paw_an_type, paw_an_init, paw_an_free, paw_an_nullify, paw_an_reset_flags
  use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
  use m_pawfgrtab,only : pawfgrtab_type
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_alloc, pawrhoij_free, pawrhoij_io, pawrhoij_inquire_dim, pawrhoij_filter
+ use m_pawrhoij,    only : pawrhoij_type, pawrhoij_init_unpacked, pawrhoij_gather, pawrhoij_filter, &
+                           pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, &
+                           pawrhoij_free_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
  use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_axpby, pawcprj_free, pawcprj_getdim
  use m_pawdij,   only : pawdij, pawdijfr, symdij
  use m_pawfgr,   only : pawfgr_type
@@ -65,7 +77,7 @@ module m_dfpt_scfcv
  use m_paw_dfpt,    only : pawdfptenergy
  use m_paw_nhat,    only : pawmknhat,pawnhatfr
  use m_rf2,         only : rf2_getidirs
- use m_dens,        only : calcdensph
+ use m_dens,        only : calcdenmagsph, prtdenmagsph
  use m_dfpt_fef,    only : dfptff_initberry, qmatrix, dfptff_edie, dfptff_ebp, dfptff_die, dfptff_bec
  use m_dfpt_vtorho, only : dfpt_vtorho
  use m_paral_atom,  only : get_my_atmtab, free_my_atmtab
@@ -192,6 +204,7 @@ contains
 !!  symrc1(3,3,nsym1)=symmetry operations in reciprocal space
 !!  symrl1(3,3,nsym1)=symmetry operations in real space in terms
 !!   of primitive translations
+!!  tnons1(3,nsym1)=non-symmorphic translations
 !!  usecprj= 1 if cprj, cprjq arrays are stored in memory
 !!  useylmgr = 1 if ylmgr  array is allocated
 !!  useylmgr1= 1 if ylmgr1 array is allocated
@@ -257,7 +270,7 @@ contains
 !!
 !! CHILDREN
 !!      ab7_mixing_deallocate,ab7_mixing_new,ab7_mixing_use_disk_cache,appdig
-!!      calcdensph,destroy_efield,dfpt_etot,dfpt_newvtr,dfpt_nselt,dfpt_nstdy
+!!      calcdenmagsph,destroy_efield,dfpt_etot,dfpt_newvtr,dfpt_nselt,dfpt_nstdy
 !!      dfpt_nstpaw,dfpt_rhofermi,dfpt_rhotov,dfpt_vtorho,dfptff_bec,dfptff_die
 !!      dfptff_ebp,dfptff_edie,dfptff_initberry,fftdatar_write_from_hdr,fourdp
 !!      getcut,hdr_update,metric,newfermie1,paw_an_free,paw_an_init
@@ -282,7 +295,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &  paw_an,paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoij,pawrhoij1,pawtab,&
 &  pertcase,phnons1,ph1d,ph1df,&
 &  prtbbb,psps,qphon,resid,residm,rhog,rhog1,&
-&  rhor,rhor1,rprimd,symaf1,symrc1,symrl1,&
+&  rhor,rhor1,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &  usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
 &  wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,conv_retcode,&
 &  kramers_deg,&
@@ -356,6 +369,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),intent(inout) :: rhog1(2,nfftf),rhor1(cplex*nfftf,nspden),xred(3,dtset%natom)
  real(dp),optional,intent(inout) :: rhog1_pq(2,nfftf),rhor1_pq(cplex*nfftf,nspden)                                 !+q/-q duplicates
  real(dp),optional,intent(inout) :: rhog1_mq(2,nfftf),rhor1_mq(cplex*nfftf,nspden)                                 !
+ real(dp),intent(in) :: tnons1(3,nsym1)
  real(dp),target,intent(in) :: vtrial(nfftf,nspden)
  real(dp),intent(in) :: vpsp1(cplex*nfftf),vxc(nfftf,nspden)
  real(dp),intent(in) :: wtk_rbz(nkpt_rbz),xccc3d1(cplex*n3xccc)
@@ -415,11 +429,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  integer,pointer :: my_atmtab(:)
  real(dp) :: dielar(7)
  real(dp) :: favg(3),gmet(3,3),gprimd(3,3),q_cart(3),qphon2(3),qred2cart(3,3)
- real(dp) :: rmet(3,3),tollist(12),tsec(2)
+ real(dp) :: rhomag(2,nspden),rmet(3,3),tollist(12),tsec(2)
  real(dp) :: zeff_red(3),zeff_bar(3,3)
  real(dp) :: intgden(dtset%nspden,dtset%natom),dentot(dtset%nspden)
 !real(dp) :: zdmc_red(3),zdmc_bar(3,3),mean_rhor1(1) !dynamic magnetic charges and mean density
- real(dp),allocatable :: dielinv(:,:,:,:,:)
+ real(dp),allocatable :: dielinv(:,:,:,:,:),gr_dum(:,:,:)
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
  real(dp),allocatable :: qmat(:,:,:,:,:,:),resid2(:),rhog2(:,:),rhor2(:,:),rhorfermi(:,:)
  real(dp),allocatable :: susmat(:,:,:,:,:),vhartr1(:),vxc1(:,:)
@@ -815,7 +829,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &       mpw,mpw1,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,ngfftf,nhatfermi,nkpt_rbz,npwarr,npwar1,&
 &       nspden,dtset%nsppol,nsym1,occkq,occ_rbz,&
 &       paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
-&       phnons1,ph1d,dtset%prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,&
+&       phnons1,ph1d,dtset%prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &       ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
        if (.not.kramers_deg) then
          call dfpt_rhofermi(cg,cg_mq,cplex,cprj,cprjq,&
@@ -824,12 +838,9 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &         mpw,mpw1_mq,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,ngfftf,nhatfermi,nkpt_rbz,npwarr,npwar1_mq,&
 &         nspden,dtset%nsppol,nsym1,occk_mq,occ_rbz,&
 &         paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
-&         phnons1,ph1d,dtset%prtvol,psps,rhorfermi_mq,rmet,rprimd,symaf1,symrc1,symrl1,&
+&         phnons1,ph1d,dtset%prtvol,psps,rhorfermi_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &         ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
        end if
-!        call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-!&        dtset%ntypat,ab_out,dtset%ratsph,rhorfermi,rprimd,dtset%typat,ucvol,xred,&
-!&        -1,cplex) !dbg
 
      end if
 
@@ -921,7 +932,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   nhat1,nkpt_rbz,npwarr,npwar1,res2,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid1,&
 &   occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &   pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid,residm,rhog1,&
-&   rhor1,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,ddk_f,&
+&   rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
 &   vtrial,vtrial1,wtk_rbz,xred,ylm,ylm1,ylmgr1)
    if (.not.kramers_deg) then
      rhor1_pq=rhor1 !at this stage rhor1_pq contains only one term of the 1st order density at +q
@@ -935,7 +946,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nhat1,nkpt_rbz,npwarr,npwar1_mq,res2_mq,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid1_mq,&
 &     occk_mq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &     pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid_mq,residm_mq,rhog1_mq,&
-&     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,ddk_f,&
+&     rhor1_mq,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
 &     vtrial,vtrial1_mq,wtk_rbz,xred,ylm,ylm1,ylmgr1)
      !reconstruct the +q and -q densities, this might bug if fft parallelization is used, todo...
      do ifft=1,nfftf
@@ -965,9 +976,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    end if
 
 !  SPr: don't remove the following comments for debugging
-!  call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-!&   dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
-!&   idir+1,cplex)
+!  call calcdenmagsph(gr_dum,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+!&   dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
+!&   idir+1,cplex,intgden=intgden,rhomag=rhomag)
+!  call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,idir+1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
+
 !     write(*,*) ' n ( 1,2)',intgden(1,1),' ',intgden(1,2)
 !     write(*,*) ' mx( 1,2)',intgden(2,1),' ',intgden(2,2)
 !     write(*,*) ' my( 1,2)',intgden(3,1),' ',intgden(3,2)
@@ -1168,7 +1181,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   nhat1,nkpt_rbz,npwarr,npwar1,res3,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid2,&
 &   occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
 &   pawrhoij1,pawtab,phnons1,ph1d,dtset%prtvol,psps,pwindall,qmat,resid2,residm2,rhog2,&
-&   rhor2,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,usecprj,useylmgr1,ddk_f,&
+&   rhor2,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,usecprj,useylmgr1,ddk_f,&
 &   vtrial,vtrial2,wtk_rbz,xred,ylm,ylm1,ylmgr1,1)
 
    write(msg,'(a)') ' '//char(10)//&
@@ -1322,7 +1335,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &     nfftf,ngfftf,nhat,nhat1,nkpt_rbz,nkxc,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,&
 &     nsym1,n3xccc,occkq,occ_rbz,paw_an,paw_an1,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrad,&
 &     pawrhoij,pawrhoij1,pawtab,phnons1,ph1d,ph1df,psps,rhog,rhor,rhor1,rmet,rprimd,symaf1,symrc1,&
-&     symrl1,ucvol,usecprj,psps%usepaw,usexcnhat,useylmgr1,vhartr1,vpsp1,vtrial,vtrial1,vxc,wtk_rbz,&
+&     symrl1,tnons1,ucvol,usecprj,psps%usepaw,usexcnhat,useylmgr1,vhartr1,vpsp1,vtrial,vtrial1,vxc,wtk_rbz,&
 &     xccc3d1,xred,ylm,ylm1,ylmgr1)
    else
      if (dtset%nspden==4) then
@@ -1377,7 +1390,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
 !Update the content of the header (evolving variables)
  bantot_rbz = sum(nband_rbz(1:nkpt_rbz*dtset%nsppol))
- call hdr_update(hdr,bantot_rbz,etotal,fermie,&
+ call hdr%update(bantot_rbz,etotal,fermie,&
 & residm,rprimd,occ_rbz,pawrhoij1,xred,dtset%amu_orig(:,1),&
 & comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
 
@@ -1391,14 +1404,17 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    prtopt=1
    if(ipert==dtset%natom+5) then
      prtopt=idir+1;
-     call calcdensph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-&     dtset%ntypat,ab_out,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
-&     prtopt,cplex,intgden=intgden,dentot=dentot)
+     ABI_ALLOCATE(gr_dum,(3,nspden,dtset%natom))
+     call calcdenmagsph(gr_dum,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+&     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
+&     prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+     ABI_DEALLOCATE(gr_dum)
+     call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
      !debug: write out the vtk first-order density components
 !    call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)
 !    call printmagvtk(mpi_enreg,cplex,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//"_PQ"))
 !    call printmagvtk(mpi_enreg,cplex,nspden,nfftf,ngfftf,rhor1,rprimd,adjustl(adjustr(fi1o_vtk)//"_MQ"))
-     !SPr: add calculation of the contributions to susceptibility from all attomic spheres
+     !SPr: add calculation of the contributions to susceptibility from all atomic spheres
    end if
  end if
 
@@ -2317,7 +2333,7 @@ end subroutine dfpt_newvtr
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,dfpt_mkcore,dfpt_mkvxcstr,dfpt_nsteltwf,dotprod_vn
+!!      dfpt_mkcore,dfpt_mkvxcstr,dfpt_nsteltwf,dotprod_vn
 !!      hartrestr,init_hamiltonian,stresssym,vlocalstr,wrtout,xmpi_barrier
 !!
 !! SOURCE
@@ -2334,8 +2350,6 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 & rhor,rhor1,rmet,rprimd,symrc1,typat,ucvol,&
 & wtk_rbz,&
 & xred,ylm,ylm1,ylmgr,ylmgr1)
-
- use m_hamiltonian,only : init_hamiltonian,destroy_hamiltonian,gs_hamiltonian_type
 
 !Arguments -------------------------------
 !scalars
@@ -2655,7 +2669,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
    end do ! istr1
  end do ! ipert1
 
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
  ABI_DEALLOCATE(vxc1)
  ABI_DEALLOCATE(xccc3d1)
@@ -2723,7 +2737,7 @@ end subroutine dfpt_nselt
 !!      dfpt_nselt
 !!
 !! CHILDREN
-!!      dotprod_g,kpgstr,load_k_hamiltonian,mkffnl,mkkin,nonlop
+!!      dotprod_g,kpgstr,mkffnl,mkkin,nonlop
 !!
 !! SOURCE
 
@@ -2731,9 +2745,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 &  istwf_k,kg_k,kg1_k,kpoint,mband,mkmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,natom,nband_k,&
 &  npw_k,npw1_k,nspinor,nsppol,ntypat,occ_k,psps,rmet,wtk_k,ylm,ylmgr)
 
- use m_hamiltonian, only : gs_hamiltonian_type, load_k_hamiltonian
- use m_mkffnl,      only : mkffnl
- use m_nonlop,      only : nonlop
+
 
 !Arguments ------------------------------------
 !scalars
@@ -2805,7 +2817,7 @@ subroutine dfpt_nsteltwf(cg,cg1,d2nl_k,ecut,ecutsm,effmass_free,gs_hamk,icg,icg1
 
 !Load k/k+q-dependent part in the Hamiltonian datastructure
  ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
- call load_k_hamiltonian(gs_hamk,kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,ffnl_k=ffnl,&
+ call gs_hamk%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,ffnl_k=ffnl,&
 & ph3d_k=ph3d,compute_ph3d=.true.)
 
  ABI_ALLOCATE(cwave0,(2,npw_k*nspinor))
@@ -2980,9 +2992,9 @@ end subroutine dfpt_nsteltwf
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      appdig,destroy_hamiltonian,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll
+!!      appdig,dfpt_mkcore,dfpt_mkvxc,dfpt_mkvxc_noncoll
 !!      dfpt_nstwf,dfpt_sygra,dfpt_vlocal,dotprod_vn,init_hamiltonian
-!!      load_spin_hamiltonian,mati3inv,timab,wfk_close,wfk_open_read,wrtout
+!!      mati3inv,timab,wfk_close,wfk_open_read,wrtout
 !!      xmpi_sum
 !!
 !! SOURCE
@@ -2992,12 +3004,6 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 &          mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,nfft,ngfft,nkpt,nkpt_rbz,nkxc,&
 &          npwarr,npwar1,nspden,nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,&
 &          symrc1,ucvol,wtk_rbz,xred,ylm,ylm1,rhor,vxc)
-
- use m_hamiltonian
-
- use m_symtk,     only : mati3inv
- use m_dynmat,    only : dfpt_sygra
- use m_dfpt_mkvxc,     only : dfpt_mkvxc
 
 !Arguments -------------------------------
 !scalars
@@ -3157,7 +3163,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
    ikg=0;ikg1=0
 
 !  Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
+   call gs_hamkq%load_spin(isppol,with_nonlocal=.true.)
 
 !  BIG FAT k POINT LOOP
    do ikpt=1,nkpt_rbz
@@ -3252,7 +3258,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !  End loop over spins
  end do
 
- call destroy_hamiltonian(gs_hamkq)
+ call gs_hamkq%free()
 
 !Treat fixed occupation numbers (as in vtorho)
  if(xmpi_paral==1)then
@@ -3531,6 +3537,7 @@ end subroutine dfpt_nstdy
 !!  symaf1(nsym1)=(anti)ferromagnetic part of symmetry operations
 !!  symrc1(3,3,nsym1)=symmetry operations in reciprocal space
 !!  symrl1(3,3,nsym1)=3x3 matrices of the group symmetries
+!!  tnons1(3,nsym1)=non-symmorphic translations
 !!  ucvol=volume of the unit cell
 !!  usecprj= 1 if cprj, cprjq, cprj1 arrays are stored in memory
 !!  useylmgr1= 1 if ylmgr1 array is allocated
@@ -3559,10 +3566,9 @@ end subroutine dfpt_nstdy
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dfpt_wfkfermi,fftpac
-!!      init_hamiltonian,init_rf_hamiltonian,kpgstr,load_k_hamiltonian
-!!      load_k_rf_hamiltonian,load_kprime_hamiltonian,load_spin_hamiltonian
-!!      load_spin_rf_hamiltonian,mkffnl,mkkin,mkkpg,occeig,paw_ij_free
+!!      destroy_rf_hamiltonian,dfpt_wfkfermi,fftpac
+!!      init_hamiltonian,init_rf_hamiltonian,kpgstr
+!!      mkffnl,mkkin,mkkpg,occeig,paw_ij_free
 !!      paw_ij_init,paw_ij_nullify,pawdijfr,pawmkrho,pawrhoij_alloc
 !!      pawrhoij_free,pawrhoij_free_unpacked,pawrhoij_init_unpacked
 !!      pawrhoij_mpisum_unpacked,status,symrhg,timab,xmpi_sum
@@ -3574,18 +3580,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 & indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,mband,mkmem,mkqmem,mk1mem,mpi_enreg,&
 & mpw,mpw1,my_natom,natom,nband_rbz,ncpgr,nfftf,ngfftf,nhatfermi,nkpt_rbz,npwarr,npwar1,nspden,&
 & nsppol,nsym1,occkq,occ_rbz,paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
-& phnons1,ph1d,prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,&
+& phnons1,ph1d,prtvol,psps,rhorfermi,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,&
 & ucvol,usecprj,useylmgr1,vtrial,vxc,wtk_rbz,xred,ylm,ylm1,ylmgr1)
-
- use m_hamiltonian
-
- use m_occ,         only : occeig
- use m_pawrhoij,    only : pawrhoij_type, pawrhoij_init_unpacked, pawrhoij_gather, &
-&                          pawrhoij_alloc, pawrhoij_free, pawrhoij_nullify, &
-&                          pawrhoij_free_unpacked, pawrhoij_mpisum_unpacked, pawrhoij_inquire_dim
- use m_paw_mkrho,   only : pawmkrho
-
- use m_mkffnl,      only : mkffnl
 
 !Arguments -------------------------------
 !scalars
@@ -3617,7 +3613,8 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  real(dp),intent(in) :: occ_rbz(mband*nkpt_rbz*nsppol),occkq(mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*natom)
  real(dp),intent(in) :: phnons1(2,dtset%nfft**(1-1/nsym1),(nspden/nsppol)-3*(nspden/4))
- real(dp),intent(in) :: rmet(3,3),rprimd(3,3),vtrial(nfftf,nspden),vxc(nfftf,nspden),wtk_rbz(nkpt_rbz)
+ real(dp),intent(in) :: rmet(3,3),rprimd(3,3),tnons1(3,nsym1)
+ real(dp),intent(in) :: vtrial(nfftf,nspden),vxc(nfftf,nspden),wtk_rbz(nkpt_rbz)
  real(dp),intent(in) :: xred(3,natom),ylm(mpw*mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylm1(mpw1*mk1mem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr1(mpw1*mk1mem,3,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
@@ -3763,10 +3760,9 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  do isppol=1,nsppol
    ikg=0;ikg1=0
 !  Continue to initialize the Hamiltonian at k+q
-   call load_spin_hamiltonian(gs_hamkq,isppol,with_nonlocal=.true.)
-!  call load_spin_rf_hamiltonian(rf_hamkq,isppol,with_nonlocal=.true.)
+   call gs_hamkq%load_spin(isppol,with_nonlocal=.true.)
 
-   call load_spin_rf_hamiltonian(rf_hamkq,isppol,with_nonlocal=.true.)
+   call rf_hamkq%load_spin(isppol,with_nonlocal=.true.)
 
 
 !  Nullify contribution to density at EFermi from this k-point
@@ -3918,26 +3914,26 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
 !    Load k-dependent part in the Hamiltonian datastructure
      ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamkq%matblk))
-     call load_k_hamiltonian(gs_hamkq,kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
+     call gs_hamkq%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
 &     ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
      if (size(ffnlk)>0) then
-       call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnlk)
+       call gs_hamkq%load_k(ffnl_k=ffnlk)
      else
-       call load_k_hamiltonian(gs_hamkq,ffnl_k=ffnl1)
+       call gs_hamkq%load_k(ffnl_k=ffnl1)
      end if
 
 !    Load k+q-dependent part in the Hamiltonian datastructure
 !        Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
-     call load_kprime_hamiltonian(gs_hamkq,kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
+     call gs_hamkq%load_kprime(kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
 &     kinpw_kp=kinpw1,kg_kp=kg1_k,kpg_kp=kpg1_k,ffnl_kp=ffnl1,&
 &     compute_gbound=.true.)
      if (qne0) then
        ABI_ALLOCATE(ph3d1,(2,npw1_k,gs_hamkq%matblk))
-       call load_kprime_hamiltonian(gs_hamkq,ph3d_kp=ph3d1,compute_ph3d=.true.)
+       call gs_hamkq%load_kprime(ph3d_kp=ph3d1,compute_ph3d=.true.)
      end if
 
 !    Load k-dependent part in the 1st-order Hamiltonian datastructure
-     call load_k_rf_hamiltonian(rf_hamkq,npw_k=npw_k,dkinpw_k=dkinpw)
+     call rf_hamkq%load_k(npw_k=npw_k,dkinpw_k=dkinpw)
 
 !    Compute fixed contributions to 1st-order Fermi energy
 !    and Fermi level charge density
@@ -4032,16 +4028,9 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
  end do ! End loop over spins
 
- !if(xmpi_paral==1)then
- !  call timab(166,1,tsec)
- !  call wrtout(std_out,'dfpt_rhofermi: loop on k-points and spins done in parallel','COLL')
- !  call xmpi_barrier(spaceworld)
- !  call timab(166,2,tsec)
- !end if
-
 !More memory cleaning
- call destroy_hamiltonian(gs_hamkq)
- call destroy_rf_hamiltonian(rf_hamkq)
+ call gs_hamkq%free()
+ call rf_hamkq%free()
  if(psps%usepaw==1) then
    call paw_ij_free(paw_ij1fr)
    ABI_DATATYPE_DEALLOCATE(paw_ij1fr)
@@ -4138,10 +4127,10 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
  ABI_ALLOCATE(rhogfermi,(2,dtset%nfft))
  if (psps%usepaw==0) then
    call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,nspden,&
-&   nsppol,nsym1,phnons1,rhogfermi,rhorfermi,rprimd,symaf1,symrl1)
+&   nsppol,nsym1,phnons1,rhogfermi,rhorfermi,rprimd,symaf1,symrl1,tnons1)
  else
    call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,nspden,&
-&   nsppol,nsym1,phnons1,rhogfermi,rhowfr,rprimd,symaf1,symrl1)
+&   nsppol,nsym1,phnons1,rhogfermi,rhowfr,rprimd,symaf1,symrl1,tnons1)
  end if
 
 !PAW: Build new rhoij quantities then symetrize them
@@ -4266,10 +4255,6 @@ subroutine dfpt_wfkfermi(cg,cgq,cplex,cprj,cprjq,&
 &          kptopt,mband,mcgq,mcprjq,mkmem,mpi_enreg,mpw,nband_k,ncpgr,&
 &          npw_k,npw1_k,nspinor,nsppol,occ_k,pawrhoijfermi,prtvol,&
 &          rf_hamkq,rhoaug,rocceig,wtk_k)
-
- use m_hamiltonian, only : gs_hamiltonian_type, rf_hamiltonian_type
- use m_getgh1c,     only : getgh1c
- use m_dfpt_mkrho,  only : dfpt_accrho
 
 !Arguments ------------------------------------
 !scalars

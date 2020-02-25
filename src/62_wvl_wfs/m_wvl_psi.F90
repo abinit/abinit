@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_psi
 !! NAME
 !!  m_wvl_psi
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DC, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (DC, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,13 +25,14 @@
 module m_wvl_psi
 
   use defs_basis
-  use defs_abitypes
-  use defs_datatypes
   use defs_wvltypes
   use m_errors
   use m_xmpi
   use m_abicore
+  use m_dtset
 
+  use defs_datatypes, only : pseudopotential_type
+  use defs_abitypes,  only : MPI_type
   use m_energies, only : energies_type
   use m_pawcprj,  only : pawcprj_type, pawcprj_alloc
   use m_abi2big,  only : wvl_vxc_abi2big, wvl_vtrial_abi2big

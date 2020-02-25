@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_cgprj
 !! NAME
 !!  m_cgprj
@@ -7,7 +6,7 @@
 !!   Routines to compute <Proj_i|Cnk> with |Cnk> expressed in reciprocal space.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (MT)
+!!  Copyright (C) 1998-2020 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -125,8 +124,6 @@ contains
 &                   idir,indlmn,istwf_k,kg_k,kpg,kpoint,lmnmax,mgfft,mpi_enreg,&
 &                   natom,nattyp,ngfft,nloalg,npw_k,nspinor,ntypat,&
 &                   phkxred,ph1d,ph3d,ucvol,useylm)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars
@@ -445,8 +442,6 @@ contains
 & iorder_cprj,istwfk,kg,kpt,mcg,mcprj,mgfft,mkmem,mpi_enreg,mpsang,&
 & mpw,natom,nattyp,nband,ncprj,ngfft,nkpt,nloalg,npwarr,nspinor,&
 & nsppol,ntypat,paral_kgb,ph1d,psps,rmet,typat,ucvol,uncp,xred,ylm,ylmgr)
-
- implicit none
 
 !Arguments -------------------------------
 !scalars

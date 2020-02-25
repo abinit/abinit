@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/fftprof
 !! NAME
 !! fftprof
@@ -7,7 +6,7 @@
 !!  Utility for profiling the FFT libraries supported by ABINIT.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2019 ABINIT group (MG)
+!! Copyright (C) 2004-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -76,7 +75,6 @@
 program fftprof
 
  use defs_basis
- use defs_abitypes
  use m_build_info
  use m_xmpi
  use m_xomp
@@ -85,11 +83,12 @@ program fftprof
  use m_abicore
  use m_dfti
 
+ use defs_abitypes,only : MPI_type
  use m_fstrings,   only : lower
  use m_specialmsg, only : specialmsg_getcount, herald
  use m_io_tools,   only : flush_unit
  use m_geometry,   only : metric
- use m_fftcore,    only : get_cache_kb, get_kg, fftalg_isavailable, fftalg_has_mpi, getng
+ use m_fftcore,    only : get_cache_kb, get_kg, fftalg_isavailable, fftalg_has_mpi, getng, fftcore_set_mixprec
  use m_fft,        only : fft_use_lib_threads, fftbox_utests, fftu_utests, fftbox_mpi_utests, fftu_mpi_utests
  use m_fftw3,      only : fftw3_init_threads
  use m_mpinfo,     only : destroy_mpi_enreg, initmpi_seq
@@ -121,7 +120,7 @@ program fftprof
  integer,allocatable :: osc_gvec(:,:)
  integer,allocatable :: fft_setups(:,:),fourwf_params(:,:)
 ! ==========  INPUT FILE ==============
- integer :: ncalls=10,max_nthreads=1,ndat=1,necut=0,nsym=1
+ integer :: ncalls = 10, max_nthreads = 1, ndat = 1, necut = 0, nsym = 1, mixprec = 0
  character(len=500) :: tasks="all"
  integer :: fftalgs(MAX_NFFTALGS) = 0
  integer :: symrel(3,3,MAX_NSYM) = 0
@@ -131,8 +130,8 @@ program fftprof
  real(dp) :: rprimd(3,3)
  real(dp) :: kpoint(3) = (/0.1,0.2,0.3/)
  logical :: use_lib_threads = .FALSE.
- namelist /CONTROL/ tasks, ncalls, max_nthreads, ndat, fftalgs, necut, ecut_arth, use_lib_threads
- namelist /SYSTEM/ ecut, rprimd, kpoint, osc_ecut, nsym,symrel
+ namelist /CONTROL/ tasks, ncalls, max_nthreads, ndat, fftalgs, necut, ecut_arth, use_lib_threads, mixprec
+ namelist /SYSTEM/ ecut, rprimd, kpoint, osc_ecut, nsym, symrel
 
 ! *************************************************************************
 
@@ -196,6 +195,10 @@ program fftprof
    call xmpi_bcast(symrel,master,comm,ierr)
  end if
 
+
+ ! Set precision for FFT libs.
+ ii = fftcore_set_mixprec(mixprec)
+
  ! replace "+" with white spaces
  do ii=1,LEN_TRIM(tasks)
    if (tasks(ii:ii) == "+") tasks(ii:ii) = " "
@@ -214,7 +217,7 @@ program fftprof
  do_mpi_utests = INDEX(tasks," mpi-utests")>0
  !do_mpi_bench  = INDEX(tasks," mpi-bench")>0
 
-#ifdef HAVE_FFT_FFTW3_THREADS
+#ifdef HAVE_FFTW3_THREADS
  call fftw3_init_threads()
 #endif
 
@@ -230,7 +233,7 @@ program fftprof
 
  if (do_mpi_utests) then
    ! Execute unit tests for MPI FFTs and terminate execution.
-   call wrtout(std_out,"=== MPI FFT Unit Tests ===","COLL")
+   call wrtout(std_out, "=== MPI FFT Unit Tests ===")
 
    ! List the FFT libraries that will be tested.
    ! Goedecker FFTs are always available, other libs are optional.
@@ -242,8 +245,8 @@ program fftprof
      fftalg = fftalgs(ii)
      do paral_kgb=1,1
        write(msg,"(5(a,i0))")&
-&       "MPI fftu_utests with fftalg = ",fftalg,", paral_kgb = ",paral_kgb," ndat = ",ndat,", nthreads = ",nthreads
-       call wrtout(std_out,msg,"COLL")
+        "MPI fftu_utests with fftalg = ",fftalg,", paral_kgb = ",paral_kgb," ndat = ",ndat,", nthreads = ",nthreads
+       call wrtout(std_out, msg)
        nfailed = nfailed + fftu_mpi_utests(fftalg,ecut,rprimd,ndat,nthreads,comm,paral_kgb)
      end do
    end do
@@ -255,13 +258,13 @@ program fftprof
      fftalg = fftalgs(ii)
      do cplex=1,2
        write(msg,"(4(a,i0))")"MPI fftbox_utests with fftalg = ",fftalg,", cplex = ",cplex," ndat = ",ndat,", nthreads = ",nthreads
-       call wrtout(std_out,msg,"COLL")
+       call wrtout(std_out, msg)
        nfailed = nfailed + fftbox_mpi_utests(fftalg=fftalg,cplex=cplex,ndat=ndat,nthreads=nthreads,comm_fft=comm)
      end do
    end do
 
    write(msg,'(a,i0)')"Total number of failed tests = ",nfailed
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
    goto 100 ! Jump to xmpi_end
  end if
 
@@ -271,7 +274,7 @@ program fftprof
 
  ! symmetries (if given) are used for defining the FFT mesh.
  if (nsym==1 .and. ALL(symrel==0)) then
-   symrel(:,:,1) = RESHAPE((/1,0,0,0,1,0,0,0,1/),(/3,3/))
+   symrel(:,:,1) = RESHAPE([1,0,0,0,1,0,0,0,1], [3,3])
  end if
 
  ! Set the number of calls for test.
@@ -295,18 +298,18 @@ program fftprof
    fftalg = fftalgs(alg)
    fftalga=fftalg/100; fftalgc=mod(fftalg,10)
    avail = 1
-   if (.not.fftalg_isavailable(fftalg)) avail = 0
+   if (.not. fftalg_isavailable(fftalg)) avail = 0
    do ith=1,max_nthreads
      !fftcache is machine-dependent.
      fftcache = get_cache_kb()
      idx = idx + 1
-     fft_setups(:,idx) = (/fftalg,fftcache,ndat,ith,avail/)
+     fft_setups(:,idx) = [fftalg, fftcache, ndat, ith, avail]
    end do
  end do
 
  ! Compute FFT box.
- ABI_DT_MALLOC(Ftest,(ntests))
- ABI_DT_MALLOC(Ftprof,(ntests))
+ ABI_MALLOC(Ftest,(ntests))
+ ABI_MALLOC(Ftprof,(ntests))
 
  do it=1,ntests ! Needed for crappy compilers that do not support => null() in type declarations.
    call fft_test_nullify(Ftest(it))
@@ -348,11 +351,11 @@ program fftprof
    ! (cplex=2 only allowed for option=2, and istwf_k=1)
    nsets=4; if (Ftest(1)%istwf_k==1) nsets=5
    ABI_MALLOC(fourwf_params,(2,nsets))
-   fourwf_params(:,1) = (/0,0/)
-   fourwf_params(:,2) = (/1,1/)
-   fourwf_params(:,3) = (/2,1/)
-   fourwf_params(:,4) = (/3,0/)
-   if (nsets==5) fourwf_params(:,5) = (/2,2/)
+   fourwf_params(:,1) = [0,0]
+   fourwf_params(:,2) = [1,1]
+   fourwf_params(:,3) = [2,1]
+   fourwf_params(:,4) = [3,0]
+   if (nsets==5) fourwf_params(:,5) = [2,2]
 
    do iset=1,nsets
      option_fourwf = fourwf_params(1,iset)
@@ -414,7 +417,7 @@ program fftprof
  end if ! test_gw
 
  if (do_seq_utests) then
-   call wrtout(std_out,"=== FFT Unit Tests ===","COLL")
+   call wrtout(std_out,"=== FFT Unit Tests ===")
 
    nfailed = 0
    do idx=1,ntests
@@ -427,7 +430,7 @@ program fftprof
      if (fft_setups(5,idx) == 0) CYCLE
 
      write(msg,"(3(a,i0))")"fftbox_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
-     call wrtout(std_out,msg,"COLL")
+     call wrtout(std_out, msg)
 
      nfailed = nfailed + fftbox_utests(fftalg,ndat,nthreads)
 
@@ -437,21 +440,21 @@ program fftprof
      ut_ngfft(8) = fftcache
 
      call getng(boxcutmin2,ecut,gmet,k0,me_fft0,ut_mgfft,ut_nfft,ut_ngfft,nproc_fft1,nsym,&
-&     paral_kgb0,symrel,unit=dev_null)
+       paral_kgb0,symrel,unit=dev_null)
 
      write(msg,"(3(a,i0))")"fftu_utests with fftalg = ",fftalg,", ndat = ",ndat,", nthreads = ",nthreads
-     call wrtout(std_out,msg,"COLL")
+     call wrtout(std_out, msg)
 
      nfailed = nfailed + fftu_utests(ecut,ut_ngfft,rprimd,ndat,nthreads)
    end do
 
    write(msg,'(a,i0)')"Total number of failed tests = ",nfailed
-   call wrtout(std_out,msg,"COLL")
+   call wrtout(std_out, msg)
  end if
 
 ! Benchmarks for the sequential version.
  if (do_seq_bench) then
-   call wrtout(std_out,"Entering benchmark mode","COLL")
+   call wrtout(std_out, "Entering benchmark mode")
    write(std_out,*)"ecut_arth",ecut_arth,", necut ",necut
 
    if (INDEX(tasks,"bench_fourdp")>0) then
@@ -482,25 +485,25 @@ program fftprof
    if (INDEX(tasks,"bench_rhotwg")>0) then
      map2sphere=1; use_padfft=1
      call prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut,boxcutmin2,&
-&     rprimd,nsym,symrel,gmet,MPI_enreg)
+      rprimd,nsym,symrel,gmet,MPI_enreg)
 
      map2sphere=1; use_padfft=0
      call prof_rhotwg(fft_setups,map2sphere,use_padfft,necut,ecut_arth,osc_ecut,boxcutmin2,&
-&     rprimd,nsym,symrel,gmet,MPI_enreg)
+      rprimd,nsym,symrel,gmet,MPI_enreg)
    end if
  end if
  !
  !===============================
  !=== End of run, free memory ===
  !===============================
- call wrtout(std_out,ch10//" Analysis completed.","COLL")
+ call wrtout(std_out,ch10//" Analysis completed.")
 
  ABI_FREE(fft_setups)
 
  call fft_test_free(Ftest)
- ABI_DT_FREE(Ftest)
+ ABI_FREE(Ftest)
  call fftprof_free(Ftprof)
- ABI_DT_FREE(Ftprof)
+ ABI_FREE(Ftprof)
  call destroy_mpi_enreg(MPI_enreg)
 
  call flush_unit(std_out)

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/aim
 !! NAME
 !! aim
@@ -7,7 +6,7 @@
 !! Main routine for Bader Atom-In-Molecule analysis.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2019 ABINIT group (PCasek,FF,XG)
+!! Copyright (C) 2002-2020 ABINIT group (PCasek,FF,XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +38,6 @@
 program aim
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_build_info
@@ -54,6 +52,7 @@ program aim
  use m_specialmsg,  only : specialmsg_getcount, herald
  use m_fstrings, only : int2char4
  use m_bader !,    only : adini, drvaim, inpar, defad, aim_shutdown
+
  implicit none
 
 !Arguments -----------------------------------

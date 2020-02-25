@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !****m* ABINIT/m_oscillators
 !! NAME
 !!  m_oscillators
@@ -7,7 +6,7 @@
 !!  This module contains procedures to calculate the oscillator matrix elements used in the GW code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -130,8 +129,8 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
  CASE (1)
    ! Collinear case.
    call ts_usug_kkp_bz(npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,gbound,&
-&    wfn1,i1,ktabr1,ktabp1,&
-&    wfn2,i2,ktabr2,ktabp2,rhotwg)
+                       wfn1,i1,ktabr1,ktabp1,&
+                       wfn2,i2,ktabr2,ktabp2,rhotwg)
 
  CASE (2)
    ! Spinorial case.
@@ -170,11 +169,11 @@ subroutine rho_tw_g(nspinor,npwvec,nr,ndat,ngfft,map2sphere,use_padfft,igfftg0,g
      CASE (1)
        ! Need results on the G-sphere. Call zero-padded FFT routines if required.
        if (use_padfft == 1) then
-         nx =ngfft(1); ny =ngfft(2); nz =ngfft(3); mgfft = MAXVAL(ngfft(1:3))
-         ldx=nx; ldy=ny; ldz=nz
-         call fftpad(u12prod,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,-1,gbound)
+         nx = ngfft(1); ny = ngfft(2); nz = ngfft(3); mgfft = maxval(ngfft(1:3))
+         ldx = nx; ldy = ny; ldz = nz
+         call fftpad(u12prod, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, -1, gbound)
        else
-         call fftbox_plan3_many(plan,ndat,ngfft(1:3),ngfft(1:3),ngfft(7),-1)
+         call fftbox_plan3_many(plan, ndat, ngfft(1:3), ngfft(1:3), ngfft(7), -1)
          call fftbox_execute(plan,u12prod)
        end if
 

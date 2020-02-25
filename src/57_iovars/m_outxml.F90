@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outxml
 !! NAME
 !! m_outxml
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt.
@@ -27,9 +26,9 @@
 module m_outxml
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
+ use m_dtset
 
  use m_io_tools,    only : open_file
  use m_geometry,    only : xcart2xred, xred2xcart
@@ -68,8 +67,6 @@ contains
 !! SOURCE
 
 subroutine outxml_open(filename)
-
-  implicit none
 
 !Arguments -------------------------------
   character(len = *), intent(in) :: filename
@@ -118,8 +115,6 @@ end subroutine outxml_open
 !! SOURCE
 
 subroutine outxml_finalise(tsec, values)
-
-  implicit none
 
 !Arguments -------------------------------
   integer, intent(in) :: values(8)
@@ -171,8 +166,6 @@ end subroutine outxml_finalise
 !! SOURCE
 
 subroutine out_resultsgs_XML(dtset, level, results_gs, usepaw)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -287,8 +280,6 @@ end subroutine out_resultsgs_XML
 !! SOURCE
 
 subroutine out_geometry_XML(dtset, level, natom, rprimd, xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

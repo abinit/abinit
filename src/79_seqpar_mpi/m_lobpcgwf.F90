@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/m_lobpcgwf
 !! NAME
 !! m_lobpcgwf
@@ -11,7 +10,7 @@
 !! it will also update the matrix elements of the hamiltonian.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (JB)
+!! Copyright (C) 1998-2020 ABINIT group (JB)
 !! this file is distributed under the terms of the
 !! gnu general public license, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,7 +31,6 @@
 
 module m_lobpcgwf
 
- use defs_abitypes
  use defs_basis
  use m_abicore
  use m_lobpcg
@@ -43,7 +41,9 @@ module m_lobpcgwf
  use m_fstrings
  use m_xg
  use m_lobpcg2
+ use m_dtset
 
+ use defs_abitypes, only : mpi_type
  use m_hamiltonian, only : gs_hamiltonian_type
  use m_pawcprj,     only : pawcprj_type
  use m_nonlop,      only : nonlop

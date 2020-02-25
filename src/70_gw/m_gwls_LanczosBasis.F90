@@ -1,5 +1,4 @@
-!{\src2tex{textfont=tt}}
-!!****m* ABINIT/m_gwls_LanczosBasis 
+!!****m* ABINIT/m_gwls_LanczosBasis
 !! NAME
 !! m_gwls_LanczosBasis
 !!
@@ -7,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +24,7 @@
 #include "abi_common.h"
 
 
-module m_gwls_LanczosBasis 
+module m_gwls_LanczosBasis
 !----------------------------------------------------------------------------------------------------
 ! This module contains the static Lanczos basis, which should be computed once and for all,
 ! and then be made available to other modules.
@@ -35,6 +34,7 @@ use m_gwls_utility
 use m_gwls_wf
 use m_gwls_hamiltonian
 use m_gwls_GenerateEpsilon
+use m_dtset
 
 ! Abinit modules
 use defs_basis
@@ -61,14 +61,14 @@ complex(dpc), public, allocatable :: Lbasis_model_lanczos(:,:)  ! complex array 
 !
 !------------------------------------------------------------
 ! Lanczos basis which puts the static dielectric matrix in bands (OBSOLETE)
-real(dp), public, allocatable :: lanczos_basis_0(:,:,:,:)      
+real(dp), public, allocatable :: lanczos_basis_0(:,:,:,:)
 
 ! modified basis, of the form (V^{1/2}. l^*) psie (OBSOLETE)
 real(dp), public, allocatable :: basis_0(:,:,:,:)
 
 
 ! modified basis, of the form (V^{1/2}. l^*) psie
-complex(dpc), public, allocatable :: Lbasis_modified(:,:) 
+complex(dpc), public, allocatable :: Lbasis_modified(:,:)
 
 
 integer, public  :: lanczos_basis_size
@@ -103,15 +103,14 @@ subroutine setup_Lanczos_basis(lmax,lmax_model)
 !----------------------------------------------------------------------------------------------------
 ! Set up the lanczos basis
 !----------------------------------------------------------------------------------------------------
-implicit none
 
-integer, intent(in) :: lmax, lmax_model 
+integer, intent(in) :: lmax, lmax_model
 
 ! *************************************************************************
 
 ABI_ALLOCATE(Lbasis_lanczos,(npw_k,lmax))
 
-if (lmax_model > 0) then 
+if (lmax_model > 0) then
   ABI_ALLOCATE(Lbasis_model_lanczos,(npw_k,lmax_model))
 end if
 
@@ -139,7 +138,6 @@ end subroutine setup_Lanczos_basis
 
 subroutine cleanup_Lanczos_basis()
 
-implicit none
 
 ! *************************************************************************
 
@@ -201,9 +199,9 @@ ABI_ALLOCATE(psikg_e ,(2,npw_g))
 ! copy the valence state on every row of FFT processors
 do mb = 1, blocksize
 psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k) = psie_k(:,:)
-end do ! mb 
+end do ! mb
 ! Transform to FFT representation
-call wf_block_distribute(psikb_wrk,  psikg_e,1) ! LA -> FFT 
+call wf_block_distribute(psikb_wrk,  psikg_e,1) ! LA -> FFT
 
 
 ! Number of blocks of lanczos vectors
@@ -233,7 +231,7 @@ psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k) = psik_wrk(:,:)
 end do ! mb
 
 ! Transform to FFT representation
-call wf_block_distribute(psikb_wrk,  psikg_wrk,1) ! LA -> FFT 
+call wf_block_distribute(psikb_wrk,  psikg_wrk,1) ! LA -> FFT
 
 ! fourier transform, conjugate
 call g_to_r(psir1,psikg_wrk)
@@ -245,7 +243,7 @@ call gr_to_g(psikg_wrk, psir1, psikg_e)
 ! return to LA configuration
 
 ! Transform to LA representation
-call wf_block_distribute(psikb_wrk,  psikg_wrk, 2) ! FFT -> LA 
+call wf_block_distribute(psikb_wrk,  psikg_wrk, 2) ! FFT -> LA
 
 do mb = 1, blocksize
 ! Determine the index of the Lanczos vector
@@ -253,7 +251,7 @@ l = (iblk_lanczos-1)*blocksize + mb
 
 if ( l <= lmax) then
   psik_wrk(:,:) = psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k)
-  Lbasis_lanczos(:,l) = cmplx_1*psik_wrk(1,:)+cmplx_i*psik_wrk(2,:) 
+  Lbasis_lanczos(:,l) = cmplx_1*psik_wrk(1,:)+cmplx_i*psik_wrk(2,:)
 end if
 
 end do ! mb
@@ -288,7 +286,7 @@ psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k) = psik_wrk(:,:)
 end do ! mb
 
 ! Transform to FFT representation
-call wf_block_distribute(psikb_wrk,  psikg_wrk,1) ! LA -> FFT 
+call wf_block_distribute(psikb_wrk,  psikg_wrk,1) ! LA -> FFT
 
 ! fourier transform, conjugate
 call g_to_r(psir1,psikg_wrk)
@@ -299,7 +297,7 @@ call gr_to_g(psikg_wrk, psir1, psikg_e)
 
 ! return to LA configuration
 ! Transform to LA representation
-call wf_block_distribute(psikb_wrk,  psikg_wrk, 2) ! FFT -> LA 
+call wf_block_distribute(psikb_wrk,  psikg_wrk, 2) ! FFT -> LA
 
 do mb = 1, blocksize
 ! Determine the index of the Lanczos vector
@@ -307,7 +305,7 @@ l = (iblk_lanczos-1)*blocksize + mb
 
 if ( l <= lmax_model) then
   psik_wrk(:,:) = psikb_wrk(:,(mb-1)*npw_k+1:mb*npw_k)
-  Lbasis_model_lanczos(:,l) = cmplx_1*psik_wrk(1,:)+cmplx_i*psik_wrk(2,:) 
+  Lbasis_model_lanczos(:,l) = cmplx_1*psik_wrk(1,:)+cmplx_i*psik_wrk(2,:)
 end if
 
 end do ! mb
@@ -323,5 +321,5 @@ ABI_DEALLOCATE(psikg_e )
 end subroutine modify_Lbasis_Coulomb
 !!***
 
-end module m_gwls_LanczosBasis 
+end module m_gwls_LanczosBasis
 !!***

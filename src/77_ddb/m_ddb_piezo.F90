@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ddb_piezo
 !! NAME
 !!  m_ddb_piezo
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XW)
+!!  Copyright (C) 1999-2020 ABINIT group (XW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -92,8 +91,6 @@ contains
 !! SOURCE
 
 subroutine ddb_piezo(inp,blkval,dielt_rlx,elast,iblok,instrain,iout,mpert,natom,nblok,piezo,ucvol,ncid)
-
- implicit none
 
 !Arguments-------------------------------------------
 !scalars

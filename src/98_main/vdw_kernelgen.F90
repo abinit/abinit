@@ -6,7 +6,7 @@
 !!  Generates vdW-DF kernels from the user input.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2019 ABINIT group (Yann Pouillon)
+!!  Copyright (C) 2011-2020 ABINIT group (Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt.
@@ -42,7 +42,6 @@ program vdw_kernelgen
 
 #if defined DEV_YP_VDWXC
  use defs_basis
- use defs_abitypes
  use m_build_info
  use m_errors
  use m_xc_vdw
@@ -54,6 +53,7 @@ program vdw_kernelgen
 
  use m_specialmsg,  only : specialmsg_getcount, herald
  use m_io_tools,    only : flush_unit
+
  implicit none
 
 #if defined HAVE_MPI1
@@ -68,7 +68,6 @@ program vdw_kernelgen
  character(len=24) :: codename
  character(len=500) :: message
  integer :: ierr
- type(MPI_type) :: mpi_enreg,mpi_enreg_seq
 
  type(xc_vdw_type) :: vdw_params
  character(len=fnlen) :: vdw_filnam
@@ -87,9 +86,6 @@ program vdw_kernelgen
 !for doing that !!
  call xmpi_init()
 
-!Default for sequential use
- call initmpi_seq(mpi_enreg)
-
 !Signal MPI I/O compilation has been activated
 #if defined HAVE_MPI_IO
  if(xmpi_paral==0)then
@@ -107,14 +103,7 @@ program vdw_kernelgen
  call abimem_init(0)
 #endif
 
-!Other values of mpi_enreg are dataset dependent, and should NOT be initialized
-!inside vdw_kernelgen.F90.
-
-!* Init fake MPI type with values for sequential case.
- call initmpi_seq(MPI_enreg_seq)
-
- write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet.',&
-& ch10
+ write(message,'(3a)') ch10,'vdW-DF functionals are not fully operational yet.',ch10
  MSG_ERROR(message)
 
 !=== Write greetings ===
@@ -171,8 +160,6 @@ program vdw_kernelgen
 & ch10
  call wrtout(std_out,message,'COLL')
  call flush_unit(std_out)
-
- call destroy_mpi_enreg(mpi_enreg)
 
  call abinit_doctor("__vdw_kernelgen")
 

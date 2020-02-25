@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_green
 !! NAME
 !!  m_green
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,16 +26,24 @@
  MODULE m_green
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_abicore
  use m_errors
  use m_lib_four
+ use m_splines
 
- use m_io_tools, only : flush_unit, open_file
+ !use defs_abitypes, only : MPI_type
+ use m_crystal, only : crystal_t
+ use m_oper,     only : init_oper, destroy_oper, copy_oper, print_oper, inverse_oper, upfold_oper, &
+                        loc_oper, trace_oper, oper_type
+ use m_paw_dmft, only: paw_dmft_type, construct_nwli_dmft
+ use m_matlu,    only : diff_matlu,print_matlu,trace_matlu, matlu_type, &
+                        sym_matlu,zero_matlu,add_matlu,shift_matlu,init_matlu,destroy_matlu,copy_matlu
+ use m_fstrings, only : int2char4
+ use m_pawang,   only : pawang_type
+ use m_self,     only : self_type
+ use m_io_tools, only : open_file
  use m_time,     only : timab
- use m_oper, only : oper_type
- use m_matlu, only : matlu_type
 
  implicit none
 
@@ -206,11 +213,6 @@ CONTAINS
 
 subroutine init_green(green,paw_dmft,opt_oper_ksloc,wtype)
 
- use m_crystal, only : crystal_t
- use m_oper, only : init_oper
- use m_paw_dmft, only: paw_dmft_type
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !type
@@ -332,10 +334,6 @@ end subroutine init_green
 
 subroutine init_green_tau(green,paw_dmft,opt_ksloc)
 
- use m_oper, only : init_oper
- use m_paw_dmft, only: paw_dmft_type
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !type
@@ -393,9 +391,6 @@ end subroutine init_green_tau
 !! SOURCE
 
 subroutine destroy_green(green)
-
- use m_oper, only : destroy_oper
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -463,10 +458,6 @@ end subroutine destroy_green
 
 subroutine destroy_green_tau(green)
 
- use m_crystal, only : crystal_t
- use m_oper, only : destroy_oper
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(green_type),intent(inout) :: green
@@ -520,10 +511,6 @@ end subroutine destroy_green_tau
 !! SOURCE
 
 subroutine copy_green(green1,green2,opt_tw)
-
- use m_crystal, only : crystal_t
- use m_oper, only : copy_oper
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -586,12 +573,6 @@ end subroutine copy_green
 !! SOURCE
 
 subroutine printocc_green(green,option,paw_dmft,pawprtvol,opt_weissgreen,chtype)
-
- use m_crystal, only : crystal_t
- use m_oper, only : print_oper
- use m_matlu, only : diff_matlu,print_matlu,trace_matlu
- use m_paw_dmft, only : paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -698,13 +679,6 @@ end subroutine printocc_green
 !! SOURCE
 
 subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
-
- use m_crystal, only : crystal_t
- use m_oper, only : print_oper
- use m_paw_dmft, only : paw_dmft_type
-
- use m_fstrings, only : int2char4
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -924,12 +898,12 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
        enddo
        write(message,*) ch10
        call wrtout(spfkresolved_unt,message,'COLL')
-! 
+!
 !     do isppol = 1 , nsppol
 !       do ikpt = 1, nkpt
 !         do ib=1,mbandc
 !           sf=czero
-!           write(71,*)  
+!           write(71,*)
 !           write(71,*)  "#", ikpt, ib
 !           do ifreq=1,green%nw
 !             sf(ifreq)=sf(ifreq)+green%oper(ifreq)%ks(isppol,ikpt,ib,ib)
@@ -940,6 +914,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
 !     enddo
    endif
    if (option==4) then
+         sf=czero
      do isppol = 1 , nsppol
        do ikpt = 1, nkpt
          do ib=1,mbandc
@@ -950,18 +925,18 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
        enddo
      enddo
    endif
-   if(paw_dmft%dmft_kspectralfunc==0) then
-     sf_corr=czero
+   if(paw_dmft%dmft_kspectralfunc==1) then
      do iatom=1,natom
-       call int2char4(iatom,tag_at)
-       ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-       tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_spectralfunction_orb_'//trim(char1)//'_iatom'//trim(tag_at)
-       if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
-         MSG_ERROR(message)
-       end if
-       write(message,*) "#", nspinor,nsppol,ndim,green%nw
-       call wrtout(spcorb_unt,message,'COLL')
        if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
+         sf_corr=czero
+         call int2char4(iatom,tag_at)
+         ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
+         tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_spectralfunction_orb_'//trim(char1)//'_iatom'//trim(tag_at)
+         if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
+           MSG_ERROR(message)
+         end if
+         write(message,*) "#", nspinor,nsppol,ndim,green%nw
+         call wrtout(spcorb_unt,message,'COLL')
          write(message,*) "#", green%oper(1)%matlu(iatom)%lpawu
          call wrtout(spcorb_unt,message,'COLL')
          ndim=2*green%oper(1)%matlu(iatom)%lpawu+1
@@ -974,12 +949,12 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
              enddo
            enddo
          enddo
+         do ifreq=1,green%nw
+           write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/3.141592653589793238_dp
+           call wrtout(spcorb_unt,message,'COLL')
+         enddo
+         close(spcorb_unt)
        endif
-       do ifreq=1,green%nw
-         write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/3.141592653589793238_dp
-         call wrtout(spcorb_unt,message,'COLL')
-       enddo
-       close(spcorb_unt)
      enddo
    endif
    if (option==4) then
@@ -1032,14 +1007,6 @@ end subroutine print_green
 
 subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,&
 &           opt_nonxsum,opt_nonxsum2)
-
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_matlu, only : sym_matlu,zero_matlu,add_matlu,print_matlu,shift_matlu,init_matlu,destroy_matlu,copy_matlu
- use m_oper, only : inverse_oper,loc_oper,print_oper,upfold_oper,init_oper,destroy_oper
- use m_paw_dmft, only : paw_dmft_type
- use m_self, only : self_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1190,7 +1157,7 @@ subroutine compute_green(cryst_struc,green,paw_dmft,pawang,prtopt,self,opt_self,
    !write(6,*) 'self hdc  ', ifreq, self%hdc%matlu(1)%mat(1,1,1,1,1)
    !write(6,*) 'self_minus_hdc_oper  ', ifreq, self_minus_hdc_oper%matlu(1)%mat(1,1,1,1,1)
 ! enddo ! natom
-     if(paw_dmft%dmft_solv==4)  then 
+     if(paw_dmft%dmft_solv==4)  then
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_shift,0.d0,kind=dp),-1)
        call shift_matlu(self_minus_hdc_oper%matlu,paw_dmft%natom,cmplx(self%qmc_xmu,0.d0,kind=dp),-1)
      endif
@@ -1416,16 +1383,6 @@ end subroutine compute_green
 
 subroutine integrate_green(cryst_struc,green,paw_dmft&
 &  ,pawang,prtopt,opt_ksloc,opt_after_solver,opt_diff,opt_nonxsum)
-
- use m_pawang, only : pawang_type
- use m_crystal,   only : crystal_t
- use m_matlu,     only : sym_matlu,print_matlu,init_matlu,&
-& destroy_matlu,diff_matlu,zero_matlu
- use m_paw_dmft,  only : paw_dmft_type
- use m_oper,      only : loc_oper,trace_oper,init_oper,destroy_oper
-! use m_oper, only : loc_oper,trace_oper,upfold_oper,print_oper,identity_oper,init_oper,destroy_oper
- use m_errors
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1884,14 +1841,6 @@ end subroutine integrate_green
 
 subroutine icip_green(char1,cryst_struc,green,paw_dmft,pawang,pawprtvol,self,opt_self)
 
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_matlu, only : sym_matlu
- use m_paw_dmft, only : paw_dmft_type
- use m_oper, only : loc_oper
- use m_self, only : self_type
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(crystal_t),intent(in) :: cryst_struc
@@ -1988,13 +1937,6 @@ end subroutine icip_green
 !! SOURCE
 
 subroutine fourier_green(cryst_struc,green,paw_dmft,pawang,opt_ksloc,opt_tw)
-
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_matlu, only : sym_matlu,init_matlu,destroy_matlu,print_matlu
- use m_paw_dmft, only : paw_dmft_type
- use m_oper, only : loc_oper
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2281,12 +2223,6 @@ end subroutine fourier_green
 
 subroutine check_fourier_green(cryst_struc,green,paw_dmft,pawang)
 
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_paw_dmft, only : paw_dmft_type
- use m_matlu, only : print_matlu
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(crystal_t),intent(in) :: cryst_struc
@@ -2361,9 +2297,6 @@ end subroutine check_fourier_green
 
 subroutine compa_occup_ks(green,paw_dmft)
 
- use m_paw_dmft, only : paw_dmft_type
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(green_type),intent(inout) :: green
@@ -2424,7 +2357,7 @@ end subroutine compa_occup_ks
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2448,10 +2381,6 @@ end subroutine compa_occup_ks
 !!
 !! SOURCE
 subroutine add_int_fct(ifreq,ff,ldiag,omega_current,option,integral,temp,wgt_wlo,dmft_nwlo)
-
- use defs_basis
- use m_paw_dmft, only : paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2515,7 +2444,7 @@ end subroutine add_int_fct
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2541,9 +2470,6 @@ end subroutine add_int_fct
 !!
 !! SOURCE
 subroutine int_fct(ff,ldiag,option,paw_dmft,integral,procb,myproc)
-
- use m_paw_dmft, only : paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2646,7 +2572,7 @@ end subroutine int_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2670,10 +2596,6 @@ end subroutine int_fct
 !!
 !! SOURCE
 subroutine fourier_fct(fw,ft,ldiag,ltau,opt_four,paw_dmft)
-
- use m_paw_dmft, only : paw_dmft_type, construct_nwli_dmft
- use m_splines
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2789,7 +2711,7 @@ end subroutine fourier_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2814,11 +2736,6 @@ end subroutine fourier_fct
 !! SOURCE
 
 subroutine spline_fct(fw1,fw2,opt_spline,paw_dmft)
-
- use defs_basis
- use m_paw_dmft, only : paw_dmft_type, construct_nwli_dmft
- use m_splines
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2890,9 +2807,6 @@ end subroutine spline_fct
 
 subroutine occup_green_tau(green)
 
- use m_matlu, only : shift_matlu
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(green_type),intent(inout) :: green
@@ -2939,7 +2853,6 @@ end subroutine occup_green_tau
 
  function occupfd(eig,fermie,temp)
 
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -2983,11 +2896,6 @@ end subroutine occup_green_tau
 !! SOURCE
 
  subroutine distrib_paral(nkpt,nproc,nw,nw_perproc,procb,proct)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -3093,7 +3001,7 @@ end subroutine occup_green_tau
 !! Compute levels for ctqmc
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3111,19 +3019,6 @@ end subroutine occup_green_tau
 !! SOURCE
 
  subroutine greenldacompute_green(cryst_struc,green,pawang,paw_dmft)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_errors
- use m_abicore
-
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_paw_dmft, only : paw_dmft_type
- use m_oper, only : oper_type,loc_oper
- use m_matlu, only : sym_matlu, print_matlu
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3196,7 +3091,7 @@ end subroutine occup_green_tau
 !!  Compute Fermi level for DMFT or LDA.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3220,16 +3115,6 @@ end subroutine occup_green_tau
 !! SOURCE
 
 subroutine fermi_green(cryst_struc,green,paw_dmft,pawang,self)
-
- use m_abicore
-
- use defs_basis
- use defs_abitypes
- use m_pawang, only : pawang_type
- use m_crystal, only : crystal_t
- use m_paw_dmft, only: paw_dmft_type
- use m_self, only : self_type
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -3352,7 +3237,7 @@ end subroutine fermi_green
 !!  Compute root of a function with newton methods (newton/halley)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3378,16 +3263,6 @@ end subroutine fermi_green
 subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 & x_input,x_precision,max_iter,f_precision,ierr_hh,opt_noninter,opt_algo)
 
- use defs_basis
- use defs_abitypes
- use m_abicore
- use m_errors
-
- use m_pawang,    only : pawang_type
- use m_crystal,   only : crystal_t
- use m_paw_dmft,  only: paw_dmft_type
- use m_self,      only : self_type
- implicit none
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst_struc
@@ -3594,15 +3469,8 @@ subroutine newton(cryst_struc,green,paw_dmft,pawang,self,&
 subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang,self&
 & ,x_input,x_old,x_precision,Fx,Fxprime,Fxdouble,opt_noninter,option)
 
- use m_abicore
 
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_crystal, only : crystal_t
- use m_paw_dmft, only: paw_dmft_type
- use m_self, only : self_type
- implicit none
+
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst_struc
@@ -3697,15 +3565,8 @@ subroutine function_and_deriv(cryst_struc,f_precision,green,iter,paw_dmft,pawang
 subroutine compute_nb_elec(cryst_struc,green,paw_dmft,pawang,self,&
 &  Fx,opt_noninter,nb_elec_x,fermie)
 
- use m_abicore
 
- use defs_basis
- use defs_abitypes
- use m_errors
- use m_crystal, only : crystal_t
- use m_paw_dmft, only: paw_dmft_type
- use m_self, only : self_type
- implicit none
+
 !Arguments ------------------------------------
 !scalars
  type(crystal_t),intent(in) :: cryst_struc
@@ -3744,7 +3605,7 @@ end subroutine newton
 !! do the fourier transformation and print it
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3769,14 +3630,6 @@ end subroutine newton
 !! SOURCE
 
 subroutine local_ks_green(green,paw_dmft,prtopt)
-
- use defs_basis
- use m_errors
- use m_abicore
-
- use m_crystal, only : crystal_t
- use m_paw_dmft, only : paw_dmft_type
- implicit none
 
 !Arguments ------------------------------------
 !scalars

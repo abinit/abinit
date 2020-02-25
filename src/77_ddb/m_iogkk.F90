@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_iogkk
 !! NAME
 !!  m_iogkk
@@ -7,7 +6,7 @@
 !!  IO routines for GKK files
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MVer)
+!!  Copyright (C) 2008-2020 ABINIT group (MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,8 +26,6 @@
 module m_iogkk
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_elphon
  use m_errors
  use m_abicore
@@ -36,6 +33,8 @@ module m_iogkk
  use m_krank
  use m_hdr
 
+ use defs_datatypes,    only : ebands_t
+ use defs_abitypes,     only : MPI_type
  use m_numeric_tools,   only : wrap2_pmhalf
  use m_io_tools,        only : open_file, get_unit
  use m_symtk,           only : mati3inv, littlegroup_q
@@ -145,13 +144,8 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
  use_sym   = 1
  nsppol    = elph_ds%nsppol
  nbranch   = elph_ds%nbranch
- if (ep_prt_yambo==1) then
-   nFSband = nband
-   minFSband = 1
- else
-   nFSband   = elph_ds%nFSband
-   minFSband = elph_ds%minFSband
- end if
+ nFSband   = elph_ds%nFSband
+ minFSband = elph_ds%minFSband
 
 !init values for parallelization
  comm = xmpi_world
@@ -223,8 +217,8 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
 
    end if
 
-!  broadcast data to all nodes:
-   call hdr_bcast(hdr1, master, me, comm)
+   ! broadcast data to all nodes:
+   call hdr1%bcast(master, me, comm)
 
 !  Find qpoint in full grid
    new=1
@@ -647,7 +641,7 @@ subroutine read_gkk(elph_ds,Cryst,ifc,Bst,FSfullpqtofull,gkk_flag,n1wf,nband,ep_
      ABI_DEALLOCATE(qdata)
    end if
 
-   call hdr_free(hdr1)
+   call hdr1%free()
 
  end do !of i1wf
 
@@ -759,7 +753,7 @@ subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phas
  end if
 
 !output GS header
- call hdr_fort_write(hdr0, unitout, fform, ierr)
+ call hdr0%fort_write(unitout, fform, ierr)
  ABI_CHECK(ierr == 0 , "hdr_fort_write returned ierr != 0")
 
 !output GS eigenvalues
@@ -775,7 +769,7 @@ subroutine outgkk(bantot0,bantot1,outfile,eigen0,eigen1,hdr0,hdr1,mpi_enreg,phas
  write (unitout) ntot
 
 !output RF header
- call hdr_fort_write(hdr1, unitout, fform, ierr)
+ call hdr1%fort_write(unitout, fform, ierr)
  ABI_CHECK(ierr == 0 , "hdr_fort_write returned ierr != 0")
 
 !output RF eigenvalues
@@ -1005,7 +999,7 @@ end subroutine prt_gkk_yambo
 !! then maps them into the FS kpt states
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2019 ABINIT group (JPCroc) based on conducti
+!! Copyright (C) 2002-2020 ABINIT group (JPCroc) based on conducti
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1075,10 +1069,10 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  bantot1 = 2*nband_in**2*nkpt_in*nsppol_in
 
  call inpgkk(eigen11,filnam1,hdr1)
- call hdr_free(hdr1)
+ call hdr1%free()
 
  call inpgkk(eigen12,filnam2,hdr1)
- call hdr_free(hdr1)
+ call hdr1%free()
 
 !we use the hdr1 from the last call - should add some consistency
 !testing here, we are trusting users not to mix different ddk files...
@@ -1146,7 +1140,7 @@ subroutine read_el_veloc(nband_in,nkpt_in,kpt_in,nsppol_in,elph_tr_ds)
  ABI_DEALLOCATE(eigen12)
  ABI_DEALLOCATE(eigen13)
 
- call hdr_free(hdr1)
+ call hdr1%free()
 
  write(std_out,*)'out of read_el_veloc '
 
@@ -1221,7 +1215,7 @@ subroutine inpgkk(eigen1,filegkk,hdr1)
  ABI_CHECK(ierr==0,"reading n1wf from gkk file")
 
  ABI_DEALLOCATE(eigen)
- call hdr_free(hdr0)
+ call hdr0%free()
 
  if (n1wf > 1) then
    write(message,'(3a)')&
@@ -1867,7 +1861,7 @@ subroutine nmsq_gam_sumFS(accum_mat,accum_mat2,displ_red,eigvec,elph_ds,FSfullpq
          sd2 = elph_ds%k_phon%wtk(ib2,ikpt_phonq,isppol)
          ibeff=ib2+(ib1-1)*elph_ds%nFSband
 
-         zgemm_tmp_mat = reshape(h1_mat_el_sq(:,ibeff,:,isppol,ik_this_proc),(/2,elph_ds%nbranch,elph_ds%nbranch/))
+         zgemm_tmp_mat = reshape(h1_mat_el_sq(:,ibeff,:,ik_this_proc,isppol),(/2,elph_ds%nbranch,elph_ds%nbranch/))
 
          call gam_mult_displ(elph_ds%nbranch, displ_red, zgemm_tmp_mat, tmp_mat2)
 
@@ -1931,7 +1925,6 @@ end subroutine nmsq_gam_sumFS
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/nmsq_pure_gkk
 !!
 !! NAME

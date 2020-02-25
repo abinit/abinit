@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gkk
 !! NAME
 !!
@@ -6,7 +5,7 @@
 !!  Tools for the computation of electron-phonon coupling matrix elements (gkk)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (GKA, MG)
+!!  Copyright (C) 2008-2020 ABINIT group (GKA, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,10 +23,10 @@
 module m_gkk
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
+ use m_dtset
  use m_ifc
  use m_ebands
  use m_ddb
@@ -37,10 +36,12 @@ module m_gkk
  use m_pawcprj
  use m_wfk
  use m_nctk
+ use m_dtfil
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
+ use defs_abitypes,    only : MPI_type
  use m_time,           only : cwtime, sec2str
  use m_io_tools,       only : iomode_from_fname
  use m_fstrings,       only : itoa, sjoin, ktoa, ltoa, strcat
@@ -315,7 +316,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
    comm_rpt = xmpi_comm_self
    method = dtset%userid
    !method = 0
-   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, dtset%ddb_qrefine, 1, dtset%ddb_shiftq, nfftf, ngfftf, method, comm_rpt)
+   call dvdb%ftinterp_setup(dtset%ddb_ngqpt, [1, 1, 1], 1, dtset%ddb_shiftq, nfftf, ngfftf, method, comm_rpt)
    cplex = 2
    ABI_MALLOC(v1scf, (cplex, nfftf, nspden, dvdb%my_npert))
    call dvdb%ftinterp_qpt(qpt, nfftf, ngfftf, v1scf, dvdb%comm_rpt)
@@ -429,7 +430,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
                pawfgr,mpi_enreg,dummy_vtrial,v1scf(:,:,:,ipc),vlocal,vlocal1(:,:,:,:,ipc))
 
      ! Continue to initialize the Hamiltonian
-     call load_spin_hamiltonian(gs_hamkq,spin,vlocal=vlocal,with_nonlocal=.true.)
+     call gs_hamkq%load_spin(spin,vlocal=vlocal,with_nonlocal=.true.)
 
      ! Allocate workspace for wavefunctions. Make npw larger than expected.
      ABI_MALLOC(bras, (2, mpw*nspinor, mband))
@@ -439,7 +440,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ! GKA: This little block used to be right after the perturbation loop
      ! Prepare application of the NL part.
      call init_rf_hamiltonian(cplex,gs_hamkq,ipert,rf_hamkq,has_e1kbsc=.true.)
-     call load_spin_rf_hamiltonian(rf_hamkq,spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
+     call rf_hamkq%load_spin(spin,vlocal1=vlocal1(:,:,:,:,ipc),with_nonlocal=.true.)
 
      do ik=1,nkpt
        ! Only do a subset a k-points
@@ -527,7 +528,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
      ABI_FREE(bras)
      ABI_FREE(kets)
      ABI_FREE(h1_kets)
-     call destroy_rf_hamiltonian(rf_hamkq)
+     call rf_hamkq%free()
 
      if (dtset%eph_task == -2) then
        ! Gather the k-points computed by all processes
@@ -597,7 +598,7 @@ subroutine eph_gkk(wfk0_path,wfq_path,dtfil,ngfft,ngfftf,dtset,cryst,ebands_k,eb
  ABI_FREE(ylmgr_kq)
  ABI_FREE(blkflg)
 
- call destroy_hamiltonian(gs_hamkq)
+ call gs_hamkq%free()
  call wfd_k%free()
  call wfd_kq%free()
  call pawcprj_free(cwaveprj0)

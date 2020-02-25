@@ -1,38 +1,39 @@
 ---
-authors: SS, XG, YG
+authors: SS, XG, YG, NAP
 ---
 
-# Tutorial on optical properties  
+# Tutorial on optical properties
 
-## Frequency-dependent linear and second order nonlinear optical response.  
+## Frequency-dependent linear and second order nonlinear optical response.
 
 This tutorial aims at showing how to get the following physical properties, for semiconductors:
 
   * Frequency dependent linear dielectric tensor
   * Frequency dependent second order nonlinear susceptibility tensor
+  * Frequency dependent electro-optical susceptibility tensor
 
 in the simple *Random-Phase Approximation* or *Sum-over-states* approach.
 This tutorial will help you to understand and make use of *optic*.
 Before starting, you should first have some theoretical background.
 We strongly suggest that you first read the first two sections of the [[help:optic]].
 
-[TUTORIAL_README]
-
 This tutorial should take about 1 hour.
+
+[TUTORIAL_README]
 
 ## Computing the momentum matrix elements
 
 *Before beginning, you might consider working in a different subdirectory.
 Why not create Work_optic?*
 
-We also need to copy *toptic_1.files* and *toptic_1.in* from 
-*$ABI_TUTORIAL/Input* to *Work_optic*.
+We also need to copy *toptic_1.files* and *toptic_1.in* from
+*$ABI_TESTS/tutorial/Input* to *Work_optic*.
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorespfn/Input
 mkdir Work_optic
 cd Work_optic
-cp ../toptic_1.files . 
+cp ../toptic_1.files .
 cp ../toptic_1.in .
 ```
 
@@ -45,30 +46,26 @@ We now examine the files.
 
 {% dialog tests/tutorespfn/Input/toptic_1.files tests/tutorespfn/Input/toptic_1.in %}
 
-The computation concerns a crystal of GaAs, in the zinc-blende structure (2 atoms per primitive cell).  
+The computation concerns a crystal of GaAs, in the zinc-blende structure (2 atoms per primitive cell).
 The *toptic_1.files* is a typical Abinit *files file* (nothing special).
 By contrast, it is worthwhile to take some time to examine the input file *toptic_1.in*.
 Examine it, it has six datasets.
 
-The first dataset is a quite standard self-consistent
-determination of the ground state for a fixed geometry. Only the occupied bands are treated.
-The density is output.
-The second dataset is a non-self-consistent calculation, where the number of
-bands has been increased to include unoccupied states.
-The k points are restricted to the Irreducible Brillouin Zone.  
+The first dataset is a quite standard self-consistent determination of the ground state for a fixed geometry. Only the occupied bands are treated. The density is output and used in later datasets.
+
+The second dataset is a non-self-consistent calculation, where the number of bands has been increased to include unoccupied states. The k points are restricted to the Irreducible Brillouin Zone.
+
 The third dataset uses the result of the second one to produce the
 wavefunctions for all the bands, for the full Brillouin Zone
-(this step could be skipped, but is included for later CPU time saving).  
+(this step could be skipped, but is included for later CPU time saving).
 
-The fourth to sixth datasets correspond to the computation of the ddk matrix elements,
-that is, matrix elements of the $\partial/\partial k$ operators.
-Note that the number of bands is the same as for datasets 2 and 3.
-Note also that these are non-self-consistent calculations, moreover,
-restricted to [[nstep]] = 1 and [[nline]] = 0.
+The fourth, fifth, and sixth datasets correspond to the computation of the ddk matrix elements,
+that is, matrix elements of the $\partial/\partial k$ operators. Note that the number of bands is the same as for datasets 2 and 3.
+Note also that these are non-self-consistent calculations, moreover, restricted to [[nstep]] = 1 and [[nline]] = 0.
 Indeed, only the matrix elements between explicitly computed states are required.
 Using a larger nstep would lead to a full computation of the derivative of the wavefunction with respect to
 the wavevector, while in Optic, only the matrix elements are needed.
-Thus a value of [[nstep]] larger than one would not lead to erroneous matrix elements, but would be a waste of time.
+Thus a value of [[nstep]] larger than one would not only lead to erroneous matrix elements, but would be a waste of time.
 
 In order to have a sufficiently fast tutorial, the k point sampling was chosen to be extremely small.
 Instead of a $4\times 4\times 4$
@@ -78,7 +75,7 @@ Moreover, we emphasize that in general the results of a sum-over-states approach
 typically converges quite slowly with the k point mesh. Thus it is of extra importance to
 test convergence carefully.
 
-The run takes less than one minute on a 2.8 GHz PC. The files *toptic_1o_DS3_WFK*,
+The run take a few minutes on a 2.8 GHz PC. The files *toptic_1o_DS3_WFK*,
 *toptic_1o_DS4_1WF7*, *toptic_1o_DS5_1WF8* and *toptic_1o_DS6_1WF9* are the four
 files requested for the Optic run.
 The first file contains the wavefunctions for the filled and empty states in the entire
@@ -96,7 +93,7 @@ response (up to second order in the current implementation) for the material und
 
 First, read the [[help:optic#input|section 3]] of the Optic help file.
 
-Copy the files *toptic_2.files* and *toptic_2.in* from *$ABI_TUTORIAL/Input* to *Work_optic*:
+Copy the files *toptic_2.files* and *toptic_2.in* from *$ABI_TESTS/tutorial/Input* to *Work_optic*:
 
 ```sh
 cp ../toptic_2.files .
@@ -132,7 +129,7 @@ as a function of energy, the magnitude, real, and imaginary parts of the tensor 
 On the graph, you should see three curves. One of them is positive, and always
 larger than the two others. It is the modulus of the dielectric function.
 Another one is also always positive, it is the imaginary part of the
-dielectric function. The last one is the real part.  
+dielectric function. The last one is the real part.
 There are a large number of peaks. This is at variance with the experimental
 spectra, which are much smoother. The origin of this discrepancy is to be found
 in the very sparse k point sampling that we used in order to be able to perform
@@ -181,7 +178,7 @@ for the non-linear optics, obtained with a 18x18x18 grid (keeping everything els
 
 Concerning the linear spectrum, we will now compare this (underconverged)
 result *toptic_ref_0001_0001-linopt.out* with experimental data and converged
-theoretical results.  
+theoretical results.
 
 The book by Cohen M.L. and Chelikowsky [[cite:Cohen1988]] presents a
 comparison of experimental data with the empirical pseudopotential method
@@ -272,7 +269,7 @@ Copy the files *toptic_4.files* and *toptic_4.in* in *Work_optic*:
 
 {% dialog tests/tutorespfn/Input/toptic_4.files tests/tutorespfn/Input/toptic_4.in %}
 
-Examine the *toptic_4.in* file: only the linear optic spectra will be built.
+Examine *toptic_4.in* file: only the linear optic spectra will be built.
 
 When you have read the input file, you can run the code, as usual using the following command
 
@@ -312,7 +309,7 @@ for *toptic_2_0001_0001-linopt.out* and
         3.265366E-02    1.177854E+01
       ...
 
-for *toptic_4_0001_0001-linopt.out*. 
+for *toptic_4_0001_0001-linopt.out*.
 This small difference is due to the number
 of bands ([[nband]] 20 for *toptic_2_0001_0001-linopt.out* and [[nband]] 9 for *toptic_4_0001_0001-linopt.out*).
 
@@ -333,7 +330,38 @@ For your information, we give some timings of the corresponding Abinit run for a
     28 x 28 x 28         2633 secs
 
 For grids on the order of $16\times 16\times 16$, the treatment by optics also takes several
-minutes, due to IO (30 minutes for the $28\times 28\times 28$ grid).  
+minutes, due to IO (30 minutes for the $28\times 28\times 28$ grid).
 You might note how the first peak slowly develop with increasing number of k
 points but nevertheless stays much smaller than the converged one, and
 even smaller than the experimental one.
+
+## Computing the linear electro-optical susceptibility
+Calculations of the linear electro-optical susceptibility follows the same inital calculations as those described in the first two sections of this tutorial.  To calculate the coefficients of the linear electro-optical susceptibility one needs to modify the optic input file with two additional keywords.
+
+Copy the files *toptic_5.files* and *toptic_5.in* in *Work_optic*:
+
+    cp ../toptic_5.files .
+    cp ../toptic_5.in .
+
+ {% dialog tests/tutorespfn/Input/toptic_5.files tests/tutorespfn/Input/toptic_5.in %}
+
+Note that *toptic_5.files* has not changed (we want to use the previously calculated wave functions). However, examine *toptic_5.in*,  only the linear electro-optic susceptibility will be calculated.
+
+When you have read the input file, you can run the code, as usual using the following command
+
+    optic < toptic_5.files > log 2> err &
+
+The calculation should run in a few seconds on a modern PC.
+
+The resulting calculation produces a number of files ending in *ChiEO* and are related to different parts of the linear electro-optical tensor:
+
+   * *ChiEOAbs.out* gives the absolute value of the linear electro-optical susceptibility
+   * *ChiEOIm.out* gives the imaginary components of the calculated linear electro-optical susceptibility
+   * *ChiEORe.out* gives the real components of the calculated linear electro-optical susceptibility
+   * *ChiEOTotIm.out* gives the total imaginary part of the calculated linear electro-optical susceptibility
+   * *ChiEOTotRe.out* gives the total real part of the calculated linear electro-optical susceptibility
+
+Generally, the low energy (or frequency) range of the linear electro-optical susceptibility is linear and of experimental importance. Here, low energy means energies much less than the band gap energy.
+
+
+

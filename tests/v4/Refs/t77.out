@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 11h58 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h36 )
   
 
 ================================================================================
@@ -70,11 +70,11 @@
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    2.248400E+00    3.192045E-17    3.193279E-17
-         1         2    3.192045E-17    2.248400E+00   -3.190811E-17
+         1         1    2.248400E+00    3.192045E-17    3.179538E-17
+         1         2    3.192045E-17    2.248400E+00   -3.204552E-17
          1         3   -3.192045E-17   -3.192045E-17    2.248400E+00
-         2         1   -2.248400E+00   -3.192045E-17   -3.193279E-17
-         2         2   -3.192045E-17   -2.248400E+00    3.190811E-17
+         2         1   -2.248400E+00   -3.192045E-17   -3.179538E-17
+         2         2   -3.192045E-17   -2.248400E+00    3.204552E-17
          2         3    3.192045E-17    3.192045E-17   -2.248400E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 
@@ -112,17 +112,17 @@
 
  Change of cartesian coordinates (delta_xcart):
        1       0.131609680       0.131609460       0.131609290
-       2      -0.086255977      -0.086256193      -0.086256367
+       2      -0.086255976      -0.086256192      -0.086256367
 
  New cartesian coordinates (xcart_new):
    xcart
      0.13160968000000D+00     0.13160946000000D+00     0.13160929000000D+00
-     0.25678767355000D+01     0.25678765195000D+01     0.25678763455000D+01
+     0.25678767365000D+01     0.25678765205000D+01     0.25678763455000D+01
 
  New reduced coordinates (xred_new):
    xred
      0.12396617299897D-01     0.12396658744697D-01     0.12396690770225D-01
-     0.24187525716086D+00     0.24187529785212D+00     0.24187533063119D+00
+     0.24187525716086D+00     0.24187529785212D+00     0.24187533081958D+00
 
  Difference between the Hellmann-Feynman stresses
  and the stresses induced by the electric field
@@ -139,18 +139,18 @@
 
  New lattice constants (acell_new):
    acell
-    0.73126511818899D+01    0.73126511817701D+01    0.73126511818242D+01
+    0.73126511818899D+01    0.73126511817702D+01    0.73126511818242D+01
 
  New primitive vectors (rprim_new):
    rprim
-    0.22044886202345D-02    0.70710506298799D+00    0.70710506300456D+00
-    0.70710506299068D+00    0.22044886345927D-02    0.70710506300182D+00
-    0.70710506299899D+00    0.70710506299355D+00    0.22044886210405D-02
+    0.22044886202318D-02    0.70710506298798D+00    0.70710506300456D+00
+    0.70710506299068D+00    0.22044886345899D-02    0.70710506300182D+00
+    0.70710506299899D+00    0.70710506299355D+00    0.22044886210410D-02
 -
 - Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
 
 ================================================================================
 
-+Total cpu time      0.027  and wall time      0.028 sec
++Total cpu time      0.015  and wall time      0.015 sec
 
  anaddb : the run completed succesfully.

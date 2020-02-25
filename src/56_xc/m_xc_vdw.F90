@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_xc_vdw
 !! NAME
 !!  m_xc_vdw
@@ -7,7 +6,7 @@
 !!  Calculates van der Waals corrections to exchange-correlation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2019 ABINIT group (Yann Pouillon, Camilo Espejo)
+!!  Copyright (C) 2010-2020 ABINIT group (Yann Pouillon, Camilo Espejo)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -280,9 +279,7 @@ contains
 subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
 & rho_grho,deltae_vdw,exc_vdw,decdrho_vdw,decdgrho_vdw,stress_vdw)
 
-  implicit none
-
-#if defined HAVE_FFT_FFTW3
+#if defined HAVE_FFTW3
   include "fftw3.f03"
 #endif
 
@@ -385,7 +382,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   end do
 
   ! Fourier-transform theta
-#if defined HAVE_FFT_FFTW3
+#if defined HAVE_FFTW3
   do iq1=1,nqpts
     call dfftw_plan_dft_r2c_3d(fftw3_plan,nr1,nr2,nr3, &
 &     t3dr(:,:,:,iq1),t3dg(:,:,:,iq1),FFTW_ESTIMATE)
@@ -493,7 +490,7 @@ subroutine xc_vdw_aggregate(volume,gprimd,npts_rho,nspden,ngrad,nr1,nr2,nr3, &
   end do !ip1=1,npts_rho
 
   ! Fourier-transform back the integrand
-#if defined HAVE_FFT_FFTW3
+#if defined HAVE_FFTW3
   !write(msg,'(a)') ch10
   !call wrtout(std_out,msg,'COLL')
   do iq1=1,nqpts
@@ -655,8 +652,6 @@ end subroutine xc_vdw_aggregate
 
 subroutine xc_vdw_energy(nspden,rho,grho,ex_lda,ec_lda,vx_lda,vc_lda, &
 & theta,eps,dexc,dexcg)
-
-  implicit none
 
 !Arguments ------------------------------------
   integer,intent(in) :: nspden
@@ -854,8 +849,6 @@ end subroutine xc_vdw_energy
 
 subroutine xc_vdw_done(vdw_params)
 
-  implicit none
-
 !Arguments ------------------------------------
   type(xc_vdw_type), intent(in) :: vdw_params
 
@@ -905,8 +898,6 @@ end subroutine xc_vdw_done
 !! SOURCE
 
 subroutine xc_vdw_get_params(vdw_params)
-
-  implicit none
 
 !Arguments ------------------------------------
   type(xc_vdw_type), intent(out)  :: vdw_params
@@ -961,8 +952,6 @@ end subroutine xc_vdw_get_params
 !! SOURCE
 
 subroutine xc_vdw_init(vdw_params)
-
-  implicit none
 
 !Arguments ------------------------------------
   type(xc_vdw_type), intent(in)  :: vdw_params
@@ -1350,8 +1339,6 @@ end subroutine xc_vdw_init
 
 subroutine xc_vdw_libxc_init(ixc_vdw)
 
-  implicit none
-
 !Arguments ------------------------------------
   integer,intent(in) :: ixc_vdw
 
@@ -1418,8 +1405,6 @@ end subroutine xc_vdw_libxc_init
 !! SOURCE
 
 subroutine xc_vdw_memcheck(unt,vp)
-
-  implicit none
 
 !Arguments ------------------------------------
   integer,intent(in) :: unt
@@ -1528,8 +1513,6 @@ end subroutine xc_vdw_memcheck
 !! SOURCE
 
 subroutine xc_vdw_read(filename)
-
-  implicit none
 
 !Arguments ------------------------------------
   character(len=*), intent(in)  :: filename
@@ -1695,8 +1678,6 @@ end subroutine xc_vdw_read
 
 subroutine xc_vdw_set_functional(vdw_func,vdw_zab)
 
-  implicit none
-
 !Arguments ------------------------------------
   integer, intent(in)  :: vdw_func
   real(dp), optional, intent(in) :: vdw_zab
@@ -1733,8 +1714,6 @@ end subroutine xc_vdw_set_functional
 !! SOURCE
 
 subroutine xc_vdw_set_params(vdw_params)
-
-  implicit none
 
 !Arguments ------------------------------------
   type(xc_vdw_type), intent(in)  :: vdw_params
@@ -1790,8 +1769,6 @@ end subroutine xc_vdw_set_params
 !! SOURCE
 
 subroutine xc_vdw_show(unt,vp)
-
-  implicit none
 
 !Arguments ------------------------------------
   integer,intent(in) :: unt
@@ -1863,8 +1840,6 @@ end subroutine xc_vdw_show
 
 function xc_vdw_status()
 
-  implicit none
-
 !Arguments ------------------------------------
 
 !Local variables ------------------------------
@@ -1896,8 +1871,6 @@ end function xc_vdw_status
 !! SOURCE
 
 subroutine xc_vdw_trigger(condition)
-
-  implicit none
 
 !Arguments ------------------------------------
   logical, intent(in) :: condition
@@ -1951,8 +1924,6 @@ end subroutine xc_vdw_trigger
 !! SOURCE
 
 subroutine xc_vdw_write(filename)
-
-  implicit none
 
 !Arguments ------------------------------------
   character(len=*), intent(in)  :: filename
@@ -2139,8 +2110,6 @@ end subroutine xc_vdw_write
 
 subroutine vdw_df_filter(nqpts,nrpts,rcut,gcut,ngpts,sofswt)
 
-  implicit none
-
 !Arguments ------------------------------------
   integer,intent(in) :: nqpts,nrpts,sofswt
   integer,intent(out) :: ngpts
@@ -2296,8 +2265,6 @@ end subroutine vdw_df_filter
 
 function vdw_df_kernel(d1,d2,dsoft,phisoft,acutmin,aratio,damax)
 
-  implicit none
-
 !Arguments ------------------------------------
   real(dp),intent(in) :: d1,d2,dsoft,phisoft,acutmin,aratio,damax
 
@@ -2388,8 +2355,6 @@ end function vdw_df_kernel
 !! SOURCE
 
 function vdw_df_kernel_value(d1,d2,acutmin,aratio,damax)
-
-  implicit none
 
 !Arguments ------------------------------------
   real(dp),intent(in) :: d1,d2,acutmin,aratio,damax
@@ -2580,8 +2545,6 @@ end function vdw_df_kernel_value
 subroutine vdw_df_ldaxc(npts_rho,nspden,ngrad,rho_grho, &
 &                       exc_lda,vxc_lda,vxcg_lda)
 
-  implicit none
-
 !Arguments ------------------------------------
   integer,intent(in) :: nspden,npts_rho,ngrad
   real(dp),intent(in) :: rho_grho(npts_rho,nspden,ngrad)
@@ -2699,8 +2662,6 @@ end subroutine vdw_df_ldaxc
 
 subroutine vdw_df_create_mesh(mesh,npts,mesh_type,mesh_cutoff, &
 & mesh_inc,mesh_ratio,mesh_tolerance,mesh_file,avoid_zero,exact_max)
-
-  implicit none
 
 !Arguments ------------------------------------
   integer,intent(in) :: npts,mesh_type
@@ -2910,8 +2871,6 @@ end subroutine vdw_df_create_mesh
 
 function vdw_df_indexof(list_1d,npts,value)
 
-  implicit none
-
 !Arguments ------------------------------------
   integer,intent(in) :: npts
   real(dp),intent(in) :: value,list_1d(npts)
@@ -2963,7 +2922,6 @@ end function vdw_df_indexof
 function vdw_df_interpolate(d1,d2,sofswt)
 
   use m_errors
-  implicit none
 
 !Arguments ------------------------------------
   real(dp),intent(in) :: d1,d2
@@ -3042,8 +3000,6 @@ end function vdw_df_interpolate
 !! SOURCE
 
 subroutine vdw_df_internal_checks(test_mode)
-
-  implicit none
 
 !Arguments ------------------------------------
   integer,intent(in) :: test_mode
@@ -3209,8 +3165,6 @@ end subroutine vdw_df_netcdf_ioerr
 
 subroutine vdw_df_set_tweaks(input_tweaks,output_tweaks)
 
-  implicit none
-
 !Arguments ------------------------------------
   integer,intent(in) :: input_tweaks
   type(vdw_df_tweaks_type),intent(out) :: output_tweaks
@@ -3248,8 +3202,6 @@ end subroutine vdw_df_set_tweaks
 !! SOURCE
 
 subroutine vdw_df_write_func(func_name,mode)
-
-  implicit none
 
 !Arguments ------------------------------------
   character(len=*),intent(in) :: func_name,mode

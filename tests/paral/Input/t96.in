@@ -25,7 +25,6 @@ ntime  = 50
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = multibinit
-#%% exclude_builders = graphene_gnu_8.3_macports
 #%% test_chain = t95.in,t96.in,t97.in,t98.in
 #%% [files]
 #%% [paral_info]

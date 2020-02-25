@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_alloc_hamilt_gpu
 !! NAME
 !!  m_alloc_hamilt_gpu
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2019 ABINIT group (MT, FDahm)
+!!  Copyright (C) 2000-2020 ABINIT group (MT, FDahm)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,14 +25,15 @@
 module m_alloc_hamilt_gpu
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
-
+ use m_dtset
 #if defined HAVE_GPU_CUDA
  use m_gpu_toolbox
 #endif
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
 
  implicit none
 
@@ -79,8 +79,6 @@ contains
 !! SOURCE
 
 subroutine alloc_hamilt_gpu(atindx1,dtset,gprimd,mpi_enreg,nattyp,npwarr,option,psps,use_gpu_cuda)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -180,8 +178,6 @@ end subroutine alloc_hamilt_gpu
 !! SOURCE
 
 subroutine dealloc_hamilt_gpu(option,use_gpu_cuda)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gammapositron
 !! NAME
 !!  m_gammapositron
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (MT,GJ)
+!!  Copyright (C) 1998-2020 ABINIT group (MT,GJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,11 +25,11 @@
 module m_gammapositron
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_electronpositron
 
+ use defs_abitypes,     only : MPI_type
  use m_numeric_tools,   only : invcb
  use m_xctk,            only : xcden
 

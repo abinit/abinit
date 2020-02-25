@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gwls_QR_factorization
 !! NAME
 !! m_gwls_QR_factorization
@@ -7,7 +6,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,13 +42,13 @@ use m_gwls_hamiltonian
 
 !abinit modules
 use defs_basis
-use defs_datatypes
 use defs_abitypes
 use defs_wvltypes
 use m_abicore
 use m_xmpi
 use m_errors
 
+use defs_abitypes, only : MPI_type
 use m_io_tools,  only : get_unit
 use m_time,      only : timab
 
@@ -91,15 +90,15 @@ subroutine extract_QR(mpi_communicator,Hsize,Xsize,Xmatrix,Rmatrix)
 ! This function computes the QR factorization:
 !
 !                X = Q . R
-! 
-! in order to extract the matrix of orthonormal vectors Q and 
+!
+! in order to extract the matrix of orthonormal vectors Q and
 ! the R matrix.
 !
 ! On output, the matrix X is replaced by Q.
 !
-! If the code is running with only one processor, this routine 
+! If the code is running with only one processor, this routine
 ! simply invokes extract_QR_serial, which wraps standard Lapack routines.
-! If we are running in MPI parallel, the serial Lapack routines no 
+! If we are running in MPI parallel, the serial Lapack routines no
 ! longer work (and understanding scalapack is too complicated right now).
 ! Thus, in that case, this routine implements some old school Gram-Schmidt
 ! algorithm.
@@ -107,9 +106,9 @@ subroutine extract_QR(mpi_communicator,Hsize,Xsize,Xmatrix,Rmatrix)
 implicit none
 
 integer,        intent(in) :: Hsize, Xsize, mpi_communicator
-complex(dpc),intent(inout) :: Xmatrix(Hsize,Xsize)  
+complex(dpc),intent(inout) :: Xmatrix(Hsize,Xsize)
 
-complex(dpc),  intent(out),optional :: Rmatrix(Xsize,Xsize)  
+complex(dpc),  intent(out),optional :: Rmatrix(Xsize,Xsize)
 
 ! local variables
 
@@ -160,11 +159,11 @@ subroutine extract_SVD(mpi_communicator, Hsize,lsolutions_max,svd_matrix,svd_val
 !--------------------------------------------------------------------------
 ! This function computes the singular value decomposition
 !
-!                X = U . SIGMA . V^dagger 
-! 
+!                X = U . SIGMA . V^dagger
+!
 ! More specifically,  the matrix U of orthonormal vectors and SIGMA
 ! the eigenvalues are returned.
-! 
+!
 ! different algorithms are used, depending on parallelisation scheme.
 !--------------------------------------------------------------------------
 implicit none
@@ -257,8 +256,8 @@ subroutine extract_SVD_lapack(Hsize,lsolutions_max,svd_matrix,svd_values)
 !--------------------------------------------------------------------------
 ! This function computes the singular value decomposition
 ! using lapack routines. This is not appropriate in MPI parallel!
-! 
-! 
+!
+!
 !--------------------------------------------------------------------------
 implicit none
 
@@ -310,7 +309,7 @@ lwork_svd,      & ! size of work array
 rwork_svd,      & ! work array
 info_zgesvd )
 
-if ( info_zgesvd /= 0) then        
+if ( info_zgesvd /= 0) then
   debug_unit = get_unit()
   write(debug_filename,'(A,I4.4,A)') 'LAPACK_DEBUG_PROC=',mpi_enreg%me,'.log'
 
@@ -353,7 +352,7 @@ lwork_svd,      & ! size of work array
 rwork_svd,      & ! work array
 info_zgesvd )
 
-if ( info_zgesvd /= 0) then        
+if ( info_zgesvd /= 0) then
   debug_unit = get_unit()
   write(debug_filename,'(A,I4.4,A)') 'LAPACK_DEBUG_PROC=',mpi_enreg%me,'.log'
 
@@ -406,26 +405,26 @@ subroutine extract_QR_Householder(mpi_communicator,Hsize,Xsize,Xmatrix,Rmatrix)
 ! This function computes the QR factorization:
 !
 !                X = Q . R
-! 
-! in order to extract the matrix of orthonormal vectors Q and 
+!
+! in order to extract the matrix of orthonormal vectors Q and
 ! the R matrix.
 !
 ! On output, the matrix X is replaced by Q.
 !
 ! This routine uses Householder operations to generate Q and R.
-! Special attention is given to the fact that the matrix may be 
+! Special attention is given to the fact that the matrix may be
 ! distributed across processors and MPI communication is necessary.
-! 
+!
 !--------------------------------------------------------------------------
 implicit none
 
 integer,        intent(in) :: Hsize, Xsize, mpi_communicator
-complex(dpc),intent(inout) :: Xmatrix(Hsize,Xsize)  
+complex(dpc),intent(inout) :: Xmatrix(Hsize,Xsize)
 
-complex(dpc),  intent(out),optional :: Rmatrix(Xsize,Xsize)  
+complex(dpc),  intent(out),optional :: Rmatrix(Xsize,Xsize)
 
 ! local variables
-integer        :: numbrer_of_plane_waves 
+integer        :: numbrer_of_plane_waves
 
 integer        :: io_unit
 integer        :: ierr
@@ -460,7 +459,7 @@ complex(dpc), allocatable :: coeff(:)
 
 integer :: mpi_rank
 integer :: mpi_nproc
-logical :: head_node    
+logical :: head_node
 
 ! *************************************************************************
 
@@ -496,7 +495,7 @@ if (debug .and.  head_node ) then
     write(io_unit,25) "#   The algorithm is running in MPI parallel with ",mpi_nproc," processors"
     write(io_unit,10) "#                                                                                       "
     write(io_unit,10) "#======================================================================================="
-  end if        
+  end if
 
   counter = counter + 1
 
@@ -537,7 +536,7 @@ nproc_array(j) = 0
 do i = 1, j-1
 nproc_array(j) = nproc_array(j)+nproc_array(i)
 end do
-end do 
+end do
 
 
 !--------------------------------------------------------------------------------
@@ -592,7 +591,7 @@ if (abs(norm_x) > tol14) then
   ! update vj, on the right processor!
   if ( l_local <= Hsize  .and. l_local >= 1) then
 
-    phase = vj(l_local) 
+    phase = vj(l_local)
 
     if (abs(phase) < tol14) then
       phase = cmplx_1
@@ -660,7 +659,7 @@ do i = 1, j
 l_local = i-nproc_array(1+mpi_rank)
 
 if ( l_local <= Hsize  .and. l_local >= 1) then
-  Rinternal(i,j) = A_matrix(l_local,j) 
+  Rinternal(i,j) = A_matrix(l_local,j)
 end if
 
 end do ! i
@@ -693,7 +692,7 @@ end do ! j
 ! Build Q interatively
 do j = Xsize,1, -1
 
-vj(:) = V_matrix(:,j) 
+vj(:) = V_matrix(:,j)
 
 
 ! Update the A matrix
@@ -759,7 +758,7 @@ if (debug ) then
   do l1=1,Xsize
 
   cmplx_value = complex_vector_product(Qinternal(:,l1),Qinternal(:,l2),Hsize)
-  call xmpi_sum(cmplx_value,mpi_communicator,ierr) ! sum on all processors working on FFT! 
+  call xmpi_sum(cmplx_value,mpi_communicator,ierr) ! sum on all processors working on FFT!
 
   error(l1,l2) = error(l1,l2)+cmplx_value
 
@@ -793,13 +792,13 @@ if (debug ) then
   end do
   end do
 
-  call xmpi_sum(real_value,mpi_communicator,ierr) ! sum on all processors 
+  call xmpi_sum(real_value,mpi_communicator,ierr) ! sum on all processors
 
 
   real_value = sqrt(real_value)
 
   if ( head_node) then
-    write(io_unit,12) "#               || Xin - Q.R ||   = ",real_value 
+    write(io_unit,12) "#               || Xin - Q.R ||   = ",real_value
 
     if ( real_value > 1.0D-10 ) write(io_unit,10) "#               ERROR!              "
 

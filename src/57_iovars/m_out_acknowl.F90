@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_out_acknowl
 !! NAME
 !!  m_out_acknowl
@@ -7,7 +6,7 @@
 !! Echo acknowledgments for the ABINIT code.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG)
+!!  Copyright (C) 2008-2020 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,11 +26,11 @@
 module m_out_acknowl
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
+ use m_dtset
 
  use m_fstrings,     only : prep_dash
+ use defs_datatypes, only : pspheader_type
 
  implicit none
 
@@ -107,7 +106,26 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
  cite(:)=0
  priority(:)=0
 
- ref(1)=' Recent developments in the ABINIT software package.'//ch10//&
+ ref(1)=' The Abinit project: Impact, environment and recent developments.'//ch10//&
+   ' Computer Phys. Comm. 248, 107042 (2020).'//ch10//&
+   ' X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,'//ch10//&
+   ' J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,'//ch10//& 
+   ' G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,'//ch10//& 
+   ' J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,'//ch10
+ ref(1)=trim(ref(1))//&
+   ' D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,'//ch10//&
+   ' W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,'//ch10//&
+   ' H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,'//ch10//&
+   ' S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,'//ch10//&
+   ' M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanziger.'
+ comment(1)=' Comment: the fifth generic paper describing the ABINIT project.'//ch10//&
+   ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
+   ' is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .'//ch10//&
+   ' The licence allows the authors to put it on the Web.'//ch10//&
+   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020'
+ priority(1)=3
+
+ ref(2)=' Recent developments in the ABINIT software package.'//ch10//&
    ' Computer Phys. Comm. 205, 106 (2016).'//ch10//&
    ' X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,'//ch10//&
    ' C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval'//ch10//&
@@ -115,60 +133,52 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
    ' B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,'//ch10//&
    ' Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,'//ch10//&
    ' A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,'//ch10
- ref(1)=trim(ref(1))//&
+ ref(2)=trim(ref(2))//&
    ' M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,'//ch10//&
    ' A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,'//ch10//&
    ' M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,'//ch10//&
    ' B.Xu, A.Zhou, J.W.Zwanziger.'
- comment(1)=' Comment: the fourth generic paper describing the ABINIT project.'//ch10//&
+ comment(2)=' Comment: the fourth generic paper describing the ABINIT project.'//ch10//&
    ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
-   ' is available at https://www.abinit.org/about/ABINIT16.pdf .'//ch10//&
+   ' is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016'
- priority(1)=3
+ priority(2)=2
 
- ref(2)=' ABINIT: First-principles approach of materials and nanosystem properties.'//ch10//&
+ ref(3)=' ABINIT: First-principles approach of materials and nanosystem properties.'//ch10//&
    ' Computer Phys. Comm. 180, 2582-2615 (2009).'//ch10//&
    ' X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,'//ch10//&
    ' D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi'//ch10//&
    ' S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,'//ch10//&
    ' M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,'//ch10//&
    ' M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger'
- comment(2)=' Comment: the third generic paper describing the ABINIT project.'//ch10//&
+ comment(3)=' Comment: the third generic paper describing the ABINIT project.'//ch10//&
    ' Note that a version of this paper, that is not formatted for Computer Phys. Comm. '//ch10//&
-   ' is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .'//ch10//&
+   ' is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .'//ch10//&
    ' The licence allows the authors to put it on the Web.'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009'
- priority(2)=2
+ priority(3)=1
 
- ref(3)=' A brief introduction to the ABINIT software package.'//ch10//&
+ ref(4)=' A brief introduction to the ABINIT software package.'//ch10//&
    ' Z. Kristallogr. 220, 558-562 (2005).'//ch10//&
    ' X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,'//ch10//&
    ' M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,'//ch10//&
    ' L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.'
- comment(3)=' Comment: the second generic paper describing the ABINIT project. Note that this paper'//ch10//&
+ comment(4)=' Comment: the second generic paper describing the ABINIT project. Note that this paper'//ch10//&
    ' should be cited especially if you are using the GW part of ABINIT, as several authors'//ch10//&
    ' of this part are not in the list of authors of the first or third paper.'//ch10//&
-   ' The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.'//ch10//&
-   ' Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,'//ch10//&
+   ' The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.'//ch10//&
+   ' Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,'//ch10//&
    ' the licence allows the authors to put it on the Web).'//ch10//&
    ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005'
- priority(3)=1
+ priority(4)=0
 
- ref(4)=' First-principles computation of material properties: the ABINIT software project. '//ch10//&
+ ref(5)=' First-principles computation of material properties: the ABINIT software project. '//ch10//&
    ' X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,'//ch10//&
    ' M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.'//ch10//&
    ' Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7'
- comment(4)=' Comment: the original paper describing the ABINIT project.'//ch10//&
+ comment(5)=' Comment: the original paper describing the ABINIT project.'//ch10//&
    ' DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002'
- priority(4)=0
-
- ref(5)=' Towards a potential-based conjugate gradient algorithm for order-N self-consistent'//ch10//&
-   ' total energy calculations.'//ch10//&
-   ' X. Gonze, Phys. Rev. B 54, 4383 (1996).'
- comment(5)=' Comment: The potential-based conjugate-gradient algorithm, used when iscf=5, is not published.'//ch10//&
-  ' However, many elements of this algorithm have been explained in the paper above.'//ch10//&
-  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1996'
  priority(5)=0
 
  ref(6)=' First-principles responses of solids to atomic displacements and homogeneous electric fields:,'//ch10//&
@@ -218,7 +228,7 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 
  ref(13)=' Large scale ab initio calculations based on three levels of parallelization'//ch10//&
   ' F. Bottin, S. Leroux, A. Knyazev, G. Zerah, Comput. Mat. Science 42, 329, (2008).'
- comment(13)=' Comment: in case LOBPCG algorithm is used (wfoptalg=4/14).'//ch10//&
+ comment(13)=' Comment: in case LOBPCG algorithm is used (wfoptalg=4/14/114).'//ch10//&
   ' Strong suggestion to cite this paper in your publications.'//ch10//&
   ' This paper is also available at http://www.arxiv.org/abs/0707.3405'//ch10//&
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#bottin2008'
@@ -413,6 +423,15 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
   ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#martin2019'
  priority(37)=20
 
+ ref(38)=' Towards a potential-based conjugate gradient algorithm for order-N self-consistent'//ch10//&
+   ' total energy calculations.'//ch10//&
+   ' X. Gonze, Phys. Rev. B 54, 4383 (1996).'
+ comment(38)=' Comment: The potential-based conjugate-gradient algorithm, used when iscf=5, is not published.'//ch10//&
+  ' However, many elements of this algorithm have been explained in the paper above.'//ch10//&
+  ' DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1996'
+ priority(38)=0
+
+
 !---------------------------------------------------------------------------------------------
 !Determine the papers to be cited
 
@@ -447,7 +466,8 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
    if(dtsets(idtset)%gwcomp/=0)cite(12)=1
 
 !  If paral_kgb/=0 and LOBPCG, cite Bottin2008
-   if(dtsets(idtset)%paral_kgb/=0.and.(dtsets(idtset)%wfoptalg==4.or.dtsets(idtset)%wfoptalg==14))cite(13)=1
+   if(dtsets(idtset)%paral_kgb/=0.and. &
+&    (dtsets(idtset)%wfoptalg==4.or.dtsets(idtset)%wfoptalg==14.or.dtsets(idtset)%wfoptalg==114))cite(13)=1
 
 !  If ucrpa/=0, cite Amadon2014
    if(dtsets(idtset)%ucrpa/=0) cite(26)=1
@@ -522,6 +542,10 @@ subroutine out_acknowl(dtsets,iout,ndtset_alloc,npsp,pspheads)
 !  If rfstrs/=0 or rfelfd/=0 and PAW, cite Martin2019
    if(dtsets(idtset)%rfstrs/=0.and.dtsets(idtset)%usepaw==1) cite(37)=1
    if(dtsets(idtset)%rfelfd/=0.and.dtsets(idtset)%usepaw==1) cite(37)=1
+
+!  If iscf=5 or iscf=15 used, cite Gonze96
+   if(dtsets(idtset)%iscf==5)cite(38)=1
+   if(dtsets(idtset)%iscf==15)cite(38)=1
 
  end do
 

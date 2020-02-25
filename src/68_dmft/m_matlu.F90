@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_matlu
 !! NAME
 !!  m_matlu
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -537,7 +536,6 @@ subroutine print_matlu(matlu,natom,prtopt,opt_diag,opt_ab_out,opt_exp,argout,com
 end subroutine print_matlu
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* m_matlu/sym_matlu
 !! NAME
 !! sym_matlu
@@ -546,7 +544,7 @@ end subroutine print_matlu
 !! Symetrise local quantity.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -816,7 +814,7 @@ end subroutine print_matlu
 !! Inverse local quantity.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1062,7 +1060,7 @@ end subroutine add_matlu
 !! Change representation of density matrix (useful for nspinor=2)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1299,7 +1297,7 @@ end subroutine add_matlu
 !! Create new array from matlu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1417,7 +1415,7 @@ end subroutine add_matlu
 !! Diagonalize matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1906,7 +1904,7 @@ end subroutine add_matlu
 !! Rotate matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2127,7 +2125,7 @@ end subroutine add_matlu
 !! shift matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2199,7 +2197,7 @@ end subroutine add_matlu
 !! Check that matlu is real in the orbital index with given precision
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2285,7 +2283,7 @@ end subroutine add_matlu
    write(message,'(3x,2a,e12.4,a,e12.4,6a)') ch10,&
 &   ' Occupation matrix is non diagonal : the maximum off-diag part ',maxoffdiag,' is larger than',tol,ch10&
 &    , "The corresponding non diagonal elements will be neglected in the Weiss/Hybridization functions",ch10&
-&    , "(Except if dmft_solv=8 where these elements are taken into accounts)",ch10&
+&    , "(Except if dmft_solv=8,9 where these elements are taken into accounts)",ch10&
 &    , "This is an approximation"
    MSG_WARNING(message)
  else
@@ -2305,7 +2303,7 @@ end subroutine add_matlu
 !! Check that matlu is diagonal in the orbital index with given precision
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2396,7 +2394,7 @@ end subroutine add_matlu
 !! Do the matrix product of two matlus
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2472,7 +2470,7 @@ end subroutine add_matlu
 !! conjugate of input matlu
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2534,7 +2532,7 @@ end subroutine add_matlu
 !! Compute the logarithm of matlu (only if diagonal for the moment)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2599,7 +2597,7 @@ end subroutine add_matlu
 !! Transform mat from Slm to Ylm basis or vice versa
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2682,7 +2680,8 @@ end subroutine add_matlu
            mat_out_c=czero
 
            if(optprt>2) then
-             write(message,'(2a)') ch10,"SLM input matrix"
+             write(message,'(2a, i2, a, i2, a, i2)') ch10,"SLM input matrix, isppol=", isppol, ", ispinor=", ispinor,& 
+&             ", ispinor2=", ispinor2
              call wrtout(std_out,message,'COLL')
              do im1=1,ll*2+1
                write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
@@ -2708,7 +2707,8 @@ end subroutine add_matlu
            end do
 
            if(optprt>2) then
-             write(message,'(2a)') ch10,"YLM output matrix"
+             write(message,'(2a, i2, a, i2, a, i2)') ch10,"YLM output matrix, isppol=", isppol, ", ispinor=", ispinor,&
+&             ", ispinor2=", ispinor2
              call wrtout(std_out,message,'COLL')
              do im1=1,ll*2+1
                write(message,'(12(1x,9(1x,"(",f9.5,",",f9.5,")")))')&
@@ -2739,7 +2739,7 @@ end subroutine add_matlu
 !! shift matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2808,7 +2808,7 @@ end subroutine add_matlu
 !! shift matlu matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2887,7 +2887,7 @@ end subroutine add_matlu
 !! Make the matlu the identity
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2005-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

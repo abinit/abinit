@@ -1,10 +1,9 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_FFT_prof
 !! NAME
 !! m_FFT_prof
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -20,13 +19,14 @@
 MODULE m_FFT_prof
 
  use defs_basis
- use defs_abitypes
  use m_xomp
  use m_errors
  use m_abicore
  use m_fftw3
  use m_fft
+ use m_distribfft
 
+ use defs_abitypes,    only : MPI_type
  use m_numeric_tools,  only : arth
  use m_time,           only : cwtime
  use m_io_tools,       only : open_file
@@ -2007,11 +2007,11 @@ function empty_cache(kbsize) result(fake)
 
  if (kbsize <= 0) RETURN
 
- sz = (100. * kbsize) / dp
+ sz = int((100._dp * kbsize) / dp)
 
  ABI_MALLOC(chunk,(sz))
  call random_number(chunk)
- fake = SUM(chunk) ! Need a result, otherwise some smart compiler could skip the call.
+ fake = int(SUM(chunk)) ! Need a result, otherwise some smart compiler could skip the call.
  ABI_FREE(chunk)
 
 !----------------------------------------------------------------------

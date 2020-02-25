@@ -96,7 +96,7 @@ def make(ctx, jobs="auto", touch=False, clean=False):
     jobs = max(1, number_of_cpus() // 2) if jobs == "auto" else int(jobs)
 
     with cd(top):
-        if clean: 
+        if clean:
             ctx.run("cd src && make clean && cd ..", pty=True)
             ctx.run("cd shared && make clean && cd ..", pty=True)
         cmd = "make -j%d  > >(tee -a make.log) 2> >(tee -a make.stderr >&2)" % jobs
@@ -218,7 +218,7 @@ def links(ctx):
     """
     top = find_top_build_tree(".", with_abinit=True)
     main98 = os.path.join(top, "src", "98_main")
-    for dest in ALL_BINARIES: 
+    for dest in ALL_BINARIES:
         if os.path.islink(os.path.join(os.getcwd(), dest)): continue
         source = os.path.join(main98, dest)
         if os.path.isfile(source):
@@ -233,7 +233,10 @@ def ctags(ctx):
     Update ctags file.
     """
     with cd(ABINIT_ROOTDIR):
-        ctx.run('ctags -R --exclude="_*"', pty=True)
+        cmd = "ctags -R shared/ src/"
+        print("Executing:", cmd)
+        ctx.run(cmd, pty=True)
+        #ctx.run('ctags -R --exclude="_*"', pty=True)
 
 @task
 def fgrep(ctx, pattern):
@@ -246,15 +249,32 @@ def fgrep(ctx, pattern):
     #    -i - case-insensitive search
     #    --include=\*.${file_extension} - search files that match the extension(s) or file pattern only
     with cd(ABINIT_ROOTDIR):
-        cmd  = 'grep -r -i --color --include "*.F90" %s src shared' % pattern
+        cmd  = 'grep -r -i --color --include "*.F90" "%s" src shared' % pattern
         print("Executing:", cmd)
         ctx.run(cmd, pty=True)
 
-#def pulltrunk(ctx):
+
+@task
+def cgrep(ctx, pattern):
+    """
+    Grep for `pattern` in all C files contained in `src` and `shared` directories.
+    """
+    # grep -r -i --include \*.h
+    # Syntax notes:
+    #    -r - search recursively
+    #    -i - case-insensitive search
+    #    --include=\*.${file_extension} - search files that match the extension(s) or file pattern only
+    with cd(ABINIT_ROOTDIR):
+        cmd  = 'grep -r -i --color --include "*.c" "%s" src shared' % pattern
+        print("Executing:", cmd)
+        ctx.run(cmd, pty=True)
+
+
+#def pull_trunk(ctx):
 #    ctx.run("git stash")
 #    ctx.run("git pull trunk develop")
 #    ctx.run("git stash apply")
-#    ctx.run("git push")
+
 
 #def move_to_master(ctx):
 #    ctx.run("git tag -a v%s -m \"v%s release\"" % (NEW_VER, NEW_VER))

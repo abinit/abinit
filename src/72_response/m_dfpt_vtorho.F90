@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_vtorho
 !! NAME
 !! m_dfpt_vtorho
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, AR, DRH, MB, XW, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,8 +25,6 @@
 module m_dfpt_vtorho
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -35,7 +32,12 @@ module m_dfpt_vtorho
  use m_hamiltonian
  use m_wfk
  use m_cgtools
+ use m_dtset
+ use m_dtfil
 
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_occ,      only : occeig
  use m_hdr,      only : hdr_skip, hdr_io
@@ -153,6 +155,7 @@ contains
 !!  symaf1(nsym1)=(anti)ferromagnetic part of symmetry operations
 !!  symrc1(3,3,nsym1)=symmetry operations in reciprocal space
 !!  symrl1(3,3,nsym1)=symmetry operations in real space
+!!  tnons1(3,nsym1)=non-symmorphic translations
 !!  ucvol=unit cell volume in bohr**3.
 !!  usecprj= 1 if cprj, cprjq, cprj1 arrays are stored in memory
 !!  useylmgr1= 1 if ylmgr1 array is allocated
@@ -204,9 +207,9 @@ contains
 !!      dfpt_scfcv
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,destroy_rf_hamiltonian,dfpt_vtowfk,dfptff_gbefd
+!!      destroy_rf_hamiltonian,dfpt_vtowfk,dfptff_gbefd
 !!      dfptff_gradberry,fftpac,getgh1c_setup,init_hamiltonian
-!!      init_rf_hamiltonian,load_spin_hamiltonian,load_spin_rf_hamiltonian
+!!      init_rf_hamiltonian
 !!      occeig,pawmkrho,pawrhoij_alloc,pawrhoij_free,pawrhoij_init_unpacked
 !!      pawrhoij_mpisum_unpacked,rf_transgrid_and_pack,sqnorm_v,symrhg,timab
 !!      xmpi_sum
@@ -222,7 +225,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 & natom,nband_rbz,ncpgr,nfftf,nhat1,nkpt_rbz,npwarr,npwar1,nres2,nspden,&
 & nsppol,nsym1,ntypat,nvresid1,occkq,occ_rbz,optres,&
 & paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,pawrhoij1,pawtab,&
-& phnons1,ph1d,prtvol,psps,pwindall,qmat,resid,residm,rhog1,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,ucvol,&
+& phnons1,ph1d,prtvol,psps,pwindall,qmat,resid,residm,rhog1,rhor1,rmet,rprimd,symaf1,symrc1,symrl1,tnons1,ucvol,&
 & usecprj,useylmgr1,ddk_f,vtrial,vtrial1,wtk_rbz,xred,ylm,ylm1,ylmgr1,cg1_out)
 
 !Arguments -------------------------------
@@ -268,6 +271,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  real(dp),intent(out) :: resid(mband*nkpt_rbz*nsppol),rhog1(2,nfftf)
  real(dp),intent(inout) :: nvresid1(cplex*nfftf,nspden),rhor1(cplex*nfftf,nspden)
  real(dp),intent(in) :: rmet(3,3),rprimd(3,3)
+ real(dp),intent(in) :: tnons1(3,nsym1)
  real(dp),intent(in),target :: vtrial(nfftf,nspden)
  real(dp),intent(inout),target :: vtrial1(cplex*nfftf,nspden)
  real(dp),intent(in) :: wtk_rbz(nkpt_rbz),xred(3,natom)
@@ -294,6 +298,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  integer :: ii,ikg,ikg1,ikpt,ilm,index1,ispden,iscf_mod,isppol,istwf_k
  integer :: mbd2kpsp,mbdkpsp,mcgq,mcgq_disk,mcprjq
  integer :: mcprjq_disk,me,n1,n2,n3,n4,n5,n6,nband_k,nband_kq,nkpg,nkpg1
+ integer :: nband_eff
  integer :: nnsclo_now,npw1_k,npw_k,nspden_rhoij,qphase_rhoij,spaceworld,test_dot
  logical :: paral_atom,qne0
  real(dp) :: arg,wtk_k
@@ -458,17 +463,17 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 &   gs_hamkq%nvloc,pawfgr,mpi_enreg,vtrial,vtrial1,vlocal,vlocal1)
 
 !  Continue to initialize the Hamiltonian
-   call load_spin_hamiltonian(gs_hamkq,isppol,vlocal=vlocal,with_nonlocal=.true.)
-   call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1,with_nonlocal=.true.)
+   call gs_hamkq%load_spin(isppol,vlocal=vlocal,with_nonlocal=.true.)
+   call rf_hamkq%load_spin(isppol,vlocal1=vlocal1,with_nonlocal=.true.)
    if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-     call load_spin_rf_hamiltonian(rf_hamk_dir2,isppol,with_nonlocal=.true.)
+     call rf_hamk_dir2%load_spin(isppol,with_nonlocal=.true.)
      if (ipert==natom+11) then ! load vlocal1
-       call load_spin_rf_hamiltonian(rf_hamk_dir2,isppol,vlocal1=vlocal1)
+       call rf_hamk_dir2%load_spin(isppol,vlocal1=vlocal1)
      end if
    end if
 
    if (ipert==natom+5) then !SPr deb, in case of magnetic field perturbation, no non-local
-     call load_spin_rf_hamiltonian(rf_hamkq,isppol,vlocal1=vlocal1)
+     call rf_hamkq%load_spin(isppol,vlocal1=vlocal1)
    end if
 
 !  Nullify contribution to 1st-order density from this k-point
@@ -712,10 +717,10 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  end do !  End loop over spins
 
 !More memory cleaning
- call destroy_hamiltonian(gs_hamkq)
- call destroy_rf_hamiltonian(rf_hamkq)
+ call gs_hamkq%free()
+ call rf_hamkq%free()
  if ((ipert==natom+10.and.idir>3).or.ipert==natom+11) then
-   call destroy_rf_hamiltonian(rf_hamk_dir2)
+   call rf_hamk_dir2%free()
  end if
  ABI_DEALLOCATE(rhoaug1)
  ABI_DEALLOCATE(vlocal)
@@ -822,10 +827,10 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 !
    if (psps%usepaw==0) then
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
-&     nspden,nsppol,nsym1,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1)
+&     nspden,nsppol,nsym1,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1)
    else
      call symrhg(cplex,gprimd,irrzon1,mpi_enreg,dtset%nfft,dtset%nfft,dtset%ngfft,&
-&     nspden,nsppol,nsym1,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1)
+&     nspden,nsppol,nsym1,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1)
    end if
 !  We now have both rho(r) and rho(G), symmetrized, and if nsppol=2
 !  we also have the spin-up density, symmetrized, in rhor1(:,2).
@@ -839,8 +844,8 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
  do isppol=1,nsppol
    do ikpt=1,nkpt_rbz
      nband_k=nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
-     nband_k=max(1,nband_k-dtset%nbdbuf)
-     residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_k-1)))
+     nband_eff=max(1,nband_k-dtset%nbdbuf)
+     residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
      ibdkpt=ibdkpt+nband_k
    end do
  end do

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_suscep_stat
 !! NAME
 !! m_suscep_stat
@@ -7,7 +6,7 @@
 !! Compute the susceptibility matrix
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG, AR, MB)
+!!  Copyright (C) 2008-2020 ABINIT group (XG, AR, MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,11 +26,12 @@
 MODULE m_suscep_stat
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_errors
  use m_abicore
+ use m_distribfft
 
+ use defs_abitypes, only : MPI_type
  use m_time,    only : timab
  use m_pawang,  only : pawang_type
  use m_pawtab,  only : pawtab_type
@@ -378,8 +378,8 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
            call pawcprj_get(atindx1,cprj_loc,cprj,natom,1,ibg,ikpt,iorder_cprj,isp,&
 &           mband/mpi_enreg%nproc_band,mkmem,natom,nband_loc,nband_loc,my_nspinor,nsppol,unpaw,&
 &           mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-           call pawcprj_mpi_allgather(cprj_loc,cprj_k,natom,my_nspinor*nband_loc,dimcprj,0,&
-&           mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.true.)
+           call pawcprj_mpi_allgather(cprj_loc,cprj_k,natom,my_nspinor*nband_loc,mpi_enreg%bandpp,&
+&           dimcprj,0,mpi_enreg%nproc_band,mpi_enreg%comm_band,ierr,rank_ordered=.true.)
            call pawcprj_free(cprj_loc)
            ABI_DATATYPE_DEALLOCATE(cprj_loc)
          end if
@@ -478,7 +478,7 @@ subroutine suscep_stat(atindx,atindx1,cg,cprj,dielar,dimcprj,doccde,&
 !      (note symrhg also make the reverse FFT, to get symmetrized density;
 !      this is useless here, and should be made an option)
        call symrhg(1,gprimd,irrzondiel,mpi_enreg_diel,nfftdiel,nfftdiel,ngfftdiel,&
-&       nspden_tmp,1,nsym,phnonsdiel,rhoextrg,rhoextrr,rprimd,symafm,symrel)
+&       nspden_tmp,1,nsym,phnonsdiel,rhoextrg,rhoextrr,rprimd,symafm,symrel,tnons)
 
        do ipw2=1,npwdiel
          j1=kg_diel(1,ipw2) ; j2=kg_diel(2,ipw2) ; j3=kg_diel(3,ipw2)
@@ -947,11 +947,12 @@ subroutine susk(atindx,bdtot_index,cg_mpi,cprj_k,doccde,drhode,eigen,extrap,gbou
  integer,allocatable :: band_loc(:),kg_k_gather(:,:),npw_per_proc(:),rdispls(:)
  integer,allocatable :: rdispls_all(:),rdisplsloc(:),recvcounts(:)
  integer,allocatable :: recvcountsloc(:),sdispls(:),sdisplsloc(:),sendcounts(:)
- integer,allocatable :: sendcountsloc(:),susmat_mpi(:,:,:)
+ integer,allocatable :: sendcountsloc(:)
  integer,allocatable,target :: kg_k_gather_all(:,:)
  real(dp) :: tsec(2)
  real(dp),allocatable :: cwavef(:,:),cwavef_alltoall(:,:)
  real(dp),allocatable :: cwavef_alltoall_gather(:,:),dummy(:,:),rhoaug(:,:,:)
+ real(dp),allocatable :: susmat_mpi(:,:,:)
  real(dp),allocatable :: wfprod(:,:),wfraug(:,:,:,:),wfrspa(:,:,:,:,:,:)
  real(dp),allocatable,target :: cg_local(:,:)
  real(dp),pointer :: cg(:,:)

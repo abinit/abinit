@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wfk_analyze
 !! NAME
 !!  m_wfk_analyze
@@ -7,7 +6,7 @@
 !!  Post-processing tools for WFK file
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,8 +26,6 @@
 module m_wfk_analyze
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -38,12 +35,15 @@ module m_wfk_analyze
  use m_nctk
  use m_wfk
  use m_wfd
+ use m_dtset
+ use m_dtfil
+ use m_distribfft
 
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
+ use defs_abitypes,     only : mpi_type
  use m_time,            only : timab
  use m_fstrings,        only : strcat, sjoin, itoa, ftoa
  use m_fftcore,         only : print_ngfft
- use m_kpts,            only : tetra_from_kptrlatt
- use m_bz_mesh,         only : kpath_t, kpath_new, kpath_free
  use m_mpinfo,          only : destroy_mpi_enreg, initmpi_seq
  use m_esymm,           only : esymm_t, esymm_free
  use m_ddk,             only : ddk_compute
@@ -135,7 +135,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
 !Arguments ------------------------------------
 !scalars
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
  type(pawang_type),intent(inout) :: pawang
@@ -209,10 +209,10 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
 
  ! Costruct crystal and ebands from the GS WFK file.
  call wfk_read_eigenvalues(wfk0_path,gs_eigen,wfk0_hdr,comm) !,gs_occ)
- call hdr_vs_dtset(wfk0_hdr, dtset)
+ call wfk0_hdr%vs_dtset(dtset)
 
- cryst = hdr_get_crystal(wfk0_hdr, timrev2)
- call crystal_print(cryst,header="crystal structure from WFK file")
+ cryst = wfk0_hdr%get_crystal(timrev2)
+ call cryst%print(header="crystal structure from WFK file")
 
  ebands = ebands_from_hdr(wfk0_hdr,maxval(wfk0_hdr%nband),gs_eigen)
 
@@ -322,9 +322,9 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    if (psp_gencond==1 .or. call_pawinit) then
      call timab(553,1,tsec)
      gsqcut_shp = two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
-     call pawinit(gnt_option,gsqcut_shp,zero,dtset%pawlcutd,dtset%pawlmix,&
+     call pawinit(dtset%effmass_free,gnt_option,gsqcut_shp,zero,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,cryst%nsym,dtset%pawntheta,pawang,Pawrad,&
-&     dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usepotzero)
+&     dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,0,dtset%usepotzero)
      call timab(553,2,tsec)
 
      ! Update internal values
@@ -394,17 +394,6 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
    if (my_rank == master) then
      wfkfull_path = dtfil%fnameabo_wfk; if (dtset%iomode == IO_MODE_ETSF) wfkfull_path = nctk_ncify(wfkfull_path)
      call wfk_tofullbz(wfk0_path, dtset, psps, pawtab, wfkfull_path)
-
-     ! Write tetrahedron tables.
-     !tetra = tetra_from_kptrlatt(cryst, dtset%kptopt, dtset%kptrlatt, dtset%nshiftk, &
-     !dtset%shiftk, dtset%nkpt, dtset%kptns, xmpi_comm_self, msg, ierr)
-     !if (ierr == 0) then
-     !  call tetra_write(tetra, dtset%nkpt, dtset%kptns, strcat(dtfil%filnam_ds(4), "_TETRA"))
-     !else
-     !  MSG_WARNING(sjoin("Cannot produce TETRA file", ch10, msg))
-     !end if
-
-     !call destroy_tetra(tetra)
    end if
    call xmpi_barrier(comm)
 
@@ -482,7 +471,7 @@ subroutine wfk_analyze(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,
  call wfd%free()
  call pawfgr_destroy(pawfgr)
  call destroy_mpi_enreg(mpi_enreg)
- call hdr_free(wfk0_hdr)
+ call wfk0_hdr%free()
 
  ! Deallocation for PAW.
  if (dtset%usepaw==1) then

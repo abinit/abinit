@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_elpolariz
 !! NAME
 !! m_elpolariz
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2005-2019 ABINIT group (XG, NSAI, MKV)
+!!  Copyright (C) 2005-2020 ABINIT group (XG, NSAI, MKV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,15 +26,17 @@
 module m_elpolariz
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_efield
  use m_xmpi
  use m_wffile
  use m_hdr
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_geometry, only : metric
  use m_symtk,    only : matr3inv
  use m_hide_lapack,  only : dzgedi, dzgefa
@@ -133,8 +134,6 @@ subroutine elpolariz(atindx1,cg,cprj,dtefield,dtfil,dtset,etotal,enefield,gprimd
 & npwarr,nsppol,ntypat,pawrhoij,pawtab,&
 & pel,pel_cg,pelev,pion,psps,pwind,pwind_alloc,&
 & pwnsfac,rprimd,ucvol,usecprj,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -486,8 +485,6 @@ end subroutine elpolariz
 subroutine uderiv(bdberry,cg,gprimd,hdr,istwfk,kberry,kg,kpt_,kptopt,kptrlatt,&
 & mband,mcg,mkmem,mpi_enreg,mpw,natom,nband,nberry,npwarr,nspinor,nsppol,nkpt_,&
 & unddk,fnameabo_1wf)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -977,8 +974,6 @@ end subroutine uderiv
 subroutine waveformat(cg,cg_disk,cg_index,cg_new,dk,ii,ikpt,&
 & ikpt_,isgn,isppol,jj,jkpt,jkpt_,kg_kpt,kpt,kg_jl,maxband,mband,mcg,mcg_disk,&
 & minband,mkmem,mpw,nkpt,nkpt_,npwarr,nsppol,nspinor,shift_g_2,tr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

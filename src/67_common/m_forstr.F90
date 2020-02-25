@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_forstr
 !! NAME
 !!  m_forstr
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, AF, AR, MB, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,8 +26,6 @@
 module m_forstr
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_efield
@@ -37,7 +34,10 @@ module m_forstr
  use m_fock
  use m_cgtools
  use m_xcdata
+ use m_dtset
 
+ use defs_datatypes,     only : pseudopotential_type
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timab
  use m_geometry,         only : xred2xcart, metric, stresssym
  use m_energies,         only : energies_type
@@ -56,8 +56,7 @@ module m_forstr
  use m_initylmg,         only : initylmg
  use m_xchybrid,         only : xchybrid_ncpp_cc
  use m_kg,               only : mkkpg
- use m_hamiltonian,      only : init_hamiltonian, destroy_hamiltonian, load_spin_hamiltonian,&
-&                               load_k_hamiltonian, gs_hamiltonian_type, load_kprime_hamiltonian!,K_H_KPRIME
+ use m_hamiltonian,      only : init_hamiltonian, gs_hamiltonian_type !,K_H_KPRIME
  use m_electronpositron, only : electronpositron_type, electronpositron_calctype
  use m_bandfft_kpt,      only : bandfft_kpt, bandfft_kpt_type, prep_bandfft_tabs, &
 &                               bandfft_kpt_savetabs, bandfft_kpt_restoretabs
@@ -141,6 +140,7 @@ contains
 !!  eigen(mband*nkpt*nsppol)=array for holding eigenvalues (hartree)
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  grchempottn(3,natom)=d(E_chemical potential)/d(xred) (hartree)
+!!  grcondft(3,natom)=d(E_constrainedDFT)/d(xred) (hartree)
 !!  grewtn(3,natom)=d(Ewald)/d(xred) (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D dispersion (hartree)
 !!  gsqcut=cutoff value on G**2 for (large) sphere inside FFT box.
@@ -192,7 +192,10 @@ contains
 !!  vhartr(nfftf)=array for holding Hartree potential
 !!  vpsp(nfftf)=array for holding local psp
 !!  vxc(nfftf,nspden)=exchange-correlation potential (hartree) in real space
+!!  vxctau(nfft,nspden,4*usekden)=(only for meta-GGA): derivative of XC energy density
+!!                                wrt kinetic energy density (depsxcdtau)
 !!  xccc3d(n3xccc)=3D core electron density for XC core correction, bohr^-3
+!!  xcctau3d(n3xccc*usekden)=(only for meta-GGA): 3D core electron kinetic energy density for XC core correction
 !!  xred(3,natom)=reduced dimensionless atomic coordinates
 !!  ylm(mpw*mkmem,mpsang*mpsang*useylm)= real spherical harmonics for each G and k point
 !!  ylmgr(mpw*mkmem,3,mpsang*mpsang*useylm)= gradients of real spherical harmonics
@@ -247,13 +250,13 @@ contains
 !! SOURCE
 
 subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,energies,favg,fcart,fock,&
-&                 forold,fred,grchempottn,gresid,grewtn,grhf,grvdw,grxc,gsqcut,indsym,&
+&                 forold,fred,grchempottn,grcondft,gresid,grewtn,grhf,grvdw,grxc,gsqcut,indsym,&
 &                 kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,n3xccc,nattyp,&
 &                 nfftf,ngfftf,ngrvdw,nhat,nkxc,npwarr,&
 &                 ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
 &                 pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1df,psps,rhog,rhor,rprimd,stress_needed,&
 &                 strsxc,strten,symrec,synlgr,ucvol,usecprj,vhartr,vpsp,&
-&                 vxc,wvl,xccc3d,xred,ylm,ylmgr,qvpotzero)
+&                 vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero)
 
 !Arguments ------------------------------------
 !scalars
@@ -277,17 +280,18 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
  integer,intent(in) :: npwarr(dtset%nkpt),symrec(3,3,dtset%nsym)
  real(dp),intent(in) :: cg(2,mcg)
  real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
- real(dp),intent(in) :: grchempottn(3,dtset%natom),grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(dtset%nfft,nkxc)
+ real(dp),intent(in) :: grchempottn(3,dtset%natom),grcondft(3,dtset%natom),grewtn(3,dtset%natom)
+ real(dp),intent(in) :: grvdw(3,ngrvdw),kxc(dtset%nfft,nkxc)
  real(dp),intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*dtset%natom)
  real(dp),intent(in) :: ph1df(2,3*(2*mgfftf+1)*dtset%natom)
  real(dp),intent(in) :: rhog(2,nfftf),rprimd(3,3),strsxc(6),vhartr(nfftf)
- real(dp),intent(in) :: vpsp(nfftf),vxc(nfftf,dtset%nspden)
+ real(dp),intent(in) :: vpsp(nfftf),vxc(nfftf,dtset%nspden),vxctau(nfftf,dtset%nspden,4*dtset%usekden)
  real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm)
  real(dp),intent(inout) :: forold(3,dtset%natom)
  real(dp),intent(inout) :: nhat(nfftf,dtset%nspden*psps%usepaw),rhor(nfftf,dtset%nspden)
- real(dp),intent(inout) :: xccc3d(n3xccc),xred(3,dtset%natom)
+ real(dp),intent(inout) :: xccc3d(n3xccc),xcctau3d(n3xccc*dtset%usekden),xred(3,dtset%natom)
  real(dp),intent(inout),target :: nvresid(nfftf,dtset%nspden)
  real(dp),intent(out) :: favg(3)
  real(dp),intent(inout) :: fcart(3,dtset%natom),fred(3,dtset%natom)
@@ -468,11 +472,11 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
      resid => nvresid
    end if
 
-   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,grchempottn,gresid,grewtn,&
+   call forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,forold,fred,grchempottn,grcondft,gresid,grewtn,&
 &   grhf,grnl,grvdw,grxc,gsqcut,indsym,maxfor,mgfftf,&
 &   mpi_enreg,psps%n1xccc,n3xccc,nattyp,&
 &   nfftf,ngfftf,ngrvdw,ntypat,pawrad,pawtab,ph1df,psps,rhog,&
-&   rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,wvl%descr,wvl%den,xred,&
+&   rhor,rprimd,symrec,synlgr,dtset%usefock,resid,vxc,vxctau,wvl%descr,wvl%den,xred,&
 &   electronpositron=electronpositron)
 
    if (apply_residual) then
@@ -489,13 +493,15 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 
  if (stress_needed==1.and.dtset%usewvl==0) then
 !   if (dtset%usefock==1 .and. associated(fock).and.fock%fock_common%optstr.and.psps%usepaw==0) then
-   if (dtset%usefock==1 .and. associated(fock).and.fock%fock_common%optstr) then
-     fock%fock_common%stress(1:3)=fock%fock_common%stress(1:3)-(two*energies%e_fock-energies%e_fock0)/ucvol
-     if (n3xccc>0.and.psps%usepaw==0 .and. &
-&     (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid())) then
-       ABI_ALLOCATE(vxc_hf,(nfftf,dtset%nspden))
+   if (dtset%usefock==1 .and. associated(fock)) then
+     if (fock%fock_common%optstr) then
+       fock%fock_common%stress(1:3)=fock%fock_common%stress(1:3)-(two*energies%e_fock-energies%e_fock0)/ucvol
+       if (n3xccc>0.and.psps%usepaw==0 .and. &
+&        (dtset%ixc==41.or.dtset%ixc==42.or.libxc_functionals_is_hybrid())) then
+         ABI_ALLOCATE(vxc_hf,(nfftf,dtset%nspden))
 !compute Vxc^GGA(rho_val)
-       call xchybrid_ncpp_cc(dtset,dum,mpi_enreg,nfftf,ngfftf,n3xccc,rhor,rprimd,strdum,dum1,xccc3d,vxc=vxc_hf,optstr=1)
+         call xchybrid_ncpp_cc(dtset,dum,mpi_enreg,nfftf,ngfftf,n3xccc,rhor,rprimd,strdum,dum1,xccc3d,vxc=vxc_hf,optstr=1)
+       end if
      end if
    end if
    call stress(atindx1,dtset%berryopt,dtefield,energies%e_localpsp,dtset%efield,&
@@ -503,9 +509,9 @@ subroutine forstr(atindx1,cg,cprj,diffor,dtefield,dtset,eigen,electronpositron,e
 &   mpi_enreg,psps%mqgrid_vl,psps%n1xccc,n3xccc,dtset%natom,nattyp,&
 &   nfftf,ngfftf,nlstr,dtset%nspden,dtset%nsym,ntypat,psps,pawrad,pawtab,ph1df,&
 &   dtset%prtvol,psps%qgrid_vl,dtset%red_efieldbar,rhog,rprimd,strten,strsxc,symrec,&
-&   dtset%typat,dtset%usefock,psps%usepaw,&
-&   dtset%vdw_tol,dtset%vdw_tol_3bt,dtset%vdw_xc,psps%vlspl,vxc,vxc_hf,psps%xccc1d,xccc3d,psps%xcccrc,xred,&
-&   psps%ziontypat,psps%znucltypat,qvpotzero,&
+&   dtset%typat,dtset%usefock,dtset%usekden,psps%usepaw,&
+&   dtset%vdw_tol,dtset%vdw_tol_3bt,dtset%vdw_xc,psps%vlspl,vxc,vxctau,vxc_hf,&
+&   psps%xccc1d,xccc3d,xcctau3d,psps%xcccrc,xred,psps%ziontypat,psps%znucltypat,qvpotzero,&
 &   electronpositron=electronpositron)
  end if
 
@@ -761,7 +767,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  do isppol=1,nsppol
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
-   call load_spin_hamiltonian(gs_hamk,isppol,with_nonlocal=.true.)
+   call gs_hamk%load_spin(isppol,with_nonlocal=.true.)
    if (usefock_loc) fockcommon%isppol=isppol
 
 !  Loop over k points
@@ -918,14 +924,14 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 !     - Prepare various tabs in case of band-FFT parallelism
 !     - Load k-dependent quantities in the Hamiltonian
      ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-     call load_k_hamiltonian(gs_hamk,kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
+     call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_gbound=compute_gbound,compute_ph3d=.true.)
 
 !    Load band-FFT tabs (transposed k-dependent arrays)
      if (mpi_enreg%paral_kgb==1) then
        call bandfft_kpt_savetabs(my_bandfft_kpt,ffnl=ffnl_sav,ph3d=ph3d_sav,kpg=kpg_k_sav)
        call prep_bandfft_tabs(gs_hamk,ikpt,mkmem,mpi_enreg)
-       call load_k_hamiltonian(gs_hamk,npw_fft_k=my_bandfft_kpt%ndatarecv, &
+       call gs_hamk%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv, &
 &       kg_k     =my_bandfft_kpt%kg_k_gather, &
 &       kpg_k    =my_bandfft_kpt%kpg_k_gather, &
        ffnl_k   =my_bandfft_kpt%ffnl_gather, &
@@ -969,7 +975,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 
 !        gs_hamk%ffnl_k is changed in fock_getghc, so that it is necessary to restore it when stresses are to be calculated.
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
-           call load_k_hamiltonian(gs_hamk,ffnl_k=ffnl)
+           call gs_hamk%load_k(ffnl_k=ffnl)
          end if
 
 !        Load contribution from n,k
@@ -993,7 +999,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
 &           mpi_enreg,nnlout,paw_opt,signs,nonlop_dum,tim_nonlop_prep,cwavef,cwavef)
          end if
          if ((stress_needed==1).and.(usefock_loc).and.(psps%usepaw==1))then
-           call load_k_hamiltonian(gs_hamk,ffnl_k=ffnl_str)
+           call gs_hamk%load_k(ffnl_k=ffnl_str)
          end if
          call timab(926,2,tsec)
 
@@ -1172,7 +1178,7 @@ subroutine forstrnps(cg,cprj,ecut,ecutsm,effmass_free,eigen,electronpositron,foc
  end if
 
 !Deallocate temporary space
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
  if (usefock_loc) then
    fockcommon%use_ACE=use_ACE_old
  end if

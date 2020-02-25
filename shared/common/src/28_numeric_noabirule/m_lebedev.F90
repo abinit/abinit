@@ -8,7 +8,7 @@
 !!  on the sphere using lebedev-laikov angular grids.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -133,8 +133,6 @@ contains  !===========================================================
 
 type(lebedev_t) function lebedev_new(seq_idx) result(new)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: seq_idx
@@ -177,8 +175,6 @@ end function lebedev_new
 
 subroutine lebedev_free(lgrid)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(lebedev_t),intent(inout) :: lgrid
@@ -186,12 +182,8 @@ subroutine lebedev_free(lgrid)
 ! *********************************************************************
 
  lgrid%npts=0
- if (allocated(lgrid%versors)) then
-   ABI_FREE(lgrid%versors)
- end if
- if (allocated(lgrid%weights)) then
-   ABI_FREE(lgrid%weights)
- end if
+ ABI_SFREE(lgrid%versors)
+ ABI_SFREE(lgrid%weights)
 
 end subroutine lebedev_free
 !!***
@@ -223,8 +215,6 @@ end subroutine lebedev_free
 !! SOURCE
 
 subroutine build_lebedev_grid(seq_idx, npts, xx, yy, zz, ww)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -923,8 +913,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 
  SUBROUTINE LD0006(X,Y,Z,W,N)
 
-       implicit none
-
        DOUBLE PRECISION X(   6)
        DOUBLE PRECISION Y(   6)
        DOUBLE PRECISION Z(   6)
@@ -984,8 +972,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0014(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(  14)
        DOUBLE PRECISION Y(  14)
@@ -1048,8 +1034,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0026(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(  26)
        DOUBLE PRECISION Y(  26)
@@ -1115,8 +1099,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 
  SUBROUTINE LD0038(X,Y,Z,W,N)
 
-       implicit none
-
        DOUBLE PRECISION X(  38)
        DOUBLE PRECISION Y(  38)
        DOUBLE PRECISION Z(  38)
@@ -1181,8 +1163,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0050(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(  50)
        DOUBLE PRECISION Y(  50)
@@ -1250,8 +1230,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0074(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(  74)
        DOUBLE PRECISION Y(  74)
@@ -1323,8 +1301,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 
  SUBROUTINE LD0086(X,Y,Z,W,N)
 
-       implicit none
-
        DOUBLE PRECISION X(  86)
        DOUBLE PRECISION Y(  86)
        DOUBLE PRECISION Z(  86)
@@ -1395,8 +1371,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0110(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X( 110)
        DOUBLE PRECISION Y( 110)
@@ -1471,8 +1445,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0146(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X( 146)
        DOUBLE PRECISION Y( 146)
@@ -1550,8 +1522,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0170(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X( 170)
        DOUBLE PRECISION Y( 170)
@@ -1632,8 +1602,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0194(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X( 194)
        DOUBLE PRECISION Y( 194)
@@ -1717,8 +1685,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0230(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X( 230)
        DOUBLE PRECISION Y( 230)
@@ -1806,8 +1772,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0266(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X( 266)
        DOUBLE PRECISION Y( 266)
@@ -1898,8 +1862,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0302(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X( 302)
        DOUBLE PRECISION Y( 302)
@@ -1994,8 +1956,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0350(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X( 350)
        DOUBLE PRECISION Y( 350)
@@ -2094,8 +2054,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0434(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X( 434)
        DOUBLE PRECISION Y( 434)
@@ -2203,8 +2161,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0590(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X( 590)
        DOUBLE PRECISION Y( 590)
@@ -2327,8 +2283,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0770(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X( 770)
        DOUBLE PRECISION Y( 770)
@@ -2468,8 +2422,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD0974(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X( 974)
        DOUBLE PRECISION Y( 974)
@@ -2628,8 +2580,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD1202(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(1202)
        DOUBLE PRECISION Y(1202)
@@ -2809,8 +2759,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD1454(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(1454)
        DOUBLE PRECISION Y(1454)
@@ -3013,8 +2961,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD1730(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(1730)
        DOUBLE PRECISION Y(1730)
@@ -3242,8 +3188,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD2030(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(2030)
        DOUBLE PRECISION Y(2030)
@@ -3498,8 +3442,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD2354(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(2354)
        DOUBLE PRECISION Y(2354)
@@ -3783,8 +3725,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD2702(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(2702)
        DOUBLE PRECISION Y(2702)
@@ -4099,8 +4039,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD3074(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(3074)
        DOUBLE PRECISION Y(3074)
@@ -4448,8 +4386,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD3470(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(3470)
        DOUBLE PRECISION Y(3470)
@@ -4832,8 +4768,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD3890(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(3890)
        DOUBLE PRECISION Y(3890)
@@ -5253,8 +5187,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD4334(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(4334)
        DOUBLE PRECISION Y(4334)
@@ -5713,8 +5645,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD4802(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(4802)
        DOUBLE PRECISION Y(4802)
@@ -6214,8 +6144,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD5294(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(5294)
        DOUBLE PRECISION Y(5294)
@@ -6758,8 +6686,6 @@ subroutine gen_oh(code, num, x, y, z, w, a, b, v)
 !!***
 
  SUBROUTINE LD5810(X,Y,Z,W,N)
-
-       implicit none
 
        DOUBLE PRECISION X(5810)
        DOUBLE PRECISION Y(5810)

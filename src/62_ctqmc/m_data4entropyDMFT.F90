@@ -1,13 +1,12 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_data4entropyDMFT
 !! NAME
 !!  m_data4entropyDMFT
-!! 
-!! FUNCTION 
-!!  FIXME: add description. 
+!!
+!! FUNCTION
+!!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,8 +30,8 @@
 module m_data4entropyDMFT
 
   use defs_basis
-  use defs_abitypes
   use m_errors
+  use m_abicore
 
   implicit none
 
@@ -54,7 +53,7 @@ module m_data4entropyDMFT
 !!  This structured datatype contains the necessary data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -85,7 +84,7 @@ contains
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -184,7 +183,7 @@ end subroutine data4entropyDMFT_init
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -256,7 +255,7 @@ subroutine data4entropyDMFT_setDocc(this,iatom,Docc,Nocc)
                               " maxnflavor=", maxnflavor
         MSG_ERROR(message)
       end if
-      
+
       do iflavor1 = 1, (2*size(Nocc,1)+1)
         do iflavor2 = 1, (2*size(Nocc,1)+1)
           this%docc(iflavor2,iflavor1,iatom) = Nocc(iflavor1)*Nocc(iflavor2)
@@ -275,7 +274,7 @@ end subroutine data4entropyDMFT_setDocc
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -336,7 +335,7 @@ end subroutine data4entropyDMFT_setHu
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -390,7 +389,7 @@ end subroutine data4entropyDMFT_setDc
 !!  FIXME: add description.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (J. Bieder)
+!!  Copyright (C) 2014-2020 ABINIT group (J. Bieder)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

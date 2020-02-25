@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_effective_potential_file
 !! NAME
 !! m_effective_potential_file
@@ -9,7 +8,7 @@
 !! (XML or DDB)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2000-2019 ABINIT group (AM)
+!! Copyright (C) 2000-2020 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2096,7 +2095,7 @@ end subroutine system_getDimFromXML
 
 !Re-generate symmetry operations from the lattice and atomic coordinates
  tolsym=tol8
- msym = 192
+ msym = 384
  ABI_ALLOCATE(spinat,(3,natom))
  ABI_ALLOCATE(ptsymrel,(3,3,msym))
  ABI_ALLOCATE(symafm,(msym))
@@ -2224,7 +2223,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  use m_ddb
  use m_ifc
  use m_copy,            only : alloc_copy
- use m_crystal,         only : crystal_t,crystal_print
+ use m_crystal,         only : crystal_t
  use m_multibinit_dataset, only : multibinit_dtset_type
  use m_effective_potential, only : effective_potential_type, effective_potential_free
 
@@ -2247,7 +2246,7 @@ subroutine system_ddb2effpot(crystal,ddb, effective_potential,inp,comm)
  logical :: iam_master=.FALSE.
  integer,parameter :: master=0
  integer :: nptsym,nsym
- integer :: msym = 192,  use_inversion = 1, space_group
+ integer :: msym = 384,  use_inversion = 1, space_group
  real(dp):: max_phfq,tolsym = tol8
 !arrays
  integer :: bravais(11),cell_number(3),cell2(3)
@@ -3477,7 +3476,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
  rprimd_hist(:,:) = hist%rprimd(:,:,1)
 
  do ia=1,3
-   scale_cell(:) = zero
+   scale_cell(:) = 0
    do ii=1,3
      if(abs(rprimd_ref(ii,ia)) > tol10)then
        scale_cell(ii) = nint(rprimd_hist(ii,ia) / rprimd_ref(ii,ia))
@@ -3499,7 +3498,7 @@ subroutine effective_potential_file_mapHistToRef(eff_pot,hist,comm,verbose)
 &         'Action: check/change your MD file'
      MSG_ERROR(msg)
    else
-     ncell(ia) = factor
+     ncell(ia) = int(factor)
    end if
  end do
 

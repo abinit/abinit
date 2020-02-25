@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_vtorhorec
 !! NAME
 !!  m_vtorhorec
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (SLeroux, MMancini).
+!!  Copyright (C) 2008-2020 ABINIT group (SLeroux, MMancini).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,15 +25,17 @@
 module m_vtorhorec
 
  use defs_basis
- use defs_abitypes
- use defs_datatypes
  use defs_rectypes
+ use m_distribfft
  use m_xmpi
  use m_pretty_rec
  use m_errors
  use m_abicore
  use m_per_cond
+ use m_dtset
 
+ use defs_datatypes,     only : pseudopotential_type
+ use defs_abitypes,      only : MPI_type
  use m_time,             only : timein, timab
  use m_rec,              only : Calcnrec, init_nlpsprec, cpu_distribution
  use m_rec_tools,        only : reshape_pot, trottersum, get_pt0_pt1
@@ -923,7 +924,7 @@ subroutine vtorhorec(dtset,&
 
  call symrhg(1,gprimd,irrzon,rset%mpi,nfftf,&
 & dtset%ngfft(1)*dtset%ngfft(2)*dtset%ngfft(3),dtset%ngfft,dtset%nspden,&
-& dtset%nsppol,dtset%nsym,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel)
+& dtset%nsppol,dtset%nsym,phnons,rhog,rhor,rprimd,dtset%symafm,dtset%symrel,dtset%tnons)
 
 end subroutine vtorhorec
 !!***
@@ -2143,7 +2144,6 @@ end subroutine nlenergyrec
 !!***
 
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/first_rec
 !! NAME
 !! first_rec
@@ -2153,7 +2153,7 @@ end subroutine nlenergyrec
 !! compute some quantities which are used in the rest of the calculation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2019 ABINIT group (MMancini)
+!!  Copyright (C) 2009-2020 ABINIT group (MMancini)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

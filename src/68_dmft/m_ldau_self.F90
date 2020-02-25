@@ -6,7 +6,7 @@
 !! Compute DFT+U self energy for DMFT
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,6 +30,18 @@
 MODULE m_ldau_self
 
  use defs_basis
+ use m_abicore
+ use m_errors
+
+ use m_crystal, only : crystal_t
+ use m_green, only : green_type
+ use m_self, only : self_type
+ use m_oper, only : print_oper
+ use m_energy, only : energy_type,compute_energy
+ use m_pawtab, only : pawtab_type
+ use m_pawdij, only : pawpupot
+ use m_paw_dmft, only : paw_dmft_type
+ use m_paw_correlations, only : setnoccmmp
 
  implicit none
 
@@ -39,7 +51,7 @@ MODULE m_ldau_self
 !!***
 
 contains
-!{\src2tex{textfont=tt}}
+
 !!****f* m_ldau_self/ldau_self
 !! NAME
 !! ldau_self
@@ -48,7 +60,7 @@ contains
 !! Use LDA+U to compute self-energy
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -75,22 +87,6 @@ contains
 !! SOURCE
 
 subroutine ldau_self(cryst_struc,green,paw_dmft,pawtab,self,opt_ldau,prtopt)
-
- use m_abicore
-
- use defs_basis
- use defs_datatypes
- use m_errors
- use m_crystal, only : crystal_t
- use m_green, only : green_type
- use m_self, only : self_type
- use m_oper, only : print_oper
- use m_energy, only : energy_type,compute_energy
-
- use m_pawtab, only : pawtab_type
- use m_pawdij, only : pawpupot
- use m_paw_dmft, only : paw_dmft_type
- use m_paw_correlations, only : setnoccmmp
 
 !Arguments ------------------------------------
 !scalars

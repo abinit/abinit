@@ -12,9 +12,10 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include <triqs/mpi/boost.hpp>
 
-#if defined HAVE_TRIQS_v2_0
+#if defined HAVE_TRIQS_v1_4
+#include <triqs/mpi/boost.hpp>
+#elif defined HAVE_TRIQS_v2_0
 #include <triqs/h5.hpp>
 #endif
 
@@ -34,32 +35,41 @@ using triqs::operators::n;
 
 #include <mpi.h>
 
+
 void ctqmc_triqs_run(bool rot_inv, bool leg_measure, bool hist,     /*boolean*/
                      bool wrt_files, bool tot_not,                  /*boolean*/	      
                      int n_orbitals, int n_freq, int n_tau,         /*integer*/
                      int n_l, int n_cycles_, int cycle_length,      /*integer*/
                      int ntherm, int verbo, int seed,               /*integer*/
-		             double beta_,                                  /*double*/
+		     double beta_,                                  /*double*/
                      double *epsi, double *umat_ij,                 /*pointers*/
                      double *umat_ijkl,                             /*pointers*/
                      std::complex<double> *f_iw_ptr,                /*pointers*/
                      std::complex<double> *g_iw_ptr,                /*pointers*/
                      double *g_tau, double *gl,                     /*pointers*/
+#if defined HAVE_TRIQS_v1_4
                      MPI_Fint *MPI_world_ptr ){                     /*pointers*/
-  
+#else
+                     int rank ){                     /*pointers*/
+#endif
+
     cout.setf(ios::fixed);
+#if defined HAVE_TRIQS_v1_4
     //Initialize Boost mpi environment
     int rank, nprocs;
     boost::mpi::environment env;
     {
-        boost::mpi::communicator c;
-        c << MPI_Comm_f2c( *MPI_world_ptr );
-        rank=c.rank();
+	boost::mpi::communicator comm;
+	comm << MPI_Comm_f2c( *MPI_world_ptr );
+        rank=comm.rank();
 
-        MPI_Comm_size(c, &nprocs);
+        MPI_Comm_size(comm, &nprocs);
         std::cout << "Number of processors: " << nprocs << endl;
     }
-  
+#else
+    std::cout << "Rank: "<< rank << endl;
+#endif
+
     // Parameters relay from Fortran and default values affectation
     double beta = beta_;                //Temperature inverse 
     int num_orbitals = n_orbitals;

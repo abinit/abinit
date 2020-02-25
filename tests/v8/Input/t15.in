@@ -14,14 +14,15 @@ fit_generateCoeff = 0
 fit_coeff = 1
 fit_ncoeff = 0
 fit_nfixcoeff  = -1
+fit_iatom = -1
 
 #---------------------------------------------------------------
 #Inputs for the bound process:
 #---------------------------------------------------------------                                                                                                                                                  
 bound_model = 2
 bound_maxCoeff = 5 
-bound_rangePower = 6 8
-bound_cutoff = 7.5
+bound_rangePower = 4 4
+bound_cutoff = 3.8
 bound_anhaStrain = 0 
 bound_SPCoupling = 1
 
@@ -44,7 +45,7 @@ bound_step = 100
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
-#%% authors = A. MARTIN
+#%% authors = A. MARTIN, M.M. SCHMITT 
 #%% keywords = Effective potential, multibinit
 #%% description = 
 #%%   read ddb and HIST, fit and enforce that the anharmonic part is bounded from below.

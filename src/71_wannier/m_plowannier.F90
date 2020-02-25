@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_plowannier
 !! NAME
 !!  m_plowannier
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon,AGerossier)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon,AGerossier)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,9 +27,20 @@ MODULE m_plowannier
  use defs_basis
  use m_errors
  use m_abicore
+ use m_dtset
+ use m_dtfil
+ use defs_wvltypes
+ use m_xmpi
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_io_tools,  only : open_file
  use m_mpinfo,    only : proc_distrb_cycle
+ use m_crystal, only : crystal_t
+ use m_pawtab, only : pawtab_type
+ use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_get,pawcprj_free
+ use m_pawrad, only : pawrad_type, simp_gen
+
 
  implicit none
 
@@ -296,16 +306,6 @@ CONTAINS  !=====================================================================
 
 subroutine init_plowannier(dtset,wan)
 
-  use defs_basis
-  use defs_datatypes
-  use defs_abitypes
-  use defs_wvltypes
-  use m_abicore
-  use m_errors
-  use m_xmpi
- implicit none
-
-
 !Arguments ----------------------------------
 !scalars
  type(dataset_type), intent(in) :: dtset
@@ -478,8 +478,6 @@ end subroutine init_plowannier
 
 subroutine copy_orbital(orbital1,orbital2,n1,n2,n3)
 
- implicit none
-
  !Arguments----------------
  integer,intent(in) :: n1,n2,n3
  type(orbital_type), intent(in) :: orbital1(n1,n2,n3)
@@ -536,8 +534,6 @@ end subroutine copy_orbital
 
 subroutine allocate_orbital(orbital1,orbital2,n1,n2,n3)
 
- implicit none
-
  !Arguments----------------
  integer,intent(in) :: n1,n2,n3
  type(orbital_type), intent(in) :: orbital1(n1,n2,n3)
@@ -589,8 +585,6 @@ end subroutine allocate_orbital
 
 
 subroutine destroy_orbital(orbital2,n1,n2,n3)
-
- implicit none
 
  !Arguments----------------
  integer,intent(in) :: n1,n2,n3
@@ -673,20 +667,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 !DEC$ NOOPTIMIZE
 #endif
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use defs_wvltypes
- use m_abicore
- use m_errors
- use m_xmpi
  use m_hide_lapack
-
- use m_crystal, only : crystal_t
- use m_pawtab, only : pawtab_type
- use m_pawcprj, only : pawcprj_type,pawcprj_alloc,pawcprj_get,pawcprj_free
- use m_pawrad, only : pawrad_type, simp_gen
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2160,8 +2141,6 @@ end subroutine compute_coeff_plowannier
 
  subroutine destroy_plowannier(wan)
 
- implicit none
-
 !Arguments-------------------------------------
  type(plowannier_type), intent(inout) :: wan
 !Local variables-------------------------------
@@ -2252,8 +2231,6 @@ end subroutine compute_coeff_plowannier
 
  subroutine initialize_operwan(wan,operwan)
 
-   implicit none
-
    !Arguments----------------------------------
    type(plowannier_type), intent(in) :: wan
    type(operwan_type), intent(inout) :: operwan(wan%nkpt,wan%natom_wan,wan%natom_wan)
@@ -2302,8 +2279,6 @@ end subroutine compute_coeff_plowannier
 !! SOURCE
 
  subroutine destroy_operwan(wan,operwan)
-
-   implicit none
 
    !Arguments----------------------------------
    type(plowannier_type), intent(in) :: wan
@@ -2354,7 +2329,6 @@ end subroutine compute_coeff_plowannier
 #ifdef FC_INTEL
 !DEC$ NOOPTIMIZE
 #endif
-   implicit none
 
    !Arguments--------------------------
    type(plowannier_type), intent(in) :: wan
@@ -2428,8 +2402,6 @@ end subroutine compute_oper_ks2wan
 subroutine normalization_plowannier(wan)
 
   use m_matrix, only : invsqrt_matrix
-
-  implicit none
 
 !Arguments------------------
   type(plowannier_type), intent(inout) :: wan

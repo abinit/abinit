@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_initylmg
 !! NAME
 !!  m_initylmg
@@ -8,7 +7,7 @@
 !! over a set of (reciprocal space) (k+G) vectors
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (FJ, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (FJ, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,13 +27,13 @@
 module m_initylmg
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
 
- use m_paw_sphharm, only : ass_leg_pol, plm_dtheta, plm_dphi, plm_coeff
- use m_mpinfo,      only : proc_distrb_cycle
+ use defs_abitypes,  only : MPI_type
+ use m_paw_sphharm,  only : ass_leg_pol, plm_dtheta, plm_dphi, plm_coeff
+ use m_mpinfo,       only : proc_distrb_cycle
 
  implicit none
 

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* m_paw_occupancies/m_paw_occupancies
 !! NAME
 !!  m_paw_occupancies
@@ -7,7 +6,7 @@
 !!  This module contains routines related to the computation of PAW on-site occupancies (rhoij).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (FJ, MT)
+!! Copyright (C) 2018-2020 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,11 +22,11 @@
 MODULE m_paw_occupancies
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_pawtab,     only : pawtab_type
  use m_pawrhoij,   only : pawrhoij_type,pawrhoij_init_unpacked,pawrhoij_mpisum_unpacked, &
 &                         pawrhoij_alloc,pawrhoij_free,pawrhoij_inquire_dim
@@ -283,7 +282,7 @@ CONTAINS  !=====================================================================
              call pawcprj_pack(dimcprj,cwaveprjb,buffer_cprj_correl(:,:,ibc1))
              do proc_recver=0,mpi_enreg%nproc_band-1
                if (proc_sender /= proc_recver .and. paw_dmft%use_bandc(proc_recver+1)) then
-!                locc_test = At least one of the bands used by proc_recver have a non neglectable occnd 
+!                locc_test = At least one of the bands used by proc_recver have a non neglectable occnd
                  locc_test = .false.
                  do ib_loop=1,nbandc1
                    if(proc_recver == paw_dmft%bandc_proc(ib_loop)) then
@@ -304,7 +303,7 @@ CONTAINS  !=====================================================================
                end if
              end do
            else
-!            locc_test = At least one of the bands used by this proc have a non neglectable occnd 
+!            locc_test = At least one of the bands used by this proc have a non neglectable occnd
              locc_test = .false.
              do ib_loop=1,nbandc1
                if(mpi_enreg%me_band == paw_dmft%bandc_proc(ib_loop)) then
@@ -463,7 +462,7 @@ CONTAINS  !=====================================================================
 !deallocate temporary cwaveprj/cprj storage
  call pawcprj_free(cwaveprj)
  ABI_DATATYPE_DEALLOCATE(cwaveprj)
- 
+
  if(paw_dmft%use_sc_dmft/=0) then
    call pawcprj_free(cwaveprjb)
    ABI_DATATYPE_DEALLOCATE(cwaveprjb)

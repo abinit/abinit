@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_kpts
 !! NAME
 !!  m_kpts
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (XG, MG, MJV, DRH, DCA, JCC, MM)
+!! Copyright (C) 2008-2020 ABINIT group (XG, MG, MJV, DRH, DCA, JCC, MM)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -369,20 +368,19 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
 
  if(timrev/=1 .and. timrev/=0)then
    write(errmsg, '(3a,i0,a)' )&
-&   'timrev should be 0 or 1, while',ch10,&
-&   'it is equal to ',timrev,'.'
+    'timrev should be 0 or 1, while',ch10,&
+    'it is equal to ',timrev,'.'
    ierr = 1; return
  end if
 
  if(nsym/=1)then
-!  Find the identity symmetry operation
+   ! Find the identity symmetry operation
    do isym=1,nsym
      tident=1
      do jj=1,3
        if(symrec(jj,jj,isym)/=1)tident=0
        do ii=1,3
-         if( ii/=jj .and.&
-&         symrec(ii,jj,isym)/=0)tident=0
+         if( ii/=jj .and.symrec(ii,jj,isym)/=0)tident=0
        end do
      end do
      if(tident==1)then
@@ -443,11 +441,11 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
 
        end do ! End secondary loop over k-points
        if (imatch/=1) then
-         write(errmsg, '(a,a,a,i4,a,i4,a,a,a,a)' )&
-&         'k-point set must have full space-group symmetry',ch10,&
-&         'there is no match for kpt',ikpt,' transformed by symmetry',isym,ch10,&
-&         'Action: change kptopt to 2 or 3 and/or change or use shiftk',ch10,&
-&         'shiftk = 0 0 0 is always a safe choice.'
+         write(errmsg, '(a,a,a,i0,a,i0,a,a,a,a)' )&
+          'k-point set must have full space-group symmetry',ch10,&
+          'there is no match for kpt: ',ikpt,' transformed by symmetry: ',isym,ch10,&
+          'Action: change kptopt to 2 or 3 and/or change or use shiftk',ch10,&
+          'shiftk = 0 0 0 is always a safe choice.'
          ierr = 2; return
        end if
 
@@ -455,8 +453,7 @@ integer function symkchk(kptns,nkpt,nsym,symrec,timrev,errmsg) result(ierr)
    end do ! End primary loop over k-points
 
    write(msg,'(a)')' symkchk : k-point set has full space-group symmetry.'
-   call wrtout(std_out,msg,'COLL')
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout([std_out, ab_out], msg, 'COLL')
  end if
 
 end function symkchk
@@ -1063,15 +1060,16 @@ subroutine getkgrid_low(chksymbreak,iout,iscf,kpt,kptopt,kptrlatt,kptrlen,&
 
  !call cwtime(cpu, wall, gflops, "start")
  if (kptopt==1.or.kptopt==4) then
-   ! Cannot use antiferromagnetic symmetry operations to decrease the number of k points
+! Cannot use antiferromagnetic symmetry operations to decrease the number of k points
+!XG20191123 : now, antiferromagnetic symmetry operations can be used to decrease the number of k points for kptopt==4
    nsym_used=0
    do isym=1,nsym
-     if(symafm(isym)==1)nsym_used=nsym_used+1
+     if(symafm(isym)==1 .or. kptopt==4)nsym_used=nsym_used+1
    end do
    ABI_ALLOCATE(symrec,(3,3,nsym_used))
    nsym_used=0
    do isym=1,nsym ! Get the symmetry matrices in terms of reciprocal basis
-     if(symafm(isym)==1)then
+     if(symafm(isym)==1 .or. kptopt==4)then
        nsym_used=nsym_used+1
        call mati3inv(symrel(:,:,isym),symrec(:,:,nsym_used))
      end if
@@ -2978,7 +2976,7 @@ end subroutine testkgrid
 !!  The second call calculates the reduced coordinates of the circuit.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2007-2019 ABINIT group (MG)
+!!  Copyright (C) 2007-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* m_paw_correlations/m_paw_correlations
 !! NAME
 !!  m_paw_correlations
@@ -8,7 +7,7 @@
 !!    correlations in the PAW approach (DFT+U, exact-exchange, ...).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (BA,FJ,MT)
+!! Copyright (C) 2018-2020 ABINIT group (BA,FJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,15 +23,14 @@
 MODULE m_paw_correlations
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
-
+ use m_dtset
  use m_linalg_interfaces
  use m_special_funcs
- use m_io_tools, only : open_file
 
+ use m_io_tools,    only : open_file
  use m_pawang,      only : pawang_type,pawang_init,pawang_free
  use m_pawrad,      only : pawrad_type,simp_gen,nderiv_gen,pawrad_ifromr,poisson
  use m_pawtab,      only : pawtab_type

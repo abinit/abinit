@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h01 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h49 )
   
-- input  file    -> t06.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t06/t06.in
 - output file    -> t06.out
 - root for input  files -> t06i
 - root for output files -> t06o
@@ -36,7 +36,7 @@
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       8.322 Mbytes of memory.
+P This job should need less than                       8.289 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -55,7 +55,7 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       8.322 Mbytes of memory.
+P This job should need less than                       8.289 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -74,7 +74,7 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       8.322 Mbytes of memory.
+P This job should need less than                       8.289 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -93,7 +93,7 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       8.322 Mbytes of memory.
+P This job should need less than                       8.289 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -112,7 +112,7 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       8.322 Mbytes of memory.
+P This job should need less than                       8.289 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -131,7 +131,7 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       8.322 Mbytes of memory.
+P This job should need less than                       8.289 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -150,7 +150,7 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       8.322 Mbytes of memory.
+P This job should need less than                       8.289 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -169,7 +169,7 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       8.322 Mbytes of memory.
+P This job should need less than                       8.289 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -188,7 +188,7 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
  PAW method is used; the additional fine FFT grid is defined by:
    mgfftf=        24    nfftf =     13824
 ================================================================================
-P This job should need less than                       8.322 Mbytes of memory.
+P This job should need less than                       8.289 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 ================================================================================
@@ -198,7 +198,7 @@ _ WF disk file :      0.230 Mbytes ; DEN or POT disk file :      0.107 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 = 10
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 = 10
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -369,15 +369,6 @@ P           mkmem           1
            symrel      1  0  0   0  1  0   0  0  1       1  0  0  -1 -1  0   0  0 -1
                        0  1  0  -1 -1  0   0  0  1       0  1  0   1  0  0   0  0 -1
                       -1 -1  0   1  0  0   0  0  1      -1 -1  0   0  1  0   0  0 -1
-         symsigma11      0
-         symsigma12      0
-         symsigma13      1
-         symsigma21      0
-         symsigma22      0
-         symsigma23      1
-         symsigma31      0
-         symsigma32      0
-         symsigma33      1
             tnons11    0.0000000  0.0000000  0.0000000     0.0000000 -0.0000000  0.0000000
                       -0.0000000  0.0000000 -0.3333333     0.0000000  0.0000000 -0.3333333
                        0.0000000  0.0000000  0.3333333     0.0000000  0.0000000  0.3333333
@@ -692,7 +683,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET 11 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -717,8 +708,8 @@ P           mkmem           1
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.13111
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/Si-LDA.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/Si-LDA.paw
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
 - Paw atomic data for element Si - Generated by AtomPAW (N. Holzwarth) + AtomPAW2Abinit v3.1.1
 - 14.00000   4.00000  20070412                znucl, zion, pspdat
     7    7    2    0      1398   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -739,8 +730,8 @@ P           mkmem           1
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
 - Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
 -  8.00000   6.00000  20040423                znucl, zion, pspdat
     7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -780,6 +771,39 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   sigma(1 1)=  9.12494228E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  9.12494228E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  9.06490641E-03  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 11, }
+comment   : Summary of ground state results
+rprimd    :
+- [  4.6421500,  -8.0404397,   0.0000000, ]
+- [  4.6421500,   8.0404397,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2132705, ]
+lattice_lengths: [   9.28430,    9.28430,   10.21327, ]
+lattice_angles: [ 90.000,  90.000, 120.000, ]
+lattice_volume:   7.6241917E+02
+convergence: {deltae: -2.036E-06, res2:  1.902E-06, residm:  7.674E-07, diffor: null, }
+etotal    :  -1.03099257E+02
+entropy   :   0.00000000E+00
+fermie    :   3.44865401E-02
+cartesian_stress_tensor:
+- [  9.12494228E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   9.12494228E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   9.06490641E-03, ]
+pressure_GPa:  -2.6788E+02
+cartesian_forces:
+- [ -4.66931268E-03,   8.08748681E-03,  -7.70988212E-19, ]
+- [ -4.66931268E-03,  -8.08748681E-03,  -7.70988212E-19, ]
+- [  9.33862537E-03,  -7.55599459E-19,  -7.70988212E-19, ]
+- [ -4.04456989E-02,   2.02582820E-02,  -3.14435777E-02, ]
+- [  3.77670363E-02,   2.48978617E-02,  -3.14435777E-02, ]
+- [  2.67866256E-03,  -4.51561437E-02,  -3.14435777E-02, ]
+- [  2.67866256E-03,   4.51561437E-02,   3.14435777E-02, ]
+- [ -4.04456989E-02,  -2.02582820E-02,   3.14435777E-02, ]
+- [  3.77670363E-02,  -2.48978617E-02,   3.14435777E-02, ]
+force_length_stats: {min:   9.33862537E-03, max:   5.50903905E-02, mean:   3.98398021E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -858,7 +882,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.2188E-08; max=  7.6742E-07
+ Mean square residual over all n,k,spin=   52.188E-09; max=  76.742E-08
  reduced coordinates (array xred) for    9 atoms
        0.465000000000     -0.000000000000      0.000000000000
       -0.000000000000      0.465000000000      0.666666666667
@@ -894,7 +918,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
  cartesian forces (hartree/bohr) at end:
     1     -0.00466931268450     0.00808748680602    -0.00000000000000
     2     -0.00466931268450    -0.00808748680602    -0.00000000000000
-    3      0.00933862536899     0.00000000000000    -0.00000000000000
+    3      0.00933862536899    -0.00000000000000    -0.00000000000000
     4     -0.04044569887009     0.02025828203440    -0.03144357766166
     5      0.03776703631377     0.02489786167830    -0.03144357766166
     6      0.00267866255632    -0.04515614371269    -0.03144357766166
@@ -906,7 +930,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
  cartesian forces (eV/Angstrom) at end:
     1     -0.24010569192646     0.41587525760524    -0.00000000000000
     2     -0.24010569192646    -0.41587525760524    -0.00000000000000
-    3      0.48021138385292     0.00000000000000    -0.00000000000000
+    3      0.48021138385292    -0.00000000000000    -0.00000000000000
     4     -2.07980128315150     1.04172265893867    -1.61689363750765
     5      1.94205892790988     1.28029941657257    -1.61689363750765
     6      0.13774235524162    -2.32202207551124    -1.61689363750765
@@ -925,29 +949,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   -0.04853   -0.04108   -0.03588   -0.02938   -0.01618    0.01875    0.02274    0.03449
    0.19654    0.31730    0.34656    0.34789
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 11, }
+comment             : Components of total free energy in Hartree
+kinetic             :  5.17483895193736E+01
+hartree             :  3.09370060748916E+01
+xc                  : -2.34952447412699E+01
+Ewald energy        : -6.95068319280861E+01
+psp_core            :  4.04809837710634E+00
+local_psp           : -8.89245929181917E+01
+spherical_terms     : -7.90385909564933E+00
+total_energy        : -1.03097034711825E+02
+total_energy_eV     : -2.80541298637123E+03
+...
 
-    Kinetic energy  =  5.17483895193736E+01
-    Hartree energy  =  3.09370060748916E+01
-    XC energy       = -2.34952447412699E+01
-    Ewald energy    = -6.95068319280861E+01
-    PspCore energy  =  4.04809837710634E+00
-    Loc. psp. energy= -8.89245929181917E+01
-    Spherical terms = -7.90385909564933E+00
-    >>>>>>>>> Etotal= -1.03097034711825E+02
 
- "Double-counting" decomposition of free energy:
-    Band energy     = -1.35488149507686E+01
-    Ewald energy    = -6.95068319280861E+01
-    PspCore energy  =  4.04809837710634E+00
-    Dble-C XC-energy= -2.38018105214104E+01
-    Spherical terms = -2.89898160111672E-01
-    >>>> Etotal (DC)= -1.03099257183270E+02
+--- !EnergyTermsDC
+iteration_state     : {dtset: 11, }
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -1.35488149507686E+01
+Ewald energy        : -6.95068319280861E+01
+psp_core            :  4.04809837710634E+00
+xc_dc               : -2.38018105214104E+01
+spherical_terms     : -2.89898160111672E-01
+total_energy_dc     : -1.03099257183270E+02
+total_energy_dc_eV  : -2.80547346289483E+03
+...
 
-  >Total energy in eV           = -2.80541298637123E+03
-  >Total DC energy in eV        = -2.80547346289483E+03
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  9.12494228E-03  sigma(3 2)=  0.00000000E+00
@@ -961,7 +989,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
 ================================================================================
 == DATASET 12 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  11.
 
@@ -984,8 +1012,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/Si-LDA.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/Si-LDA.paw
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
 - Paw atomic data for element Si - Generated by AtomPAW (N. Holzwarth) + AtomPAW2Abinit v3.1.1
 - 14.00000   4.00000  20070412                znucl, zion, pspdat
     7    7    2    0      1398   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1006,8 +1034,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
 - Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
 -  8.00000   6.00000  20040423                znucl, zion, pspdat
     7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1070,8 +1098,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Size of radial mesh ............................ 1398
   Size of radial mesh for partial waves........... 1398
   Size of radial mesh for [pseudo] core density... 1398
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -1081,13 +1110,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -9.88287344E+00
@@ -1112,8 +1144,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Size of radial mesh ............................  350
   Size of radial mesh for partial waves...........  350
   Size of radial mesh for [pseudo] core density...  350
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -1123,13 +1156,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -9.16767837E+00
@@ -1226,7 +1262,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000
-        0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000
+       -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000
 
     2  -0.000  -7.580   0.001   0.549   0.385  -1.100  -0.774   0.551   0.388
         0.000   0.000  -0.000  -0.950   0.669  -0.002  -0.001   0.954  -0.670
@@ -1234,10 +1270,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   chi0(G,G') at the    2 th omega   0.0000  24.2036 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000
-       -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000
+        0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000
 
     2  -0.000  -1.297   0.000   0.122   0.101  -0.245  -0.202   0.122   0.101
-        0.000  -0.000  -0.000  -0.211   0.175  -0.000  -0.000   0.212  -0.175
+        0.000   0.000  -0.000  -0.211   0.175  -0.000  -0.000   0.212  -0.175
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =   2.5015
@@ -1249,19 +1285,19 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.400  -0.013   0.013   0.003   0.003  -0.014   0.014  -0.003  -0.003
-      0.000  -0.005  -0.005   0.002  -0.003   0.001   0.001  -0.003   0.002
+     -0.000  -0.005  -0.005   0.002  -0.003   0.001   0.001  -0.003   0.002
        1       2       3       4       5       6       7       8       9
       0.400  -0.013   0.013   0.003   0.003  -0.014   0.014  -0.003  -0.003
-      0.000   0.005   0.005  -0.002   0.003  -0.001  -0.001   0.003  -0.002
+     -0.000   0.005   0.005  -0.002   0.003  -0.001  -0.001   0.003  -0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  24.2036 [eV]
        1       2       3       4       5       6       7       8       9
       0.868  -0.003   0.003   0.000   0.001  -0.004   0.004  -0.001  -0.000
-     -0.000  -0.001  -0.001   0.002  -0.002   0.001   0.001  -0.002   0.002
+      0.000  -0.001  -0.001   0.002  -0.002   0.001   0.001  -0.002   0.002
        1       2       3       4       5       6       7       8       9
       0.868  -0.003   0.003   0.000   0.001  -0.004   0.004  -0.001  -0.000
-     -0.000   0.001   0.001  -0.002   0.002  -0.001  -0.001   0.002  -0.002
+      0.000   0.001   0.001  -0.002   0.002  -0.001  -0.001   0.002  -0.002
 
 
 
@@ -1280,16 +1316,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   chi0(G,G') at the    2 th omega   0.0000  24.2036 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.591   0.000  -0.000   0.046   0.098   0.046   0.098   0.046   0.098
-        0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000
+       -0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000
 
     2   0.000  -1.310   0.000   0.175   0.166  -0.351  -0.333   0.176   0.167
-       -0.000  -0.000   0.000  -0.303   0.288  -0.000  -0.000   0.304  -0.288
+       -0.000   0.000   0.000  -0.303   0.288  -0.000  -0.000   0.304  -0.288
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     10.39  [%]
 
 ================================================================================
 == DATASET 13 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  11.
 
@@ -1356,8 +1392,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Size of radial mesh ............................ 1398
   Size of radial mesh for partial waves........... 1398
   Size of radial mesh for [pseudo] core density... 1398
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -1367,13 +1404,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    0
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -9.88287344E+00
@@ -1398,8 +1438,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Size of radial mesh ............................  350
   Size of radial mesh for partial waves...........  350
   Size of radial mesh for [pseudo] core density...  350
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -1409,13 +1450,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    0
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -9.16767837E+00
@@ -1533,14 +1577,18 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
  Perturbative Calculation
 
- k =    0.000   0.000   0.250
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-   24   0.938 -17.484 -23.476   3.014   0.813  -0.230 -19.904  -2.420  -1.482
-   25   5.348 -11.566  -6.230  -2.218   0.835  -0.198  -8.963   2.603   7.951
-
- E^0_gap          4.410
- E^GW_gap         9.432
- DeltaE^GW_gap    5.023
+--- !SelfEnergy_ee
+iteration_state: {dtset: 13, }
+kpoint     : [   0.000,    0.000,    0.250, ]
+spin       : 1
+KS_gap     :    4.410
+QP_gap     :    9.432
+Delta_QP_KS:    5.023
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+       24   0.938 -17.484 -23.476   3.014   0.813  -0.230 -19.904  -2.420  -1.482
+       25   5.348 -11.566  -6.230  -2.218   0.835  -0.198  -8.963   2.603   7.951
+...
 
 
  New Fermi energy :        1.574611E-01 Ha ,    4.284734E+00 eV
@@ -1553,7 +1601,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
 ================================================================================
 == DATASET 21 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -1578,8 +1626,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.13111
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/Si-LDA.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/Si-LDA.paw
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
 - Paw atomic data for element Si - Generated by AtomPAW (N. Holzwarth) + AtomPAW2Abinit v3.1.1
 - 14.00000   4.00000  20070412                znucl, zion, pspdat
     7    7    2    0      1398   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1600,8 +1648,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
 - Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
 -  8.00000   6.00000  20040423                znucl, zion, pspdat
     7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1640,6 +1688,39 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   sigma(1 1)=  9.12494228E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  9.12494228E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  9.06490641E-03  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 21, }
+comment   : Summary of ground state results
+rprimd    :
+- [  4.6421500,  -8.0404397,   0.0000000, ]
+- [  4.6421500,   8.0404397,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2132705, ]
+lattice_lengths: [   9.28430,    9.28430,   10.21327, ]
+lattice_angles: [ 90.000,  90.000, 120.000, ]
+lattice_volume:   7.6241917E+02
+convergence: {deltae: -2.036E-06, res2:  1.902E-06, residm:  7.674E-07, diffor: null, }
+etotal    :  -1.03099257E+02
+entropy   :   0.00000000E+00
+fermie    :   3.44865401E-02
+cartesian_stress_tensor:
+- [  9.12494228E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   9.12494228E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   9.06490641E-03, ]
+pressure_GPa:  -2.6788E+02
+cartesian_forces:
+- [ -4.04456988E-02,   2.02582818E-02,  -3.14435776E-02, ]
+- [ -4.66931269E-03,   8.08748682E-03,  -5.27283638E-29, ]
+- [  3.77670361E-02,   2.48978617E-02,  -3.14435776E-02, ]
+- [ -4.04456988E-02,  -2.02582818E-02,   3.14435776E-02, ]
+- [ -4.66931269E-03,  -8.08748682E-03,  -0.00000000E+00, ]
+- [  9.33862538E-03,  -2.62150821E-19,  -0.00000000E+00, ]
+- [  2.67866267E-03,  -4.51561435E-02,  -3.14435776E-02, ]
+- [  2.67866267E-03,   4.51561435E-02,   3.14435776E-02, ]
+- [  3.77670361E-02,  -2.48978617E-02,   3.14435776E-02, ]
+force_length_stats: {min:   9.33862538E-03, max:   5.50903903E-02, mean:   3.98398020E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1708,7 +1789,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.2188E-08; max=  7.6742E-07
+ Mean square residual over all n,k,spin=   52.188E-09; max=  76.742E-08
  reduced coordinates (array xred) for    9 atoms
        0.415000000000      0.272000000000      0.120000000000
        0.465000000000     -0.000000000000      0.000000000000
@@ -1724,7 +1805,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
     2       0.086702600389     -0.043351300195      0.000000000000
     3       0.024869508087     -0.375510004299      0.321141764663
     4       0.024869508087      0.350640496212     -0.321141764663
-    5      -0.043351300195      0.086702600389     -0.000000000000
+    5      -0.043351300195      0.086702600389      0.000000000000
     6      -0.043351300195     -0.043351300195      0.000000000000
     7      -0.375510004299      0.350640496212      0.321141764663
     8       0.350640496212     -0.375510004299     -0.321141764663
@@ -1746,7 +1827,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
     2     -0.00466931269147     0.00808748681809    -0.00000000000000
     3      0.03776703609256     0.02489786168753    -0.03144357755964
     4     -0.04044569876748    -0.02025828183821     0.03144357755964
-    5     -0.00466931269147    -0.00808748681809     0.00000000000000
+    5     -0.00466931269147    -0.00808748681809    -0.00000000000000
     6      0.00933862538294    -0.00000000000000    -0.00000000000000
     7      0.00267866267492    -0.04515614352574    -0.03144357755964
     8      0.00267866267492     0.04515614352574     0.03144357755964
@@ -1758,7 +1839,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
     2     -0.24010569228493     0.41587525822612    -0.00000000000000
     3      1.94205891653488     1.28029941704736    -1.61689363226133
     4     -2.07980127787518    -1.04172264885023     1.61689363226133
-    5     -0.24010569228493    -0.41587525822612     0.00000000000000
+    5     -0.24010569228493    -0.41587525822612    -0.00000000000000
     6      0.48021138456985    -0.00000000000000    -0.00000000000000
     7      0.13774236134030    -2.32202206589759    -1.61689363226133
     8      0.13774236134030     2.32202206589759     1.61689363226133
@@ -1775,29 +1856,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   -0.04853   -0.04108   -0.03588   -0.02938   -0.01618    0.01875    0.02274    0.03449
    0.19654    0.31730    0.34656    0.34789
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 21, }
+comment             : Components of total free energy in Hartree
+kinetic             :  5.17483895171265E+01
+hartree             :  3.09370060754738E+01
+xc                  : -2.34952447414424E+01
+Ewald energy        : -6.95068319280860E+01
+psp_core            :  4.04809837710634E+00
+local_psp           : -8.89245929190569E+01
+spherical_terms     : -7.90385909633054E+00
+total_energy        : -1.03097034715209E+02
+total_energy_eV     : -2.80541298646331E+03
+...
 
-    Kinetic energy  =  5.17483895171265E+01
-    Hartree energy  =  3.09370060754738E+01
-    XC energy       = -2.34952447414424E+01
-    Ewald energy    = -6.95068319280860E+01
-    PspCore energy  =  4.04809837710634E+00
-    Loc. psp. energy= -8.89245929190569E+01
-    Spherical terms = -7.90385909633054E+00
-    >>>>>>>>> Etotal= -1.03097034715209E+02
 
- "Double-counting" decomposition of free energy:
-    Band energy     = -1.35488149516453E+01
-    Ewald energy    = -6.95068319280860E+01
-    PspCore energy  =  4.04809837710634E+00
-    Dble-C XC-energy= -2.38018105219346E+01
-    Spherical terms = -2.89898158710486E-01
-    >>>> Etotal (DC)= -1.03099257183270E+02
+--- !EnergyTermsDC
+iteration_state     : {dtset: 21, }
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -1.35488149516453E+01
+Ewald energy        : -6.95068319280860E+01
+psp_core            :  4.04809837710634E+00
+xc_dc               : -2.38018105219346E+01
+spherical_terms     : -2.89898158710486E-01
+total_energy_dc     : -1.03099257183270E+02
+total_energy_dc_eV  : -2.80547346289483E+03
+...
 
-  >Total energy in eV           = -2.80541298646331E+03
-  >Total DC energy in eV        = -2.80547346289483E+03
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  9.12494228E-03  sigma(3 2)=  0.00000000E+00
@@ -1811,7 +1896,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
 ================================================================================
 == DATASET 22 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  21.
 
@@ -1834,8 +1919,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/Si-LDA.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/Si-LDA.paw
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
 - Paw atomic data for element Si - Generated by AtomPAW (N. Holzwarth) + AtomPAW2Abinit v3.1.1
 - 14.00000   4.00000  20070412                znucl, zion, pspdat
     7    7    2    0      1398   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1856,8 +1941,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
 - Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
 -  8.00000   6.00000  20040423                znucl, zion, pspdat
     7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1920,8 +2005,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Size of radial mesh ............................ 1398
   Size of radial mesh for partial waves........... 1398
   Size of radial mesh for [pseudo] core density... 1398
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -1931,13 +2017,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -9.88287344E+00
@@ -1962,8 +2051,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Size of radial mesh ............................  350
   Size of radial mesh for partial waves...........  350
   Size of radial mesh for [pseudo] core density...  350
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -1973,13 +2063,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -9.16767837E+00
@@ -2066,10 +2159,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   chi0(G,G') at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.000  -0.000   0.000   0.000   0.000  -0.000   0.000  -0.000  -0.000
-        0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000
+       -0.000  -0.000  -0.000   0.000  -0.000   0.000   0.000  -0.000   0.000
 
     2  -0.000  -7.580   0.001   0.549   0.385  -1.100  -0.774   0.551   0.388
-        0.000   0.000  -0.000  -0.950   0.669  -0.002  -0.001   0.954  -0.670
+        0.000   0.000   0.000  -0.950   0.669  -0.002  -0.001   0.954  -0.670
 
   chi0(G,G') at the    2 th omega   0.0000  24.2036 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2089,10 +2182,10 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
    Upper and lower wings at the    1 th omega   0.0000   0.0000 [eV]
        1       2       3       4       5       6       7       8       9
       0.400  -0.013   0.013   0.003   0.003  -0.014   0.014  -0.003  -0.003
-      0.000  -0.005  -0.005   0.002  -0.003   0.001   0.001  -0.003   0.002
+     -0.000  -0.005  -0.005   0.002  -0.003   0.001   0.001  -0.003   0.002
        1       2       3       4       5       6       7       8       9
       0.400  -0.013   0.013   0.003   0.003  -0.014   0.014  -0.003  -0.003
-      0.000   0.005   0.005  -0.002   0.003  -0.001  -0.001   0.003  -0.002
+     -0.000   0.005   0.005  -0.002   0.003  -0.001  -0.001   0.003  -0.002
 
 
    Upper and lower wings at the    2 th omega   0.0000  24.2036 [eV]
@@ -2115,21 +2208,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
         0.000   0.002  -0.000  -0.000  -0.000   0.001  -0.001  -0.000   0.001
 
     2   0.001  -6.266   0.001   0.747   0.537  -1.496  -1.078   0.749   0.541
-       -0.002   0.000   0.001  -1.293   0.932  -0.001   0.000   1.298  -0.934
+       -0.002  -0.000   0.001  -1.293   0.932  -0.001   0.000   1.298  -0.934
 
   chi0(G,G') at the    2 th omega   0.0000  24.2036 [eV]
        1       2       3       4       5       6       7       8       9
     1  -0.591   0.000  -0.000   0.046   0.098   0.046   0.098   0.046   0.098
-       -0.000   0.000   0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000
+        0.000   0.000  -0.000  -0.000  -0.000   0.000  -0.000  -0.000   0.000
 
     2   0.000  -1.310   0.000   0.175   0.166  -0.351  -0.333   0.176   0.167
-       -0.000   0.000   0.000  -0.303   0.288  -0.000  -0.000   0.304  -0.288
+       -0.000  -0.000   0.000  -0.303   0.288  -0.000  -0.000   0.304  -0.288
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     10.39  [%]
 
 ================================================================================
 == DATASET 23 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  21.
 
@@ -2196,8 +2289,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Size of radial mesh ............................ 1398
   Size of radial mesh for partial waves........... 1398
   Size of radial mesh for [pseudo] core density... 1398
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -2207,13 +2301,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    0
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -9.88287344E+00
@@ -2238,8 +2335,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Size of radial mesh ............................  350
   Size of radial mesh for partial waves...........  350
   Size of radial mesh for [pseudo] core density...  350
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -2249,13 +2347,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    0
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -9.16767837E+00
@@ -2363,14 +2464,18 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
  Perturbative Calculation
 
- k =    0.000   0.000   0.250
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-   24   0.938 -17.484 -23.476   3.014   0.813  -0.230 -19.904  -2.420  -1.482
-   25   5.348 -11.566  -6.230  -2.218   0.835  -0.198  -8.963   2.603   7.951
-
- E^0_gap          4.410
- E^GW_gap         9.432
- DeltaE^GW_gap    5.023
+--- !SelfEnergy_ee
+iteration_state: {dtset: 23, }
+kpoint     : [   0.000,    0.000,    0.250, ]
+spin       : 1
+KS_gap     :    4.410
+QP_gap     :    9.432
+Delta_QP_KS:    5.023
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+       24   0.938 -17.484 -23.476   3.014   0.813  -0.230 -19.904  -2.420  -1.482
+       25   5.348 -11.566  -6.230  -2.218   0.835  -0.198  -8.963   2.603   7.951
+...
 
 
  New Fermi energy :        1.574611E-01 Ha ,    4.284734E+00 eV
@@ -2383,7 +2488,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
 ================================================================================
 == DATASET 31 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -2408,8 +2513,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.13111
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/Si-LDA.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/Si-LDA.paw
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
 - Paw atomic data for element Si - Generated by AtomPAW (N. Holzwarth) + AtomPAW2Abinit v3.1.1
 - 14.00000   4.00000  20070412                znucl, zion, pspdat
     7    7    2    0      1398   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2430,8 +2535,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
 - Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
 -  8.00000   6.00000  20040423                znucl, zion, pspdat
     7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2470,6 +2575,39 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   sigma(1 1)=  9.12561120E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  9.12561120E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  9.06559961E-03  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 31, }
+comment   : Summary of ground state results
+rprimd    :
+- [  4.6421500,  -8.0404397,   0.0000000, ]
+- [  4.6421500,   8.0404397,   0.0000000, ]
+- [  0.0000000,   0.0000000,  10.2132705, ]
+lattice_lengths: [   9.28430,    9.28430,   10.21327, ]
+lattice_angles: [ 90.000,  90.000, 120.000, ]
+lattice_volume:   7.6241917E+02
+convergence: {deltae: -1.828E-06, res2:  1.910E-06, residm:  1.733E-06, diffor: null, }
+etotal    :  -1.03099257E+02
+entropy   :   0.00000000E+00
+fermie    :   3.44781152E-02
+cartesian_stress_tensor:
+- [  9.12561120E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   9.12561120E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   9.06559961E-03, ]
+pressure_GPa:  -2.6790E+02
+cartesian_forces:
+- [ -4.04229217E-02,   2.02098164E-02,  -3.15010455E-02, ]
+- [ -4.67968403E-03,   8.10545050E-03,  -5.27283638E-29, ]
+- [  3.77136752E-02,   2.49023689E-02,  -3.15010455E-02, ]
+- [ -4.04229217E-02,  -2.02098164E-02,   3.15010455E-02, ]
+- [ -4.67968403E-03,  -8.10545050E-03,  -0.00000000E+00, ]
+- [  9.35936805E-03,  -1.40559810E-18,  -0.00000000E+00, ]
+- [  2.70924649E-03,  -4.51121853E-02,  -3.15010455E-02, ]
+- [  2.70924649E-03,   4.51121853E-02,   3.15010455E-02, ]
+- [  3.77136752E-02,  -2.49023689E-02,   3.15010455E-02, ]
+force_length_stats: {min:   9.35936805E-03, max:   5.50887025E-02, mean:   3.98455910E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2538,7 +2676,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   9.8959E-08; max=  1.7327E-06
+ Mean square residual over all n,k,spin=   98.959E-09; max=  17.327E-07
  reduced coordinates (array xred) for    9 atoms
        0.915000000000      0.522000000000      0.620000000000
        0.965000000000      0.250000000000      0.500000000000
@@ -2577,22 +2715,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
     3      0.03771367524661     0.02490236893296    -0.03150104545253
     4     -0.04042292173355    -0.02020981636733     0.03150104545253
     5     -0.00467968402647    -0.00810545049726    -0.00000000000000
-    6      0.00935936805295     0.00000000000000    -0.00000000000000
+    6      0.00935936805295    -0.00000000000000    -0.00000000000000
     7      0.00270924648694    -0.04511218530029    -0.03150104545253
     8      0.00270924648694     0.04511218530029     0.03150104545253
     9      0.03771367524661    -0.02490236893296     0.03150104545253
  frms,max,avg= 2.6155790E-02 4.5112185E-02   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -2.07863003579682     1.03923045434398    -1.61984874988114
+    1     -2.07863003579681     1.03923045434398    -1.61984874988114
     2     -0.24063900772900     0.41679898767173    -0.00000000000000
-    3      1.93931499174212     1.28053118890664    -1.61984874988114
+    3      1.93931499174213     1.28053118890663    -1.61984874988114
     4     -2.07863003579682    -1.03923045434398     1.61984874988114
     5     -0.24063900772900    -0.41679898767173    -0.00000000000000
-    6      0.48127801545801     0.00000000000000    -0.00000000000000
+    6      0.48127801545801    -0.00000000000000    -0.00000000000000
     7      0.13931504405469    -2.31976164325062    -1.61984874988114
     8      0.13931504405469     2.31976164325062     1.61984874988114
-    9      1.93931499174212    -1.28053118890664     1.61984874988114
+    9      1.93931499174213    -1.28053118890663     1.61984874988114
  frms,max,avg= 1.3449847E+00 2.3197616E+00   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  9.284300079912  9.284300079912 10.213270549578 bohr
               =  4.913040000000  4.913040000000  5.404630000000 angstroms
@@ -2605,29 +2743,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   -0.04854   -0.04109   -0.03588   -0.02938   -0.01618    0.01874    0.02273    0.03448
    0.19653    0.31729    0.34656    0.34788
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 31, }
+comment             : Components of total free energy in Hartree
+kinetic             :  5.17487338627978E+01
+hartree             :  3.09366404907722E+01
+xc                  : -2.34951787250978E+01
+Ewald energy        : -6.95068319280860E+01
+psp_core            :  4.04809837710634E+00
+local_psp           : -8.89239859896727E+01
+spherical_terms     : -7.90375559219564E+00
+total_energy        : -1.03096279504376E+02
+total_energy_eV     : -2.80539243613142E+03
+...
 
-    Kinetic energy  =  5.17487338627978E+01
-    Hartree energy  =  3.09366404907722E+01
-    XC energy       = -2.34951787250978E+01
-    Ewald energy    = -6.95068319280860E+01
-    PspCore energy  =  4.04809837710634E+00
-    Loc. psp. energy= -8.89239859896727E+01
-    Spherical terms = -7.90375559219564E+00
-    >>>>>>>>> Etotal= -1.03096279504376E+02
 
- "Double-counting" decomposition of free energy:
-    Band energy     = -1.35491858136478E+01
-    Ewald energy    = -6.95068319280860E+01
-    PspCore energy  =  4.04809837710634E+00
-    Dble-C XC-energy= -2.38014656688454E+01
-    Spherical terms = -2.89872128707060E-01
-    >>>> Etotal (DC)= -1.03099257162180E+02
+--- !EnergyTermsDC
+iteration_state     : {dtset: 31, }
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -1.35491858136478E+01
+Ewald energy        : -6.95068319280860E+01
+psp_core            :  4.04809837710634E+00
+xc_dc               : -2.38014656688454E+01
+spherical_terms     : -2.89872128707060E-01
+total_energy_dc     : -1.03099257162180E+02
+total_energy_dc_eV  : -2.80547346232093E+03
+...
 
-  >Total energy in eV           = -2.80539243613142E+03
-  >Total DC energy in eV        = -2.80547346232093E+03
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  9.12561120E-03  sigma(3 2)=  0.00000000E+00
@@ -2641,7 +2783,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
 ================================================================================
 == DATASET 32 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  31.
 
@@ -2664,8 +2806,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  1.20000000E+02 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/Si-LDA.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/Si-LDA.paw
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Si-LDA.paw
 - Paw atomic data for element Si - Generated by AtomPAW (N. Holzwarth) + AtomPAW2Abinit v3.1.1
 - 14.00000   4.00000  20070412                znucl, zion, pspdat
     7    7    2    0      1398   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2686,8 +2828,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
  Compensation charge density is taken into account in XC energy/potential
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/8o.paw
+- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/8o.paw
 - Paw atomic data for element O - Generated by AtomPAW (N. Holzwarth)
 -  8.00000   6.00000  20040423                znucl, zion, pspdat
     7    7    1    0       350   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2750,8 +2892,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Size of radial mesh ............................ 1398
   Size of radial mesh for partial waves........... 1398
   Size of radial mesh for [pseudo] core density... 1398
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -2761,13 +2904,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -9.88287344E+00
@@ -2792,8 +2938,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Size of radial mesh ............................  350
   Size of radial mesh for partial waves...........  350
   Size of radial mesh for [pseudo] core density...  350
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -2803,13 +2950,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    2
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -9.16767837E+00
@@ -2899,7 +3049,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
         0.000   0.000   0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
 
     2   0.000  -7.579  -0.003   0.549   0.671   0.003   0.000  -0.958   0.388
-       -0.000   0.000   0.000  -0.952  -0.384  -1.097   0.774   0.551  -0.671
+       -0.000   0.000  -0.000  -0.952  -0.384  -1.097   0.774   0.551  -0.671
 
   chi0(G,G') at the    2 th omega   0.0000  24.2036 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2907,7 +3057,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
        -0.000   0.000   0.000  -0.000   0.000   0.000   0.000   0.000  -0.000
 
     2   0.000  -1.297  -0.001   0.122   0.175   0.001  -0.000  -0.213   0.101
-       -0.000  -0.000   0.000  -0.212  -0.100  -0.244   0.202   0.123  -0.175
+       -0.000   0.000  -0.000  -0.212  -0.100  -0.244   0.202   0.123  -0.175
 
  For q-point:  0.000010 0.000020 0.000030
   dielectric constant =   2.5010
@@ -2945,7 +3095,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
        -0.000  -0.003  -0.000   0.000   0.472  -0.398   0.475  -0.399  -0.000
 
     2   0.001  -6.266  -0.002   0.746   0.935   0.002   0.001  -1.300   0.540
-        0.003   0.000   0.002  -1.294  -0.535  -1.493   1.078   0.750  -0.935
+        0.003  -0.000   0.002  -1.294  -0.535  -1.493   1.078   0.750  -0.935
 
   chi0(G,G') at the    2 th omega   0.0000  24.2036 [eV]
        1       2       3       4       5       6       7       8       9
@@ -2953,13 +3103,13 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
         0.000  -0.001  -0.000   0.000   0.097  -0.046   0.098  -0.046   0.000
 
     2   0.000  -1.310  -0.000   0.175   0.288   0.001   0.000  -0.305   0.166
-        0.001   0.000   0.000  -0.304  -0.166  -0.350   0.333   0.176  -0.289
+        0.001  -0.000   0.000  -0.304  -0.166  -0.350   0.333   0.176  -0.289
 
   Average fulfillment of the sum rule on Im[epsilon] for q-point    2 :     10.38  [%]
 
 ================================================================================
 == DATASET 33 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  31.
 
@@ -3026,8 +3176,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Size of radial mesh ............................ 1398
   Size of radial mesh for partial waves........... 1398
   Size of radial mesh for [pseudo] core density... 1398
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -3037,13 +3188,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    0
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -9.88287344E+00
@@ -3068,8 +3222,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Size of radial mesh ............................  350
   Size of radial mesh for partial waves...........  350
   Size of radial mesh for [pseudo] core density...  350
+  Size of radial mesh for [pseudo] kin core density   0
   Size of radial mesh for pseudo valence density..    0
-  No of Q-points for tcorespl and tvalespl ....... 3001
+  No of Q-points for tcorespl/tvalespl/tcoretauspl 3001
   No of Q-points for the radial shape functions ..    0
   Radial shape function type .....................    2
   shape_lambda ...................................   -1
@@ -3079,13 +3234,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
   Use Local Exact exchange .......................    0
   Use potential zero .............................    0
   Use spin-orbit coupling ........................    0
+  Has Fock  ......................................    0
   Has kij   ......................................    0
   Has tproj ......................................    0
   Has tvale ......................................    0
+  Has coretau ....................................    0
   Has vhtnzc .....................................    2
   Has vhnzc ......................................    2
   Has vminushalf .................................    0
   Has nabla ......................................    0
+  Has nablaphi ...................................    0
   Has shapefuncg .................................    0
   Has wvl ........................................    0
   beta ............................................ -9.16767837E+00
@@ -3193,14 +3351,18 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
 
  Perturbative Calculation
 
- k =    0.000   0.000   0.250
- Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
-   24   0.938 -17.485 -23.476   3.014   0.813  -0.230 -19.905  -2.420  -1.482
-   25   5.348 -11.566  -6.230  -2.218   0.835  -0.198  -8.963   2.603   7.951
-
- E^0_gap          4.410
- E^GW_gap         9.433
- DeltaE^GW_gap    5.023
+--- !SelfEnergy_ee
+iteration_state: {dtset: 33, }
+kpoint     : [   0.000,    0.000,    0.250, ]
+spin       : 1
+KS_gap     :    4.410
+QP_gap     :    9.433
+Delta_QP_KS:    5.023
+data: !SigmaeeData |
+     Band     E0 <VxcLDA>   SigX SigC(E0)      Z dSigC/dE  Sig(E)    E-E0       E
+       24   0.938 -17.485 -23.476   3.014   0.813  -0.230 -19.905  -2.420  -1.482
+       25   5.348 -11.566  -6.230  -2.218   0.835  -0.198  -8.963   2.603   7.951
+...
 
 
  New Fermi energy :        1.574566E-01 Ha ,    4.284613E+00 eV
@@ -3266,9 +3428,9 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
            etotal31   -1.0309925716E+02
            etotal32    0.0000000000E+00
            etotal33    0.0000000000E+00
-            fcart11   -4.6693126845E-03  8.0874868060E-03 -1.5419764231E-18
-                      -4.6693126845E-03 -8.0874868060E-03 -1.5419764231E-18
-                       9.3386253690E-03  3.9382127614E-20 -1.5419764231E-18
+            fcart11   -4.6693126845E-03  8.0874868060E-03 -7.7098821160E-19
+                      -4.6693126845E-03 -8.0874868060E-03 -7.7098821155E-19
+                       9.3386253690E-03 -7.5559945929E-19 -7.7098821155E-19
                       -4.0445698870E-02  2.0258282034E-02 -3.1443577662E-02
                        3.7767036314E-02  2.4897861678E-02 -3.1443577662E-02
                        2.6786625563E-03 -4.5156143713E-02 -3.1443577662E-02
@@ -3294,11 +3456,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart21   -4.0445698767E-02  2.0258281838E-02 -3.1443577560E-02
-                      -4.6693126915E-03  8.0874868181E-03 -2.6364181876E-29
+                      -4.6693126915E-03  8.0874868181E-03 -5.2728363752E-29
                        3.7767036093E-02  2.4897861688E-02 -3.1443577560E-02
                       -4.0445698767E-02 -2.0258281838E-02  3.1443577560E-02
-                      -4.6693126915E-03 -8.0874868181E-03  2.1091345501E-28
-                       9.3386253829E-03 -1.0156893053E-18 -0.0000000000E+00
+                      -4.6693126915E-03 -8.0874868181E-03 -0.0000000000E+00
+                       9.3386253829E-03 -2.6215082128E-19 -0.0000000000E+00
                        2.6786626749E-03 -4.5156143526E-02 -3.1443577560E-02
                        2.6786626749E-03  4.5156143526E-02  3.1443577560E-02
                        3.7767036093E-02 -2.4897861688E-02  3.1443577560E-02
@@ -3325,7 +3487,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     533.000     533.000
                        3.7713675247E-02  2.4902368933E-02 -3.1501045453E-02
                       -4.0422921734E-02 -2.0209816367E-02  3.1501045453E-02
                       -4.6796840265E-03 -8.1054504973E-03 -0.0000000000E+00
-                       9.3593680529E-03  1.3637832289E-19 -0.0000000000E+00
+                       9.3593680529E-03 -1.4055981002E-18 -0.0000000000E+00
                        2.7092464869E-03 -4.5112185300E-02 -3.1501045453E-02
                        2.7092464869E-03  4.5112185300E-02  3.1501045453E-02
                        3.7713675247E-02 -2.4902368933E-02  3.1501045453E-02
@@ -3488,15 +3650,6 @@ P           mkmem           1
            symrel      1  0  0   0  1  0   0  0  1       1  0  0  -1 -1  0   0  0 -1
                        0  1  0  -1 -1  0   0  0  1       0  1  0   1  0  0   0  0 -1
                       -1 -1  0   1  0  0   0  0  1      -1 -1  0   0  1  0   0  0 -1
-         symsigma11      0
-         symsigma12      0
-         symsigma13      1
-         symsigma21      0
-         symsigma22      0
-         symsigma23      1
-         symsigma31      0
-         symsigma32      0
-         symsigma33      1
             tnons11    0.0000000  0.0000000  0.0000000     0.0000000 -0.0000000  0.0000000
                       -0.0000000  0.0000000 -0.3333333     0.0000000  0.0000000 -0.3333333
                        0.0000000  0.0000000  0.3333333     0.0000000  0.0000000  0.3333333
@@ -3813,48 +3966,76 @@ P           mkmem           1
 -
 - [1] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
-- Comment : PAW calculations. Strong suggestion to cite this paper.
+- Comment: PAW calculations. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
-- [2] ABINIT : First-principles approach of materials and nanosystem properties.
+- [2] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [3] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
--
-- [3] A brief introduction to the ABINIT software package.
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - And optionally:
 -
-- [4] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- [5] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
+- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
+- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
+- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
+- should be cited especially if you are using the GW part of ABINIT, as several authors
+- of this part are not in the list of authors of the first or third paper.
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
+- the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- [5] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=         84.9  wall=         85.3
+- Proc.   0 individual time (sec): cpu=         97.1  wall=         97.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered  21 WARNINGs and  14 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         84.9  wall=         85.3
+.Delivered   9 WARNINGs and  15 COMMENTs to log file.
++Overall time at end (sec) : cpu=         97.1  wall=         97.4

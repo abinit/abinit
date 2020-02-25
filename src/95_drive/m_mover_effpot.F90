@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mover_effpot
 !! NAME
 !!  m_mover_effpot
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group ()
+!!  Copyright (C) 2008-2020 ABINIT group (AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,6 +28,43 @@ module m_mover_effpot
  use defs_basis
  use m_errors
  use m_abicore
+ use m_dtset
+ use m_dtfil
+ use m_abimover
+ use m_build_info
+ use m_scf_history
+ use defs_wvltypes
+ use m_xmpi
+ use m_phonons
+ use m_strain
+ use m_effective_potential_file
+ use m_supercell
+ use m_psps
+ use m_args_gs
+ use m_ifc
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
+ use m_geometry, only : xcart2xred, xred2xcart
+ use m_multibinit_dataset, only : multibinit_dtset_type
+ use m_effective_potential,only : effective_potential_type
+ use m_fit_polynomial_coeff, only : polynomial_coeff_writeXML, &
+   fit_polynomial_coeff_fit, genereList, fit_polynomial_coeff_getPositive,fit_polynomial_coeff_getCoeffBound
+ use m_polynomial_coeff,only : polynomial_coeff_getNorder
+! use m_pawang,       only : pawang_type, pawang_free
+! use m_pawrad,       only : pawrad_type, pawrad_free
+! use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
+! use m_pawxmlps, only : paw_setup, ipsp2xml, rdpawpsxml, &
+!&                       paw_setup_copy, paw_setup_free, getecutfromxml
+ use m_abihist, only : abihist
+ use m_ewald
+ use m_mpinfo,           only : init_mpi_enreg,destroy_mpi_enreg
+ use m_copy            , only : alloc_copy
+ use m_electronpositron, only : electronpositron_type
+ use m_scfcv,            only : scfcv_t, scfcv_run,scfcv_destroy
+ use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
+ use m_mover,            only : mover
+ use m_io_tools,         only : get_unit, open_file
 
  implicit none
 
@@ -47,12 +83,6 @@ contains
 !!
 !! FUNCTION
 !! this routine is driver for using mover with effective potential
-!!
-!! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (AM)
-!! This file is distributed under the terms of the
-!! GNU General Public License, see ~abinit/COPYING
-!! or http://www.gnu.org/copyleft/gpl.txt .
 !!
 !! INPUTS
 !!  inp = input of multibinit
@@ -85,49 +115,7 @@ contains
 
 subroutine mover_effpot(inp,filnam,effective_potential,option,comm,hist)
 
- use defs_basis
- use defs_abitypes
- use m_abicore
- use defs_datatypes
- use m_errors
- use m_abimover
- use m_build_info
- use m_scf_history
- use defs_wvltypes
- use m_xmpi
- use m_abimover
- use m_phonons
- use m_strain
- use m_effective_potential_file
- use m_supercell
- use m_psps
- use m_args_gs
-
- use m_geometry, only : xcart2xred, xred2xcart
- use m_multibinit_dataset, only : multibinit_dtset_type
- use m_effective_potential,only : effective_potential_type
- use m_fit_polynomial_coeff, only : polynomial_coeff_writeXML
- use m_fit_polynomial_coeff, only : fit_polynomial_coeff_fit,genereList
- use m_fit_polynomial_coeff, only : fit_polynomial_coeff_getPositive,fit_polynomial_coeff_getCoeffBound
- use m_electronpositron,   only : electronpositron_type
- use m_polynomial_coeff,only : polynomial_coeff_getNorder
-! use m_pawang,       only : pawang_type, pawang_free
-! use m_pawrad,       only : pawrad_type, pawrad_free
-! use m_pawtab,       only : pawtab_type, pawtab_nullify, pawtab_free
-! use m_pawxmlps, only : paw_setup, ipsp2xml, rdpawpsxml, &
-!&                       paw_setup_copy, paw_setup_free, getecutfromxml
- use m_dtset,  only : dtset_free
- use m_abihist, only : abihist
- use m_ifc
- use m_ewald
- use m_mpinfo,           only : init_mpi_enreg,destroy_mpi_enreg
- use m_copy            , only : alloc_copy
- use m_electronpositron, only : electronpositron_type
- use m_scfcv,            only : scfcv_t, scfcv_run,scfcv_destroy
- use m_results_gs,       only : results_gs_type,init_results_gs,destroy_results_gs
- use m_mover,            only : mover
- use m_io_tools,         only : get_unit, open_file
-implicit none
+ use m_scup_dataset,       only : scup_dtset_type 
 
 !Arguments --------------------------------
 !scalar
@@ -141,7 +129,7 @@ implicit none
 !scalar
  integer :: filetype,icoeff_bound,ii, unit_out
 !integer :: iexit,initialized
- integer :: jj,kk,nproc,icoeff,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
+ integer :: jj,kk,nproc,ncoeff,nmodels,ncoeff_bound,ncoeff_bound_tot,ncoeff_max
  integer :: model_bound,model_ncoeffbound,my_rank
 !integer :: mtypalch,,npsp,paw_size,type
 !integer,save :: paw_size_old=-1
@@ -149,9 +137,11 @@ implicit none
 ! real(dp):: time_q,time_b
  logical :: iam_master
  integer, parameter:: master=0
- logical :: verbose,writeHIST
-!real(dp) :: cpui
-!character(len=6) :: codvsn
+ logical :: verbose,writeHIST,file_opened
+ !type 
+ type(scup_dtset_type) :: scup_inp
+ !real(dp) :: cpui
+!character(len=8) :: codvsn
 
 !TEST_AM
 ! integer :: ia,mu,rand_seed = 5
@@ -186,8 +176,7 @@ implicit none
  real(dp) :: vel_cell(3,3),rprimd(3,3)
  type(polynomial_coeff_type),dimension(:),allocatable :: coeffs_all,coeffs_tmp,coeffs_bound
  character(len=fnlen) :: filename
- character(len=50) :: name_file 
- character(len=200):: term_name
+ character(len=fnlen) :: name_file 
 !character(len=fnlen) :: filename_psp(3)
  type(electronpositron_type),pointer :: electronpositron
 ! type(pspheader_type),allocatable :: pspheads(:)
@@ -255,7 +244,7 @@ implicit none
 !     to mover scfcv_args or effective_potential...
 !***************************************************************
 !  Free dtset
-   call dtset_free(dtset)
+   call dtset%free()
 
 !  Set mpi_eng
    mpi_enreg%comm_cell  = comm
@@ -266,7 +255,7 @@ implicit none
    dtset%dmft_entropy = 0
    dtset%nctime = inp%nctime ! NetCdf TIME between output of molecular dynamics informations
    dtset%delayperm = 0  ! DELAY between trials to PERMUTE atoms
-   dtset%dilatmx = one  ! DILATation : MaXimal value
+   dtset%dilatmx = 1.5  ! DILATation : MaXimal value
    dtset%chkdilatmx = 0 ! No check on dilatmx is needed in multibilint
    dtset%diismemory = 8 ! Direct Inversion in the Iterative Subspace MEMORY
    dtset%friction = 0.0001d0 ! internal FRICTION coefficient
@@ -324,7 +313,7 @@ implicit none
 !    else
 !    Need to init some values
    ABI_ALLOCATE(symrel,(3,3,dtset%nsym))
-   symrel = 1
+   symrel = reshape((/1,0,0,0,1,0,0,0,1/),shape(symrel)) 
    call alloc_copy(symrel,dtset%symrel)
    ABI_ALLOCATE(tnons,(3,dtset%nsym))
    tnons = zero
@@ -450,7 +439,7 @@ implicit none
 !      filename_psp(2) = "/home/alex/calcul/psp/Ti.LDA_PW-JTH.xml"
 !      filename_psp(3) = "/home/alex/calcul/psp/O.LDA_PW-JTH.xml"
 !      ABI_DATATYPE_ALLOCATE(pspheads,(npsp))
-!      call inpspheads(filename_psp,npsp,pspheads,ecut_tmp)
+!      call inpspheads-rw-rw-r-- 1 mschmitt mschmitt  22004 Nov 28 14:30 log-MPI16-t98-new-4-8-from-ddb-large-coeff_ini-(filename_psp,npsp,pspheads,ecut_tmp)
 !      call psps_init_global(mtypalch, npsp, psps, pspheads)
 !      call psps_init_from_dtset(dtset, 1, psps, pspheads)
 !    end if
@@ -481,7 +470,7 @@ implicit none
 !      ABI_ALLOCATE(npwtot,(dtset%nkpt))
 !    end if
 !  initialisation of results_gs
-   call init_results_gs(dtset%natom,1,results_gs)
+   call init_results_gs(dtset%natom,1,1,results_gs)
 
 !  Set the pointers of scfcv_args
    zero_integer = 0
@@ -510,12 +499,17 @@ implicit none
    ab_xfh%nxfh = 0
    ab_xfh%mxfh = 1
    ABI_ALLOCATE(ab_xfh%xfhist,(3,dtset%natom+4,2,ab_xfh%mxfh))
-   if (any((/2,3,10,11,22/)==dtset%ionmov)) then
+   if (any((/3,10,11/)==dtset%ionmov)) then
      write(message, '(3a)' )&
 &     ' This dynamics can not be used with effective potential',ch10,&
 &     'Action: correct dynamics input'
      MSG_BUG(message)
    end if
+
+  !Get SCALE-UP INPUT
+
+  scup_inp = inp%scup_dtset
+
 
 !***************************************************************
 !2  initialization of the structure for the dynamics
@@ -552,43 +546,24 @@ implicit none
      write(message, '((80a),3a)' ) ('-',ii=1,80), ch10,&
 &     '-Monte Carlo / Molecular Dynamics ',ch10
 
-     ! Marcus: if wanted analyze anharmonic terms of effective potential && 
+     ! Marcus: if wanted analyze anharmonic terms of effective potential &&
      ! and print anharmonic contribution to file anharmonic_energy_terms.out
-     ! Open File and write header 
+     ! Open File and write header
      ncoeff = effective_potential%anharmonics_terms%ncoeff
-     name_file='anharmonic_energy_terms.out' 
-     unit_out = get_unit()
-     if(inp%analyze_anh_pot == 1)then 
-       open(unit=unit_out,file=name_file,status='replace',form='formatted')
-       write(unit_out,*) '#---------------------------------------------#'
-       write(unit_out,*) '#    Anharmonic Terms Energy Contribution     #'
-       write(unit_out,*) '#---------------------------------------------#'
-       write(unit_out,*) ''
-       write(unit_out,'(A,I5)') 'Number of Terms: ', ncoeff
-       write(unit_out,*) '' 
-       write(unit_out,'(A)') 'Terms     Names' 
-       do icoeff=1,ncoeff
-         term_name = effective_potential%anharmonics_terms%coefficients(icoeff)%name
-         write(unit_out,'(I5,A,A)') icoeff,'     ',trim(term_name)
-       enddo  
-       write(unit_out,*) ''  
-       write(unit_out,'(A)',advance='no')  'Cycle/Terms'
-       do icoeff=1,ncoeff
-         if(icoeff<ncoeff)then
-         write(unit_out,'(I5)',advance='no') icoeff
-         else 
-         write(unit_out,'(I5)',advance='yes') icoeff
-         endif
-       enddo  
-     end if 
+     name_file='MD' 
+     if(inp%analyze_anh_pot == 1)then
+       call effective_potential_writeAnhHead(ncoeff,name_file,&
+&                        effective_potential%anharmonics_terms)      
+     end if
 
      call wrtout(ab_out,message,'COLL')
      call wrtout(std_out,message,'COLL')
      call mover(scfcv_args,ab_xfh,acell,effective_potential%crystal%amu,dtfil,electronpositron,&
 &     rhog,rhor,dtset%rprimd_orig,vel,vel_cell,xred,xred_old,&
 &     effective_potential=effective_potential,filename_ddb=filnam(3),&
-&     verbose=verbose,writeHIST=writeHIST)
-     close(unit_out)
+&     verbose=verbose,writeHIST=writeHIST,scup_dtset=scup_inp)     
+     INQUIRE(FILE='MD_anharmonic_terms_energy.dat',OPENED=file_opened,number=unit_out)
+     if(file_opened) close(unit_out)
    else if(option== -1.or.option==-2)then
      !*************************************************************
      !   Try to bound the model
@@ -1019,7 +994,7 @@ implicit none
    !   ABI_DATATYPE_DEALLOCATE(pawtab)
    !   ABI_DEALLOCATE(npwtot)
    ! end if
-   call dtset_free(dtset)
+   call dtset%free()
    call destroy_results_gs(results_gs)
    call scfcv_destroy(scfcv_args)
    call destroy_mpi_enreg(mpi_enreg)

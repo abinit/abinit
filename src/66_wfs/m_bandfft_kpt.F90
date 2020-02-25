@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_bandfft_kpt
 !! NAME
 !!  m_bandfft_kpt
@@ -8,7 +7,7 @@
 !!  used for kgb parallelization.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2019 ABINIT group (FJ, FB, MT)
+!! Copyright (C) 2011-2020 ABINIT group (FJ, FB, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,11 +27,11 @@
 MODULE m_bandfft_kpt
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_time,      only : timab
  use m_kg,        only : mkkpg
  use m_fftcore,   only : sphereboundary
@@ -202,8 +201,6 @@ CONTAINS
 !! SOURCE
 
 subroutine bandfft_kpt_init1(bandfft_kpt_in,istwfk,kg,mgfft,mkmem,mpi_enreg,mpw,nband,nkpt,npwarr,nsppol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -658,8 +655,6 @@ end subroutine bandfft_kpt_init1
 subroutine bandfft_kpt_init2(bandfft_kpt_in,dimffnl,ffnl_gather,ikpt_this_proc,kinpw_gather,&
 &                            kpg_k_gather,lmnmax,matblk,mkmem,ndatarecv,nkpg,ntypat,ph3d_gather)
 
- implicit none
-
 !Arguments -------------------------------
  integer, intent(in) :: dimffnl,ikpt_this_proc,lmnmax,matblk,mkmem,ndatarecv,nkpg,ntypat
 !Local variables-------------------------------
@@ -739,8 +734,6 @@ end subroutine bandfft_kpt_init2
 
 subroutine bandfft_kpt_reset(bandfft_kpt_in)
 
- implicit none
-
 !Arguments ------------------------------------
  type(bandfft_kpt_type) :: bandfft_kpt_in
 !Local variables-------------------------------
@@ -779,8 +772,6 @@ end subroutine bandfft_kpt_reset
 !! SOURCE
 
 subroutine bandfft_kpt_destroy(bandfft_kpt_in)
-
- implicit none
 
 !Arguments ------------------------------------
  type(bandfft_kpt_type) :: bandfft_kpt_in
@@ -895,8 +886,6 @@ end subroutine bandfft_kpt_destroy
 
 subroutine bandfft_kpt_destroy_array(bandfft_kpt_in,mpi_enreg)
 
- implicit none
-
 !Arguments ------------------------------------
  type(bandfft_kpt_type),pointer :: bandfft_kpt_in(:)
  type(MPI_type), intent(inout) :: mpi_enreg
@@ -963,8 +952,6 @@ end subroutine bandfft_kpt_destroy_array
 !! SOURCE
 
 subroutine bandfft_kpt_copy(bandfft_kpt_in,bandfft_kpt_out,mpi_enreg1,opt_bandfft)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1176,8 +1163,6 @@ end subroutine bandfft_kpt_copy
 !! SOURCE
 
 subroutine bandfft_kpt_mpi_send(input,receiver,tag,spaceComm,ierr,profile)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1473,8 +1458,6 @@ end subroutine bandfft_kpt_mpi_send
 !! SOURCE
 
 subroutine bandfft_kpt_mpi_recv(output,sender,tag,spaceComm,ierr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1823,8 +1806,6 @@ end subroutine bandfft_kpt_mpi_recv
 
 subroutine bandfft_kpt_savetabs(bandfft_kpt_in,ffnl,ph3d,kpg,kinpw)
 
- implicit none
-
 !Arguments -------------------------------
  type(bandfft_kpt_type),intent(inout) :: bandfft_kpt_in
  real(dp),intent(inout),allocatable,optional :: ffnl(:,:,:,:),ph3d(:,:,:),kpg(:,:),kinpw(:)
@@ -1912,8 +1893,6 @@ end subroutine bandfft_kpt_savetabs
 !! SOURCE
 
 subroutine bandfft_kpt_restoretabs(bandfft_kpt_out,ffnl,ph3d,kpg,kinpw)
-
- implicit none
 
 !Arguments -------------------------------
  type(bandfft_kpt_type),intent(inout) :: bandfft_kpt_out
@@ -2006,8 +1985,6 @@ end subroutine bandfft_kpt_restoretabs
 
 subroutine bandfft_kpt_set_ikpt(ikpt,mpi_enreg)
 
- implicit none
-
 !Arguments -------------------------------
  integer,intent(in) :: ikpt
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -2049,8 +2026,6 @@ end subroutine bandfft_kpt_set_ikpt
 
 function bandfft_kpt_get_ikpt()
 
- implicit none
-
 !Arguments -------------------------------
  integer :: bandfft_kpt_get_ikpt
 !Local variables-------------------------------
@@ -2087,8 +2062,6 @@ end function bandfft_kpt_get_ikpt
 
 
 subroutine prep_bandfft_tabs(gs_hamk,ikpt,mkmem,mpi_enreg)
-
- implicit none
 
 !Arguments -------------------------------
  integer,intent(in) :: ikpt,mkmem

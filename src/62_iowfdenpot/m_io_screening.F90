@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_io_screening
 !! NAME
 !!  m_io_screening
@@ -8,7 +7,7 @@
 !!  _SCR and _SUSC file as well as methods used to read/write/echo.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG)
+!! Copyright (C) 2008-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +25,6 @@
 MODULE m_io_screening
 
  use defs_basis
- use defs_abitypes
  use m_abicore
 #if defined HAVE_MPI2
  use mpi
@@ -35,6 +33,7 @@ MODULE m_io_screening
  use m_mpiotk
  use m_nctk
  use m_errors
+ use m_dtset
  use iso_c_binding
 #ifdef HAVE_NETCDF
  use netcdf
@@ -231,7 +230,8 @@ MODULE m_io_screening
  integer,private,parameter :: HSCR_KNOWN_HEADFORMS(1) = [80]
  ! The list of headforms used for SCR/SUSC so far.
 
- integer,public,parameter :: HSCR_LATEST_HEADFORM = HSCR_KNOWN_HEADFORMS(size(HSCR_KNOWN_HEADFORMS))
+ integer,private,parameter :: size_hscr_known_headforms = size(HSCR_KNOWN_HEADFORMS) ! Need this for Flang
+ integer,public,parameter :: HSCR_LATEST_HEADFORM = HSCR_KNOWN_HEADFORMS(size_hscr_known_headforms)
  ! The latest headform used when writing.
 
  public :: hscr_from_file       ! Read the header from file.
@@ -306,8 +306,6 @@ end function ncname_from_id
 !! SOURCE
 
 subroutine hscr_from_file(hscr,path,fform,comm)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -411,8 +409,6 @@ end subroutine hscr_from_file
 !! SOURCE
 
 subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -558,7 +554,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
 
    if (iomode==IO_MODE_FORTRAN .or. iomode==IO_MODE_MPI) then
      ! Write the abinit header.
-     call hdr_fort_write(hscr%hdr, unt, fform, ierr)
+     call hscr%hdr%fort_write(unt, fform, ierr)
      ABI_CHECK(ierr == 0, "hdr_fort_write retured ierr != 0")
 
      write(unt, err=10, iomsg=errmsg)hscr%titles
@@ -588,7 +584,7 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
 #ifdef HAVE_NETCDF
      ncid = unt
      ! Write the abinit header, rewinding of the file (if any) is done here.
-     NCF_CHECK(hdr_ncwrite(hscr%hdr, ncid, fform, nc_define=.True.))
+     NCF_CHECK(hscr%hdr%ncwrite(ncid, fform, nc_define=.True.))
 
      ! Define dimensions
      ! Part 2) of etsf-io specifications
@@ -596,13 +592,13 @@ subroutine hscr_io(hscr,fform,rdwr,unt,comm,master,iomode)
      ! and I'm not gonna allocate extra memory just to have up up, down down
      ! Besides number_of_spins should be replaced by `number_of_spins_dielectric_function`
      ! Should add spin_dependent attribute.
-     ncerr = nctk_def_dims(ncid, [&
-       nctkdim_t("complex", 2), nctkdim_t("number_of_reduced_dimensions", 3),&
+     ncerr = nctk_def_dims(ncid, [ &
+       nctkdim_t("complex", 2), nctkdim_t("number_of_reduced_dimensions", 3), &
        nctkdim_t("number_of_frequencies_dielectric_function", hscr%nomega), &
-       nctkdim_t("number_of_qpoints_dielectric_function", hscr%nqibz),&
-       nctkdim_t("number_of_qpoints_gamma_limit", hscr%nqlwl),&
-       nctkdim_t("number_of_spins", hscr%hdr%nsppol),&
-       nctkdim_t("nI", hscr%nI), nctkdim_t("nJ", hscr%nJ),&
+       nctkdim_t("number_of_qpoints_dielectric_function", hscr%nqibz), &
+       nctkdim_t("number_of_qpoints_gamma_limit", hscr%nqlwl), &
+       nctkdim_t("number_of_spins", hscr%hdr%nsppol), &
+       nctkdim_t("nI", hscr%nI), nctkdim_t("nJ", hscr%nJ), &
        nctkdim_t("number_of_coefficients_dielectric_function", hscr%npwe)], defmode=.True.)
      NCF_CHECK(ncerr)
 
@@ -729,8 +725,6 @@ end subroutine hscr_io
 
 subroutine hscr_print(Hscr,header,unit,prtvol,mode_paral)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in),optional :: prtvol,unit
@@ -856,8 +850,6 @@ end subroutine hscr_print
 
 type(hscr_t) function hscr_new(varname,dtset,ep,hdr_abinit,ikxc,test_type,tordering,titles,ngvec,gvec) result(hscr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ikxc,test_type,tordering,ngvec
@@ -972,8 +964,6 @@ end function hscr_new
 
 subroutine hscr_bcast(hscr,master,my_rank,comm)
 
- implicit none
-
 !Arguments ------------------------------------
  integer, intent(in) :: master,my_rank,comm
  type(hscr_t),intent(inout) :: hscr
@@ -1024,7 +1014,7 @@ subroutine hscr_bcast(hscr,master,my_rank,comm)
  call xmpi_bcast(hscr%omega,master,comm,ierr)
 
  ! Communicate the Abinit header.
- call hdr_bcast(hscr%Hdr,master,my_rank,comm)
+ call hscr%Hdr%bcast(master, my_rank, comm)
 
 ! HSCR_NEW
  call xmpi_bcast(hscr%awtr, master, comm, ierr)
@@ -1059,8 +1049,6 @@ end subroutine hscr_bcast
 !! SOURCE
 
 subroutine hscr_malloc(hscr, npwe, nqibz, nomega, nqlwl)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1103,8 +1091,6 @@ end subroutine hscr_malloc
 
 subroutine hscr_free(hscr)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(hscr_t),intent(inout) :: hscr
@@ -1114,20 +1100,12 @@ subroutine hscr_free(hscr)
  !@hscr_t
  DBG_ENTER("COLL")
 
- if (allocated(hscr%gvec)) then
-   ABI_FREE(hscr%gvec)
- end if
- if (allocated(hscr%qibz)) then
-   ABI_FREE(hscr%qibz)
- end if
- if (allocated(hscr%qlwl)) then
-   ABI_FREE(hscr%qlwl)
- end if
- if (allocated(hscr%omega)) then
-   ABI_FREE(hscr%omega)
- end if
+ ABI_SFREE(hscr%gvec)
+ ABI_SFREE(hscr%qibz)
+ ABI_SFREE(hscr%qlwl)
+ ABI_SFREE(hscr%omega)
 
- call hdr_free(hscr%Hdr)
+ call hscr%Hdr%free()
 
  DBG_EXIT("COLL")
 
@@ -1154,8 +1132,6 @@ end subroutine hscr_free
 !! SOURCE
 
 subroutine hscr_copy(Hscr_in,Hscr_cp)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1240,8 +1216,6 @@ end subroutine hscr_copy
 !! SOURCE
 
 subroutine hscr_merge(Hscr_in,Hscr_out)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1401,8 +1375,6 @@ end subroutine hscr_merge
 
 subroutine write_screening(varname,unt,iomode,npwe,nomega,iqibz,epsm1)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=*),intent(in) :: varname
@@ -1511,8 +1483,6 @@ end subroutine write_screening
 
 subroutine read_screening(varname,fname,npweA,nqibzA,nomegaA,epsm1,iomode,comm,&
 & iqiA) ! Optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1839,8 +1809,6 @@ end subroutine read_screening
 
 subroutine hscr_mpio_skip(mpio_fh,fform,offset)
 
- implicit none
-
 !Arguments ------------------------------------
  integer,intent(in) :: mpio_fh
  integer,intent(out) :: fform
@@ -1925,8 +1893,6 @@ end subroutine hscr_mpio_skip
 !! SOURCE
 
 subroutine ioscr_qmerge(nfiles, filenames, hscr_files, fname_out, ohscr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2066,8 +2032,6 @@ end subroutine ioscr_qmerge
 
 subroutine ioscr_qrecover(ipath, nqrec, fname_out)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nqrec
@@ -2193,8 +2157,6 @@ end subroutine ioscr_qrecover
 !! SOURCE
 
 subroutine ioscr_wmerge(nfiles, filenames, hscr_file, freqremax, fname_out, ohscr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2488,8 +2450,6 @@ end subroutine ioscr_wmerge
 !! SOURCE
 
 subroutine ioscr_wremove(inpath, ihscr, fname_out, nfreq_tot, freq_indx, ohscr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

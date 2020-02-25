@@ -1,11 +1,10 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fock_getghc
 !! NAME
 !!
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2013-2019 ABINIT group (CMartins, FJ, MT, XG)
+!!  Copyright (C) 2013-2020 ABINIT group (CMartins, FJ, MT, XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +24,6 @@
 module m_fock_getghc
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
@@ -33,6 +31,7 @@ module m_fock_getghc
  use m_pawcprj
  !use m_cgtools
 
+ use defs_abitypes, only : mpi_type
  use defs_datatypes, only : pseudopotential_type
  use m_time,         only : timab
  use m_symtk,        only : matr3inv
@@ -40,8 +39,7 @@ module m_fock_getghc
  use m_kg,           only : mkkpg
  use m_fftcore,      only : sphereboundary
  use m_fft,          only : fftpac, fourwf, fourdp
- use m_hamiltonian,  only : gs_hamiltonian_type,load_kprime_hamiltonian,K_H_KPRIME,load_k_hamiltonian, &
-                            init_hamiltonian, destroy_hamiltonian, load_spin_hamiltonian
+ use m_hamiltonian,  only : gs_hamiltonian_type, K_H_KPRIME, init_hamiltonian
  use m_pawdij,       only : pawdijhat
  use m_paw_nhat,     only : pawmknhat_psipsi
  use m_spacepar,     only : hartre
@@ -84,7 +82,7 @@ contains
 !!                   contains the fock exchange term for cwavef at the end.
 !!
 !! NOTES
-!!  The current version assumes that :
+!!  The current version assumes that:
 !!   * nspinor = 1
 !!   * no "my_nspinor"
 !!   * no restriction to the value of istwfk_bz (but must be tested in all case)
@@ -289,14 +287,14 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
      ABI_ALLOCATE(gs_ham%ph3d_kp,(2,npwj,gs_ham%matblk))
    end if
 
-   call load_kprime_hamiltonian(gs_ham,kpt_kp=fockbz%kptns_bz(:,jkpt),&
+   call gs_ham%load_kprime(kpt_kp=fockbz%kptns_bz(:,jkpt),&
 &   istwf_kp=jstwfk,npw_kp=npwj,kg_kp=fockbz%kg_bz(:,1+jkg:npwj+jkg))
 !* Some temporary allocations needed for PAW
    if (fockcommon%usepaw==1) then
      ABI_ALLOCATE(vectin_dum,(2,npwj*nspinor))
      vectin_dum=zero
      ABI_ALLOCATE(ffnl_kp_dum,(npwj,0,gs_ham%lmnmax,gs_ham%ntypat))
-     call load_kprime_hamiltonian(gs_ham,ffnl_kp=ffnl_kp_dum)
+     call gs_ham%load_kprime(ffnl_kp=ffnl_kp_dum)
    end if
 
 ! ======================================
@@ -622,7 +620,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    if (associated(gs_ham%ph3d_kp)) then
      ABI_ALLOCATE(gs_ham%ph3d_kp,(2,gs_ham%npw_k,gs_ham%matblk))
    end if
-   call load_kprime_hamiltonian(gs_ham,kpt_kp=gs_ham%kpt_k,istwf_kp=gs_ham%istwf_k,&
+   call gs_ham%load_kprime(kpt_kp=gs_ham%kpt_k,istwf_kp=gs_ham%istwf_k,&
 &   npw_kp=gs_ham%npw_k,kg_kp=gs_ham%kg_k,ffnl_kp=gs_ham%ffnl_k,ph3d_kp=gs_ham%ph3d_k)
 
 !   if (fockcommon%ieigen/=0) fockcommon%ieigen=0
@@ -638,7 +636,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
  if (associated(gs_ham%ph3d_kp)) then
    ABI_ALLOCATE(gs_ham%ph3d_kp,(2,gs_ham%npw_k,gs_ham%matblk))
  end if
- call load_kprime_hamiltonian(gs_ham,kpt_kp=gs_ham%kpt_k,istwf_kp=gs_ham%istwf_k,&
+ call gs_ham%load_kprime(kpt_kp=gs_ham%kpt_k,istwf_kp=gs_ham%istwf_k,&
 & npw_kp=gs_ham%npw_k,kg_kp=gs_ham%kg_k,ffnl_kp=gs_ham%ffnl_k,ph3d_kp=gs_ham%ph3d_k)
 
 !* Perform an FFT using fourwf to get ghc1 = FFT^-1(vlocpsi_r)
@@ -684,7 +682,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 ! === Calculate the contribution to energy ===
 ! ============================================
 !* Only the contribution when cwavef=cgocc_bz are calculated, in order to cancel exactly the self-interaction
-!* at each convergence step. (consistent definition with the defintion of hartree energy)
+!* at each convergence step. (consistent definition with the definition of hartree energy)
  if (fockcommon%ieigen/=0) then
    eigen=zero
 !* Dot product of cwavef and ghc
@@ -891,7 +889,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
  do isppol=1,nsppol
    fockcommon%isppol=isppol
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
-   call load_spin_hamiltonian(gs_hamk,isppol,with_nonlocal=.true.)
+   call gs_hamk%load_spin(isppol,with_nonlocal=.true.)
 
 !  Loop over k points
    ikg=0
@@ -969,14 +967,14 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 !     - Load k-dependent quantities in the Hamiltonian
 
      ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-     call load_k_hamiltonian(gs_hamk,kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
+     call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_gbound=compute_gbound,compute_ph3d=.true.)
 
 !    Load band-FFT tabs (transposed k-dependent arrays)
      if (mpi_enreg%paral_kgb==1) then
        call bandfft_kpt_savetabs(my_bandfft_kpt,ffnl=ffnl_sav,ph3d=ph3d_sav,kpg=kpg_k_sav)
        call prep_bandfft_tabs(gs_hamk,ikpt,mkmem,mpi_enreg)
-       call load_k_hamiltonian(gs_hamk,npw_fft_k=my_bandfft_kpt%ndatarecv, &
+       call gs_hamk%load_k(npw_fft_k=my_bandfft_kpt%ndatarecv, &
 &       kg_k     =my_bandfft_kpt%kg_k_gather, &
 &       kpg_k    =my_bandfft_kpt%kpg_k_gather, &
        ffnl_k   =my_bandfft_kpt%ffnl_gather, &
@@ -1156,7 +1154,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
    call pawcprj_reorder(cprj,gs_hamk%atindx1)
  end if
 !Deallocate temporary space
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
  call timab(925,2,tsec)
  call timab(920,2,tsec)
@@ -1212,7 +1210,6 @@ subroutine fock_ACE_getghc(cwavef,ghc,gs_ham,mpi_enreg)
  type(fock_common_type),pointer :: fockcommon
 ! Arrays
  real(dp), allocatable :: ghc1(:,:),xi(:,:)
-
 
 ! *************************************************************************
 

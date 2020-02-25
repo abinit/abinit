@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_eig2d
 !! NAME
 !!  m_eig2d
@@ -9,7 +8,7 @@
 !!  displacements.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2019 ABINIT group (SP, PB, XG)
+!! Copyright (C) 2014-2020 ABINIT group (SP, PB, XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,8 +29,6 @@
 MODULE m_eig2d
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_nctk
@@ -41,7 +38,12 @@ MODULE m_eig2d
  use m_xmpi
  use m_ebands
  use m_cgtools
+ use m_hdr
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_abitypes, only : MPI_type
  use m_time,       only : timab
  use m_fstrings,   only : strcat
  use m_crystal,    only : crystal_init,  crystal_t
@@ -196,8 +198,6 @@ CONTAINS
 
 subroutine eigr2d_init(eig2nkq,eigr2d,mband,nsppol,nkpt,natom)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) ::mband,nsppol,nkpt,natom
@@ -241,8 +241,6 @@ end subroutine eigr2d_init
 !! SOURCE
 
 subroutine eigr2d_ncwrite(eigr2d,iqpt,wtq,ncid)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -330,8 +328,6 @@ end subroutine eigr2d_ncwrite
 
 subroutine eigr2d_free(eigr2d)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(eigr2d_t),intent(inout) :: eigr2d
@@ -377,8 +373,6 @@ end subroutine eigr2d_free
 !! SOURCE
 
 subroutine fan_init(fan,fan2d,mband,nsppol,nkpt,natom)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -428,8 +422,6 @@ end subroutine fan_init
 
 subroutine gkk_init(gkk,gkk2d,mband,nsppol,nkpt,natom,ncart)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) ::mband,nsppol,nkpt,natom,ncart
@@ -473,8 +465,6 @@ end subroutine gkk_init
 !! SOURCE
 
 subroutine fan_ncwrite(fan2d,iqpt,wtq,ncid)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -564,8 +554,6 @@ end subroutine fan_ncwrite
 
 subroutine gkk_ncwrite(gkk2d,iqpt,wtq,ncid)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) ::ncid
@@ -653,8 +641,6 @@ end subroutine gkk_ncwrite
 
 subroutine fan_free(fan2d)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(fan_t),intent(inout) :: fan2d
@@ -696,8 +682,6 @@ end subroutine fan_free
 !! SOURCE
 
 subroutine gkk_free(gkk2d)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -804,8 +788,6 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 &  eigen1,eig2nkq,elph2_imagden,esmear,gh0c1_pert,gh1c_pert,ieig2rf,istwfk_pert,&
 &  mband,mk1mem,mpert,npert,mpi_enreg,mpw1,nkpt_rbz,npwar1,nspinor,nsppol,smdelta,&
 &  dtset,eigbrd,eigenq_fine,hdr_fine,hdr0)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1216,10 +1198,6 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
 
  call timab(148,2,tsec)
 
-!DEBUG
-!write(std_out,*)' eig2stern: exit'
-!ENDDEBUG
-
 end subroutine eig2stern
 !!***
 
@@ -1298,8 +1276,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 &  elph2_imagden,esmear,ieig2rf,mband,mpert,npert,mpi_enreg,doccde,&
 &  nkpt_rbz,nsppol,smdelta,rprimd,dtset,occ_rbz,hdr0,eigbrd,eigenq_fine,hdr_fine)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: bdeigrf,dim_eig2nkq,ieig2rf,mband,mpert,natom,nkpt_rbz
@@ -1338,7 +1314,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  real(dp) :: ar,ai,deltae,den,eig1_i1,eig1_i2,eigen_corr
  real(dp) :: eig1_r1,eig1_r2,eig2_diai,den_av
  real(dp) :: eig2_diar,eigbrd_i,eigbrd_r,wgt_int
- character(len=500) :: message
+ !character(len=500) :: message
  logical :: remove_inv,test_do_band
  type(crystal_t) :: Crystal
  type(ebands_t)  :: Bands
@@ -1380,8 +1356,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
  call timab(148,1,tsec)
 
  if(nsppol==2)then
-   message = 'nsppol=2 is still under development. Be careful when using it ...'
-   MSG_COMMENT(message)
+   MSG_COMMENT('nsppol=2 is still under development. Be careful when using it ...')
  end if
 
  band2tot_index =0
@@ -1833,9 +1808,6 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 
 
  call timab(148,2,tsec)
-!DEBUG
-!write(std_out,*)' eig2tot: exit'
-!ENDDEBUG
 
 end subroutine eig2tot
 !!***
@@ -1866,8 +1838,6 @@ end subroutine eig2tot
 !! SOURCE
 
 subroutine outbsd(bdeigrf,dtset,eig2nkq,mpert,nkpt_rbz,unitout)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1949,8 +1919,6 @@ end subroutine outbsd
 !! SOURCE
 
 subroutine smeared_delta(eigen0,eigenq,esmear,mband,smdelta,smdfunc)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2063,8 +2031,6 @@ end subroutine smeared_delta
 !! SOURCE
 
 subroutine elph2_fanddw(dim_eig2nkq,displ,eig2nkq,eigen_corr,gprimd,mband,natom,nkpt,nsppol,option,phfrq,prtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

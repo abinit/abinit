@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gruneisen
 !! NAME
 !!  m_gruneisen
@@ -8,7 +7,7 @@
 !!  of dynamical matrices obtained with different unit cell volumes.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2019 ABINIT group (MG)
+!! Copyright (C) 2011-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,7 +42,7 @@ MODULE m_gruneisen
  use m_fstrings,            only : sjoin, itoa, ltoa, ftoa, strcat
  use m_numeric_tools,       only : central_finite_diff, arth
  use m_kpts,                only : kpts_ibz_from_kptrlatt, tetra_from_kptrlatt
- use m_bz_mesh,             only : kpath_t, kpath_new, kpath_free, kpath_print
+ use m_bz_mesh,             only : kpath_t, kpath_new
  use m_anaddb_dataset,      only : anaddb_dataset_type
  use m_dynmat,              only : massmult_and_breaksym, dfpt_phfrq, gtdyn9
 
@@ -156,7 +155,7 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
  ddbun = get_unit()
  do ivol=1,new%nvols
    call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_paths(ivol)))
-   call ddb_hdr_open_read(ddb_hdr,ddb_paths(ivol),ddbun,DDB_VERSION, dimonly=1)
+   call ddb_hdr_open_read(ddb_hdr, ddb_paths(ivol), ddbun, DDB_VERSION, dimonly=1)
    natom = ddb_hdr%natom
 
    call ddb_hdr_free(ddb_hdr)
@@ -166,7 +165,7 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
    call ddb_from_file(new%ddb_vol(ivol), ddb_paths(ivol), inp%brav, natom, natifc0, atifc0, new%cryst_vol(ivol), comm)
    ABI_FREE(atifc0)
    if (my_rank == master) then
-     call crystal_print(new%cryst_vol(ivol), header=sjoin("Structure for ivol:", itoa(ivol)), unit=ab_out, prtvol=-1)
+     call new%cryst_vol(ivol)%print(header=sjoin("Structure for ivol:", itoa(ivol)), unit=ab_out, prtvol=-1)
    end if
 
    ! Get Dielectric Tensor and Effective Charges
@@ -181,8 +180,8 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
    end if
 
    call ifc_init(new%ifc_vol(ivol), new%cryst_vol(ivol), new%ddb_vol(ivol),&
-     inp%brav,inp%asr,inp%symdynmat,inp%dipdip,inp%rfmeth,inp%ngqpt(1:3),inp%nqshft,inp%q1shft,dielt,zeff,&
-     inp%nsphere,inp%rifcsph,inp%prtsrlr,inp%enunit,comm)
+     inp%brav, inp%asr, inp%symdynmat, inp%dipdip, inp%rfmeth, inp%ngqpt(1:3), inp%nqshft, inp%q1shft, dielt, zeff, &
+     inp%nsphere, inp%rifcsph, inp%prtsrlr, inp%enunit, comm)
    ABI_FREE(zeff)
  end do
 
@@ -389,7 +388,7 @@ subroutine gruns_qpath(gruns, prefix, qpath, ncid, comm)
    end if
    write(unt,'(a)')'# Phonon band structure, Gruneisen parameters and group velocity'
    write(unt,'(a)')"# Energy in Hartree, DOS in states/Hartree"
-   call kpath_print(qpath, unit=unt, pre="#")
+   call qpath%print(unit=unt, pre="#")
    write(unt,'(5a)')&
      "# phfreq(mode=1) gruneisen(mode=1) velocity(mode=1)    phfreq(mode=2) gruneisen(mode=2) velocity(mode=2)   ..."
    do iqpt=1,qpath%npts
@@ -824,7 +823,7 @@ subroutine gruns_anaddb(inp, prefix, comm)
  if (inp%nqpath /= 0) then
    qpath = kpath_new(inp%qpath, gruns%cryst_vol(iv0)%gprimd, inp%ndivsm)
    call gruns_qpath(gruns, prefix, qpath, ncid, comm)
-   call kpath_free(qpath)
+   call qpath%free()
  else
    MSG_WARNING("Cannot compute Gruneisen parameters on q-path because nqpath == 0")
  end if

@@ -7,7 +7,7 @@
 !!  LDA or LDA-like XC functionals.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LG, MF, JFD, LK)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LG, MF, JFD, LK)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -82,8 +82,6 @@ contains
 
 subroutine xcpzca(exc,npt,order,rhor,rspts,vxc,&  !Mandatory arguments
 &                dvxc)                            !Optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -252,8 +250,6 @@ end subroutine xcpzca
 
 subroutine xcspol(exc,npts,nspden,order,rspts,vxc,zeta,ndvxc,& !Mandatory arguments
 &                 dvxc)                            !Optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -750,8 +746,6 @@ end subroutine xcspol
 subroutine xctetr(exc,npt,order,rhor,rspts,vxc,& !Mandatory arguments
 &                 d2vxc,dvxc)                    !Optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npt,order
@@ -915,8 +909,6 @@ end subroutine xctetr
 subroutine xcwign(exc,npt,order,rspts,vxc,& !Mandatory arguments
 &                dvxc)                           !Optional arguments
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npt,order
@@ -1025,8 +1017,6 @@ end subroutine xcwign
 
 subroutine xchelu(exc,npt,order,rspts,vxc,dvxc)  ! dvxc is optional
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npt,order
@@ -1121,8 +1111,6 @@ end subroutine xchelu
 !! SOURCE
 
 subroutine xcxalp(exc,npt,order,rspts,vxc, dvxc)  ! dvxc is optional
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1226,8 +1214,6 @@ end subroutine xcxalp
 
 subroutine xclb(grho2_updn,npts,nspden,rho_updn,vxci)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: npts,nspden
@@ -1285,10 +1271,9 @@ end subroutine xclb
 !!
 !! INPUTS
 !!  ndvxcdgr= size of dvxcdgr(npts,ndvxcdgr)
-!!  ngr2= size of grho2_updn(npts,ngr2)
 !!  npts= number of points to be computed
 !!  nspden=number if spin density component (necessarily 1 here)
-!!  grho2_updn(npts,ngr2)=square of the gradient of the spin-up,
+!!  grho2_updn(npts,2*nspden-1)=square of the gradient of the spin-up,
 !!     and, if nspden==2, spin-down, and total density (Hartree/Bohr**2),
 !!     only used if gradient corrected functional (option=2,-2,-4 and 4 or beyond)
 !!  rho_updn(npts,nspden)=spin-up and spin-down density (Hartree/bohr**3)
@@ -1310,16 +1295,14 @@ end subroutine xclb
 !!
 !! SOURCE
 
-subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdgr,grho2_updn,ngr2)
-
- implicit none
+subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdgr,grho2_updn)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ndvxcdgr,ngr2,npts,nspden,usefxc
+ integer,intent(in) :: ndvxcdgr,npts,nspden,usefxc
  real(dp),intent(in) :: temp
 !arrays
- real(dp),intent(in) :: grho2_updn(npts,ngr2),rho_updn(npts,nspden)
+ real(dp),intent(in) :: grho2_updn(npts,2*nspden-1),rho_updn(npts,nspden)
  real(dp),intent(inout) :: dvxcdgr(npts,ndvxcdgr),fxci(npts*usefxc),exci(npts),vxci(npts,nspden)
 
 !Local variables-------------------------------
@@ -1334,8 +1317,6 @@ subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdg
  real(dp),allocatable :: rho_updnm1_3(:,:)
 
 ! *************************************************************************
-
-!DBG_ENTER('COLL')
 
  has_fxc=(usefxc/=0)
  has_dvxcdgr=(ndvxcdgr/=0)
@@ -1404,8 +1385,6 @@ subroutine xctfw(temp,exci,fxci,usefxc,rho_updn,vxci,npts,nspden,dvxcdgr,ndvxcdg
  end do
 
  ABI_DEALLOCATE(rho_updnm1_3)
-
-!DBG_EXIT('COLL')
 
 end subroutine xctfw
 !!***

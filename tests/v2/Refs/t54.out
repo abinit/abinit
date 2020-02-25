@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 11h57 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h35 )
   
-- input  file    -> t54.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v2_t54/t54.in
 - output file    -> t54.out
 - root for input  files -> t54i
 - root for output files -> t54o
@@ -34,7 +34,7 @@
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          65          nfft =        2700          nkpt =           1
 ================================================================================
-P This job should need less than                       1.310 Mbytes of memory.
+P This job should need less than                       1.302 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
 ================================================================================
@@ -51,7 +51,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          63          nfft =        2700          nkpt =           1
 ================================================================================
-P This job should need less than                       1.309 Mbytes of memory.
+P This job should need less than                       1.301 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
 ================================================================================
@@ -68,7 +68,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.023 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          65          nfft =        2880          nkpt =           1
 ================================================================================
-P This job should need less than                       1.360 Mbytes of memory.
+P This job should need less than                       1.352 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.024 Mbytes.
 ================================================================================
@@ -85,7 +85,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.024 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          65          nfft =        2880          nkpt =           1
 ================================================================================
-P This job should need less than                       1.360 Mbytes of memory.
+P This job should need less than                       1.352 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.024 Mbytes.
 ================================================================================
@@ -102,7 +102,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.024 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          62          nfft =        2304          nkpt =           1
 ================================================================================
-P This job should need less than                       1.206 Mbytes of memory.
+P This job should need less than                       1.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 ================================================================================
@@ -119,7 +119,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          62          nfft =        2304          nkpt =           1
 ================================================================================
-P This job should need less than                       1.206 Mbytes of memory.
+P This job should need less than                       1.198 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 ================================================================================
@@ -136,7 +136,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          41          nfft =        1728          nkpt =           1
 ================================================================================
-P This job should need less than                       1.045 Mbytes of memory.
+P This job should need less than                       1.040 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -153,7 +153,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          49          nfft =        2304          nkpt =           1
 ================================================================================
-P This job should need less than                       1.201 Mbytes of memory.
+P This job should need less than                       1.195 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 ================================================================================
@@ -170,7 +170,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          41          nfft =        1728          nkpt =           1
 ================================================================================
-P This job should need less than                       1.045 Mbytes of memory.
+P This job should need less than                       1.040 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -187,7 +187,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          41          nfft =        1728          nkpt =           1
 ================================================================================
-P This job should need less than                       1.045 Mbytes of memory.
+P This job should need less than                       1.040 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -204,7 +204,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          52          nfft =        2304          nkpt =           1
 ================================================================================
-P This job should need less than                       1.202 Mbytes of memory.
+P This job should need less than                       1.196 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 ================================================================================
@@ -221,7 +221,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          64          nfft =        3600          nkpt =           1
 ================================================================================
-P This job should need less than                       1.550 Mbytes of memory.
+P This job should need less than                       1.542 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.029 Mbytes.
 ================================================================================
@@ -238,7 +238,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.029 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          30          nfft =        3600          nkpt =           1
 ================================================================================
-P This job should need less than                       1.538 Mbytes of memory.
+P This job should need less than                       1.534 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.029 Mbytes.
 ================================================================================
@@ -255,7 +255,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.029 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          30          nfft =        6750          nkpt =           1
 ================================================================================
-P This job should need less than                       2.406 Mbytes of memory.
+P This job should need less than                       2.402 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 ================================================================================
@@ -272,7 +272,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.053 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          52          nfft =        2304          nkpt =           1
 ================================================================================
-P This job should need less than                       1.201 Mbytes of memory.
+P This job should need less than                       1.194 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 ================================================================================
@@ -289,7 +289,7 @@ _ WF disk file :      0.004 Mbytes ; DEN or POT disk file :      0.020 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          22          nfft =        1500          nkpt =           1
 ================================================================================
-P This job should need less than                       0.983 Mbytes of memory.
+P This job should need less than                       0.980 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.013 Mbytes.
 ================================================================================
@@ -306,7 +306,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.013 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          22          nfft =         960          nkpt =           1
 ================================================================================
-P This job should need less than                       0.850 Mbytes of memory.
+P This job should need less than                       0.848 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.009 Mbytes.
 ================================================================================
@@ -323,7 +323,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.009 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          22          nfft =        2000          nkpt =           1
 ================================================================================
-P This job should need less than                       1.109 Mbytes of memory.
+P This job should need less than                       1.107 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.017 Mbytes.
 ================================================================================
@@ -340,7 +340,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.017 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =           9          nfft =        1000          nkpt =           1
 ================================================================================
-P This job should need less than                       0.854 Mbytes of memory.
+P This job should need less than                       0.853 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -374,7 +374,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =           8          nfft =         512          nkpt =           1
 ================================================================================
-P This job should need less than                       0.733 Mbytes of memory.
+P This job should need less than                       0.732 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 ================================================================================
@@ -391,7 +391,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.006 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          28          nfft =        1728          nkpt =           1
 ================================================================================
-P This job should need less than                       1.040 Mbytes of memory.
+P This job should need less than                       1.037 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
@@ -408,7 +408,7 @@ _ WF disk file :      0.003 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          14          nfft =        1000          nkpt =           1
 ================================================================================
-P This job should need less than                       0.856 Mbytes of memory.
+P This job should need less than                       0.854 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -427,7 +427,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 -    mband =           2        mffmem =           1         mkmem =           1
        mpw =          14          nfft =        1000          nkpt =           1
 ================================================================================
-P This job should need less than                       0.856 Mbytes of memory.
+P This job should need less than                       0.854 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 ================================================================================
@@ -437,7 +437,7 @@ _ WF disk file :      0.002 Mbytes ; DEN or POT disk file :      0.010 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -984,730 +984,55 @@ P           mkmem           1
 
  chkinp: Checking input parameters for consistency, jdtset=   1.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=   2.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0  0  1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=   3.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0  0  1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    5
-   symrel is  -1  0  0  0 -1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is  -1  0  0  0  1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=   4.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0  0  1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    5
-   symrel is  -1  0  0  0 -1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is  -1  0  0  0  1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=   5.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0  0  1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    5
-   symrel is  -1  0  0  0 -1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is  -1  0  0  0  1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=   6.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0  0  1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    5
-   symrel is  -1  0  0  0 -1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is  -1  0  0  0  1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=   7.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    8.413098E-19    8.413098E-19
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     1.000000E-01    8.413098E-19    8.413098E-19
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=   8.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0  1  1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    5
-   symrel is  -1  0  0  0 -1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is  -1  0  0  1  1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=   9.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0  0  1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    5
-   symrel is  -1  0  0  0 -1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is  -1  0  0  0  1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   11
-   symrel is  -1  0  0  0  0  1  0 -1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   13
-   symrel is  -1  0  0  0  0 -1  0  1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   16
-   symrel is  -1  0  0  0  0  1  0  1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=  10.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0  0  1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    5
-   symrel is  -1  0  0  0 -1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is  -1  0  0  0  1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   11
-   symrel is  -1  0  0  0  0  1  0 -1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   13
-   symrel is  -1  0  0  0  0 -1  0  1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   16
-   symrel is  -1  0  0  0  0  1  0  1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=  11.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=  12.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0 -1  1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=  13.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    7.930164E-19    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=  14.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    7.930164E-19    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=  15.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=  16.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0  0 -1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=  17.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0  0 -1  0  0  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=  18.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0  0 -1  0  2  2  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=  19.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=  20.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0 -1  0  1 -1  1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=  21.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0 -1  0  1 -1  1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    5
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is  -1  0  0 -1  1  0 -1  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=  22.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0 -1  0  1  1  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is  -1  0  0  1  1  1  0 -1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is  -1  0  0  1  1  1  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is  -1  0  0  0  0 -1  1  1  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=  23.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0 -1  0  1 -1  1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    5
-   symrel is  -1  0  0 -1  1  0 -1  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=  24.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    3
-   symrel is  -1  0  0 -1  0  1 -1  1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    5
-   symrel is  -1  0  0 -1  1  0 -1  0  1
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     1.000000E-01    0.000000E+00    0.000000E+00
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -1725,8 +1050,8 @@ P           mkmem           1
          ecut(hartree)=      3.000   => boxcut(ratio)=   2.00055
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/12mg.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/12mg.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/12mg.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/12mg.pspnc
 -  Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
 - 12.00000   2.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1737,7 +1062,7 @@ P           mkmem           1
     2   0.000   0.000    0   2.5922174        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     2.54196289048337    0.05499530377757    0.78827945413088   rchrg,fchrg,qchrg
- pspatm : epsatm=   -1.54393848
+  pspatm : epsatm=   -1.54393848
          --- l  ekb(1:nproj) -->
              0    1.755924
              1    0.853613
@@ -1763,6 +1088,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  8.058E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [ -0.6972459,   7.9695576,   0.0000000, ]
+- [  0.0000000,   0.7873980,   8.9654896, ]
+lattice_lengths: [   7.00000,    8.00000,    9.00000, ]
+lattice_angles: [ 85.000,  90.000,  95.000, ]
+lattice_volume:   5.0015690E+02
+convergence: {deltae:  2.150E+00, res2:  2.429E+00, residm:  5.609E-04, diffor:  8.058E+00, }
+etotal    :   2.15002132E+00
+entropy   :   0.00000000E+00
+fermie    :   1.24302227E-02
+cartesian_stress_tensor:
+- [ -1.05412498E-02,  -2.17567669E-06,  -9.09549983E-06, ]
+- [ -2.17567669E-06,   3.40521357E-04,  -3.95475354E-05, ]
+- [ -9.09549983E-06,  -3.95475354E-05,  -5.81997028E-04, ]
+pressure_GPa:   1.0575E+02
+cartesian_forces:
+- [ -8.05807857E+00,  -9.26448596E-04,  -6.13834645E-04, ]
+- [  8.05807857E+00,   9.26448596E-04,   6.13834645E-04, ]
+force_length_stats: {min:   8.05807865E+00, max:   8.05807865E+00, mean:   8.05807865E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1772,7 +1123,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.3314E-04; max=  5.6088E-04
+ Mean square residual over all n,k,spin=   33.314E-05; max=  56.088E-05
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -1801,21 +1152,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.21554    0.01243
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.86301625103121E-01
+hartree             :  2.57124009191211E-01
+xc                  : -1.45577067221593E+00
+Ewald energy        :  2.91197201355739E+00
+psp_core            : -2.46952661518072E-02
+local_psp           : -1.22000289322717E+00
+non_local_psp       :  7.95092498924611E-01
+total_energy        :  2.15002131518143E+00
+total_energy_eV     :  5.85050553145839E+01
+band_energy         : -4.06228590434243E-01
+...
 
-    Kinetic energy  =  8.86301625103121E-01
-    Hartree energy  =  2.57124009191211E-01
-    XC energy       = -1.45577067221593E+00
-    Ewald energy    =  2.91197201355739E+00
-    PspCore energy  = -2.46952661518072E-02
-    Loc. psp. energy= -1.22000289322717E+00
-    NL   psp  energy=  7.95092498924610E-01
-    >>>>>>>>> Etotal=  2.15002131518143E+00
-
- Other information on the energy :
-    Total energy(eV)=  5.85050553145839E+01 ; Band energy (Ha)=  -4.0622859043E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.05412498E-02  sigma(3 2)= -3.95475354E-05
@@ -1829,7 +1180,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -1864,6 +1215,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  8.058E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 2, }
+comment   : Summary of ground state results
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.7844017,   0.0000000,   8.9657523, ]
+lattice_lengths: [   7.00000,    8.00000,    9.00000, ]
+lattice_angles: [ 90.000,  85.000,  90.000, ]
+lattice_volume:   5.0208213E+02
+convergence: {deltae:  2.152E+00, res2:  2.604E+00, residm:  5.894E-05, diffor:  8.058E+00, }
+etotal    :   2.15201361E+00
+entropy   :   0.00000000E+00
+fermie    :   1.16472548E-02
+cartesian_stress_tensor:
+- [ -1.04894766E-02,   0.00000000E+00,  -1.70530084E-05, ]
+- [  0.00000000E+00,   3.57722652E-04,   0.00000000E+00, ]
+- [ -1.70530084E-05,   0.00000000E+00,  -6.13832917E-04, ]
+pressure_GPa:   1.0538E+02
+cartesian_forces:
+- [ -8.05825695E+00,   4.93425929E-16,   2.41078523E-03, ]
+- [  8.05825695E+00,  -4.93425929E-16,  -2.41078523E-03, ]
+force_length_stats: {min:   8.05825731E+00, max:   8.05825731E+00, mean:   8.05825731E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1873,7 +1250,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.6983E-05; max=  5.8942E-05
+ Mean square residual over all n,k,spin=   46.983E-06; max=  58.942E-06
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -1902,21 +1279,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.21533    0.01165
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 2, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.85029027027351E-01
+hartree             :  2.59485942244480E-01
+xc                  : -1.45500955585865E+00
+Ewald energy        :  2.91666195965568E+00
+psp_core            : -2.46005725301173E-02
+local_psp           : -1.22945651053830E+00
+non_local_psp       :  7.99903320386874E-01
+total_energy        :  2.15201361038732E+00
+total_energy_eV     :  5.85592684241939E+01
+band_energy         : -4.07357060199816E-01
+...
 
-    Kinetic energy  =  8.85029027027351E-01
-    Hartree energy  =  2.59485942244480E-01
-    XC energy       = -1.45500955585865E+00
-    Ewald energy    =  2.91666195965568E+00
-    PspCore energy  = -2.46005725301173E-02
-    Loc. psp. energy= -1.22945651053830E+00
-    NL   psp  energy=  7.99903320386875E-01
-    >>>>>>>>> Etotal=  2.15201361038732E+00
-
- Other information on the energy :
-    Total energy(eV)=  5.85592684241939E+01 ; Band energy (Ha)=  -4.0735706020E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.04894766E-02  sigma(3 2)=  0.00000000E+00
@@ -1930,7 +1307,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     125.000     125.000
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -1965,6 +1342,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  8.058E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 3, }
+comment   : Summary of ground state results
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
+lattice_lengths: [   7.00000,    8.00000,    9.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   5.0400000E+02
+convergence: {deltae:  2.150E+00, res2:  2.809E+00, residm:  2.021E-04, diffor:  8.058E+00, }
+etotal    :   2.15033546E+00
+entropy   :   0.00000000E+00
+fermie    :   1.00854687E-02
+cartesian_stress_tensor:
+- [ -1.04530096E-02,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.57689059E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -6.04840285E-04, ]
+pressure_GPa:   1.0494E+02
+cartesian_forces:
+- [ -8.05808628E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [  8.05808628E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   8.05808628E+00, max:   8.05808628E+00, mean:   8.05808628E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -1974,7 +1377,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.5194E-04; max=  2.0208E-04
+ Mean square residual over all n,k,spin=   15.194E-05; max=  20.208E-05
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -2003,21 +1406,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.21672    0.01009
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 3, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.85139212532194E-01
+hartree             :  2.61868397866899E-01
+xc                  : -1.45500341787479E+00
+Ewald energy        :  2.92194410159526E+00
+psp_core            : -2.45069599245243E-02
+local_psp           : -1.23364421689048E+00
+non_local_psp       :  7.94538338991487E-01
+total_energy        :  2.15033545629605E+00
+total_energy_eV     :  5.85136035290402E+01
+band_energy         : -4.13269831692826E-01
+...
 
-    Kinetic energy  =  8.85139212532194E-01
-    Hartree energy  =  2.61868397866899E-01
-    XC energy       = -1.45500341787479E+00
-    Ewald energy    =  2.92194410159526E+00
-    PspCore energy  = -2.45069599245243E-02
-    Loc. psp. energy= -1.23364421689048E+00
-    NL   psp  energy=  7.94538338991487E-01
-    >>>>>>>>> Etotal=  2.15033545629605E+00
-
- Other information on the energy :
-    Total energy(eV)=  5.85136035290402E+01 ; Band energy (Ha)=  -4.1326983169E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.04530096E-02  sigma(3 2)=  0.00000000E+00
@@ -2031,7 +1434,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2066,6 +1469,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  8.058E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 4, }
+comment   : Summary of ground state results
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
+lattice_lengths: [   7.00000,    8.00000,    9.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   5.0400000E+02
+convergence: {deltae:  2.150E+00, res2:  2.809E+00, residm:  2.021E-04, diffor:  8.058E+00, }
+etotal    :   2.15033546E+00
+entropy   :   0.00000000E+00
+fermie    :   1.00854687E-02
+cartesian_stress_tensor:
+- [ -1.04530096E-02,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.57689059E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -6.04840285E-04, ]
+pressure_GPa:   1.0494E+02
+cartesian_forces:
+- [ -8.05808628E+00,   4.93415478E-16,   4.93415478E-16, ]
+- [  8.05808628E+00,  -4.93415478E-16,  -4.93415478E-16, ]
+force_length_stats: {min:   8.05808628E+00, max:   8.05808628E+00, mean:   8.05808628E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2075,7 +1504,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.5194E-04; max=  2.0208E-04
+ Mean square residual over all n,k,spin=   15.194E-05; max=  20.208E-05
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -2104,21 +1533,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.21672    0.01009
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 4, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.85139212532194E-01
+hartree             :  2.61868397866899E-01
+xc                  : -1.45500341787479E+00
+Ewald energy        :  2.92194410159526E+00
+psp_core            : -2.45069599245243E-02
+local_psp           : -1.23364421689048E+00
+non_local_psp       :  7.94538338991486E-01
+total_energy        :  2.15033545629606E+00
+total_energy_eV     :  5.85136035290402E+01
+band_energy         : -4.13269831692826E-01
+...
 
-    Kinetic energy  =  8.85139212532194E-01
-    Hartree energy  =  2.61868397866899E-01
-    XC energy       = -1.45500341787479E+00
-    Ewald energy    =  2.92194410159526E+00
-    PspCore energy  = -2.45069599245243E-02
-    Loc. psp. energy= -1.23364421689048E+00
-    NL   psp  energy=  7.94538338991486E-01
-    >>>>>>>>> Etotal=  2.15033545629606E+00
-
- Other information on the energy :
-    Total energy(eV)=  5.85136035290402E+01 ; Band energy (Ha)=  -4.1326983169E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.04530096E-02  sigma(3 2)=  0.00000000E+00
@@ -2132,7 +1561,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
 
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2167,6 +1596,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     123.000     123.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  8.059E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 5, }
+comment   : Summary of ground state results
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
+lattice_lengths: [   7.00000,    7.00000,    9.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   4.4100000E+02
+convergence: {deltae:  2.092E+00, res2:  1.060E+00, residm:  8.329E-05, diffor:  8.059E+00, }
+etotal    :   2.09217946E+00
+entropy   :   0.00000000E+00
+fermie    :   2.90811858E-02
+cartesian_stress_tensor:
+- [ -1.20178749E-02,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   8.95449997E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -7.38113538E-04, ]
+pressure_GPa:   1.1632E+02
+cartesian_forces:
+- [ -8.05907750E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [  8.05907750E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   8.05907750E+00, max:   8.05907750E+00, mean:   8.05907750E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2176,7 +1631,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     123.000     123.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   7.9247E-05; max=  8.3289E-05
+ Mean square residual over all n,k,spin=   79.247E-06; max=  83.289E-06
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -2205,21 +1660,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     123.000     123.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.20966    0.02908
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 5, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.47149428024061E-01
+hartree             :  2.09006434941015E-01
+xc                  : -1.45687251287003E+00
+Ewald energy        :  2.81139727662115E+00
+psp_core            : -2.80079541994563E-02
+local_psp           : -1.03114043422213E+00
+non_local_psp       :  7.40647223580421E-01
+total_energy        :  2.09217946187503E+00
+total_energy_eV     :  5.69310984410896E+01
+band_energy         : -3.61160825437043E-01
+...
 
-    Kinetic energy  =  8.47149428024061E-01
-    Hartree energy  =  2.09006434941015E-01
-    XC energy       = -1.45687251287003E+00
-    Ewald energy    =  2.81139727662115E+00
-    PspCore energy  = -2.80079541994563E-02
-    Loc. psp. energy= -1.03114043422213E+00
-    NL   psp  energy=  7.40647223580421E-01
-    >>>>>>>>> Etotal=  2.09217946187503E+00
-
- Other information on the energy :
-    Total energy(eV)=  5.69310984410895E+01 ; Band energy (Ha)=  -3.6116082544E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.20178749E-02  sigma(3 2)=  0.00000000E+00
@@ -2233,7 +1688,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     123.000     123.000
 
 ================================================================================
 == DATASET  6 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2268,6 +1723,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     123.000     123.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  8.059E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 6, }
+comment   : Summary of ground state results
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
+lattice_lengths: [   7.00000,    7.00000,    9.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   4.4100000E+02
+convergence: {deltae:  2.092E+00, res2:  1.060E+00, residm:  8.329E-05, diffor:  8.059E+00, }
+etotal    :   2.09217946E+00
+entropy   :   0.00000000E+00
+fermie    :   2.90811858E-02
+cartesian_stress_tensor:
+- [ -1.20178749E-02,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   8.95449997E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -7.38113538E-04, ]
+pressure_GPa:   1.1632E+02
+cartesian_forces:
+- [ -8.05907750E+00,   4.93476173E-16,   4.93476173E-16, ]
+- [  8.05907750E+00,  -4.93476173E-16,  -4.93476173E-16, ]
+force_length_stats: {min:   8.05907750E+00, max:   8.05907750E+00, mean:   8.05907750E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2277,7 +1758,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     123.000     123.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   7.9247E-05; max=  8.3289E-05
+ Mean square residual over all n,k,spin=   79.247E-06; max=  83.289E-06
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -2306,21 +1787,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     123.000     123.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.20966    0.02908
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 6, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.47149428024061E-01
+hartree             :  2.09006434941015E-01
+xc                  : -1.45687251287003E+00
+Ewald energy        :  2.81139727662115E+00
+psp_core            : -2.80079541994563E-02
+local_psp           : -1.03114043422213E+00
+non_local_psp       :  7.40647223580421E-01
+total_energy        :  2.09217946187503E+00
+total_energy_eV     :  5.69310984410896E+01
+band_energy         : -3.61160825437043E-01
+...
 
-    Kinetic energy  =  8.47149428024061E-01
-    Hartree energy  =  2.09006434941015E-01
-    XC energy       = -1.45687251287003E+00
-    Ewald energy    =  2.81139727662115E+00
-    PspCore energy  = -2.80079541994563E-02
-    Loc. psp. energy= -1.03114043422213E+00
-    NL   psp  energy=  7.40647223580422E-01
-    >>>>>>>>> Etotal=  2.09217946187503E+00
-
- Other information on the energy :
-    Total energy(eV)=  5.69310984410895E+01 ; Band energy (Ha)=  -3.6116082544E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.20178749E-02  sigma(3 2)=  0.00000000E+00
@@ -2334,7 +1815,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     123.000     123.000
 
 ================================================================================
 == DATASET  7 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2376,6 +1857,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  6.277E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 7, }
+comment   : Summary of ground state results
+rprimd    :
+- [  5.4607306,   0.0000000,   4.3795457, ]
+- [ -2.7303653,   4.7291315,   4.3795457, ]
+- [ -2.7303653,  -4.7291315,   4.3795457, ]
+lattice_lengths: [   7.00000,    7.00000,    7.00000, ]
+lattice_angles: [ 85.000,  85.000,  85.000, ]
+lattice_volume:   3.3929891E+02
+convergence: {deltae:  2.243E+00, res2:  1.392E+00, residm:  7.765E-04, diffor:  6.277E+00, }
+etotal    :   2.24295035E+00
+entropy   :   0.00000000E+00
+fermie    :   1.87053117E-01
+cartesian_stress_tensor:
+- [ -9.98371710E-03,   0.00000000E+00,  -7.60467674E-03, ]
+- [  0.00000000E+00,  -4.00375076E-04,   0.00000000E+00, ]
+- [ -7.60467674E-03,   0.00000000E+00,  -6.66561557E-03, ]
+pressure_GPa:   1.6721E+02
+cartesian_forces:
+- [ -6.27727199E+00,  -1.33066194E-16,  -5.05224785E+00, ]
+- [  6.27727199E+00,   1.33066194E-16,   5.05224785E+00, ]
+force_length_stats: {min:   8.05787516E+00, max:   8.05787516E+00, mean:   8.05787516E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2385,7 +1892,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.9187E-04; max=  7.7647E-04
+ Mean square residual over all n,k,spin=   39.187E-05; max=  77.647E-05
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -2414,21 +1921,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.15797    0.18705
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 7, }
+comment             : Components of total free energy in Hartree
+kinetic             :  1.08939592858304E+00
+hartree             :  1.46450766533564E-01
+xc                  : -1.51263094236869E+00
+Ewald energy        :  2.46834910350547E+00
+psp_core            : -3.64030284401909E-02
+local_psp           : -7.97578956606449E-01
+non_local_psp       :  8.85367476965397E-01
+total_energy        :  2.24295034817214E+00
+total_energy_eV     :  6.10337829030327E+01
+band_energy         :  5.81591071472011E-02
+...
 
-    Kinetic energy  =  1.08939592858304E+00
-    Hartree energy  =  1.46450766533564E-01
-    XC energy       = -1.51263094236869E+00
-    Ewald energy    =  2.46834910350547E+00
-    PspCore energy  = -3.64030284401909E-02
-    Loc. psp. energy= -7.97578956606449E-01
-    NL   psp  energy=  8.85367476965396E-01
-    >>>>>>>>> Etotal=  2.24295034817214E+00
-
- Other information on the energy :
-    Total energy(eV)=  6.10337829030327E+01 ; Band energy (Ha)=   5.8159107147E-02
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -9.98371710E-03  sigma(3 2)=  0.00000000E+00
@@ -2442,7 +1949,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
 
 ================================================================================
 == DATASET  8 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2477,6 +1984,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      97.000      97.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  8.061E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 8, }
+comment   : Summary of ground state results
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [ -3.5000000,   6.0621778,   0.0000000, ]
+- [  0.0000000,   0.0000000,   9.0000000, ]
+lattice_lengths: [   7.00000,    7.00000,    9.00000, ]
+lattice_angles: [ 90.000,  90.000, 120.000, ]
+lattice_volume:   3.8191720E+02
+convergence: {deltae:  2.030E+00, res2:  4.558E-01, residm:  1.467E-05, diffor:  8.061E+00, }
+etotal    :   2.02977073E+00
+entropy   :   0.00000000E+00
+fermie    :   4.98507520E-02
+cartesian_stress_tensor:
+- [ -1.35254754E-02,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.35438466E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -9.11541317E-04, ]
+pressure_GPa:   1.2830E+02
+cartesian_forces:
+- [ -8.06109515E+00,   2.25217747E-15,   4.93599719E-16, ]
+- [  8.06109515E+00,  -2.25217747E-15,  -4.93599719E-16, ]
+force_length_stats: {min:   8.06109515E+00, max:   8.06109515E+00, mean:   8.06109515E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2486,7 +2019,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      97.000      97.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.3248E-05; max=  1.4670E-05
+ Mean square residual over all n,k,spin=   13.248E-06; max=  14.670E-06
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -2515,21 +2048,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      97.000      97.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.20056    0.04985
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 8, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.87417634920754E-01
+hartree             :  1.81737485560167E-01
+xc                  : -1.46400535091601E+00
+Ewald energy        :  2.69269015959492E+00
+psp_core            : -3.23407997930136E-02
+local_psp           : -8.30693215840922E-01
+non_local_psp       :  6.94964820621671E-01
+total_energy        :  2.02977073414756E+00
+total_energy_eV     :  5.52328705946834E+01
+band_energy         : -3.01416330678278E-01
+...
 
-    Kinetic energy  =  7.87417634920754E-01
-    Hartree energy  =  1.81737485560167E-01
-    XC energy       = -1.46400535091601E+00
-    Ewald energy    =  2.69269015959492E+00
-    PspCore energy  = -3.23407997930136E-02
-    Loc. psp. energy= -8.30693215840922E-01
-    NL   psp  energy=  6.94964820621671E-01
-    >>>>>>>>> Etotal=  2.02977073414756E+00
-
- Other information on the energy :
-    Total energy(eV)=  5.52328705946834E+01 ; Band energy (Ha)=  -3.0141633068E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.35254754E-02  sigma(3 2)=  0.00000000E+00
@@ -2543,7 +2076,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      97.000      97.000
 
 ================================================================================
 == DATASET  9 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2578,6 +2111,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  8.063E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 9, }
+comment   : Summary of ground state results
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   7.0000000, ]
+lattice_lengths: [   7.00000,    7.00000,    7.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.4300000E+02
+convergence: {deltae:  2.239E+00, res2:  1.424E+00, residm:  3.393E-04, diffor:  8.063E+00, }
+etotal    :   2.23949971E+00
+entropy   :   0.00000000E+00
+fermie    :   1.83581991E-01
+cartesian_stress_tensor:
+- [ -1.55965773E-02,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -5.23969985E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -5.23969985E-04, ]
+pressure_GPa:   1.6323E+02
+cartesian_forces:
+- [ -8.06292348E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [  8.06292348E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   8.06292348E+00, max:   8.06292348E+00, mean:   8.06292348E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2587,7 +2146,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.7319E-04; max=  3.3930E-04
+ Mean square residual over all n,k,spin=   17.319E-05; max=  33.930E-05
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -2616,21 +2175,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.16021    0.18358
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 9, }
+comment             : Components of total free energy in Hartree
+kinetic             :  1.09472700545367E+00
+hartree             :  1.34425319027958E-01
+xc                  : -1.49707914151046E+00
+Ewald energy        :  2.48380595471828E+00
+psp_core            : -3.60102268278724E-02
+local_psp           : -7.88850574364868E-01
+non_local_psp       :  8.48481374125148E-01
+total_energy        :  2.23949971062186E+00
+total_energy_eV     :  6.09398862800903E+01
+band_energy         :  4.67493651798908E-02
+...
 
-    Kinetic energy  =  1.09472700545367E+00
-    Hartree energy  =  1.34425319027958E-01
-    XC energy       = -1.49707914151046E+00
-    Ewald energy    =  2.48380595471828E+00
-    PspCore energy  = -3.60102268278724E-02
-    Loc. psp. energy= -7.88850574364867E-01
-    NL   psp  energy=  8.48481374125147E-01
-    >>>>>>>>> Etotal=  2.23949971062186E+00
-
- Other information on the energy :
-    Total energy(eV)=  6.09398862800903E+01 ; Band energy (Ha)=   4.6749365180E-02
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.55965773E-02  sigma(3 2)=  0.00000000E+00
@@ -2644,7 +2203,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
 
 ================================================================================
 == DATASET 10 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2679,6 +2238,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  8.063E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 10, }
+comment   : Summary of ground state results
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   7.0000000, ]
+lattice_lengths: [   7.00000,    7.00000,    7.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.4300000E+02
+convergence: {deltae:  2.239E+00, res2:  1.424E+00, residm:  3.393E-04, diffor:  8.063E+00, }
+etotal    :   2.23949971E+00
+entropy   :   0.00000000E+00
+fermie    :   1.83581991E-01
+cartesian_stress_tensor:
+- [ -1.55965773E-02,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -5.23969985E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -5.23969985E-04, ]
+pressure_GPa:   1.6323E+02
+cartesian_forces:
+- [ -8.06292348E+00,   4.93711672E-16,   4.93711672E-16, ]
+- [  8.06292348E+00,  -4.93711672E-16,  -4.93711672E-16, ]
+force_length_stats: {min:   8.06292348E+00, max:   8.06292348E+00, mean:   8.06292348E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2688,7 +2273,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.7319E-04; max=  3.3930E-04
+ Mean square residual over all n,k,spin=   17.319E-05; max=  33.930E-05
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -2717,21 +2302,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.16021    0.18358
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 10, }
+comment             : Components of total free energy in Hartree
+kinetic             :  1.09472700545367E+00
+hartree             :  1.34425319027958E-01
+xc                  : -1.49707914151046E+00
+Ewald energy        :  2.48380595471828E+00
+psp_core            : -3.60102268278724E-02
+local_psp           : -7.88850574364866E-01
+non_local_psp       :  8.48481374125146E-01
+total_energy        :  2.23949971062186E+00
+total_energy_eV     :  6.09398862800903E+01
+band_energy         :  4.67493651798907E-02
+...
 
-    Kinetic energy  =  1.09472700545368E+00
-    Hartree energy  =  1.34425319027958E-01
-    XC energy       = -1.49707914151046E+00
-    Ewald energy    =  2.48380595471828E+00
-    PspCore energy  = -3.60102268278724E-02
-    Loc. psp. energy= -7.88850574364866E-01
-    NL   psp  energy=  8.48481374125146E-01
-    >>>>>>>>> Etotal=  2.23949971062186E+00
-
- Other information on the energy :
-    Total energy(eV)=  6.09398862800903E+01 ; Band energy (Ha)=   4.6749365180E-02
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.55965773E-02  sigma(3 2)=  0.00000000E+00
@@ -2745,7 +2330,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.000      81.000
 
 ================================================================================
 == DATASET 11 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2787,6 +2372,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.000     103.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  8.062E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 11, }
+comment   : Summary of ground state results
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [ -0.6100902,   6.9733629,   0.0000000, ]
+- [  1.5628336,   1.7055336,   8.6976265, ]
+lattice_lengths: [   7.00000,    7.00000,    9.00000, ]
+lattice_angles: [ 80.000,  80.000,  95.000, ]
+lattice_volume:   4.2456194E+02
+convergence: {deltae:  2.104E+00, res2:  9.606E-01, residm:  3.115E-05, diffor:  8.062E+00, }
+etotal    :   2.10437958E+00
+entropy   :   0.00000000E+00
+fermie    :   4.50438432E-02
+cartesian_stress_tensor:
+- [ -1.24819394E-02,  -2.87478329E-05,  -2.22401797E-05, ]
+- [ -2.87478329E-05,   9.12066835E-04,  -2.85063034E-05, ]
+- [ -2.22401797E-05,  -2.85063034E-05,  -7.76194777E-04, ]
+pressure_GPa:   1.2108E+02
+cartesian_forces:
+- [ -8.06155835E+00,   7.13842432E-04,  -5.58203840E-04, ]
+- [  8.06155835E+00,  -7.13842432E-04,   5.58203840E-04, ]
+force_length_stats: {min:   8.06155840E+00, max:   8.06155840E+00, mean:   8.06155840E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2796,7 +2407,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.000     103.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.1817E-05; max=  3.1153E-05
+ Mean square residual over all n,k,spin=   21.817E-06; max=  31.153E-06
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -2825,21 +2436,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.000     103.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.19819    0.04504
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 11, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.51545015720641E-01
+hartree             :  1.85125022354586E-01
+xc                  : -1.45938538006641E+00
+Ewald energy        :  2.75311714317994E+00
+psp_core            : -2.90923576705364E-02
+local_psp           : -9.58384258738035E-01
+non_local_psp       :  7.61454398353124E-01
+total_energy        :  2.10437958313330E+00
+total_energy_eV     :  5.72630806237871E+01
+band_energy         : -3.06287936242099E-01
+...
 
-    Kinetic energy  =  8.51545015720641E-01
-    Hartree energy  =  1.85125022354586E-01
-    XC energy       = -1.45938538006641E+00
-    Ewald energy    =  2.75311714317994E+00
-    PspCore energy  = -2.90923576705364E-02
-    Loc. psp. energy= -9.58384258738035E-01
-    NL   psp  energy=  7.61454398353124E-01
-    >>>>>>>>> Etotal=  2.10437958313330E+00
-
- Other information on the energy :
-    Total energy(eV)=  5.72630806237871E+01 ; Band energy (Ha)=  -3.0628793624E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.24819394E-02  sigma(3 2)= -2.85063034E-05
@@ -2853,7 +2464,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.000     103.000
 
 ================================================================================
 == DATASET 12 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2888,6 +2499,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  8.057E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 12, }
+comment   : Summary of ground state results
+rprimd    :
+- [  7.0000000,   0.0000000,   0.0000000, ]
+- [  3.5000000,   8.0000000,   0.0000000, ]
+- [  1.0000000,   0.0000000,   9.0000000, ]
+lattice_lengths: [   7.00000,    8.73212,    9.05539, ]
+lattice_angles: [ 87.463,  83.660,  66.371, ]
+lattice_volume:   5.0400000E+02
+convergence: {deltae:  2.152E+00, res2:  3.534E+00, residm:  6.697E-05, diffor:  8.057E+00, }
+etotal    :   2.15174148E+00
+entropy   :   0.00000000E+00
+fermie    :   1.12520382E-02
+cartesian_stress_tensor:
+- [ -1.04047251E-02,   0.00000000E+00,  -1.13511348E-05, ]
+- [  0.00000000E+00,   3.04685151E-04,   0.00000000E+00, ]
+- [ -1.13511348E-05,   0.00000000E+00,  -5.97970569E-04, ]
+pressure_GPa:   1.0492E+02
+cartesian_forces:
+- [ -8.05737204E+00,   6.66133815E-16,  -1.06220210E-03, ]
+- [  8.05737204E+00,  -6.66133815E-16,   1.06220210E-03, ]
+force_length_stats: {min:   8.05737211E+00, max:   8.05737211E+00, mean:   8.05737211E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -2897,7 +2534,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   5.3392E-05; max=  6.6968E-05
+ Mean square residual over all n,k,spin=   53.392E-06; max=  66.968E-06
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -2915,8 +2552,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
  frms,max,avg= 4.6519260E+00 8.0573720E+00   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1   -414.32669413082220     0.00000000000003    -0.05462062338818
-    2    414.32669413082220    -0.00000000000003     0.05462062338818
+    1   -414.32669413082220     0.00000000000003    -0.05462062338819
+    2    414.32669413082220    -0.00000000000003     0.05462062338819
  frms,max,avg= 2.3921163E+02 4.1432669E+02   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  1.000000000000  1.000000000000  1.000000000000 bohr
               =  0.529177208590  0.529177208590  0.529177208590 angstroms
@@ -2926,21 +2563,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.21503    0.01125
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 12, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.84182251695969E-01
+hartree             :  2.59504217883857E-01
+xc                  : -1.45377948858307E+00
+Ewald energy        :  2.91552692676816E+00
+psp_core            : -2.45069599245243E-02
+local_psp           : -1.22737223615847E+00
+non_local_psp       :  7.98186764182369E-01
+total_energy        :  2.15174147586428E+00
+total_energy_eV     :  5.85518632672259E+01
+band_energy         : -4.07550603684376E-01
+...
 
-    Kinetic energy  =  8.84182251695969E-01
-    Hartree energy  =  2.59504217883857E-01
-    XC energy       = -1.45377948858307E+00
-    Ewald energy    =  2.91552692676816E+00
-    PspCore energy  = -2.45069599245243E-02
-    Loc. psp. energy= -1.22737223615847E+00
-    NL   psp  energy=  7.98186764182369E-01
-    >>>>>>>>> Etotal=  2.15174147586428E+00
-
- Other information on the energy :
-    Total energy(eV)=  5.85518632672259E+01 ; Band energy (Ha)=  -4.0755060368E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.04047251E-02  sigma(3 2)=  0.00000000E+00
@@ -2954,7 +2591,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     127.000     127.000
 
 ================================================================================
 == DATASET 13 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -2996,6 +2633,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.000      59.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  1.057E+01 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 13, }
+comment   : Summary of ground state results
+rprimd    :
+- [  3.5000000,   4.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  1.0000000,   0.0000000,   9.0000000, ]
+lattice_lengths: [   5.31507,    8.00000,    9.05539, ]
+lattice_angles: [ 90.000,  85.830,  41.186, ]
+lattice_volume:   2.5200000E+02
+convergence: {deltae:  3.653E+00, res2:  1.020E+01, residm:  2.812E-04, diffor:  1.057E+01, }
+etotal    :   3.65349035E+00
+entropy   :   0.00000000E+00
+fermie    :   7.65745586E-02
+cartesian_stress_tensor:
+- [ -1.07478016E-02,  -1.48891157E-02,  -1.18858829E-05, ]
+- [ -1.48891157E-02,  -1.49184234E-02,   5.29908112E-06, ]
+- [ -1.18858829E-05,   5.29908112E-06,  -1.93082268E-03, ]
+pressure_GPa:   2.7064E+02
+cartesian_forces:
+- [ -9.24853856E+00,  -1.05698918E+01,   2.65466439E-04, ]
+- [  9.24853856E+00,   1.05698918E+01,  -2.65466439E-04, ]
+force_length_stats: {min:   1.40448595E+01, max:   1.40448595E+01, mean:   1.40448595E+01, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3005,7 +2668,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.000      59.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.6163E-04; max=  2.8123E-04
+ Mean square residual over all n,k,spin=   26.163E-05; max=  28.123E-05
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -3034,21 +2697,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.000      59.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.22877    0.07657
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 13, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.58902243664968E-01
+hartree             :  3.43116690396311E-01
+xc                  : -1.60935389591313E+00
+Ewald energy        :  4.33576681471510E+00
+psp_core            : -4.90139198490485E-02
+local_psp           : -9.65933235576944E-01
+non_local_psp       :  7.40005652750432E-01
+total_energy        :  3.65349035018770E+00
+total_energy_eV     :  9.94165283477632E+01
+band_energy         : -3.04395477230168E-01
+...
 
-    Kinetic energy  =  8.58902243664968E-01
-    Hartree energy  =  3.43116690396311E-01
-    XC energy       = -1.60935389591313E+00
-    Ewald energy    =  4.33576681471510E+00
-    PspCore energy  = -4.90139198490485E-02
-    Loc. psp. energy= -9.65933235576944E-01
-    NL   psp  energy=  7.40005652750432E-01
-    >>>>>>>>> Etotal=  3.65349035018770E+00
-
- Other information on the energy :
-    Total energy(eV)=  9.94165283477632E+01 ; Band energy (Ha)=  -3.0439547723E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.07478016E-02  sigma(3 2)=  5.29908112E-06
@@ -3062,7 +2725,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.000      59.000
 
 ================================================================================
 == DATASET 14 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3097,6 +2760,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.000      59.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  1.057E+01 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 14, }
+comment   : Summary of ground state results
+rprimd    :
+- [  3.5000000,   4.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  1.0000000,  16.0000000,   9.0000000, ]
+lattice_lengths: [   5.31507,    8.00000,   18.38478, ]
+lattice_angles: [ 29.508,  46.309,  41.186, ]
+lattice_volume:   2.5200000E+02
+convergence: {deltae:  3.656E+00, res2:  2.104E+01, residm:  4.975E-04, diffor:  1.057E+01, }
+etotal    :   3.65587689E+00
+entropy   :   0.00000000E+00
+fermie    :   7.65646730E-02
+cartesian_stress_tensor:
+- [ -1.07144405E-02,  -1.48780423E-02,  -1.22029904E-05, ]
+- [ -1.48780423E-02,  -1.48894602E-02,   2.77823359E-06, ]
+- [ -1.22029904E-05,   2.77823359E-06,  -2.08515206E-03, ]
+pressure_GPa:   2.7155E+02
+cartesian_forces:
+- [ -9.24803268E+00,  -1.05693621E+01,   1.82869660E-04, ]
+- [  9.24803268E+00,   1.05693621E+01,  -1.82869660E-04, ]
+force_length_stats: {min:   1.40441278E+01, max:   1.40441278E+01, mean:   1.40441278E+01, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3106,7 +2795,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.000      59.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   3.5895E-04; max=  4.9746E-04
+ Mean square residual over all n,k,spin=   35.895E-05; max=  49.746E-05
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -3135,21 +2824,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.000      59.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.22875    0.07656
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 14, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.66666458226611E-01
+hartree             :  3.51879306013153E-01
+xc                  : -1.61161074718322E+00
+Ewald energy        :  4.33576681471510E+00
+psp_core            : -4.90139198490485E-02
+local_psp           : -9.84280880848547E-01
+non_local_psp       :  7.46469855405613E-01
+total_energy        :  3.65587688647966E+00
+total_energy_eV     :  9.94814693028997E+01
+band_energy         : -3.04361504237218E-01
+...
 
-    Kinetic energy  =  8.66666458226611E-01
-    Hartree energy  =  3.51879306013153E-01
-    XC energy       = -1.61161074718322E+00
-    Ewald energy    =  4.33576681471510E+00
-    PspCore energy  = -4.90139198490485E-02
-    Loc. psp. energy= -9.84280880848547E-01
-    NL   psp  energy=  7.46469855405612E-01
-    >>>>>>>>> Etotal=  3.65587688647966E+00
-
- Other information on the energy :
-    Total energy(eV)=  9.94814693028997E+01 ; Band energy (Ha)=  -3.0436150424E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.07144405E-02  sigma(3 2)=  2.77823359E-06
@@ -3163,7 +2852,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      59.000      59.000
 
 ================================================================================
 == DATASET 15 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3205,6 +2894,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.000     103.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  4.769E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 15, }
+comment   : Summary of ground state results
+rprimd    :
+- [  9.0000000,   0.0000000,   0.0000000, ]
+- [  1.2155372,   6.8936543,   0.0000000, ]
+- [  1.2155372,  -0.8338338,   6.8430396, ]
+lattice_lengths: [   9.00000,    7.00000,    7.00000, ]
+lattice_angles: [ 95.000,  80.000,  80.000, ]
+lattice_volume:   4.2456194E+02
+convergence: {deltae:  8.782E-01, res2:  6.123E-01, residm:  4.530E-04, diffor:  4.769E+00, }
+etotal    :   8.78220563E-01
+entropy   :   0.00000000E+00
+fermie    :   6.38327011E-02
+cartesian_stress_tensor:
+- [ -1.09710884E-02,   2.45145038E-04,   2.76829521E-04, ]
+- [  2.45145038E-04,   9.42244925E-04,  -6.72140617E-05, ]
+- [  2.76829521E-04,  -6.72140617E-05,   9.25864672E-04, ]
+pressure_GPa:   8.9273E+01
+cartesian_forces:
+- [ -4.76886987E+00,  -1.71735407E-02,  -1.93931850E-02, ]
+- [  4.76886987E+00,   1.71735407E-02,   1.93931850E-02, ]
+force_length_stats: {min:   4.76894022E+00, max:   4.76894022E+00, mean:   4.76894022E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3214,7 +2929,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.000     103.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.5150E-04; max=  4.5296E-04
+ Mean square residual over all n,k,spin=   25.150E-05; max=  45.296E-05
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -3243,21 +2958,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.000     103.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.19447    0.06383
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 15, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.12449379154126E-01
+hartree             :  1.62423597295718E-01
+xc                  : -1.44058991075101E+00
+Ewald energy        :  1.47671652797340E+00
+psp_core            : -2.90923576705364E-02
+local_psp           : -8.71267451046781E-01
+non_local_psp       :  7.67580778259307E-01
+total_energy        :  8.78220563214227E-01
+total_energy_eV     :  2.38975968593677E+01
+band_energy         : -2.61275936845308E-01
+...
 
-    Kinetic energy  =  8.12449379154126E-01
-    Hartree energy  =  1.62423597295718E-01
-    XC energy       = -1.44058991075101E+00
-    Ewald energy    =  1.47671652797340E+00
-    PspCore energy  = -2.90923576705364E-02
-    Loc. psp. energy= -8.71267451046781E-01
-    NL   psp  energy=  7.67580778259307E-01
-    >>>>>>>>> Etotal=  8.78220563214227E-01
-
- Other information on the energy :
-    Total energy(eV)=  2.38975968593677E+01 ; Band energy (Ha)=  -2.6127593685E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.09710884E-02  sigma(3 2)= -6.72140617E-05
@@ -3271,7 +2986,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     103.000     103.000
 
 ================================================================================
 == DATASET 16 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3306,6 +3021,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  1.269E+01 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 16, }
+comment   : Summary of ground state results
+rprimd    :
+- [  4.0000000,   3.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [   5.00000,    6.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  53.130, ]
+lattice_volume:   1.9200000E+02
+convergence: {deltae:  4.117E+00, res2:  7.771E+00, residm:  1.388E-06, diffor:  1.269E+01, }
+etotal    :   4.11657431E+00
+entropy   :   0.00000000E+00
+fermie    :   1.74247984E-01
+cartesian_stress_tensor:
+- [ -2.46207259E-02,  -2.01174934E-02,   0.00000000E+00, ]
+- [ -2.01174934E-02,  -1.21624963E-02,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -3.98067308E-03, ]
+pressure_GPa:   3.9977E+02
+cartesian_forces:
+- [ -1.26930452E+01,  -9.52673661E+00,  -0.00000000E+00, ]
+- [  1.26930452E+01,   9.52673661E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   1.58704791E+01, max:   1.58704791E+01, mean:   1.58704791E+01, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3315,7 +3056,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.0069E-06; max=  1.3883E-06
+ Mean square residual over all n,k,spin=   10.069E-07; max=  13.883E-07
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -3344,21 +3085,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.17950    0.17425
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 16, }
+comment             : Components of total free energy in Hartree
+kinetic             :  9.92557873736792E-01
+hartree             :  2.95387044872757E-01
+xc                  : -1.69766725147089E+00
+Ewald energy        :  4.42682594564616E+00
+psp_core            : -6.43307698018762E-02
+local_psp           : -6.66145476324504E-01
+non_local_psp       :  8.29946944095974E-01
+total_energy        :  4.11657431075441E+00
+total_energy_eV     :  1.12017683758153E+02
+band_energy         : -1.05082019704380E-02
+...
 
-    Kinetic energy  =  9.92557873736791E-01
-    Hartree energy  =  2.95387044872757E-01
-    XC energy       = -1.69766725147089E+00
-    Ewald energy    =  4.42682594564616E+00
-    PspCore energy  = -6.43307698018762E-02
-    Loc. psp. energy= -6.66145476324503E-01
-    NL   psp  energy=  8.29946944095974E-01
-    >>>>>>>>> Etotal=  4.11657431075441E+00
-
- Other information on the energy :
-    Total energy(eV)=  1.12017683758153E+02 ; Band energy (Ha)=  -1.0508201970E-02
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.46207259E-02  sigma(3 2)=  0.00000000E+00
@@ -3372,7 +3113,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
 
 ================================================================================
 == DATASET 17 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3407,6 +3148,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  1.269E+01 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 17, }
+comment   : Summary of ground state results
+rprimd    :
+- [  4.0000000,  -3.0000000,   0.0000000, ]
+- [  4.0000000,   3.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [   5.00000,    5.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  73.740, ]
+lattice_volume:   1.9200000E+02
+convergence: {deltae:  4.117E+00, res2:  4.972E+00, residm:  1.424E-06, diffor:  1.269E+01, }
+etotal    :   4.11655504E+00
+entropy   :   0.00000000E+00
+fermie    :   1.74247944E-01
+cartesian_stress_tensor:
+- [ -2.46214858E-02,   2.01174199E-02,   0.00000000E+00, ]
+- [  2.01174199E-02,  -1.21633948E-02,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -3.98001340E-03, ]
+pressure_GPa:   3.9978E+02
+cartesian_forces:
+- [ -1.26930220E+01,   9.52670686E+00,  -0.00000000E+00, ]
+- [  1.26930220E+01,  -9.52670686E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   1.58704427E+01, max:   1.58704427E+01, mean:   1.58704427E+01, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3416,7 +3183,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.1594E-06; max=  1.4242E-06
+ Mean square residual over all n,k,spin=   11.594E-07; max=  14.242E-07
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -3445,21 +3212,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.17950    0.17425
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 17, }
+comment             : Components of total free energy in Hartree
+kinetic             :  9.92424929061595E-01
+hartree             :  2.95342096608396E-01
+xc                  : -1.69766170886985E+00
+Ewald energy        :  4.42682594564617E+00
+psp_core            : -6.43307698018762E-02
+local_psp           : -6.66176947374839E-01
+non_local_psp       :  8.30131489785086E-01
+total_energy        :  4.11655503505467E+00
+total_energy_eV     :  1.12017159239689E+02
+band_energy         : -1.05082826944984E-02
+...
 
-    Kinetic energy  =  9.92424929061595E-01
-    Hartree energy  =  2.95342096608396E-01
-    XC energy       = -1.69766170886985E+00
-    Ewald energy    =  4.42682594564617E+00
-    PspCore energy  = -6.43307698018762E-02
-    Loc. psp. energy= -6.66176947374839E-01
-    NL   psp  energy=  8.30131489785086E-01
-    >>>>>>>>> Etotal=  4.11655503505467E+00
-
- Other information on the energy :
-    Total energy(eV)=  1.12017159239689E+02 ; Band energy (Ha)=  -1.0508282694E-02
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.46214858E-02  sigma(3 2)=  0.00000000E+00
@@ -3473,7 +3240,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
 
 ================================================================================
 == DATASET 18 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3515,6 +3282,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  1.269E+01 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 18, }
+comment   : Summary of ground state results
+rprimd    :
+- [  4.0000000,  -3.0000000,   0.0000000, ]
+- [  4.0000000,   3.0000000,   0.0000000, ]
+- [ -8.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [   5.00000,    5.00000,   11.31371, ]
+lattice_angles: [124.450, 124.450,  73.740, ]
+lattice_volume:   1.9200000E+02
+convergence: {deltae:  4.117E+00, res2:  1.036E+01, residm:  2.867E-06, diffor:  1.269E+01, }
+etotal    :   4.11657133E+00
+entropy   :   0.00000000E+00
+fermie    :   1.74247913E-01
+cartesian_stress_tensor:
+- [ -2.46212931E-02,   2.01170998E-02,   0.00000000E+00, ]
+- [  2.01170998E-02,  -1.21633778E-02,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -3.98132798E-03, ]
+pressure_GPa:   3.9979E+02
+cartesian_forces:
+- [ -1.26930399E+01,   9.52672224E+00,  -1.77635684E-15, ]
+- [  1.26930399E+01,  -9.52672224E+00,   1.77635684E-15, ]
+force_length_stats: {min:   1.58704663E+01, max:   1.58704663E+01, mean:   1.58704663E+01, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3524,7 +3317,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.6523E-06; max=  2.8669E-06
+ Mean square residual over all n,k,spin=   16.523E-07; max=  28.669E-07
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -3553,21 +3346,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.17950    0.17425
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 18, }
+comment             : Components of total free energy in Hartree
+kinetic             :  9.92534342034802E-01
+hartree             :  2.95404370755911E-01
+xc                  : -1.69768903327372E+00
+Ewald energy        :  4.42682594564612E+00
+psp_core            : -6.43307698018762E-02
+local_psp           : -6.66256230846569E-01
+non_local_psp       :  8.30082710143212E-01
+total_energy        :  4.11657133465788E+00
+total_energy_eV     :  1.12017602774448E+02
+band_energy         : -1.05082608360824E-02
+...
 
-    Kinetic energy  =  9.92534342034803E-01
-    Hartree energy  =  2.95404370755912E-01
-    XC energy       = -1.69768903327372E+00
-    Ewald energy    =  4.42682594564612E+00
-    PspCore energy  = -6.43307698018762E-02
-    Loc. psp. energy= -6.66256230846569E-01
-    NL   psp  energy=  8.30082710143212E-01
-    >>>>>>>>> Etotal=  4.11657133465788E+00
-
- Other information on the energy :
-    Total energy(eV)=  1.12017602774448E+02 ; Band energy (Ha)=  -1.0508260836E-02
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -2.46212931E-02  sigma(3 2)=  0.00000000E+00
@@ -3581,7 +3374,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      43.000      43.000
 
 ================================================================================
 == DATASET 19 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3623,6 +3416,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      17.000      17.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  1.014E+01 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 19, }
+comment   : Summary of ground state results
+rprimd    :
+- [ -2.0000000,   3.0000000,   4.0000000, ]
+- [  2.0000000,  -3.0000000,   4.0000000, ]
+- [  2.0000000,   3.0000000,  -4.0000000, ]
+lattice_lengths: [   5.38516,    5.38516,    5.38516, ]
+lattice_angles: [136.397, 112.291,  84.062, ]
+lattice_volume:   9.6000000E+01
+convergence: {deltae:  3.947E+00, res2:  3.280E+00, residm:  8.094E-04, diffor:  1.014E+01, }
+etotal    :   3.94682968E+00
+entropy   :   0.00000000E+00
+fermie    :   7.27179096E-01
+cartesian_stress_tensor:
+- [ -1.25877862E-02,   1.58486890E-02,   2.11699292E-02, ]
+- [  1.58486890E-02,  -2.98254321E-02,  -2.99915366E-02, ]
+- [  2.11699292E-02,  -2.99915366E-02,  -3.56839914E-02, ]
+pressure_GPa:   7.6590E+02
+cartesian_forces:
+- [  5.02616209E+00,  -7.58357199E+00,  -1.01365203E+01, ]
+- [ -5.02616209E+00,   7.58357199E+00,   1.01365203E+01, ]
+force_length_stats: {min:   1.36206429E+01, max:   1.36206429E+01, mean:   1.36206429E+01, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3632,7 +3451,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      17.000      17.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.0943E-04; max=  8.0941E-04
+ Mean square residual over all n,k,spin=   40.943E-05; max=  80.941E-05
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -3661,21 +3480,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      17.000      17.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
    0.11122    0.72718
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 19, }
+comment             : Components of total free energy in Hartree
+kinetic             :  1.91349869334108E+00
+hartree             :  1.23609493567807E-01
+xc                  : -1.93657679262773E+00
+Ewald energy        :  2.52741040992594E+00
+psp_core            : -1.28661539603752E-01
+local_psp           :  9.80444710012754E-01
+non_local_psp       :  4.67104702239937E-01
+total_energy        :  3.94682967685604E+00
+total_energy_eV     :  1.07398697366969E+02
+band_energy         :  1.67679749011978E+00
+...
 
-    Kinetic energy  =  1.91349869334108E+00
-    Hartree energy  =  1.23609493567806E-01
-    XC energy       = -1.93657679262773E+00
-    Ewald energy    =  2.52741040992594E+00
-    PspCore energy  = -1.28661539603752E-01
-    Loc. psp. energy=  9.80444710012753E-01
-    NL   psp  energy=  4.67104702239939E-01
-    >>>>>>>>> Etotal=  3.94682967685604E+00
-
- Other information on the energy :
-    Total energy(eV)=  1.07398697366969E+02 ; Band energy (Ha)=   1.6767974901E+00
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.25877862E-02  sigma(3 2)= -2.99915366E-02
@@ -3689,7 +3508,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      17.000      17.000
 
 ================================================================================
 == DATASET 20 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3724,6 +3543,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      13.000      13.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  1.235E+01 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 20, }
+comment   : Summary of ground state results
+rprimd    :
+- [  0.0000000,   3.0000000,   4.0000000, ]
+- [  2.0000000,   0.0000000,   4.0000000, ]
+- [  2.0000000,   3.0000000,   0.0000000, ]
+lattice_lengths: [   5.00000,    4.47214,    3.60555, ]
+lattice_angles: [ 75.637,  60.051,  44.312, ]
+lattice_volume:   4.8000000E+01
+convergence: {deltae:  4.756E+00, res2:  1.888E+00, residm:  4.795E-05, diffor:  1.235E+01, }
+etotal    :   4.75628884E+00
+entropy   :   0.00000000E+00
+fermie    :   1.18447485E+00
+cartesian_stress_tensor:
+- [ -8.34651168E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -7.83853976E-02,  -7.76235600E-02, ]
+- [  0.00000000E+00,  -7.76235600E-02,  -1.40023209E-01, ]
+pressure_GPa:   2.2238E+03
+cartesian_forces:
+- [  3.55271368E-15,  -9.22987487E+00,  -1.23517648E+01, ]
+- [ -3.55271368E-15,   9.22987487E+00,   1.23517648E+01, ]
+force_length_stats: {min:   1.54193607E+01, max:   1.54193607E+01, mean:   1.54193607E+01, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3733,7 +3578,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      13.000      13.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.4226E-05; max=  4.7949E-05
+ Mean square residual over all n,k,spin=   24.226E-06; max=  47.949E-06
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -3762,21 +3607,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      13.000      13.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
    0.49439    1.18447
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 20, }
+comment             : Components of total free energy in Hartree
+kinetic             :  3.35178855766490E+00
+hartree             :  1.22256766044378E-01
+xc                  : -2.36471651043234E+00
+Ewald energy        :  1.77368345443471E+00
+psp_core            : -2.57323079207505E-01
+local_psp           :  1.21915787548510E+00
+non_local_psp       :  9.11441779665965E-01
+total_energy        :  4.75628884365521E+00
+total_energy_eV     :  1.29425201473738E+02
+band_energy         :  3.35772000031969E+00
+...
 
-    Kinetic energy  =  3.35178855766490E+00
-    Hartree energy  =  1.22256766044378E-01
-    XC energy       = -2.36471651043234E+00
-    Ewald energy    =  1.77368345443471E+00
-    PspCore energy  = -2.57323079207505E-01
-    Loc. psp. energy=  1.21915787548510E+00
-    NL   psp  energy=  9.11441779665965E-01
-    >>>>>>>>> Etotal=  4.75628884365521E+00
-
- Other information on the energy :
-    Total energy(eV)=  1.29425201473738E+02 ; Band energy (Ha)=   3.3577200003E+00
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.34651168E-03  sigma(3 2)= -7.76235600E-02
@@ -3790,7 +3635,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      13.000      13.000
 
 ================================================================================
 == DATASET 21 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3825,6 +3670,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      15.000      15.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  2.465E+01 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 21, }
+comment   : Summary of ground state results
+rprimd    :
+- [  4.0000000,   0.0000000,   0.0000000, ]
+- [  2.0000000,   2.0000000,  -4.0000000, ]
+- [  2.0000000,   2.0000000,   4.0000000, ]
+lattice_lengths: [   4.00000,    4.89898,    4.89898, ]
+lattice_angles: [109.471,  65.905,  65.905, ]
+lattice_volume:   6.4000000E+01
+convergence: {deltae:  6.721E+00, res2:  4.343E+00, residm:  1.975E-03, diffor:  2.465E+01, }
+etotal    :   6.72076663E+00
+entropy   :   0.00000000E+00
+fermie    :   1.06260899E+00
+cartesian_stress_tensor:
+- [ -1.61509871E-01,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.39533344E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,  -1.60506658E-02, ]
+pressure_GPa:   1.7080E+03
+cartesian_forces:
+- [ -2.46526023E+01,   1.77635684E-15,   8.88178420E-16, ]
+- [  2.46526023E+01,  -1.77635684E-15,  -8.88178420E-16, ]
+force_length_stats: {min:   2.46526023E+01, max:   2.46526023E+01, mean:   2.46526023E+01, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3834,7 +3705,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      15.000      15.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   9.8750E-04; max=  1.9749E-03
+ Mean square residual over all n,k,spin=   98.750E-05; max=  19.749E-04
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -3863,21 +3734,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      15.000      15.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
    0.28162    1.06261
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 21, }
+comment             : Components of total free energy in Hartree
+kinetic             :  3.26109098803817E+00
+hartree             :  2.12007116282683E-01
+xc                  : -2.22182833126554E+00
+Ewald energy        :  4.28973755159342E+00
+psp_core            : -1.92992309405629E-01
+local_psp           :  8.43646410713603E-01
+non_local_psp       :  5.29105201943907E-01
+total_energy        :  6.72076662790061E+00
+total_energy_eV     :  1.82881360545281E+02
+band_energy         :  2.68845435707627E+00
+...
 
-    Kinetic energy  =  3.26109098803817E+00
-    Hartree energy  =  2.12007116282683E-01
-    XC energy       = -2.22182833126554E+00
-    Ewald energy    =  4.28973755159342E+00
-    PspCore energy  = -1.92992309405629E-01
-    Loc. psp. energy=  8.43646410713603E-01
-    NL   psp  energy=  5.29105201943907E-01
-    >>>>>>>>> Etotal=  6.72076662790061E+00
-
- Other information on the energy :
-    Total energy(eV)=  1.82881360545281E+02 ; Band energy (Ha)=   2.6884543571E+00
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -1.61509871E-01  sigma(3 2)=  0.00000000E+00
@@ -3891,7 +3762,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      15.000      15.000
 
 ================================================================================
 == DATASET 22 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -3933,6 +3804,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      55.000      55.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  4.754E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 22, }
+comment   : Summary of ground state results
+rprimd    :
+- [ -4.0000000,   4.0000000,   4.0000000, ]
+- [  4.0000000,  -4.0000000,   4.0000000, ]
+- [  4.0000000,   4.0000000,  -4.0000000, ]
+lattice_lengths: [   6.92820,    6.92820,    6.92820, ]
+lattice_angles: [109.471, 109.471, 109.471, ]
+lattice_volume:   2.5600000E+02
+convergence: {deltae:  2.419E+00, res2:  1.668E+00, residm:  3.396E-04, diffor:  4.754E+00, }
+etotal    :   2.41933080E+00
+entropy   :   0.00000000E+00
+fermie    :   3.68655224E-01
+cartesian_stress_tensor:
+- [ -8.53236391E-03,   7.01109972E-03,   7.01109972E-03, ]
+- [  7.01109972E-03,  -8.53236391E-03,  -7.01109972E-03, ]
+- [  7.01109972E-03,  -7.01109972E-03,  -8.53236391E-03, ]
+pressure_GPa:   2.5103E+02
+cartesian_forces:
+- [  4.75383085E+00,  -4.75383085E+00,  -4.75383085E+00, ]
+- [ -4.75383085E+00,   4.75383085E+00,   4.75383085E+00, ]
+force_length_stats: {min:   8.23387656E+00, max:   8.23387656E+00, mean:   8.23387656E+00, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3942,7 +3839,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      55.000      55.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   2.1263E-04; max=  3.3963E-04
+ Mean square residual over all n,k,spin=   21.263E-05; max=  33.963E-05
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -3955,13 +3852,13 @@ _setup2: Arith. and geom. avg. npw (full set) are      55.000      55.000
     2     -0.21167088343600     0.21167088343600     0.21167088343600
 
  cartesian forces (hartree/bohr) at end:
-    1      4.75383085020320    -4.75383085020320    -4.75383085020320
-    2     -4.75383085020320     4.75383085020320     4.75383085020320
+    1      4.75383085020319    -4.75383085020320    -4.75383085020320
+    2     -4.75383085020319     4.75383085020320     4.75383085020320
  frms,max,avg= 4.7538309E+00 4.7538309E+00   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1    244.45179038429558  -244.45179038429563  -244.45179038429558
-    2   -244.45179038429558   244.45179038429563   244.45179038429558
+    1    244.45179038429555  -244.45179038429566  -244.45179038429558
+    2   -244.45179038429555   244.45179038429566   244.45179038429558
  frms,max,avg= 2.4445179E+02 2.4445179E+02   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales=  8.000000000000  8.000000000000  8.000000000000 bohr
               =  4.233417668720  4.233417668720  4.233417668720 angstroms
@@ -3971,21 +3868,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      55.000      55.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -0.10585    0.36866
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 22, }
+comment             : Components of total free energy in Hartree
+kinetic             :  1.35493702598278E+00
+hartree             :  9.09433374091862E-02
+xc                  : -1.58580544307794E+00
+Ewald energy        :  2.15003749800875E+00
+psp_core            : -4.82480773514071E-02
+local_psp           : -6.67609995313344E-01
+non_local_psp       :  1.12507645668222E+00
+total_energy        :  2.41933080234024E+00
+total_energy_eV     :  6.58333391468021E+01
+band_energy         :  5.25609510430781E-01
+...
 
-    Kinetic energy  =  1.35493702598278E+00
-    Hartree energy  =  9.09433374091861E-02
-    XC energy       = -1.58580544307794E+00
-    Ewald energy    =  2.15003749800875E+00
-    PspCore energy  = -4.82480773514071E-02
-    Loc. psp. energy= -6.67609995313344E-01
-    NL   psp  energy=  1.12507645668222E+00
-    >>>>>>>>> Etotal=  2.41933080234024E+00
-
- Other information on the energy :
-    Total energy(eV)=  6.58333391468021E+01 ; Band energy (Ha)=   5.2560951043E-01
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)= -8.53236391E-03  sigma(3 2)= -7.01109972E-03
@@ -3999,7 +3896,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      55.000      55.000
 
 ================================================================================
 == DATASET 23 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -4041,6 +3938,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      27.000      27.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  8.671E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 23, }
+comment   : Summary of ground state results
+rprimd    :
+- [  0.0000000,   4.0000000,   4.0000000, ]
+- [  4.0000000,   0.0000000,   4.0000000, ]
+- [  4.0000000,   4.0000000,   0.0000000, ]
+lattice_lengths: [   5.65685,    5.65685,    5.65685, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_volume:   1.2800000E+02
+convergence: {deltae:  3.712E+00, res2:  1.036E+00, residm:  1.902E-05, diffor:  8.671E+00, }
+etotal    :   3.71229762E+00
+entropy   :   0.00000000E+00
+fermie    :   7.18159731E-01
+cartesian_stress_tensor:
+- [  1.90973466E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -2.77405226E-02,  -3.31982104E-02, ]
+- [  0.00000000E+00,  -3.31982104E-02,  -2.77405226E-02, ]
+pressure_GPa:   5.2537E+02
+cartesian_forces:
+- [ -0.00000000E+00,  -8.67066358E+00,  -8.67066358E+00, ]
+- [ -0.00000000E+00,   8.67066358E+00,   8.67066358E+00, ]
+force_length_stats: {min:   1.22621700E+01, max:   1.22621700E+01, mean:   1.22621700E+01, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -4050,7 +3973,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      27.000      27.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.1450E-05; max=  1.9016E-05
+ Mean square residual over all n,k,spin=   11.450E-06; max=  19.016E-06
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -4079,21 +4002,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      27.000      27.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
    0.01874    0.71816
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 23, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.02864200204140E+00
+hartree             :  6.03732173756394E-02
+xc                  : -1.77879629185257E+00
+Ewald energy        :  2.50717592594219E+00
+psp_core            : -9.64961547028143E-02
+local_psp           :  6.35998816973963E-01
+non_local_psp       :  3.55400107093352E-01
+total_energy        :  3.71229762287116E+00
+total_energy_eV     :  1.01016755618513E+02
+band_energy         :  1.47379485640608E+00
+...
 
-    Kinetic energy  =  2.02864200204140E+00
-    Hartree energy  =  6.03732173756394E-02
-    XC energy       = -1.77879629185257E+00
-    Ewald energy    =  2.50717592594219E+00
-    PspCore energy  = -9.64961547028143E-02
-    Loc. psp. energy=  6.35998816973963E-01
-    NL   psp  energy=  3.55400107093352E-01
-    >>>>>>>>> Etotal=  3.71229762287116E+00
-
- Other information on the energy :
-    Total energy(eV)=  1.01016755618513E+02 ; Band energy (Ha)=   1.4737948564E+00
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.90973466E-03  sigma(3 2)= -3.31982104E-02
@@ -4107,7 +4030,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      27.000      27.000
 
 ================================================================================
 == DATASET 24 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -4149,6 +4072,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      27.000      27.000
   nstep=    1 was not enough SCF cycles to converge;
   maximum force difference=  8.671E+00 exceeds toldff=  1.000E-08
 
+
+--- !ResultsGS
+iteration_state: {dtset: 24, }
+comment   : Summary of ground state results
+rprimd    :
+- [  0.0000000,   4.0000000,   4.0000000, ]
+- [  4.0000000,   0.0000000,   4.0000000, ]
+- [  4.0000000,   4.0000000,   0.0000000, ]
+lattice_lengths: [   5.65685,    5.65685,    5.65685, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_volume:   1.2800000E+02
+convergence: {deltae:  3.712E+00, res2:  1.037E+00, residm:  1.902E-05, diffor:  8.671E+00, }
+etotal    :   3.71229809E+00
+entropy   :   0.00000000E+00
+fermie    :   7.18159731E-01
+cartesian_stress_tensor:
+- [  1.90972357E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,  -2.77405205E-02,  -3.31982043E-02, ]
+- [  0.00000000E+00,  -3.31982043E-02,  -2.77405205E-02, ]
+pressure_GPa:   5.2537E+02
+cartesian_forces:
+- [ -0.00000000E+00,  -8.67066354E+00,  -8.67066354E+00, ]
+- [ -0.00000000E+00,   8.67066354E+00,   8.67066354E+00, ]
+force_length_stats: {min:   1.22621700E+01, max:   1.22621700E+01, mean:   1.22621700E+01, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -4158,7 +4107,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      27.000      27.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   1.1450E-05; max=  1.9016E-05
+ Mean square residual over all n,k,spin=   11.450E-06; max=  19.016E-06
  reduced coordinates (array xred) for    2 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.100000000000      0.000000000000      0.000000000000
@@ -4187,21 +4136,21 @@ _setup2: Arith. and geom. avg. npw (full set) are      27.000      27.000
  kpt#   1, nband=  2, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
    0.01874    0.71816
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 24, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.02864200204140E+00
+hartree             :  6.03753421947901E-02
+xc                  : -1.77879795312144E+00
+Ewald energy        :  2.50717592594219E+00
+psp_core            : -9.64961547028143E-02
+local_psp           :  6.35998816973964E-01
+non_local_psp       :  3.55400107093352E-01
+total_energy        :  3.71229808642144E+00
+total_energy_eV     :  1.01016768232357E+02
+band_energy         :  1.47379485640608E+00
+...
 
-    Kinetic energy  =  2.02864200204140E+00
-    Hartree energy  =  6.03753421947901E-02
-    XC energy       = -1.77879795312144E+00
-    Ewald energy    =  2.50717592594219E+00
-    PspCore energy  = -9.64961547028143E-02
-    Loc. psp. energy=  6.35998816973964E-01
-    NL   psp  energy=  3.55400107093352E-01
-    >>>>>>>>> Etotal=  3.71229808642144E+00
-
- Other information on the energy :
-    Total energy(eV)=  1.01016768232357E+02 ; Band energy (Ha)=   1.4737948564E+00
---------------------------------------------------------------------------------
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  1.90972357E-03  sigma(3 2)= -3.31982043E-02
@@ -4279,8 +4228,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      27.000      27.000
                        8.0590774950E+00 -0.0000000000E+00 -0.0000000000E+00
             fcart6    -8.0590774950E+00  4.9347617292E-16  4.9347617292E-16
                        8.0590774950E+00 -4.9347617292E-16 -4.9347617292E-16
-            fcart7    -6.2772719926E+00 -1.3746551204E-16 -5.0522478516E+00
-                       6.2772719926E+00  1.3746551204E-16  5.0522478516E+00
+            fcart7    -6.2772719926E+00 -1.3306619400E-16 -5.0522478516E+00
+                       6.2772719926E+00  1.3306619400E-16  5.0522478516E+00
             fcart8    -8.0610951498E+00  2.2521774709E-15  4.9359971864E-16
                        8.0610951498E+00 -2.2521774709E-15 -4.9359971864E-16
             fcart9    -8.0629234831E+00 -0.0000000000E+00 -0.0000000000E+00
@@ -4896,46 +4845,73 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] ABINIT : First-principles approach of materials and nanosystem properties.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
--
-- [2] A brief introduction to the ABINIT software package.
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - And optionally:
 -
-- [3] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
+- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
+- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
+- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
+- should be cited especially if you are using the GW part of ABINIT, as several authors
+- of this part are not in the list of authors of the first or third paper.
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
+- the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- [4] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=          5.2  wall=          6.1
+- Proc.   0 individual time (sec): cpu=         12.1  wall=         15.4
 
 ================================================================================
 
  Calculation completed.
-.Delivered 108 WARNINGs and  37 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.2  wall=          6.1
+.Delivered 108 WARNINGs and  60 COMMENTs to log file.
++Overall time at end (sec) : cpu=         12.1  wall=         15.4

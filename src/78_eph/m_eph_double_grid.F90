@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_eph_double_grid
 !! NAME
 !!  m_eph_double_grid
@@ -7,7 +6,7 @@
 !!  Structure and functions to create a double grid mapping
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (HM)
+!!  Copyright (C) 2008-2020 ABINIT group (HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,9 +24,9 @@
 module m_eph_double_grid
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_ebands
+ use m_abicore
 
  use defs_datatypes,   only : ebands_t
  use m_numeric_tools,  only : wrap2_pmhalf

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psxml2ab
 !! NAME
 !! m_psxml2ab
@@ -8,7 +7,7 @@
 !!  convert to abinit internal datastructures for pspheader.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (MJV).
+!! Copyright (C) 2005-2020 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,18 +40,19 @@ module m_psxml2ab
  use defs_datatypes
  use m_abicore
  use m_errors
-#ifdef HAVE_PSML
+#ifdef HAVE_LIBPSML
  use m_psml
  use m_psml_api
 #endif
 
+ use defs_datatypes, only : pspheader_type
  use m_fstrings,     only : yesno
 
 implicit none
 
 private
 
-#ifdef HAVE_PSML
+#ifdef HAVE_LIBPSML
 public :: psxml2abheader
 !public :: psxml2abfull
 
@@ -379,7 +379,6 @@ end subroutine psxml2abheader
 end module m_psxml2ab
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/psml_die
 !! NAME
 !! psml_die
@@ -389,7 +388,7 @@ end module m_psxml2ab
 !!  allows calling software to decide how fatal the PSML die call actually is.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (MJV).
+!! Copyright (C) 2005-2020 ABINIT group (MJV).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -8,7 +8,7 @@
 !!  radial Fourier transform.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2011-2019 ABINIT group (CE)
+!!  Copyright (C) 2011-2020 ABINIT group (CE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,6 +44,7 @@ program test_radsintr
  use m_errors
 
  use m_integrals,     only : radsintr
+
  implicit none
 
 !Arguments ------------------------------------

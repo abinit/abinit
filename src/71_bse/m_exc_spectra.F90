@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_exc_spectra
 !! NAME
 !! m_exc_spectra
@@ -7,7 +6,7 @@
 !!  Routines to compute the macroscopic dielectric function in the Bethe-Salpeter code.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi, Y. Gillet)
+!! Copyright (C) 2009-2020 ABINIT and EXC groups (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi, Y. Gillet)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,7 +24,6 @@
 MODULE m_exc_spectra
 
  use defs_basis
- use defs_datatypes
  use m_bs_defs
  use m_abicore
  use iso_c_binding
@@ -36,9 +34,9 @@ MODULE m_exc_spectra
  use netcdf
 #endif
  use m_ebands
- !use m_hdr,          only : hdr_free
+ use m_hdr
 
- use defs_abitypes,     only : hdr_type
+ use defs_datatypes,    only : pseudopotential_type, ebands_t
  use m_io_tools,        only : open_file
  use m_fstrings,        only : toupper, strcat, sjoin, int2char4
  use m_numeric_tools,   only : simpson_int, simpson_cplx

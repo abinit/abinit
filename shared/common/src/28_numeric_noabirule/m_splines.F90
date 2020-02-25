@@ -7,7 +7,7 @@
 !!  This module contains routines for spline interpolation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2019 ABINIT group (YP, BAmadon)
+!!  Copyright (C) 2010-2020 ABINIT group (YP, BAmadon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -90,8 +90,6 @@ contains
 !! SOURCE
 
 subroutine splfit(arg,derfun,fun,ider,newarg,newfun,numarg,numnew)
-
- implicit none
 
  integer, intent(in) :: ider,numarg,numnew
  real(dp), intent(in) :: arg(numarg),fun(numarg,2),newarg(numnew)
@@ -359,7 +357,6 @@ subroutine spline( t, y, n, ybcbeg, ybcend, ypp )
 !      0: the spline should be a quadratic over the last interval;
 !      1: the first derivative at the right endpoint should be YBCEND;
 !      2: the second derivative at the right endpoint should be YBCEND.
-  implicit none
 
   integer, intent(in) :: n
   real(dp), intent(in) :: t(n)
@@ -478,8 +475,6 @@ end subroutine spline
 
 subroutine spline_bicubic(n1,n2,x1,x2,y,der1_x1,der1_x2,der2_x1x2,spl_c)
 
-  implicit none
-
   integer,intent(in)  :: n1,n2
   real(dp),intent(in) :: x1(n1),x2(n2),y(n1,n2)
   real(dp),intent(in) :: der1_x1(n1,n2),der1_x2(n1,n2),der2_x1x2(n1,n2)
@@ -559,8 +554,6 @@ end subroutine spline_bicubic
 
 subroutine spline_c( nomega_lo, nomega_li, omega_lo, omega_li, splined_li, tospline_lo)
 
- implicit none
-
 !Arguments --------------------------------------------
 !scalars
  integer, intent(in) :: nomega_lo, nomega_li
@@ -619,8 +612,6 @@ end subroutine spline_c
 !! SOURCE
 
 subroutine spline_complex( t, y, n, ybcbeg, ybcend, ypp )
-
- implicit none
 
  integer, intent(in) :: n
  real(dp), intent(in) :: t(n)
@@ -693,8 +684,6 @@ end subroutine spline_complex
 !! SOURCE
 
 subroutine splint(nspline,xspline,yspline,ysplin2,nfit,xfit,yfit,ierr)
-
- implicit none
 
  integer, intent(in) :: nfit, nspline
  integer,optional,intent(out) :: ierr
@@ -780,8 +769,6 @@ end subroutine splint
 
 subroutine splint_complex (nspline,xspline,yspline,ysplin2,nfit,xfit,yfit)
 
- implicit none
-
  integer, intent(in) :: nfit, nspline
  real(dp), intent(in) :: xspline(nspline)
  complex(dpc), intent(in) :: yspline(nspline)
@@ -831,7 +818,7 @@ end subroutine splint_complex
 !!  Calculates an integral using cubic spline interpolation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2019 ABINIT Group (Yann Pouillon)
+!!  Copyright (C) 2010-2020 ABINIT Group (Yann Pouillon)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -854,8 +841,6 @@ end subroutine splint_complex
 !! SOURCE
 
 subroutine spline_integrate(integral,npts,dx,integrand)
-
- implicit none
 
  integer,intent(in) :: npts
  real(dp),intent(out) :: integral

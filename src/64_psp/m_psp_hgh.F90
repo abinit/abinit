@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psp_hgh
 !! NAME
 !!  m_psp_hgh
@@ -7,7 +6,7 @@
 !! Initialize pspcod=2, 3, 10 pseudopotentials (GTH)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MT, FD, PT)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MT, FD, PT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,12 +26,12 @@
 module m_psp_hgh
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_splines
  use m_abicore
  use m_errors
+ use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
  use m_special_funcs,  only : abi_derfc
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: atomic_info
@@ -116,8 +115,6 @@ contains
 !! SOURCE
 
 subroutine psp2in(dtset,ekb,epsatm,ffspl,indlmn,ipsp,lmax,nproj,psps,vlspl,dvlspl,zion)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -300,8 +297,6 @@ end subroutine psp2in
 
 subroutine psp2nl(ekb,ffspl,h1p,h1s,h2s,lnmax,mqgrid,qgrid,rrp,rrs)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: lnmax,mqgrid
@@ -446,8 +441,6 @@ end subroutine psp2nl
 
 subroutine psp2lo(cc1,cc2,cc3,cc4,dvloc,epsatm,mqgrid,qgrid,q2vq,&
 &  rloc,vlspl_recipSpace,yp1,ypn,zion)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -608,8 +601,6 @@ end subroutine psp2lo
 !! SOURCE
 
 subroutine psp3in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, pspso, vlspl, zion)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1048,8 +1039,6 @@ end subroutine psp3in
 subroutine psp3nl(ekb,ffspl,h11s,h22s,h33s,h11p,h22p,h33p,h11d,h22d,&
 &                  h33d,h11f,mproj,mpsang,mqgrid,qgrid,rrd,rrf,rrp,rrs)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: mproj,mpsang,mqgrid
@@ -1416,8 +1405,6 @@ end subroutine psp3nl
 
 subroutine psp10in(dtset, ekb, epsatm, ffspl, indlmn, ipsp, lmax, nproj, psps, pspso, vlspl, zion)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ipsp,pspso
@@ -1664,8 +1651,6 @@ end subroutine psp10in
 !! SOURCE
 
 subroutine psp10nl(ekb,ffspl,hij,lmax,mproj,mpsang,mqgrid,nproj,qgrid,rr)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

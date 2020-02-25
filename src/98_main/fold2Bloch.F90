@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/fold2Bloch
 !! NAME
 !! fold2Bloch
@@ -7,7 +6,7 @@
 !! Main routine for the unfolding of the wavefuntion.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2019 ABINIT group (AB)
+!! Copyright (C) 2014-2020 ABINIT group (AB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -143,11 +142,11 @@ real(dp), allocatable :: cg(:,:), eig(:),kpts(:,:), weights(:),coefc(:,:), nkval
 
 #ifdef HAVE_NETCDF
  timrev = 2; if (any(wfk%hdr%kptopt == [3, 4])) timrev = 1
- cryst = hdr_get_crystal(wfk%hdr, timrev)
+ cryst = wfk%hdr%get_crystal(timrev)
 
  NCF_CHECK(nctk_open_create(ncid, strcat(seedname, "_FOLD2BLOCH.nc"), xmpi_comm_self))
  fform = fform_from_ext("FOLD2BLOCH.nc")
- NCF_CHECK(hdr_ncwrite(wfk%hdr, ncid, fform, nc_define=.True.))
+ NCF_CHECK(wfk%hdr%ncwrite(ncid, fform, nc_define=.True.))
  NCF_CHECK(cryst%ncwrite(ncid))
  NCF_CHECK(ebands_ncwrite(ebands, ncid))
 

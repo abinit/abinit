@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_wfsinp
 !! NAME
 !!  m_wvl_wfsinp
@@ -7,7 +6,7 @@
 !!  Routines to initialize (wavelet) wavefunctions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DC)
+!!  Copyright (C) 1998-2020 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,15 +26,16 @@
 module m_wvl_wfsinp
 
  use defs_basis
- use defs_abitypes
- use defs_datatypes
  use defs_wvltypes
  use m_wffile
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_hdr
+ use m_dtset
 
-
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : MPI_type
  use m_geometry,  only : xred2xcart
  use m_abi2big,   only : wvl_occ_abi2big, wvl_occopt_abi2big, wvl_setngfft, wvl_setboxgeometry
  use m_psolver,   only : psolver_kernel
@@ -100,7 +100,6 @@ subroutine wvl_wfsinp_disk(dtset, hdr0, hdr, mpi_enreg, occ, option, rprimd, wff
  use BigDFT_API, only : first_orthon,sumrho,communicate_density,plot_density
  use dynamic_memory
 #endif
-  implicit none
 
 !Arguments -------------------------------
   !scalars
@@ -256,7 +255,6 @@ subroutine wvl_wfsinp_reformat(dtset, mpi_enreg, psps, rprimd, wvl, xred, xred_o
 & deallocate_coulomb_operator, nullify_gaussian_basis
  use dynamic_memory
 #endif
-  implicit none
 
 !Arguments ------------------------------------
   type(dataset_type), intent(inout)      :: dtset
@@ -462,7 +460,6 @@ subroutine wvl_wfsinp_scratch(dtset, mpi_enreg, occ, rprimd, wvl, xred)
       & input_variables, calculate_rhocore, deallocate_Lzd_except_Glr, INPUT_IG_OFF,&
       & SMEARING_DIST_ERF, PSPCODE_PAW
 #endif
-  implicit none
 
 !Arguments -------------------------------
   !scalars

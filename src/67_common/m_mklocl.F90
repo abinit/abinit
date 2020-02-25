@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_mklocl
 !! NAME
 !!  m_mklocl
@@ -7,7 +6,7 @@
 !!   Routines related to the local part of the pseudopotentials.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MM, DRH)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MM, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,13 +26,14 @@
 module m_mklocl
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_geometry, only : xred2xcart
  use m_mpinfo,   only : ptabs_fourdp

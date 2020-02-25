@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_rhotov
 !! NAME
 !!  m_dfpt_rhotov
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XG, DRH, MT, SPr)
+!!  Copyright (C) 1999-2020 ABINIT group (XG, DRH, MT, SPr)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,11 +26,11 @@
 module m_dfpt_rhotov
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_cgtools
 
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_spacepar,    only : hartrestr, hartre
  use m_dfpt_mkvxc,    only : dfpt_mkvxc, dfpt_mkvxc_noncoll

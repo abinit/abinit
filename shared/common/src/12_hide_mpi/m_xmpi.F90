@@ -8,7 +8,7 @@
 !!  and a set of generic interfaces wrapping the most commonly used MPI primitives.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG, MB, XG, YP, MT)
+!! Copyright (C) 2009-2020 ABINIT group (MG, MB, XG, YP, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -55,6 +55,7 @@ MODULE m_xmpi
 
 #ifdef HAVE_MPI
  ! MPI constants used in abinit. Make sure that a corresponding fake value is provided for the sequential version.
+ integer,public,parameter :: xmpi_paral          = 1
  integer,public,parameter :: xmpi_world          = MPI_COMM_WORLD
  integer,public,parameter :: xmpi_comm_self      = MPI_COMM_SELF
  integer,public,parameter :: xmpi_undefined      = MPI_UNDEFINED
@@ -64,21 +65,22 @@ MODULE m_xmpi
  integer,public,parameter :: xmpi_any_source     = MPI_ANY_SOURCE
  integer,public,parameter :: xmpi_request_null   = MPI_REQUEST_NULL
  integer,public,parameter :: xmpi_msg_len        = MPI_MAX_ERROR_STRING ! Length of fortran string used to store MPI error strings.
- integer,public,parameter :: xmpi_paral          = 1
  integer,public,parameter :: xmpi_info_null      = MPI_INFO_NULL
  integer,public,parameter :: xmpi_success        = MPI_SUCCESS
 #else
- ! Fake replacements for the sequential version.
- integer,public,parameter :: xmpi_world          = 0
- integer,public,parameter :: xmpi_comm_self      = 0
- integer,public,parameter :: xmpi_undefined      =-32765
- integer,public,parameter :: xmpi_undefined_rank =-32766
- integer,public,parameter :: xmpi_comm_null      = 0
- integer,public,parameter :: xmpi_group_null     = 0
- integer,public,parameter :: xmpi_any_source     = 0
- integer,public,parameter :: xmpi_request_null   = 738197504
- integer,public,parameter :: xmpi_msg_len        = 1000
+ ! Fake replacements for the sequential version. Values are taken from
+ ! http://www.mit.edu/course/13/13.715/sun-hpc-ct-8.2.1/Linux/sun/include/mpif-common.h
+ ! Please use these conventions when adding new replacements in order to avoid collisions between values.
  integer,public,parameter :: xmpi_paral          = 0
+ integer,public,parameter :: xmpi_world          = 0
+ integer,public,parameter :: xmpi_comm_self      = 1
+ integer,public,parameter :: xmpi_undefined      =-32766
+ integer,public,parameter :: xmpi_undefined_rank =-32766
+ integer,public,parameter :: xmpi_comm_null      = 2
+ integer,public,parameter :: xmpi_group_null     = 0
+ integer,public,parameter :: xmpi_any_source     = -1
+ integer,public,parameter :: xmpi_request_null   = 0
+ integer,public,parameter :: xmpi_msg_len        = 1000
  integer,public,parameter :: xmpi_info_null      = 0
  integer,public,parameter :: xmpi_success        = 0
 #endif
@@ -135,7 +137,40 @@ MODULE m_xmpi
  ! Count number of requests (+1 for each call to non-blocking API, -1 for each call to xmpi_wait)
  ! This counter should be zero at the end of the run if all requests have been released)
 
+ ! For MPI <v4, collective communication routines accept only a 32bit integer as data count.
+ ! To exchange more than 2^32 data we need to create specific user-defined datatypes
+ ! For this, we need some parameters:
+ integer(KIND=int32),public,parameter :: xmpi_maxint32=HUGE(0_int32)
+ integer(KIND=int64),public,parameter :: xmpi_maxint32_64=int(xmpi_maxint32,kind=int64)
+ ! Max. integer that can be represented with 32 bits
+ integer(KIND=int64),public,save :: xmpi_largetype_size=0
+ ! Number of data to be used in user-defined operations related to user-defined "largetype" type
+!!***
+
 !----------------------------------------------------------------------
+
+!!****t* m_xmpi/xcomm_t
+!! NAME
+!! xcomm_t
+!!
+!! FUNCTION
+!!  A small object storing the MPI communicator, the rank of the processe and the size of the communicator.
+!!  Provides helper functions to perform typical operations and parallelize loops.
+!!  The datatype is initialized with xmpi_comm_self
+!!
+!! SOURCE
+
+ type, public :: xcomm_t
+   integer :: value = xmpi_comm_self
+   integer :: nproc = 1
+   integer :: me = 0
+ contains
+   ! procedure :: iam_master => xcomm_iam_master
+   procedure :: skip => xcomm_skip
+   procedure :: set_to_null => xcomm_set_to_null
+   procedure :: set_to_self => xcomm_set_to_self
+   procedure :: free => xcomm_free
+ end type xcomm_t
 !!***
 
 ! Public procedures.
@@ -162,9 +197,16 @@ MODULE m_xmpi
  public :: xmpi_request_free          ! Hides MPI_REQUEST_FREE from MPI library.
  public :: xmpi_comm_set_errhandler   ! Hides MPI_COMM_SET_ERRHANDLER from MPI library.
  public :: xmpi_error_string          ! Return a string describing the error from ierr.
- public :: xmpi_split_work
- public :: xmpi_distab
+ public :: xmpi_split_work            ! Splits tasks inside communicator using blocks
+ public :: xmpi_split_block           ! Splits tasks inside communicator using block distribution.
+ public :: xmpi_split_cyclic          ! Splits tasks inside communicator using cyclic distribution.
+ public :: xmpi_split_list            ! Splits list of indices inside communicator using block distribution.
+ public :: xmpi_distab                ! Fill table defining the distribution of the tasks according to the # of processors
  public :: xmpi_distrib_with_replicas ! Distribute tasks among MPI ranks (replicas are allowed)
+
+! Private procedures.
+ private :: xmpi_largetype_create      ! Build a large-count contiguous datatype (to handle a very large # of data)
+ private :: xmpi_largetype_free        ! Release a large-count contiguous datatype
 
  interface xmpi_comm_free
    module procedure xmpi_comm_free_0D
@@ -2095,10 +2137,10 @@ end subroutine xmpi_comm_set_errhandler
 
 !!****f* m_xmpi/xmpi_split_work_i4b
 !! NAME
-!!  split_work_i4b
+!!  xmpi_split_work_i4b
 !!
 !! FUNCTION
-!!  Splits the number of tasks, ntasks, among nprocs processors. 
+!!  Splits the number of tasks, ntasks, among nprocs processors.
 !!  Used for the MPI parallelization of simple loops.
 !!
 !! INPUTS
@@ -2126,7 +2168,7 @@ end subroutine xmpi_comm_set_errhandler
 !!
 !! SOURCE
 
-subroutine xmpi_split_work_i4b(ntasks,comm,my_start,my_stop)
+subroutine xmpi_split_work_i4b(ntasks, comm, my_start, my_stop)
 
 !Arguments ------------------------------------
  integer,intent(in)  :: ntasks,comm
@@ -2152,6 +2194,152 @@ subroutine xmpi_split_work_i4b(ntasks,comm,my_start,my_stop)
  end if
 
 end subroutine xmpi_split_work_i4b
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_split_block
+!! NAME
+!!  xmpi_split_block
+!!
+!! FUNCTION
+!!  Splits tasks inside communicator using cyclic distribution.
+!!  Used for the MPI parallelization of simple loops.
+!!
+!! INPUTS
+!!  ntasks: number of tasks
+!!  comm: MPI communicator.
+!!
+!! OUTPUT
+!!  my_ntasks: Number of tasks received by this rank. May be zero if ntasks > nprocs.
+!!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine xmpi_split_block(ntasks, comm, my_ntasks, my_inds)
+
+!Arguments ------------------------------------
+ integer,intent(in)  :: ntasks, comm
+ integer,intent(out) :: my_ntasks
+ integer,allocatable,intent(out) :: my_inds(:)
+
+!Local variables-------------------------------
+ integer :: ii, istart, istop
+
+! *************************************************************************
+
+ call xmpi_split_work(ntasks, comm, istart, istop)
+ my_ntasks = istop - istart + 1
+ ABI_MALLOC(my_inds, (my_ntasks))
+ if (my_ntasks > 0) my_inds = [(istart + (ii - 1), ii=1, my_ntasks)]
+
+end subroutine xmpi_split_block
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_split_cyclic
+!! NAME
+!!  xmpi_split_cyclic
+!!
+!! FUNCTION
+!!  Splits tasks inside communicator using cyclic distribution.
+!!  Used for the MPI parallelization of simple loops.
+!!
+!! INPUTS
+!!  ntasks: number of tasks
+!!  comm: MPI communicator.
+!!
+!! OUTPUT
+!!  my_ntasks: Number of tasks received by this rank. May be zero if ntasks > nprocs.
+!!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine xmpi_split_cyclic(ntasks, comm, my_ntasks, my_inds)
+
+!Arguments ------------------------------------
+ integer,intent(in)  :: ntasks, comm
+ integer,intent(out) :: my_ntasks
+ integer,allocatable,intent(out) :: my_inds(:)
+
+!Local variables-------------------------------
+ integer :: ii, cnt, itask, my_rank, nprocs
+
+! *************************************************************************
+
+ nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
+
+ do ii=1,2
+   if (ii == 2) then
+     ABI_MALLOC(my_inds, (my_ntasks))
+   end if
+   cnt = 0
+   do itask=1,ntasks
+     if (mod(itask, nprocs) == my_rank) then
+       cnt = cnt + 1
+       if (ii == 2) my_inds(cnt) = itask
+     end if
+   end do
+   if (ii == 1) my_ntasks = cnt
+ end do
+
+end subroutine xmpi_split_cyclic
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_split_list
+!! NAME
+!!  xmpi_split_list
+!!
+!! FUNCTION
+!!  Splits list of itmes inside communicator using block distribution.
+!!  Used for the MPI parallelization of simple loops.
+!!
+!! INPUTS
+!!  ntasks:Number of items in list (global)
+!!  list(ntasks): List of indices
+!!  comm: MPI communicator.
+!!
+!! OUTPUT
+!!  my_ntasks: Number of tasks received by this rank. May be zero if ntasks > nprocs.
+!!  my_inds(my_ntasks): List of tasks treated by this rank. Allocated by the routine. May be zero-sized.
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine xmpi_split_list(ntasks, list, comm, my_ntasks, my_inds)
+
+!Arguments ------------------------------------
+ integer,intent(in)  :: ntasks, comm
+ integer,intent(out) :: my_ntasks
+ integer,intent(in) :: list(ntasks)
+ integer,allocatable,intent(out) :: my_inds(:)
+
+!Local variables-------------------------------
+ integer :: my_start, my_stop
+
+! *************************************************************************
+
+ call xmpi_split_work(ntasks, comm, my_start, my_stop)
+
+ my_ntasks = my_stop - my_start + 1
+
+ if (my_stop >= my_start) then
+   ABI_MALLOC(my_inds, (my_ntasks))
+   my_inds = list(my_start:my_stop)
+ else
+   my_ntasks = 0
+   ABI_MALLOC(my_inds, (0))
+ end if
+
+end subroutine xmpi_split_list
 !!***
 
 !----------------------------------------------------------------------
@@ -2300,7 +2488,7 @@ end subroutine xmpi_split_work2_i8b
 !!
 !! SOURCE
 
-subroutine xmpi_distab_4D(nprocs,task_distrib)
+subroutine xmpi_distab_4D(nprocs, task_distrib)
 
 !Arguments ------------------------------------
  integer,intent(in) :: nprocs
@@ -2320,7 +2508,7 @@ subroutine xmpi_distab_4D(nprocs,task_distrib)
  n4= SIZE(task_distrib,DIM=4)
  ntasks = n1*n2*n3*n4
 
- ABI_ALLOCATE(list,(ntasks))
+ ABI_MALLOC(list, (ntasks))
  list=-999
 
  ntpblock  = ntasks/nprocs
@@ -2347,7 +2535,7 @@ subroutine xmpi_distab_4D(nprocs,task_distrib)
 
  if (ANY(task_distrib==-999)) call xmpi_abort(msg="task_distrib == -999")
 
- ABI_DEALLOCATE(list)
+ ABI_FREE(list)
 
 end subroutine xmpi_distab_4D
 !!***
@@ -2411,6 +2599,328 @@ end function xmpi_distrib_with_replicas
 
 !----------------------------------------------------------------------
 
+!!****f* m_xmpi/xmpi_largetype_create
+!! NAME
+!!  xmpi_largetype_create
+!!
+!! FUNCTION
+!!  This function builds a large-count contiguous datatype made of "small" adjacent
+!!  chunks (of same original type). The new type can then be used in MPI
+!!  routines when the number of elements to communicate exceeds a 32bit integer.
+!!
+!! INPUTS
+!!  inputtype= (INTEGER) input type (typically INTEGER, REAL(dp), ...)
+!!  largecount= total number of elements expressed as a 64bit integer
+!!  op_type= type of operation that will be applied during collective comms
+!!           At present, MPI_SUM, MPI_LOR, MPI_LAND are implemented
+!!
+!! OUTPUT
+!!  largetype= (INTEGER) new MPI type made of a serie of adjacent chunks
+!!  largetype_op= (INTEGER) MPI user-defined operation associated to largetype type
+!!
+!! NOTE
+!!  This routine is partially inspired by https://github.com/jeffhammond/BigMPI
+!!  See: J.R. Hammond. A. Schafer, R. Latham,
+!!       "ToINT_MAX. . . and beyond. Exploring large-count support in MPI",
+!!       2014 Workshop on Exascale MPI at Supercomputing Conference
+!!       MIT License (MIT)
+!!       Permission is hereby granted, free of charge, to any person obtaining a copy
+!!       of this software and associated documentation files (the "Software"), to deal
+!!       in the Software without restriction, including without limitation the rights
+!!       to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+!!       copies of the Software, and to permit persons to whom the Software is
+!!       furnished to do so.
+!!
+!!  From MPI4 specification, thiss routine is useless aslarge-count MPI communications
+!!    can be called with the use of the MPI_count datatype (instead of INTEGER).
+!!
+!! SOURCE
+
+subroutine xmpi_largetype_create(largecount,inputtype,largetype,largetype_op,op_type)
+
+!Arguments ------------------------------------
+!scalars
+ integer(KIND=int64),intent(in) :: largecount
+ integer,intent(in) :: inputtype,op_type
+ integer,intent(out) :: largetype,largetype_op
+
+!Local variables-------------------------------
+#ifdef HAVE_MPI
+!scalars
+ integer,parameter :: INT_MAX=max(1,xmpi_maxint32/2)
+ integer(KIND=int32) :: cc,rr,ierr
+ integer(KIND=XMPI_ADDRESS_KIND) :: extent,lb,remdisp
+ integer :: chunks,remainder
+!arrays
+ integer(KIND=int32) :: blklens(2)
+ integer(KIND=XMPI_ADDRESS_KIND) :: disps(2)
+ integer :: types(2)
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_MPI
+ if (XMPI_ADDRESS_KIND<int64) &
+&  call xmpi_abort(msg="Too much data to communicate for this architecture!")
+
+!Divide data in chunks
+ cc=int(largecount,kind=int32)/INT_MAX
+ rr=int(largecount,kind=int32)-cc*INT_MAX
+
+!Create user-defined datatype
+ if (rr==0) then 
+   call MPI_TYPE_VECTOR(cc,INT_MAX,INT_MAX,inputtype,largetype,ierr)
+   if (ierr==0) call MPI_TYPE_COMMIT(largetype,ierr)
+ else
+   call MPI_TYPE_VECTOR(cc,INT_MAX,INT_MAX,inputtype,chunks,ierr)
+   call MPI_TYPE_CONTIGUOUS(rr,inputtype,remainder,ierr)
+   if (ierr==0) then
+     call MPI_TYPE_GET_EXTENT(inputtype,lb,extent,ierr)
+     remdisp=cc*INT_MAX*extent
+     blklens(1:2)=1
+     disps(1)=0;disps(2)=remdisp
+     types(1)=chunks;types(2)=remainder
+#ifdef HAVE_MPI_TYPE_CREATE_STRUCT
+     call MPI_TYPE_CREATE_STRUCT(2,blklens,disps,types,largetype,ierr)
+#else
+     call MPI_TYPE_STRUCT(2,blklens,disps,types,largetype,ierr)
+#endif
+     if (ierr==0) then
+       call MPI_TYPE_COMMIT(largetype,ierr)
+       call MPI_TYPE_FREE(chunks,ierr)
+       call MPI_TYPE_FREE(remainder,ierr)
+     end if
+   end if
+ end if
+ if (ierr/=0) call xmpi_abort(msg="Cannot remove ABI_MPIABORTFILE")
+
+!Associate user-defined MPI operation
+ xmpi_largetype_size=largecount ; largetype_op=-1111
+ if (op_type==MPI_SUM) then
+   select case(inputtype)
+     case(MPI_INTEGER)
+      call MPI_OP_CREATE(largetype_sum_int  ,.true.,largetype_op,ierr)
+     case(MPI_REAL)
+      call MPI_OP_CREATE(largetype_sum_real ,.true.,largetype_op,ierr)
+     case(MPI_DOUBLE_PRECISION)
+      call MPI_OP_CREATE(largetype_sum_dble ,.true.,largetype_op,ierr)
+     case(MPI_COMPLEX)
+      call MPI_OP_CREATE(largetype_sum_cplx ,.true.,largetype_op,ierr)
+     case(MPI_DOUBLE_COMPLEX)
+      call MPI_OP_CREATE(largetype_sum_dcplx,.true.,largetype_op,ierr)
+   end select
+ else if (op_type==MPI_LOR) then
+   select case(inputtype)
+     case(MPI_LOGICAL)
+      call MPI_OP_CREATE(largetype_lor_log,.true.,largetype_op,ierr)
+   end select
+ else if (op_type==MPI_LAND) then
+   select case(inputtype)
+     case(MPI_LOGICAL)
+      call MPI_OP_CREATE(largetype_land_log,.true.,largetype_op,ierr)
+   end select
+ else if (op_type==MPI_OP_NULL) then
+   largetype_op=-1111
+ end if
+#else
+ ABI_UNUSED(largecount)
+ ABI_UNUSED(inputtype)
+ ABI_UNUSED(largetype)
+ ABI_UNUSED(largetype_op)
+ ABI_UNUSED(op_type)
+#endif
+
+end subroutine xmpi_largetype_create
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_sum_int
+!! NAME
+!!  largetype_sum_int
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_SUM for integers
+ subroutine largetype_sum_int(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  integer :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk)+invec(kk)
+    end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_sum_int
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_sum_real
+!! NAME
+!!  largetype_sum_real
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_SUM for reals
+ subroutine largetype_sum_real(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  real(sp) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk)+invec(kk)
+    end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_sum_real
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_sum_dble
+!! NAME
+!!  largetype_sum_dble
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_SUM for double precision reals
+ subroutine largetype_sum_dble(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  real(dp) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk)+invec(kk)
+    end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_sum_dble
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_sum_cplx
+!! NAME
+!!  largetype_sum_cplx
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_SUM for complex
+ subroutine largetype_sum_cplx(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  complex(spc) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk)+invec(kk)
+    end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_sum_cplx
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_sum_dcplx
+!! NAME
+!!  largetype_sum_dcplx
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_SUM for double commplex
+ subroutine largetype_sum_dcplx(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  complex(dpc) :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk)+invec(kk)
+    end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_sum_dcplx
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_lor_log
+!! NAME
+!!  largetype_lor_log
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_LOR for logicals
+ subroutine largetype_lor_log(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  logical :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk).or.invec(kk)
+    end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_lor_log
+!!***
+!--------------------------------------
+!!****f* m_xmpi/largetype_lang_log
+!! NAME
+!!  largetype_lang_log
+!!
+!! FUNCTION
+!!  Routine used to overload MPI_LANG for logicals
+ subroutine largetype_land_log(invec,inoutvec,len,datatype)
+  integer :: len,datatype
+  logical :: invec(len*xmpi_largetype_size),inoutvec(len*xmpi_largetype_size)
+  integer(KIND=int64) :: ii,jj,kk
+  kk=0
+  do ii=1,len
+    do jj=1,xmpi_largetype_size
+      kk=kk+1
+      inoutvec(kk)=inoutvec(kk).and.invec(kk)
+    end do
+  end do
+  ABI_UNUSED(datatype)
+ end subroutine largetype_land_log
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_xmpi/xmpi_largetype_free
+!! NAME
+!!  xmpi_largetype_free
+!!
+!! FUNCTION
+!!  This function release a large-count contiguous datatype.
+!!
+!! SIDE EFFECTS
+!!  largetype= (INTEGER) MPI type to release
+!!  largetype_op= (INTEGER) MPI user-defined operation associated to largetype type
+!!
+!! SOURCE
+
+subroutine xmpi_largetype_free(largetype,largetype_op)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(inout) :: largetype,largetype_op
+!Local variables-------------------------------
+#ifdef HAVE_MPI
+ integer :: ierr
+#endif
+
+! *************************************************************************
+
+#ifdef HAVE_MPI
+   xmpi_largetype_size=0
+   if (largetype_op/=-1111) call MPI_OP_FREE(largetype_op,ierr)
+   call MPI_TYPE_FREE(largetype,ierr)
+#else
+ ABI_UNUSED(largetype)
+ ABI_UNUSED(largetype_op)
+#endif
+
+end subroutine xmpi_largetype_free
+!!***
+
+!----------------------------------------------------------------------
+
 ! Include files providing wrappers for some of the most commonly used MPI primitives.
 
 #include "xmpi_allgather.finc"
@@ -2426,6 +2936,7 @@ end function xmpi_distrib_with_replicas
 #include "xmpi_ialltoallv.finc"
 
 #include "xmpi_bcast.finc"
+
 #include "xmpi_ibcast.finc"
 
 #include "xmpi_exch.finc"
@@ -2635,10 +3146,10 @@ subroutine xmpio_get_info_frm(bsize_frm,mpi_type_frm,comm)
 
    if (ii==iimax.and.bsize_frm<=0) then
      write(std_out,'(7a)') &
-&      'Error during FORTRAN file record marker detection:',ch10,&
-&      'It was not possible to read/write a small file!',ch10,&
-&      'ACTION: check your access permissions to the file system.',ch10,&
-&      'Common sources of this problem: quota limit exceeded, R/W incorrect permissions, ...'
+       'Error during FORTRAN file record marker detection:',ch10,&
+       'It was not possible to read/write a small file!',ch10,&
+       'ACTION: check your access permissions to the file system.',ch10,&
+       'Common sources of this problem: quota limit exceeded, R/W incorrect permissions, ...'
      call xmpi_abort()
    else
      !write(std_out,'(a,i0)')' Detected FORTRAN record mark length: ',bsize_frm
@@ -4301,20 +4812,20 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
 
 !************************************************************************
 
- if ( sizes(1) /= SUM(block_sizes(1,1:2)) .or. &
-&     sizes(2) /= SUM(block_sizes(2,1:2)) ) then
+ if (sizes(1) /= SUM(block_sizes(1,1:2)) .or. &
+     sizes(2) /= SUM(block_sizes(2,1:2)) ) then
    write(std_out,*)" xmpio_create_coldistr_from_fp3blocks: Inconsistency between block_sizes ans sizes "
    call xmpi_abort()
  end if
 
- if ( block_sizes(1,1)/=block_sizes(2,1) .or.&
-&     block_sizes(1,2)/=block_sizes(2,2) ) then
+ if (block_sizes(1,1) /= block_sizes(2,1) .or.&
+     block_sizes(1,2) /= block_sizes(2,2) ) then
    write(std_out,*)" xmpio_create_coldistr_from_fp3blocks: first two blocks must be square"
    call xmpi_abort()
  end if
 
- if ( block_sizes(2,3)/=block_sizes(2,2) .or.&
-&     block_sizes(1,3)/=block_sizes(1,1) ) then
+ if (block_sizes(2,3) /= block_sizes(2,2) .or.&
+     block_sizes(1,3) /= block_sizes(1,1) ) then
    write(std_out,*)" xmpio_create_coldistr_from_fp3blocks: Full matrix must be square"
    call xmpi_abort()
  end if
@@ -4452,6 +4963,36 @@ subroutine xmpio_create_coldistr_from_fp3blocks(sizes,block_sizes,my_cols,old_ty
 end subroutine xmpio_create_coldistr_from_fp3blocks
 !!***
 #endif
+
+ !type(xcomm_t) function from_mpi_int(comm_value) result(new)
+ !  new%value = comm_value
+ !  new%nproc  xmpi_comm_size(comm_value)
+ !  new%me  xmpi_comm_rank(comm_value)
+ !end function from_mpi_int
+ !pure logical function xcomm_iam_master(self)
+ !  class(xcomm_t),intent(in) :: self
+ !  xcomm_iam_master = self%me == 0
+ !end function xcomm_iam_master
+ pure logical function xcomm_skip(self, iter)
+   class(xcomm_t),intent(in) :: self
+   integer,intent(in) :: iter
+   xcomm_skip = mod(iter, self%nproc) /= self%me
+ end function xcomm_skip
+ subroutine xcomm_set_to_self(self)
+   class(xcomm_t),intent(inout) :: self
+   call self%free()
+   self%value = xmpi_comm_self; self%me = 0; self%nproc = 1
+ end subroutine xcomm_set_to_self
+ subroutine xcomm_set_to_null(self)
+   class(xcomm_t),intent(inout) :: self
+   call self%free()
+   self%value = xmpi_comm_null
+ end subroutine xcomm_set_to_null
+ subroutine xcomm_free(self)
+   class(xcomm_t),intent(inout) :: self
+   call xmpi_comm_free(self%value)
+   self%me = -1; self%nproc = 0
+ end subroutine xcomm_free
 
 END MODULE m_xmpi
 !!***

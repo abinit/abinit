@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -13,15 +13,49 @@
 
 
 
-# _ABI_CHECK_CXX_GNU(COMPILER)
+# _ABI_CXX_CHECK_ARM(COMPILER)
+# ----------------------------
+#
+# Checks whether the specified C++ compiler is the ARMClang++ compiler.
+# If yes, tries to determine its version number and sets the abi_cxx_vendor
+# and abi_cxx_version variables accordingly.
+#
+AC_DEFUN([_ABI_CXX_CHECK_ARM],[
+  # Do some sanity checking of the arguments
+  m4_if([$1], [], [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl AC_MSG_CHECKING([if we are using the ARM C++ compiler])
+  cxx_info_string=`$1 --version 2>/dev/null | head -n 1`
+  abi_result=`echo "${cxx_info_string}" | grep '^Arm C/C++/Fortran Compiler'`
+  if test "${abi_result}" = ""; then
+    abi_result="no"
+    cxx_info_string=""
+    abi_cxx_vendor="unknown"
+    abi_cxx_version="unknown"
+  else
+    AC_DEFINE([CXX_ARM],1,
+      [Define to 1 if you are using the ARM C++ compiler.])
+    abi_cxx_vendor="arm"
+    abi_cxx_version=`echo ${abi_result} | sed -e 's/.*ersion //; s/ .*//'`
+    if test "${abi_cxx_version}" = "${abi_result}"; then
+      abi_cxx_version="unknown"
+    fi
+    abi_result="yes"
+  fi
+  dnl AC_MSG_RESULT(${abi_result})
+]) # _ABI_CXX_CHECK_ARM
+
+
+
+# _ABI_CXX_CHECK_GNU(COMPILER)
 # ----------------------------
 #
 # Checks whether the specified C++ compiler is the GNU C++ compiler.
 # If yes, tries to determine its version number and sets the abi_cxx_vendor
 # and abi_cxx_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_CXX_GNU],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_CXX_CHECK_GNU],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the GNU C++ compiler])
@@ -44,19 +78,19 @@ AC_DEFUN([_ABI_CHECK_CXX_GNU],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CXX_GNU
+]) # _ABI_CXX_CHECK_GNU
 
 
 
-# _ABI_CHECK_CXX_IBM(COMPILER)
+# _ABI_CXX_CHECK_IBM(COMPILER)
 # ----------------------------
 #
 # Checks whether the specified C++ compiler is the IBM XL C++ compiler.
 # If yes, tries to determine its version number and sets the abi_cxx_vendor
 # and abi_cxx_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_CXX_IBM],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_CXX_CHECK_IBM],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the IBM XL C++ compiler])
@@ -93,19 +127,19 @@ AC_DEFUN([_ABI_CHECK_CXX_IBM],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CXX_IBM
+]) # _ABI_CXX_CHECK_IBM
 
 
 
-# _ABI_CHECK_CXX_INTEL(COMPILER)
+# _ABI_CXX_CHECK_INTEL(COMPILER)
 # ------------------------------
 #
 # Checks whether the specified C++ compiler is the Intel C++ compiler.
 # If yes, tries to determine its version number and sets the abi_cxx_vendor
 # and abi_cxx_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_CXX_INTEL],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_CXX_CHECK_INTEL],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the Intel C++ compiler])
@@ -126,19 +160,52 @@ AC_DEFUN([_ABI_CHECK_CXX_INTEL],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CXX_INTEL
+]) # _ABI_CXX_CHECK_INTEL
+
+
+# _ABI_CXX_CHECK_LLVM(COMPILER)
+# -----------------------------
+#
+# Checks whether the specified C compiler is the LLVM Clang++ compiler.
+# If yes, tries to determine its version number and sets the abi_cxx_vendor
+# and abi_cxx_version variables accordingly.
+#
+AC_DEFUN([_ABI_CXX_CHECK_LLVM],[
+  # Do some sanity checking of the arguments
+  m4_if([$1], [], [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl AC_MSG_CHECKING([if we are using the LLVM Clang++ C++ compiler])
+  cxx_info_string=`$1 --version 2>/dev/null | head -n 1`
+  abi_result=`echo "${cxx_info_string}" | grep '[[Cc]]lang'`
+  if test "${abi_result}" = ""; then
+    abi_result="no"
+    cxx_info_string=""
+    abi_cxx_vendor="unknown"
+    abi_cxx_version="unknown"
+  else
+    AC_DEFINE([CXX_LLVM],1,
+      [Define to 1 if you are using the LLVM Clang++ C++ compiler.])
+    abi_cxx_vendor="llvm"
+    abi_cxx_version=`echo ${abi_result} | sed -e 's/.*ersion //; s/ .*//'`
+    if test "${abi_cxx_version}" = "${abi_result}"; then
+      abi_cxx_version="unknown"
+    fi
+    abi_result="yes"
+  fi
+  dnl AC_MSG_RESULT(${abi_result})
+]) # _ABI_CXX_CHECK_LLVM
 
 
 
-# _ABI_CHECK_CXX_PGI(COMPILER)
+# _ABI_CXX_CHECK_PGI(COMPILER)
 # ----------------------------
 #
 # Checks whether the specified C++ compiler is the Portland Group C++
 # compiler. If yes, tries to determine its version number and sets the
 # abi_cxx_vendor and abi_cxx_version variables accordingly.
 #
-AC_DEFUN([_ABI_CHECK_CXX_PGI],[
-  dnl Do some sanity checking of the arguments
+AC_DEFUN([_ABI_CXX_CHECK_PGI],[
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
 
   dnl AC_MSG_CHECKING([if we are using the Portland Group C++ compiler])
@@ -159,7 +226,7 @@ AC_DEFUN([_ABI_CHECK_CXX_PGI],[
     abi_result="yes"
   fi
   dnl AC_MSG_RESULT(${abi_result})
-]) # _ABI_CHECK_CXX_PGI
+]) # _ABI_CXX_CHECK_PGI
 
 
 
@@ -169,45 +236,72 @@ AC_DEFUN([_ABI_CHECK_CXX_PGI],[
 # Tries to determine which type of C++ compiler is installed.
 #
 AC_DEFUN([ABI_PROG_CXX],[
-  dnl Init
+  # Init
   if test "${abi_cxx_vendor}" = ""; then
     abi_cxx_vendor="unknown"
   fi
 
-  dnl Determine C++ compiler type (the order is important)
+  # Preserve environment
+  ABI_ENV_BACKUP
+
+  # Look for the C++ compiler
+  if test "${CXX}" != "" -a ! -x "${CXX}"; then
+    abi_cxx_probe=`echo "${CXX}" | sed -e 's/ .*//'`
+    if test ! -x "${abi_cxx_probe}"; then
+      AC_PATH_PROG([abi_cxx_path],[${abi_cxx_probe}])
+      if test "${abi_cxx_path}" = ""; then
+        AC_MSG_ERROR([could not run C++ compiler "${CXX}"])
+      fi
+    fi
+  fi
+  AC_PROG_CXX
+
+  # Warn if no C++ compiler is available
+  if test "${CXX}" = ""; then
+    AC_MSG_WARN([no C++ compiler available])
+  fi
+
+  # Determine C++ compiler type (the order is important)
   AC_MSG_CHECKING([which type of C++ compiler we have])
 
-  dnl Get rid of that one as early as possible
   if test "${abi_cxx_vendor}" = "unknown"; then
-    _ABI_CHECK_CXX_IBM(${CXX})
+    _ABI_CXX_CHECK_IBM(${CXX})
+  fi
+  if test "${abi_cxx_vendor}" = "unknown"; then
+    _ABI_CXX_CHECK_ARM(${CXX})
+  fi
+  if test "${abi_cxx_vendor}" = "unknown"; then
+    _ABI_CXX_CHECK_INTEL(${CXX})
+  fi
+  if test "${abi_cxx_vendor}" = "unknown"; then
+    _ABI_CXX_CHECK_LLVM(${CXX})
+  fi
+  if test "${abi_cxx_vendor}" = "unknown"; then
+    _ABI_CXX_CHECK_PGI(${CXX})
   fi
 
+  # Check the GNU compiler last, because other compilers are cloning
+  # its CLI
   if test "${abi_cxx_vendor}" = "unknown"; then
-    _ABI_CHECK_CXX_INTEL(${CXX})
-  fi
-  if test "${abi_cxx_vendor}" = "unknown"; then
-    _ABI_CHECK_CXX_PGI(${CXX})
-  fi
-
-  dnl Check the GNU compiler last, because other compilers are cloning
-  dnl its CLI
-  if test "${abi_cxx_vendor}" = "unknown"; then
-    _ABI_CHECK_CXX_GNU(${CXX})
+    _ABI_CXX_CHECK_GNU(${CXX})
   fi
 
-  dnl Fall back to generic when detection fails
+  # Fall back to generic when detection fails
   if test "${abi_cxx_vendor}" = "unknown"; then
     abi_cxx_vendor="generic"
     abi_cxx_version="0.0"
   fi
 
-  dnl Normalize C++ compiler version
+  # Normalize C++ compiler version
   abi_cxx_version=`echo ${abi_cxx_version} | cut -d. -f1-2`
 
-  dnl Display final result
+  # Display final result
   AC_MSG_RESULT([${abi_cxx_vendor} ${abi_cxx_version}])
 
-  dnl Schedule compiler info for substitution
+  # Restore back CXXFLAGS
+  CXXFLAGS="${abi_env_CXXFLAGS}"
+
+  # Schedule compiler info for substitution
   AC_SUBST(abi_cxx_vendor)
   AC_SUBST(abi_cxx_version)
   AC_SUBST(cxx_info_string)

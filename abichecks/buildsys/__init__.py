@@ -17,8 +17,6 @@ keywords = [
 pyscripts = [
 "check-binaries-conf.py",
 "check-build-config.py",
-"check-build-examples.py",
-"check-build-refs.py",
+"check-cpp-options.py",
 "check-forbidden-flags.py",
-"check-libpaw.py"
 ]

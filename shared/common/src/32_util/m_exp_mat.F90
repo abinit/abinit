@@ -7,14 +7,14 @@
 !!  This subroutine calculate the exponential of a  matrix
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2019 ABINIT group (XG)
+!! Copyright (C) 2002-2020 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt.
 !!
 !! PARENTS
-!!     
+!!
 !!
 !! CHILDREN
 !!
@@ -35,9 +35,9 @@ MODULE m_exp_mat
 
  implicit none
 
- private  
+ private
 
- public :: exp_mat  ! exponential of a complex matrix   
+ public :: exp_mat  ! exponential of a complex matrix
 
 
  interface exp_mat
@@ -59,19 +59,18 @@ CONTAINS  !===========================================================
  !! mat_a = the complex matrix
  !! mat_a = the size of mat_a
  !! factor =  a real factor multiplying at the exponent
- !! 
+ !!
  !! OUTPUT
  !!  exp_mat_cx = its exponential is returned in the same matrix
  !! PARENTS
 !!
- !! CHILDREN  
+ !! CHILDREN
 !!      zgeev,zgetrf,zgetri
 !!
  !! SOURCE
 
  subroutine exp_mat_cx(mat_a,mat_a_size,factor)
 
-  implicit none
   !Arguments ------------------------------------
   ! scalars
   real(dp),intent(in) ::  factor
@@ -83,7 +82,7 @@ CONTAINS  !===========================================================
   ! scalars
   integer :: info,mat_a_size,ii
   integer,parameter :: maxsize=3
-  integer,parameter :: lwork=(1+32)*maxsize 
+  integer,parameter :: lwork=(1+32)*maxsize
 
   ! arrays
   integer :: ipvt(mat_a_size)

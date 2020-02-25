@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_qparticles
 !! NAME
 !!  m_qparticles
@@ -9,7 +8,7 @@
 !!  of KS states.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (FB, MG)
+!! Copyright (C) 2008-2020 ABINIT group (FB, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,13 +28,15 @@
 MODULE m_qparticles
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_hdr
  use m_errors
  use m_nctk
+ use m_distribfft
 
+
+ use defs_datatypes,   only : pseudopotential_type, ebands_t
+ use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : open_file, file_exists, isncfile
  use m_fstrings,       only : int2char10, itoa, sjoin
  use m_numeric_tools,  only : linfit, c2r, set2unit, interpol3d, rhophi

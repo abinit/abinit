@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sigc
 !! NAME
 !!  m_sigc
@@ -21,8 +20,6 @@
 module m_sigc
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_gwdefs
  use m_abicore
  use m_xmpi
@@ -31,9 +28,10 @@ module m_sigc
  use m_errors
  use m_time
  use m_splines
+ use m_dtset
 
- !use m_gwdefs, only : czero_gw, cone_gw, Kron15N, Kron15W, Gau7W, &
- !                     Kron23N, Kron23W, Gau11W, Kron31N, Kron31W, Gau15W
+
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
  use m_hide_blas,     only : xdotc, xgemv, xgemm
  use m_numeric_tools, only : hermitianize, imin_loc, coeffs_gausslegint
  use m_fstrings,      only : sjoin, itoa

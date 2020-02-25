@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_frohlichmodel
 !! NAME
 !!  m_frohlichmodel
@@ -8,7 +7,7 @@
 !!  using the Frohlich model
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2018-2019 ABINIT group (XG)
+!!  Copyright (C) 2018-2020 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,14 +27,13 @@
 module m_frohlichmodel
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_crystal
  use m_ebands
  use m_efmas_defs
  use m_ifc
+ use m_dtset
 
  use m_gaussian_quadrature, only : cgqf
 

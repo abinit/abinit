@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outvar_o_z
 !! NAME
 !!  m_outvar_o_z
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,14 +26,15 @@
 module m_outvar_o_z
 
  use defs_basis
- use defs_abitypes
+
  use m_errors
  use m_results_out
  use m_abicore
  use m_xmpi
+ use m_dtset
 
  use m_geometry,     only : mkrdim, xred2xcart
- use m_parser,       only : prttagm, prttagm_images
+ use m_parser,       only : prttagm, prttagm_images, ab_dimensions
 
  implicit none
 
@@ -562,6 +562,9 @@ contains
  intarr(1,:)=dtsets(:)%prtposcar
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtposcar','INT',0)
 
+ intarr(1,:)=dtsets(:)%prtprocar
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtprocar','INT',0)
+
  intarr(1,:)=dtsets(:)%prtpot
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'prtpot','INT',0)
 
@@ -695,6 +698,9 @@ contains
 !variables used for the random positions in unit cell
  intarr(1,:)=dtsets(:)%random_atpos
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'random_atpos','INT',0)
+
+ dprarr(1,:)=dtsets(:)%ratsm
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ratsm','LEN',0)
 
  do idtset=0, ndtset_alloc
    do ii = 1, ntypat
@@ -1136,6 +1142,9 @@ contains
  intarr(1,:)=dtsets(:)%use_gemm_nonlop
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_gemm_nonlop','INT',0)
 
+ intarr(1,:)=dtsets(:)%use_yaml
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_yaml','INT',0)
+
  intarr(1,:)=dtsets(:)%use_nonscf_gkk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_nonscf_gkk','INT',0)
 
@@ -1189,9 +1198,6 @@ contains
 
  intarr(1,:)=dtsets(:)%use_slk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_slk','INT',0, firstchar="-")
-
- intarr(1,:)=dtsets(:)%use_yaml
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_yaml','INT',0)
 
 
 !###########################################################

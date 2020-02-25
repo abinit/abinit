@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_getgh2c
 !! NAME
 !!  m_getgh2c
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2019 ABINIT group (MT,JLJ)
+!!  Copyright (C) 2015-2020 ABINIT group (MT,JLJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,10 +26,10 @@
 module m_getgh2c
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
 
+ use defs_abitypes, only : mpi_type
  use m_pawcprj,     only : pawcprj_type,pawcprj_alloc,pawcprj_free
  use m_hamiltonian, only : gs_hamiltonian_type,rf_hamiltonian_type
  use m_nonlop,      only : nonlop

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_rec
 !! NAME
 !!  m_rec
@@ -10,7 +9,7 @@
 !!  of recursion_type
 !!
 !! COPYRIGHT
-!! Copyright (C) 2002-2019 ABINIT group (MMancini)
+!! Copyright (C) 2002-2020 ABINIT group (MMancini)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -41,14 +40,15 @@
 module m_rec
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_rectypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_sort
+ use m_dtset
 
+ use defs_datatypes,    only : pseudopotential_type
+ use defs_abitypes,     only : mpi_type
  use m_exp_mat,         only : exp_mat
  use m_numeric_tools,   only : set2unit
  use m_special_funcs,   only : gamma_function

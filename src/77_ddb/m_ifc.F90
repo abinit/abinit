@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ifc
 !! NAME
 !!  m_ifc
@@ -8,7 +7,7 @@
 !!  used to handle interatomic force constant sets
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2019 ABINIT group (XG,MJV,EB,MG)
+!! Copyright (C) 2011-2020 ABINIT group (XG,MJV,EB,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2509,8 +2508,7 @@ subroutine ifc_outphbtrap(ifc, cryst, ngqpt, nqshft, qshft, basename)
 
  outfile = trim(basename) // '_BTRAP'
  write(msg, '(3a)')ch10,' Will write phonon FREQS in BoltzTrap format to file ',trim(outfile)
- call wrtout(ab_out,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout([std_out, ab_out], msg)
 
  if (open_file(outfile,msg,newunit=unit_btrap,status="replace") /= 0) then
    MSG_ERROR(msg)

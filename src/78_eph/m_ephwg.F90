@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ephwg
 !! NAME
 !! m_ephwg
@@ -12,7 +11,7 @@
 !!    2.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG, HM)
+!!  Copyright (C) 2008-2020 ABINIT group (MG, HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -36,6 +35,7 @@ module m_ephwg
  use m_errors
  use m_xmpi
  use m_copy
+ use m_dtset
  use m_htetra
  use m_nctk
 #ifdef HAVE_NETCDF
@@ -48,7 +48,6 @@ module m_ephwg
  use m_eph_double_grid
 
  use defs_datatypes,    only : ebands_t
- use defs_abitypes,     only : dataset_type
  use m_time,            only : cwtime, cwtime_report
  use m_symtk,           only : matr3inv
  use m_numeric_tools,   only : arth, inrange, wrap2_pmhalf
@@ -550,7 +549,7 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
                             eph_doublegrid%bz2lgkibz, timrev0, use_symrec=.true.)
 
  ! self%lgrp%ibz --> dg%bz
- ABI_CALLOC(lgkibz2bz,(self%lgk%nibz))
+ ABI_ICALLOC(lgkibz2bz, (self%lgk%nibz))
  do ii=1,self%nbz
    ik_idx = eph_doublegrid%bz2lgkibz(ii)
    lgkibz2bz(ik_idx) = ii
@@ -563,25 +562,6 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
    ik_idx = lgkibz2bz(ii)
    self%lgk2ibz(ii) = eph_doublegrid%bz2ibz_dense(ik_idx)
  enddo
-
-#if 0
-   ! Get mapping IBZ_k --> initial IBZ (self%lgrp%ibz --> self%ibz)
-   ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
-   call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
-
-   if (dksqmax > tol12) then
-     write(msg, '(a,es16.6)' ) &
-      "At least one of the points in IBZ(k) could not be generated from a symmetrical one. dksqmax: ",dksqmax
-     MSG_ERROR(msg)
-   end if
-
-   !check if same results as listkk
-   do ii=1,self%nq_k
-      ABI_CHECK(self%lgk2ibz(ii)==indkk(ii,1),'Unmatching indexes')
-   enddo
-   ABI_FREE(indkk)
-#endif
 
  ! calculate k+q
  do ii=1,self%nq_k
@@ -614,25 +594,6 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
  enddo
  ABI_FREE(lgkibz2bz)
 
-#if 0
-   ! Get mapping (k + q) --> initial IBZ.
-   ABI_MALLOC(indkk, (self%nq_k * sppoldbl1, 6))
-   call listkk(dksqmax, cryst%gmet, indkk, self%ibz, self%lgk%ibz, self%nibz, self%nq_k, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
-
-   if (dksqmax > tol12) then
-     write(msg, '(a,es16.6)' ) &
-      "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
-     MSG_ERROR(msg)
-   end if
-
-   !check if same results as listkk
-   do ii=1,self%nq_k
-      ABI_CHECK(self%kq2ibz(ii)==indkk(ii,1),'Unmatching indexes')
-   enddo
-   ABI_FREE(indkk)
-#endif
-
  ! revert change
  do ii=1,self%nq_k
    self%lgk%ibz(:, ii) = self%lgk%ibz(:, ii) - kpoint
@@ -641,51 +602,12 @@ subroutine ephwg_double_grid_setup_kpoint(self, eph_doublegrid, kpoint, prtvol, 
  ! get self%bz --> dg%bz --> self%lgrp%ibz
  ABI_MALLOC(bz2lgkibz,(self%nbz))
 
-#if 0
-   ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
-   ABI_MALLOC(bz2bz, (self%nbz * sppoldbl1))
-   call listkk(dksqmax, cryst%gmet, indkk, eph_doublegrid%kpts_dense, self%bz,&
-      eph_doublegrid%dense_nbz, self%nbz, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
-
-   do ii=1,self%nbz
-      ! get self%bz --> self%bz
-      bz2bz(ii) = eph_doublegrid%get_index(self%bz(:,ii),2)
-   end do
-
-   !check if same results as listkk
-   do ii=1,self%nbz
-      ABI_CHECK(indkk(ii,1)==bz2bz(ii),'Unmatching indexes')
-   enddo
-   ABI_FREE(indkk)
-   ABI_FREE(bz2bz)
-#endif
-
  do ii=1,self%nbz
     ! get self%bz --> dg%bz
     ik_idx = eph_doublegrid%get_index(self%bz(:,ii),2)
     ! dg%bz --> self%lgrp%ibz
     bz2lgkibz(ii) = eph_doublegrid%bz2lgkibz(ik_idx)
  end do
-
-#if 0
-   ! Get mapping BZ --> IBZ_k (self%bz --> self%lgrp%ibz) required for tetrahedron method
-   ABI_MALLOC(indkk, (self%nbz * sppoldbl1, 6))
-   call listkk(dksqmax, cryst%gmet, indkk, self%lgk%ibz, self%bz, self%nq_k, self%nbz, cryst%nsym,&
-      sppoldbl1, cryst%symafm, cryst%symrel, self%timrev, xmpi_comm_self, use_symrec=.False.)
-
-   if (dksqmax > tol12) then
-     write(msg, '(a,es16.6)' ) &
-      "At least one of the points in IBZ(k) + q could not be generated from a symmetrical one. dksqmax: ",dksqmax
-     MSG_ERROR(msg)
-   end if
-
-   !check if same results as listkk
-   do ii=1,self%nbz
-      ABI_CHECK(indkk(ii,1)==bz2lgkibz(ii),'Unmatching indexes')
-   enddo
-   ABI_FREE(indkk)
-#endif
 
  ! Build tetrahedron object using IBZ(k) as the effective IBZ
  ! This means that input data for tetra routines must be provided in lgk%kibz_q
@@ -885,10 +807,9 @@ subroutine ephwg_get_deltas_wvals(self, band, spin, nu, neig, eig, bcorr, deltaw
  real(dp),parameter :: max_occ1 = one
  real(dp) :: wme0(neig)
 !arrays
- real(dp) :: pme_k(self%nq_k,2), weights(neig,2)
+ real(dp) :: pme_k(self%nq_k,2)
 
 !----------------------------------------------------------------------
- ABI_UNUSED(weights)
 
  ib = band - self%bstart + 1
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -962,7 +883,7 @@ subroutine ephwg_get_deltas_qibzk(self, nu, nene, eminmax, bcorr, dt_weights, co
  integer :: iq, iq_ibz, ie, ii
  real(dp),parameter :: max_occ1 = one
 !arrays
- real(dp) :: eigen_in(self%nq_k) !thetaw(nene, self%nq_k),
+ real(dp) :: eigen_in(self%nq_k)
 
 !----------------------------------------------------------------------
 
@@ -1004,6 +925,7 @@ end subroutine ephwg_get_deltas_qibzk
 !! nu=Phonon branch.
 !! nbcalc=Number of bands in self-energy matrix elements.
 !! zvals
+!! opt: 1 for S. Kaprzyk routines, 2 for Lambin.
 !! comm=MPI communicator
 !! [use_bzsum]= By default the weights are multiplied by the Nstar(q) / Nq where
 !!   Nstar(q) is the number of points in the star of the q-point (using the symmetries of the little group of k)
@@ -1020,11 +942,11 @@ end subroutine ephwg_get_deltas_qibzk
 !!
 !! SOURCE
 
-subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, cweights, comm, use_bzsum)
+subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, opt, cweights, comm, use_bzsum)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iband_sum, spin, nu, nz, nbcalc, comm
+ integer,intent(in) :: iband_sum, spin, nu, nz, nbcalc, opt, comm
  class(ephwg_t),intent(in) :: self
  logical, optional, intent(in) :: use_bzsum
 !arraye
@@ -1040,7 +962,6 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
 !arrays
  real(dp),allocatable :: pme_k(:,:)
  complex(dp),allocatable :: cweights_tmp(:,:)
- !complex(dpc) :: SIM0, SIM0I
 !----------------------------------------------------------------------
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
@@ -1063,7 +984,7 @@ subroutine ephwg_get_zinv_weights(self, nz, nbcalc, zvals, iband_sum, spin, nu, 
  do ib=1,nbcalc
    do ii=1,2
      call self%tetra_k%weights_wvals_zinv(pme_k(:, ii), nz, zvals(:,ib), &
-                                          max_occ1, self%nq_k, 1, cweights_tmp, comm)
+                                          max_occ1, self%nq_k, opt, cweights_tmp, comm)
      do iq=1,self%nq_k
        cweights(:,ii,ib,iq) = cweights_tmp(:,iq)
      end do

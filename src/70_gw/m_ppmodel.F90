@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ppmodel
 !! NAME
 !! m_ppmodel
@@ -8,7 +7,7 @@
 !!  the plasmonpole technique. Methods to operate on the object are also provided.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG, GMR, VO, LR, RWG, RS)
+!!  Copyright (C) 2008-2020 ABINIT group (MG, GMR, VO, LR, RWG, RS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,12 +27,13 @@
 MODULE m_ppmodel
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_array
  use m_linalg_interfaces
+ use m_distribfft
 
+ use defs_abitypes,    only : MPI_type
  use m_fstrings,       only : sjoin, itoa
  use m_hide_lapack,    only : xhegv
  use m_gwdefs,         only : GW_Q0_DEFAULT, czero_gw

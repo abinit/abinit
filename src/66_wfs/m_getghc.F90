@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_getghc
 !! NAME
 !!  m_getghc
@@ -7,7 +6,7 @@
 !! Compute <G|H|C> for input vector |C> expressed in reciprocal space;
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LSI, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,11 +26,11 @@
 module m_getghc
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
 
+ use defs_abitypes, only : mpi_type
  use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_getdim, pawcprj_copy
  use m_bandfft_kpt, only : bandfft_kpt, bandfft_kpt_get_ikpt
@@ -462,7 +461,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        do idat=1,ndat
          do ipw=1,npw_k2
            ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)       =ghc1(1:2,ipw+(idat-1)*npw_k2)+ghc4(1:2,ipw+(idat-1)*npw_k2)
-           ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+npw_k2)=ghc3(1:2,ipw+(idat-1)*npw_k2)+ghc2(1:2,ipw+(idat-1)*npw_k2)
+           ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(1:2,ipw+(idat-1)*npw_k2)+ghc2(1:2,ipw+(idat-1)*npw_k2)
          end do
        end do
      else
@@ -477,7 +476,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
        else if (nspinor2TreatedByThisProc) then
          do idat=1,ndat
            do ipw=1,npw_k2
-             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2)=ghc3(1:2,ipw+(idat-1)*npw_k2)+ghc2(1:2,ipw+(idat-1)*npw_k2)
+             ghc(1:2,ipw+(idat-1)*my_nspinor*npw_k2+shift2)=ghc3(1:2,ipw+(idat-1)*npw_k2)+ghc2(1:2,ipw+(idat-1)*npw_k2)
            end do
          end do
        end if
@@ -628,7 +627,7 @@ subroutine getghc(cpopt,cwavef,cwaveprj,ghc,gsc,gs_ham,gvnlxc,lambda,mpi_enreg,n
 !============================================================
 
 !  Assemble modified kinetic, local and nonlocal contributions
-!  to <G|H|C(n,k)>. Take also into account build-in debugging.
+   !  to <G|H|C(n,k)>. Take also into account build-in debugging.
    if(prtvol/=-level)then
      do idat=1,ndat
        if (k1_eq_k2) then
@@ -759,7 +758,7 @@ end subroutine getghc
 !! for input vector |C> expressed in reciprocal space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LSI, MT, JWZ)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, MT, JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -822,8 +821,9 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
  logical :: nspinor1TreatedByThisProc,nspinor2TreatedByThisProc
  real(dp) :: scale_conversion,weight=one
  !arrays
- real(dp),allocatable :: gcwavef(:,:,:)
- real(dp),allocatable :: ghc1(:,:),kgkpk(:,:)
+ real(dp),allocatable :: cwavef1(:,:),cwavef2(:,:)
+ real(dp),allocatable :: gcwavef(:,:,:),gcwavef1(:,:,:),gcwavef2(:,:,:)
+ real(dp),allocatable :: ghc1(:,:),ghc2(:,:),kgkpk(:,:)
  real(dp),allocatable :: work(:,:,:,:)
 
 ! *********************************************************************
@@ -847,13 +847,15 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
  ! scale conversion from SI to atomic units,
  ! here \alpha^2 where \alpha is the fine structure constant
  scale_conversion = FineStructureConstant2
- 
+ ! JWZ debug
+ ! scale_conversion = zero
+
  if (nspinortot==1) then
 
     ABI_ALLOCATE(ghc1,(2,npw_k*ndat))
 
     !  Do it in 2 STEPs:
-    !  STEP1: Compute grad of cwavef 
+    !  STEP1: Compute grad of cwavef
     ABI_ALLOCATE(gcwavef,(2,npw_k*ndat,3))
 
     gcwavef = zero
@@ -875,7 +877,7 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
     end do
     ABI_DEALLOCATE(kgkpk)
     gcwavef = gcwavef*two_pi
-         
+
     !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
     do idir=1,3
        call fourwf(1,vectornd(:,:,:,:,idir),gcwavef(:,:,idir),ghc1,work,gbound_k,gbound_k,&
@@ -894,10 +896,111 @@ subroutine getghc_nucdip(cwavef,ghc_vectornd,gbound_k,istwf_k,kg_k,kpt,mgfft,mpi
     ABI_DEALLOCATE(gcwavef)
     ABI_DEALLOCATE(ghc1)
 
- else ! nspinortot==2
-    ! not coded yet
+    ! JWZ debug blank this term for now
+    ! ghc_vectornd = zero
 
- end if ! npsinortot
+ else ! nspinortot==2
+
+    ABI_ALLOCATE(cwavef1,(2,npw_k*ndat))
+    ABI_ALLOCATE(cwavef2,(2,npw_k*ndat))
+    do idat=1,ndat
+       do ipw=1,npw_k
+          cwavef1(1:2,ipw+(idat-1)*npw_k)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k)
+          cwavef2(1:2,ipw+(idat-1)*npw_k)=cwavef(1:2,ipw+(idat-1)*my_nspinor*npw_k+shift)
+       end do
+    end do
+
+    ! compute k + G. Note these are in reduced coords
+    ABI_ALLOCATE(kgkpk,(npw_k,3))
+    do ipw = 1, npw_k
+       kgkpk(ipw,:) = kpt(:) + kg_k(:,ipw)
+    end do
+
+    if (nspinor1TreatedByThisProc) then
+
+       ABI_ALLOCATE(ghc1,(2,npw_k*ndat))
+
+       !  Do it in 2 STEPs:
+       !  STEP1: Compute grad of cwavef
+       ABI_ALLOCATE(gcwavef1,(2,npw_k*ndat,3))
+
+       gcwavef1 = zero
+       ! make 2\pi(k+G)c(G)|G> by element-wise multiplication
+       do idir = 1, 3
+          do idat = 1, ndat
+             gcwavef1(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
+                  & cwavef1(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
+             gcwavef1(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
+                  & cwavef1(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
+          end do
+       end do
+       gcwavef1 = gcwavef1*two_pi
+
+       !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+       do idir=1,3
+          call fourwf(1,vectornd(:,:,:,:,idir),gcwavef1(:,:,idir),ghc1,work,gbound_k,gbound_k,&
+               istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+               &     tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+!!$OMP PARALLEL DO
+          ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
+          ! should be faster than explicit loop over ipw as npw_k gets large
+          do idat=1,ndat
+             call DAXPY(npw_k,scale_conversion,ghc1(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
+                  & ghc_vectornd(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1)
+             call DAXPY(npw_k,scale_conversion,ghc1(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
+                  & ghc_vectornd(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1)
+          end do
+       end do ! idir
+       ABI_DEALLOCATE(gcwavef1)
+       ABI_DEALLOCATE(ghc1)
+
+    end if ! end spinor 1
+
+    if (nspinor2TreatedByThisProc) then
+
+       ABI_ALLOCATE(ghc2,(2,npw_k*ndat))
+
+       !  Do it in 2 STEPs:
+       !  STEP1: Compute grad of cwavef
+       ABI_ALLOCATE(gcwavef2,(2,npw_k*ndat,3))
+
+       gcwavef2 = zero
+       ! make 2\pi(k+G)c(G)|G> by element-wise multiplication
+       do idir = 1, 3
+          do idat = 1, ndat
+             gcwavef2(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
+                  & cwavef2(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
+             gcwavef2(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k,idir) = &
+                  & cwavef2(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k)*kgkpk(1:npw_k,idir)
+          end do
+       end do
+       gcwavef2 = gcwavef2*two_pi
+
+       !  STEP2: Compute sum of (grad components of vectornd)*(grad components of cwavef)
+       do idir=1,3
+          call fourwf(1,vectornd(:,:,:,:,idir),gcwavef2(:,:,idir),ghc2,work,gbound_k,gbound_k,&
+               istwf_k,kg_k,kg_k,mgfft,mpi_enreg,ndat,ngfft,npw_k,npw_k,n4,n5,n6,2,&
+               &     tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
+!!$OMP PARALLEL DO
+          ! DAXPY is a BLAS routine for y -> A*x + y, here x = ghc1, A = scale_conversion, and y = ghc_vectornd
+          ! should be faster than explicit loop over ipw as npw_k gets large
+          do idat=1,ndat
+             call DAXPY(npw_k,scale_conversion,ghc2(1,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
+                  & ghc_vectornd(1,1+(idat-1)*npw_k+shift:npw_k+(idat-1)*npw_k+shift),1)
+             call DAXPY(npw_k,scale_conversion,ghc2(2,1+(idat-1)*npw_k:npw_k+(idat-1)*npw_k),1,&
+                  & ghc_vectornd(2,1+(idat-1)*npw_k+shift:npw_k+(idat-1)*npw_k+shift),1)
+          end do
+       end do ! idir
+       ABI_DEALLOCATE(gcwavef2)
+       ABI_DEALLOCATE(ghc2)
+
+    end if ! end spinor 2
+
+    ABI_DEALLOCATE(cwavef1)
+    ABI_DEALLOCATE(cwavef2)
+    ABI_DEALLOCATE(kgkpk)
+
+ end if ! nspinortot
 
  ABI_DEALLOCATE(work)
 
@@ -913,7 +1016,7 @@ end subroutine getghc_nucdip
 !! Compute metaGGA contribution to <G|H|C> for input vector |C> expressed in reciprocal space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LSI, MT)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1166,8 +1269,12 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 &     tim_fourwf,weight,weight,use_gpu_cuda=use_gpu_cuda)
 !!$OMP PARALLEL DO
      do idat=1,ndat
-       do ipw=1,npw_k
-         ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)=ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc2(:,ipw+(idat-1)*npw_k)
+        do ipw=1,npw_k
+           ! original code
+           ! ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)=ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc2(:,ipw+(idat-1)*npw_k)
+           ! but this stores the spinor2 result in the spinor1 location. Should be stored with shift
+           ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k+shift)=ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k+shift)&
+                & -half*ghc2(:,ipw+(idat-1)*npw_k)
        end do
      end do
      ABI_DEALLOCATE(lcwavef2)
@@ -1179,7 +1286,11 @@ subroutine getghc_mGGA(cwavef,ghc_mGGA,gbound_k,gprimd,istwf_k,kg_k,kpt,mgfft,mp
 !!$OMP PARALLEL DO
        do idat=1,ndat
          do ipw=1,npw_k
-           ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)=ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc2(:,ipw+(idat-1)*npw_k)
+           ! original code
+           ! ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)=ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k)-half*ghc2(:,ipw+(idat-1)*npw_k)
+           ! but this stores the spinor2 result in the spinor1 location. Should be stored with shift
+            ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k+shift)=ghc_mGGA(:,ipw+(idat-1)*my_nspinor*npw_k+shift)&
+                 & -half*ghc2(:,ipw+(idat-1)*npw_k)
          end do
        end do
      end do ! idir
@@ -1371,7 +1482,7 @@ end subroutine getgsc
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2019 ABINIT group (JB)
+!! Copyright (C) 2016-2020 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

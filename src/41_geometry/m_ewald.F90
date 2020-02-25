@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ewald
 !! NAME
 !!  m_ewald
@@ -7,7 +6,7 @@
 !!  This module gathers routines to compute the Ewald energy and its derivatives
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (DCA, XG, JJC, GMR)
+!!  Copyright (C) 2014-2020 ABINIT group (DCA, XG, JJC, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

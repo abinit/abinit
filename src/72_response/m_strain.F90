@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_strain
 !!
 !! NAME
@@ -9,7 +8,7 @@
 !! Container type is defined
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (AM)
+!! Copyright (C) 2010-2020 ABINIT group (AM)
 !! This file is distributed under the terms of the
 !! GNU General Public Licence, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +41,7 @@ module m_strain
  public  :: strain_apply
 !!***
 
-!!****t* defs_abitypes/strain_type
+!!****t* m_strain/strain_type
 !! NAME
 !! strain_type
 !!
@@ -95,8 +94,6 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine strain_init(strain,delta,direction,name)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -156,8 +153,6 @@ end subroutine strain_init
 
 subroutine strain_free(strain)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !array
@@ -202,8 +197,6 @@ end subroutine strain_free
 !! SOURCE
 
 subroutine strain_get(strain,rprim,rprim_def,mat_delta,symmetrized)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -302,8 +295,6 @@ end subroutine strain_get
 
 subroutine strain_apply(rprim,rprim_def,strain)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !array
@@ -345,8 +336,6 @@ end subroutine strain_apply
 !! SOURCE
 
 subroutine strain_def2strain(mat_strain,strain)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -461,8 +450,6 @@ end subroutine strain_def2strain
 
 subroutine strain_strain2def(mat_strain,strain)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !array
@@ -520,8 +507,6 @@ end subroutine strain_strain2def
 !! SOURCE
 
 subroutine strain_print(strain)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

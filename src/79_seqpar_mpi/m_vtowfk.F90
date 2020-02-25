@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_vtowfk
 !! NAME
 !!  m_vtowfk
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,14 +26,16 @@
 module m_vtowfk
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
  use m_efield
  use m_linalg_interfaces
  use m_cgtools
+ use m_dtset
+ use m_dtfil
 
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab, cwtime, sec2str
  use m_fstrings,    only : sjoin, itoa, ftoa
  use m_hamiltonian, only : gs_hamiltonian_type

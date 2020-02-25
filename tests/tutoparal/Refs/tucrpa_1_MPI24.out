@@ -1,8 +1,8 @@
 
-.Version 8.11.8 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 19 Jun 2019.
-- ( at 11h15 )
+.Starting date : Wed 12 Feb 2020.
+- ( at 03h40 )
   
 - input  file    -> tucrpa_1.in
 - output file    -> tucrpa_1_MPI24.out
@@ -415,7 +415,8 @@ P           mkmem2          4
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =   24   -> not optimal: autoparal keyword recommended in input file
+-   mpi_nproc: 24, omp_nthreads: -1 (-1 if OMP is not activated)
+-    --> not optimal distribution: autoparal keyword recommended in input file <--
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.2605000  0.0000000  0.0000000  G(1)=  0.1377316  0.0000000  0.0000000
@@ -554,6 +555,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   nstep=   40 was not enough SCF cycles to converge;
   maximum residual=  3.735E-07 exceeds tolwfr=  1.000E-15
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  7.2605000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.2605000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   7.2605000, ]
+lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.8273624E+02
+convergence: {deltae: -3.695E-13, res2:  3.609E-20, residm:  3.735E-07, diffor: null, }
+etotal    :  -1.51928525E+02
+entropy   :   0.00000000E+00
+fermie    :   2.85506715E-01
+cartesian_stress_tensor:
+- [  2.09025506E-03,   3.41980221E-12,   2.24049585E-12, ]
+- [  3.41980221E-12,   2.09025501E-03,  -4.16237044E-12, ]
+- [  2.24049585E-12,  -4.16237044E-12,   2.09025499E-03, ]
+pressure_GPa:  -6.1497E+01
+cartesian_forces:
+- [ -7.79318497E-10,   2.34547917E-09,   1.33042909E-09, ]
+- [  1.55610097E-10,  -6.73892019E-10,  -1.57341296E-10, ]
+- [  7.44884714E-11,  -9.55727856E-10,  -5.49328789E-10, ]
+- [  1.13960924E-10,  -2.38987642E-10,  -3.54044367E-10, ]
+- [  4.35259006E-10,  -4.76871654E-10,  -2.69714635E-10, ]
+force_length_stats: {min:   4.42096820E-10, max:   2.80689355E-09, mean:   1.15257358E-09, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -681,38 +711,36 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.22101241859796E+01
-    Hartree energy  =  3.42935069756873E+01
-    XC energy       = -1.94923332649580E+01
-    Ewald energy    = -1.14220316979058E+02
-    PspCore energy  =  6.33972391350157E+00
-    Loc. psp. energy= -1.09494361865327E+02
-    Spherical terms =  8.43865527676179E+00
-    >>>>> Internal E= -1.51925001757412E+02
-
-    -kT*entropy     = -3.52332107437964E-03
-    >>>>>>>>> Etotal= -1.51928525078487E+02
-
- "Double-counting" decomposition of free energy:
-    Band energy     = -1.47235259001391E+01
-    Ewald energy    =-1.14220316979058E+02
-    PspCore energy  =  6.33972391350157E+00
-    Dble-C XC-energy= -3.05330261649364E+01
-    Spherical terms =  1.21214337322791E+00
-    >>>>> Internal E= -1.51925001757404E+02
-
-    -kT*entropy     = -3.52332107437964E-03
-    >>>> Etotal (DC)= -1.51928525078478E+02
-
-  >Total energy in eV           = -4.13418541519434E+03
-  >Total DC energy in eV        = -4.13418541519410E+03
---------------------------------------------------------------------------------
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  4.22101241859796E+01
+hartree             :  3.42935069756873E+01
+xc                  : -1.94923332649580E+01
+Ewald energy        : -1.14220316979058E+02
+psp_core            :  6.33972391350157E+00
+local_psp           : -1.09494361865327E+02
+spherical_terms     :  8.43865527676179E+00
+internal            : -1.51925001757412E+02
+'-kT*entropy'       : -3.52332107437964E-03
+total_energy        : -1.51928525078487E+02
+total_energy_eV     : -4.13418541519434E+03
+...
 
 
-
+--- !EnergyTermsDC
+iteration_state     : {dtset: 1, }
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -1.47235259001391E+01
+Ewald energy        : -1.14220316979058E+02
+psp_core            :  6.33972391350157E+00
+xc_dc               : -3.05330261649364E+01
+spherical_terms     :  1.21214337322791E+00
+internal            : -1.51925001757404E+02
+'-kT*entropy'       : -3.52332107437964E-03
+total_energy_dc     : -1.51928525078478E+02
+total_energy_dc_eV  : -4.13418541519410E+03
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -727,7 +755,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =   24
+-   mpi_nproc: 24, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -1713,6 +1741,27 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
   maximum residual=  1.282E-15 exceeds tolwfr=  1.000E-15
 
 
+--- !ResultsGS
+iteration_state: {dtset: 2, }
+comment   : Summary of ground state results
+rprimd    :
+- [  7.2605000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   7.2605000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   7.2605000, ]
+lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   3.8273624E+02
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  1.282E-15, diffor:  0.000E+00, }
+etotal    :  -1.51928525E+02
+entropy   :   0.00000000E+00
+fermie    :   2.85506715E-01
+cartesian_stress_tensor: null
+pressure_GPa: null
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
+...
+
+
  ***** Print of fatbands activated ****** 
   Number of atom: natsph =     5
   atoms  are             =     1    2    3    4    5
@@ -1796,7 +1845,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   95.155E-09; max=  83.840E-06
+ Mean square residual over all n,k,spin=   54.920E-17; max=  12.822E-16
  reduced coordinates (array xred) for    5 atoms
        0.000000000000      0.000000000000      0.000000000000
        0.500000000000      0.500000000000      0.500000000000
@@ -2617,16 +2666,33 @@ P           mkmem2          4
 -
 - [1] Implementation of the Projector Augmented-Wave Method in the ABINIT code.
 - M. Torrent, F. Jollet, F. Bottin, G. Zerah, and X. Gonze Comput. Mat. Science 42, 337, (2008).
-- Comment : PAW calculations. Strong suggestion to cite this paper.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#torrent2008
+- Comment: PAW calculations. Strong suggestion to cite this paper.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#torrent2008
 -
 - [2] Libxc: A library of exchange and correlation functionals for density functional theory.
 - M.A.L. Marques, M.J.T. Oliveira, T. Burnus, Computer Physics Communications 183, 2227 (2012).
-- Comment : to be cited when LibXC is used (negative value of ixc)
+- Comment: to be cited when LibXC is used (negative value of ixc)
 - Strong suggestion to cite this paper.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#marques2012
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#marques2012
 -
-- [3] Recent developments in the ABINIT software package.
+- [3] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -2638,37 +2704,24 @@ P           mkmem2          4
 - A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
 - M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
 - B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment : the fourth generic paper describing the ABINIT project.
+- Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [4] ABINIT : First-principles approach of materials and nanosystem properties.
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2009
--
-- [5] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2005
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - Proc.   0 individual time (sec): cpu=         67.9  wall=         68.4
 

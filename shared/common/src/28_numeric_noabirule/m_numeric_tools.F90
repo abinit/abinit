@@ -7,7 +7,7 @@
 !!  This module contains basic tools for numeric computations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile, AL)
+!! Copyright (C) 2008-2020 ABINIT group (MG, GMR, MJV, XG, MVeithen, NH, FJ, MT, DCS, FrD, Olevano, Reining, Sottile, AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -123,6 +123,12 @@ MODULE m_numeric_tools
    module procedure get_trace_rdp
    module procedure get_trace_cdp
  end interface get_trace
+
+ !interface cart_prod33
+ !  module procedure cart_prod33_int
+ !  module procedure cart_prod33_rdp
+ !  module procedure cart_prod33_cdp
+ !end interface cart_prod33
 
  interface get_diag
    module procedure get_diag_int
@@ -296,7 +302,7 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-pure function arth_int(start,step,nn)
+pure function arth_int(start, step, nn)
 
 
 !Arguments ------------------------------------
@@ -338,7 +344,7 @@ end function arth_int
 !!
 !! SOURCE
 
-pure function arth_rdp(start,step,nn)
+pure function arth_rdp(start, step, nn)
 
 
 !Arguments ------------------------------------
@@ -1596,7 +1602,7 @@ pure function bisect_rdp(AA,xx) result(loc)
 
  nn=SIZE(AA); ascnd=(AA(nn)>=AA(1))
  !
- ! === Initialize lower and upper limits ===
+ ! Initialize lower and upper limits
  jl=0; ju=nn+1
  do
    if (ju-jl<=1) EXIT
@@ -1608,7 +1614,7 @@ pure function bisect_rdp(AA,xx) result(loc)
    end if
  end do
  !
- ! === Set the output, being careful with the endpoints ===
+ ! Set the output, being careful with the endpoints
  if (xx==AA(1)) then
    loc=1
  else if (xx==AA(nn)) then
@@ -1651,8 +1657,8 @@ pure function bisect_int(AA,xx) result(loc)
 ! *********************************************************************
 
  nn=SIZE(AA) ; ascnd=(AA(nn)>=AA(1))
- !
- ! === Initialize lower and upper limits ===
+
+ ! Initialize lower and upper limits
  jl=0 ; ju=nn+1
  do
   if (ju-jl<=1) EXIT
@@ -1664,7 +1670,7 @@ pure function bisect_int(AA,xx) result(loc)
   end if
  end do
  !
- ! === Set the output, being careful with the endpoints ===
+ ! Set the output, being careful with the endpoints
  if (xx==AA(1)) then
   loc=1
  else if (xx==AA(nn)) then
@@ -2149,8 +2155,8 @@ function linfit_spc(nn,xx,zz,aa,bb) result(res)
   sx2=sx2+xx(ii)*xx(ii)
  end do
 
- aa=(nn*sxz-sx*sz)/(nn*sx2-sx*sx)
- bb=sz/nn-sx*aa/nn
+ aa=CMPLX((nn*sxz-sx*sz)/(nn*sx2-sx*sx), kind=spc)
+ bb=CMPLX(sz/nn-sx*aa/nn, kind=spc)
 
  do ii=1,nn
   msrt=msrt+ABS(zz(ii)-aa*xx(ii)-bb)**2
@@ -3344,7 +3350,8 @@ subroutine hermitianize_spc(mat,uplo)
    ABI_MALLOC(tmp,(nn))
    do ii=1,nn
      do jj=ii,nn
-       tmp(jj)=half*(mat(ii,jj)+CONJG(mat(jj,ii)))
+       ! reference half constant is dp not sp
+       tmp(jj)=real(half)*(mat(ii,jj)+CONJG(mat(jj,ii)))
      end do
      mat(ii,ii:nn)=tmp(ii:nn)
      mat(ii:nn,ii)=CONJG(tmp(ii:nn))
@@ -3446,7 +3453,7 @@ subroutine hermitianize_dpc(mat,uplo)
        if (ii/=jj) then
          mat(jj,ii) = DCONJG(mat(ii,jj))
        else
-         mat(ii,ii) = DCMPLX(DBLE(mat(ii,ii)),zero)
+         mat(ii,ii) = CMPLX(DBLE(mat(ii,ii)),zero, kind=dpc)
        end if
      end do
    end do
@@ -3457,7 +3464,7 @@ subroutine hermitianize_dpc(mat,uplo)
       if (ii/=jj) then
         mat(ii,jj) = DCONJG(mat(jj,ii))
       else
-        mat(ii,ii) = DCMPLX(REAL(mat(ii,ii)),zero)
+        mat(ii,ii) = CMPLX(REAL(mat(ii,ii)),zero, kind=dpc)
       end if
     end do
   end do
@@ -3690,7 +3697,7 @@ subroutine symmetrize_spc(mat,uplo)
    ABI_MALLOC(tmp,(nn))
    do ii=1,nn
      do jj=ii,nn
-       tmp(jj)=half*(mat(ii,jj)+mat(jj,ii))
+       tmp(jj)=REAL(half)*(mat(ii,jj)+mat(jj,ii))
      end do
      mat(ii,ii:nn)=tmp(ii:nn)
      mat(ii:nn,ii)=tmp(ii:nn)
@@ -4741,7 +4748,7 @@ subroutine cmplx_sphcart(carr, from, units)
      do ii=1,SIZE(carr,DIM=1)
         rho  = DBLE(carr(ii,jj))
         theta= AIMAG(carr(ii,jj)) * fact
-        carr(ii,jj) = DCMPLX(rho*DCOS(theta), rho*DSIN(theta))
+        carr(ii,jj) = CMPLX(rho*DCOS(theta), rho*DSIN(theta), kind=dpc)
      end do
    end do
 
@@ -4760,7 +4767,7 @@ subroutine cmplx_sphcart(carr, from, units)
         else
           theta= zero
         end if
-        carr(ii,jj) = DCMPLX(rho, theta*fact)
+        carr(ii,jj) = CMPLX(rho, theta*fact, kind=dpc)
      end do
    end do
 
@@ -6080,12 +6087,12 @@ subroutine findmin(dedv_1,dedv_2,dedv_predict,&
 !  ENDDEBUG
 
 !  Now, must find the unique root of
-!$0 = bb + 2*cc * lambda + 3*dd * lambda^2 + 4*ee * lambda^3$
+!  0 = bb + 2*cc * lambda + 3*dd * lambda^2 + 4*ee * lambda^3
 !  This root is unique because it was imposed that the second derivative
 !  of the quartic polynomial is everywhere positive.
 !  First, remove the quadratic term, by a shift of lambda
 !  lambdap=lambda-lambda_shift
-!$0 = bbp + ccp * lambdap + eep * lambdap^3$
+!  0 = bbp + ccp * lambdap + eep * lambdap^3
    eep=4.0_dp*ee
    lambda_shift=-dd/(4.0_dp*ee)
    ccp=2.0_dp*cc-12.0_dp*ee*lambda_shift**2
@@ -6173,7 +6180,7 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
  integer,intent(in) :: method,nomega,only_check
 !arrays
  real(dp),intent(in) :: omega(nomega)
- complex,intent(inout) :: eps(nomega)
+ complex(dpc),intent(inout) :: eps(nomega)
 
 !Local variables-------------------------------
 !scalars
@@ -6263,7 +6270,7 @@ subroutine kramerskronig(nomega,omega,eps,method,only_check)
 
 !at this point real part is in e1kk, need to put it into eps
  do ii=1,nomega
-   eps(ii)=CMPLX(e1kk(ii),AIMAG(eps(ii)))
+   eps(ii)=CMPLX(e1kk(ii),AIMAG(eps(ii)), kind=dpc)
  end do
 
 !Verify Kramers-Kronig
@@ -6456,6 +6463,7 @@ end subroutine invcb
 !! SOURCE
 
 elemental subroutine safe_div( n, d, altv, q )
+
 !Arguments ----------------------------------------------
 !scalars
  real(dp), intent(in) :: n, d, altv
@@ -6463,7 +6471,7 @@ elemental subroutine safe_div( n, d, altv, q )
 
 ! *********************************************************************
 
- if ( exponent(n) - exponent(d) >= maxexponent(n) .or. d==0 ) then
+ if ( exponent(n) - exponent(d) >= maxexponent(n) .or. d==zero ) then
     q = altv
  else
     q = n / d

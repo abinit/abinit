@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/band2eps
 !! NAME
 !! band2eps
@@ -9,7 +8,7 @@
 !! of each atom.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (FDortu,MVeithen)
+!! Copyright (C) 1999-2020 ABINIT group (FDortu,MVeithen)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +38,6 @@
 program band2eps
 
  use defs_basis
- use defs_abitypes
  use m_abimover
  use m_build_info
  use m_xmpi
@@ -54,12 +52,11 @@ program band2eps
  use m_fstrings,      only : int2char4, tolower, inupper
  use m_time,          only : asctime
  use m_parser,        only : instrng
+
  implicit none
 
 !Arguments -----------------------------------
-
 !Local variables-------------------------------
-!no_abirules
  integer,parameter :: master=0
  character(len=fnlen) :: filnam(4)
  real(dp) :: E,deltaE

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_respfn_driver
 !! NAME
 !!  m_respfn_driver
@@ -7,7 +6,7 @@
 !!  Subdriver for DFPT calculations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XG, DRH, MT, MKV)
+!!  Copyright (C) 1999-2020 ABINIT group (XG, DRH, MT, MKV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,8 +26,6 @@
 module m_respfn_driver
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_efmas_defs
  use m_abicore
@@ -41,7 +38,11 @@ module m_respfn_driver
  use m_hdr
  use m_crystal
  use m_xcdata
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
  use m_fstrings,    only : strcat
  use m_symtk,       only : matr3inv, littlegroup_q, symmetrize_xred
@@ -216,7 +217,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  integer,intent(inout) :: iexit
  real(dp),intent(in) :: cpui
  real(dp),intent(inout) :: etotal !vz_i
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
  type(dataset_type),intent(in) :: dtset
@@ -454,9 +455,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Here, rprimd, xred and occ are available
  etot=hdr%etot ; fermie=hdr%fermie ; residm=hdr%residm
 !If parallelism over atom, hdr is distributed
- call hdr_update(hdr,bantot,etot,fermie,&
-& residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
-& comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
+ call hdr%update(bantot,etot,fermie,&
+   residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1), &
+   comm_atom=mpi_enreg%comm_atom, mpi_atmtab=mpi_enreg%my_atmtab)
 
 !Clean band structure datatype (should use it more in the future !)
  call ebands_free(bstruct)
@@ -595,7 +596,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 
 !  Update fermie and occ
    etot=hdr%etot ; residm=hdr%residm
-   call hdr_update(hdr,bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
+   call hdr%update(bantot,etot,fermie,residm,rprimd,occ,pawrhoij,xred,dtset%amu_orig(:,1))
 
  else
 !  doccde is irrelevant in this case
@@ -629,9 +630,9 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    if (psp_gencond==1.or.call_pawinit) then
 !    Some gen-cond have to be added...
      call timab(553,1,tsec)
-     call pawinit(gnt_option,zero,zero,dtset%pawlcutd,dtset%pawlmix,&
+     call pawinit(dtset%effmass_free,gnt_option,zero,zero,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
-&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usepotzero)
+&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,0,dtset%usepotzero)
      call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,&
 &     rprimd,symrec,pawang%zarot)
 
@@ -745,7 +746,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !    MT july 2013: Should we read rhoij from the density file ?
    call read_rhor(dtfil%fildensin, cplex1, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor, &
    hdr_den, pawrhoij_read, spaceworld, check_hdr=hdr)
-   etotal = hdr_den%etot; call hdr_free(hdr_den)
+   etotal = hdr_den%etot; call hdr_den%free()
 
    if (rdwrpaw/=0) then
      call pawrhoij_bcast(pawrhoij_read,hdr%pawrhoij,0,spaceworld)
@@ -1580,11 +1581,10 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
        ABI_DEALLOCATE(eigenq_pert)
        ABI_DEALLOCATE(occ_rbz_pert)
        ABI_DEALLOCATE(eigen1_pert)
-       call hdr_free(hdr0)
+       call hdr0%free()
        if ((dtset%getwfkfine /= 0 .and. dtset%irdwfkfine ==0) .or.&
 &       (dtset%getwfkfine == 0 .and. dtset%irdwfkfine /=0) )  then
-!         call hdr_free(hdr0)
-         call hdr_free(hdr_fine)
+         call hdr_fine%free()
          ABI_DEALLOCATE(eigenq_fine)
        end if
      end if ! ieig2rf == 3  or %ieig2rf == 4 or %ieig2rf == 5
@@ -1815,8 +1815,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_DEALLOCATE(blkflgfrx1)
  end if
 
-!Clean the header
- call hdr_free(hdr)
+ ! Clean the header
+ call hdr%free()
 
 !Clean GPU data
 #if defined HAVE_GPU_CUDA

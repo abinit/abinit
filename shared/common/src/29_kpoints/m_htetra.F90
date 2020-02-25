@@ -12,7 +12,7 @@
 !!  details of his implementation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2019 ABINIT group (HM,MJV)
+!!  Copyright (C) 2010-2020 ABINIT group (HM,MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +39,9 @@ module m_htetra
  use m_abicore
  use m_krank
  use m_xmpi
+ use m_errors
 
+ use m_fstrings,        only : sjoin, itoa
  use m_numeric_tools,   only : linspace
  use m_simtet,          only : sim0onei, SIM0TWOI
 
@@ -856,9 +858,9 @@ subroutine htetra_init(tetra, bz2ibz, gprimd, klatt, kpt_fullbz, nkpt_fullbz, kp
 
  ! Volume of all tetrahedra should be the same as that of tetra 1
  ! this is the volume of 1 tetrahedron, should be coherent with notation in Lehmann & Taut
- k1(:) = gprimd(:,1)*klatt(1,1) +  gprimd(:,2)*klatt(2,1) +  gprimd(:,3)*klatt(3,1)
- k2(:) = gprimd(:,1)*klatt(1,2) +  gprimd(:,2)*klatt(2,2) +  gprimd(:,3)*klatt(3,2)
- k3(:) = gprimd(:,1)*klatt(1,3) +  gprimd(:,2)*klatt(2,3) +  gprimd(:,3)*klatt(3,3)
+ k1(:) = gprimd(:,1)*klatt(1,1) + gprimd(:,2)*klatt(2,1) + gprimd(:,3)*klatt(3,1)
+ k2(:) = gprimd(:,1)*klatt(1,2) + gprimd(:,2)*klatt(2,2) + gprimd(:,3)*klatt(3,2)
+ k3(:) = gprimd(:,1)*klatt(1,3) + gprimd(:,2)*klatt(2,3) + gprimd(:,3)*klatt(3,3)
  tetra%vv = abs(k1(1)*(k2(2)*k3(3)-k2(3)*k3(2))- &
                 k1(2)*(k2(1)*k3(3)-k2(3)*k3(1))+ &
                 k1(3)*(k2(1)*k3(2)-k2(2)*k3(1))) / 6.d0 / rcvol
@@ -1689,6 +1691,7 @@ end subroutine htetra_get_onewk
 !! nibz=number of irreducible kpoints
 !! wvals(nw)=Frequency points.
 !! eigen_ibz(nkibz)=eigenenergies for each k point
+!! opt: 1 for S. Kaprzyk routines, 2 for Lambin.
 !!
 !! OUTPUT
 !!  weights(nw,2) = integration weights for
@@ -1727,6 +1730,10 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
  ! lazy evaluation of the mapping from k-points to tetrahedra
  if (.not.allocated(tetra%ibz)) call htetra_init_mapping_ibz(tetra)
 
+ if (all(opt /= [1, 2])) then
+   MSG_ERROR(sjoin("Invalid opt:", itoa(opt)))
+ end if
+
  ! For each tetrahedron that belongs to this k-point
  tetra_count = tetra%tetra_count(ik_ibz)
  tetra_total = tetra%tetra_total(ik_ibz)
@@ -1747,7 +1754,7 @@ subroutine htetra_get_onewk_wvals_zinv(tetra, ik_ibz, nz, zvals, max_occ, nkibz,
        verm = zvals(iz) - eig
        call SIM0TWOI(cw, VERLI, VERM)
      case(2)
-       call get_ontetra_lambinvigneron(eig,zvals(iz),cw)
+       call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
      end select
 
      do isummit=1,4
@@ -2129,7 +2136,7 @@ subroutine htetra_weights_wvals_zinv(tetra,eig_ibz,nz,zvals,max_occ,nkpt,opt,cwe
          verm = zvals(iz) - eig
          call SIM0TWOI(cw, VERLI, VERM)
        case(2)
-         call get_ontetra_lambinvigneron(eig,zvals(iz),cw)
+         call get_ontetra_lambinvigneron(eig, zvals(iz), cw)
        end select
 
        ! Acumulate the contributions

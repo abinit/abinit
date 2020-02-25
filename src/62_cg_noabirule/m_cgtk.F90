@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_cgtk
 !! NAME
 !!  m_cgtk
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -84,8 +83,8 @@ contains
 !!
 !! SOURCE
 
-subroutine cgtk_rotate(cryst,kpt1,isym,itimrev,shiftg,nspinor,ndat,&
-  npw1,kg1,npw2,kg2,istwf1,istwf2,cg1,cg2,work_ngfft,work)
+subroutine cgtk_rotate(cryst, kpt1, isym, itimrev, shiftg, nspinor, ndat, &
+  npw1, kg1, npw2, kg2, istwf1, istwf2, cg1, cg2, work_ngfft, work)
 
 !Arguments ------------------------------------
 !scalars

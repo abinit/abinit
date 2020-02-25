@@ -6,7 +6,7 @@
 !! Prepare data for the calculation of U with the CRPA method: oscillators strenghs and k-points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,13 +31,13 @@
 MODULE m_prep_calc_ucrpa
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_gwdefs!,        only : czero_gw, cone_gw, j_gw, sigparams_t
  use m_xmpi
  use m_defs_ptgroups
  use m_errors
 
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
  use m_time,          only : timab
  use m_hide_blas,     only : xdotc
  use m_geometry,      only : normv
@@ -77,7 +77,7 @@ contains
 !! Prepare data for the calculation of U with the CRPA method: oscillators strenghs and k-points.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
+!! Copyright (C) 1999-2020 ABINIT group (FB, GMR, VO, LR, RWG, MG, RShaltaf,TApplencourt,BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

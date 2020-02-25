@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_nhat
 !! NAME
 !!  m_paw_nhat
@@ -8,7 +7,7 @@
 !!    charge density (i.e. n^hat(r)).
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (FJ, MT, MG, TRangel)
+!! Copyright (C) 2018-2020 ABINIT group (FJ, MT, MG, TRangel)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,10 +24,10 @@ MODULE m_paw_nhat
 
  use defs_basis
  use m_abicore
- use defs_abitypes
  use m_errors
  use m_xmpi
 
+ use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
  use m_pawang,       only : pawang_type
  use m_pawtab,       only : pawtab_type
@@ -135,7 +134,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
  integer,intent(in) :: nhatgrdim,nspden,ntypat
  integer,optional,intent(in) :: me_g0,comm_atom,comm_fft,mpi_comm_wvl,paral_kgb
  real(dp),intent(in) :: ucvol
- real(dp),intent(out) :: compch_fft
+ real(dp),intent(inout) :: compch_fft
  type(distribfft_type),optional,intent(in),target :: distribfft
  type(pawang_type),intent(in) :: pawang
 !arrays

@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 11h59 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h36 )
   
 
 ================================================================================
@@ -73,6 +73,7 @@
 
  Calculation of the interatomic forces 
 
+-begin at tcpu      0.018  and twall      0.018 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -90,7 +91,7 @@
 
  Treat the first list of vectors 
 
- 
+
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
  Phonon energies in Hartree :
    0.000000E+00  0.000000E+00  0.000000E+00  2.342579E-03  2.342579E-03
@@ -106,7 +107,7 @@
  Symmetry characters of vibration mode #   4
        degenerate with vibration modes #   5 to    6
   3.0
- 
+
   Phonon wavevector (reduced coordinates) :  0.50000  0.00000  0.00000
  Phonon energies in Hartree :
    4.793080E-04  4.793118E-04  1.728541E-03  1.881034E-03  2.241334E-03
@@ -372,6 +373,6 @@
 
 ================================================================================
 
-+Total cpu time      0.278  and wall time      0.280 sec
++Total cpu time      0.309  and wall time      0.313 sec
 
  anaddb : the run completed succesfully.

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_efmas
 !! NAME
 !! m_efmas
@@ -7,7 +6,7 @@
 !! This module contains datatypes for efmas functionalities.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2001-2019 ABINIT group (JLJ)
+!! Copyright (C) 2001-2020 ABINIT group (JLJ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,15 +22,17 @@
 module m_efmas
 
  use defs_basis
- use defs_abitypes
  use m_errors
+ use m_abicore
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_efmas_defs
  use m_nctk
  use m_cgtools
+ use m_dtset
 
+ use defs_abitypes,         only : MPI_type
  use m_gaussian_quadrature, only : cgqf
  use m_io_tools, only : get_unit
 

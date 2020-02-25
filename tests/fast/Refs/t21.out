@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 06h18 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 17h00 )
   
-- input  file    -> t21.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/fast_t17-t19-t20-t21-t23/t21.in
 - output file    -> t21.out
 - root for input  files -> t20o
 - root for output files -> t21o
@@ -43,8 +43,8 @@ P              Additional     real(dp)  numbers, for      0.319 Mbytes.
 P              With residue estimated to be             0.237 Mbytes.
 P
 P Comparison of the memory needs of different chains
-P Main chain + fourwf.f                 5.587 Mbytes.
-P Main chain + nonlop.f + opernl.f      5.267 Mbytes.
+P Main chain + fourwf.f                 5.546 Mbytes.
+P Main chain + nonlop.f + opernl.f      5.226 Mbytes.
 P XC chain                              5.739 Mbytes.
 P mkrho chain                           4.936 Mbytes.
 P fourdp chain                          4.732 Mbytes.
@@ -59,7 +59,7 @@ _ WF disk file :      0.043 Mbytes ; DEN or POT disk file :      0.185 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -115,7 +115,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -133,8 +133,8 @@ P           mkmem           1
          ecut(hartree)=      7.000   => boxcut(ratio)=   2.09906
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.3/gonze/8.0.3-private/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -145,7 +145,7 @@ P           mkmem           1
     2   0.000   0.000    0   2.0872718        l,e99.0,e99.9,nproj,rcpsp
    0.00000000   0.00000000   0.00000000   0.00000000     rms, ekb1, ekb2, epsatm
     1.80626423934776    0.22824404341771    1.17378968127746   rchrg,fchrg,qchrg
- pspatm : epsatm=    1.43386982
+  pspatm : epsatm=    1.43386982
          --- l  ekb(1:nproj) -->
              0    3.287949
              1    1.849886
@@ -315,7 +315,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06325   -5.17706   -2.20117
 
- ETOT  9  -8.6716316122266    -1.664E-11 1.285E-12 1.321E-08
+ ETOT  9  -8.6716316122266    -1.666E-11 1.285E-12 1.321E-08
 
  prteigrs : about to open file t21o_TIMA_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04726   Average Vxc (hartree)=  -0.22294
@@ -333,7 +333,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06320   -5.17704   -2.20117
 
- ETOT 10  -8.6716316122318    -5.256E-12 4.165E-13 2.816E-10
+ ETOT 10  -8.6716316122318    -5.242E-12 4.165E-13 2.816E-10
 
  prteigrs : about to open file t21o_TIMA_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04726   Average Vxc (hartree)=  -0.22294
@@ -351,7 +351,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.06321   -5.17705   -2.20117
 
- ETOT 11  -8.6716316122318     3.553E-15 7.529E-14 2.043E-11
+ ETOT 11  -8.6716316122318     1.776E-15 7.529E-14 2.043E-11
 
  prteigrs : about to open file t21o_TIMA_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04726   Average Vxc (hartree)=  -0.22294
@@ -376,9 +376,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.10399040E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.10399040E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae:  1.776E-15, res2:  2.043E-11, residm:  7.529E-14, diffor: null, }
+etotal    :  -8.67163161E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.72568033E-02
+cartesian_stress_tensor:
+- [  1.36717627E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.10399040E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.10399040E-04, ]
+pressure_GPa:  -3.5062E+00
+cartesian_forces:
+- [ -1.77516741E-02,  -9.11859322E-18,  -3.77249498E-17, ]
+- [  1.77516741E-02,   9.11859322E-18,   3.77249498E-17, ]
+force_length_stats: {min:   1.77516741E-02, max:   1.77516741E-02, mean:   1.77516741E-02, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.951584     0.610130      1.561714     0.341454
     2   2.00000     0.951584     0.610130      1.561714     0.341454
@@ -396,11 +422,11 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  -1.76833333333333E-01  0.00000000000000E+00  0.00000000000000E+00
   1.76833333333333E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.77517E-02 1.02489E-02 (free atoms)
- -1.77516741099363E-02 -9.42448093391243E-19 -1.64740552962697E-17
-  1.77516741099363E-02  9.42448093391249E-19  1.64740552962697E-17
+ -1.77516741099375E-02 -9.11859321552573E-18 -3.77249497633751E-17
+  1.77516741099375E-02  9.11859321552573E-18  3.77249497633751E-17
  Reduced forces (fred)
-  2.13020089319244E-01  4.19122963437250E-16 -4.38878766228911E-16
- -2.13020089319227E-01  4.04043793942990E-16 -7.02463650969225E-16
+  2.13020089319250E-01  7.29487457242058E-17  3.01799598107001E-16
+ -2.13020089319250E-01 -7.29487457242058E-17 -3.01799598107001E-16
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 0.00000E+00 0.00000E+00 (free atoms)
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
   0.00000000000000E+00  0.00000000000000E+00  0.00000000000000E+00
@@ -414,7 +440,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
 
- ETOT  1  -8.6716316122318    -8.672E+00 8.006E-14 1.390E-27
+ ETOT  1  -8.6716316122318    -8.672E+00 8.006E-14 1.004E-27
 
  prteigrs : about to open file t21o_TIMB_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04726   Average Vxc (hartree)=  -0.22294
@@ -439,9 +465,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.10399040E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.10399040E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 1, icycle: 2, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -8.672E+00, res2:  1.004E-27, residm:  8.006E-14, diffor: null, }
+etotal    :  -8.67163161E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.72568101E-02
+cartesian_stress_tensor:
+- [  1.36717627E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.10399040E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.10399040E-04, ]
+pressure_GPa:  -3.5062E+00
+cartesian_forces:
+- [ -1.77516702E-02,  -2.31744218E-17,  -1.39420888E-17, ]
+- [  1.77516702E-02,   2.31744218E-17,   1.39420888E-17, ]
+force_length_stats: {min:   1.77516702E-02, max:   1.77516702E-02, mean:   1.77516702E-02, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.951584     0.610130      1.561714     0.341454
     2   2.00000     0.951584     0.610130      1.561714     0.341454
@@ -459,20 +511,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  -1.76833333333333E-01  0.00000000000000E+00  0.00000000000000E+00
   1.76833333333333E-01  0.00000000000000E+00  0.00000000000000E+00
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.77517E-02 1.02489E-02 (free atoms)
- -1.77516702139449E-02  7.25050568900610E-17  4.79978729855132E-17
-  1.77516702139449E-02 -7.25050568900610E-17 -4.79978729855132E-17
+ -1.77516702139461E-02 -2.31744217625019E-17 -1.39420888367456E-17
+  1.77516702139461E-02  2.31744217625019E-17  1.39420888367456E-17
  Reduced forces (fred)
-  2.13020042567342E-01 -6.31436817890054E-17 -3.96584747485581E-16
- -2.13020042567336E-01  1.09693722845197E-15  3.71381220282630E-16
+  2.13020042567353E-01  1.85395374100015E-16  1.11536710693965E-16
+ -2.13020042567353E-01 -1.85395374100015E-16 -1.11536710693965E-16
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.17380E-04 6.77695E-05 (free atoms)
- -1.17380231269148E-04 -6.23179394102953E-21 -1.08932172179439E-19
-  1.17380231269148E-04  6.23179394102957E-21  1.08932172179439E-19
- Kinetic energy of ions (ekin) [Ha]=  7.03247269198118E-04
- Total energy (etotal) [Ha]= -8.67163161223184E+00
+ -1.17380231269156E-04 -6.02953036349729E-20 -2.49450463117918E-19
+  1.17380231269156E-04  6.02953036349729E-20  2.49450463117918E-19
+ Kinetic energy of ions (ekin) [Ha]=  7.03247269198213E-04
+ Total energy (etotal) [Ha]= -8.67163161223183E+00
 
  Difference of energy with previous step (new-old):
-           Absolute (Ha)=-3.55271E-15
-           Relative     =-4.09694E-16
+           Absolute (Ha)= 0.00000E+00
+           Relative     = 0.00000E+00
 
 --- Iteration: ( 1/10) Internal Cycle: (3/4)
 --------------------------------------------------------------------------------
@@ -535,7 +587,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.94823   -5.21873   -2.21265
 
- ETOT  4  -8.6726918560643    -6.296E-07 1.246E-08 4.123E-05
+ ETOT  4  -8.6726918560644    -6.296E-07 1.246E-08 4.123E-05
 
  prteigrs : about to open file t21o_TIMC_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04339   Average Vxc (hartree)=  -0.22334
@@ -607,7 +659,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.94438   -5.21152   -2.20837
 
- ETOT  8  -8.6726918816227    -4.489E-11 3.780E-12 1.672E-09
+ ETOT  8  -8.6726918816227    -4.490E-11 3.780E-12 1.672E-09
 
  prteigrs : about to open file t21o_TIMC_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04342   Average Vxc (hartree)=  -0.22334
@@ -625,7 +677,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.94440   -5.21148   -2.20836
 
- ETOT  9  -8.6726918816241    -1.442E-12 9.259E-14 3.334E-10
+ ETOT  9  -8.6726918816241    -1.428E-12 9.259E-14 3.334E-10
 
  prteigrs : about to open file t21o_TIMC_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04342   Average Vxc (hartree)=  -0.22334
@@ -650,9 +702,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.10650826E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.10650826E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 1, icycle: 3, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -1.428E-12, res2:  3.334E-10, residm:  9.259E-14, diffor: null, }
+etotal    :  -8.67269188E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.34216756E-02
+cartesian_stress_tensor:
+- [  1.90302709E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.10650826E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.10650826E-04, ]
+pressure_GPa:  -4.0366E+00
+cartesian_forces:
+- [ -9.27751934E-03,  -6.54256118E-18,  -1.06961264E-16, ]
+- [  9.27751934E-03,   6.54256118E-18,   1.06961264E-16, ]
+force_length_stats: {min:   9.27751934E-03, max:   9.27751934E-03, mean:   9.27751934E-03, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.954079     0.609981      1.564059     0.344098
     2   2.00000     0.954079     0.609981      1.564059     0.344098
@@ -664,21 +742,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.16161582805334E+00 -2.10323045509747E-18 -3.67646081105606E-17
-  2.16161582805334E+00  2.10323045509748E-18  3.67646081105606E-17
+ -2.16161582805334E+00 -2.03496649768033E-17 -8.41895313022974E-17
+  2.16161582805334E+00  2.03496649768033E-17  8.41895313022975E-17
  Reduced coordinates (xred)
- -1.80134652337778E-01 -2.62903806887183E-19 -4.59557601382008E-18
-  1.80134652337778E-01  2.62903806887185E-19  4.59557601382008E-18
+ -1.80134652337778E-01 -2.54370812210042E-18 -1.05236914127872E-17
+  1.80134652337778E-01  2.54370812210042E-18  1.05236914127872E-17
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 9.27752E-03 5.35638E-03 (free atoms)
- -9.27751934145892E-03 -7.21620698338761E-17  4.03184304586128E-17
-  9.27751934145892E-03  7.21620698338761E-17 -4.03184304586128E-17
+ -9.27751934146348E-03 -6.54256118431953E-18 -1.06961264255668E-16
+  9.27751934146348E-03  6.54256118431953E-18  1.06961264255668E-16
  Reduced forces (fred)
-  1.11330232097508E-01  4.19023803867006E-16  2.23100524991102E-16
- -1.11330232097506E-01 -7.35569313475012E-16  8.68195412328908E-16
+  1.11330232097562E-01  5.23404894745562E-17  8.55690114045343E-16
+ -1.11330232097562E-01 -5.23404894745562E-17 -8.55690114045343E-16
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.15467E-04 6.66652E-05 (free atoms)
-  1.15467444930492E-04  4.91790639918150E-19  5.33467798120967E-19
- -1.15467444930492E-04 -4.91790639918150E-19 -5.33467798120967E-19
- Kinetic energy of ions (ekin) [Ha]=  6.80514282274506E-04
+  1.15467444930499E-04 -3.36292778235554E-20  4.02645984767160E-19
+ -1.15467444930499E-04  3.36292778235554E-20 -4.02645984767160E-19
+ Kinetic energy of ions (ekin) [Ha]=  6.80514282274597E-04
  Total energy (etotal) [Ha]= -8.67269188162410E+00
 
  Difference of energy with previous step (new-old):
@@ -818,7 +896,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.31220   -5.10771   -2.18600
 
- ETOT  8  -8.6672584558617    -6.715E-10 2.501E-11 5.130E-08
+ ETOT  8  -8.6672584558617    -6.714E-10 2.501E-11 5.130E-08
 
  prteigrs : about to open file t21o_TIM1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.05547   Average Vxc (hartree)=  -0.22214
@@ -854,7 +932,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.31212   -5.10783   -2.18612
 
- ETOT 10  -8.6672584558979    -8.487E-12 6.778E-13 3.813E-10
+ ETOT 10  -8.6672584558979    -8.491E-12 6.778E-13 3.813E-10
 
  prteigrs : about to open file t21o_TIM1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.05546   Average Vxc (hartree)=  -0.22214
@@ -872,7 +950,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -9.31213   -5.10783   -2.18612
 
- ETOT 11  -8.6672584558979     3.553E-15 9.605E-14 4.750E-11
+ ETOT 11  -8.6672584558979    -1.776E-15 9.605E-14 4.750E-11
 
  prteigrs : about to open file t21o_TIM1_EIG
  Fermi (or HOMO) energy (hartree) =  -0.05546   Average Vxc (hartree)=  -0.22214
@@ -897,9 +975,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.10203989E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.10203989E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 1, icycle: 4, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -1.776E-15, res2:  4.750E-11, residm:  9.605E-14, diffor: null, }
+etotal    :  -8.66725846E+00
+entropy   :   0.00000000E+00
+fermie    :  -5.54641623E-02
+cartesian_stress_tensor:
+- [  9.82402515E-06,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.10203989E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.10203989E-04, ]
+pressure_GPa:  -2.2579E+00
+cartesian_forces:
+- [ -3.96019083E-02,  -4.06187094E-17,  -1.21861377E-16, ]
+- [  3.96019083E-02,   4.06187094E-17,   1.21861377E-16, ]
+force_length_stats: {min:   3.96019083E-02, max:   3.96019083E-02, mean:   3.96019083E-02, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.955249     0.607643      1.562892     0.347606
     2   2.00000     0.955249     0.607643      1.562892     0.347606
@@ -911,22 +1015,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.04405947467192E+00  3.31958681944751E-16  3.60090763731653E-16
-  2.04405947467192E+00 -3.31958681944751E-16 -3.60090763731653E-16
+ -2.04405947467191E+00 -2.26997625308999E-17  2.71786039717833E-16
+  2.04405947467191E+00  2.26997625308999E-17 -2.71786039717833E-16
  Reduced coordinates (xred)
- -1.70338289555993E-01  4.14948352430939E-17  4.50113454664566E-17
-  1.70338289555993E-01 -4.14948352430939E-17 -4.50113454664566E-17
+ -1.70338289555993E-01 -2.83747031636249E-18  3.39732549647291E-17
+  1.70338289555993E-01  2.83747031636249E-18 -3.39732549647292E-17
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.96019E-02 2.28642E-02 (free atoms)
- -3.96019083395346E-02 -5.44948313033587E-17 -8.56149176999394E-17
-  3.96019083395346E-02  5.44948313033588E-17  8.56149176999394E-17
+ -3.96019083395380E-02 -4.06187094234150E-17 -1.21861376673535E-16
+  3.96019083395380E-02  4.06187094234151E-17  1.21861376673535E-16
  Reduced forces (fred)
-  4.75222900074435E-01  1.90800459065707E-15  1.34054799621562E-15
- -4.75222900074397E-01  1.03608728980333E-15 -2.92906869834124E-17
+  4.75222900074457E-01  3.24949675387320E-16  9.74891013388282E-16
+ -4.75222900074457E-01 -3.24949675387320E-16 -9.74891013388282E-16
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 5.80799E-04 3.35324E-04 (free atoms)
- -5.80798853221238E-04 -2.90545556448724E-18 -1.58328564131511E-18
-  5.80798853221238E-04  2.90545556448724E-18  1.58328564131511E-18
- Kinetic energy of ions (ekin) [Ha]=  1.72174818201268E-02
- Total energy (etotal) [Ha]= -8.66725845589791E+00
+ -5.80798853221329E-04  4.68977038466518E-20 -3.01199102834765E-18
+  5.80798853221329E-04 -4.68977038466518E-20  3.01199102834765E-18
+ Kinetic energy of ions (ekin) [Ha]=  1.72174818201323E-02
+ Total energy (etotal) [Ha]= -8.66725845589792E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)= 5.43343E-03
@@ -1065,7 +1169,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.86925   -5.23406   -2.21309
 
- ETOT  8  -8.6730498799717    -3.290E-09 1.412E-10 2.219E-08
+ ETOT  8  -8.6730498799718    -3.290E-09 1.412E-10 2.219E-08
 
  prteigrs : about to open file t21o_TIM2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04101   Average Vxc (hartree)=  -0.22359
@@ -1083,7 +1187,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.86888   -5.23381   -2.21292
 
- ETOT  9  -8.6730498799912    -1.950E-11 1.206E-12 1.437E-08
+ ETOT  9  -8.6730498799912    -1.948E-11 1.206E-12 1.437E-08
 
  prteigrs : about to open file t21o_TIM2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04101   Average Vxc (hartree)=  -0.22359
@@ -1119,7 +1223,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.86895   -5.23384   -2.21297
 
- ETOT 11  -8.6730498799983    -6.928E-14 8.265E-14 2.321E-10
+ ETOT 11  -8.6730498799983    -8.882E-14 8.265E-14 2.321E-10
 
  prteigrs : about to open file t21o_TIM2_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04101   Average Vxc (hartree)=  -0.22359
@@ -1144,9 +1248,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.10864275E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.10864275E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -8.882E-14, res2:  2.321E-10, residm:  8.265E-14, diffor: null, }
+etotal    :  -8.67304988E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.10105273E-02
+cartesian_stress_tensor:
+- [  2.22162974E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.10864275E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.10864275E-04, ]
+pressure_GPa:  -4.3532E+00
+cartesian_forces:
+- [ -4.51419194E-03,  -5.09763592E-17,  -2.23318281E-16, ]
+- [  4.51419194E-03,   5.09763592E-17,   2.23318281E-16, ]
+force_length_stats: {min:   4.51419194E-03, max:   4.51419194E-03, mean:   4.51419194E-03, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.941250     0.604025      1.545275     0.337226
     2   2.00000     0.941250     0.604025      1.545275     0.337226
@@ -1158,22 +1288,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.18777024791359E+00 -2.17613010659962E-16 -8.25991188111061E-17
-  2.18777024791359E+00  2.17613010659962E-16  8.25991188111061E-17
+ -2.18777024791360E+00 -1.58570391454205E-17 -3.04379998318032E-16
+  2.18777024791360E+00  1.58570391454205E-17  3.04379998318032E-16
  Reduced coordinates (xred)
- -1.82314187326132E-01 -2.72016263324953E-17 -1.03248898513883E-17
-  1.82314187326132E-01  2.72016263324953E-17  1.03248898513883E-17
+ -1.82314187326133E-01 -1.98212989317757E-18 -3.80474997897540E-17
+  1.82314187326133E-01  1.98212989317757E-18  3.80474997897540E-17
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 4.51419E-03 2.60627E-03 (free atoms)
- -4.51419193575820E-03  1.15053375120767E-16 -2.85815089153021E-16
-  4.51419193575820E-03 -1.15053375120767E-16  2.85815089153021E-16
+ -4.51419193575452E-03 -5.09763592176335E-17 -2.23318280771647E-16
+  4.51419193575452E-03  5.09763592176335E-17  2.23318280771647E-16
  Reduced forces (fred)
-  5.41703032290970E-02  5.48634138306231E-17  2.47959412963549E-15
- -5.41703032290999E-02  1.89571741576290E-15 -2.09344729681285E-15
+  5.41703032290543E-02  4.07810873741068E-16  1.78654624617318E-15
+ -5.41703032290543E-02 -4.07810873741068E-16 -1.78654624617318E-15
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.41009E-04 8.14116E-05 (free atoms)
-  1.41009109613520E-04  1.15837313503633E-18  6.49790835151382E-19
- -1.41009109613520E-04 -1.15837313503633E-18 -6.49790835151382E-19
- Kinetic energy of ions (ekin) [Ha]=  1.01487481046667E-03
- Total energy (etotal) [Ha]= -8.67304987999832E+00
+  1.41009109613545E-04 -1.47424110361963E-19  9.04319939870565E-19
+ -1.41009109613545E-04  1.47424110361963E-19 -9.04319939870565E-19
+ Kinetic energy of ions (ekin) [Ha]=  1.01487481046703E-03
+ Total energy (etotal) [Ha]= -8.67304987999833E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-5.79142E-03
@@ -1294,7 +1424,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.85930   -5.23673   -2.21356
 
- ETOT  7  -8.6730786243990    -2.812E-12 1.452E-13 6.078E-10
+ ETOT  7  -8.6730786243990    -2.805E-12 1.452E-13 6.078E-10
 
  prteigrs : about to open file t21o_TIM3_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04070   Average Vxc (hartree)=  -0.22362
@@ -1312,7 +1442,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.85930   -5.23672   -2.21356
 
- ETOT  8  -8.6730786243992    -1.883E-13 8.070E-14 5.832E-11
+ ETOT  8  -8.6730786243992    -1.847E-13 8.070E-14 5.832E-11
 
  prteigrs : about to open file t21o_TIM3_EIG
  Fermi (or HOMO) energy (hartree) =  -0.04070   Average Vxc (hartree)=  -0.22362
@@ -1337,9 +1467,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.10894675E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.10894675E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -1.847E-13, res2:  5.832E-11, residm:  8.070E-14, diffor: null, }
+etotal    :  -8.67307862E+00
+entropy   :   0.00000000E+00
+fermie    :  -4.07039662E-02
+cartesian_stress_tensor:
+- [  2.26113088E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.10894675E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.10894675E-04, ]
+pressure_GPa:  -4.3926E+00
+cartesian_forces:
+- [ -3.94011823E-03,   1.00456121E-16,  -1.10365838E-16, ]
+- [  3.94011823E-03,  -1.00456121E-16,   1.10365838E-16, ]
+force_length_stats: {min:   3.94011823E-03, max:   3.94011823E-03, mean:   3.94011823E-03, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.922277     0.589143      1.511420     0.333134
     2   2.00000     0.922277     0.589143      1.511420     0.333134
@@ -1351,21 +1507,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.19117075162906E+00  1.00666595029739E-16 -8.73961121172056E-16
-  2.19117075162906E+00 -1.00666595029739E-16  8.73961121172056E-16
+ -2.19117075162906E+00 -1.53375379145407E-16 -9.12579024480452E-16
+  2.19117075162906E+00  1.53375379145407E-16  9.12579024480452E-16
  Reduced coordinates (xred)
- -1.82597562635755E-01  1.25833243787173E-17 -1.09245140146507E-16
-  1.82597562635755E-01 -1.25833243787173E-17  1.09245140146507E-16
+ -1.82597562635755E-01 -1.91719223931759E-17 -1.14072378060056E-16
+  1.82597562635755E-01  1.91719223931759E-17  1.14072378060056E-16
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.94012E-03 2.27483E-03 (free atoms)
- -3.94011822904584E-03  1.46133118057475E-16 -8.62932324401803E-17
-  3.94011822904584E-03 -1.46133118057475E-16  8.62932324401803E-17
+ -3.94011822904648E-03  1.00456121238660E-16 -1.10365838098976E-16
+  3.94011822904648E-03 -1.00456121238660E-16  1.10365838098976E-16
  Reduced forces (fred)
-  4.72814187485309E-02 -8.22016836472277E-16  1.69361260831301E-15
- -4.72814187485693E-02  1.51611305244732E-15  3.12920889270124E-16
+  4.72814187485577E-02 -8.03648969909282E-16  8.82926704791808E-16
+ -4.72814187485577E-02  8.03648969909282E-16 -8.82926704791808E-16
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.41009E-04 8.14116E-05 (free atoms)
-  1.41009109613520E-04  1.15837313503633E-18  6.49790835151382E-19
- -1.41009109613520E-04 -1.15837313503633E-18 -6.49790835151382E-19
- Kinetic energy of ions (ekin) [Ha]=  1.01487481046667E-03
+  1.41009109613545E-04 -1.47424110361963E-19  9.04319939870565E-19
+ -1.41009109613545E-04  1.47424110361963E-19 -9.04319939870565E-19
+ Kinetic energy of ions (ekin) [Ha]=  1.01487481046703E-03
  Total energy (etotal) [Ha]= -8.67307862439920E+00
 
  Difference of energy with previous step (new-old):
@@ -1487,7 +1643,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.81710   -5.24945   -2.21616
 
- ETOT  7  -8.6731603112327    -4.545E-11 2.166E-12 9.910E-09
+ ETOT  7  -8.6731603112327    -4.544E-11 2.166E-12 9.910E-09
 
  prteigrs : about to open file t21o_TIM4_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03937   Average Vxc (hartree)=  -0.22377
@@ -1505,7 +1661,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.81711   -5.24943   -2.21615
 
- ETOT  8  -8.6731603112403    -7.599E-12 8.165E-13 2.936E-10
+ ETOT  8  -8.6731603112403    -7.606E-12 8.165E-13 2.936E-10
 
  prteigrs : about to open file t21o_TIM4_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03937   Average Vxc (hartree)=  -0.22377
@@ -1523,7 +1679,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.81712   -5.24941   -2.21614
 
- ETOT  9  -8.6731603112403     1.776E-15 9.860E-14 7.080E-11
+ ETOT  9  -8.6731603112403     0.000E+00 9.860E-14 7.080E-11
 
  prteigrs : about to open file t21o_TIM4_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03937   Average Vxc (hartree)=  -0.22377
@@ -1548,9 +1704,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.11036500E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.11036500E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae:  0.000E+00, res2:  7.080E-11, residm:  9.860E-14, diffor: null, }
+etotal    :  -8.67316031E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.93657611E-02
+cartesian_stress_tensor:
+- [  2.43091441E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.11036500E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.11036500E-04, ]
+pressure_GPa:  -4.5619E+00
+cartesian_forces:
+- [ -1.51647676E-03,  -1.40242130E-16,  -7.07303263E-18, ]
+- [  1.51647676E-03,   1.40242130E-16,   7.07303263E-18, ]
+force_length_stats: {min:   1.51647676E-03, max:   1.51647676E-03, mean:   1.51647676E-03, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.921594     0.587943      1.509537     0.333651
     2   2.00000     0.921594     0.587943      1.509537     0.333651
@@ -1562,22 +1744,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.20622828064827E+00  4.03113699927030E-16 -7.16088232257740E-16
-  2.20622828064827E+00 -4.03113699927030E-16  7.16088232257740E-16
+ -2.20622828064828E+00  2.56365562526007E-16 -9.44674378120112E-16
+  2.20622828064828E+00 -2.56365562526007E-16  9.44674378120112E-16
  Reduced coordinates (xred)
- -1.83852356720689E-01  5.03892124908787E-17 -8.95110290322175E-17
-  1.83852356720689E-01 -5.03892124908787E-17  8.95110290322175E-17
+ -1.83852356720690E-01  3.20456953157508E-17 -1.18084297265014E-16
+  1.83852356720690E-01 -3.20456953157508E-17  1.18084297265014E-16
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.51648E-03 8.75538E-04 (free atoms)
- -1.51647675731591E-03 -1.16876988059129E-16 -3.07462907906298E-17
-  1.51647675731591E-03  1.16876988059129E-16  3.07462907906297E-17
+ -1.51647675731205E-03 -1.40242129578648E-16 -7.07303262587052E-18
+  1.51647675731205E-03  1.40242129578648E-16  7.07303262587050E-18
  Reduced forces (fred)
-  1.81977210877870E-02  1.38559763494943E-15  1.05398675477267E-15
- -1.81977210877948E-02 -4.84434173996629E-16  5.62046102122593E-16
+  1.81977210877445E-02  1.12193703662918E-15  5.65842610069641E-17
+ -1.81977210877445E-02 -1.12193703662918E-15 -5.65842610069640E-17
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.10505E-05 6.38000E-06 (free atoms)
- -1.10504783738634E-05  4.78078311641166E-19 -5.52681904844539E-19
-  1.10504783738634E-05 -4.78078311641166E-19  5.52681904844539E-19
- Kinetic energy of ions (ekin) [Ha]=  6.23275837121935E-06
- Total energy (etotal) [Ha]= -8.67316031124028E+00
+ -1.10504783738600E-05  1.67435817232126E-19 -5.25199457699597E-19
+  1.10504783738600E-05 -1.67435817232126E-19  5.25199457699597E-19
+ Kinetic energy of ions (ekin) [Ha]=  6.23275837121551E-06
+ Total energy (etotal) [Ha]= -8.67316031124029E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-8.16868E-05
@@ -1662,7 +1844,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.81399   -5.25033   -2.21631
 
- ETOT  5  -8.6731634896797    -1.751E-11 4.115E-13 1.367E-08
+ ETOT  5  -8.6731634896797    -1.755E-11 4.115E-13 1.367E-08
 
  prteigrs : about to open file t21o_TIM5_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03927   Average Vxc (hartree)=  -0.22378
@@ -1680,7 +1862,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.81402   -5.25034   -2.21632
 
- ETOT  6  -8.6731634896857    -6.006E-12 4.063E-13 4.868E-10
+ ETOT  6  -8.6731634896857    -6.020E-12 4.063E-13 4.868E-10
 
  prteigrs : about to open file t21o_TIM5_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03927   Average Vxc (hartree)=  -0.22378
@@ -1698,7 +1880,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.81404   -5.25035   -2.21633
 
- ETOT  7  -8.6731634896859    -2.096E-13 8.380E-14 4.017E-11
+ ETOT  7  -8.6731634896859    -2.167E-13 8.380E-14 4.017E-11
 
  prteigrs : about to open file t21o_TIM5_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03927   Average Vxc (hartree)=  -0.22378
@@ -1723,9 +1905,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.11048392E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.11048392E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 5, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -2.167E-13, res2:  4.017E-11, residm:  8.380E-14, diffor: null, }
+etotal    :  -8.67316349E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.92682864E-02
+cartesian_stress_tensor:
+- [  2.44310594E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.11048392E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.11048392E-04, ]
+pressure_GPa:  -4.5741E+00
+cartesian_forces:
+- [ -1.34538643E-03,   6.35067709E-17,  -1.91726491E-16, ]
+- [  1.34538643E-03,  -6.35067709E-17,   1.91726491E-16, ]
+force_length_stats: {min:   1.34538643E-03, max:   1.34538643E-03, mean:   1.34538643E-03, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.921540     0.587853      1.509393     0.333688
     2   2.00000     0.921540     0.587853      1.509393     0.333688
@@ -1737,22 +1945,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.20733882403164E+00 -1.57556030708679E-16 -8.28193620079698E-16
-  2.20733882403164E+00  1.57556030708679E-16  8.28193620079698E-16
+ -2.20733882403164E+00 -3.94758991675759E-16 -9.07927936834850E-16
+  2.20733882403164E+00  3.94758991675759E-16  9.07927936834850E-16
  Reduced coordinates (xred)
- -1.83944902002637E-01 -1.96945038385848E-17 -1.03524202509962E-16
-  1.83944902002637E-01  1.96945038385849E-17  1.03524202509962E-16
+ -1.83944902002636E-01 -4.93448739594699E-17 -1.13490992104356E-16
+  1.83944902002636E-01  4.93448739594699E-17  1.13490992104356E-16
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.34539E-03 7.76759E-04 (free atoms)
- -1.34538642595489E-03  5.25235805103568E-17 -2.49887539537685E-17
-  1.34538642595489E-03 -5.25235805103568E-17  2.49887539537684E-17
+ -1.34538642595488E-03  6.35067708801372E-17 -1.91726491281707E-16
+  1.34538642595488E-03 -6.35067708801372E-17  1.91726491281707E-16
  Reduced forces (fred)
-  1.61446371114617E-02 -2.51813734398734E-17  1.76441926415514E-15
- -1.61446371114556E-02  8.15195914725835E-16  1.36459920089484E-15
+  1.61446371114585E-02 -5.08054167041098E-16  1.53381193025365E-15
+ -1.61446371114585E-02  5.08054167041098E-16 -1.53381193025365E-15
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 7.47650E-06 4.31656E-06 (free atoms)
- -7.47649992886594E-06 -1.07381313397074E-19 -1.19217736880281E-19
-  7.47649992886594E-06  1.07381313397074E-19  1.19217736880281E-19
- Kinetic energy of ions (ekin) [Ha]=  2.85308558641107E-06
- Total energy (etotal) [Ha]= -8.67316348968593E+00
+ -7.47649992885868E-06 -1.83610212916560E-19 -1.08382562565765E-19
+  7.47649992885868E-06  1.83610212916560E-19  1.08382562565765E-19
+ Kinetic energy of ions (ekin) [Ha]=  2.85308558640553E-06
+ Total energy (etotal) [Ha]= -8.67316348968595E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-3.17845E-06
@@ -1855,7 +2063,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.80267   -5.25377   -2.21700
 
- ETOT  6  -8.6731719404777    -8.029E-11 4.834E-12 5.358E-09
+ ETOT  6  -8.6731719404777    -8.031E-11 4.834E-12 5.358E-09
 
  prteigrs : about to open file t21o_TIM6_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03891   Average Vxc (hartree)=  -0.22382
@@ -1873,7 +2081,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.80273   -5.25378   -2.21703
 
- ETOT  7  -8.6731719404814    -3.768E-12 2.003E-13 8.363E-10
+ ETOT  7  -8.6731719404814    -3.737E-12 2.003E-13 8.363E-10
 
  prteigrs : about to open file t21o_TIM6_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03891   Average Vxc (hartree)=  -0.22382
@@ -1891,7 +2099,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.80274   -5.25377   -2.21703
 
- ETOT  8  -8.6731719404820    -5.862E-13 9.202E-14 1.044E-10
+ ETOT  8  -8.6731719404820    -6.022E-13 9.202E-14 1.044E-10
 
  prteigrs : about to open file t21o_TIM6_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03891   Average Vxc (hartree)=  -0.22382
@@ -1916,9 +2124,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.11087722E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.11087722E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 6, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -6.022E-13, res2:  1.044E-10, residm:  9.202E-14, diffor: null, }
+etotal    :  -8.67317194E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.89108648E-02
+cartesian_stress_tensor:
+- [  2.48763261E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.11087722E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.11087722E-04, ]
+pressure_GPa:  -4.6185E+00
+cartesian_forces:
+- [ -7.23913583E-04,   1.35160712E-16,   1.91701404E-16, ]
+- [  7.23913583E-04,  -1.35160712E-16,  -1.91701404E-16, ]
+force_length_stats: {min:   7.23913583E-04, max:   7.23913583E-04, mean:   7.23913583E-04, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.931469     0.597299      1.528768     0.334171
     2   2.00000     0.931469     0.597299      1.528768     0.334171
@@ -1930,21 +2164,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.21142684984974E+00  2.77105361875028E-16 -9.06763072490035E-16
-  2.21142684984974E+00 -2.77105361875028E-16  9.06763072490035E-16
+ -2.21142684984973E+00  8.99570936740619E-17 -1.59014114548378E-15
+  2.21142684984973E+00 -8.99570936740620E-17  1.59014114548378E-15
  Reduced coordinates (xred)
- -1.84285570820811E-01  3.46381702343785E-17 -1.13345384061254E-16
-  1.84285570820811E-01 -3.46381702343785E-17  1.13345384061254E-16
+ -1.84285570820811E-01  1.12446367092577E-17 -1.98767643185473E-16
+  1.84285570820811E-01 -1.12446367092577E-17  1.98767643185473E-16
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 7.23914E-04 4.17952E-04 (free atoms)
- -7.23913582829249E-04  9.23998381628656E-17 -2.52679087893826E-16
-  7.23913582829249E-04 -9.23998381628656E-17  2.52679087893826E-16
+ -7.23913582829580E-04  1.35160711684545E-16  1.91701404356487E-16
+  7.23913582829580E-04 -1.35160711684545E-16 -1.91701404356487E-16
  Reduced forces (fred)
-  8.68696299395506E-03 -8.13503252281041E-16  2.83060120604244E-15
- -8.68696299394692E-03  6.64894158324809E-16 -1.21226420025877E-15
+  8.68696299395496E-03 -1.08128569347636E-15 -1.53361123485189E-15
+ -8.68696299395496E-03  1.08128569347636E-15  1.53361123485189E-15
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 4.15951E-06 2.40149E-06 (free atoms)
- -4.15950987626032E-06 -5.72588459521232E-20 -7.77531256529012E-20
-  4.15950987626032E-06  5.72588459521233E-20  7.77531256529011E-20
- Kinetic energy of ions (ekin) [Ha]=  8.83084886956246E-07
+ -4.15950987625531E-06 -5.20043038833424E-20 -4.23988813070682E-19
+  4.15950987625531E-06  5.20043038833424E-20  4.23988813070682E-19
+ Kinetic energy of ions (ekin) [Ha]=  8.83084886954115E-07
  Total energy (etotal) [Ha]= -8.67317194048203E+00
 
  Difference of energy with previous step (new-old):
@@ -2012,7 +2246,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79995   -5.25482   -2.21733
 
- ETOT  4  -8.6731732963224    -4.524E-10 7.801E-12 4.322E-08
+ ETOT  4  -8.6731732963223    -4.524E-10 7.801E-12 4.322E-08
 
  prteigrs : about to open file t21o_TIM7_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03882   Average Vxc (hartree)=  -0.22383
@@ -2030,7 +2264,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79980   -5.25463   -2.21718
 
- ETOT  5  -8.6731732963377    -1.537E-11 3.586E-13 1.239E-08
+ ETOT  5  -8.6731732963377    -1.538E-11 3.586E-13 1.239E-08
 
  prteigrs : about to open file t21o_TIM7_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03882   Average Vxc (hartree)=  -0.22383
@@ -2066,7 +2300,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79984   -5.25465   -2.21721
 
- ETOT  7  -8.6731732963433    -6.573E-14 7.786E-14 3.083E-11
+ ETOT  7  -8.6731732963433    -8.349E-14 7.786E-14 3.083E-11
 
  prteigrs : about to open file t21o_TIM7_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03882   Average Vxc (hartree)=  -0.22383
@@ -2091,9 +2325,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.11099275E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.11099275E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 7, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -8.349E-14, res2:  3.083E-11, residm:  7.786E-14, diffor: null, }
+etotal    :  -8.67317330E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.88194292E-02
+cartesian_stress_tensor:
+- [  2.49897952E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.11099275E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.11099275E-04, ]
+pressure_GPa:  -4.6299E+00
+cartesian_forces:
+- [ -5.66299062E-04,   7.96692294E-18,  -5.66088808E-17, ]
+- [  5.66299062E-04,  -7.96692294E-18,   5.66088808E-17, ]
+force_length_stats: {min:   5.66299062E-04, max:   5.66299062E-04, mean:   5.66299062E-04, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.931427     0.597220      1.528647     0.334206
     2   2.00000     0.931427     0.597220      1.528647     0.334206
@@ -2105,22 +2365,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.21247771461457E+00  4.40754437688645E-16 -1.72215202085721E-15
-  2.21247771461457E+00 -4.40754437688645E-16  1.72215202085721E-15
+ -2.21247771461457E+00  3.66226464385355E-16 -6.53283164594226E-16
+  2.21247771461457E+00 -3.66226464385356E-16  6.53283164594226E-16
  Reduced coordinates (xred)
- -1.84373142884548E-01  5.50943047110806E-17 -2.15269002607151E-16
-  1.84373142884548E-01 -5.50943047110806E-17  2.15269002607151E-16
+ -1.84373142884548E-01  4.57783080481694E-17 -8.16603955742782E-17
+  1.84373142884548E-01 -4.57783080481694E-17  8.16603955742782E-17
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 5.66299E-04 3.26953E-04 (free atoms)
- -5.66299062134765E-04  7.83145681981321E-18  2.15675791012732E-16
-  5.66299062134765E-04 -7.83145681981321E-18 -2.15675791012732E-16
+ -5.66299062135139E-04  7.96692293774966E-18 -5.66088808463580E-17
+  5.66299062135139E-04 -7.96692293774966E-18  5.66088808463580E-17
  Reduced forces (fred)
-  6.79558874561782E-03  1.09037784741283E-16 -2.09184223879288E-15
- -6.79558874561654E-03  2.34341093858295E-16  1.35897041741084E-15
+  6.79558874562167E-03 -6.37353835019973E-17  4.52871046770864E-16
+ -6.79558874562167E-03  6.37353835019973E-17 -4.52871046770864E-16
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 3.02877E-06 1.74866E-06 (free atoms)
- -3.02876617661170E-06  3.01426269510153E-19 -6.02348688029182E-19
-  3.02876617661170E-06 -3.01426269510153E-19  6.02348688029182E-19
- Kinetic energy of ions (ekin) [Ha]=  4.68219639389056E-07
- Total energy (etotal) [Ha]= -8.67317329634331E+00
+ -3.02876617661324E-06  4.17797881245803E-19  1.98595599550460E-19
+  3.02876617661324E-06 -4.17797881245803E-19 -1.98595599550460E-19
+ Kinetic energy of ions (ekin) [Ha]=  4.68219639389532E-07
+ Total energy (etotal) [Ha]= -8.67317329634333E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-1.35586E-06
@@ -2223,7 +2483,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79590   -5.25583   -2.21744
 
- ETOT  6  -8.6731746073217    -1.030E-11 6.604E-13 6.874E-10
+ ETOT  6  -8.6731746073217    -1.031E-11 6.604E-13 6.874E-10
 
  prteigrs : about to open file t21o_TIM8_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03870   Average Vxc (hartree)=  -0.22384
@@ -2241,7 +2501,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79593   -5.25584   -2.21745
 
- ETOT  7  -8.6731746073220    -3.499E-13 6.760E-14 3.477E-11
+ ETOT  7  -8.6731746073221    -3.428E-13 6.760E-14 3.477E-11
 
  prteigrs : about to open file t21o_TIM8_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03870   Average Vxc (hartree)=  -0.22384
@@ -2266,9 +2526,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.11113756E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.11113756E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 8, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -3.428E-13, res2:  3.477E-11, residm:  6.760E-14, diffor: null, }
+etotal    :  -8.67317461E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.86956601E-02
+cartesian_stress_tensor:
+- [  2.51430234E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.11113756E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.11113756E-04, ]
+pressure_GPa:  -4.6452E+00
+cartesian_forces:
+- [ -3.54117835E-04,  -3.70032537E-17,  -7.07662572E-17, ]
+- [  3.54117835E-04,   3.70032537E-17,   7.07662572E-17, ]
+force_length_stats: {min:   3.54117835E-04, max:   3.54117835E-04, mean:   3.54117835E-04, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.931368     0.597114      1.528482     0.334254
     2   2.00000     0.931368     0.597114      1.528482     0.334254
@@ -2280,21 +2566,21 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.21390208108091E+00  3.47315768129279E-16 -6.18284547399983E-16
-  2.21390208108091E+00 -3.47315768129279E-16  6.18284547399983E-16
+ -2.21390208108091E+00  2.11118721821884E-16 -1.24348556594934E-15
+  2.21390208108091E+00 -2.11118721821884E-16  1.24348556594934E-15
  Reduced coordinates (xred)
- -1.84491840090076E-01  4.34144710161598E-17 -7.72855684249979E-17
-  1.84491840090076E-01 -4.34144710161598E-17  7.72855684249979E-17
+ -1.84491840090076E-01  2.63898402277355E-17 -1.55435695743668E-16
+  1.84491840090076E-01 -2.63898402277355E-17  1.55435695743668E-16
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 3.54118E-04 2.04450E-04 (free atoms)
- -3.54117835182500E-04 -2.03061333904552E-16  8.56332934005168E-17
-  3.54117835182500E-04  2.03061333904552E-16 -8.56332934005168E-17
+ -3.54117835183362E-04 -3.70032537321876E-17 -7.07662572366568E-17
+  3.54117835183362E-04  3.70032537321876E-17  7.07662572366568E-17
  Reduced forces (fred)
-  4.24941402219178E-03  2.13103203709007E-15  6.41545290347313E-16
- -4.24941402218822E-03 -1.11794930538276E-15  2.01167798475558E-15
+  4.24941402220034E-03  2.96026029857500E-16  5.66130057893254E-16
+ -4.24941402220034E-03 -2.96026029857501E-16 -5.66130057893254E-16
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.92354E-06 1.11056E-06 (free atoms)
- -1.92353996200506E-06  1.23081149477172E-19  1.80506218694548E-19
-  1.92353996200506E-06 -1.23081149477172E-19 -1.80506218694548E-19
- Kinetic energy of ions (ekin) [Ha]=  1.88851552471429E-07
+ -1.92353996200633E-06  1.74838387232223E-19  1.51418934607215E-19
+  1.92353996200633E-06 -1.74838387232223E-19 -1.51418934607215E-19
+ Kinetic energy of ions (ekin) [Ha]=  1.88851552471679E-07
  Total energy (etotal) [Ha]= -8.67317460732205E+00
 
  Difference of energy with previous step (new-old):
@@ -2380,7 +2666,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79411   -5.25637   -2.21754
 
- ETOT  5  -8.6731750054416    -5.201E-12 1.376E-13 5.637E-09
+ ETOT  5  -8.6731750054416    -5.194E-12 1.376E-13 5.637E-09
 
  prteigrs : about to open file t21o_TIM9_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03864   Average Vxc (hartree)=  -0.22385
@@ -2398,7 +2684,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79413   -5.25638   -2.21755
 
- ETOT  6  -8.6731750054441    -2.528E-12 2.331E-13 9.061E-10
+ ETOT  6  -8.6731750054441    -2.530E-12 2.331E-13 9.061E-10
 
  prteigrs : about to open file t21o_TIM9_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03864   Average Vxc (hartree)=  -0.22385
@@ -2441,9 +2727,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.11119336E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.11119336E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 9, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae:  0.000E+00, res2:  1.728E-10, residm:  7.796E-14, diffor: null, }
+etotal    :  -8.67317501E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.86392003E-02
+cartesian_stress_tensor:
+- [  2.52126989E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.11119336E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.11119336E-04, ]
+pressure_GPa:  -4.6521E+00
+cartesian_forces:
+- [ -2.57697095E-04,  -5.79549978E-17,  -2.34529281E-16, ]
+- [  2.57697095E-04,   5.79549978E-17,   2.34529281E-16, ]
+force_length_stats: {min:   2.57697095E-04, max:   2.57697095E-04, mean:   2.57697095E-04, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.941878     0.605369      1.547247     0.336509
     2   2.00000     0.941878     0.605369      1.547247     0.336509
@@ -2455,22 +2767,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.21455245631729E+00 -2.92070311672246E-16 -8.05349775055299E-16
-  2.21455245631729E+00  2.92070311672246E-16  8.05349775055299E-16
+ -2.21455245631729E+00  1.44985296475929E-16 -1.29039797160821E-15
+  2.21455245631729E+00 -1.44985296475929E-16  1.29039797160821E-15
  Reduced coordinates (xred)
- -1.84546038026441E-01 -3.65087889590307E-17 -1.00668721881912E-16
-  1.84546038026441E-01  3.65087889590307E-17  1.00668721881912E-16
+ -1.84546038026441E-01  1.81231620594911E-17 -1.61299746451026E-16
+  1.84546038026441E-01 -1.81231620594911E-17  1.61299746451026E-16
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 2.57697E-04 1.48781E-04 (free atoms)
- -2.57697094953183E-04 -1.09603346592023E-16 -1.89616394536056E-18
-  2.57697094953183E-04  1.09603346592023E-16  1.89616394536056E-18
+ -2.57697094952202E-04 -5.79549977607040E-17 -2.34529280949526E-16
+  2.57697094952202E-04  5.79549977607040E-17  2.34529280949526E-16
  Reduced forces (fred)
-  3.09236513943689E-03  1.60862638830437E-15  3.45797366492007E-16
- -3.09236513943951E-03 -1.45027157168003E-16  3.15458743366238E-16
+  3.09236513942643E-03  4.63639982085632E-16  1.87623424759620E-15
+ -3.09236513942643E-03 -4.63639982085632E-16 -1.87623424759620E-15
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 1.36998E-06 7.90960E-07 (free atoms)
- -1.36998231769550E-06 -4.73367787475752E-19  5.19238957990040E-19
-  1.36998231769550E-06  4.73367787475752E-19 -5.19238957990040E-19
- Kinetic energy of ions (ekin) [Ha]=  9.57961502014819E-08
- Total energy (etotal) [Ha]= -8.67317500544413E+00
+ -1.36998231769787E-06 -1.02663217958086E-19 -2.72690739207656E-19
+  1.36998231769787E-06  1.02663217958086E-19  2.72690739207656E-19
+ Kinetic energy of ions (ekin) [Ha]=  9.57961502018133E-08
+ Total energy (etotal) [Ha]= -8.67317500544414E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-3.98122E-07
@@ -2537,7 +2849,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79259   -5.25696   -2.21773
 
- ETOT  4  -8.6731752568398    -1.407E-10 2.421E-12 1.340E-08
+ ETOT  4  -8.6731752568397    -1.407E-10 2.421E-12 1.340E-08
 
  prteigrs : about to open file t21o_TIM10_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03859   Average Vxc (hartree)=  -0.22385
@@ -2555,7 +2867,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79251   -5.25686   -2.21765
 
- ETOT  5  -8.6731752568434    -3.649E-12 1.103E-13 5.050E-09
+ ETOT  5  -8.6731752568434    -3.650E-12 1.103E-13 5.050E-09
 
  prteigrs : about to open file t21o_TIM10_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03859   Average Vxc (hartree)=  -0.22385
@@ -2573,7 +2885,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79252   -5.25686   -2.21765
 
- ETOT  6  -8.6731752568456    -2.181E-12 2.540E-13 1.704E-09
+ ETOT  6  -8.6731752568456    -2.176E-12 2.540E-13 1.704E-09
 
  prteigrs : about to open file t21o_TIM10_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03859   Average Vxc (hartree)=  -0.22385
@@ -2591,7 +2903,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
  kpt#   1, nband=  3, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
   -8.79254   -5.25687   -2.21766
 
- ETOT  7  -8.6731752568456    -3.553E-15 8.467E-14 4.007E-10
+ ETOT  7  -8.6731752568456    -7.105E-15 8.467E-14 4.007E-10
 
  prteigrs : about to open file t21o_TIM10_EIG
  Fermi (or HOMO) energy (hartree) =  -0.03859   Average Vxc (hartree)=  -0.22385
@@ -2616,9 +2928,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
   sigma(2 2)=  1.11124872E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.11124872E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 10, icycle: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 12.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   8.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   8.0000000, ]
+lattice_lengths: [  12.00000,    8.00000,    8.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   7.6800000E+02
+convergence: {deltae: -7.105E-15, res2:  4.007E-10, residm:  8.467E-14, diffor: null, }
+etotal    :  -8.67317526E+00
+entropy   :   0.00000000E+00
+fermie    :  -3.85884581E-02
+cartesian_stress_tensor:
+- [  2.52753343E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.11124872E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.11124872E-04, ]
+pressure_GPa:  -4.6584E+00
+cartesian_forces:
+- [ -1.71221021E-04,   6.28299166E-17,  -3.00347285E-17, ]
+- [  1.71221021E-04,  -6.28299166E-17,   3.00347285E-17, ]
+force_length_stats: {min:   1.71221021E-04, max:   1.71221021E-04, mean:   1.71221021E-04, }
+...
+
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
- Note: Diff(up-dn) is a rough approximation of local magnetic moment
+ Radius=ratsph(iatom), smearing ratsm=  0.0000. Diff(up-dn)=approximate z local magnetic moment.
  Atom    Radius    up_density   dn_density  Total(up+dn)  Diff(up-dn)
     1   2.00000     0.941859     0.605327      1.547186     0.336532
     2   2.00000     0.941859     0.605327      1.547186     0.336532
@@ -2630,22 +2968,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 ---OUTPUT-----------------------------------------------------------------------
 
  Cartesian coordinates (xcart) [bohr]
- -2.21513790887011E+00 -3.30302133236578E-16 -8.36614196615736E-16
-  2.21513790887011E+00  3.30302133236578E-16  8.36614196615736E-16
+ -2.21513790887010E+00  1.52264057893803E-17 -1.98625087400976E-15
+  2.21513790887010E+00 -1.52264057893804E-17  1.98625087400976E-15
  Reduced coordinates (xred)
- -1.84594825739176E-01 -4.12877666545722E-17 -1.04576774576967E-16
-  1.84594825739176E-01  4.12877666545722E-17  1.04576774576967E-16
+ -1.84594825739175E-01  1.90330072367254E-18 -2.48281359251220E-16
+  1.84594825739175E-01 -1.90330072367255E-18  2.48281359251220E-16
  Cartesian forces (fcart) [Ha/bohr]; max,rms= 1.71221E-04 9.88545E-05 (free atoms)
- -1.71221020573905E-04  5.81508469866530E-17  1.15989282133040E-16
-  1.71221020573905E-04 -5.81508469866530E-17 -1.15989282133040E-16
+ -1.71221020570430E-04  6.28299165576003E-17 -3.00347284843716E-17
+  1.71221020570430E-04 -6.28299165576003E-17  3.00347284843716E-17
  Reduced forces (fred)
-  2.05465224688261E-03 -6.26781889558830E-16 -9.00295729212235E-16
- -2.05465224689110E-03  3.03631662227619E-16  9.55532784916399E-16
+  2.05465224684516E-03 -5.02639332460803E-16  2.40277827874973E-16
+ -2.05465224684516E-03  5.02639332460803E-16 -2.40277827874973E-16
  Cartesian velocities (vel) [bohr*Ha/hbar]; max,rms= 9.15901E-07 5.28796E-07 (free atoms)
- -9.15901233528277E-07 -5.07226906490920E-19  5.84225309934987E-20
-  9.15901233528277E-07  5.07226906490920E-19 -5.84225309934987E-20
- Kinetic energy of ions (ekin) [Ha]=  4.28169197140016E-08
- Total energy (etotal) [Ha]= -8.67317525684559E+00
+ -9.15901233527041E-07 -1.80588669189013E-19 -6.13043420266202E-19
+  9.15901233527041E-07  1.80588669189013E-19  6.13043420266202E-19
+ Kinetic energy of ions (ekin) [Ha]=  4.28169197138860E-08
+ Total energy (etotal) [Ha]= -8.67317525684558E+00
 
  Difference of energy with previous step (new-old):
            Absolute (Ha)=-2.51401E-07
@@ -2654,31 +2992,30 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   4.6587E-14; max=  8.4670E-14
+ Mean square residual over all n,k,spin=   46.587E-15; max=  84.670E-15
    0.0000  0.0000  0.0000    1  8.46699E-14 kpt; spin; max resid(k); each band:
   8.47E-14 3.77E-14 6.32E-14 2.24E-14 2.24E-14
    0.0000  0.0000  0.0000    2  6.71116E-14 kpt; spin; max resid(k); each band:
   2.88E-14 6.71E-14 4.65E-14
-- nxfh > 0 in outwf is deprecated and will be removed in ABINIT8
  reduced coordinates (array xred) for    2 atoms
-      -0.184594825739     -0.000000000000     -0.000000000000
-       0.184594825739      0.000000000000      0.000000000000
+      -0.184594825739      0.000000000000     -0.000000000000
+       0.184594825739     -0.000000000000      0.000000000000
  rms dE/dt=  1.1863E-03; max dE/dt=  2.0547E-03; dE/dt below (all hartree)
-    1       0.002054652247     -0.000000000000     -0.000000000000
+    1       0.002054652247     -0.000000000000      0.000000000000
     2      -0.002054652247      0.000000000000      0.000000000000
 
  cartesian coordinates (angstrom) at end:
-    1     -1.17220049525777    -0.00000000000000    -0.00000000000000
-    2      1.17220049525777     0.00000000000000     0.00000000000000
+    1     -1.17220049525777     0.00000000000000    -0.00000000000000
+    2      1.17220049525777    -0.00000000000000     0.00000000000000
 
  cartesian forces (hartree/bohr) at end:
-    1     -0.00017122102057     0.00000000000000     0.00000000000000
-    2      0.00017122102057    -0.00000000000000    -0.00000000000000
+    1     -0.00017122102057     0.00000000000000    -0.00000000000000
+    2      0.00017122102057    -0.00000000000000     0.00000000000000
  frms,max,avg= 9.8854502E-05 1.7122102E-04   0.000E+00  0.000E+00  0.000E+00 h/b
 
  cartesian forces (eV/Angstrom) at end:
-    1     -0.00880453813979     0.00000000000000     0.00000000000001
-    2      0.00880453813979    -0.00000000000000    -0.00000000000001
+    1     -0.00880453813961     0.00000000000000    -0.00000000000000
+    2      0.00880453813961    -0.00000000000000     0.00000000000000
  frms,max,avg= 5.0833025E-03 8.8045381E-03   0.000E+00  0.000E+00  0.000E+00 e/A
  length scales= 12.000000000000  8.000000000000  8.000000000000 bohr
               =  6.350126503080  4.233417668720  4.233417668720 angstroms
@@ -2727,41 +3064,41 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
       Minimum=   -6.8152E-02  at reduced coord.    0.0000    0.5000    0.5000
  Next minimum=   -6.7252E-02  at reduced coord.    0.5000    0.5000    0.5000
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 1, itime: 10, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.53967475407832E+00
+hartree             :  1.46046282455237E+00
+xc                  : -3.21841716849620E+00
+Ewald energy        : -5.58865694911764E+00
+psp_core            :  2.98722879456821E-02
+local_psp           : -5.84403620103924E+00
+non_local_psp       :  1.94792519523111E+00
+total_energy        : -8.67317525684558E+00
+total_energy_eV     : -2.36009101199079E+02
+band_energy         : -1.35379156206490E+00
+...
 
-    Kinetic energy  =  2.53967475407832E+00
-    Hartree energy  =  1.46046282455236E+00
-    XC energy       = -3.21841716849620E+00
-    Ewald energy    = -5.58865694911764E+00
-    PspCore energy  =  2.98722879456821E-02
-    Loc. psp. energy= -5.84403620103923E+00
-    NL   psp  energy=  1.94792519523112E+00
-    >>>>>>>>> Etotal= -8.67317525684559E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.36009101199079E+02 ; Band energy (Ha)=  -1.3537915621E+00
---------------------------------------------------------------------------------
 
           ===> extra information on forces <===
  ewald contribution to reduced grads
-    1       7.734534036590      0.000000000000      0.000000000000
-    2      -7.734534036590     -0.000000000000     -0.000000000000
+    1       7.734534036590     -0.000000000000      0.000000000000
+    2      -7.734534036590      0.000000000000     -0.000000000000
  nonlocal contribution to red. grads
-    1       0.439878189350      0.000000000000     -0.000000000000
-    2      -0.439878189350     -0.000000000000     -0.000000000000
+    1       0.439878189350     -0.000000000000      0.000000000000
+    2      -0.439878189350      0.000000000000      0.000000000000
  local psp contribution to red. grads
-    1      -8.086030285437     -0.000000000000      0.000000000000
-    2       8.086030285437      0.000000000000      0.000000000000
+    1      -8.086030285437      0.000000000000     -0.000000000000
+    2       8.086030285437     -0.000000000000      0.000000000000
  core charge xc contribution to reduced grads
-    1      -0.086331055131     -0.000000000000      0.000000000000
-    2       0.086331055131     -0.000000000000      0.000000000000
+    1      -0.086331055131      0.000000000000      0.000000000000
+    2       0.086331055131      0.000000000000     -0.000000000000
  residual contribution to red. grads
     1       0.000003766875      0.000000000000     -0.000000000000
-    2      -0.000003766875     -0.000000000000     -0.000000000000
+    2      -0.000003766875      0.000000000000     -0.000000000000
  rms coord change=  4.4811E-03   atom, delta coord (reduced):
-     1       -0.007761492406     -0.000000000000     -0.000000000000
-     2        0.007761492406      0.000000000000      0.000000000000
+     1       -0.007761492406      0.000000000000     -0.000000000000
+     2        0.007761492406     -0.000000000000      0.000000000000
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.52753343E-04  sigma(3 2)=  0.00000000E+00
@@ -2786,8 +3123,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     675.000     675.000
              ecut      7.00000000E+00 Hartree
            enunit           2
            etotal     -8.6731752568E+00
-            fcart     -1.7122102057E-04  5.8150846987E-17  1.1598928213E-16
-                       1.7122102057E-04 -5.8150846987E-17 -1.1598928213E-16
+            fcart     -1.7122102057E-04  6.2829916558E-17 -3.0034728484E-17
+                       1.7122102057E-04 -6.2829916558E-17  3.0034728484E-17
 -          fftalg         312
             intxc           1
            ionmov           1
@@ -2817,346 +3154,325 @@ P           mkmem           1
            tolmxf      1.00000000E-04
            tolwfr      1.00000000E-13
             typat      1  1
-              vel     -9.1590123353E-07 -5.0722690649E-19  5.8422530993E-20
-                       9.1590123353E-07  5.0722690649E-19 -5.8422530993E-20
+              vel     -9.1590123353E-07 -1.8058866919E-19 -6.1304342027E-19
+                       9.1590123353E-07  1.8058866919E-19  6.1304342027E-19
               vis      3.00000000E+02
-           xangst     -1.1722004953E+00 -1.7478836086E-16 -4.4271716523E-16
-                       1.1722004953E+00  1.7478836086E-16  4.4271716523E-16
-            xcart     -2.2151379089E+00 -3.3030213324E-16 -8.3661419662E-16
-                       2.2151379089E+00  3.3030213324E-16  8.3661419662E-16
-             xred     -1.8459482574E-01 -4.1287766655E-17 -1.0457677458E-16
-                       1.8459482574E-01  4.1287766655E-17  1.0457677458E-16
+           xangst     -1.1722004953E+00  8.0574669125E-18 -1.0510786931E-15
+                       1.1722004953E+00 -8.0574669125E-18  1.0510786931E-15
+            xcart     -2.2151379089E+00  1.5226405789E-17 -1.9862508740E-15
+                       2.2151379089E+00 -1.5226405789E-17  1.9862508740E-15
+             xred     -1.8459482574E-01  1.9033007237E-18 -2.4828135925E-16
+                       1.8459482574E-01 -1.9033007237E-18  2.4828135925E-16
             znucl       14.00000
 
 ================================================================================
 
  Test the timer : 
   a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
-- CPU time =    5.0758E-05 sec,    Wall time =    8.4009E-06 sec
+- CPU time =    1.8517E-06 sec,    Wall time =    1.8567E-06 sec
 
-- Total cpu        time (s,m,h):         18.2        0.30      0.005
-- Total wall clock time (s,m,h):          3.6        0.06      0.001
+- Total cpu        time (s,m,h):          6.5        0.11      0.002
+- Total wall clock time (s,m,h):          8.3        0.14      0.002
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           18.2, wall_time =            3.6
+- cpu_time =            6.5, wall_time =            8.3
 -
-- routine                        cpu     %       wall     %      number of calls  Gflops 
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- xc:pot/=fourdp                 4.139  22.8      0.716  20.0            116      -1.00    
-- fourwf%(pot)                   3.742  20.6      0.654  18.2           3563      -1.00    
-- scfcv-scprqt                   1.462   8.1      0.312   8.7            103      -1.00    
-- fourdp                         1.044   5.7      0.176   4.9           1161      -1.00    
-- vtowfk(ssdiag)                 0.687   3.8      0.113   3.2             -1      -1.00    
-- nonlop(apply)                  0.545   3.0      0.103   2.9           3563      -1.00    
-- fourwf%(den)                   0.522   2.9      0.092   2.6            832      -1.00    
-- stress                         0.463   2.5      0.068   1.9             13      -1.00    
-- getghc-other                   0.391   2.2      0.067   1.9             -1      -1.00    
-- projbd                         0.363   2.0      0.066   1.8           5094      -1.00    
-- pspini                         0.347   1.9      0.347   9.7              1      -1.00    
-- ewald                          0.343   1.9      0.055   1.5             13      -1.00    
-- ewald2 (+vdw_dftd)             0.246   1.4      0.037   1.0             13      -1.00    
-- mkcore                         0.185   1.0      0.027   0.8             39      -1.00    
-- forces                         0.169   0.9      0.024   0.7             13      -1.00    
-- vtowfk(contrib)                0.123   0.7      0.019   0.5            206      -1.00    
-- timing timab                   0.114   0.6      0.019   0.5              3      -1.00    
-- invars2                        0.101   0.6      0.100   2.8              1      -1.00    
-- nonlop(forstr)                 0.053   0.3      0.007   0.2            104      -1.00    
-- vtowfk  (1)                    0.032   0.2      0.005   0.1            206      -1.00    
-- abinit(2)                      0.029   0.2      0.029   0.8              1      -1.00    
-- symrhg(no FFT)                 0.018   0.1      0.003   0.1            104      -1.00    
-- mkrho/=                        0.001   0.0      0.001   0.0              2      -1.00    
-- inwffil(excl. calls)           0.000   0.0      0.000   0.0              1      -1.00    
-- newkpt(excl. rwwf   )          0.000   0.0      0.000   0.0             -1      -1.00    
-- wfsinp(excl. calls)            0.000   0.0      0.000   0.0              1      -1.00    
-- initwf(after rwwf)             0.000   0.0      0.000   0.0              2      -1.00    
-- status                         0.000   0.0      0.000   0.0              1      -1.00    
-- kpgsph                         0.000   0.0      0.000   0.0              2      -1.00    
-- initwf(before rwwf)            0.000   0.0      0.000   0.0              2      -1.00    
-- dfpt_vtowfk(contrib)           0.000   0.0      0.000   0.0             -1      -1.00    
-- dfpt_cgwf-O(npw)               0.000   0.0      0.000   0.0             -1      -1.00    
-- others (80)                    0.000   0.0      0.000   0.0             -1      -1.00    
+- ewald                          2.058  31.6      2.066  24.8             13      -1.00        1.00       1.00
+- stress                         1.455  22.3      1.465  17.6             13      -1.00        0.99       0.99
+- ewald2 (+vdw_dftd)             1.423  21.9      1.433  17.2             13      -1.00        0.99       0.99
+- xc:pot/=fourdp                 0.744  11.4      0.755   9.1            116      -1.00        0.99       0.99
+- fourwf%(pot)                   0.659  10.1      0.667   8.0           3563      -1.00        0.99       0.99
+- pspini                         0.404   6.2      0.408   4.9              1      -1.00        0.99       0.99
+- fourdp                         0.180   2.8      0.182   2.2           1161      -1.00        0.99       0.99
+- timing timab                   0.107   1.6      0.107   1.3             11      -1.00        1.00       1.00
+- fourwf%(den)                   0.088   1.4      0.088   1.1            832      -1.00        1.00       1.00
+- nonlop(apply)                  0.088   1.3      0.088   1.1           3563      -1.00        0.99       0.99
+- projbd                         0.049   0.8      0.049   0.6           5094      -1.00        0.99       0.99
+- scfcv-scprqt                   0.046   0.7      1.740  20.9            103      -1.00        0.03       0.03
+- vtowfk(ssdiag)                 0.040   0.6      0.040   0.5             -1      -1.00        0.99       0.99
+- getghc-other                   0.027   0.4      0.026   0.3             -1      -1.00        1.07       1.07
+- mkcore                         0.024   0.4      0.024   0.3             39      -1.00        0.99       0.99
+- invars2                        0.024   0.4      0.025   0.3              1      -1.00        0.96       0.96
+- forces                         0.023   0.4      0.023   0.3             13      -1.00        1.00       1.00
+- vtowfk(contrib)                0.015   0.2      0.015   0.2            206      -1.00        0.98       0.98
+- nonlop(forstr)                 0.007   0.1      0.007   0.1            104      -1.00        0.95       0.95
+- abinit(2)                      0.006   0.1      0.006   0.1              1      -1.00        1.00       1.00
+- vtowfk  (1)                    0.003   0.0      0.003   0.0            206      -1.00        1.00       1.00
+- symrhg(no FFT)                 0.003   0.0      0.003   0.0            104      -1.00        0.99       0.99
+- mkrho/=                        0.001   0.0      0.001   0.0              2      -1.00        1.00       1.00
+- inwffil(excl. calls)           0.000   0.0      0.000   0.0              1      -1.00        1.00       1.00
+- newkpt(excl. rwwf   )          0.000   0.0      0.000   0.0             -1      -1.00        0.99       0.99
+- wfsinp(excl. calls)            0.000   0.0      0.000   0.0              1      -1.00        1.00       1.00
+- kpgsph                         0.000   0.0      0.000   0.0              2      -1.00        1.00       1.00
+- initwf(after rwwf)             0.000   0.0      0.000   0.0              2      -1.00        0.98       0.98
+- others (106)                   0.000   0.0      0.000   0.0             -1      -1.00        0.92       0.92
 -<END_TIMER>
 -
-- subtotal                      15.116  83.2      3.040  84.7
+- subtotal                       7.474 114.8      9.223 110.9                                  0.81       0.81
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          18.2, wall_time =           3.6
+- cpu_time =           6.5, wall_time =           8.3
 -
-- routine                         cpu     %       wall     %      number of calls Gflops 
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- xc:pot/=fourdp                 4.139  22.8      0.716  20.0            116      -1.00    
-- fourwf%(pot)                   3.742  20.6      0.654  18.2           3563      -1.00    
-- scfcv-scprqt                   1.462   8.1      0.312   8.7            103      -1.00    
-- fourdp                         1.044   5.7      0.176   4.9           1161      -1.00    
-- vtowfk(ssdiag)                 0.687   3.8      0.113   3.2             -1      -1.00    
-- nonlop(apply)                  0.545   3.0      0.103   2.9           3563      -1.00    
-- fourwf%(den)                   0.522   2.9      0.092   2.6            832      -1.00    
-- stress                         0.463   2.5      0.068   1.9             13      -1.00    
-- getghc-other                   0.391   2.2      0.067   1.9             -1      -1.00    
-- projbd                         0.363   2.0      0.066   1.8           5094      -1.00    
-- pspini                         0.347   1.9      0.347   9.7              1      -1.00    
-- ewald                          0.343   1.9      0.055   1.5             13      -1.00    
-- ewald2 (+vdw_dftd)             0.246   1.4      0.037   1.0             13      -1.00    
-- mkcore                         0.185   1.0      0.027   0.8             39      -1.00    
-- forces                         0.169   0.9      0.024   0.7             13      -1.00    
-- vtowfk(contrib)                0.123   0.7      0.019   0.5            206      -1.00    
-- timing timab                   0.114   0.6      0.019   0.5              3      -1.00    
-- invars2                        0.101   0.6      0.100   2.8              1      -1.00    
-- nonlop(forstr)                 0.053   0.3      0.007   0.2            104      -1.00    
-- vtowfk  (1)                    0.032   0.2      0.005   0.1            206      -1.00    
-- abinit(2)                      0.029   0.2      0.029   0.8              1      -1.00    
-- symrhg(no FFT)                 0.018   0.1      0.003   0.1            104      -1.00    
-- mkrho/=                        0.001   0.0      0.001   0.0              2      -1.00    
-- inwffil(excl. calls)           0.000   0.0      0.000   0.0              1      -1.00    
-- newkpt(excl. rwwf   )          0.000   0.0      0.000   0.0             -1      -1.00    
-- wfsinp(excl. calls)            0.000   0.0      0.000   0.0              1      -1.00    
-- initwf(after rwwf)             0.000   0.0      0.000   0.0              2      -1.00    
-- status                         0.000   0.0      0.000   0.0              1      -1.00    
-- kpgsph                         0.000   0.0      0.000   0.0              2      -1.00    
-- initwf(before rwwf)            0.000   0.0      0.000   0.0              2      -1.00    
-- dfpt_vtowfk(contrib)           0.000   0.0      0.000   0.0             -1      -1.00    
-- dfpt_cgwf-O(npw)               0.000   0.0      0.000   0.0             -1      -1.00    
-- others (80)                    0.000   0.0      0.000   0.0             -1      -1.00    
+- ewald                          2.058  31.6      2.066  24.8             13      -1.00        1.00       1.00
+- stress                         1.455  22.3      1.465  17.6             13      -1.00        0.99       0.99
+- ewald2 (+vdw_dftd)             1.423  21.9      1.433  17.2             13      -1.00        0.99       0.99
+- xc:pot/=fourdp                 0.744  11.4      0.755   9.1            116      -1.00        0.99       0.99
+- fourwf%(pot)                   0.659  10.1      0.667   8.0           3563      -1.00        0.99       0.99
+- pspini                         0.404   6.2      0.408   4.9              1      -1.00        0.99       0.99
+- fourdp                         0.180   2.8      0.182   2.2           1161      -1.00        0.99       0.99
+- timing timab                   0.107   1.6      0.107   1.3             11      -1.00        1.00       1.00
+- fourwf%(den)                   0.088   1.4      0.088   1.1            832      -1.00        1.00       1.00
+- nonlop(apply)                  0.088   1.3      0.088   1.1           3563      -1.00        0.99       0.99
+- projbd                         0.049   0.8      0.049   0.6           5094      -1.00        0.99       0.99
+- scfcv-scprqt                   0.046   0.7      1.740  20.9            103      -1.00        0.03       0.03
+- vtowfk(ssdiag)                 0.040   0.6      0.040   0.5             -1      -1.00        0.99       0.99
+- getghc-other                   0.027   0.4      0.026   0.3             -1      -1.00        1.07       1.07
+- mkcore                         0.024   0.4      0.024   0.3             39      -1.00        0.99       0.99
+- invars2                        0.024   0.4      0.025   0.3              1      -1.00        0.96       0.96
+- forces                         0.023   0.4      0.023   0.3             13      -1.00        1.00       1.00
+- vtowfk(contrib)                0.015   0.2      0.015   0.2            206      -1.00        0.98       0.98
+- nonlop(forstr)                 0.007   0.1      0.007   0.1            104      -1.00        0.95       0.95
+- abinit(2)                      0.006   0.1      0.006   0.1              1      -1.00        1.00       1.00
+- vtowfk  (1)                    0.003   0.0      0.003   0.0            206      -1.00        1.00       1.00
+- symrhg(no FFT)                 0.003   0.0      0.003   0.0            104      -1.00        0.99       0.99
+- mkrho/=                        0.001   0.0      0.001   0.0              2      -1.00        1.00       1.00
+- inwffil(excl. calls)           0.000   0.0      0.000   0.0              1      -1.00        1.00       1.00
+- newkpt(excl. rwwf   )          0.000   0.0      0.000   0.0             -1      -1.00        0.99       0.99
+- wfsinp(excl. calls)            0.000   0.0      0.000   0.0              1      -1.00        1.00       1.00
+- kpgsph                         0.000   0.0      0.000   0.0              2      -1.00        1.00       1.00
+- initwf(after rwwf)             0.000   0.0      0.000   0.0              2      -1.00        0.98       0.98
+- others (106)                   0.000   0.0      0.000   0.0             -1      -1.00        0.92       0.92
 -<END_TIMER>
 
-- subtotal                      15.116  83.2      3.040  84.7
+- subtotal                       7.474 114.8      9.223 110.9                                  0.81       0.81
 
  Partitioning of abinit
-- abinit                        18.159 100.0      3.587 100.0              1
+- abinit                         6.510 100.0      8.315 100.0              1                   0.78       0.78
  
-- abinit(1)                      0.009   0.1      0.009   0.3              1
-- abinit(2)                      0.029   0.2      0.029   0.8              1
-- indefo+macroin+invars2m        0.101   0.6      0.101   2.8              1
-- abinit(4)                      0.012   0.1      0.027   0.8              1
-- abinit(5)                      0.005   0.0      0.005   0.1              1
-- driver                        17.847  98.3      3.389  94.5              1
-- abinit(6)                      0.041   0.2      0.008   0.2              1
-- timing timab                   0.114   0.6      0.019   0.5              3
+- abinit(1)                      0.008   0.1      0.009   0.1              1                   0.94       0.94
+- abinit(2)                      0.006   0.1      0.006   0.1              1                   1.00       1.00
+- indefo+macroin+invars2m        0.024   0.4      0.025   0.3              1                   0.96       0.96
+- abinit(4)                      0.045   0.7      0.047   0.6              1                   0.95       0.95
+- abinit(5)                      0.026   0.4      0.027   0.3              1                   0.97       0.97
+- driver                         6.324  97.1      8.119  97.6              1                   0.78       0.78
+- abinit(6)                      0.004   0.1      0.011   0.1              1                   0.33       0.33
+- timing timab                   0.107   1.6      0.107   1.3             11                   1.00       1.00
 
-- subtotal                      18.159 100.0      3.587 100.0
+- subtotal                       6.510 100.0      8.315 100.0                                  0.78       0.78
 
  Partitioning of driver
-- driver                        17.847  98.3      3.389  94.5              1
+- driver                         6.324  97.1      8.119  97.6              1                   0.78       0.78
  
-- gstateimg                     17.846  98.3      3.389  94.5              1
+- gstateimg                      6.324  97.1      8.118  97.6              1                   0.78       0.78
 
-- subtotal                      17.847  98.3      3.389  94.5
+- subtotal                       6.324  97.1      8.119  97.6                                  0.78       0.78
 
  Partitioning of gstateimg+gstate
-- gstateimg                     17.846  98.3      3.389  94.5              1
+- gstateimg                      6.324  97.1      8.118  97.6              1                   0.78       0.78
  
-- gstate->kpgsph                 0.002   0.0      0.001   0.0              2
-- gstate(pspini)                 0.347   1.9      0.347   9.7              1
-- gstate  (2)                    0.003   0.0      0.003   0.1              1
-- gstate(...scfcv)              17.449  96.1      3.030  84.5              1
-- gstate  (3)                    0.045   0.3      0.009   0.2              1
+- gstate(pspini)                 0.404   6.2      0.408   4.9              1                   0.99       0.99
+- gstate  (2)                    0.003   0.0      0.003   0.0              1                   1.00       1.00
+- gstate(...scfcv)               5.912  90.8      7.668  92.2              1                   0.77       0.77
+- gstate  (3)                    0.003   0.0      0.038   0.5              1                   0.08       0.08
 
-- subtotal                      17.846  98.3      3.389  94.5
+- subtotal                       6.324  97.1      8.118  97.6                                  0.78       0.78
 
  Partitioning of scfcv_core
-- scfcv                         17.367  95.6      3.017  84.1             13
+- scfcv_core                     5.895  90.6      7.650  92.0             13                   0.77       0.77
  
-- scfcv(iniloop, setvtr  )       1.121   6.2      0.180   5.0            103
-- scfcv-read                     0.006   0.0      0.001   0.0            103
-- scfcv(vtorho(f))               7.773  42.8      1.354  37.7            103
-- scfcv(etotfor)                 0.014   0.1      0.002   0.1            206
-- scfcv-scprqt                   1.462   8.1      0.312   8.7            103
-- scfcv(rhotov)                  4.802  26.4      0.832  23.2            103
-- scfcv(qui loop)                0.006   0.0      0.001   0.0            103
-- scfcv(mix pot)                 0.562   3.1      0.098   2.7             90
-- scfcv(afterscfloop)            0.746   4.1      0.108   3.0             13
-- scfcv(outscfcv)                0.818   4.5      0.120   3.4             13
-- (other)                        0.040   0.2      0.006   0.2             -1
+- scfcv_core(iniloop, setv       2.187  33.6      2.196  26.4            103                   1.00       1.00
+- scfcv_core(vtorho(f))          1.159  17.8      1.170  14.1            103                   0.99       0.99
+- scfcv-scprqt                   0.046   0.7      1.740  20.9            103                   0.03       0.03
+- scfcv_core(rhotov)             0.839  12.9      0.851  10.2            103                   0.99       0.99
+- scfcv_core(mix pot)            0.091   1.4      0.092   1.1             90                   0.98       0.98
+- scfcv_core(afterscfloop)       1.489  22.9      1.499  18.0             13                   0.99       0.99
+- scfcv_core(outscfcv)           0.078   1.2      0.095   1.1             13                   0.81       0.81
+- (other)                        0.002   0.0      0.002   0.0             -1                   1.08       1.08
 
-- subtotal                      17.367  95.6      3.017  84.1
+- subtotal                       5.895  90.6      7.650  92.0                                  0.77       0.77
 
  Partitioning of rhotov
-- rhotov                         4.795  26.4      0.831  23.2            103
+- rhotov                         0.839  12.9      0.851  10.2            103                   0.99       0.99
  
-- rhotov(rhohxc)                 4.565  25.1      0.791  22.0            103
-- rhotov(dotprod_vn)             0.030   0.2      0.006   0.2            103
-- rhotov(other)                  0.186   1.0      0.033   0.9            103
-- (other)                        0.014   0.1      0.002   0.1             -1
+- rhotov(rhotoxc)                0.788  12.1      0.800   9.6            103                   0.98       0.98
+- rhotov(dotprod_vn)             0.003   0.0      0.003   0.0            103                   1.00       1.00
+- rhotov(other)                  0.026   0.4      0.026   0.3            103                   1.00       1.00
+- (other)                        0.022   0.3      0.022   0.3             -1                   1.00       1.00
 
-- subtotal                       4.795  26.4      0.831  23.2
+- subtotal                       0.839  12.9      0.851  10.2                                  0.99       0.99
 
  Partitioning of vtorho
-- vtorho                         7.766  42.8      1.353  37.7            103
+- vtorho                         1.159  17.8      1.170  14.1            103                   0.99       0.99
  
-- vtorho(bef. spin loop)         0.018   0.1      0.003   0.1            103
-- vtorho(bef. kpt  loop)         0.034   0.2      0.006   0.2            206
-- vtorho(bef. vtowfk)            0.085   0.5      0.015   0.4            206
-- vtowfk                         7.045  38.8      1.226  34.2            206
-- vtorho(aft. vtowfk)            0.006   0.0      0.001   0.0            206
-- vtorho(aft. kpt loop)          0.050   0.3      0.009   0.2            206
-- vtorho(aft. spin loop)         0.004   0.0      0.001   0.0            103
-- vtorho(mkrho 2)                0.461   2.5      0.081   2.3            206
-- vtorho(init kpt loop)          0.006   0.0      0.001   0.0            206
-- (other)                        0.051   0.3      0.009   0.3             -1
+- vtorho(bef. spin loop)         0.003   0.0      0.003   0.0            103                   0.98       0.98
+- vtorho(bef. kpt  loop)         0.010   0.2      0.010   0.1            206                   0.99       0.99
+- vtorho(bef. vtowfk)            0.014   0.2      0.014   0.2            206                   1.00       1.00
+- vtowfk                         1.034  15.9      1.044  12.6            206                   0.99       0.99
+- vtorho(aft. kpt loop)          0.009   0.1      0.009   0.1            206                   1.00       1.00
+- vtorho(mkrho 2)                0.084   1.3      0.085   1.0            206                   0.99       0.99
+- (other)                        0.003   0.0      0.003   0.0             -1                   0.98       0.98
 
-- subtotal                       7.766  42.8      1.353  37.7
+- subtotal                       1.159  17.8      1.170  14.1                                  0.99       0.99
 
  Partitioning of vtowfk
-- vtowfk                         7.045  38.8      1.226  34.2            206
+- vtowfk                         1.034  15.9      1.044  12.6            206                   0.99       0.99
  
-- vtowfk  (1)                    0.032   0.2      0.005   0.1            206
-- cgwf                           5.683  31.3      0.997  27.8            254
-- vtowfk(subdiago)               0.448   2.5      0.073   2.0            254
-- vtowfk(pw_orthon)              0.181   1.0      0.030   0.8            254
-- vtowfk(2)                      0.058   0.3      0.010   0.3             -1
-- fourwf%vtowfk                  0.520   2.9      0.091   2.5            824
-- vtowfk(nonlocalpart)           0.010   0.1      0.002   0.0            206
-- vtowfk(3)                      0.113   0.6      0.017   0.5             -1
+- vtowfk  (1)                    0.003   0.0      0.003   0.0            206                   1.00       1.00
+- cgwf                           0.890  13.7      0.899  10.8            254                   0.99       0.99
+- vtowfk(subdiago)               0.021   0.3      0.022   0.3            254                   0.98       0.98
+- vtowfk(pw_orthon)              0.011   0.2      0.011   0.1            254                   1.00       1.00
+- vtowfk(2)                      0.008   0.1      0.008   0.1             -1                   1.00       1.00
+- fourwf%vtowfk                  0.087   1.3      0.087   1.0            824                   1.00       1.00
+- vtowfk(3)                      0.014   0.2      0.014   0.2             -1                   0.98       0.98
 
-- subtotal                       7.045  38.8      1.226  34.2
+- subtotal                       1.034  15.9      1.044  12.6                                  0.99       0.99
 
  Partitioning of cgwf
-- cgwf                           5.683  31.3      0.997  27.8            254
+- cgwf                           0.890  13.7      0.899  10.8            254                   0.99       0.99
  
-- getghc%cgwf                    4.678  25.8      0.823  23.0           3563
-- cgwf-O(npw)                    0.643   3.5      0.108   3.0             -1
-- projbd%cgwf                    0.363   2.0      0.066   1.8           5094
+- getghc%cgwf                    0.774  11.9      0.781   9.4           3563                   0.99       0.99
+- cgwf-O(npw)                    0.067   1.0      0.069   0.8             -1                   0.98       0.98
+- projbd%cgwf                    0.049   0.8      0.049   0.6           5094                   0.99       0.99
 
-- subtotal                       5.683  31.3      0.997  27.8
+- subtotal                       0.890  13.7      0.899  10.8                                  0.99       0.99
 
  Partitioning of getghc
-- getghc                         4.678  25.8      0.823  23.0           3563
+- getghc                         0.774  11.9      0.781   9.4           3563                   0.99       0.99
  
-- fourwf%getghc                  3.742  20.6      0.654  18.2           3563
-- nonlop%getghc                  0.545   3.0      0.103   2.9           3563
-- getghc-other                   0.391   2.2      0.067   1.9             -1
+- fourwf%getghc                  0.659  10.1      0.667   8.0           3563                   0.99       0.99
+- nonlop%getghc                  0.088   1.3      0.088   1.1           3563                   0.99       0.99
+- getghc-other                   0.027   0.4      0.026   0.3             -1                   1.07       1.07
 
-- subtotal                       4.678  25.8      0.823  23.0
+- subtotal                       0.774  11.9      0.781   9.4                                  0.99       0.99
 
  Partitioning of fourwf (upwards partitioning)
-- fourwf                         4.264  23.5      0.746  20.8           4395
+- fourwf                         0.747  11.5      0.755   9.1           4395                   0.99       0.99
  
-- fourwf%getghc                  3.742  20.6      0.654  18.2           3563
-- fourwf%vtowfk                  0.520   2.9      0.091   2.5            824
-- fourwf%mkrho                   0.002   0.0      0.001   0.0              8
+- fourwf%getghc                  0.659  10.1      0.667   8.0           3563                   0.99       0.99
+- fourwf%vtowfk                  0.087   1.3      0.087   1.0            824                   1.00       1.00
 
-- subtotal                       4.264  23.5      0.746  20.8
+- subtotal                       0.747  11.5      0.755   9.1                                  0.99       0.99
 
  Partitioning of mkrho (upwards partitioning)
-- mkrho                          0.003   0.0      0.002   0.1              1
+- mkrho                          0.003   0.0      0.003   0.0              1                   1.00       1.00
  
-- mkrho%gstate                   0.003   0.0      0.002   0.1              1
+- mkrho%gstate                   0.003   0.0      0.003   0.0              1                   1.00       1.00
 
-- subtotal                       0.003   0.0      0.002   0.1
+- subtotal                       0.003   0.0      0.003   0.0                                  1.00       1.00
 
  Partitioning of inwffil
-- inwffil                        0.001   0.0      0.001   0.0              1
+- inwffil                        0.001   0.0      0.001   0.0              1                   1.00       1.00
  
 
-- subtotal                       0.001   0.0      0.001   0.0
+- subtotal                       0.001   0.0      0.001   0.0                                  0.99       0.99
 
  Partitioning of wfsinp
-- wfsinp                         0.000   0.0      0.000   0.0              1
+- wfsinp                         0.000   0.0      0.000   0.0              1                   0.98       0.98
  
 
-- subtotal                       0.000   0.0      0.000   0.0
+- subtotal                       0.000   0.0      0.000   0.0                                  0.98       0.98
 
  Partitioning of initwf
-- initwf                         0.000   0.0      0.000   0.0              2
+- initwf                         0.000   0.0      0.000   0.0              2                   0.98       0.98
  
 
-- subtotal                       0.000   0.0      0.000   0.0
+- subtotal                       0.000   0.0      0.000   0.0                                  0.98       0.98
 
  Partitioning of newkpt
-- newkpt                         0.000   0.0      0.000   0.0              1
+- newkpt                         0.000   0.0      0.000   0.0              1                   1.00       1.00
  
 
-- subtotal                       0.000   0.0      0.000   0.0
+- subtotal                       0.000   0.0      0.000   0.0                                  0.99       0.99
 
  Partitioning of newvtr
-- newvtr                         0.554   3.1      0.097   2.7             90
+- newvtr                         0.090   1.4      0.092   1.1             90                   0.98       0.98
  
-- newvtr(before selection)       0.023   0.1      0.004   0.1             90
-- newvtr(call prcref_PMA)        0.012   0.1      0.002   0.1             90
-- newvtr(aft. prcref_PMA)        0.441   2.4      0.077   2.2             90
-- newvtr(mean potential)         0.024   0.1      0.004   0.1             90
-- (other)                        0.051   0.3      0.009   0.2             -1
+- newvtr(before selection)       0.004   0.1      0.005   0.1             90                   0.94       0.94
+- newvtr(call prcref_PMA)        0.002   0.0      0.002   0.0             90                   0.99       0.99
+- newvtr(aft. prcref_PMA)        0.073   1.1      0.074   0.9             90                   0.98       0.98
+- newvtr(mean potential)         0.004   0.1      0.004   0.0             90                   1.00       1.00
+- (other)                        0.006   0.1      0.006   0.1             -1                   1.02       1.02
 
-- subtotal                       0.554   3.1      0.097   2.7
+- subtotal                       0.090   1.4      0.092   1.1                                  0.98       0.98
 
  Partitioning of  fourdp (upwards partitioning)
-- fourdp                         1.044   5.7      0.176   4.9           1161
+- fourdp                         0.180   2.8      0.182   2.2           1161                   0.99       0.99
  
-- fourdp%(other)                 1.044   5.7      0.176   4.9           1161
+- fourdp%(other)                 0.180   2.8      0.182   2.2           1161                   0.99       0.99
 
-- subtotal                       1.044   5.7      0.176   4.9
+- subtotal                       0.180   2.8      0.182   2.2                                  0.99       0.99
 
  Partitioning of afterscfloop
-- afterscfloop                   0.745   4.1      0.108   3.0             13
+- afterscfloop                   1.489  22.9      1.499  18.0             13                   0.99       0.99
  
-- afterscfloop(forstr)           0.736   4.1      0.107   3.0             13
+- afterscfloop(forstr)           1.488  22.9      1.498  18.0             13                   0.99       0.99
 
-- subtotal                       0.741   4.1      0.107   3.0
+- subtotal                       1.488  22.9      1.499  18.0                                  0.99       0.99
 
  Partitioning of forstr
-- forstr                         0.735   4.0      0.107   3.0             13
+- forstr                         1.488  22.9      1.498  18.0             13                   0.99       0.99
  
-- forstr(forstrnps)              0.100   0.5      0.014   0.4             13
-- forstr(forces)                 0.169   0.9      0.024   0.7             13
-- forstr(stress)                 0.464   2.6      0.068   1.9             13
+- forstr(forstrnps)              0.010   0.2      0.010   0.1             13                   0.97       0.97
+- forstr(forces)                 0.023   0.4      0.023   0.3             13                   1.00       1.00
+- forstr(stress)                 1.455  22.4      1.465  17.6             13                   0.99       0.99
 
-- subtotal                       0.733   4.0      0.106   3.0
+- subtotal                       1.488  22.9      1.498  18.0                                  0.99       0.99
 
  Partitioning of forstrnps
-- forstrnps                      0.099   0.5      0.014   0.4             13
+- forstrnps                      0.010   0.2      0.010   0.1             13                   0.97       0.97
  
-- forstrnps(bef.loop band)       0.014   0.1      0.002   0.1             26
-- forstrnps(nonlop+prep_ba       0.059   0.3      0.008   0.2            104
-- forstrnps(kinetic contr)       0.006   0.0      0.001   0.0            104
-- (other)                        0.012   0.1      0.002   0.1             -1
+- forstrnps(bef.loop band)       0.002   0.0      0.002   0.0             26                   0.99       0.99
+- forstrnps(nonlop+prep_ba       0.007   0.1      0.007   0.1            104                   0.96       0.96
 
-- subtotal                       0.099   0.5      0.014   0.4
+- subtotal                       0.010   0.2      0.010   0.1                                  0.97       0.97
 
  Partitioning of outscfcv
-- outscfcv                       0.817   4.5      0.120   3.3             13
+- outscfcv                       0.078   1.2      0.095   1.1             13                   0.81       0.81
  
-- outscfcv([PAW]prtden)          0.074   0.4      0.011   0.3             13
-- outscfcv(prtelf)               0.715   3.9      0.105   2.9             13
-- outscfcv(calcdensph)           0.011   0.1      0.002   0.0             13
+- outscfcv([PAW]prtden)          0.004   0.1      0.004   0.0             13                   1.00       1.00
+- outscfcv(prtelf)               0.066   1.0      0.067   0.8             13                   1.00       1.00
+- outscfcv(calcdenmagsph)        0.003   0.0      0.003   0.0             13                   1.00       1.00
 
-- subtotal                       0.805   4.4      0.118   3.3
+- subtotal                       0.073   1.1      0.074   0.9                                  1.00       1.00
 -
 -Synchronisation (=leave_test) and MPI calls 
-- communic.MPI                   0.132   0.7      0.022   0.6           5239
+- communic.MPI                   0.005   0.1      0.005   0.1           5239                   1.01       1.01
 -
-- forstrnps:synchr               0.002   0.0      0.000   0.0             26
-- wfsinp:synchro                 0.000   0.0      0.000   0.0              1
-- mkrho :MPIrhor                 0.000   0.0      0.000   0.0              1
--
-- subtotal                       0.002   0.0      0.000   0.0
+- forstrnps:synchr               0.000   0.0      0.000   0.0             26                   0.85       0.85
+- wfsinp:synchro                 0.000   0.0      0.000   0.0              1                   1.04       1.04
+- mkrho :MPIrhor                 0.000   0.0      0.000   0.0              1                   0.86       0.86
+- subtotal                       0.000   0.0      0.000   0.0                                  0.89       0.89
 
  Additional information
-- timana(1)                      0.000   0.0      0.000   0.0              1
-- total timab                    2.085  11.5      0.345   9.6          41085
-- fourwf                         4.264  23.5      0.746  20.8           4395
-- mklocl(2)                      0.046   0.3      0.007   0.2             13
-- status                         0.000   0.0      0.000   0.0              1
-- nonlop(forstr)                 0.053   0.3      0.007   0.2            104
-- nonlop(total)                  0.598   3.3      0.110   3.1           3667
-- xc:fourdp                      0.884   4.9      0.147   4.1            928
+- timana(1)                      0.000   0.0      0.000   0.0              1                   0.99       0.99
+- total timab                    0.179   2.7      0.179   2.2          96483                   1.00       1.00
+- fourwf                         0.747  11.5      0.755   9.1           4395                   0.99       0.99
+- mklocl(2)                      0.006   0.1      0.006   0.1             13                   1.00       1.00
+- nonlop(forstr)                 0.007   0.1      0.007   0.1            104                   0.95       0.95
+- nonlop(total)                  0.094   1.4      0.095   1.1           3667                   0.99       0.99
+- xc:fourdp                      0.143   2.2      0.145   1.7            928                   0.99       0.99
 
 
  Detailed analysis of some time consuming routines 
                                   tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata
                                  (sec)                (msec)              (microsec)
-- fourwf%(pot)                   3.742      3563       1.050     24000       0.044
-- fourwf%(den)                   0.522       832       0.627     12000       0.052
-- fourdp                         1.044      1161       0.899     12000       0.075
-- nonlop(apply)                  0.545      3563       0.153      1350       0.113
+- fourwf%(pot)                   0.659      3563       0.185     24000       0.008
+- fourwf%(den)                   0.088       832       0.106     12000       0.009
+- fourdp                         0.180      1161       0.155     12000       0.013
+- nonlop(apply)                  0.088      3563       0.025      1350       0.018
 - nonlop(forces)                 0.000         0
-- nonlop(forstr)                 0.053       104       0.511      1350       0.379
-- projbd                         0.363      5094       0.071      2700       0.026
-- xc:pot/=fourdp                 4.139       116      35.677     24000       1.487
+- nonlop(forstr)                 0.007       104       0.064      1350       0.047
+- projbd                         0.049      5094       0.010      2700       0.004
+- xc:pot/=fourdp                 0.744       116       6.415     24000       0.267
 
 ================================================================================
 
@@ -3173,46 +3489,73 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] ABINIT : First-principles approach of materials and nanosystem properties.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
--
-- [2] A brief introduction to the ABINIT software package.
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
 - And optionally:
 -
-- [3] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
+- [4] A brief introduction to the ABINIT software package.
+- Z. Kristallogr. 220, 558-562 (2005).
+- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
+- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
+- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
+- Comment: the second generic paper describing the ABINIT project. Note that this paper
+- should be cited especially if you are using the GW part of ABINIT, as several authors
+- of this part are not in the list of authors of the first or third paper.
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
+- the licence allows the authors to put it on the Web).
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- [4] Fast radix 2, 3, 4 and 5 kernels for Fast Fourier Transformations
-- on computers with overlapping multiply-add instructions.
-- S. Goedecker, SIAM J. on Scientific Computing 18, 1605 (1997).
--
-- Proc.   0 individual time (sec): cpu=         18.2  wall=          3.6
+- Proc.   0 individual time (sec): cpu=          6.5  wall=          8.3
 
 ================================================================================
 
  Calculation completed.
-.Delivered  10 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         18.2  wall=          3.6
+.Delivered  11 WARNINGs and   3 COMMENTs to log file.
++Overall time at end (sec) : cpu=          6.5  wall=          8.3

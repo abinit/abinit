@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_d2frnl
 !! NAME
 !!  m_d2frnl
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GM, AR, MB, MT, AM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,6 +24,42 @@
 #include "abi_common.h"
 
 module m_d2frnl
+
+ use defs_basis
+ use m_abicore
+ use m_xmpi
+ use m_errors
+ use m_cgtools
+ use m_nctk
+ use m_hamiltonian
+ use m_efmas_defs
+ use m_wfk
+ use m_dtset
+ use m_dtfil
+
+
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
+ use m_time,     only : timab
+ use m_geometry, only : metric, strconv
+ use m_efmas,    only : check_degeneracies
+ use m_io_tools, only : file_exists
+ use m_hdr,      only : hdr_skip
+ use m_pawang,   only : pawang_type
+ use m_pawrad,   only : pawrad_type
+ use m_pawtab,   only : pawtab_type,pawtab_get_lsize
+ use m_pawfgrtab,only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
+ use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
+ use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_gather, &
+                        pawrhoij_nullify, pawrhoij_symrhoij
+ use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_free
+ use m_pawdij,   only : pawdijfr
+ use m_paw_dfpt, only : pawgrnl
+ use m_kg,       only : mkkin, mkkpg
+ use m_mkffnl,   only : mkffnl
+ use m_mpinfo,   only : proc_distrb_cycle
+ use m_nonlop,   only : nonlop
+ use m_paw_occupancies, only : pawaccrhoij
 
  implicit none
 
@@ -113,8 +148,8 @@ contains
 !!      respfn
 !!
 !! CHILDREN
-!!      appdig,check_degeneracies,destroy_hamiltonian,dotprod_g
-!!      init_hamiltonian,load_k_hamiltonian,load_spin_hamiltonian,metric,mkffnl
+!!      appdig,check_degeneracies,dotprod_g
+!!      init_hamiltonian,metric,mkffnl
 !!      mkkin,mkkpg,nonlop,paw_ij_free,paw_ij_init,paw_ij_nullify
 !!      paw_ij_reset_flags,pawaccrhoij,pawcprj_alloc,pawcprj_free,pawdij2e1kb
 !!      pawdijfr,pawfgrtab_free,pawfgrtab_init,pawgrnl,pawrhoij_free
@@ -127,40 +162,6 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 &          gsqcut,has_allddk,indsym,kg,mgfftf,mpi_enreg,mpsang,my_natom,natom,nfftf,ngfft,ngfftf,npwarr,&
 &          occ,paw_ij,pawang,pawbec,pawfgrtab,pawpiezo,pawrad,pawrhoij,pawtab,ph1d,ph1df,piezofrnl,psps,&
 &          rprimd,rfphon,rfstrs,symrec,vtrial,vxc,xred,ylm,ylmgr)
-
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_abicore
- use m_xmpi
- use m_errors
- use m_cgtools
- use m_nctk
- use m_hamiltonian
- use m_efmas_defs
- use m_wfk
-
- use m_time,     only : timab
- use m_geometry, only : metric, strconv
- use m_efmas,    only : check_degeneracies
- use m_io_tools, only : file_exists
- use m_hdr,      only : hdr_skip
- use m_pawang,   only : pawang_type
- use m_pawrad,   only : pawrad_type
- use m_pawtab,   only : pawtab_type,pawtab_get_lsize
- use m_pawfgrtab,only : pawfgrtab_type, pawfgrtab_init, pawfgrtab_free
- use m_paw_ij,   only : paw_ij_type, paw_ij_init, paw_ij_free, paw_ij_nullify, paw_ij_reset_flags
- use m_pawrhoij, only : pawrhoij_type, pawrhoij_copy, pawrhoij_free, pawrhoij_gather, &
-&                       pawrhoij_nullify, pawrhoij_symrhoij
- use m_pawcprj,  only : pawcprj_type, pawcprj_alloc, pawcprj_get, pawcprj_copy, pawcprj_free
- use m_pawdij,   only : pawdijfr
- use m_paw_dfpt, only : pawgrnl
- use m_kg,       only : mkkin, mkkpg
- use m_mkffnl,   only : mkffnl
- use m_mpinfo,   only : proc_distrb_cycle
- use m_nonlop,   only : nonlop
- use m_paw_occupancies, only : pawaccrhoij
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -473,7 +474,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  do isppol=1,dtset%nsppol
 
 !  Continue to initialize the Hamiltonian (PAW DIJ coefficients)
-   call load_spin_hamiltonian(gs_ham,isppol,with_nonlocal=.true.)
+   call gs_ham%load_spin(isppol,with_nonlocal=.true.)
 
 !  Rewind (k+G) data if needed
    ikg=0
@@ -606,7 +607,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 
 !    Load k-dependent part in the Hamiltonian datastructure
      ABI_ALLOCATE(ph3d,(2,npw_k,gs_ham%matblk))
-     call load_k_hamiltonian(gs_ham,kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,&
+     call gs_ham%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=.true.)
 
 !    Initialize contributions from current k point
@@ -720,14 +721,14 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 
            if(need_piezofr)then
              do mu=1,6 !loop over strain
-               call load_k_hamiltonian(gs_ham,ffnl_k=ffnl_str(:,:,:,:,mu))
+               call gs_ham%load_k(ffnl_k=ffnl_str(:,:,:,:,mu))
                call nonlop(choice_piez3,cpopt,cwaveprj,enlout_piez1,gs_ham,mu,(/zero/),mpi_enreg,1,&
 &               nnlout_piez1,paw_opt_3,signs_field,svectout,tim_nonlop,cwavef,svectout)
                call dotprod_g(dotprod(1),dotprod(2),istwf_k,npw_k*dtset%nspinor,2,svectout,ddk,&
 &               mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
                piezofrnlk(mu,ii)=piezofrnlk(mu,ii)+occ_k*dotprod(1)
              end do
-             call load_k_hamiltonian(gs_ham,ffnl_k=ffnl)
+             call gs_ham%load_k(ffnl_k=ffnl)
            end if
 
            ABI_DEALLOCATE(ddk)
@@ -1082,7 +1083,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      ABI_DATATYPE_DEALLOCATE(pawrhoij_tot)
    end if
  end if
- call destroy_hamiltonian(gs_ham)
+ call gs_ham%free()
  call timab(159,2,tsec)
 
  write(msg,'(3a)')ch10,' ==> Calculation of the frozen part of the second order derivative done',ch10

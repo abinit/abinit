@@ -4,7 +4,7 @@ authors: XG, RC
 
 # Third tutorial
 
-## Crystalline silicon.  
+## Crystalline silicon.
 
 This tutorial aims at showing you how to get the following physical properties, for an insulator:
 
@@ -14,27 +14,27 @@ This tutorial aims at showing you how to get the following physical properties, 
 
 You will learn about the use of k-points, as well as the smearing of the plane-wave kinetic energy cut-off.
 
-[TUTORIAL_README]
-
-This tutorial should take about 1 hour.
-
 Visualisation tools are NOT covered in this tutorial.
 Powerful visualisation procedures have been developed in the Abipy context,
 relying on matplotlib. See the README of [Abipy](https://github.com/abinit/abipy)
 and the [Abipy tutorials](https://github.com/abinit/abitutorials).
+
+This tutorial should take about 1 hour.
+
+[TUTORIAL_README]
 
 ## Computing the total energy of silicon at a fixed number of k-points
 
 *Before beginning, you might consider working in a different subdirectory, as
 for tutorial 1 or 2. Why not Work3?*
 
-The file *tbase3_x.files* lists the file names and root names. 
-You can copy it in the *Work3* directory and change it as you did in the 
-[[lesson:base1|first]] and [[lesson:base2|second]] tutorials. 
-You can also copy the file *tbase3_1.in* inside the *Work3* directory with: 
+The file *tbase3_x.files* lists the file names and root names.
+You can copy it in the *Work3* directory and change it as you did in the
+[[lesson:base1|first]] and [[lesson:base2|second]] tutorials.
+You can also copy the file *tbase3_1.in* inside the *Work3* directory with:
 
 ```sh
-cd $ABI_TUTORIAL/Input
+cd $ABI_TESTS/tutorial/Input
 mkdir Work3
 cd Work3
 cp ../tbase3_x.files .   # You will need to edit this file.
@@ -52,9 +52,9 @@ You should edit it, read it carefully, have a look at the following **new input 
 * [[kptopt]], [[ngkpt]], [[nshiftk]], [[shiftk]], [[kptrlatt]] (not easy, take your time!)
 * [[diemac]] (a different value is used for this variable compare to previous calculations where isolated molecules were considered).
 
-Note also the following: you will work at fixed [[ecut]] (8Ha). 
-It is implicit that in *real life*, you should do a convergence test with respect to *ecut*. 
-Here, a suitable *ecut* is given to you. 
+Note also the following: you will work at fixed [[ecut]] (8Ha).
+It is implicit that in *real life*, you should do a convergence test with respect to *ecut*.
+Here, a suitable *ecut* is given to you.
 It will result in a lattice parameter that is 0.2% off of the experimental value.
 
 When you have read the input file, you can run the code, as usual:
@@ -67,7 +67,7 @@ Then, read the output file, and note the total energy:
 
 ## Starting the convergence study with respect to k-points
 
-There is, of course, a convergence study associated with the sampling of the Brillouin zone. 
+There is, of course, a convergence study associated with the sampling of the Brillouin zone.
 You should examine different grids, of increasing resolution. You might try the following series of grids:
 
     ngkpt1  2 2 2
@@ -75,7 +75,7 @@ You should examine different grids, of increasing resolution. You might try the 
     ngkpt3  6 6 6
     ngkpt4  8 8 8
 
-However, the associated number of k-points in the irreducible Brillouin zone grows very fast. 
+However, the associated number of k-points in the irreducible Brillouin zone grows very fast.
 It is
 
     nkpt1  2
@@ -83,17 +83,17 @@ It is
     nkpt3 28
     nkpt4 60
 
-Abinit computes automatically this number of k-points, from the definition of the grid and the symmetries. 
-You might nevertheless define an input [[nkpt]] value in the input file, in which case the code will compare 
+Abinit computes automatically this number of k-points, from the definition of the grid and the symmetries.
+You might nevertheless define an input [[nkpt]] value in the input file, in which case the code will compare
 its computed value (from the grid) with this input value.
 
-We take this opportunity to examine the behaviour of abinit when a problem is detected. 
-Let us suppose that with *ngkpt1 4 4 4*, one mentions *nkpt1 2*. 
+We take this opportunity to examine the behaviour of abinit when a problem is detected.
+Let us suppose that with *ngkpt1 4 4 4*, one mentions *nkpt1 2*.
 The input file *tbase3_2.in* is an example:
 
 {% dialog tests/tutorial/Input/tbase3_2.in %}
 
-Do not forget to change *tbase3_x.files*, if you are using that file name. 
+Do not forget to change *tbase3_x.files*, if you are using that file name.
 The message that you get a few dozen of lines before the end of the log file is:
 
 ```yaml
@@ -112,19 +112,19 @@ src_line: 415
 Action : contact ABINIT group.
 ```
 
-This is a typical abinit error message. 
-It states what is the problem that causes the stop of the code, then suggests that it might be due to an error 
-in the input file, namely, an erroneous value of [[nkpt]]. 
-The expected value, [[nkpt]] 10 is mentioned before the notice that the input file might be erroneous. 
+This is a typical abinit error message.
+It states what is the problem that causes the stop of the code, then suggests that it might be due to an error
+in the input file, namely, an erroneous value of [[nkpt]].
+The expected value, [[nkpt]] 10 is mentioned before the notice that the input file might be erroneous.
 Then, the file at which the problem occurred is mentioned, as well as the number of the line in that file.
 
-As the computation of [[nkpt]] for specific grids of k-points is not an easy task, 
-while the even more important selection of specific economical grids 
-(the best ratio between the accuracy of the integration in the Brillouin zone and the number of k-points) 
+As the computation of [[nkpt]] for specific grids of k-points is not an easy task,
+while the even more important selection of specific economical grids
+(the best ratio between the accuracy of the integration in the Brillouin zone and the number of k-points)
 is more difficult, some help to the user is provided by ABINIT.
 
-The code is able to examine automatically different k-point grids, and to propose the best grids for integration. 
-This is described in the [[help:abinit]], see the input variable [[prtkpt]], and the associated characterisation 
+The code is able to examine automatically different k-point grids, and to propose the best grids for integration.
+This is described in the [[help:abinit]], see the input variable [[prtkpt]], and the associated characterisation
 of the integral accuracy, described in [[kptrlen]].
 
 !!! tip
@@ -133,34 +133,34 @@ of the integral accuracy, described in [[kptrlen]].
     You can directly have a look at the output files in `$ABI_TESTS/v2/Refs`,
     the output files for the tests 61 to 73.
 
-When one begins the study of a new material, it is strongly advised to examine first the list of k-points grids, 
+When one begins the study of a new material, it is strongly advised to examine first the list of k-points grids,
 and select (at least) three efficient ones, for the k-point convergence study.
 
-Do not forget that the CPU time will be linearly proportional to the number of k-points to be treated: 
-using 10 k-points will take five more times than using 2 k-points. Even for a similar accuracy of the 
-Brillouin zone integration (about the same value of [[kptrlen]]), it might be easy to generate a grid 
-that will fold to 10 k-points in the irreducible Brillouin zone, as well as one that will fold to 2 k-points 
-in the irreducible Brillouin zone. 
+Do not forget that the CPU time will be linearly proportional to the number of k-points to be treated:
+using 10 k-points will take five more times than using 2 k-points. Even for a similar accuracy of the
+Brillouin zone integration (about the same value of [[kptrlen]]), it might be easy to generate a grid
+that will fold to 10 k-points in the irreducible Brillouin zone, as well as one that will fold to 2 k-points
+in the irreducible Brillouin zone.
 The latter is clearly to be preferred!
 
 ## Convergence study with respect to k-points
 
-In order to understand k-point grids, you should read [[cite:Monkhorst1976]]. 
+In order to understand k-point grids, you should read [[cite:Monkhorst1976]].
 Well, maybe not immediately. In the meantime, you can try the above-mentioned convergence study.
 
-The input file *tbase3_3.in* is an example, 
-while *$ABI_TUTORIAL/Refs/tbase3_3.out* is a reference output file.
+The input file *tbase3_3.in* is an example,
+while *$ABI_TESTS/tutorial/Refs/tbase3_3.out* is a reference output file.
 
 ```sh
-cd $ABI_TUTORIAL/Work3
+cd $ABI_TESTS/tutorial/Work3
 cp ../tbase3_3.in .
 ```
 
 {% dialog tests/tutorial/Input/tbase3_3.in tests/tutorial/Refs/tbase3_3.out %}
 
-In this output file, you should have a look at the echo of input variables. 
-As you know, these are preprocessed, and, in particular, [[ngkpt]] and [[shiftk]] 
-are used to generate the list of k-points ([[kpt]]) and their weights ([[wtk]]). 
+In this output file, you should have a look at the echo of input variables.
+As you know, these are preprocessed, and, in particular, [[ngkpt]] and [[shiftk]]
+are used to generate the list of k-points ([[kpt]]) and their weights ([[wtk]]).
 You should read the information about [[kpt]] and [[wtk]].
 
 From the output file, here is the evolution of total energy per unit cell:
@@ -170,13 +170,13 @@ From the output file, here is the evolution of total energy per unit cell:
     etotal3  -8.8726017432E+00
     etotal4  -8.8726056405E+00
 
-The difference between dataset 3 and dataset 4 is rather small. 
-Even the dataset 2 gives an accuracy of about 0.0001 Ha. So, our converged value for the total energy, 
+The difference between dataset 3 and dataset 4 is rather small.
+Even the dataset 2 gives an accuracy of about 0.0001 Ha. So, our converged value for the total energy,
 at fixed [[acell]], fixed [[ecut]], is -8.8726 Ha.
 
 ## Determination of the lattice parameters
 
-The input variable [[optcell]] governs the automatic optimisation of cell shape and volume. 
+The input variable [[optcell]] governs the automatic optimisation of cell shape and volume.
 For the automatic optimisation of cell volume, use:
 
     optcell 1
@@ -185,14 +185,14 @@ For the automatic optimisation of cell volume, use:
     dilatmx 1.05
     ecutsm 0.5
 
-You should read the indications about [[dilatmx]] and [[ecutsm]]. 
+You should read the indications about [[dilatmx]] and [[ecutsm]].
 Do not test all the k-point grids, only those with **nkpt** 2 and 10.
 
-The input file *$ABI_TUTORIAL/Input/tbase3_4.in* is an example,
+The input file *$ABI_TESTS/tutorial/Input/tbase3_4.in* is an example,
 
 {% dialog tests/tutorial/Input/tbase3_4.in %}
 
-while *$ABI_TUTORIAL/Refs/tbase3_4.out* is a reference output file.  
+while *$ABI_TESTS/tutorial/Refs/tbase3_4.out* is a reference output file.
 
 {% dialog tests/tutorial/Refs/tbase3_4.out %}
 
@@ -213,25 +213,25 @@ The stress tensor is given in Hartree/Bohr<sup>3</sup>, and the order of the com
                             11  22  33
                             23  13  12
 
-There is only a 0.13% relative difference between *acell1* and *acell2*. 
-So, our converged LDA value for Silicon, with the *14si.pspnc* pseudopotential (see the *tbase3_x.files* file) 
-is 10.216 Bohr (actually 10.21644), that is 5.406 Angstrom. 
-The experimental value is *5.431* Angstrom at 25 degree Celsius, 
-see R.W.G. Wyckoff, Crystal structures Ed. Wiley and sons, New-York (1963) 
+There is only a 0.13% relative difference between *acell1* and *acell2*.
+So, our converged LDA value for Silicon, with the *14si.pspnc* pseudopotential (see the *tbase3_x.files* file)
+is 10.216 Bohr (actually 10.21644), that is 5.406 Angstrom.
+The experimental value is *5.431* Angstrom at 25 degree Celsius,
+see R.W.G. Wyckoff, Crystal structures Ed. Wiley and sons, New-York (1963)
 or the [NIST database](https://physics.nist.gov/cgi-bin/cuu/Value?asil|search_for=silicon).
 
 ## Computing the band structure
 
-We fix the parameters [[acell]] to the theoretical value of 3 * 10.216, 
-and we fix also the grid of k-points (the 4x4x4 FCC grid, equivalent to a 8x8x8 Monkhorst-pack grid). 
+We fix the parameters [[acell]] to the theoretical value of 3 * 10.216,
+and we fix also the grid of k-points (the 4x4x4 FCC grid, equivalent to a 8x8x8 Monkhorst-pack grid).
 We will ask for 8 bands (4 valence and 4 conduction).
 
-A band structure can be computed by solving the Kohn-Sham equation for many different k-points, 
-along different lines of the Brillouin zone. The potential that enters the Kohn-Sham must be 
+A band structure can be computed by solving the Kohn-Sham equation for many different k-points,
+along different lines of the Brillouin zone. The potential that enters the Kohn-Sham must be
 derived from a previous self-consistent calculation, and will not vary during the scan of different k-point lines.
 
-Suppose that you want to make a L-Gamma-X-(U-)Gamma circuit, with 10, 12 and 17 divisions for each line 
-(each segment has a different length in reciprocal space, and these divisions give approximately 
+Suppose that you want to make a L-Gamma-X-(U-)Gamma circuit, with 10, 12 and 17 divisions for each line
+(each segment has a different length in reciprocal space, and these divisions give approximately
 the same distance between points along a line). The circuit will be obtained easily by the following choice of segment end points:
 
     L     (1/2 0 0)
@@ -241,22 +241,22 @@ the same distance between points along a line). The circuit will be obtained eas
 
 Note:
 
-1. the last Gamma point is in another cell of the reciprocal space than the first one, 
+1. the last Gamma point is in another cell of the reciprocal space than the first one,
    this choice allows to construct the X-U-Gamma line easily;
 
-2. the k-points are specified using reduced coordinates - in agreement with the input setting of the primitive 2-atom unit cell - 
-   in standard textbooks, you will often find the L, Gamma or X point given in coordinates of the conventional 8-atom cell: 
-   the above-mentioned circuit is then (1/2 1/2 1/2)-(0 0 0)-(1 0 0)-(1 1 1), but such (conventional) coordinates 
+2. the k-points are specified using reduced coordinates - in agreement with the input setting of the primitive 2-atom unit cell -
+   in standard textbooks, you will often find the L, Gamma or X point given in coordinates of the conventional 8-atom cell:
+   the above-mentioned circuit is then (1/2 1/2 1/2)-(0 0 0)-(1 0 0)-(1 1 1), but such (conventional) coordinates
    cannot be used with the 2-atom (non-conventional) cell.
 
-So, you should set up in your input file, for the first dataset, a usual SCF calculation 
+So, you should set up in your input file, for the first dataset, a usual SCF calculation
 in which you output the density ([[prtden]] 1), and, for the second dataset:
 
 * fix [[iscf]] to -2, to make a non-self-consistent calculation;
 * define [[getden]] -1, to take the output density of dataset 1;
 * set [[nband]] to 8;
 * set [[kptopt]] to -3, to define three segments in the brillouin Zone;
-* set [[ndivk]] to 10 12 17 (this means a circuit defined by 4 points, with 10 divisions of the first segment, 
+* set [[ndivk]] to 10 12 17 (this means a circuit defined by 4 points, with 10 divisions of the first segment,
   12 divisions of the second, 17 divisions of the third)
 * set [[kptbounds]] to
 
@@ -266,14 +266,14 @@ in which you output the density ([[prtden]] 1), and, for the second dataset:
         1.0  1.0  1.0 # Gamma point in another cell.
 
 * set [[enunit]] to 1, in order to have eigenenergies in eV
-* the only tolerance criterion admitted for non-self-consistent calculations is [[tolwfr]]. 
+* the only tolerance criterion admitted for non-self-consistent calculations is [[tolwfr]].
   You should set it to 1.0d-10 (or so), and suppress [[toldfe]].
 
-The input file *$ABI_TUTORIAL/Input/tbase3_5.in* is an example, 
+The input file *$ABI_TESTS/tutorial/Input/tbase3_5.in* is an example,
 
 {% dialog tests/tutorial/Input/tbase3_5.in %}
 
-while *$ABI_TUTORIAL/Refs/tbase3_5.out* is a reference output file.
+while *$ABI_TESTS/tutorial/Refs/tbase3_5.out* is a reference output file.
 
 {% dialog tests/tutorial/Refs/tbase3_5.out %}
 
@@ -291,7 +291,7 @@ You should find the band structure starting at (second dataset):
      ....
 
 One needs a graphical tool to represent all these data.
-In a separate file (*_EIG*), you will find the list of k-points and the eigenenergies 
+In a separate file (*_EIG*), you will find the list of k-points and the eigenenergies
 (the input variable [[prteig]] is set by default to 1).
 
 Even without a graphical tool we will have a quick look at the values at L, $\Gamma$, X and $\Gamma$ again:
@@ -308,15 +308,15 @@ Even without a graphical tool we will have a quick look at the values at L, $\Ga
      kpt#  40, nband=  8, wtk=  1.00000, kpt=  1.0000  1.0000  1.0000 (reduced coord)
       -6.17005   5.91814   5.91814   5.91814   8.44836   8.44836   8.44836   9.17755
 
-The last $\Gamma$ is exactly equivalent to the first $\Gamma$. 
-It can be checked that the top of the valence band 
-is obtained at $\Gamma$ (=5.91814 eV). The width of the valence band is 12.09 eV, the lowest unoccupied state at X 
+The last $\Gamma$ is exactly equivalent to the first $\Gamma$.
+It can be checked that the top of the valence band
+is obtained at $\Gamma$ (=5.91814 eV). The width of the valence band is 12.09 eV, the lowest unoccupied state at X
 is 0.594 eV higher than the top of the valence band, at $\Gamma$.
 
-The Si is described as an indirect band gap material (this is correct), 
-with a band-gap of about 0.594 eV (this is quantitatively quite wrong: the experimental value 1.17 eV is at 25 degree Celsius). 
-The minimum of the conduction band is even slightly displaced with respect to X, see kpt # 21. 
-This underestimation of the band gap is well-known (the famous DFT band-gap problem). 
+The Si is described as an indirect band gap material (this is correct),
+with a band-gap of about 0.594 eV (this is quantitatively quite wrong: the experimental value 1.17 eV is at 25 degree Celsius).
+The minimum of the conduction band is even slightly displaced with respect to X, see kpt # 21.
+This underestimation of the band gap is well-known (the famous DFT band-gap problem).
 In order to obtain correct band gaps, you need to go beyond the Kohn-Sham Density Functional
 Theory: use the GW approximation. This is described in [the first tutorial on GW](gw1).
 
@@ -341,10 +341,10 @@ For experimental data and band structure representation, see the book by M.L. Co
 
 ## Using AbiPy to automate the most boring steps
 
-The |AbiPy| package provides several tools to facilitate the preparation of band structure calculations 
-and the analysis of the output results. First of all, one can use the |abistruct| script with 
-the `kpath` command to determine a high-symmetry k-path from **any file** containing structural 
-information (abinit input file, netcdf output files etc.). 
+The |AbiPy| package provides several tools to facilitate the preparation of band structure calculations
+and the analysis of the output results. First of all, one can use the |abistruct| script with
+the `kpath` command to determine a high-symmetry k-path from **any file** containing structural
+information (abinit input file, netcdf output files etc.).
 The high-symmetry k-path follows the conventions described in [[cite:Setyawan2010]].
 Let's try with:
 

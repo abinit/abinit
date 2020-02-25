@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_screening_driver
 !! NAME
 !!  m_screening_driver
@@ -7,7 +6,7 @@
 !! Calculate screening and dielectric functions
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
+!!  Copyright (C) 2008-2020 ABINIT group (MG, GMR, VO, LR, RWG, MT, RShaltaf, AS, FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,10 +26,9 @@
 module m_screening_driver
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
+ use m_dtset
  use m_xmpi
  use m_xomp
  use m_errors
@@ -42,7 +40,13 @@ module m_screening_driver
 #endif
  use libxc_functionals
  use m_hdr
+ use m_dtfil
+ use m_distribfft
+ use m_crystal
 
+
+ use defs_datatypes,  only : pseudopotential_type, ebands_t
+ use defs_abitypes,   only : MPI_type
  use m_time,          only : timab
  use m_io_tools,      only : open_file, file_exists, iomode_from_fname
  use m_fstrings,      only : int2char10, sjoin, strcat, itoa, ltoa, itoa
@@ -51,7 +55,6 @@ module m_screening_driver
  use m_geometry,      only : normv, vdotw, mkrdim, metric
  use m_gwdefs,        only : GW_TOLQ0, GW_TOLQ, em1params_free, em1params_t, GW_Q0_DEFAULT
  use m_mpinfo,        only : destroy_mpi_enreg, initmpi_seq
- use m_crystal,       only : crystal_t, crystal_print
  use m_ebands,        only : ebands_update_occ, ebands_copy, get_valence_idx, get_occupied, apply_scissor, &
                              ebands_free, ebands_has_metal_scheme, ebands_ncwrite, ebands_init
  use m_bz_mesh,       only : kmesh_t, kmesh_init, kmesh_free, littlegroup_t, littlegroup_free, littlegroup_init, &
@@ -179,7 +182,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
 !Arguments ------------------------------------
 !scalars
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(Datafiles_type),intent(in) :: Dtfil
  type(Dataset_type),intent(inout) :: Dtset
  type(Pawang_type),intent(inout) :: Pawang
@@ -239,7 +242,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  real(dp) :: gmet(3,3),gprimd(3,3),k0(3),qtmp(3),rmet(3,3),rprimd(3,3),tsec(2),strsxc(6)
  real(dp),allocatable :: igwene(:,:,:),chi0_sumrule(:),ec_rpa(:),rspower(:)
  real(dp),allocatable :: nhat(:,:),nhatgr(:,:,:),ph1d(:,:),ph1df(:,:)
- real(dp),allocatable :: rhog(:,:),rhor(:,:),rhor_p(:,:),rhor_kernel(:,:),taug(:,:),taur(:,:)
+ real(dp),allocatable :: rhog(:,:),rhor(:,:),rhor_p(:,:),rhor_kernel(:,:),taur(:,:)
  real(dp),allocatable :: z(:),zw(:),grchempottn(:,:),grewtn(:,:),grvdw(:,:),kxc(:,:),qmax(:)
  real(dp),allocatable :: ks_vhartr(:),vpsp(:),ks_vtrial(:,:),ks_vxc(:,:),xccc3d(:)
  complex(gwpc),allocatable :: arr_99(:,:),kxcg(:,:),fxc_ADA(:,:,:)
@@ -373,9 +376,9 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    if (psp_gencond==1.or.call_pawinit) then
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
-     call pawinit(gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
+     call pawinit(dtset%effmass_free,gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
 &     Psps%mpsang,Dtset%pawnphi,Cryst%nsym,Dtset%pawntheta,Pawang,Pawrad,&
-&     Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%xclevel,Dtset%usepotzero)
+&     Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%xclevel,0,Dtset%usepotzero)
 
      ! Update internal values
      call paw_gencond(Dtset,gnt_option,"save",call_pawinit)
@@ -532,10 +535,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nbvw=MAXVAL(ibocc)
    nbcw=Ep%nbnds-nbvw
    write(msg,'(4a,i0,2a,i0,2a,i0,a)')ch10,&
-&   '- screening: taking advantage of time-reversal symmetry ',ch10,&
-&   '- Maximum band index for partially occupied states nbvw = ',nbvw,ch10,&
-&   '- Remaining bands to be divided among processors   nbcw = ',nbcw,ch10,&
-&   '- Number of bands treated by each node ~',nbcw/nprocs,ch10
+    '- screening: taking advantage of time-reversal symmetry ',ch10,&
+    '- Maximum band index for partially occupied states nbvw = ',nbvw,ch10,&
+    '- Remaining bands to be divided among processors   nbcw = ',nbcw,ch10,&
+    '- Number of bands treated by each node ~',nbcw/nprocs,ch10
    call wrtout(ab_out,msg,'COLL')
    if (Cryst%timrev/=2) then
      MSG_ERROR('Time-reversal cannot be used since cryst%timrev/=2')
@@ -745,7 +748,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,rhor_p,prev_Pawrhoij)
 
    ABI_FREE(rhor_p)
-   ABI_DT_FREE(prev_Pawrhoij)
+   ABI_FREE(prev_Pawrhoij)
 
    ! FIXME this is to preserve the old implementation for the head and the wings in ccchi0q0
    ! But has to be rationalized
@@ -874,11 +877,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  end if
 
  ABI_MALLOC(rhog,(2,nfftf))
- ABI_MALLOC(taug,(2,nfftf*Dtset%usekden))
  call fourdp(1,rhog,rhor(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp4)
- if(Dtset%usekden==1)then
-   call fourdp(1,taug,taur(:,1),-1,MPI_enreg_seq,nfftf,1,ngfftf,tim_fourdp4)
- end if
 
 !The following steps have been gathered in the setvtr routine:
 !- get Ewald energy and Ewald forces
@@ -915,7 +914,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 & moved_atm_inside,moved_rhor,MPI_enreg_seq, &
 & Cryst%nattyp,nfftf,ngfftf,ngrvdw,nhat,nhatgr,nhatgrdim,nkxc,Cryst%ntypat,&
 & Psps%n1xccc,n3xccc,optene,pawrad,Pawtab,ph1df,Psps,rhog,rhor,Cryst%rmet,Cryst%rprimd,strsxc,Cryst%ucvol,usexcnhat,&
-& ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,wvl_dummy,xccc3d,Cryst%xred,taug=taug,taur=taur)
+& ks_vhartr,vpsp,ks_vtrial,ks_vxc,vxcavg,wvl_dummy,xccc3d,Cryst%xred,taur=taur)
 
  if (nkxc/=0)  then
    ABI_FREE(kxc)
@@ -1315,7 +1314,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      dim_kxcg=0
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
 
-!  @WC: bootstrap --
+!  bootstrap --
    case (-3, -4, -5, -6, -7, -8)
      ABI_CHECK(Dtset%usepaw==0,"GWGamma + PAW not available")
      if (Dtset%gwgamma>-5) then
@@ -1325,7 +1324,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
        MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (head-only) is being added to screening')
        approx_type=5
      else
-       MSG_WARNING('EXPERIMENTAL: Bootstrap kernel (RPA-type, head-only) is being added to screening')
+       MSG_WARNING('EXPERIMENTAL: RPA Bootstrap kernel is being added to screening')
        approx_type=6
      end if
      dim_kxcg=0
@@ -1333,7 +1332,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
      ! 1 -> TESTELECTRON, vertex in chi0 *and* sigma
      ! 0 -> TESTPARTICLE, vertex in chi0 only
      ABI_MALLOC(kxcg,(nfftf_tot,dim_kxcg))
-!--@WC
+!
 
    case default
      MSG_ERROR(sjoin("Wrong gwgamma:", itoa(dtset%gwgamma)))
@@ -1487,7 +1486,6 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  ABI_FREE(qp_vbik)
  ABI_FREE(ktabr)
  ABI_FREE(taur)
- ABI_FREE(taug)
  ABI_FREE(ks_vhartr)
  ABI_FREE(ks_vtrial)
  ABI_FREE(vpsp)
@@ -1511,13 +1509,13 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
    end if
  end if
 
- ABI_DT_FREE(Pawfgrtab)
- ABI_DT_FREE(Paw_pwff)
- ABI_DT_FREE(Pawrhoij)
- ABI_DT_FREE(Paw_ij)
- ABI_DT_FREE(Paw_an)
+ ABI_FREE(Pawfgrtab)
+ ABI_FREE(Paw_pwff)
+ ABI_FREE(Pawrhoij)
+ ABI_FREE(Paw_ij)
+ ABI_FREE(Paw_an)
  ABI_FREE(ktabrf)
- ABI_DT_FREE(Paw_onsite)
+ ABI_FREE(Paw_onsite)
 
  call wfd%free()
  call kmesh_free(Kmesh)
@@ -1527,13 +1525,13 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call gsph_free(Gsph_wfn)
  call vcoul_free(Vcp)
  call em1params_free(Ep)
- call hdr_free(Hdr_wfk)
- call hdr_free(Hdr_local)
+ call Hdr_wfk%free()
+ call Hdr_local%free()
  call ebands_free(KS_BSt)
  call ebands_free(QP_BSt)
  call littlegroup_free(Ltg_q)
  call destroy_mpi_enreg(MPI_enreg_seq)
- ABI_DT_FREE(Ltg_q)
+ ABI_FREE(Ltg_q)
 
  call timab(301,2,tsec)
 
@@ -1593,7 +1591,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  character(len=fnlen),intent(in) :: wfk_fname
  type(Dataset_type),intent(inout) :: Dtset !INOUT is due to setshells
  type(datafiles_type),intent(in) :: dtfil
@@ -1687,7 +1685,7 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
  ! Read parameters from WFK and verifify them.
  call wfk_read_eigenvalues(wfk_fname,energies_p,Hdr_wfk,comm)
  mband = MAXVAL(Hdr_wfk%nband)
- call hdr_vs_dtset(Hdr_wfk,Dtset)
+ call hdr_wfk%vs_dtset(dtset)
  remove_inv=.FALSE.
 
  test_npwkss = 0
@@ -1731,13 +1729,13 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    Ep%nbnds=mband
    Dtset%nband(:)=mband
    write(msg,'(4a,i4,a)')ch10,&
-&    ' Number of bands found less then required. ',ch10,&
-&    ' Calculation will proceed with nbnds = ',mband,ch10
+     ' Number of bands found less then required. ',ch10,&
+     ' Calculation will proceed with nbnds = ',mband,ch10
    MSG_WARNING(msg)
  end if
 
- cryst = hdr_get_crystal(Hdr_wfk, timrev, remove_inv)
- call crystal_print(Cryst,mode_paral='COLL')
+ cryst = Hdr_wfk%get_crystal(timrev, remove_inv)
+ call cryst%print(mode_paral='COLL')
 
  ! === Create basic data types for the calculation ===
  ! * Kmesh defines the k-point sampling for the wavefunctions.
@@ -2144,11 +2142,11 @@ subroutine setup_screening(codvsn,acell,rprim,ngfftf,wfk_fname,dtfil,Dtset,Psps,
    call pawrhoij_alloc(Pawrhoij,1,Dtset%nspden,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
  end if
- call hdr_update(Hdr_out,bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
+ call Hdr_out%update(bantot,1.0d20,1.0d20,1.0d20,Cryst%rprimd,occfact,Pawrhoij,Cryst%xred,dtset%amu_orig(:,1))
 
  ABI_FREE(occfact)
  call pawrhoij_free(Pawrhoij)
- ABI_DT_FREE(Pawrhoij)
+ ABI_FREE(Pawrhoij)
 
  ! ==== Setup of extrapolar technique ====
  Ep%gwcomp = Dtset%gwcomp; Ep%gwencomp = Dtset%gwencomp

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_rwwf
 !! NAME
 !!  m_wvl_rwwf
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DC)
+!!  Copyright (C) 1998-2020 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,17 +26,19 @@
 module m_wvl_rwwf
 
  use defs_basis
- use defs_abitypes
- use defs_datatypes
+
  use defs_wvltypes
  use m_wffile
  use m_errors
  use m_abicore
+ use m_hdr
  use m_xmpi
+ use m_dtset
 #if defined HAVE_ETSF_IO
   use etsf_io
 #endif
 
+ use defs_abitypes,  only : MPI_type
  use m_geometry,     only : xred2xcart
 
  implicit none

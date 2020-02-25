@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fft
 !! NAME
 !!  m_fft
@@ -8,7 +7,7 @@
 !!  It also defines generic interfaces for single or double precision arrays.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG, MM, GZ, MT, MF, XG, PT, FF)
+!! Copyright (C) 2009-2020 ABINIT group (MG, MM, GZ, MT, MF, XG, PT, FF)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -529,8 +528,7 @@ end subroutine fftbox_execute_op_dpc
 !!
 !! SOURCE
 
-subroutine fft_ug_dp(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
-
+subroutine fft_ug_dp(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug, ur)
 
 !Arguments ------------------------------------
 !scalars
@@ -632,7 +630,7 @@ end subroutine fft_ug_spc
 !!
 !! SOURCE
 
-subroutine fft_ug_dpc(npw_k,nfft,nspinor,ndat,mgfft,ngfft,istwf_k,kg_k,gbound_k,ug,ur)
+subroutine fft_ug_dpc(npw_k, nfft, nspinor, ndat, mgfft, ngfft, istwf_k, kg_k, gbound_k, ug, ur)
 
 
 !Arguments ------------------------------------
@@ -948,7 +946,7 @@ end subroutine fftpad_spc
 !!
 !! SOURCE
 
-subroutine fftpad_dpc(ff,ngfft,nx,ny,nz,ldx,ldy,ldz,ndat,mgfft,isign,gbound)
+subroutine fftpad_dpc(ff, ngfft, nx, ny, nz, ldx, ldy, ldz, ndat, mgfft, isign, gbound)
 
 
 !Arguments ------------------------------------
@@ -2931,7 +2929,7 @@ end subroutine fourwf
 !!
 !! SOURCE
 
-subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
+subroutine fourdp(cplex, fofg, fofr, isign, mpi_enreg, nfft, ndat, ngfft, tim_fourdp)
 
 
 !Arguments ------------------------------------
@@ -2958,6 +2956,7 @@ subroutine fourdp(cplex,fofg,fofr,isign,mpi_enreg,nfft,ndat,ngfft,tim_fourdp)
  real(dp),allocatable :: workf(:,:,:,:,:),workr(:,:,:,:,:)
 
 ! *************************************************************************
+
  ABI_CHECK(ndat == 1, "ndat != 1 should be tested")
 
  ! Keep track of timing

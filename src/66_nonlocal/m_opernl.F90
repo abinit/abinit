@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_opernl
 !! NAME
 !!  m_opernl
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, DRH)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -139,7 +138,6 @@ subroutine opernl2(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 &  mlang5,mlang6,mproj,ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,&
 &  ntypat,ph3d,sign,vect)
 
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -753,8 +751,6 @@ subroutine opernl3(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 &  mlang5,mlang6,mproj,ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,&
 &  ntypat,ph3d,sign,vect)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: choice,ia3,idir,ispinor,istwf_k,itypat,lmnmax,matblk
@@ -1351,8 +1347,6 @@ subroutine opernl4a(choice,dgxdis,dgxds,d2gxdis,d2gxds2,dgxdt,&
 &  jproj,kg_k,kpg_k,kpt,lmnmax,matblk,mincat,mlang1,mlang3,mlang4,&
 &  mlang5,mlang6,mproj,ndgxdt,nffnl,nincat,nkpg,nlang,nloalg,npw,&
 &  ntypat,ph3d,vect)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2360,8 +2354,6 @@ subroutine opernl4b(choice,dgxds,dgxdt,ffnl,gmet,gxa,&
 &  ia3,idir,indlmn,ispinor,itypat,jproj,kg_k,kpg_k,kpt,&
 &  lmnmax,matblk,mincat,mlang3,mlang4,mproj,ndgxdt,nffnl,nincat,&
 &  nkpg,nlang,nloalg,npw,ntypat,ph3d,vect)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

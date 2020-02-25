@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_a2ftr
 !! NAME
 !! m_a2ftr
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!   Copyright (C) 2004-2019 ABINIT group (JPC, MJV, BXU)
+!!   Copyright (C) 2004-2020 ABINIT group (JPC, MJV, BXU)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +26,6 @@
 module m_a2ftr
 
  use defs_basis
- use defs_datatypes
  use defs_elphon
  use m_errors
  use m_abicore
@@ -35,6 +33,7 @@ module m_a2ftr
  use m_splines
  use m_ebands
 
+ use defs_datatypes,    only : ebands_t
  use m_io_tools,        only : open_file
  use m_numeric_tools,   only : simpson_int
  use m_hide_lapack,     only : matrginv
@@ -43,7 +42,6 @@ module m_a2ftr
  use m_ifc,             only : ifc_type
  use m_dynmat,          only : ftgam_init, ftgam
  use m_epweights,       only : d2c_wtq, ep_ph_weights, ep_el_weights, ep_ph_weights
- use m_fstab,           only : mkqptequiv
 
  implicit none
 

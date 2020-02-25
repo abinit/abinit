@@ -7,7 +7,7 @@
 !!  Tools and wrappers for NETCDF-IO.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -229,6 +229,9 @@ MODULE m_nctk
  public :: nctk_read_datar
  public :: nctk_defwrite_nonana_terms  ! Write phonon frequencies and displacements for q-->0
                                        ! in the presence of non-analytical behaviour.
+ public :: nctk_defwrite_nonana_raman_terms   ! Write raman susceptiblities for q-->0
+ public :: nctk_defwrite_raman_terms   ! Write raman susceptiblities and frequencies for q=0
+
 #endif
  public :: create_nc_file              ! FIXME: Deprecated
  public :: write_var_netcdf            ! FIXME: Deprecated
@@ -725,12 +728,13 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  if (nctk_has_mpiio) then
    ncerr = nf90_einval
 #ifdef HAVE_NETCDF_MPI
-   call wrtout(std_out, sjoin(" Creating HDf5 file: ", path), "COLL")
+   call wrtout(std_out, sjoin("- Creating HDf5 file with MPI-IO support:", path))
    ! Believe it or not, I have to use xmpi_comm_self even in sequential to avoid weird SIGSEV in the MPI layer!
    ncerr = nf90_create(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), ncid=ncid, &
      comm=comm, info=xmpio_info)
 #endif
  else
+   call wrtout(std_out, sjoin("- Creating netcdf file WITHOUT MPI-IO support:", path))
    ncerr = nf90_create(path, ior(nf90_clobber, nf90_write), ncid)
    if (xmpi_comm_size(comm) > 1) then
      MSG_WARNING("netcdf without MPI-IO support with nprocs > 1!")
@@ -780,16 +784,14 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
  integer,intent(in) :: comm
  character(len=*),intent(in) :: path
 
-!Local variables-------------------------------
-
 ! *********************************************************************
 
  if (.not. nctk_has_mpiio .and. xmpi_comm_size(comm) > 1) then
    MSG_ERROR("netcdf without MPI-IO support with nprocs > 1!")
  end if
 
- !if (xmpi_comm_size(comm) > 1) then
  if (xmpi_comm_size(comm) > 1 .or. nctk_has_mpiio) then
+   call wrtout(std_out, sjoin("- Opening HDf5 file with MPI-IO support:", path))
 #ifdef HAVE_NETCDF_MPI
    ncerr = nf90_open_par(path, cmode=ior(ior(nf90_netcdf4, nf90_mpiio), nf90_write), &
      comm=comm, info=xmpio_info, ncid=ncid)
@@ -798,12 +800,13 @@ integer function nctk_open_modify(ncid, path, comm) result(ncerr)
    MSG_ERROR("nprocs > 1 but netcdf does not support MPI-IO")
 #endif
  else
+   call wrtout(std_out, sjoin("- Opening netcdf file without MPI-IO support:", path))
    ncerr = nf90_open(path, nf90_write, ncid)
    NCF_CHECK_MSG(ncerr, sjoin("nf90_open: ", path))
  end if
 
  ! Set file in define mode.
- ncerr = nctk_set_defmode(ncid)
+ NCF_CHECK(nctk_set_defmode(ncid))
 
 end function nctk_open_modify
 !!***
@@ -2616,6 +2619,126 @@ subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, c
  end select
 
 end subroutine nctk_defwrite_nonana_terms
+!!***
+
+!!****f* m_nctk/nctk_defwrite_nonana_raman_terms
+!! NAME
+!! nctk_defwrite_nonana_raman_terms
+!!
+!! FUNCTION
+!! Write the Raman susceptiblities for q-->0 along different directions in the netcdf file.
+!!
+!! INPUTS
+!!  ncid=netcdf file id.
+!!  iphl2=Index of the q-point to be written to file.
+!!  nph2l=Number of qpoints.
+!!  rsus(3*natom,3,3)=List of Raman susceptibilities along the direction corresponding to iphl2.
+!!  natom=Number of atoms
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! PARENTS
+!!      anaddb
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nctk_defwrite_nonana_raman_terms(ncid, iphl2, nph2l, natom, rsus, mode)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid,natom,iphl2,nph2l
+ character(len=*),intent(in) :: mode
+!arrays
+ real(dp),intent(in) :: rsus(3*natom,3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncerr, raman_sus_varid
+
+! *************************************************************************
+
+!Fake use of nph2l, to keep it as argument. This should be removed when nph2l will be used.
+ if(.false.)then
+  ncerr=nph2l
+ endif
+
+ select case (mode)
+ case ("define")
+   NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
+   ncerr = nctk_def_arrays(ncid, [ nctkarr_t("non_analytical_raman_sus", "dp", &
+"number_of_non_analytical_directions,number_of_phonon_modes,number_of_cartesian_directions,number_of_cartesian_directions")])
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nctk_set_datamode(ncid))
+
+ case ("write")
+
+   NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_raman_sus", raman_sus_varid))
+   ncerr = nf90_put_var(ncid,raman_sus_varid,rsus,&
+     start=[iphl2,1,1,1], count=[1,3*natom,3,3])
+   NCF_CHECK(ncerr)
+
+ case default
+   MSG_ERROR(sjoin("Wrong value for mode", mode))
+ end select
+
+end subroutine nctk_defwrite_nonana_raman_terms
+!!***
+
+!!****f* m_nctk/nctk_defwrite_raman_terms
+!! NAME
+!! nctk_defwrite_raman_terms
+!!
+!! FUNCTION
+!! Write the Raman susceptiblities for q=0 and also the phonon frequncies at gamma.
+!!
+!! INPUTS
+!!  ncid=netcdf file id.
+!!  rsus(3*natom,3,3)=List of Raman susceptibilities.
+!!  natom=Number of atoms
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! PARENTS
+!!      anaddb
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nctk_defwrite_raman_terms(ncid, natom, rsus, phfrq)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid,natom
+!arrays
+ real(dp),intent(in) :: rsus(3*natom,3,3)
+ real(dp),intent(in) :: phfrq(3*natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncerr, raman_sus_varid, phmodes_varid
+
+! *************************************************************************
+
+ NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
+ ncerr = nctk_def_arrays(ncid, [ nctkarr_t("raman_sus", "dp", &
+  "number_of_phonon_modes,number_of_cartesian_directions,number_of_cartesian_directions"), &
+  nctkarr_t("gamma_phonon_modes", "dp", "number_of_phonon_modes")])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nctk_set_datamode(ncid))
+
+ NCF_CHECK(nf90_inq_varid(ncid, "raman_sus", raman_sus_varid))
+ NCF_CHECK(nf90_put_var(ncid,raman_sus_varid,rsus))
+ NCF_CHECK(nf90_inq_varid(ncid, "gamma_phonon_modes", phmodes_varid))
+ NCF_CHECK(nf90_put_var(ncid,phmodes_varid,phfrq*Ha_eV))
+
+end subroutine nctk_defwrite_raman_terms
 !!***
 
 #endif

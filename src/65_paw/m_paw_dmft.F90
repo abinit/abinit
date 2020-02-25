@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_dmft
 !! NAME
 !!  m_paw_dmft
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,14 +29,15 @@
 MODULE m_paw_dmft
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_CtqmcInterface
  use m_errors
  use m_abicore
  use m_xmpi
  use m_data4entropyDMFT
+ use m_dtset
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_io_tools,  only : open_file
  use m_pawtab,    only : pawtab_type
 
@@ -163,7 +163,7 @@ MODULE m_paw_dmft
   integer :: dmftctqmc_triqs_nleg
   ! CTQMC of TRIQS: Nb of Legendre polynomial used to compute the
   ! Green's function (Phys. Rev. B 84, 075145) [[cite:Boehnke2011]]. Default is 30.
-  
+
   ! 0 : nothing, >=1 max order evaluated in Perturbation.dat
 
   real(dp) :: dmftqmc_n
@@ -349,9 +349,6 @@ CONTAINS  !=====================================================================
 subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,nkpt,nspden,&
 &nspinor,nsppol,occ,usedmft,paw_dmft,use_sc_dmft,dmft_solv,mpi_enreg)
 
- implicit none
-
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: bandkss,dmft_read_occnd,dmftbandi,dmftbandf,mband,nkpt,nspden,&
@@ -471,7 +468,7 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
  else
   paw_dmft%mbandc = 0
  endif
-  
+
  if(paw_dmft%use_sc_dmft /= 0 .and. mpi_enreg%paral_kgb/=0) then
    call init_sc_dmft_paralkgb(paw_dmft, mpi_enreg)
  end if
@@ -510,6 +507,9 @@ subroutine init_sc_dmft(bandkss,dmftbandi,dmftbandf,dmft_read_occnd,mband,nband,
    else if(dmft_solv==7) then
      write(message, '(a,a)') ch10,' DMFT uses the Continuous Time Quantum Monte Carlo solver of TRIQS&
      & (with rotationaly invariant interaction)'
+   else if(dmft_solv==9) then
+     write(message, '(a,a)') ch10,' DMFT uses the python invocation of TRIQS, for which you need to &
+     &give your personal script'
   endif
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
@@ -555,10 +555,8 @@ end subroutine init_sc_dmft
 
 subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor, paw_dmft, pawtab, psps, typat)
 
- use defs_abitypes
  use m_splines
  !use m_CtqmcInterface
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -696,7 +694,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
    MSG_BUG(message)
  endif
  paw_dmft%dmft_log_freq=1 ! use logarithmic frequencies.
- if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7) then
+ if(paw_dmft%dmft_solv==6.or.paw_dmft%dmft_solv==7.or.paw_dmft%dmft_solv==9) then
    paw_dmft%dmft_log_freq=0 ! do not use logarithmic frequencies.
  endif
  paw_dmft%dmft_nwli=dtset%dmft_nwli
@@ -750,8 +748,8 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
  do ikpt=1,paw_dmft%nkpt
    sumwtk=sumwtk+paw_dmft%wtk(ikpt)
  enddo
- if(abs(sumwtk-1_dp)>tol13.and.dtset%iscf>=0) then
-   write(message, '(a,f15.10)' )' sum of k-point is incorrect',sumwtk
+ if(abs(sumwtk-1_dp)>tol11.and.dtset%iscf>=0) then
+   write(message, '(a,f15.11)' )' sum of k-point is incorrect',sumwtk
    MSG_ERROR(message)
  endif
  ABI_ALLOCATE(paw_dmft%lpawu,(paw_dmft%natom))
@@ -778,6 +776,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
      tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realfrequencygrid'
      inquire(file=trim(tmpfil),exist=lexist)!,recl=nrecl)
    !  write(6,*) "inquire",lexist
+   grid_unt=2000
      if((.not.lexist)) then
        iexist2=0
        write(message,'(4x,a,i5,3a)') "File number",grid_unt,&
@@ -786,7 +785,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
        message = "Cannot continue: the missing file coming from Maxent code is needed"
        MSG_WARNING(message)
      endif
-     
+
      if(iexist2==1) then
 #ifdef FC_NAG
        open (unit=grid_unt,file=trim(tmpfil),status='unknown',form='formatted',recl=ABI_RECL)
@@ -908,8 +907,6 @@ end subroutine init_dmft
 
 subroutine construct_nwli_dmft(paw_dmft,nwli,omega_li)
 
- implicit none
-
  type(paw_dmft_type), intent(in) :: paw_dmft
  integer, intent(in) :: nwli
  real(dp), intent(out) :: omega_li(:)
@@ -976,7 +973,6 @@ end subroutine construct_nwli_dmft
 
 subroutine construct_nwlo_dmft(paw_dmft)
  use m_splines
- implicit none
 
  type(paw_dmft_type), intent(inout) :: paw_dmft
  integer :: cubic_freq
@@ -1055,7 +1051,7 @@ subroutine construct_nwlo_dmft(paw_dmft)
 !         Check variables (Already done in chkinp if dmft_solv==5)
      if (paw_dmft%dmftqmc_l .gt. paw_dmft%dmft_nwlo) then
        write(message, '(a,a,i6)' )ch10,&
-&       ' ERROR: dmft_nwlo has to be at leat equal to 2xdmftqmc_l :',2*paw_dmft%dmftqmc_l
+&       ' ERROR: dmft_nwlo has to be at least equal to 2xdmftqmc_l :',2*paw_dmft%dmftqmc_l
        MSG_ERROR(message)
      end if
 !         End Check
@@ -1108,103 +1104,103 @@ subroutine construct_nwlo_dmft(paw_dmft)
 
      omega_lo_tmp(1)=paw_dmft%temp*pi
      omega_lo_tmp(paw_dmft%dmft_nwlo)=paw_dmft%temp*pi*real(2*paw_dmft%dmft_nwli-1,kind=dp)
-  endif
+   endif
 
 !=======================
 !== construct weight for log. freq.
 !=======================
-  ABI_ALLOCATE(tospline_lo,(paw_dmft%dmft_nwlo))
-  ABI_ALLOCATE(splined_li,(paw_dmft%dmft_nwli))
-  ABI_ALLOCATE(ysplin2_lo,(paw_dmft%dmft_nwlo))
-  if (allocated(omega_li)) then
-    ABI_DEALLOCATE(omega_li)
-  endif
-  ABI_ALLOCATE(omega_li,(1:paw_dmft%dmft_nwli))
-  call construct_nwli_dmft(paw_dmft,paw_dmft%dmft_nwli,omega_li)
-
-  !Parallelisation over frequencies!
-  ! ============= Set up =============
-  myproc = paw_dmft%myproc
-  nproc = paw_dmft%nproc
-  spacecomm = paw_dmft%spacecomm
-  deltaw = paw_dmft%dmft_nwlo / nproc
-  residu = paw_dmft%dmft_nwlo - nproc*deltaw
-  if ( myproc .LT. nproc - residu ) then
-    omegaBegin = 1 + myproc*deltaw
-    omegaEnd   = (myproc + 1)*deltaw
-  else
-    omegaBegin = 1 + myproc*(deltaw + 1) -nproc + residu
-    omegaEnd = omegaBegin + deltaw
-  end if
-  wgt_wlo(:)=zero
-  ! ============= END Set up =============
-  do ifreq=omegaBegin,omegaEnd
-    tospline_lo=cmplx(0_dp,0_dp,kind=dp)
+   ABI_ALLOCATE(tospline_lo,(paw_dmft%dmft_nwlo))
+   ABI_ALLOCATE(splined_li,(paw_dmft%dmft_nwli))
+   ABI_ALLOCATE(ysplin2_lo,(paw_dmft%dmft_nwlo))
+   if (allocated(omega_li)) then
+     ABI_DEALLOCATE(omega_li)
+   endif
+   ABI_ALLOCATE(omega_li,(1:paw_dmft%dmft_nwli))
+   call construct_nwli_dmft(paw_dmft,paw_dmft%dmft_nwli,omega_li)
+  
+   !Parallelisation over frequencies!
+   ! ============= Set up =============
+   myproc = paw_dmft%myproc
+   nproc = paw_dmft%nproc
+   spacecomm = paw_dmft%spacecomm
+   deltaw = paw_dmft%dmft_nwlo / nproc
+   residu = paw_dmft%dmft_nwlo - nproc*deltaw
+   if ( myproc .LT. nproc - residu ) then
+     omegaBegin = 1 + myproc*deltaw
+     omegaEnd   = (myproc + 1)*deltaw
+   else
+     omegaBegin = 1 + myproc*(deltaw + 1) -nproc + residu
+     omegaEnd = omegaBegin + deltaw
+   end if
+   wgt_wlo(:)=zero
+   ! ============= END Set up =============
+   do ifreq=omegaBegin,omegaEnd
+     tospline_lo=cmplx(0_dp,0_dp,kind=dp)
 !    do ifreq1=1,paw_dmft%dmft_nwlo
-    tospline_lo(ifreq)=cmplx(1_dp,0_dp,kind=dp)
+     tospline_lo(ifreq)=cmplx(1_dp,0_dp,kind=dp)
 !    tospline_lo(ifreq1)=ifreq1**2-ifreq1
 !    enddo
-    splined_li=cmplx(0_dp,0_dp,kind=dp)
+     splined_li=cmplx(0_dp,0_dp,kind=dp)
 !    ybcbeg=cmplx(one/tol16**2,zero)
 !    ybcend=cmplx(one/tol16**2,zero)
-    ybcbeg=czero
-    ybcend=czero
+     ybcbeg=czero
+     ybcend=czero
 
 
 !==         spline delta function
-    call spline_complex( omega_lo_tmp, tospline_lo, paw_dmft%dmft_nwlo, &
-   & ybcbeg, ybcend, ysplin2_lo)
+     call spline_complex( omega_lo_tmp, tospline_lo, paw_dmft%dmft_nwlo, &
+     & ybcbeg, ybcend, ysplin2_lo)
 !   do ifreq1=1,paw_dmft%dmft_nwlo
 !    write(6588,*) paw_dmft%omega_lo(ifreq1),ysplin2_lo(ifreq1)
 !   enddo
 
-    call splint_complex( paw_dmft%dmft_nwlo, omega_lo_tmp, tospline_lo,&
-   & ysplin2_lo, paw_dmft%dmft_nwli, omega_li, splined_li)
+     call splint_complex( paw_dmft%dmft_nwlo, omega_lo_tmp, tospline_lo,&
+     & ysplin2_lo, paw_dmft%dmft_nwli, omega_li, splined_li)
 
 !==         accumulate weights
-    wgt_wlo(ifreq)=zero
-    do ifreq2=1,paw_dmft%dmft_nwli
-      wgt_wlo(ifreq)=wgt_wlo(ifreq)+real(splined_li(ifreq2),kind=dp)
-    enddo
+     wgt_wlo(ifreq)=zero
+     do ifreq2=1,paw_dmft%dmft_nwli
+       wgt_wlo(ifreq)=wgt_wlo(ifreq)+real(splined_li(ifreq2),kind=dp)
+     enddo
 ! do ifreq1=1,paw_dmft%dmft_nwlo
 !  write(6688,*) paw_dmft%omega_lo(ifreq1),tospline_lo(ifreq1)
 ! enddo
 ! do ifreq1=1,paw_dmft%dmft_nwli
 !  write(6788,*) paw_dmft%omega_li(ifreq1),splined_li(ifreq1)
-  enddo
+   enddo
   ! ============= Gatherall  =============
-  call xmpi_sum(wgt_wlo, spacecomm, residu)
+   call xmpi_sum(wgt_wlo, spacecomm, residu)
   ! ============= END Gatherall ==========
   ! end parallelisation over frequencies
 
-  ABI_DEALLOCATE(tospline_lo)
-  ABI_DEALLOCATE(splined_li)
-  ABI_DEALLOCATE(ysplin2_lo)
+   ABI_DEALLOCATE(tospline_lo)
+   ABI_DEALLOCATE(splined_li)
+   ABI_DEALLOCATE(ysplin2_lo)
 ! if(abs(dtset%pawprtvol)>=3) then
-    write(message, '(a,18x,2(2x,a21))') ch10,"Log. Freq","weight"
-    call wrtout(std_out,message,'COLL')
-    do ifreq=1,paw_dmft%dmft_nwlo
-      write(message, '(3x,a9,i6,2(2x,e21.14))') "--ifreq--",ifreq,omega_lo_tmp(ifreq),wgt_wlo(ifreq)
-      call wrtout(std_out,message,'COLL')
-    enddo
-    write(message, '(3x,a,i6)') "  Total number of log frequencies is", paw_dmft%dmft_nwlo
-    call wrtout(std_out,message,'COLL')
-    ifreq2 = 1
-    do ifreq=1,min(30,paw_dmft%dmft_nwlo)
-      write(message, '(3x,a9,i6,2(2x,e21.14))') "--ifreq--",ifreq,omega_li(ifreq)
-      call wrtout(std_out,message,'COLL')
-      if ( select_log(ifreq2) .eq. ifreq ) then
-        write(message, '(3x,a,i4,2(2x,i5))') "--sel_log",1
-        ifreq2 = ifreq+1
-      else
-        write(message, '(3x,a,i4,2(2x,i5))') "--sel_log",0
-      end if
-      call wrtout(std_out,message,'COLL')
-    enddo
-    write(message, '(3x,2a)') "--ifreq--","..."
-    call wrtout(std_out,message,'COLL')
-    write(message, '(3x,a,i6,2(2x,e13.5))') "--ifreq--",paw_dmft%dmft_nwli,omega_li(paw_dmft%dmft_nwli)
-    call wrtout(std_out,message,'COLL')
+   write(message, '(a,18x,2(2x,a21))') ch10,"Log. Freq","weight"
+   call wrtout(std_out,message,'COLL')
+   do ifreq=1,paw_dmft%dmft_nwlo
+     write(message, '(3x,a9,i6,2(2x,e21.14))') "--ifreq--",ifreq,omega_lo_tmp(ifreq),wgt_wlo(ifreq)
+     call wrtout(std_out,message,'COLL')
+   enddo
+   write(message, '(3x,a,i6)') "  Total number of log frequencies is", paw_dmft%dmft_nwlo
+   call wrtout(std_out,message,'COLL')
+   ifreq2 = 1
+   do ifreq=1,min(30,paw_dmft%dmft_nwlo)
+     write(message, '(3x,a9,i6,2(2x,e21.14))') "--ifreq--",ifreq,omega_li(ifreq)
+     call wrtout(std_out,message,'COLL')
+     if ( select_log(ifreq2) .eq. ifreq ) then
+       write(message, '(3x,a,i4,2(2x,i5))') "--sel_log",1
+       ifreq2 = ifreq+1
+     else
+       write(message, '(3x,a,i4,2(2x,i5))') "--sel_log",0
+     end if
+     call wrtout(std_out,message,'COLL')
+   enddo
+   write(message, '(3x,2a)') "--ifreq--","..."
+   call wrtout(std_out,message,'COLL')
+   write(message, '(3x,a,i6,2(2x,e13.5))') "--ifreq--",paw_dmft%dmft_nwli,omega_li(paw_dmft%dmft_nwli)
+   call wrtout(std_out,message,'COLL')
 !   endif
    ABI_DEALLOCATE(select_log)
    ABI_DEALLOCATE(omega_li)
@@ -1257,8 +1253,6 @@ end subroutine construct_nwlo_dmft
 !! SOURCE
 
 subroutine destroy_dmft(paw_dmft)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1325,8 +1319,6 @@ end subroutine destroy_dmft
 
 subroutine destroy_sc_dmft(paw_dmft)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(paw_dmft_type),intent(inout) :: paw_dmft
@@ -1381,8 +1373,6 @@ end subroutine destroy_sc_dmft
 !! SOURCE
 
 subroutine print_dmft(paw_dmft,pawprtvol)
-
- implicit none
 
 !Arguments ------------------------------------
 !type
@@ -1476,8 +1466,6 @@ end subroutine print_dmft
 
 subroutine print_sc_dmft(paw_dmft,pawprtvol)
 
- implicit none
-
 !Arguments ------------------------------------
 !type
  type(paw_dmft_type),intent(in) :: paw_dmft
@@ -1544,8 +1532,6 @@ end subroutine print_sc_dmft
 
 subroutine saveocc_dmft(paw_dmft)
 
- implicit none
-
 !Arguments ------------------------------------
  type(paw_dmft_type),intent(inout) :: paw_dmft
 
@@ -1608,8 +1594,6 @@ end subroutine saveocc_dmft
 !! SOURCE
 
 subroutine readocc_dmft(paw_dmft,filnam_ds3,filnam_ds4)
-
- implicit none
 
 !Arguments ------------------------------------
  type(paw_dmft_type),intent(inout) :: paw_dmft
@@ -1679,7 +1663,7 @@ end subroutine readocc_dmft
 !!
 !! INPUTS
 !!  paw_dmft   = data structure
-!!  
+!!
 !! OUTPUT
 !!  paw_dmft: bandc_proc, use_bandc
 !!
@@ -1691,8 +1675,6 @@ end subroutine readocc_dmft
 !! SOURCE
 
 subroutine init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
-
- implicit none
 
 !Arguments ------------------------------------
  type(paw_dmft_type),intent(inout) :: paw_dmft
@@ -1709,7 +1691,7 @@ subroutine init_sc_dmft_paralkgb(paw_dmft,mpi_enreg)
  ABI_ALLOCATE(paw_dmft%use_bandc,(nproc))
  paw_dmft%bandc_proc = 0
  paw_dmft%use_bandc = .false.
- 
+
  do ibc=1,paw_dmft%mbandc
    ib = paw_dmft%include_bands(ibc)
    proc = mod((ib-1)/mpi_enreg%bandpp,nproc)
@@ -1731,7 +1713,7 @@ end subroutine init_sc_dmft_paralkgb
 !!
 !! INPUTS
 !!  paw_dmft   = data structure
-!!  
+!!
 !! OUTPUT
 !!
 !! PARENTS
@@ -1742,8 +1724,6 @@ end subroutine init_sc_dmft_paralkgb
 !! SOURCE
 
 subroutine destroy_sc_dmft_paralkgb(paw_dmft)
-
- implicit none
 
 !Arguments ------------------------------------
  type(paw_dmft_type),intent(inout) :: paw_dmft

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_xchybrid
 !! NAME
 !!  m_xchybrid
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2019 ABINIT group (FA,MT,FJ)
+!!  Copyright (C) 2015-2020 ABINIT group (FA,MT,FJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,10 +29,10 @@ module m_xchybrid
  use m_errors
  use m_xcdata
  use libxc_functionals
+ use m_dtset
 
  use m_geometry,    only : metric
- use defs_abitypes, only : MPI_type, dataset_type
- use m_dtset,       only : dtset_copy, dtset_free
+ use defs_abitypes, only : MPI_type
  use m_rhotoxc,     only : rhotoxc
  use m_mkcore,      only : mkcore
 

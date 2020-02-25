@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psptk
 !! NAME
 !!  m_psptk
@@ -7,7 +6,7 @@
 !!  This module collects low-level procedures used by the other psp modules
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (XG, DCA, MM, DRH, FrD, GZ, AF)
+!!  Copyright (C) 1998-2020 ABINIT group (XG, DCA, MM, DRH, FrD, GZ, AF)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

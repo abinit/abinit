@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/cut3d
 !! NAME
 !! cut3d
@@ -8,7 +7,7 @@
 !! as well as other files with the ABINIT header.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
+!! Copyright (C) 1999-2020 ABINIT group (GMR, RC, LSI, XG, NCJ, JFB, MCote, LPizzagalli)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -48,7 +47,6 @@
 program cut3d
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_build_info
  use m_xmpi
@@ -64,6 +62,7 @@ program cut3d
  use m_cut3d
  use m_crystal
 
+ use defs_abitypes,     only : MPI_type
  use m_specialmsg,      only : specialmsg_getcount, herald
  use m_fstrings,        only : endswith, sjoin, itoa
  use m_time,            only : timein
@@ -172,7 +171,7 @@ program cut3d
    ABI_CHECK(abifile%fform /= 0, "Cannot detect abifile from fform")
 
 !  Echo part of the header
-   call hdr_echo(hdr, fform0, 4)
+   call hdr%echo(fform0, 4)
 
    nr1=hdr%ngfft(1); nr2=hdr%ngfft(2); nr3=hdr%ngfft(3)
    natom=hdr%natom
@@ -252,7 +251,7 @@ program cut3d
 
      call cut3d_wffile(filrho,hdr%ecut_eff,exchn2n3d0,hdr%istwfk,hdr%kptns,natom,hdr%nband,hdr%nkpt,hdr%npwarr,&
 &     nr1,nr2,nr3,hdr%nspinor,hdr%nsppol,ntypat,rprimd,xcart,hdr%typat,hdr%znucltypat)
-     call hdr_free(hdr)
+     call hdr%free()
 
 !    -------------------------------------------------------------------------
 ! This is a DEN/POT file
@@ -758,7 +757,7 @@ program cut3d
          case (15)
            ! Write netcdf file.
            timrev = 2; if (any(hdr%kptopt == [3, 4])) timrev = 1
-           cryst = hdr_get_crystal(hdr, timrev)
+           cryst = hdr%get_crystal(timrev)
            call ngfft_seq(ngfft, [nr1, nr2, nr3])
            ngfft(4:6) = ngfft(1:3)
            nfft = product(ngfft(1:3))
@@ -783,7 +782,7 @@ program cut3d
        write(std_out,'(a)') ' More analysis of the 3D file ? ( 0=no ; 1=default=yes ; 2= treat another file - restricted usage)'
        read(std_in,*) iprompt
        if(iprompt/=1) then
-         call hdr_free(hdr)
+         call hdr%free()
          exit
        else
          cycle

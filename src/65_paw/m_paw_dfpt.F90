@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* m_paw_dfpt/m_paw_dfpt
 !! NAME
 !!  m_paw_dfpt
@@ -8,7 +7,7 @@
 !!    (in the DFPT approach) of PAW on-site quantities.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (MT,AM,FJ,JWZ)
+!! Copyright (C) 2018-2020 ABINIT group (MT,AM,FJ,JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,13 +23,12 @@
 MODULE m_paw_dfpt
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
  use m_time, only : timab
 
+ use defs_datatypes, only : pseudopotential_type
  use m_pawang,       only : pawang_type
  use m_pawrad,       only : pawrad_type
  use m_pawtab,       only : pawtab_type
@@ -44,11 +42,9 @@ MODULE m_paw_dfpt
  use m_pawxc,        only : pawxc_dfpt, pawxcm_dfpt
  use m_paw_denpot,   only : pawdensities,pawaccenergy,pawaccenergy_nospin
  use m_paral_atom,   only : get_my_atmtab,free_my_atmtab
-
  use m_atm2fft,      only : dfpt_atm2fft
  use m_distribfft,   only : distribfft_type,init_distribfft_seq,destroy_distribfft
  use m_geometry,     only : metric, stresssym
-
  use m_efield,       only : efield_type
 
  implicit none
@@ -151,8 +147,6 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 &                        paw_an0,paw_an1,paw_ij1,pawang,pawprtvol,pawrad,pawrhoij_a,pawrhoij_b,&
 &                        pawtab,pawxcdev,xclevel, &
 &                        mpi_atmtab,comm_atom) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -300,8 +294,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 &       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),rho1,usecore,0,&
 &       paw_an1(iatom)%vxc1,xclevel)
-       call pawxcm_dfpt(pawtab(itypat)%tcoredens(:,1),&
-&       cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxct1,&
+       call pawxcm_dfpt(pawtab(itypat)%tcoredens(:,1),cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxct1,&
 &       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,&
 &       paw_an1(iatom)%vxct1,xclevel)
@@ -310,8 +303,7 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
 &       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),rho1,usecore,0,&
 &       paw_an0(iatom)%vxc1,paw_an1(iatom)%vxc1,xclevel)
-       call pawxc_dfpt(pawtab(itypat)%tcoredens(:,1),&
-&       cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxct1,&
+       call pawxc_dfpt(pawtab(itypat)%tcoredens(:,1),cplex_a,cplex_vxc1,eexc,ixc,paw_an0(iatom)%kxct1,&
 &       lm_size_a,lmselect_a,nhat1,paw_an0(iatom)%nkxc1,non_magnetic_xc,mesh_size,nspden,optvxc,&
 &       pawang,pawrad(itypat),trho1,usetcore,2*usexcnhat,&
 &       paw_an0(iatom)%vxct1,paw_an1(iatom)%vxct1,xclevel)
@@ -345,7 +337,6 @@ subroutine pawdfptenergy(delta_energy,ipert1,ipert2,ixc,my_natom,natom,ntypat,nz
      call pawxcm_dfpt(pawtab(itypat)%coredens,cplex_b,cplex_vxc1,eexc,ixc,kxc_dum,&
 &     lm_size_b,lmselect_b,nhat1,0,non_magnetic_xc,mesh_size,nspden,optexc,pawang,pawrad(itypat),&
 &     rho1,usecore,0,paw_an1(iatom)%vxc1,xclevel,d2enxc_im=eexc_im)
-
      delta_energy_xc(1)=delta_energy_xc(1)+eexc
      delta_energy_xc(2)=delta_energy_xc(2)+eexc_im
      call pawxcm_dfpt(pawtab(itypat)%tcoredens(:,1),&
@@ -512,8 +503,6 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 &          nattyp,nfft,ngfft,nhat,nlstr,nspden,nsym,ntypat,optgr,optgr2,optstr,optstr2,&
 &          pawang,pawfgrtab,pawrhoij,pawtab,ph1d,psps,qphon,rprimd,symrec,typat,ucvol,vtrial,vxc,xred,&
 &          mpi_atmtab,comm_atom,comm_fft,mpi_comm_grid,me_g0,paral_kgb,distribfft) ! optional arguments (parallelism)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1965,8 +1954,6 @@ subroutine pawgrnl(atindx1,dimnhat,dyfrnl,dyfr_cplex,eltfrnl,grnl,gsqcut,mgfft,m
 
 subroutine pawgrnl_convert(mu4,eps_alpha,eps_beta,eps_gamma,eps_delta)
 
- implicit none
-
 !Arguments ------------------------------------
  !scalar
  integer,intent(in)  :: eps_alpha,eps_beta
@@ -2055,8 +2042,6 @@ end subroutine pawgrnl
 !! SOURCE
 
  subroutine dsdr_k_paw(cprj_k,cprj_kb,dsdr,dtefield,kdir,kfor,mband,natom,ncpgr,typat)
-
- implicit none
 
 !Arguments---------------------------
 !scalars

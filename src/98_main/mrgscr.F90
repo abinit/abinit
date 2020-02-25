@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/mrgscr
 !! NAME
 !! mrgscr
@@ -8,7 +7,7 @@
 !! can be used to perform a sigma calculation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (RS, MG, MS)
+!! Copyright (C) 2005-2020 ABINIT group (RS, MG, MS)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -52,7 +51,6 @@
 program mrgscr
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_abicore
  use m_build_info
@@ -64,7 +62,9 @@ program mrgscr
  use m_hdr
  use m_crystal
  use m_pawrhoij
+ use m_dtset
 
+ use defs_abitypes,         only : MPI_type
  use m_specialmsg,          only : herald
  use m_time,                only : timein
  use m_gwdefs,              only : GW_TOLQ, GW_TOLQ0, GW_Q0_DEFAULT
@@ -275,7 +275,7 @@ program mrgscr
  end if
 
  timrev=2 ! This should be read from kptopt
- cryst = hdr_get_crystal(HScr0%Hdr,timrev,remove_inv=.FALSE.)
+ cryst = HScr0%Hdr%get_crystal(timrev,remove_inv=.FALSE.)
 
  kptopt=1
  call kmesh_init(Kmesh,Cryst,HScr0%Hdr%nkpt,Hscr0%Hdr%kptns,kptopt)
@@ -648,7 +648,7 @@ program mrgscr
 
      call read_rhor(fname_rho, cplex1, nfft, Hscr0%Hdr%nspden, ngfft, 1, MPI_enreg, rhor, hdr_rhor, pawrhoij, comm)
 
-     call hdr_free(hdr_rhor)
+     call hdr_rhor%free()
      call pawrhoij_free(pawrhoij)
      ABI_FREE(pawrhoij)
 

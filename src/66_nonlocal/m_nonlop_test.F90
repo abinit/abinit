@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_nonlop_test
 !! NAME
 !!  m_nonlop_test
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2017-2019 ABINIT group (MT)
+!!  Copyright (C) 2017-2020 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -87,7 +86,7 @@ contains
 !!      afterscfloop
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,dotprod_g,init_hamiltonian,initylmg
+!!      dotprod_g,init_hamiltonian,initylmg
 !!      load_k_hamiltonian,load_spin_hamiltonian,mkffnl,mkkpg,nonlop
 !!
 !! SOURCE
@@ -97,8 +96,6 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 &                       paw_ij,pawtab,ph1d,psps,rprimd,typat,xred)
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
@@ -108,12 +105,14 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  use m_pawcprj
  use m_cgtools
 
+
+ use defs_datatypes,   only : pseudopotential_type
+ use defs_abitypes,    only : MPI_type
  use m_kg,             only : mkkpg
  use m_initylmg,       only : initylmg
  use m_mkffnl,         only : mkffnl
  use m_mpinfo,         only : proc_distrb_cycle
  use m_nonlop,         only : nonlop
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -305,7 +304,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  bdtot_index=0 ; icg=0 ; isppol=1
 
 !Continue to initialize the Hamiltonian (PAW DIJ coefficients)
- call load_spin_hamiltonian(gs_hamk,isppol,with_nonlocal=.true.)
+ call gs_hamk%load_spin(isppol,with_nonlocal=.true.)
 
 !No loop over k points; only do the first one
  ikg=0 ; ikpt=1
@@ -370,7 +369,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
 
 !  Load k-dependent part in the Hamiltonian datastructure
    ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamk%matblk))
-   call load_k_hamiltonian(gs_hamk,kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
+   call gs_hamk%load_k(kpt_k=kpoint,istwf_k=istwf_k,npw_k=npw_k,&
 &   kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnl,ph3d_k=ph3d,compute_ph3d=.true.)
 
    do iblock=1,nblockbd
@@ -448,7 +447,7 @@ subroutine nonlop_test(cg,eigen,istwfk,kg,kpt,mband,mcg,mgfft,mkmem,mpi_enreg,mp
  ABI_DEALLOCATE(ylmgr_k)
  ABI_DEALLOCATE(ylm)
  ABI_DEALLOCATE(ylmgr)
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
 end subroutine nonlop_test
 !!***

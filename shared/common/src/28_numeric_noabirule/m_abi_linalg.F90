@@ -8,7 +8,7 @@
 !! with support of different external library (scalapack, elpa, plasma, magma, ... )
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2019 ABINIT group (LNguyen,FDahm,MT)
+!!  Copyright (C) 2012-2020 ABINIT group (LNguyen,FDahm,MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -42,7 +42,7 @@ module m_abi_linalg
 #endif
 
  use m_time,  only : timab
- 
+
  implicit none
 
  private
@@ -63,7 +63,7 @@ module m_abi_linalg
  logical,save :: lapack_full_storage    =.false.
  logical,save :: lapack_packed_storage  =.false.
  logical,save :: lapack_divide_conquer  =.false.
- 
+
  integer,save :: eigen_s_maxsize=0
  integer,save :: eigen_d_maxsize=0
  integer,save :: eigen_c_maxsize=0
@@ -272,8 +272,6 @@ CONTAINS  !===========================================================
   use mpi
 #endif
 
- implicit none
-
 #if defined HAVE_MPI1
  include 'mpif.h'
 #endif
@@ -363,7 +361,7 @@ CONTAINS  !===========================================================
  ABI_UNUSED(use_slk)
  ABI_UNUSED(np_slk)
 #endif
- 
+
 #ifdef HAVE_LINALG_ELPA
  call elpa_func_init()
 #endif
@@ -426,8 +424,6 @@ CONTAINS  !===========================================================
 !! SOURCE
 !!
  subroutine abi_linalg_work_allocate()
-
- implicit none
 
 !Arguments ------------------------------------
 
@@ -645,8 +641,6 @@ CONTAINS  !===========================================================
 !!
  subroutine abi_linalg_finalize()
 
- implicit none
-
 !Arguments ------------------------------------
 
 !Local variables ------------------------------
@@ -657,7 +651,7 @@ CONTAINS  !===========================================================
 !******************************************************************
 
  if (.not.abi_linalg_in_use) return
- 
+
  eigen_s_maxsize = 0
  eigen_d_maxsize = 0
  eigen_c_maxsize = 0
@@ -747,8 +741,6 @@ CONTAINS  !===========================================================
 
 subroutine linalg_allow_gemm3m(bool)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  logical,intent(in) :: bool
@@ -790,8 +782,6 @@ end subroutine linalg_allow_gemm3m
 
 pure logical function use_zgemm3m(m,n,k)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: m,n,k
@@ -826,8 +816,6 @@ end function use_zgemm3m
 
 pure logical function use_cgemm3m(m,n,k)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: m,n,k
@@ -855,8 +843,6 @@ end function use_cgemm3m
 !! SOURCE
 
 subroutine linalg_allow_plasma(bool)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -887,8 +873,6 @@ end subroutine linalg_allow_plasma
 
 integer function uplo_plasma(uplo)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=1),intent(in) :: uplo
@@ -917,8 +901,6 @@ end function uplo_plasma
 !! SOURCE
 
 integer function trans_plasma(trans)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -951,8 +933,6 @@ end function trans_plasma
 
 integer function side_plasma(side)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=1),intent(in) :: side
@@ -982,8 +962,6 @@ end function side_plasma
 
 integer function diag_plasma(diag)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  character(len=1),intent(in) :: diag
@@ -1012,8 +990,6 @@ end function diag_plasma
 !! SOURCE
 
 integer function jobz_plasma(jobz)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

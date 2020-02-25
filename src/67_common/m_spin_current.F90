@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_spin_current
 !! NAME
 !!  m_spin_current
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (Mver)
+!! Copyright (C) 2005-2020 ABINIT group (Mver)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,12 +25,15 @@
 
 module m_spin_current
 
- use defs_datatypes
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_splines
+ use m_hdr
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_io_tools,   only : open_file
  use m_pptools,    only : printxsf
  use m_geometry,   only : xred2xcart
@@ -95,8 +97,6 @@ contains
 !! SOURCE
 
 subroutine spin_current(cg,dtfil,dtset,gprimd,hdr,kg,mcg,mpi_enreg,psps)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -614,8 +614,6 @@ end subroutine spin_current
 !! SOURCE
 
 subroutine vso_realspace_local(dtset,hdr,position_op,psps,vso_realspace)
-
- implicit none
 
 !Arguments -------------------------------
  type(hdr_type),intent(inout) :: hdr

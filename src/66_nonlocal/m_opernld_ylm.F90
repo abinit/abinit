@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_opernld_ylm
 !! NAME
 !!  m_opernld_ylm
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MT)
+!!  Copyright (C) 2008-2020 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -129,8 +128,6 @@ contains
 subroutine opernld_ylm(choice,cplex,cplex_fac,ddkk,dgxdt,dgxdtfac,dgxdtfac_sij,d2gxdt,&
 &                      enlk,enlout,fnlk,gx,gxfac,gxfac_sij,ia3,natom,nd2gxdt,ndgxdt,&
 &                      ndgxdtfac,nincat,nlmn,nnlout,nspinor,paw_opt,strnlk)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

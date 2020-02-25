@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_berryphase_new
 !! NAME
 !!  m_berryphase_new
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2003-2019 ABINIT  group (MVeithen)
+!!  Copyright (C) 2003-2020 ABINIT  group (MVeithen)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -25,15 +24,18 @@
 
 module m_berryphase_new
 
- use defs_abitypes
  use defs_basis
- use defs_datatypes
  use defs_wvltypes
  use m_efield
  use m_errors
  use m_abicore
  use m_xmpi
+ use m_hdr
+ use m_dtset
+ use m_dtfil
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes,  only : MPI_type
  use m_berrytk,      only : smatrix, polcart
  use m_cgprj,        only : ctocprj
  use m_fftcore,      only : kpgsph
@@ -174,8 +176,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 &  nkpt,calc_pol_ddk,pawrhoij,pawtab,pel,pelev,pion,ptot,red_ptot,pwind,&  !!REC
 &  pwind_alloc,pwnsfac,&
 &  rprimd,typat,ucvol,unit_out,usecprj,usepaw,xred,zion)
-
- implicit none
 
 !Arguments ------------------------------------
  integer, intent(in) :: lmnmax,mband,mcg,mcprj,mkmem,mpw,my_natom,natom,nkpt
@@ -418,7 +418,7 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
          call pawcprj_get(atindx1,cprj_k,cprj,natom,1,(ikpt_loc-1)*nband_k*my_nspinor,ikpt1,0,isppol,mband,&
 &         mkmem,natom,nband_k,nband_k,my_nspinor,nsppol,0,&
 &         mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb)
-         call pawcprj_mpi_allgather(cprj_k,cprj_gat,natom,n2dim,dimlmn,ncpgr,nproc,spaceComm,ierr,rank_ordered=.true.)
+         call pawcprj_mpi_allgather(cprj_k,cprj_gat,natom,n2dim,1,dimlmn,ncpgr,nproc,spaceComm,ierr,rank_ordered=.true.)
          do iproc = 1, nproc
            icp2=nband_k*(iproc-1)*my_nspinor
            call pawcprj_get(atindx1,cprj_k,cprj_gat,natom,1,icp2,ikpt1,0,isppol,mband,&
@@ -1710,7 +1710,6 @@ subroutine berryphase_new(atindx1,cg,cprj,dtefield,dtfil,dtset,psps,&
 end subroutine berryphase_new
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/update_e_field_vars
 !! NAME
 !! update_e_field_vars
@@ -1719,7 +1718,7 @@ end subroutine berryphase_new
 !! This routine updates E field variables
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2019 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1805,8 +1804,6 @@ subroutine update_e_field_vars(atindx,atindx1,cg,dimcprj,dtefield,dtfil,dtset,&
 &  pwind_alloc,pwnsfac,red_efield2,red_efield2_old,red_ptot,rmet,rprimd,&
 &  scfcv_level,scfcv_quit,scfcv_step,ucvol,unit_out,&
 &  usepaw,xred,ylm,ylmgr)
-
-  implicit none
 
   !Arguments ------------------------------------
   integer, intent(in) :: idir,mcg,mkmem,mpw,my_natom,natom,nkpt,ntypat
@@ -2276,7 +2273,7 @@ end subroutine update_e_field_vars
 !! Print components of electric field, displacement field and polarization in nice format
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LBoeri, MT)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LBoeri, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2308,8 +2305,6 @@ end subroutine update_e_field_vars
 !! SOURCE
 
 subroutine prtefield(dtset,dtefield,iunit,rprimd)
-
-  implicit none
 
   !Arguments ------------------------------------
   integer :: iunit
@@ -2656,7 +2651,6 @@ subroutine prtefield(dtset,dtefield,iunit,rprimd)
 end subroutine prtefield
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/init_e_field_vars
 !! NAME
 !! init_e_field_vars
@@ -2666,7 +2660,7 @@ end subroutine prtefield
 !! calculations
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2019 ABINIT group
+!! Copyright (C) 2004-2020 ABINIT group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2713,8 +2707,6 @@ end subroutine prtefield
 subroutine init_e_field_vars(dtefield,dtset,gmet,gprimd,kg,&
      &              mpi_enreg,npwarr,occ,pawang,pawrad,pawtab,psps,&
      &              pwind,pwind_alloc,pwnsfac,rprimd,symrec,xred)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars
@@ -2775,7 +2767,6 @@ subroutine init_e_field_vars(dtefield,dtset,gmet,gprimd,kg,&
 end subroutine init_e_field_vars
 !!***
 
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/initberry
 !! NAME
 !! initberry
@@ -2785,7 +2776,7 @@ end subroutine init_e_field_vars
 !! ddk and the response of an insulator to a homogenous electric field.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2019 ABINIT group (MVeithen).
+!! Copyright (C) 2004-2020 ABINIT group (MVeithen).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2861,8 +2852,6 @@ subroutine initberry(dtefield,dtset,gmet,gprimd,kg,mband,&
      &              nsym,ntypat,occ,pawang,pawrad,pawtab,psps,&
      &              pwind,pwind_alloc,pwnsfac,&
      &              rprimd,symrec,typat,usepaw,xred)
-
-  implicit none
 
   !Arguments ------------------------------------
   !scalars

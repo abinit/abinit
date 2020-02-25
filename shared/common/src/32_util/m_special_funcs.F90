@@ -8,7 +8,7 @@
 !! evaluate special functions frequently needed in Abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, MT, FB, XG, MVer, FJ, NH, GZ, DRH)
+!! Copyright (C) 2008-2020 ABINIT group (MG, MT, FB, XG, MVer, FJ, NH, GZ, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -924,8 +924,6 @@ end function abi_derfc
 !! SOURCE
 
 subroutine GAMMA_FUNCTION(X,GA)
-
-  implicit none
 
 !       ====================================================
 !       Purpose: This program computes the gamma function

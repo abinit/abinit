@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_mkaewf
 !! NAME
 !!  m_paw_mkaewf
@@ -7,7 +6,7 @@
 !! Construct complete AE wave functions on the fine FFT grid adding onsite PAW corrections.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,8 +26,6 @@
 module m_paw_mkaewf
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_xmpi
@@ -37,10 +34,14 @@ module m_paw_mkaewf
  use m_errors
  use m_nctk
  use m_hdr
+ use m_dtset
+ use m_dtfil
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
 
+ use defs_datatypes,   only : ebands_t
+ use defs_abitypes,    only : MPI_type
  use m_io_tools,       only : flush_unit
  use m_numeric_tools,  only : wrap2_zero_one
  use m_fftcore,        only : sphereboundary
@@ -140,8 +141,6 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 & istwfk,npwarr,kpt,ngfftf,kg,dimcprj,Pawfgrtab,Pawrad,Pawtab,&
 & Hdr,Dtfil,cg,Cprj,MPI_enreg,ierr,pseudo_norms,set_k,set_band , &
 & mpi_atmtab,comm_atom) ! Optional arguments
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -319,14 +318,13 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 
  fname = trim(dtfil%filnam_ds(4))//'_PAWAVES.nc'
  write(msg,'(2a)')' Opening file for AE PAW wave functions: ',trim(fname)
- call wrtout(std_out,msg,'PERS')
- call wrtout(ab_out,msg,'PERS')
+ call wrtout([std_out, ab_out], msg, 'PERS')
 
  if (xmpi_comm_rank(comm_cell) == master) then
    NCF_CHECK(nctk_open_create(ncid, fname, xmpi_comm_self))
 
-   fform=602
-   NCF_CHECK(hdr_ncwrite(hdr, ncid, fform, nc_define=.True.))
+   fform = 602
+   NCF_CHECK(hdr%ncwrite(ncid, fform, nc_define=.True.))
 
    ! Define wavefunctions in real space on the dense FFT mesh
    ! Fortran layout:
@@ -489,8 +487,8 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
        ABI_MALLOC(fofgout,(2,npwout*ndat))
 
        call fourwf(cplex,denpot,fofgin(:,1:npw_k),fofgout,fofr(:,:,:,1:n6),gbound,gbound,istwf_k,kg_k,kg_k,&
-&       mgfftf,MPI_enreg,1,ngfftf,npw_k,npwout,n4,n5,n6,option,tim_fourwf0,weight1,weight1,&
-&       use_gpu_cuda=Dtset%use_gpu_cuda)
+         mgfftf,MPI_enreg,1,ngfftf,npw_k,npwout,n4,n5,n6,option,tim_fourwf0,weight1,weight1,&
+         use_gpu_cuda=Dtset%use_gpu_cuda)
 
 !      Here I do not know if fourwf works in the case of spinors,
 !      It seems that not all fftalg option support ndata! should check!
@@ -504,7 +502,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 !        NOTE: fofr_down can NOT be replaced by fofr(:,:,:,n6+1:2*n6), or else
 !        the data in fofr(:,:,:,1:n6) will be the same with fofr(:,:,:,n6+1:2*n6)
          call fourwf(cplex,denpot,fofgin_down,fofgout,fofr_down,gbound,gbound,istwf_k,kg_k,kg_k,&
-&         mgfftf,MPI_enreg,1,ngfftf,npw_k,npwout,n4,n5,n6,option,tim_fourwf0,weight1,weight1)
+           mgfftf,MPI_enreg,1,ngfftf,npw_k,npwout,n4,n5,n6,option,tim_fourwf0,weight1,weight1)
          ABI_FREE(fofgin_down)
        end if
 
@@ -639,7 +637,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
            norm = zero
            do ifft = 1, nfftot
              dummy_1d(ifft) = ((ur_pw(1,ifft)-ur_ps_onsite(1,ifft))**2 &
-&             +  (ur_pw(2,ifft)-ur_ps_onsite(2,ifft))**2) * ur_mask(ifft)
+              +  (ur_pw(2,ifft)-ur_ps_onsite(2,ifft))**2) * ur_mask(ifft)
              norm = norm + dummy_1d(ifft)
            end do
            norm = norm / nfftot
@@ -649,27 +647,27 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 
        else
          write(msg,'(5a)')&
-&         "The option to print PAW all-electron wavefunctions is on, but execution ",ch10,&
-&         "is in parallel on two or more processors. XcrysDen files with individual con-",ch10,&
-&         "tributions will not be written. In order to enable this you must run in serial."
+          "The option to print PAW all-electron wavefunctions is on, but execution ",ch10,&
+          "is in parallel on two or more processors. XcrysDen files with individual con-",ch10,&
+          "tributions will not be written. In order to enable this you must run in serial."
          MSG_WARNING(msg)
        end if ! Check if serial run
 
 #ifdef HAVE_NETCDF
        ncerr = nf90_put_var(ncid, ae_ncid, ur_ae, &
-&       start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
+          start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
        NCF_CHECK(ncerr)
 
        ncerr = nf90_put_var(ncid, pw_ncid, ur_pw, &
-&       start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
+         start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
        NCF_CHECK(ncerr)
 
        ncerr = nf90_put_var(ncid, aeons_ncid, ur_ae_onsite, &
-&       start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
+         start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
        NCF_CHECK(ncerr)
 
        ncerr = nf90_put_var(ncid, psons_ncid, ur_ps_onsite, &
-&       start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
+         start=[1,1,1,1,1,iband,ikpt,isppol], count=[2,n1,n2,n3,1,1,1,1])
        NCF_CHECK(ncerr)
 #endif
 
@@ -678,7 +676,6 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
        ABI_FREE(ur_ps_onsite)
        ABI_FREE(ur_pw)
        ABI_FREE(ur_mask)
-
        ABI_FREE(fofgin)
        ABI_FREE(fofgout)
        ABI_FREE(denpot)
@@ -713,10 +710,10 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
 
  if (max_rerr > ten) then
    write(msg,'(7a)')&
-&   "Inaccuracy on the normalization of the wave funtions exceeds 10%. ",ch10,&
-&   "Likely due to the use of a too coarse FFT mesh or unconverged wavefunctions. ",ch10,&
-&   "Numerical values inside the augmentation regions might be inaccurate. ",ch10,&
-&   "Action: increase pawecutdg in your input file. "
+    "Inaccuracy on the normalization of the wave funtions exceeds 10%. ",ch10,&
+    "Likely due to the use of a too coarse FFT mesh or unconverged wavefunctions. ",ch10,&
+    "Numerical values inside the augmentation regions might be inaccurate. ",ch10,&
+    "Action: increase pawecutdg in your input file. "
    MSG_COMMENT(msg)
  end if
 
@@ -724,7 +721,7 @@ subroutine pawmkaewf(Dtset,crystal,ebands,my_natom,mpw,mband,mcg,mcprj,nkpt,mkme
  ABI_FREE(phk_atm)
  call pawfgrtab_free(local_pawfgrtab)
 
-!Destroy atom table used for parallelism
+ ! Destroy atom table used for parallelism
  call free_my_atmtab(my_atmtab,my_atmtab_allocated)
 
  DBG_EXIT("COLL")

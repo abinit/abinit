@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_chebfi
 !! NAME
 !!  m_chebfi
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (AL)
+!!  Copyright (C) 2014-2020 ABINIT group (AL)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,14 +26,15 @@
 module m_chebfi
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_xmpi
  use m_abicore
  use m_abi_linalg
  use m_rayleigh_ritz
  use m_invovl
+ use m_dtset
 
+ use defs_abitypes, only : mpi_type
  use m_time,          only : timab
  use m_cgtools,       only : dotprod_g
  use m_bandfft_kpt,   only : bandfft_kpt, bandfft_kpt_get_ikpt
@@ -113,8 +113,6 @@ contains
 !! SOURCE
 
 subroutine chebfi(cg,dtset,eig,enlx,gs_hamk,gsc,kinpw,mpi_enreg,nband,npw,nspinor,prtvol,resid)
-
- implicit none
 
 !Arguments ------------------------------------
  type(gs_hamiltonian_type),intent(inout) :: gs_hamk
@@ -621,8 +619,6 @@ end subroutine chebfi
 
 function cheb_poly(x, n, a, b) result(y)
 
- implicit none
-
  integer, intent(in) :: n
  integer :: i
  real(dp), intent(in) :: x, a, b
@@ -671,8 +667,6 @@ end function cheb_poly
 !! SOURCE
 
 function cheb_oracle(x, a, b, tol, nmax) result(n)
-
- implicit none
 
  real(dp) :: tol
 

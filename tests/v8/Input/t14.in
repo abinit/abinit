@@ -16,6 +16,7 @@ fit_coeff = 1
 fit_ncoeff = 2
 fit_nfixcoeff  = 2 
 fit_fixcoeff  = 1 2 
+fit_iatom = -1
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

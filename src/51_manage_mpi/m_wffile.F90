@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wffile
 !! NAME
 !!  m_wffile
@@ -8,7 +7,7 @@
 !!  As the type contains MPI-dependent fields, it has to be declared in a MPI-managed directory.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MT,MB,MVer,ZL,MD)
+!! Copyright (C) 2009-2020 ABINIT group (MT,MB,MVer,ZL,MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -19,7 +18,7 @@
 !! CHILDREN
 !!
 !! NOTES
-!! wffile_type : a handler for dealing with the IO of a wavefunction file
+!! wffile_type: a handler for dealing with the IO of a wavefunction file
 !!
 !! SOURCE
 
@@ -32,7 +31,6 @@
 MODULE m_wffile
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
@@ -44,6 +42,7 @@ MODULE m_wffile
  use netcdf
 #endif
 
+ use defs_abitypes, only : MPI_Type
  use m_io_tools,   only : mvrecord, open_file
  use m_fstrings,   only : toupper, endswith, sjoin
 

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_conducti
 !! NAME
 !!  m_conducti
@@ -9,7 +8,7 @@
 !! from the Kubo-Greenwood formula.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2019 ABINIT group (VRecoules, PGhosh, SMazevet, SM, SVinko)
+!!  Copyright (C) 2002-2020 ABINIT group (VRecoules, PGhosh, SMazevet, SM, SVinko)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -31,13 +30,13 @@ module m_conducti
  use defs_basis
  use m_errors
  use m_abicore
- use defs_abitypes
  use m_xmpi
  use m_wffile
  use m_wfk
  use m_hdr
  use m_nctk
 
+ use defs_abitypes,  only : MPI_type
  use m_io_tools,     only : open_file, get_unit
  use m_fstrings,     only : sjoin
  use m_symtk,        only : matr3inv
@@ -180,7 +179,7 @@ contains
 
 ! Read the header of the optic files
  call hdr_read_from_fname(hdr, filnam1, fform1, spaceComm)
- call hdr_free(hdr)
+ call hdr%free()
  if (fform1 /= 610) then
    MSG_ERROR("Abinit8 requires an OPT file with fform = 610")
  end if
@@ -507,7 +506,7 @@ contains
  ABI_DEALLOCATE(doccde)
  ABI_DEALLOCATE(wtk)
 
- call hdr_free(hdr)
+ call hdr%free()
 
 end subroutine conducti_paw
 !!***
@@ -621,7 +620,7 @@ end subroutine conducti_paw
 
 ! Read the header of the OPT2 file.
  call hdr_read_from_fname(hdr, filnam2, fform2, spaceComm)
- call hdr_free(hdr)
+ call hdr%free()
 
  if (fform2 /= 611) then
    MSG_ERROR("Abinit8 requires an OPT2 file with fform = 611")
@@ -807,7 +806,7 @@ end subroutine conducti_paw
  ABI_DEALLOCATE(occ)
  ABI_DEALLOCATE(wtk)
 
- call hdr_free(hdr)
+ call hdr%free()
 
 end subroutine conducti_paw_core
 !!***
@@ -1468,7 +1467,7 @@ subroutine conducti_nc(filnam,filnam_out,mpi_enreg)
  ABI_DEALLOCATE(Stp)
  ABI_DEALLOCATE(Kth)
 
- call hdr_free(hdr)
+ call hdr%free()
 
  end subroutine conducti_nc
 !!***
@@ -1802,7 +1801,7 @@ end subroutine msig
 
 ! Read the header of the OPT2 file.
  call hdr_read_from_fname(hdr, filnam2, fform2, spaceComm)
- call hdr_free(hdr)
+ call hdr%free()
 
  if (fform2 /= 611) then
    MSG_ERROR("Abinit8 requires an OPT2 file with fform = 611")
@@ -1998,7 +1997,7 @@ end subroutine msig
  ABI_DEALLOCATE(occ)
  ABI_DEALLOCATE(wtk)
 
- call hdr_free(hdr)
+ call hdr%free()
 
 end subroutine emispec_paw
 !!***

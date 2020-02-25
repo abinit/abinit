@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_psps
 !! NAME
 !!  m_psps
@@ -8,7 +7,7 @@
 !!  pseudopotential_type object.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (XG,DC,MG)
+!!  Copyright (C) 2014-2020 ABINIT group (XG,DC,MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,6 +32,7 @@ module m_psps
  use m_xmpi
  use m_nctk
  use m_copy
+ use m_dtset
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -41,7 +41,6 @@ module m_psps
  use m_io_tools,      only : open_file
  use m_symtk,         only : matr3inv
  use defs_datatypes,  only : pspheader_type, pseudopotential_type, pseudopotential_gth_type, nctab_t
- use defs_abitypes,   only : dataset_type
  use m_paw_numeric,   only : paw_spline
  use m_pawrad,        only : pawrad_type, pawrad_init, pawrad_free, simp_gen
  use m_pawpsp,        only : pawpsp_cg
@@ -1261,12 +1260,14 @@ subroutine nctab_init(nctab, mqgrid_vl, has_tcore, has_tvale)
  nctab%has_tcore = has_tcore
  nctab%dncdq0 = zero; nctab%d2ncdq0 = zero
  ABI_CALLOC(nctab%tcorespl, (mqgrid_vl, 2))
-
+ nctab%tcorespl = zero
+ 
  ! tvalespl is allocated only if available.
  nctab%has_tvale = has_tvale
  nctab%dnvdq0 = zero
  if (has_tvale) then
    ABI_MALLOC(nctab%tvalespl, (mqgrid_vl, 2))
+   nctab%tvalespl = zero
  end if
 
 end subroutine nctab_init

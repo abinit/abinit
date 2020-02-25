@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_read_plowannier
 !! NAME
 !!  m_read_plowannier
@@ -8,7 +7,7 @@
 !!  this file was typically created in a DFT run with usedmft=1 and nbandkss -1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,6 +31,14 @@
 MODULE m_read_plowannier
 
  use defs_basis
+ use m_abicore
+ use m_errors
+
+ use m_io_tools,      only : open_file
+ use m_crystal,       only : crystal_t
+ use m_bz_mesh,       only : kmesh_t, get_BZ_item
+ use m_pawang,        only : pawang_type
+
  implicit none
 
  private
@@ -50,7 +57,7 @@ contains
 !!  this file was typically created in a DFT run with usedmft=1 and nbandkss -1
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -100,17 +107,6 @@ contains
 
 subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,luwindow,nspinor,nsppol,pawang,prtvol,ucrpa_bands)
 
- use defs_basis
- use defs_datatypes
- use defs_abitypes
- use m_abicore
- use m_errors
-
- use m_io_tools,      only : open_file
- use m_crystal,       only : crystal_t
- use m_bz_mesh,       only : kmesh_t, get_BZ_item
- use m_pawang,        only : pawang_type
- implicit none
 !Arguments ------------------------------------
 !types and arrays
  type(kmesh_t),intent(in) :: Kmesh
@@ -137,6 +133,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
    MSG_ERROR(msg)
  end if
  rewind(unt)
+ read(unt,*) message
  read(unt,*) message, lcor,itypatcor
  read(unt,*) message, bandinf,bandsup
  write(std_out,*) 'read from forlb.ovlp',lcor, bandinf,bandsup
@@ -167,7 +164,7 @@ subroutine read_plowannier(cryst,bandinf,bandsup,coeffW_BZ,itypatcor,Kmesh,lcor,
         do ispinor=1,nspinor
           do iat=1,Cryst%nattyp(itypatcor)
             do m1=1,2*lcor+1
-              read(unt,*) dummy,dummy,dummy,xx,yy
+              read(unt,*) dummy,dummy,dummy,dummy,xx,yy
               coeffW_IBZ(iat,spin,band1,ik_ibz,ispinor,m1)=cmplx(xx,yy)
             end do
           end do

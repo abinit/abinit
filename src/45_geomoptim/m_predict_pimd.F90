@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_predict_pimd
 !! NAME
 !!  m_predict_pimd
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2010-2019 ABINIT group (GG)
+!!  Copyright (C) 2010-2020 ABINIT group (GG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,12 +26,12 @@
 module m_predict_pimd
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_pimd
  use m_xmpi
  use m_results_img
 
+ use defs_abitypes,    only : MPI_type
  use m_geometry,       only : mkradim, mkrdim
  use m_pimd_langevin,  only : pimd_langevin_npt, pimd_langevin_nvt
  use m_pimd_nosehoover, only : pimd_nosehoover_npt, pimd_nosehoover_nvt
@@ -108,8 +107,6 @@ contains
 
 subroutine predict_pimd(imgmov,itimimage,itimimage_eff,mpi_enreg,natom,nimage,nimage_tot,&
 &                       ntimimage_stored,pimd_param,prtvolimg,results_img)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

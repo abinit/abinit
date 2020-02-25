@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_results_img
 !! NAME
 !!  m_results_img
@@ -8,7 +7,7 @@
 !!  to store results from GS calculations for a given image of the cell.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2019 ABINIT group (MT)
+!! Copyright (C) 2011-2020 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -32,13 +31,13 @@
 MODULE m_results_img
 
  use defs_basis
- use defs_abitypes
  use m_energies
  use m_abicore
  use m_results_gs
  use m_errors
  use m_xmpi
 
+ use defs_abitypes, only : mpi_type
  use m_geometry,   only : mkrdim, xred2xcart
 
  implicit none
@@ -85,6 +84,9 @@ MODULE m_results_img
 
   integer :: npspalch
    ! The number of pseudopotentials for alchemical mixing  for this image
+
+  integer :: nspden
+   ! The number of spin-density channels for this image
 
   integer :: nsppol
    ! The number of spin channels for this image
@@ -147,6 +149,7 @@ CONTAINS
 !! INPUTS
 !!  natom=number of atoms in cell
 !!  npspalch = number of pseudopotentials for alchemical mixing  for this image
+!!  nspden   = number of spin-density channels
 !!  nsppol   = number of spin channels
 !!  ntypalch = The number of alchemical pseudoatoms  for this image
 !!
@@ -163,11 +166,11 @@ CONTAINS
 !!
 !! SOURCE
 
-subroutine init_results_img(natom,npspalch,nsppol,ntypalch,ntypat,results_img)
+subroutine init_results_img(natom,npspalch,nspden,nsppol,ntypalch,ntypat,results_img)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: natom,npspalch,nsppol,ntypalch,ntypat
+ integer,intent(in) :: natom,npspalch,nspden,nsppol,ntypalch,ntypat
 !arrays
  type(results_img_type),intent(inout) :: results_img(:)
 !Local variables-------------------------------
@@ -187,12 +190,13 @@ subroutine init_results_img(natom,npspalch,nsppol,ntypalch,ntypat,results_img)
 
      results_img(ii)%natom  =natom
      results_img(ii)%npspalch  =npspalch
+     results_img(ii)%nspden    =nspden
      results_img(ii)%nsppol    =nsppol
      results_img(ii)%ntypalch  =ntypalch
      results_img(ii)%ntypat    =ntypat
 
      ABI_DATATYPE_ALLOCATE(results_img(ii)%results_gs,)
-     call init_results_gs(natom,nsppol,results_img(ii)%results_gs)
+     call init_results_gs(natom,nspden,nsppol,results_img(ii)%results_gs)
 
      ABI_ALLOCATE(results_img(ii)%acell,(3))
      results_img(ii)%acell=zero
@@ -259,6 +263,7 @@ subroutine destroy_results_img(results_img)
 
      results_img(ii)%natom=0
      results_img(ii)%npspalch=0
+     results_img(ii)%nspden  =0
      results_img(ii)%nsppol  =0
      results_img(ii)%ntypalch=0
      results_img(ii)%ntypat=0
@@ -338,6 +343,7 @@ subroutine nullify_results_img(results_img)
    do ii=1,results_img_size
      results_img(ii)%natom=0
      results_img(ii)%npspalch=0
+     results_img(ii)%nspden=0
      results_img(ii)%nsppol=0
      results_img(ii)%ntypalch=0
      results_img(ii)%ntypat=0
@@ -381,7 +387,7 @@ subroutine copy_results_img(results_img_in,results_img_out)
 !Local variables-------------------------------
 !scalars
  integer :: natom_in,natom_out,npspalch_in,npspalch_out,ntypalch_in,ntypalch_out
- integer :: nsppol_in, nsppol_out,ntypat_in,ntypat_out
+ integer :: nspden_in, nspden_out, nsppol_in, nsppol_out,ntypat_in,ntypat_out
 
 !************************************************************************
 
@@ -391,6 +397,8 @@ subroutine copy_results_img(results_img_in,results_img_out)
  natom_out=results_img_out%natom
  npspalch_in =results_img_in%npspalch
  npspalch_out=results_img_out%npspalch
+ nspden_in =results_img_in%nspden
+ nspden_out=results_img_out%nspden
  nsppol_in =results_img_in%nsppol
  nsppol_out=results_img_out%nsppol
  ntypalch_in =results_img_in%ntypalch
@@ -434,6 +442,7 @@ subroutine copy_results_img(results_img_in,results_img_out)
 
  results_img_out%natom  =results_img_in%natom
  results_img_out%npspalch  =results_img_in%npspalch
+ results_img_out%nspden =results_img_in%nspden
  results_img_out%nsppol =results_img_in%nsppol
  results_img_out%ntypalch  =results_img_in%ntypalch
  results_img_out%ntypat  =results_img_in%ntypat
@@ -496,7 +505,8 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
 !Local variables-------------------------------
 !scalars
  integer :: ibufr,ierr,iproc,jj
- integer :: master_all,master_img,master_one_img,natom,ngrvdw,nimage,nimagetot,npspalch,nsppol,ntypalch,ntypat
+ integer :: master_all,master_img,master_one_img
+ integer :: natom,ngrvdw,nimage,nimagetot,npspalch,nspden,nsppol,ntypalch,ntypat
  integer :: rsize,rsize_img
  logical :: do_allgather,i_am_master,one_per_img,use_results_all
  !character(len=500) :: msg
@@ -522,7 +532,7 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
 
 !Create global results_img_all datastructure
  if (use_results_all) then
-   call init_results_img(results_img(1)%natom,results_img(1)%npspalch,results_img(1)%nsppol,&
+   call init_results_img(results_img(1)%natom,results_img(1)%npspalch,results_img(1)%nspden,results_img(1)%nsppol,&
 &    results_img(1)%ntypalch,results_img(1)%ntypat,results_img_all)
  end if
 
@@ -550,6 +560,7 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
 !  Copy natom from distributed results_img to gathered one
    natom =results_img(1)%natom
    npspalch =results_img(1)%npspalch
+   nspden =results_img(1)%nspden
    nsppol =results_img(1)%nsppol
    ntypalch =results_img(1)%ntypalch
    ntypat   =results_img(1)%ntypat
@@ -558,6 +569,7 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
      do jj=1,nimagetot
        results_img_all(jj)%natom =natom
        results_img_all(jj)%npspalch =npspalch
+       results_img_all(jj)%nspden =nspden
        results_img_all(jj)%nsppol =nsppol
        results_img_all(jj)%ntypalch =ntypalch
        results_img_all(jj)%ntypat   =ntypat
@@ -566,7 +578,7 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
    end if
 
 !  Compute number of data
-   rsize=38+n_energies+24*natom+3*nsppol+ntypat+npspalch*ntypalch+3*ngrvdw
+   rsize=38+n_energies+(30+nspden)*natom+3*nsppol+ntypat+npspalch*ntypalch+3*ngrvdw
    rsize_img=nimage*rsize
    ABI_ALLOCATE(rsize_img_all,(mpi_enreg%nproc_img))
    rsize_img_all(:)=rsize*nimage_all(:)
@@ -610,12 +622,18 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
      ibufr=ibufr+3*natom
      rbuffer(ibufr+1:ibufr+3*nsppol)=reshape(results_img(jj)%results_gs%gaps(1:3,1:nsppol),(/3*nsppol/))
      ibufr=ibufr+3*nsppol
+     rbuffer(ibufr+1:ibufr+3*natom)=reshape(results_img(jj)%results_gs%grchempottn(1:3,1:natom),(/3*natom/))
+     ibufr=ibufr+3*natom
+     rbuffer(ibufr+1:ibufr+3*natom)=reshape(results_img(jj)%results_gs%grcondft(1:3,1:natom),(/3*natom/))
+     ibufr=ibufr+3*natom
      rbuffer(ibufr+1:ibufr+3*natom)=reshape(results_img(jj)%results_gs%gresid(1:3,1:natom),(/3*natom/))
      ibufr=ibufr+3*natom
      rbuffer(ibufr+1:ibufr+3*natom)=reshape(results_img(jj)%results_gs%grewtn(1:3,1:natom),(/3*natom/))
      ibufr=ibufr+3*natom
      rbuffer(ibufr+1:ibufr+3*natom)=reshape(results_img(jj)%results_gs%grxc(1:3,1:natom),(/3*natom/))
      ibufr=ibufr+3*natom
+     rbuffer(ibufr+1:ibufr+nspden*natom)=reshape(results_img(jj)%results_gs%intgres(1:nspden,1:natom),(/nspden*natom/))
+     ibufr=ibufr+nspden*natom
      rbuffer(ibufr+1:ibufr+3*natom)=reshape(results_img(jj)%results_gs%synlgr(1:3,1:natom),(/3*natom/))
      ibufr=ibufr+3*natom
      rbuffer(ibufr+1:ibufr+ntypat)=results_img(jj)%amu(1:ntypat)
@@ -692,6 +710,12 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
        results_img_all(jj)%results_gs%gaps(1:3,1:nsppol)= &
 &             reshape(rbuffer_all(ibufr+1:ibufr+3*nsppol),(/3,nsppol/))
        ibufr=ibufr+3*nsppol
+       results_img_all(jj)%results_gs%grchempottn(1:3,1:natom)= &
+  &            reshape(rbuffer_all(ibufr+1:ibufr+3*natom),(/3,natom/))
+       ibufr=ibufr+3*natom
+       results_img_all(jj)%results_gs%grcondft(1:3,1:natom)= &
+  &            reshape(rbuffer_all(ibufr+1:ibufr+3*natom),(/3,natom/))
+       ibufr=ibufr+3*natom
        results_img_all(jj)%results_gs%gresid(1:3,1:natom)= &
   &            reshape(rbuffer_all(ibufr+1:ibufr+3*natom),(/3,natom/))
        ibufr=ibufr+3*natom
@@ -701,6 +725,9 @@ subroutine gather_results_img(mpi_enreg,results_img,results_img_all,&
        results_img_all(jj)%results_gs%grxc(1:3,1:natom)= &
   &            reshape(rbuffer_all(ibufr+1:ibufr+3*natom),(/3,natom/))
        ibufr=ibufr+3*natom
+       results_img_all(jj)%results_gs%intgres(1:nspden,1:natom)= &
+  &            reshape(rbuffer_all(ibufr+1:ibufr+nspden*natom),(/nspden,natom/))
+       ibufr=ibufr+nspden*natom
        results_img_all(jj)%results_gs%synlgr(1:3,1:natom)= &
   &            reshape(rbuffer_all(ibufr+1:ibufr+3*natom),(/3,natom/))
        ibufr=ibufr+3*natom

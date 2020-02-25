@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_outvar_a_h
 !! NAME
 !!  m_outvar_a_h
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MM)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,11 +25,11 @@
 module m_outvar_a_h
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_results_out
+ use m_dtset
 
- use m_parser,  only : prttagm, prttagm_images
+ use m_parser,  only : prttagm, prttagm_images, ab_dimensions
 
  implicit none
 
@@ -126,7 +125,7 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  integer :: defo,idtset,ii,iimage,ga_n_rules,nn
  integer :: lpawu1,narr,mxnsp
  integer :: natom,nimfrqs,nimage
- integer :: ntypalch,ntypat,size1,size2,tmpimg0
+ integer :: ntypalch,ntypat,print_constraint,size1,size2,tmpimg0
  logical :: compute_static_images
  real(dp) :: cpus
  character(len=1) :: firstchar_fftalg,firstchar_gpu
@@ -478,6 +477,15 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%chneut
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'chneut','INT',0)
 
+!chrgat
+ narr=mxvals%natom              ! default size for all datasets
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
+   narrm(idtset)=dtsets(idtset)%natom
+   if(idtset==0)narrm(idtset)=mxvals%natom
+   if (narrm(idtset)>0) dprarr(1:narrm(idtset),idtset)=dtsets(idtset)%chrgat(1:narrm(idtset))
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'chrgat','DPR',multivals%natom)
+
  intarr(1,:)=dtsets(:)%cineb_start
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'cineb_start','INT',0)
 
@@ -488,12 +496,23 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    write(iout,'(1x,a16,1x,1p,t22,g10.2,t25,a)') 'cpuh',cpus/3600.0_dp,'(hours)'
  end if
 
- do idtset=0, ndtset_alloc
-   do ii = 1, ntypat
-     dprarr(ii,idtset) = dtsets(idtset)%corecs(ii)
-   end do ! end loop over ntypat
- end do ! end loop over datasets
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,ntypat,narrm,ncid,ndtset_alloc,'corecs','DPR',0)
+!constraint_kind
+ narr=mxvals%ntypat             ! default size for all datasets
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
+   narrm(idtset)=dtsets(idtset)%ntypat
+   if(idtset==0)narrm(idtset)=mxvals%ntypat
+   if (narrm(idtset)>0) intarr(1:narrm(idtset),idtset)=dtsets(idtset)%constraint_kind(1:narrm(idtset))
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'constraint_kind','INT',multivals%ntypat)
+
+!corecs
+ narr=mxvals%ntypat             ! default size for all datasets
+ do idtset=0,ndtset_alloc       ! specific size for each dataset
+   narrm(idtset)=dtsets(idtset)%ntypat
+   if(idtset==0)narrm(idtset)=mxvals%ntypat
+   if (narrm(idtset)>0) dprarr(1:narrm(idtset),idtset)=dtsets(idtset)%corecs(1:narrm(idtset))
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,narr,narrm,ncid,ndtset_alloc,'corecs','DPR',multivals%ntypat)
 
 !###########################################################
 !### 03. Print all the input variables (D)
@@ -758,6 +777,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%eph_fsewin
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_fsewin','ENE',0)
 
+ dprarr(1,:)=dtsets(:)%eph_ecutosc
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_ecutosc','ENE',0)
+
  !dprarr(1,:)=dtsets(:)%eph_alpha_gmin
  !call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'eph_alpha_gmin','DPR',0)
 
@@ -806,11 +828,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
    intarr(1:3,idtset)=dtsets(idtset)%ddb_ngqpt
  end do
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ddb_ngqpt','INT',0)
-
- do idtset=0,ndtset_alloc
-   intarr(1:3,idtset)=dtsets(idtset)%ddb_qrefine
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ddb_qrefine','INT',0)
 
  do idtset=0,ndtset_alloc
    intarr(1:3,idtset)=dtsets(idtset)%dvdb_ngqpt
@@ -1113,6 +1130,80 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%gpu_linalg_limit
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gpu_linalg_limit','INT',0)
+
+!grchrg
+ print_constraint=0
+ do idtset=1,ndtset_alloc
+   if(any(dtsets(idtset)%constraint_kind(:)>=10))print_constraint=1
+ enddo
+ if(print_constraint==1)then
+!if(any(dtsets(1:ndtset_alloc)%constraint_kind(:)>=10))then
+   if(choice==2)then
+     prtimg(:,:)=1
+     do idtset=0,ndtset_alloc       ! specific size for each dataset
+       compute_static_images=(dtsets(idtset)%istatimg>0)
+       size2=dtsets(idtset)%natom
+       if(idtset==0)size2=0
+       narrm(idtset)=size2
+       if(dtsets(idtset)%iscf>=0 .or. idtset==0)then
+         do iimage=1,dtsets(idtset)%nimage
+           if (narrm(idtset)>0) then
+             dprarr_images(1:narrm(idtset),iimage,idtset)=&
+&             results_out(idtset)%intgres(1,1:size2,iimage)
+           end if
+           if(.not.(dtsets(idtset)%dynimage(iimage)==1.or.compute_static_images))then
+             prtimg(iimage,idtset)=0
+           end if
+         end do
+       else
+         narrm(idtset)=0
+       end if
+     end do
+!    This is a trick to force printing of fcart even if zero, still not destroying the value of nimagem(0).
+     tmpimg0=nimagem(0)
+     nimagem(0)=0
+     call prttagm_images(dprarr_images,iout,jdtset_,1,marr,narrm,ncid,ndtset_alloc,'grchrg','DPR',&
+       mxvals%nimage,nimagem,ndtset,prtimg,strimg)
+     nimagem(0)=tmpimg0
+   end if
+ endif
+
+!grspin
+ print_constraint=0
+ do idtset=1,ndtset_alloc
+   if(any(mod(dtsets(idtset)%constraint_kind(:),10)>0))print_constraint=1
+ enddo
+ if(print_constraint==1)then
+!if(any(mod(dtsets(1:ndtset_alloc)%constraint_kind(:),10)/=0))then
+   if(choice==2)then
+     prtimg(:,:)=1
+     do idtset=0,ndtset_alloc       ! specific size for each dataset
+       compute_static_images=(dtsets(idtset)%istatimg>0)
+       size2=dtsets(idtset)%natom
+       if(idtset==0)size2=0
+       narrm(idtset)=3*size2
+       if(dtsets(idtset)%iscf>=0 .or. idtset==0)then
+         do iimage=1,dtsets(idtset)%nimage
+           if (narrm(idtset)>0) then
+             dprarr_images(1:narrm(idtset),iimage,idtset)=&
+&             reshape(results_out(idtset)%intgres(2:4,1:size2,iimage),(/ narrm(idtset) /) )
+           end if
+           if(.not.(dtsets(idtset)%dynimage(iimage)==1.or.compute_static_images))then
+             prtimg(iimage,idtset)=0
+           end if
+         end do
+       else
+         narrm(idtset)=0
+       end if
+     end do
+!    This is a trick to force printing of fcart even if zero, still not destroying the value of nimagem(0).
+     tmpimg0=nimagem(0)
+     nimagem(0)=0
+     call prttagm_images(dprarr_images,iout,jdtset_,2,marr,narrm,ncid,ndtset_alloc,'grspin','DPR',&
+       mxvals%nimage,nimagem,ndtset,prtimg,strimg)
+     nimagem(0)=tmpimg0
+   end if
+ endif
 
  intarr(1,:)=dtsets(:)%gwcalctyp
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'gwcalctyp','INT',0)

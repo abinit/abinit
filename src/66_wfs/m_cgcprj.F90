@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_cgcprj
 !! NAME
 !!  m_cgcprj
@@ -7,7 +6,7 @@
 !!  Functions operating on wavefunctions in the cg+cprj representation.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG)
+!!  Copyright (C) 2008-2020 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -115,8 +114,6 @@ contains
 subroutine dotprod_set_cgcprj(atindx1,cg1,cg2,cprj1,cprj2,dimcprj,hermitian,&
 & ibg1,ibg2,icg1,icg2,ikpt,isppol,istwf,mband,mcg1,mcg2,mcprj1,mcprj2,mkmem,&
 & mpi_enreg,natom,nattyp,nbd1,nbd2,npw,nspinor,nsppol,ntypat,pawtab,smn,usepaw)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -456,8 +453,6 @@ subroutine dotprodm_sumdiag_cgcprj(atindx1,cg_set,cprj_set,dimcprj,&
 & mpi_enreg,mset,natom,nattyp,nbd,npw,nset1,nset2,nspinor,nsppol,ntypat,&
 & shift_set1,shift_set2,pawtab,smn,usepaw)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: ibg,icg,ikpt,isppol,istwf
@@ -691,8 +686,6 @@ end subroutine dotprodm_sumdiag_cgcprj
 & icg,inplace,mcg,mcprj,natom,nband_in,nband_out,npw,nspinor,usepaw, &
 & cgout,cprjout,icgout) ! optional args
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: icg,inplace,mcg,mcprj
@@ -820,8 +813,6 @@ end subroutine lincom_cgcprj
 
  subroutine cgcprj_cholesky(atindx1,cg,cprj_k,dimcprj,icg,ikpt,isppol,istwf,mcg,mcprj,mkmem,&
 &  mpi_enreg,natom,nattyp,nband,npw,nspinor,nsppol,ntypat,pawtab,usepaw)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

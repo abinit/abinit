@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/conducti
 !! NAME
 !! conducti
@@ -9,7 +8,7 @@
 !! from the Kubo-Greenwood formula.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (FJ,SMazevet)
+!! Copyright (C) 2006-2020 ABINIT group (FJ,SMazevet)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +38,6 @@
 program conducti
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_errors
  use m_abicore
@@ -48,6 +46,7 @@ program conducti
 #endif
  use m_conducti
 
+ use defs_abitypes, only : MPI_type
  use m_io_tools,  only : open_file
  use m_time,      only : timein
  use m_fstrings,  only : sjoin, itoa

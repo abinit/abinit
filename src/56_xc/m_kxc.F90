@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_kxc
 !! NAME
 !! m_kxc
@@ -9,7 +8,7 @@
 !! since the ACFD code has been disabled.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, MF, XG, GMR, LSI, YMN, Rhaltaf, MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -50,9 +49,9 @@ MODULE m_kxc
  use m_distribfft
  use m_xcdata
  use libxc_functionals
+ use m_dtset
 
- use defs_abitypes,   only : MPI_type, dataset_type
- use m_dtset,         only : dtset_copy, dtset_free
+ use defs_abitypes,   only : MPI_type
  use m_io_tools,      only : open_file
  use m_pptools,       only : printxsf
  use m_numeric_tools, only : hermitianize
@@ -459,7 +458,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    call libxc_functionals_end()
  end if
  if (ixc<0) then
-   call libxc_functionals_init(ixc,dtset%nspden)
+   call libxc_functionals_init(ixc,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
  end if
 
 !to be adjusted for the call to rhotoxc
@@ -588,7 +587,7 @@ subroutine kxc_alda(dtset,ixc,kxcg,mpi_enreg,nfft,ngfft,nspden,option,rhor,rhocu
    call libxc_functionals_end()
  end if
  if (dtset%ixc<0) then
-   call libxc_functionals_init(dtset%ixc,dtset%nspden)
+   call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
  end if
 
 !Free memory.
@@ -1116,7 +1115,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
    call libxc_functionals_end()
  end if
  if (ixc<0) then
-   call libxc_functionals_init(ixc,Dtset%nspden)
+   call libxc_functionals_init(ixc,Dtset%nspden,xc_tb09_c=Dtset%xc_tb09_c)
  end if
 
  call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft_tot,ngfft,rhog,Cryst%rprimd,vhartr)
@@ -1227,7 +1226,7 @@ subroutine kxc_driver(Dtset,Cryst,ixc,ngfft,nfft_tot,nspden,rhor,npw,dim_kxcg,kx
    call libxc_functionals_end()
  end if
  if (dtset%ixc<0) then
-   call libxc_functionals_init(dtset%ixc,dtset%nspden)
+   call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
  end if
 
  call destroy_mpi_enreg(MPI_enreg_seq)
@@ -1433,7 +1432,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    call libxc_functionals_end()
  end if
  if (ixc<0) then
-   call libxc_functionals_init(ixc,Dtset%nspden)
+   call libxc_functionals_init(ixc,Dtset%nspden,xc_tb09_c=Dtset%xc_tb09_c)
  end if
 
  call hartre(1,gsqcut,izero,MPI_enreg_seq,nfft,ngfft,rhog,Cryst%rprimd,vhartr)
@@ -1683,7 +1682,7 @@ subroutine kxc_ADA(Dtset,Cryst,ixc,ngfft,nfft,nspden,rhor,&
    call libxc_functionals_end()
  end if
  if (dtset%ixc<0) then
-   call libxc_functionals_init(dtset%ixc,dtset%nspden)
+   call libxc_functionals_init(dtset%ixc,dtset%nspden,xc_tb09_c=dtset%xc_tb09_c)
  end if
 
  call destroy_mpi_enreg(MPI_enreg_seq)

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_opernlb_ylm
 !! NAME
 !!  m_opernlb_ylm
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (MT)
+!!  Copyright (C) 1998-2020 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -152,11 +151,8 @@ subroutine opernlb_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_fac,&
 &                      ia3,idir,indlmn,kpg,matblk,ndgxdtfac,nd2gxdtfac,nincat,nkpg,nlmn,nloalg,npw,&
 &                      nspinor,paw_opt,ph3d,svect,ucvol,vect)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
-
  integer,intent(in) :: choice,cplex,cplex_fac,dimffnl,ia3,idir,matblk,ndgxdtfac,nd2gxdtfac,nincat
  integer,intent(in) :: nkpg,nlmn,npw,nspinor,paw_opt
  real(dp),intent(in) :: ucvol

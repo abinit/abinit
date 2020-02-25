@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_m1geo
 !! NAME
 !! m_m1geo
@@ -8,7 +7,7 @@
 !! and its related init and destroy routines
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (XG)
+!! Copyright (C) 2018-2020 ABINIT group (XG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,9 +23,11 @@
 module m_m1geo
 
  use defs_basis
- use defs_abitypes
+ use m_profiling_abi
  use m_abimover
  use m_abihist
+ use m_dtset
+ use m_dtfil
 
  implicit none
 
@@ -69,7 +70,7 @@ type, public :: m1geo_type
   logical  :: skipcycle      ! .TRUE. when the remaining of the cycle has to be skipped. .FALSE. otherwise.
 ! Arrays
   real(dp) :: rprimd_orig(3,3)   ! rprimd from dtset
-  real(dp),allocatable :: mixesimgf(:)   ! mixesimgf from dtset 
+  real(dp),allocatable :: mixesimgf(:)   ! mixesimgf from dtset
 ! Character string
   character(len=fnlen) :: filnam_ds4
 ! Datatypes
@@ -221,13 +222,8 @@ contains  !=============================================================
 
 !************************************************************************
 
- if(allocated(m1geo_param%mixesimgf))then
-   ABI_FREE(m1geo_param%mixesimgf)
- endif
-
- if (allocated(m1geo_param%ab_xfh_1geo%xfhist))then
-   ABI_FREE(m1geo_param%ab_xfh_1geo%xfhist)
- endif
+ ABI_SFREE(m1geo_param%mixesimgf)
+ ABI_SFREE(m1geo_param%ab_xfh_1geo%xfhist)
 
  call abimover_destroy(m1geo_param%ab_mover)
  call delocint_fin(m1geo_param%deloc)

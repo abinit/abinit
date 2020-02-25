@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pspheads
 !! NAME
 !! m_pspheads
@@ -7,7 +6,7 @@
 !!  Functions used to read the pseudopotential header of each psp file, in order to initialize pspheads(1:npsp).
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, FrD, AF, MT, FJ, MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,12 +26,11 @@
 MODULE m_pspheads
 
  use defs_basis
- use defs_datatypes
  use m_abicore
  use m_errors
  use m_hash_md5
  use m_psxml2ab
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
  use m_psml
 #endif
 #if defined HAVE_BIGDFT
@@ -43,6 +41,7 @@ MODULE m_pspheads
  use funct_pwscf  ! pwscf module for naming xc functionals
  use m_xmpi
 
+ use defs_datatypes, only : pspheader_type
  use m_time,     only : timab
  use m_io_tools, only : open_file
  use m_fstrings, only : basename, lstrip, sjoin, startswith
@@ -57,7 +56,7 @@ MODULE m_pspheads
 
  public :: inpspheads      ! Initialize pspheads(1:npsp).
  public :: pspheads_comm   ! Communicate pspheads to all processors
- public ::  pawpsxml2ab
+ public :: pawpsxml2ab
  public :: upfxc2abi       ! UPF XcC to Abinit pspxc
 
 contains
@@ -122,7 +121,7 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
  real(dp) :: psppar(0:4,0:6)
  logical :: exists
 #endif
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
  character(len=3) :: atmsymb
  character(len=30) :: creator
 #endif
@@ -133,7 +132,7 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
 
  do ipsp=1,npsp
 
-!  Check if the file is written in XML
+   ! Check if the file is written in XML
    pspheads(ipsp)%filpsp=trim(filnam(ipsp))
 
    usexml = 0
@@ -197,7 +196,7 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
      pspheads(ipsp)%pspso=0
 
    else if (usexml==1 .and. test_paw==0) then
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
      write(message,'(a,a)')  &
 &     '- inpspheads : Reading pseudopotential header in XML form from ', trim(filnam(ipsp))
      call wrtout(ab_out,message,'COLL')
@@ -246,14 +245,11 @@ subroutine inpspheads(filnam,npsp,pspheads,ecut_tmp)
      pspheads(ipsp)%pspso = 0
    end if
 
-!  DEBUG
-!  write(std_out,*) pspheads(ipsp)%znuclpsp
-!  write(std_out,*) pspheads(ipsp)%zionpsp
-!  write(std_out,*) pspheads(ipsp)%pspcod
-!  write(std_out,*) pspheads(ipsp)%pspxc
-!  write(std_out,*) pspheads(ipsp)%lmax
-!  stop
-!  ENDDEBUG
+   ! write(std_out,*) pspheads(ipsp)%znuclpsp
+   ! write(std_out,*) pspheads(ipsp)%zionpsp
+   ! write(std_out,*) pspheads(ipsp)%pspcod
+   ! write(std_out,*) pspheads(ipsp)%pspxc
+   ! write(std_out,*) pspheads(ipsp)%lmax
 
 !  Initialize nproj, nprojso, pspso, as well as xccc, for each type of psp
    pspheads(ipsp)%GTHradii = zero
@@ -744,7 +740,7 @@ subroutine pawpsxml2ab( filnam,ecut_tmp, pspheads,option)
 !arrays
 
 ! *********************************************************************
- 
+
  if (option==1) then
    call rdpawpsxml_header(ecut_tmp,filnam,paw_setuploc)
    paw_setuploc%idgrid= paw_setuploc%radial_grid(1)%id

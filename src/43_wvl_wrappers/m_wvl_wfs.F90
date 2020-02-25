@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_wfs
 !! NAME
 !! m_wvl_wfs
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DC)
+!!  Copyright (C) 1998-2020 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,6 +27,8 @@ module m_wvl_wfs
  use defs_basis
  use m_errors
  use m_abicore
+
+ use defs_datatypes, only : pseudopotential_type
 
  implicit none
 
@@ -79,7 +80,6 @@ contains
 subroutine wvl_wfs_set(alphadiis, spinmagntarget, kpt, me, natom, nband, nkpt, nproc, nspinor, &
 &  nsppol, nwfshist, occ, psps, rprimd, wfs, wtk, wvl, wvl_crmult, wvl_frmult, xred)
 
- use defs_datatypes
  use defs_wvltypes
 
  use m_geometry, only : xred2xcart

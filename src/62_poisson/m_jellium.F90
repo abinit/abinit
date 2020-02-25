@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_jellium
 !! NAME
 !!  m_jellium
@@ -7,7 +6,7 @@
 !!  Routines related to jellium
 !!
 !! COPYRIGHT
-!! Copyright (C) 2007-2019 ABINIT group (SC)
+!! Copyright (C) 2007-2020 ABINIT group (SC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,11 +26,11 @@
 module m_jellium
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
 
- use m_fft,      only : fourdp
+ use defs_abitypes, only : MPI_type
+ use m_fft,         only : fourdp
 
  implicit none
 

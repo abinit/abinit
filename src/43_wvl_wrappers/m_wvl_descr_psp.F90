@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_wvl_descr_psp
 !! NAME
 !!  wvl_descr_psp
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (DC)
+!!  Copyright (C) 2008-2020 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,6 +28,8 @@ module m_wvl_descr_psp
  use defs_basis
  use m_errors
  use m_abicore
+
+ use defs_datatypes, only : pseudopotential_type, pseudopotential_gth_type
 
  implicit none
 
@@ -77,7 +78,6 @@ contains
 
 subroutine wvl_descr_psp_set(filoccup, nsppol, psps, spinat, wvl)
 
- use defs_datatypes
  use defs_wvltypes
 #if defined HAVE_BIGDFT
  use BigDFT_API, only: aoig_set,UNINITIALIZED,dict_init,dict_free,dictionary, &
@@ -176,7 +176,6 @@ end subroutine wvl_descr_psp_set
 
 subroutine wvl_descr_psp_fill(gth_params, ipsp, ixc, nelpsp, nzatom, pspunit)
 
-  use defs_datatypes
 #if defined HAVE_BIGDFT
   use BigDFT_API, only: atomic_info, UNINITIALIZED, psp_from_data
 #endif

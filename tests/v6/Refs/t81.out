@@ -1,8 +1,8 @@
 
-.Version 8.4.2 of ANADDB 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ANADDB 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ANADDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  5 Jun 2017.
-- ( at 21h08 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h49 )
   
 
 ================================================================================
@@ -80,7 +80,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.012  and twall      0.012 sec
+-begin at tcpu      0.030  and twall      0.030 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       16
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -437,7 +437,7 @@
  Transformation to local coordinates 
  First  local vector :       -0.816497       -0.408248       -0.408248
  Second local vector :       -0.577350        0.577350        0.577350
- Third  local vector :       -0.000000        0.707107       -0.707107
+ Third  local vector :        0.000000        0.707107       -0.707107
    0.00060  0.00047  0.00000
    0.00047  0.00026  0.00000
    0.00000  0.00000 -0.00152
@@ -463,8 +463,8 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
   Phonon wavevector (reduced coordinates) :  0.10000  0.10000  0.00000
  Phonon energies in Hartree :
@@ -478,10 +478,10 @@
  Phonon energies in Kelvin  :
 -  3.806946E+01  9.587914E+01  9.587914E+01
  Speed of sound for this q and mode:
-   in atomic units:     0.7291270698E-03
+   in atomic units:     0.7291270699E-03
    in units km/s:              1.59510
  Partial Debye temperature for this q and mode:
-   in atomic units:     0.5935991800E-03
+   in atomic units:     0.5935991801E-03
    in SI units K  :            187.44357
 
  Speed of sound for this q and mode:
@@ -656,8 +656,8 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0  0.0 -0.0  0.0 -0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+ -0.0  0.0 -0.0  0.0  0.0 -0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 
   Phonon wavevector (reduced coordinates) :  0.12500  0.12500  0.12500
  Phonon energies in Hartree :
@@ -732,6 +732,6 @@
 
 ================================================================================
 
-+Total cpu time      0.095  and wall time      0.095 sec
++Total cpu time      0.119  and wall time      0.140 sec
 
  anaddb : the run completed succesfully.

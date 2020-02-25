@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_exc_build
 !! NAME
 !!  m_exc_build
@@ -8,7 +7,7 @@
 !!
 !! COPYRIGHT
 !!  Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!!  Copyright (C) 2009-2019 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
+!!  Copyright (C) 2009-2020 ABINIT group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida, M.Giantomassi)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -40,7 +39,6 @@ module m_exc_build
  use m_hdr
 
  use defs_datatypes, only : pseudopotential_type
- use defs_abitypes,  only : hdr_type
  use m_gwdefs,       only : czero_gw, cone_gw, GW_TOLQ0
  use m_time,         only : cwtime, timab
  use m_io_tools,     only : get_unit, open_file

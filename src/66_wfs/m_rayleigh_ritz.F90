@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_rayleigh_ritz
 !! NAME
 !!  m_rayleigh_ritz
@@ -9,7 +8,7 @@
 !! distributed matrix in block-cyclic form (_distributed)
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2014-2019 ABINIT group (AL)
+!!  Copyright (C) 2014-2020 ABINIT group (AL)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,7 +28,6 @@
 module m_rayleigh_ritz
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_cgtools
  use m_xmpi
@@ -37,6 +35,7 @@ module m_rayleigh_ritz
  use m_abi_linalg
  use m_slk
 
+ use defs_abitypes,   only : mpi_type
  use m_time,          only : timab
  use m_numeric_tools, only : pack_matrix
 
@@ -89,8 +88,6 @@ contains
 !! SOURCE
 
 subroutine rayleigh_ritz_subdiago(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
-
- implicit none
 
  ! Arguments
  type(mpi_type),intent(inout) :: mpi_enreg
@@ -315,8 +312,6 @@ end subroutine rayleigh_ritz_subdiago
 !! SOURCE
 
 subroutine rayleigh_ritz_distributed(cg,ghc,gsc,gvnlxc,eig,has_fock,istwf_k,mpi_enreg,nband,npw,nspinor,usepaw)
-
- implicit none
 
  integer,external :: NUMROC
 
@@ -591,8 +586,6 @@ end subroutine rayleigh_ritz_distributed
 !! SOURCE
 subroutine from_mat_to_block_cyclic(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
 
- implicit none
-
  integer, intent(in) :: vectsize, nband, buffsize, blocksize, iproc, nprocs
  real(dp), intent(in) :: full_mat(2, vectsize*nband)
  real(dp), intent(inout) :: block_cyclic_mat(2, vectsize*buffsize)
@@ -647,8 +640,6 @@ end subroutine from_mat_to_block_cyclic
 !! SOURCE
 
 subroutine from_block_cyclic_to_mat(full_mat, vectsize, nband, block_cyclic_mat, buffsize, blocksize, iproc, nprocs)
-
- implicit none
 
  integer, intent(in) :: vectsize, nband, buffsize, blocksize, iproc, nprocs
  real(dp), intent(inout) :: full_mat(2, vectsize*nband)

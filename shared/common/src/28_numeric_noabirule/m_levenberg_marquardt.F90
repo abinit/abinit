@@ -14,7 +14,7 @@
 !!        evaluations.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MS)
+!!  Copyright (C) 2008-2020 ABINIT group (MS)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1616,8 +1616,6 @@ CONTAINS  !=====================================================================
 !!
 !! SOURCE
 subroutine lm_fit_print_info(info,msg)
-
-  implicit none
 
   integer, intent(in) :: info
   character(len=500)  :: msg

@@ -72,6 +72,6 @@ istwfk 4*1
 #%% max_nprocs = 4
 #%% [extra_info]
 #%% authors = F. Jollet
-#%% keywords = HF
+#%% keywords = HF, PAW
 #%% description = Test of HF in PAW
 #%%<END TEST_INFO>

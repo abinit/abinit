@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_opernla_ylm
 !! NAME
 !!  m_opernla_ylm
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MT)
+!!  Copyright (C) 2008-2020 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,7 +25,6 @@
 module m_opernla_ylm
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
@@ -34,6 +32,7 @@ module m_opernla_ylm
  use OMP_LIB
 #endif
 
+ use defs_abitypes, only : MPI_type
  use m_time,        only : timab
 
  implicit none
@@ -146,8 +145,6 @@ contains
 subroutine opernla_ylm(choice,cplex,cplex_dgxdt,cplex_d2gxdt,dimffnl,d2gxdt,dgxdt,ffnl,gx,&
 &       ia3,idir,indlmn,istwf_k,kpg,matblk,mpi_enreg,nd2gxdt,ndgxdt,nincat,nkpg,nlmn,&
 &       nloalg,npw,nspinor,ph3d,signs,ucvol,vect)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

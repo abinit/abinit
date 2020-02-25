@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_haydock
 !! NAME
 !! m_haydock
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (M.Giantomassi, Y. Gillet, L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
+!!  Copyright (C) 2008-2020 ABINIT group (M.Giantomassi, Y. Gillet, L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,6 +33,7 @@ MODULE m_haydock
  use m_haydock_io
  use m_linalg_interfaces
  use m_ebands
+ use m_hdr
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
@@ -41,7 +41,6 @@ MODULE m_haydock
  use m_time,              only : timab
  use m_fstrings,          only : strcat, sjoin, itoa, int2char4
  use m_io_tools,          only : file_exists, open_file
- use defs_abitypes,       only : Hdr_type
  use defs_datatypes,      only : ebands_t, pseudopotential_type
  use m_geometry,          only : normv
  use m_hide_blas,         only : xdotc, xgemv

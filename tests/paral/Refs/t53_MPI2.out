@@ -1,8 +1,8 @@
 
-.Version 8.0.3 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 12h09 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 17h25 )
   
-- input  file    -> t53.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t51_MPI2-t52_MPI2-t53_MPI2/t53.in
 - output file    -> t53_MPI2.out
 - root for input  files -> t53_MPI2i
 - root for output files -> t53_MPI2o
@@ -45,7 +45,7 @@ _ WF disk file :      3.283 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   accesswff0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -232,7 +232,7 @@ P          mk1mem         128
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    2
+-   mpi_nproc: 2, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -251,8 +251,8 @@ P          mk1mem         128
          ecut(hartree)=     10.000   => boxcut(ratio)=   2.03844
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/13al.pspgth
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_5.3_openmpi/gonze_8.0.3-public/tests/Psps_for_tests/13al.pspgth
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/13al.pspgth
 - Goedecker-Teter-Hutter  Tue May 28 09:24:05 EDT 1996
 - 13.00000   3.00000    960528                znucl, zion, pspdat
     2    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -267,7 +267,7 @@ P          mk1mem         128
   so that the KB energies are not consistent with 
   definition in PRB44, 8503 (1991). 
   However, this does not influence the results obtained hereafter.
- pspatm : epsatm=   -5.99108991
+  pspatm : epsatm=   -5.99108991
          --- l  ekb(1:nproj) -->
              0    1.005823    0.184862
              1    0.220213
@@ -305,30 +305,30 @@ P          mk1mem         128
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   197.60420709415      1.761E+02 2.429E-01 4.864E+05
- ETOT  2   8.0044274369127     -1.896E+02 2.082E-01 1.722E+04
- ETOT  3  0.99970088302755     -7.005E+00 5.732E-03 3.211E+00
- ETOT  4  0.99825835121603     -1.443E-03 2.641E-06 1.487E-02
- ETOT  5  0.99825030278270     -8.048E-06 9.166E-09 4.531E-05
- ETOT  6  0.99825027615860     -2.662E-08 6.286E-11 2.092E-07
- ETOT  7  0.99825027600862     -1.500E-10 3.359E-13 1.295E-09
- ETOT  8  0.99825027600746     -1.155E-12 2.536E-15 9.494E-12
+-ETOT  1   197.60420702297      1.761E+02 2.429E-01 4.864E+05
+ ETOT  2   8.0044274246145     -1.896E+02 2.082E-01 1.722E+04
+ ETOT  3  0.99970088310660     -7.005E+00 5.732E-03 3.211E+00
+ ETOT  4  0.99825835126319     -1.443E-03 2.641E-06 1.487E-02
+ ETOT  5  0.99825030283009     -8.048E-06 1.319E-08 4.531E-05
+ ETOT  6  0.99825027620594     -2.662E-08 6.286E-11 2.092E-07
+ ETOT  7  0.99825027605593     -1.500E-10 3.427E-13 1.295E-09
+ ETOT  8  0.99825027605481     -1.119E-12 2.536E-15 9.494E-12
 
  At SCF step    8       vres2   =  9.49E-12 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -6.0000E-02; max=  2.5360E-15
+ Mean square residual over all n,k,spin=   94.124E-17; max=  25.360E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   1.50274826E+01 eigvalue=  -1.18003667E+00  local=  -1.21175837E+01
+     kin0=   1.50274833E+01 eigvalue=  -1.18003694E+00  local=  -1.21175847E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
  loc psp =   3.54951637E+00  Hartree=   8.67110675E+00     xc=  -1.66979924E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   2.67319110E+00     enl0=   9.12654566E+00   enl1=  -4.46113296E+01
+    edocc=   2.67319076E+00     enl0=   9.12654648E+00   enl1=  -4.46113296E+01
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -2.05309068E+01
  10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
@@ -336,9 +336,9 @@ P          mk1mem         128
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.9982502760E+00 Ha. Also 2DEtotal=    0.271637714488E+02 eV
+ 2DEtotal=    0.9982502761E+00 Ha. Also 2DEtotal=    0.271637714501E+02 eV
     (2DErelax=   -2.0530906791E+01 Ha. 2DEnonrelax=    2.1529157067E+01 Ha)
-    (  non-var. 2DEtotal :    9.9825045712E-01 Ha)
+    (  non-var. 2DEtotal :    9.9825045717E-01 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -359,30 +359,30 @@ P          mk1mem         128
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   50.252500037475      3.514E+01 1.274E-01 1.221E+05
- ETOT  2   2.3463569087083     -4.791E+01 4.655E-02 4.204E+03
- ETOT  3  0.63141359257724     -1.715E+00 1.445E-03 2.176E+00
- ETOT  4  0.63042969688844     -9.839E-04 1.493E-06 6.962E-03
- ETOT  5  0.63042598288048     -3.714E-06 5.318E-09 3.741E-05
- ETOT  6  0.63042596264403     -2.024E-08 4.508E-11 1.437E-07
- ETOT  7  0.63042596256738     -7.665E-11 1.635E-13 5.774E-10
- ETOT  8  0.63042596256688     -5.009E-13 8.222E-16 5.005E-12
+-ETOT  1   50.252500025372      3.514E+01 1.274E-01 1.221E+05
+ ETOT  2   2.3463569067336     -4.791E+01 5.218E-02 4.204E+03
+ ETOT  3  0.63141359261009     -1.715E+00 1.445E-03 2.176E+00
+ ETOT  4  0.63042969691422     -9.839E-04 1.493E-06 6.962E-03
+ ETOT  5  0.63042598290624     -3.714E-06 6.263E-09 3.741E-05
+ ETOT  6  0.63042596266978     -2.024E-08 4.508E-11 1.437E-07
+ ETOT  7  0.63042596259327     -7.651E-11 1.635E-13 5.774E-10
+ ETOT  8  0.63042596259273     -5.365E-13 1.431E-15 5.005E-12
 
  At SCF step    8       vres2   =  5.00E-12 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -6.0000E-02; max=  8.2221E-16
+ Mean square residual over all n,k,spin=   36.265E-17; max=  14.315E-16
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   1.46992328E+01 eigvalue=  -1.11898920E+00  local=  -1.16471326E+01
+     kin0=   1.46992325E+01 eigvalue=  -1.11898912E+00  local=  -1.16471329E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
  loc psp =   1.73193565E+01  Hartree=   3.35927845E+00     xc=  -1.34435347E+00
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   1.82656014E+00     enl0=   8.70768563E+00   enl1=  -4.62839202E+01
+    edocc=   1.82656048E+00     enl0=   8.70768584E+00   enl1=  -4.62839202E+01
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.44822819E+01
  10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
@@ -390,9 +390,9 @@ P          mk1mem         128
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.6304259626E+00 Ha. Also 2DEtotal=    0.171547628627E+02 eV
+ 2DEtotal=    0.6304259626E+00 Ha. Also 2DEtotal=    0.171547628634E+02 eV
     (2DErelax=   -1.4482281870E+01 Ha. 2DEnonrelax=    1.5112707832E+01 Ha)
-    (  non-var. 2DEtotal :    6.3042600074E-01 Ha)
+    (  non-var. 2DEtotal :    6.3042600077E-01 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -414,30 +414,30 @@ P          mk1mem         128
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1   49.866112311674      3.644E+01 7.927E-02 1.215E+05
- ETOT  2   2.4865587432648     -4.738E+01 5.189E-02 4.409E+03
- ETOT  3  0.69608788195795     -1.790E+00 1.456E-03 6.692E-01
- ETOT  4  0.69578461398618     -3.033E-04 4.002E-07 2.002E-03
- ETOT  5  0.69578337375376     -1.240E-06 2.393E-09 6.709E-06
- ETOT  6  0.69578336978086     -3.973E-09 7.309E-12 5.704E-08
- ETOT  7  0.69578336974496     -3.590E-11 7.131E-14 4.092E-10
- ETOT  8  0.69578336974458     -3.766E-13 6.673E-16 2.341E-12
+-ETOT  1   49.866112287899      3.644E+01 7.927E-02 1.215E+05
+ ETOT  2   2.4865587393160     -4.738E+01 5.189E-02 4.409E+03
+ ETOT  3  0.69608788199091     -1.790E+00 1.456E-03 6.692E-01
+ ETOT  4  0.69578461401376     -3.033E-04 4.968E-07 2.002E-03
+ ETOT  5  0.69578337378145     -1.240E-06 2.948E-09 6.709E-06
+ ETOT  6  0.69578336980862     -3.973E-09 1.016E-11 5.704E-08
+ ETOT  7  0.69578336977274     -3.588E-11 9.705E-14 4.092E-10
+ ETOT  8  0.69578336977229     -4.476E-13 6.673E-16 2.341E-12
 
  At SCF step    8       vres2   =  2.34E-12 < tolvrs=  1.00E-10 =>converged.
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=  -6.0000E-02; max=  6.6728E-16
+ Mean square residual over all n,k,spin=   29.789E-17; max=  66.728E-17
 
  Thirteen components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   1.42112893E+01 eigvalue=  -1.02455365E+00  local=  -1.11556856E+01
+     kin0=   1.42112899E+01 eigvalue=  -1.02455382E+00  local=  -1.11556861E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
  loc psp =   2.04290577E+01  Hartree=   2.45114088E+00     xc=  -9.45780135E-01
  note that "loc psp" includes a xc core correction that could be resolved
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   9.51077522E-01     enl0=   8.24251105E+00   enl1=  -4.58890566E+01
+    edocc=   9.51077198E-01     enl0=   8.24251145E+00   enl1=  -4.58890566E+01
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -1.27299995E+01
  10,11,12 Non-relaxation  contributions : frozen-wavefunctions and Ewald
@@ -445,9 +445,9 @@ P          mk1mem         128
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.6957833697E+00 Ha. Also 2DEtotal=    0.189332283575E+02 eV
+ 2DEtotal=    0.6957833698E+00 Ha. Also 2DEtotal=    0.189332283583E+02 eV
     (2DErelax=   -1.2729999515E+01 Ha. 2DEnonrelax=    1.3425782884E+01 Ha)
-    (  non-var. 2DEtotal :    6.9578341572E-01 Ha)
+    (  non-var. 2DEtotal :    6.9578341575E-01 Ha)
 
 ================================================================================
 
@@ -465,7 +465,7 @@ P          mk1mem         128
    1    1   2    1         0.0359158595         0.0000000050
    1    1   3    1         0.5318039220         0.0000000037
   
-   2    1   1    1         0.0359158591        -0.0000000030
+   2    1   1    1         0.0359158592        -0.0000000030
    2    1   2    1         0.6304260139         0.0000000002
    2    1   3    1         0.1639794937        -0.0000000037
   
@@ -481,16 +481,16 @@ P          mk1mem         128
   
    1    1   1    1         0.0265421478        -0.0000000000
    1    1   2    1        -0.0150657408        -0.0000000002
-   1    1   3    1        -0.0000000000        -0.0000000000
+   1    1   3    1         0.0000000000        -0.0000000000
   
    2    1   1    1        -0.0150657408         0.0000000003
    2    1   2    1         0.0522850181        -0.0000000001
-   2    1   3    1        -0.0000000000         0.0000000000
+   2    1   3    1         0.0000000000         0.0000000000
   
    3    1   1    1        -0.0000000000        -0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0175793784         0.0000000000
- 
+
   Phonon wavevector (reduced coordinates) :  0.25000 -0.12500  0.12500
  Phonon energies in Hartree :
    5.980834E-04  6.314920E-04  1.097810E-03
@@ -512,7 +512,7 @@ P          mk1mem         128
            densty      1.20000000E+00
              ecut      1.00000000E+01 Hartree
            enunit           2
-           etotal      6.9578336974E-01
+           etotal      6.9578336977E-01
             fcart      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
 -          fftalg         312
            irdwfk           1
@@ -689,62 +689,58 @@ P          mk1mem         128
 ================================================================================
 
 - Total cpu        time (s,m,h):         21.4        0.36      0.006
-- Total wall clock time (s,m,h):         42.7        0.71      0.012
+- Total wall clock time (s,m,h):         85.2        1.42      0.024
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 2, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           10.7, wall_time =           21.4
+- cpu_time =           10.7, wall_time =           42.6
 -
-- routine                        cpu     %       wall     %      number of calls  Gflops 
+- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                   5.331  24.9      5.504  12.9          33463      -1.00    
-- fourwf%(G->r)                  1.068   5.0      1.034   2.4          13008      -1.00    
-- nonlop(forces)                 0.703   3.3      0.978   2.3          17600      -1.00    
-- projbd                         0.433   2.0      0.516   1.2          56686      -1.00    
-- dfpt_cgwf-O(npw)               0.327   1.5      0.374   0.9             -1      -1.00    
-- dfpt_vtorho-kpt loop           0.309   1.4      0.333   0.8             24      -1.00    
-- nonlop(apply)                  0.285   1.3      0.596   1.4          20663      -1.00    
-- dfpt_vtorho:MPI                0.280   1.3      0.505   1.2             24      -1.00    
-- newkpt(excl. rwwf   )          0.262   1.2      0.530   1.2             -1      -1.00    
-- dfpt_vtowfk(contrib)           0.223   1.0      0.337   0.8             -1      -1.00    
-- dfpt_vtowfk (1)                0.163   0.8      7.853  18.4           2560      -1.00    
-- status                         0.159   0.7      7.983  18.7           2687      -1.00    
-- invars2                        0.159   0.7      0.302   0.7              1      -1.00    
-- wfsinp(excl. calls)            0.119   0.6      0.206   0.5              7      -1.00    
-- getghc-other                   0.116   0.5      0.129   0.3             -1      -1.00    
-- others (97)                    0.179   0.8      0.322   0.8             -1      -1.00    
+- fourwf%(pot)                   5.148  24.1     20.286  23.8          33463      -1.00        0.25       0.25
+- fourwf%(G->r)                  1.026   4.8      4.276   5.0          13008      -1.00        0.24       0.24
+- nonlop(forces)                 0.675   3.2      2.756   3.2          17600      -1.00        0.24       0.24
+- projbd                         0.539   2.5      2.271   2.7          56686      -1.00        0.24       0.24
+- nonlop(apply)                  0.491   2.3      2.037   2.4          20663      -1.00        0.24       0.24
+- dfpt_vtorho-kpt loop           0.326   1.5      1.326   1.6             24      -1.00        0.25       0.25
+- dfpt_vtowfk(contrib)           0.325   1.5      1.182   1.4             -1      -1.00        0.27       0.27
+- getgh1c_setup                  0.293   1.4      1.253   1.5           2560      -1.00        0.23       0.23
+- dfpt_vtorho:MPI                0.262   1.2      1.286   1.5             24      -1.00        0.20       0.20
+- getghc-other                   0.174   0.8      0.602   0.7             -1      -1.00        0.29       0.29
+- newkpt(excl. rwwf   )          0.167   0.8      0.664   0.8             -1      -1.00        0.25       0.25
+- inwffil(excl. calls)           0.130   0.6      0.506   0.6             10      -1.00        0.26       0.26
+- listkk                         0.115   0.5      0.428   0.5              7      -1.00        0.27       0.27
+- others (121)                  -1.844  -8.6     -7.479  -8.8             -1      -1.00        0.25       0.25
 -<END_TIMER>
 -
-- subtotal                      10.116  47.2     27.502  64.4
+- subtotal                       7.827  36.6     31.393  36.8                                  0.25       0.25
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 2, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          21.4, wall_time =          42.7
+- cpu_time =          21.4, wall_time =          85.2
 -
-- routine                         cpu     %       wall     %      number of calls Gflops 
+- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- fourwf%(pot)                  10.391  48.5     15.386  36.0          67037      -1.00    
-- fourwf%(G->r)                  2.061   9.6      2.931   6.9          25920      -1.00    
-- nonlop(forces)                 1.465   6.8      2.606   6.1          35200      -1.00    
-- projbd                         0.864   4.0      1.362   3.2         113594      -1.00    
-- nonlop(apply)                  0.773   3.6      1.644   3.9          41437      -1.00    
-- dfpt_cgwf-O(npw)               0.645   3.0      1.042   2.4             -2      -1.00    
-- dfpt_vtorho:MPI                0.628   2.9      1.255   2.9             48      -1.00    
-- dfpt_vtorho-kpt loop           0.607   2.8      0.980   2.3             48      -1.00    
-- newkpt(excl. rwwf   )          0.537   2.5      1.038   2.4             -2      -1.00    
-- dfpt_vtowfk(contrib)           0.533   2.5      1.003   2.4             -2      -1.00    
-- invars2                        0.313   1.5      0.626   1.5              2      -1.00    
-- getghc-other                   0.242   1.1      0.311   0.7             -2      -1.00    
-- wfsinp(excl. calls)            0.222   1.0      0.430   1.0             14      -1.00    
-- dfpt_vtowfk (1)                0.174   0.8      7.863  18.4           5120      -1.00    
-- status                         0.159   0.7      7.983  18.7           2687      -1.00    
-- others (97)                    0.355   1.7      0.595   1.4             -1      -1.00    
+- fourwf%(pot)                  10.244  47.9     40.510  47.6          67037      -1.00        0.25       0.25
+- fourwf%(G->r)                  2.040   9.5      8.282   9.7          25920      -1.00        0.25       0.25
+- nonlop(forces)                 1.333   6.2      5.558   6.5          35200      -1.00        0.24       0.24
+- projbd                         1.077   5.0      4.583   5.4         113594      -1.00        0.24       0.24
+- nonlop(apply)                  0.974   4.6      3.846   4.5          41437      -1.00        0.25       0.25
+- dfpt_vtorho-kpt loop           0.653   3.1      2.942   3.5             48      -1.00        0.22       0.22
+- dfpt_vtowfk(contrib)           0.648   3.0      2.432   2.9             -2      -1.00        0.27       0.27
+- dfpt_vtorho:MPI                0.601   2.8      2.792   3.3             48      -1.00        0.22       0.22
+- getgh1c_setup                  0.588   2.8      2.757   3.2           5120      -1.00        0.21       0.21
+- getghc-other                   0.351   1.6      1.242   1.5             -2      -1.00        0.28       0.28
+- newkpt(excl. rwwf   )          0.319   1.5      1.339   1.6             -2      -1.00        0.24       0.24
+- inwffil(excl. calls)           0.275   1.3      1.095   1.3             20      -1.00        0.25       0.25
+- listkk                         0.252   1.2      0.989   1.2             14      -1.00        0.25       0.25
+- others (121)                  -3.656 -17.1    -15.335 -18.0             -1      -1.00        0.24       0.24
 -<END_TIMER>
 
-- subtotal                      19.971  93.2     47.055 110.2
+- subtotal                      15.698  73.5     63.032  74.0                                  0.25       0.25
 
 ================================================================================
 
@@ -761,51 +757,69 @@ P          mk1mem         128
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
-- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
-- [2] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
+-
+- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
 - interatomic force constants from density-functional perturbation theory,
 - X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment : Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
 -
-- [3] ABINIT : First-principles approach of materials and nanosystem properties.
+- [4] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
+- Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
 - S. Goedecker, D.R. Hamann, P. Hermet, F. Jollet, G. Jomard, S. Leroux, M. Mancini, S. Mazevet,
 - M.J.T. Oliveira, G. Onida, Y. Pouillon, T. Rangel, G.-M. Rignanese, D. Sangalli, R. Shaltaf,
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
-- Computer Phys. Comm. 180, 2582-2615 (2009).
-- Comment : the third generic paper describing the ABINIT project.
+- Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [4] A brief introduction to the ABINIT software package.
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Z. Kristallogr. 220, 558-562 (2005).
-- Comment : the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
--
-- And optionally:
--
-- [5] First-principles computation of material properties : the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment : the original paper describing the ABINIT project.
--
-- Proc.   0 individual time (sec): cpu=         10.8  wall=         21.4
+- Proc.   0 individual time (sec): cpu=         10.7  wall=         42.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         21.5  wall=         42.8
++Overall time at end (sec) : cpu=         21.4  wall=         85.3

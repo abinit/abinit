@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ddb_internalstr
 !! NAME
 !!  m_ddb_internalstr
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XW)
+!!  Copyright (C) 1999-2020 ABINIT group (XW)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -66,9 +65,9 @@ contains
 !! msize=Maximum size of dynamical matrices and other perturbations (ddk, dde...)
 !! natom=number of atoms in unit cell
 !! nblok=number of total bloks in DDB file
-!! prt_internalstr=if 2 or higher, print force and displacement internal strain, 
-!!                 if 1, print only force internal strain, 
-!!                 if 0, do not print internal strain. 
+!! prt_internalstr=if 2 or higher, print force and displacement internal strain,
+!!                 if 1, print only force internal strain,
+!!                 if 0, do not print internal strain.
 !!
 !! OUTPUT
 !! instrain=force response internal strain tensor
@@ -93,8 +92,6 @@ subroutine ddb_internalstr(asr,&
 & d2asr,iblok,instrain,iout,mpert,&
 !&msize,&
 natom,nblok,prt_internalstr)
-
- implicit none
 
 !Arguments----------------------------------------------
 !scalars

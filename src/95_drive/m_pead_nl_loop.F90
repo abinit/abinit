@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pead_nl_loop
 !! NAME
 !!  m_pead_nl_loop
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2002-2019 ABINIT group (MVeithen,MB)
+!!  Copyright (C) 2002-2020 ABINIT group (MVeithen,MB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,17 +26,19 @@
 module m_pead_nl_loop
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
  use defs_wvltypes
  use m_wffile
  use m_abicore
  use m_xmpi
  use m_hdr
+ use m_dtset
+ use m_dtfil
 #if defined HAVE_MPI2
  use mpi
 #endif
 
+ use defs_datatypes, only : pseudopotential_type
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_kg,       only : getph, mkkpg
  use m_cgtools,  only : dotprod_vn, dotprod_g
@@ -52,8 +53,7 @@ module m_pead_nl_loop
  use m_dfpt_mkvxc, only : dfpt_mkvxc
  use m_mkcore,     only : dfpt_mkcore
  use m_mklocl,     only : dfpt_vlocal
- use m_hamiltonian,only : init_hamiltonian, destroy_hamiltonian, &
-                          load_k_hamiltonian, gs_hamiltonian_type
+ use m_hamiltonian,only : init_hamiltonian, gs_hamiltonian_type
  use m_mkffnl,     only : mkffnl
  use m_mpinfo,     only : proc_distrb_cycle
  use m_nonlop,     only : nonlop
@@ -299,7 +299,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
          call read_rhor(fiden1i, cplex, dtset%nspden, nfft, dtset%ngfft, rdwrpaw, mpi_enreg, rho1r1, &
          hdr_den, rhoij_dum, comm_cell, check_hdr=hdr)
-         call hdr_free(hdr_den)
+         call hdr_den%free()
        end if
 
        xccc3d1(:) = 0._dp
@@ -338,7 +338,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
                call read_rhor(fiden1i, cplex, dtset%nspden, nfft, dtset%ngfft, rdwrpaw, mpi_enreg, rho3r1, &
                hdr_den, rhoij_dum, comm_cell, check_hdr=hdr)
-               call hdr_free(hdr_den)
+               call hdr_den%free()
              end if
 
              xccc3d3(:) = 0._dp
@@ -413,7 +413,7 @@ subroutine pead_nl_loop(blkflg,cg,cgindex,dtfil,dtset,d3lo,&
 
                      call read_rhor(fiden1i, cplex, dtset%nspden, nfft, dtset%ngfft, rdwrpaw, mpi_enreg, rho2r1, &
                      hdr_den, rhoij_dum, comm_cell, check_hdr=hdr)
-                     call hdr_free(hdr_den)
+                     call hdr_den%free()
 
 !                    Compute up+down rho1(G) by fft
                      ABI_ALLOCATE(work,(cplex*nfft))
@@ -735,8 +735,8 @@ end subroutine pead_nl_loop
 !!      pead_nl_loop
 !!
 !! CHILDREN
-!!      destroy_hamiltonian,dotprod_g,fftpac,fourwf,init_hamiltonian
-!!      load_k_hamiltonian,mkffnl,mkkpg,nonlop,status,xmpi_sum
+!!      dotprod_g,fftpac,fourwf,init_hamiltonian
+!!      mkffnl,mkkpg,nonlop,status,xmpi_sum
 !!
 !! SOURCE
 
@@ -865,7 +865,7 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
      end if
 
 !    Load k-dependent part in the Hamiltonian datastructure
-     call load_k_hamiltonian(gs_hamk,kpt_k=kpt,npw_k=npw_k,istwf_k=istwf_k,&
+     call gs_hamk%load_k(kpt_k=kpt,npw_k=npw_k,istwf_k=istwf_k,&
 &     kg_k=kg_k,kpg_k=kpg_k,ffnl_k=ffnlk,compute_gbound=.true.)
 !    Load k+q-dependent part in the Hamiltonian datastructure
 !    call load_kprime_hamiltonian...  !! To be activated when q/=0
@@ -984,7 +984,7 @@ subroutine pead_nl_resp(cg,cg1,cg3,cplex,dtfil,dtset,d3lo,&
 !use of time reversal symmetry
  d3lo(2,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert) = zero
 
- call destroy_hamiltonian(gs_hamk)
+ call gs_hamk%free()
 
  ABI_DEALLOCATE(vlocal1)
  ABI_DEALLOCATE(wfraug)

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_timana
 !! NAME
 !!  m_timana
@@ -7,7 +6,7 @@
 !! Analyse the timing, and print in unit ab_out. Some discussion of the
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (XG, GMR)
+!!  Copyright (C) 1998-2020 ABINIT group (XG, GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -154,7 +153,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  integer(i8b) :: npwmean,npwnbdmean
  integer :: spaceworld,temp_list,totcount,tslot,utimab,ount
  real(dp) :: cpunm,lflops,other_cpu,other_wal,percent_limit,subcpu,subwal,timab_cpu,timab_wall,wallnm
- character(len=500) :: message
+ character(len=500) :: msg
 !arrays
  integer(i8b) :: basic(TIMER_SIZE),ndata(TIMER_SIZE),tslots(TIMER_SIZE)
  integer :: ncount(TIMER_SIZE)
@@ -185,7 +184,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    end do
  end do
 
-!initialize ftime, valgrind complains on line 832 = sum up of all Gflops
+ ! initialize ftime, valgrind complains on line 832 = sum up of all Gflops
  ftimes=zero
 
  npwmean=dble(npwmean)/dble(nkpt*nsppol)
@@ -806,7 +805,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
  names(957)='outscfcv(prt geo misc.)         '
  names(958)='outscfcv(prt stm,vha,..)        '
  names(959)='outscfcv(prtdos)                '
- names(960)='outscfcv(calcdensph)            '
+ names(960)='outscfcv(calcdenmagsph)         '
  names(961)='outscfcv(pawprt)                '
  names(962)='outscfcv(optics)                '
  names(963)='outscfcv(pawmkaewf)             '
@@ -1302,17 +1301,17 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !Warning if the time is negative
  do itim=1,TIMER_SIZE
    if(times(1,itim)<-tol6 .or. times(2,itim)<-tol6 .or. ncount(itim)<-1 )then
-     write(message, '(6a,i4,4a,es16.6,a,es16.6,a,i6,a,es16.6)' ) ch10,&
-&     ' timana: WARNING -',ch10,&
-&     '  One among cpu, wall and ncount is negative.',ch10,&
-&     '  Timing section #',itim,', name :  ',names(itim),ch10,&
-&     '  CPU =',times(1,itim),', Wall=',times(2,itim),' ncount=',ncount(itim),' flops=',nflops(itim)
-     call wrtout(std_out,message,'PERS')
+     write(msg, '(6a,i4,4a,es16.6,a,es16.6,a,i6,a,es16.6)' ) ch10,&
+      ' timana: WARNING -',ch10,&
+      '  One among cpu, wall and ncount is negative.',ch10,&
+      '  Timing section #',itim,', name :  ',names(itim),ch10,&
+      '  CPU =',times(1,itim),', Wall=',times(2,itim),' ncount=',ncount(itim),' flops=',nflops(itim)
+     call wrtout(std_out,msg,'PERS')
    end if
  end do
 
 !List of major independent code sections
- ABI_ALLOCATE(list,(TIMER_SIZE))
+ ABI_MALLOC(list, (TIMER_SIZE))
  list(:)=0
  nlist=0
  do itim=1,TIMER_SIZE
@@ -1336,21 +1335,21 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !  (0) Take care of major independent code sections for this account of node 0 timing
 
    write(ount,  '(a,a,a,a,/,a,a,a)' ) '-',ch10,&
-&   '- For major independent code sections,',' cpu and wall times (sec),',&
-&   '-  as well as % of the time and number of calls for node 0',&
-&   '-'
+    '- For major independent code sections,',' cpu and wall times (sec),',&
+    '-  as well as % of the time and number of calls for node 0',&
+    '-'
 
    write(ount,"(3(a,i0),a)")&
-&   "-<BEGIN_TIMER mpi_nprocs = ",nproc,", omp_nthreads = ",nthreads,", mpi_rank = ",me,">"
+    "-<BEGIN_TIMER mpi_nprocs = ",nproc,", omp_nthreads = ",nthreads,", mpi_rank = ",me,">"
 
 !  write(ount,"(2(a,f13.1))")"- tot_cpu_time = ",tsec(1),   ", tot_wall_time = ",tsec(2)
    write(ount,"(2(a,f13.1))")"- cpu_time =  ",my_tsec(1),", wall_time =  ",my_tsec(2)
    write(ount,"(a)")"-"
 
    write(ount, '(a,t34,a,t42,a,t50,a,t59,a,t65,a,t82,a,3x,a7,1x,a10)' )&
-&   '- routine','cpu','%','wall','%',' number of calls ',' Gflops ', 'Speedup', 'Efficacity'
+     '- routine','cpu','%','wall','%',' number of calls ',' Gflops ', 'Speedup', 'Efficacity'
    write(ount,'(a,t35,a,t43,a,t51,a,t60,a,t66,a,t78,a)')&
-&   '-                ','   ',' ','    ',' ','  (-1=no count)'
+     '-                ','   ',' ','    ',' ','  (-1=no count)'
 
 !  Sort the list by decreasing CPU time
    do ii=1,nlist
@@ -1369,11 +1368,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
      isort = list(ilist)
 
      if ( (times(1,isort)*cpunm  > percent_limit .and. &
-&     times(2,isort)*wallnm > percent_limit) .and. ncount(isort)/=0 ) then ! Timing analysis
+           times(2,isort)*wallnm > percent_limit) .and. ncount(isort)/=0 ) then ! Timing analysis
 
        write(ount,format01041)names(isort),&
-&       times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort), &
-&       times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
+         times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort), &
+         times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
 
      else
        nothers=nothers+1
@@ -1388,7 +1387,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    other_wal = other_wal + tol14
    write(entry_name,"(a,i0,a)")"others (",nothers,")"
    write(ount,format01041)entry_name,other_cpu,other_cpu*cpunm,other_wal,other_wal*wallnm,-1,-1.0, &
-&   other_cpu/other_wal,other_cpu/other_wal/nthreads
+     other_cpu/other_wal,other_cpu/other_wal/nthreads
    write(ount,"(a)")"-<END_TIMER>"
 
    write(ount,'(a)' ) '-'
@@ -1424,21 +1423,21 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
 !  (1) Take care of major independent code sections
    write(ount,'(/,a,/,a,/)' )&
-&   '- For major independent code sections, cpu and wall times (sec),',&
-&   '- as well as % of the total time and number of calls '
+     '- For major independent code sections, cpu and wall times (sec),',&
+     '- as well as % of the total time and number of calls '
 
    write(ount,"(2(a,i0),a)")&
-&   "-<BEGIN_TIMER mpi_nprocs = ",nproc,", omp_nthreads = ",nthreads,", mpi_rank = world>"
+     "-<BEGIN_TIMER mpi_nprocs = ",nproc,", omp_nthreads = ",nthreads,", mpi_rank = world>"
 
    write(ount,"(2(a,f13.1))")"- cpu_time = ",tsec(1),   ", wall_time = ",tsec(2)
 !  write(ount,"(2(a,f13.1))")"- my_cpu_time =  ",my_tsec(1),", my_wall_time =  ",my_tsec(2)
    write(ount,"(a)")"-"
 
    write(ount,'(a,t35,a,t43,a,t51,a,t60,a,t66,a,t82,a,3x,a7,1x,a10)')&
-&   '- routine        ','cpu','%','wall','%', ' number of calls ',' Gflops ', &
-   'Speedup', 'Efficacity'
+    '- routine        ','cpu','%','wall','%', ' number of calls ',' Gflops ', &
+    'Speedup', 'Efficacity'
    write(ount,'(a,t35,a,t43,a,t51,a,t60,a,t66,a,t78,a)')&
-&   '-                ','   ',' ','    ',' ','  (-1=no count)'
+    '-                ','   ',' ','    ',' ','  (-1=no count)'
 
 !  Sort the list by decreasing CPU time
    do ii=1,nlist
@@ -1455,12 +1454,11 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
    do ilist=1,nlist
      isort = list(ilist)
-     if( (times(1,isort)*cpunm > percent_limit .and.  &
-&     times(2,isort)*wallnm> percent_limit) .and. ncount(isort)/=0 )then
+     if( (times(1,isort)*cpunm > percent_limit .and. times(2,isort)*wallnm> percent_limit) .and. ncount(isort)/=0 )then
 
        write(ount,format01041)names(isort),&
-&       times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort), &
-&       times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
+         times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort),mflops(isort), &
+         times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
      else
        nothers=nothers+1
        other_cpu=other_cpu+times(1,isort)
@@ -1473,7 +1471,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
    other_wal = other_wal + tol14
    write(entry_name,"(a,i0,a)")"others (",nothers,")"
    write(ount,format01041)entry_name,other_cpu,other_cpu*cpunm,other_wal,other_wal*wallnm,-1,-1.0, &
-&   other_cpu/other_wal,other_cpu/other_wal/nthreads
+     other_cpu/other_wal,other_cpu/other_wal/nthreads
 
    write(ount,"(a)")"-<END_TIMER>"
 
@@ -1489,146 +1487,146 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        select case(ipart)
 
        case(1)
-         list(:11)=(/1,41,42,43,44,45,640,46,49,50,TIMER_SIZE/)      ; message='abinit '
+         list(:11)=(/1,41,42,43,44,45,640,46,49,50,TIMER_SIZE/)      ; msg='abinit '
        case(2)
-         list(:13)=(/640,641,642,700,132,84,301,401,501,650,643,644,TIMER_SIZE/)  ; message='driver '
+         list(:13)=(/640,641,642,700,132,84,301,401,501,650,643,644,TIMER_SIZE/)  ; msg='driver '
        case(3)
-         list(:13)=(/700,703,704,705,33,701,34,35,36,706,702,707,708/)       ; message='gstateimg+gstate '
+         list(:13)=(/700,703,704,705,33,701,34,35,36,706,702,707,708/)       ; msg='gstateimg+gstate '
        case(4)
-         list(:19)=(/238,54,240,241,56,242,60,52,68,239,243,244,245,246,247,248,61,249,TIMER_SIZE/); message='scfcv_core '
+         list(:19)=(/238,54,240,241,56,242,60,52,68,239,243,244,245,246,247,248,61,249,TIMER_SIZE/); msg='scfcv_core '
        case(5)
-         list(:7)=(/940,941,942,943,944,945,TIMER_SIZE/)             ; message= 'rhotov '
+         list(:7)=(/940,941,942,943,944,945,TIMER_SIZE/)             ; msg= 'rhotov '
        case(6)
          list(:22)=(/980,981,982,983,984,28,985,271,986,987,988,989,990,991,992,993,994,995,996,997,1620,TIMER_SIZE/)
-         message= 'vtorho '
+         msg= 'vtorho '
        case(7)
-         list(:15)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,1600,TIMER_SIZE/) ; message='vtowfk '
+         list(:15)=(/28,31,22,530,585,583,590,222,572,842,537,586,591,1600,TIMER_SIZE/) ; msg='vtowfk '
        case(8)
          if(abs(timopt)==3)then
-           list(:11)=(/530,204,205,571,532,533,630,535,536,584,587/)  ; message='lobpcgwf (abs(timopt)==3)'
+           list(:11)=(/530,204,205,571,532,533,630,535,536,584,587/)  ; msg='lobpcgwf (abs(timopt)==3)'
          else if(abs(timopt)==4)then
-           list(:8)=(/530,520,521,522,523,524,525,526/)               ; message='lobpcgwf (abs(timopt)==4)'
+           list(:8)=(/530,520,521,522,523,524,525,526/)               ; msg='lobpcgwf (abs(timopt)==4)'
 !            else
 !            list(:3)=(/530,204,205/)
-!            message='lobpcgwf (light analysis: for a deeper one, use abs(timopt)=3 or 4)'
+!            msg='lobpcgwf (light analysis: for a deeper one, use abs(timopt)=3 or 4)'
          end if
        case(9)
-         list(:4)=(/22,201,40,211/)                            ; message='cgwf '
+         list(:4)=(/22,201,40,211/)                            ; msg='cgwf '
        case(10)
-         list(:8)=(/132,133,134,135,136,137,138,141/)          ; message='respfn '
+         list(:8)=(/132,133,134,135,136,137,138,141/)          ; msg='respfn '
        case(11)
-         list(:8)=(/141,142,143,144,120,146,147,TIMER_SIZE/)         ; message='dfpt_looppert '
+         list(:8)=(/141,142,143,144,120,146,147,TIMER_SIZE/)         ; msg='dfpt_looppert '
        case(12)
-         list(:9)=(/120,154,121,157,152,158,160,150,564/) ; message='dfpt_scfcv '
+         list(:9)=(/120,154,121,157,152,158,160,150,564/) ; msg='dfpt_scfcv '
        case(13)
-         list(:9)=(/121,118,128,126,287,166,129,127,556/)      ; message='dfpt_vtorho '
+         list(:9)=(/121,118,128,126,287,166,129,127,556/)      ; msg='dfpt_vtorho '
        case(14)
-         list(:9)=(/128,131,122,845,288,214,108,130,565/)      ; message='dfpt_vtowfk '
+         list(:9)=(/128,131,122,845,288,214,108,130,565/)      ; msg='dfpt_vtowfk '
        case(15)
-         list(:8)=(/122,140,202,197,212,227,228,844/)          ; message='dfpt_cgwf '
+         list(:8)=(/122,140,202,197,212,227,228,844/)          ; msg='dfpt_cgwf '
        case(16)
-         list(:4)=(/200,841,221,98/)                           ; message='getghc '
+         list(:4)=(/200,841,221,98/)                           ; msg='getghc '
        case(17)
          list(:20)=(/801,840,841,842,843,844,845,846,847,848,849,850,851,852,853,854,855,856,857,858/)
-         message='fourwf (upwards partitioning)'
+         msg='fourwf (upwards partitioning)'
        case(18)
-         list(:5)=(/933,934,936,937,938/)                      ; message='outkss '
+         list(:5)=(/933,934,936,937,938/)                      ; msg='outkss '
        case(19)
          list(:14)=(/301,302,315,316,319,304,305,320,321,306,307,308,309,310/)
-         message='screening '
+         msg='screening '
        case(20)
-         list(:13)=(/401,402,403,404,405,406,407,408,409,421,423,424,425/); message='sigma  '
+         list(:13)=(/401,402,403,404,405,406,407,408,409,421,423,424,425/); msg='sigma  '
        case(21)
-         list(:9)=(/431,432,433,434,435,445,440,441,442/)     ; message='calc_sigc_me '
+         list(:9)=(/431,432,433,434,435,445,440,441,442/)     ; msg='calc_sigc_me '
        case(23)
-         list(:11)=(/630,631,632,633,634,545,635,636,637,638,TIMER_SIZE/)         ; message='prep_getghc '
+         list(:11)=(/630,631,632,633,634,545,635,636,637,638,TIMER_SIZE/)         ; msg='prep_getghc '
        case(24)
-         list(:4)=(/539,856,547,548/)                          ; message='prep_fourwf '
+         list(:4)=(/539,856,547,548/)                          ; msg='prep_fourwf '
        case(25)
-         list(:5)=(/570,231,232,581,TIMER_SIZE/)                     ; message='prep_nonlop '
+         list(:5)=(/570,231,232,581,TIMER_SIZE/)                     ; msg='prep_nonlop '
        case(26)
-         list(:6)=(/790,791,792,793,794,795/)                  ; message='mkrho (upwards partitioning)'
+         list(:6)=(/790,791,792,793,794,795/)                  ; msg='mkrho (upwards partitioning)'
 !          Disabled (temporarily ?) because the partitioning was not correct
 !          case(27);list(:17)=(/600,601,602,603,604,605,617,606,607,608,609,610,611,612,613,614,615/)
-!          message='vtorhorec '
+!          msg='vtorhorec '
        case(28)
          list(:10)=(/650,651,653,654,655,656,658,659,660,661/)
-         message='bethe_salpeter '
+         msg='bethe_salpeter '
        case(29)
-         list(:8)=(/740,741,742,743,744,745,746,747/)          ; message='suscep_stat '
+         list(:8)=(/740,741,742,743,744,745,746,747/)          ; msg='suscep_stat '
        case(30)
-         list(:9)=(/750,751,848,849,753,756,859,757,755/)      ; message='susk '
+         list(:9)=(/750,751,848,849,753,756,859,757,755/)      ; msg='susk '
        case(31)
-         list(:8)=(/760,761,764,861,871,765,862,872/)          ; message='suskmm '
+         list(:8)=(/760,761,764,861,871,765,862,872/)          ; msg='suskmm '
        case(32)
-         list(:8)=(/710,711,712,713,714,715,716,717/)          ; message='inwffil '
+         list(:8)=(/710,711,712,713,714,715,716,717/)          ; msg='inwffil '
        case(33)
-         list(:10)=(/720,721,722,723,724,725,726,727,67,TIMER_SIZE/)  ; message='wfsinp '
+         list(:10)=(/720,721,722,723,724,725,726,727,67,TIMER_SIZE/)  ; msg='wfsinp '
        case(34)
-         list(:5)=(/770,771,772,272,290/)                      ; message='initwf '
+         list(:5)=(/770,771,772,272,290/)                      ; msg='initwf '
        case(35)
-         list(:9)=(/780,781,782,783,784,785,786,291,292/)      ; message='newkpt '
+         list(:9)=(/780,781,782,783,784,785,786,291,292/)      ; msg='newkpt '
        case(36)
-         list(:8)=(/93,901,902,903,904,905,268,TIMER_SIZE/)          ; message='newvtr '
+         list(:8)=(/93,901,902,903,904,905,268,TIMER_SIZE/)          ; msg='newvtr '
        case(37)
-         list(:2)=(/94,269/)                                   ; message='newrho '
+         list(:2)=(/94,269/)                                   ; msg='newrho '
        case(38)
-         list(:11)=(/9,260,261,262,263,264,265,266,267,268,269/) ; message=' fourdp (upwards partitioning)'
+         list(:11)=(/9,260,261,262,263,264,265,266,267,268,269/) ; msg=' fourdp (upwards partitioning)'
        case(39)
-         list(:8)=(/250,251,252,253,254,255,256,257/)          ; message='afterscfloop '
+         list(:8)=(/250,251,252,253,254,255,256,257/)          ; msg='afterscfloop '
        case(40)
-         list(:5)=(/910,911,912,913,914/)                      ; message='forstr '
+         list(:5)=(/910,911,912,913,914/)                      ; msg='forstr '
        case(41)
-         list(:10)=(/920,921,927,922,923,926,924,65,925,TIMER_SIZE/) ; message='forstrnps '
+         list(:10)=(/920,921,927,922,923,926,924,65,925,TIMER_SIZE/) ; msg='forstrnps '
        case(42)
-         list(:4)=(/670,671,672,673/)                          ; message='exc_build_ham '
+         list(:4)=(/670,671,672,673/)                          ; msg='exc_build_ham '
        case(43)
-         list(:7)=(/680,681,682,683,684,685,686/)              ; message='exc_build_block'
+         list(:7)=(/680,681,682,683,684,685,686/)              ; msg='exc_build_block'
        case(44)
-         list(:8)=(/690,691,692,693,694,695,696,697/)                  ; message='exc_haydock_driver '
+         list(:8)=(/690,691,692,693,694,695,696,697/)                  ; msg='exc_haydock_driver '
        case(45)
          list(:20)=(/950,951,952,953,954,955,956,957,958,959,960,961,962,963,964,965,966,967,968,969/)
-         message='outscfcv '
+         msg='outscfcv '
        case(46)
-         list(:8)=(/620,621,622,623,624,625,626,627/)          ; message='dmft '
+         list(:8)=(/620,621,622,623,624,625,626,627/)          ; msg='dmft '
        case(47)
          list(:9)=(/1001,1002,1003,1004,1005,1006,1007,1008,1009/)
-         message='initberry '
+         msg='initberry '
        case(50)
-         list(:12)=(/1500,1501,1502,1503,1504,1505,1506,1507,1508,1509,1510,1511/)          ; message='hartreefock '
+         list(:12)=(/1500,1501,1502,1503,1504,1505,1506,1507,1508,1509,1510,1511/)          ; msg='hartreefock '
        case(60)
          list(:13) = (/1600,1607,1630,1631,1632,1601,1603,1604,1605,1606,1608,1609,1610/)
-         message = 'chebfi'
+         msg = 'chebfi'
        case(61)
          list(:3) = (/1620,1621,1622/)
-         message = 'mkinvovl'
+         msg = 'mkinvovl'
        case(70)
          list(:5)=(/1701,1702,1703,1721,1722/)
-         message='gwls GW code'
+         msg='gwls GW code'
        case(71)
          list(:16)=(/1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1715,1716,1717,1718/)
-         message='gwls: compute_correlations_shift_lanczos'
+         msg='gwls: compute_correlations_shift_lanczos'
        case(72)
          list(:10)=(/1724,1725,1726,1727,1728,1729,1730,1731,1732,1733/)
-         message='gwls: Applying the susceptibility Pk'
+         msg='gwls: Applying the susceptibility Pk'
        case(73)
          list(:7)=(/1734,1735,1736,1737,1738,1739,1740/)
-         message='gwls: Applying the model susceptibility Pk_model'
+         msg='gwls: Applying the model susceptibility Pk_model'
        case(74)
          list(:7)=(/1741,1742,1743,1744,1745,1746,1747/)
-         message='gwls: computing the matrix elements of eps_model^{-1}(w) -1 '
+         msg='gwls: computing the matrix elements of eps_model^{-1}(w) -1 '
        case(75)
          list(:12)=(/1650,1651,1652,1653,1654,1655,1656,1657,1658,1659,1660,1661/)
-         message='lobpcgwf2 core engine '
+         msg='lobpcgwf2 core engine '
        case(76)
          list(:18)=(/1670,1671,1672,1673,1674,1675,1676,1677,1678,1679,1680,1681,1682,1683,1684,1685,1686,1687/)
-         message='low-level xgBlock type '
+         msg='low-level xgBlock type '
        case(77)
          list(:5)=(/1690,1691,1692,1693,1694/)
-         message='low-level xgScalapack type '
+         msg='low-level xgScalapack type '
        case(78)
          list(:8)=(/1662,1663,1664,1665,1666,1667,1668,1669/)
-         message='low-level xgTransposer type '
+         msg='low-level xgTransposer type '
        case default
          cycle ! This allows to disable temporarily some partitionings
 
@@ -1648,7 +1646,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
        end if
 
        if(ncount(list(1))/=0)then
-         write(ount,'(/,a,a)')' Partitioning of ',trim(message)
+         write(ount,'(/,a,a)')' Partitioning of ',trim(msg)
          subcpu=zero
          subwal=zero
          do ilist=1,nlist
@@ -1663,16 +1661,16 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 #if defined HAVE_TEST_TIME_PARTITIONING
              if(times(2,TIMER_SIZE)>1.2d0 .and. wallnm*times(2,TIMER_SIZE)>3.d0)then
                write(ount, '(3a,es16.6,4a,es16.6,2a)')&
-&               ' Note : the partitioning does not work well for this routine.',ch10,&
-&               '   The (other) Wall time            ',times(2,TIMER_SIZE),ch10,&
-&               '   is bigger than 1.2 secs. ',ch10,&
-&               '   The (other) Wall time percentage ',wallnm*times(2,TIMER_SIZE),ch10,&
-&               '   is bigger than 3% '
+                ' Note : the partitioning does not work well for this routine.',ch10,&
+                '   The (other) Wall time            ',times(2,TIMER_SIZE),ch10,&
+                '   is bigger than 1.2 secs. ',ch10,&
+                '   The (other) Wall time percentage ',wallnm*times(2,TIMER_SIZE),ch10,&
+                '   is bigger than 3% '
              else if (times(2,TIMER_SIZE)<0.2d0 .and. wallnm*times(2,TIMER_SIZE)<-0.2d0)then
                write(ount, '(3a,es16.6,2a)')&
-&               ' Note : the partitioning does not work well for this routine.',ch10,&
-&               '   The (other) Wall time percentage ',wallnm*times(2,TIMER_SIZE),ch10,&
-&               '   is negative '
+                ' Note : the partitioning does not work well for this routine.',ch10,&
+                '   The (other) Wall time percentage ',wallnm*times(2,TIMER_SIZE),ch10,&
+                '   is negative '
              end if
 #endif
            end if
@@ -1680,9 +1678,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
              if(times(2,isort)*wallnm>0.02d0 .or. ilist==1)then   ! Does not write a slot if the wall time ratio is below a threshold
                if ( times(2,isort) < 0.0001 ) times(2,isort) = -1.d0
                write(ount,format01040)names(isort),&
-&               times(1,isort),times(1,isort)*cpunm,&
-&               times(2,isort),times(2,isort)*wallnm,ncount(isort), &
-&               times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
+                 times(1,isort),times(1,isort)*cpunm,&
+                 times(2,isort),times(2,isort)*wallnm,ncount(isort), &
+                 times(1,isort)/times(2,isort),times(1,isort)/times(2,isort)/nthreads
              end if
              if(ilist/=1)then
                subcpu=subcpu+times(1,isort)
@@ -1698,19 +1696,19 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 #ifdef HAVE_TEST_TIME_PARTITIONING
          if( wallnm*abs(subwal-times(2,list(1)))>1.d0 .and. abs(subwal-times(2,list(1)))>0.2d0 )then
            write(ount, '(3a,es16.6,2a,es16.6,4a,es16.6,2a,es16.6,6a,i4)')&
-&           ' Note : the partitioning does not work well for this routine.',ch10,&
-&           '   The subtotal Wall time            ',subwal,ch10,&
-&           '   differs from the total Wall time  ',times(2,list(1)),ch10,&
-&           '   by more than 0.2 secs.',ch10,&
-&           '   The subtotal Wall time percentage ',wallnm*subwal,ch10,&
-&           '   differs from the total Wall time %',wallnm*times(2,list(1)),ch10,&
-&           '   by more than 1%. ',ch10,&
-&           '   The partitioning might not have been coded properly.',ch10,&
-&           '   nlist=',nlist
+            ' Note : the partitioning does not work well for this routine.',ch10,&
+            '   The subtotal Wall time            ',subwal,ch10,&
+            '   differs from the total Wall time  ',times(2,list(1)),ch10,&
+            '   by more than 0.2 secs.',ch10,&
+            '   The subtotal Wall time percentage ',wallnm*subwal,ch10,&
+            '   differs from the total Wall time %',wallnm*times(2,list(1)),ch10,&
+            '   by more than 1%. ',ch10,&
+            '   The partitioning might not have been coded properly.',ch10,&
+            '   nlist=',nlist
            do ilist=1,nlist
              write(ount, '(a,i4,i4,es16.6,i8)' )&
-&             ' ilist,list(ilist),wallnm*times(2,list(ilist)),ncount(list(ilist))=',&
-&             ilist,isort,wallnm*times(2,isort),ncount(isort)
+              ' ilist,list(ilist),wallnm*times(2,list(ilist)),ncount(list(ilist))=',&
+              ilist,isort,wallnm*times(2,isort),ncount(isort)
            end do
          end if
 #endif
@@ -1730,9 +1728,9 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 !
            if (ncount(isort)/=0) then
              write(ount,format01040)names(isort),&
-&             times(1,isort),times(1,isort)*cpunm,&
-&             times(2,isort),times(2,isort)*wallnm,ncount(isort), &
-&             times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(times(2,isort)+tol14)/nthreads
+              times(1,isort),times(1,isort)*cpunm,&
+              times(2,isort),times(2,isort)*wallnm,ncount(isort), &
+              times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(times(2,isort)+tol14)/nthreads
 
              if(ilist/=1)then
                subcpu=subcpu+times(1,isort)
@@ -1741,7 +1739,6 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
                write(ount, '(a)' ) '-'
              end if
            end if !ncount
-!
          end do !ilist
 
          subwal = subwal + tol14
@@ -1760,8 +1757,8 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
            flag_write=0
          end if
          write(ount,format01040)names(isort),&
-&         times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort), &
-&         times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(tol14+times(2,isort))/nthreads
+           times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort), &
+           times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(tol14+times(2,isort))/nthreads
        end if
      end do
 
@@ -1776,29 +1773,28 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
            flag_write=0
          end if
          write(ount,format01040)names(isort),&
-&         times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort), &
-&         times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(tol14+times(2,isort))/nthreads
+           times(1,isort),times(1,isort)*cpunm,times(2,isort),times(2,isort)*wallnm,ncount(isort), &
+           times(1,isort)/(tol14+times(2,isort)),times(1,isort)/(tol14+times(2,isort))/nthreads
        end if
      end do
 
 !    The detailed analysis cannot be done in the multidataset mode
      if(ndtset<2)then
        write(ount, '(/,/,a,/,a,/,a)' ) &
-&       ' Detailed analysis of some time consuming routines ',&
-&       '                                  tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata',&
-&       '                                 (sec)                (msec)              (microsec)'
+        ' Detailed analysis of some time consuming routines ',&
+        '                                  tcpu    ncalls  tcpu/ncalls    ndata tcpu/ncalls/ndata',&
+        '                                 (sec)                (msec)              (microsec)'
        nlist=8
        list(:8)=(/802,803,9,75,76,77,210,11/)
        do ilist=1,nlist
          isort = list(ilist)
          if(ncount(isort)/=0)then
            write(ount, '(a,a24,f12.3,i10,f12.3,i10,f12.3)' )'- ',names(isort),&
-&           times(1,isort),ncount(isort),&
-&           1000.0_dp*times(1,isort)/dble(ncount(isort)),ndata(isort),&
-&           1000000.0_dp*times(1,isort)/dble(ncount(isort)*dble(ndata(isort)))
+             times(1,isort),ncount(isort),&
+             1000.0_dp*times(1,isort)/dble(ncount(isort)),ndata(isort),&
+             1000000.0_dp*times(1,isort)/dble(ncount(isort)*dble(ndata(isort)))
          else
-           write(ount, '(a,a24,f12.3,i10)' )'- ',names(isort),&
-&           times(1,isort),ncount(isort)
+           write(ount, '(a,a24,f12.3,i10)' )'- ',names(isort),times(1,isort),ncount(isort)
          end if
        end do !ilist
      else
@@ -1809,7 +1805,7 @@ subroutine timana(mpi_enreg,natom,nband,ndtset,nfft,nkpt,npwtot,nsppol,timopt)
 
  end if ! me==0
 
- ABI_DEALLOCATE(list)
+ ABI_FREE(list)
 
 end subroutine timana
 !!***

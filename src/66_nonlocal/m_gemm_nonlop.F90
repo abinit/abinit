@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gemm_nonlop
 !! NAME
 !! m_gemm_nonlop
@@ -9,7 +8,7 @@
 !!  which leads to excellent CPU efficiency and OpenMP scalability.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2014-2019 ABINIT group (AL)
+!! Copyright (C) 2014-2020 ABINIT group (AL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -44,11 +43,11 @@
 module m_gemm_nonlop
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
 
+ use defs_abitypes, only : MPI_type
  use m_opernlc_ylm,    only :  opernlc_ylm
 
  implicit none
@@ -147,8 +146,6 @@ contains
 !! SOURCE
  subroutine destroy_gemm_nonlop(nkpt)
 
-  implicit none
-
   integer,intent(in) :: nkpt
   integer :: ikpt
 
@@ -189,7 +186,6 @@ contains
  subroutine make_gemm_nonlop(ikpt,npw,lmnmax,ntypat,indlmn,nattyp,istwf_k,ucvol,ffnl_k,ph3d_k)
 
   use m_abi_linalg
-  implicit none
 
   integer, intent(in) :: ikpt
   integer, intent(in) :: npw, lmnmax,ntypat
@@ -328,7 +324,6 @@ contains
 
   use m_pawcprj, only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_axpby
   use m_time,    only : cwtime
-  implicit none
 
   !Arguments ------------------------------------
   !scalars

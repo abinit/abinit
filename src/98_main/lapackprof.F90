@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****p* ABINIT/lapackprof
 !! NAME
 !! lapackprof
@@ -7,7 +6,7 @@
 !!  Utility for profiling the (Sca)Lapack libraries supported by abinit.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2019 ABINIT group (MG)
+!! Copyright (C) 2004-2020 ABINIT group (MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -39,7 +38,6 @@
 program lapackprof
 
  use defs_basis
- use defs_abitypes
  use m_build_info
  use m_abicore
  use m_xmpi
@@ -49,12 +47,15 @@ program lapackprof
  use m_cgtools
  use m_hide_lapack
 
+
+ use defs_abitypes,   only : MPI_type
  use m_fstrings,      only : lower, itoa, strcat
  use m_specialmsg,    only : specialmsg_getcount, herald
  use m_time,          only : cwtime
  use m_io_tools,      only : prompt
  use m_numeric_tools, only : arth
  use m_mpinfo,        only : init_mpi_enreg, destroy_mpi_enreg
+
  implicit none
 
 !Local variables-------------------------------

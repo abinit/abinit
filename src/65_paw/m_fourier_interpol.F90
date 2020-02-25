@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_fourier_interpol
 !! NAME
 !!  m_fourier_interpol
@@ -8,7 +7,7 @@
 !!  Mainly used in PAW to interpol data from/to the coarse FFT grid from/to the fine FFT grid.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (FJ, MT, MG)
+!! Copyright (C) 2018-2020 ABINIT group (FJ, MT, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -24,10 +23,10 @@
 MODULE m_fourier_interpol
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
 
+ use defs_abitypes, only : MPI_type
  use m_fft,    only : zerosym, indirect_parallel_Fourier, fourdp
  use m_pawfgr, only : pawfgr_type,pawfgr_destroy,indgrid
 

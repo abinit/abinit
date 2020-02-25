@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_loopert
 !! NAME
 !!  m_dfpt_loopert
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XG, DRH, MB, XW, MT, SPr, MJV)
+!!  Copyright (C) 1999-2020 ABINIT group (XG, DRH, MB, XW, MT, SPr, MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,8 +26,8 @@
 module m_dfpt_loopert
 
  use defs_basis
- use defs_datatypes
- use defs_abitypes
+ use m_dtset
+ use m_dtfil
  use defs_wvltypes
  use m_efmas_defs
  use m_abicore
@@ -46,6 +45,8 @@ module m_dfpt_loopert
  use m_hdr
  use m_ebands
 
+ use defs_datatypes, only : pseudopotential_type, ebands_t
+ use defs_abitypes, only : MPI_type
  use m_occ,        only : getnel
  use m_ddb_hdr,    only : ddb_hdr_type, ddb_hdr_init, ddb_hdr_free, ddb_hdr_open_write
  use m_io_tools,   only : file_exists
@@ -61,7 +62,6 @@ module m_dfpt_loopert
  use m_fft,        only : fourdp
  use m_fftcore,    only : fftcore_set_mixprec
  use m_kg,         only : getcut, getmpw, kpgio, getph
- use m_dtset,      only : dtset_copy, dtset_free
  use m_iowf,       only : outwf
  use m_ioarr,      only : read_rhor
  use m_pawang,     only : pawang_type, pawang_init, pawang_free
@@ -232,7 +232,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  real(dp), intent(in) :: cpus,vxcavg
  real(dp), intent(inout) :: fermie
  real(dp), intent(inout) :: etotal
- character(len=6), intent(in) :: codvsn
+ character(len=8), intent(in) :: codvsn
  type(MPI_type), intent(inout) :: mpi_enreg
  type(datafiles_type), intent(in) :: dtfil
  type(dataset_type), intent(in), target :: dtset
@@ -433,7 +433,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  nullify(dtset_tmp)
  if (dtset%prepgkk/=0) then ! .and. dtset%use_nonscf_gkk==1) then !Later uncomment this - in scf case rhor1_save is used below only for testing
    ABI_DATATYPE_ALLOCATE(dtset_tmp,)
-   call dtset_copy(dtset_tmp, dtset)
+   dtset_tmp = dtset%copy()
  else
    dtset_tmp => dtset
  end if
@@ -868,7 +868,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &   nsym1,phnons1,symaf1,symrc1,symrl1,tnons1,dtset%typat,xred)
    if (psps%usepaw==1) then
 !    Allocate/initialize only zarot in pawang1 datastructure
-     call pawang_init(pawang1,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
+     call pawang_init(pawang1,0,0,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
      call setsym_ylm(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
    end if
 
@@ -1059,11 +1059,11 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !  Initialize header, update it with evolving variables
    gscase=0 ! A GS WF file is read
    call hdr_init(ebands_k,codvsn,dtset,hdr0,pawtab,gscase,psps,wvl%descr,&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
-   call hdr_update(hdr0,bantot_rbz,etotal,fermie,&
-&   residm,rprimd,occ_rbz,pawrhoij_pert,xred,dtset%amu_orig(:,1),&
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+   call hdr0%update(bantot_rbz,etotal,fermie,&
+     residm,rprimd,occ_rbz,pawrhoij_pert,xred,dtset%amu_orig(:,1),&
+     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
 
    _IBM6("before inwffil")
 
@@ -1208,10 +1208,10 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 !  Initialize header
    call hdr_init(ebands_kq,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl%descr, &
-&   comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
+     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
    if (.not.kramers_deg) then
      call hdr_init(ebands_kmq,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl%descr, &
-&     comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
+       comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab )
    end if
 
 !  Initialize wavefunctions at k+q
@@ -1760,7 +1760,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
            kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
            dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-           occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,ucvol,wtk_rbz)
+           occ_rbz,phnons1,rho1wfg,rho1wfr,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
          call transgrid(cplex,mpi_enreg,nspden,+1,1,1,dtset%paral_kgb,pawfgr,rho1wfg,rhog1,rho1wfr,rhor1)
          ABI_DEALLOCATE(rho1wfg)
          ABI_DEALLOCATE(rho1wfr)
@@ -1769,7 +1769,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
          call dfpt_mkrho(cg,cg1,cplex,gprimd,irrzon1,istwfk_rbz,&
            kg,kg1,dtset%mband,dtset%mgfft,mkmem_rbz,mk1mem_rbz,mpi_enreg,mpw,mpw1,nband_rbz,&
            dtset%nfft,dtset%ngfft,nkpt_rbz,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,nsym1,&
-           occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,ucvol,wtk_rbz)
+           occ_rbz,phnons1,rhog1,rhor1,rprimd,symaf1,symrl1,tnons1,ucvol,wtk_rbz)
        end if
 
      else if (.not. found_eq_gkk) then
@@ -1785,7 +1785,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 !       call appdig(pertcase,dtfil%fildens1in,fiden1i)
        call read_rhor(fiden1i, cplex, dtset%nspden, nfftf, ngfftf, rdwrpaw, mpi_enreg, rhor1, &
        hdr_den, pawrhoij1, spaceComm, check_hdr=hdr)
-       etotal = hdr_den%etot; call hdr_free(hdr_den)
+       etotal = hdr_den%etot; call hdr_den%free()
 
 !      Compute up+down rho1(G) by fft
        ABI_ALLOCATE(work,(cplex*nfftf))
@@ -1824,7 +1824,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       paw_an_pert,paw_ij_pert,pawang,pawang1,pawfgr,pawfgrtab_pert,pawrad,pawrhoij_pert,pawrhoij1,pawtab,&
 &       pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
 &       dtset%qptn,resid,residm,rhog,rhog1,&
-&       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,&
+&       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
 &       wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode,&
 &       kramers_deg)
@@ -1843,7 +1843,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 &       paw_an_pert,paw_ij_pert,pawang,pawang1,pawfgr,pawfgrtab_pert,pawrad,pawrhoij_pert,pawrhoij1,pawtab,&
 &       pertcase,phnons1,ph1d,ph1df,prtbbb,psps,&
 &       dtset%qptn,resid,residm,rhog,rhog1,&
-&       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,&
+&       rhor,rhor1,rprimd,symaf1,symrc1,symrl1,tnons1,&
 &       usecprj,useylmgr,useylmgr1,ddk_f,vpsp1,vtrial,vxc,&
 &       wtk_rbz,xccc3d1,xred,ylm,ylm1,ylmgr,ylmgr1,zeff,dfpt_scfcv_retcode,&
 &       kramers_deg,&
@@ -2047,8 +2047,8 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      hdr_tmp%kptopt = dtset%kptopt
      hdr_tmp%pertcase = pertcase
      hdr_tmp%qptn = dtset%qptn(1:3)
-     NCF_CHECK(hdr_ncwrite(hdr_tmp, ncid, 43, nc_define=.True.))
-     call hdr_free(hdr_tmp)
+     NCF_CHECK(hdr_tmp%ncwrite(ncid, 43, nc_define=.True.))
+     call hdr_tmp%free()
      NCF_CHECK(crystal%ncwrite(ncid))
      NCF_CHECK(ebands_ncwrite(ebands_k, ncid))
      ncerr = nctk_def_arrays(ncid, [ &
@@ -2104,7 +2104,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
    if(mpi_enreg%paral_pert==1) then
      if (ipert_me < npert_me -1) then
-       call hdr_free(hdr0)
+       call hdr0%free()
      else
        eigen0_copy(1:dtset%mband*nkpt_rbz*dtset%nsppol) = eigen0
      end if
@@ -2113,7 +2113,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      if (icase == ipert_cnt) then
        eigen0_copy(1:dtset%mband*nkpt_rbz*dtset%nsppol) = eigen0
      else
-       call hdr_free(hdr0)
+       call hdr0%free()
      end if
    end if
 
@@ -2196,14 +2196,12 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      ABI_DEALLOCATE(mpi_enreg%proc_distrb)
      ABI_DEALLOCATE(mpi_enreg%my_kpttab)
    end if
-   call hdr_free(hdr)
+   call hdr%free()
 
    ! Clean band structure datatypes (should use it more in the future !)
    call ebands_free(ebands_k)
    call ebands_free(ebands_kq)
-   if(.not.kramers_deg) then
-     call ebands_free(ebands_kmq)
-   end if
+   if(.not.kramers_deg) call ebands_free(ebands_kmq)
 
 !  %%%% Parallelization over perturbations %%%%%
 !  *Redefine output/log files
@@ -2378,25 +2376,23 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_DEALLOCATE(npwarr_pert)
    ABI_DEALLOCATE(cg0_pert)
 
-   if(dtset%prtefmas==1)then
-     fname = strcat(dtfil%filnam_ds(4),"_EFMAS.nc")
-     !write(std_out,*)' dfpt_looppert: will write ',fname
+   if (dtset%prtefmas == 1 .and. me == master) then
+     fname = strcat(dtfil%filnam_ds(4), "_EFMAS.nc")
 #ifdef HAVE_NETCDF
      NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating EFMAS file")
      NCF_CHECK(crystal%ncwrite(ncid))
-!    NCF_CHECK(ebands_ncwrite(ebands_k, ncid)) ! At this stage, ebands_k is not available
-     call print_efmas(efmasdeg,efmasval,kpt_rbz_pert,ncid)
+     !NCF_CHECK(ebands_ncwrite(ebands_k, ncid)) ! At this stage, ebands_k is not available
+     call print_efmas(efmasdeg, efmasval, kpt_rbz_pert, ncid)
      NCF_CHECK(nf90_close(ncid))
 #endif
    endif
 
    call efmas_analysis(dtset,efmasdeg,efmasval,kpt_rbz_pert,mpi_enreg,nkpt_rbz,rprimd)
-
    ABI_DEALLOCATE(kpt_rbz_pert)
  end if
 
 !Free memory.
- if(dtset%ieig2rf /= 3 .and. dtset%ieig2rf /= 4 .and. dtset%ieig2rf /= 5) call hdr_free(hdr0)
+ if(dtset%ieig2rf /= 3 .and. dtset%ieig2rf /= 4 .and. dtset%ieig2rf /= 5) call hdr0%free()
  ABI_DEALLOCATE(eigen0_copy)
  call crystal%free()
 
@@ -2440,7 +2436,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  if (dtset%prepgkk /= 0) then ! .and. dtset%use_nonscf_gkk == 1) then !Later uncomment this - in scf case rhor1_save is used below only for testing
    ABI_DEALLOCATE(rhor1_save)
    ABI_DEALLOCATE(blkflg_save)
-   call dtset_free (dtset_tmp)
+   call dtset_tmp%free()
    ABI_DATATYPE_DEALLOCATE(dtset_tmp)
  end if
 

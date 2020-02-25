@@ -7,7 +7,7 @@
 !!  .
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (JLJ, BR, MC)
+!! Copyright (C) 2009-2020 ABINIT group (JLJ, BR, MC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -99,7 +99,6 @@ contains
  !
  !
  !----------------------------------------------------------------------------------------------------
-  implicit none
 
 
   ! input and output variables
@@ -195,7 +194,6 @@ contains
  !
  !
  !----------------------------------------------------------------------------------------------------
-  implicit none
 
 
   ! input and output variables
@@ -296,7 +294,6 @@ contains
  !
  !
  !----------------------------------------------------------------------------------------------------
-  implicit none
   ! input and output variables
   integer,   intent(in)   :: order
   real(dp),  intent(out)  :: frequencies(order)
@@ -418,8 +415,6 @@ subroutine cdgqf ( nt, gaussian_kind, alpha, beta, t, wts )
 !
 !    Output, real ( dp ) WTS(NT), the weights.
 !
-  implicit none
-
   integer ( kind = 4 ) nt
 
   real ( dp ) aj(nt)
@@ -527,8 +522,6 @@ subroutine cgqf ( nt, gaussian_kind, alpha, beta, a, b, t, wts )
 !
 !    Output, real ( dp ) WTS(NT), the weights.
 !
-  implicit none
-
   integer ( kind = 4 ) nt
 
   real ( dp ) a
@@ -612,8 +605,6 @@ subroutine ch_cap ( c )
 !
 !    Input/output, character C, the character to capitalize.
 !
-  implicit none
-
   character              c
   integer ( kind = 4 ) itemp
 
@@ -676,8 +667,6 @@ function ch_eqi ( c1, c2 )
 !
 !    Output, logical CH_EQI, the result of the comparison.
 !
-  implicit none
-
   logical ch_eqi
   character c1
   character c1_cap
@@ -758,8 +747,6 @@ subroutine ch_to_digit ( c, digit )
 !    Output, integer ( kind = 4 ) DIGIT, the corresponding integer value.
 !    If C was 'illegal', then DIGIT is -1.
 !
-  implicit none
-
   character c
   integer ( kind = 4 ) digit
 
@@ -865,8 +852,6 @@ subroutine class_matrix ( gaussian_kind, m, alpha, beta, aj, bj, zemu )
 !
 !    Output, real ( dp ) ZEMU, the zero-th moment.
 !
-  implicit none
-
   integer ( kind = 4 ) m
 
   real ( dp ) a2b2
@@ -1100,8 +1085,6 @@ subroutine imtqlx ( n, d, e, z )
 !    the value of Q' * Z, where Q is the matrix that diagonalizes the
 !    input symmetric tridiagonal matrix.
 !
-  implicit none
-
   integer ( kind = 4 ) n
 
   real ( dp ) b
@@ -1310,8 +1293,6 @@ subroutine parchk ( gaussian_kind, m, alpha, beta )
 !    Input, real ( dp ) ALPHA, BETA, the parameters, if required
 !    by the value of KIND.
 !
-  implicit none
-
   real ( dp ) alpha
   real ( dp ) beta
   integer ( kind = 4 ) gaussian_kind
@@ -1420,8 +1401,6 @@ function r8_gamma_gq ( x )
 !
 !    Output, real ( dp ) R8_GAMMA, the value of the function.
 !
-  implicit none
-
   real ( dp ), dimension ( 7 ) :: c = (/ &
    -1.910444077728D-03, &
     8.4171387781295D-04, &
@@ -1655,8 +1634,6 @@ subroutine r8mat_write ( output_filename, m, n, table )
 !
 !    Input, real ( dp ) TABLE(M,N), the table data.
 !
-  implicit none
-
   integer ( kind = 4 ) m
   integer ( kind = 4 ) n
 
@@ -1753,8 +1730,6 @@ subroutine rule_write ( order, x, w, r, filename )
 !    'filename_w.txt', 'filename_x.txt', 'filename_r.txt' defining weights,
 !    abscissas, and region.
 !
-  implicit none
-
   integer ( kind = 4 ) order
 
   character ( len = * ) filename
@@ -1839,8 +1814,6 @@ subroutine s_to_i4 ( s, ival, ierror, length )
 !    Output, integer ( kind = 4 ) LENGTH, the number of characters of S
 !    used to make IVAL.
 !
-  implicit none
-
   character c
   integer ( kind = 4 ) i
   integer ( kind = 4 ) ierror
@@ -2026,8 +1999,6 @@ subroutine s_to_r8 ( s, dval, ierror, length )
 !    to form the number, including any terminating
 !    characters such as a trailing comma or blanks.
 !
-  implicit none
-
   character c
   real ( dp ) dval
   integer ( kind = 4 ) ierror
@@ -2311,8 +2282,6 @@ subroutine scqf ( nt, t, mlt, wts, nwts, ndx, swts, st, gaussian_kind, alpha, be
 !
 !    Input, real ( dp ) A, B, the interval endpoints.
 !
-  implicit none
-
   integer ( kind = 4 ) nt
   integer ( kind = 4 ) nwts
 
@@ -2540,8 +2509,6 @@ subroutine sgqf ( nt, aj, bj, zemu, t, wts )
 !
 !    Output, real ( dp ) WTS(NT), the weights.
 !
-  implicit none
-
   integer ( kind = 4 ) nt
 
   real ( dp ) aj(nt)

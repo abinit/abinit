@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_inwffil
 !! NAME
 !!  m_inwffil
@@ -7,7 +6,7 @@
 !!  Do initialization of wavefunction files.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, AR, MB, MVer, ZL, MB, TD)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,7 +26,6 @@
 module m_inwffil
 
  use defs_basis
- use defs_abitypes
  use defs_wvltypes
  use m_abicore
  use m_wffile
@@ -36,10 +34,12 @@ module m_inwffil
  use m_xmpi
  use m_nctk
  use m_hdr
+ use m_dtset
 #if defined HAVE_MPI2
  use mpi
 #endif
 
+ use defs_abitypes, only : MPI_type
  use m_time,     only : timab
  use m_io_tools, only : file_exists, get_unit
  use m_geometry, only : getspinrot
@@ -955,13 +955,8 @@ subroutine inwffil(ask_accurate,cg,dtset,ecut,ecut_eff,eigen,exchn2n3d,&
    end if
  end if
 
-!Clean hdr0
- !if (ireadwf==1)then
- !  if( restart==2 .or. localrdwf==1 .or. master==me)then
- !    call hdr_free(hdr0)
- !  end if
- !end if
- call hdr_free(hdr0)
+ !Clean hdr0
+ call hdr0%free()
 
  call timab(716,2,tsec)
  call timab(717,1,tsec)
@@ -2702,7 +2697,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  integer :: conv_tnons,convert,fftalg,fold1,fold2,foldim,foldre,i1,i2,iband
  integer :: iband_first,iband_last,icgmod,ierr,index,ipw
  integer :: ispinor,ispinor1,ispinor2,ispinor_first,ispinor_last
- integer :: istwf10_k,istwf1_k,istwf2_k,isym,itimrev,jsign
+ integer :: istwf10_k,istwf1_k,istwf2_k,isym,itimrev
  integer :: mgfft1,mgfft2,n1,n2,n3,n4,n5,n6
  integer :: nbremn,npwtot,nspinor_index,nspinor1_this_proc,nspinor2_this_proc
  integer :: order,ortalgo,seed
@@ -3143,8 +3138,8 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 !    and to avoid linear dependencies between wavefunctions
 !    No need for a difference for different k points and/or spin-polarization
 
+     npwtot=npw2
      if (mpi_enreg1%paral_kgb == 1) then
-       npwtot=npw2
        call timab(539,1,tsec)
        call xmpi_sum(npwtot, mpi_enreg1%comm_bandfft, ierr)
        call timab(539,2,tsec)
@@ -3153,7 +3148,6 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
      do iband=(nbd1/nspinor1)*nspinor2+1,nbd2
        do ispinor2=1,nspinor2_this_proc
          ispinor=ispinor2;if (nspinor2_this_proc/=nspinor2) ispinor=mpi_enreg2%me_spinor+1
-         jsign=1;if (ispinor==2) jsign=-1
 
          do ipw=1,npw2
            index=index+1
@@ -3162,10 +3156,11 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
 !          if(.false.) then
 !          ENDDEBUG seq==par
 
-           if ( mpi_enreg2%paral_kgb /= 1) then
+           if ( mpi_enreg2%paral_kgb /= 1.or.mpi_enreg2%nproc_cell == 1) then
              seed=(iband-1)*npw2*nspinor2 + (ispinor-1)*npw2 + ipw
            else
-             seed=jsign*(iband*(kg2(1,ipw)*npwtot*npwtot + kg2(2,ipw)*npwtot + kg2(3,ipw)))
+             seed=kg2(1,ipw)*npwtot*npwtot + kg2(2,ipw)*npwtot + kg2(3,ipw)
+             seed=(iband*nspinor2+ispinor-1)*seed
            end if
 
            if(randalg == 0) then
@@ -3249,8 +3244,7 @@ subroutine wfconv(ceksp2,cg1,cg2,debug,ecut1,ecut2,ecut2_eff,&
  end if
 
 !Orthogonalize GS wfs
- !if (.False.) then
- if (optorth==1.and.formeig==0.and.mpi_enreg2%paral_kgb/=1) then
+ if (optorth==1.and.formeig==0.and.(mpi_enreg2%paral_kgb/=1.or.mpi_enreg2%nproc_cell==1)) then
    ABI_ALLOCATE(dum,(2,0))
    ortalgo=0 !;ortalgo=3
    call pw_orthon(icg2,0,istwf2_k,mcg2,0,npw2*nspinor2_this_proc,nbd2,ortalgo,dum,0,cg2,&

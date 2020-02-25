@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_nonlop_ylm
 !! NAME
 !!  m_nonlop_ylm
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (MT)
+!!  Copyright (C) 1998-2020 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,11 +25,11 @@
 module m_nonlop_ylm
 
  use defs_basis
- use defs_abitypes
  use m_xmpi
  use m_abicore
  use m_errors
 
+ use defs_abitypes, only : MPI_type
  use m_geometry,    only : strconv
  use m_kg,          only : ph1d3d, mkkpg
  use m_pawcprj,     only : pawcprj_type
@@ -328,8 +327,6 @@ contains
 &                      mpi_enreg,natom,nattyp,ngfft,nkpgin,nkpgout,nloalg,nnlout,&
 &                      npwin,npwout,nspinor,nspinortot,ntypat,paw_opt,phkxredin,phkxredout,ph1d,&
 &                      ph3din,ph3dout,signs,sij,svectout,ucvol,vectin,vectout,cprjin_left)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

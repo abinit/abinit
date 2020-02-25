@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_opernlc_ylm
 !! NAME
 !!  m_opernlc_ylm
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MT)
+!!  Copyright (C) 2008-2020 ABINIT group (MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -26,10 +25,11 @@
 module m_opernlc_ylm
 
  use defs_basis
- use defs_abitypes
  use m_errors
  use m_abicore
  use m_xmpi
+
+ use defs_abitypes, only : MPI_type
 
  implicit none
 
@@ -137,8 +137,6 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 &          gx,gxfac,gxfac_sij,iatm,indlmn,itypat,lambda,mpi_enreg,natom,ndgxdt,ndgxdtfac,&
 &          nd2gxdt,nd2gxdtfac,nincat,nlmn,nspinor,nspinortot,optder,paw_opt,sij)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,cplex_enl,cplex_fac,dimenl1,dimenl2,dimekbq,iatm,itypat
@@ -202,7 +200,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
   if (optder>=2) d2gxdtfac_=zero
   enl_ptr => enl(:,:,:,iphase)
 
-  
+
 !Accumulate gxfac related to non-local operator (Norm-conserving)
 !-------------------------------------------------------------------
   if (paw_opt==0) then
@@ -1397,7 +1395,7 @@ subroutine opernlc_ylm(atindx1,cplex,cplex_dgxdt,cplex_d2gxdt,cplex_enl,cplex_fa
 
 !End loop over real/imaginary part of the exp(-iqR) phase
  end do
-          
+
 
 !Accumulate gxfac related to overlap (Sij) (PAW)
 !------------------------------------------- ------------------------

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_frskerker2
 !! NAME
 !! m_frskerker2
@@ -9,7 +8,7 @@
 !! with some residuals and a real space dielectric function
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -34,9 +33,10 @@
 module m_frskerker2
 
   use defs_basis
-  use defs_abitypes
   use m_abicore
+  use m_dtset
 
+  use defs_abitypes, only : MPI_type
   use m_spacepar, only : laplacian
   use m_numeric_tools, only : dotproduct
 

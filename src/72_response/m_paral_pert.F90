@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paral_pert
 !! NAME
 !!  m_paral_pert
@@ -8,7 +7,7 @@
 !!  over perturbations
 !!
 !! COPYRIGHT
-!! Copyright (C) 2013-2019 ABINIT group (MT,FJ,MD)
+!! Copyright (C) 2013-2020 ABINIT group (MT,FJ,MD)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -29,11 +28,12 @@
 MODULE m_paral_pert
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_errors
  use m_xmpi
+ use m_dtset
 
+ use defs_abitypes, only : MPI_type
  use m_time,      only : timab
  use m_copy,      only : deep_copy
  use m_paw_an,    only : paw_an_type, paw_an_free, paw_an_redistribute
@@ -86,8 +86,6 @@ CONTAINS
 
 subroutine set_pert_comm(mpi_enreg,nppert)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: nppert
@@ -132,8 +130,6 @@ end subroutine set_pert_comm
 !! SOURCE
 
 subroutine unset_pert_comm(mpi_enreg)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -206,8 +202,6 @@ end  subroutine unset_pert_comm
 subroutine set_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 &                       paw_an,paw_ij,pawfgrtab,pawrhoij,&
 &                       paw_an_out,paw_ij_out,pawfgrtab_out,pawrhoij_out)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars
@@ -458,8 +452,6 @@ subroutine unset_pert_paw(dtset,mpi_enreg,my_natom,old_atmtab,old_comm_atom,&
 &                       paw_an,paw_ij,pawfgrtab,pawrhoij,&
 &                       paw_an_out,paw_ij_out,pawfgrtab_out,pawrhoij_out)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(inout) :: my_natom
@@ -651,8 +643,6 @@ end  subroutine unset_pert_paw
  subroutine get_exchatom_list(mpicomm_in,mpicomm_out,my_atmtab_in,my_atmtab_out,natom, &
 &                             SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
 
- implicit none
-
 !Arguments ---------------------------------------------
 !scalars
  integer,intent(in) :: mpicomm_in,mpicomm_out,natom
@@ -801,8 +791,6 @@ end subroutine get_exchatom_list
 
 subroutine get_exchatom_list1(mpicomm_in,mpicomm_out,my_atmtab_in,my_atmtab_out,natom, &
 &                             SendAtomProc,SendAtomList,RecvAtomProc,RecvAtomList)
-
- implicit none
 
 !Arguments ---------------------------------------------
 !scalars

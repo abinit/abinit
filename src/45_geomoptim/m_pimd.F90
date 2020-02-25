@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_pimd
 !! NAME
 !!  m_pimd
@@ -8,7 +7,7 @@
 !!  Path-Integral Molecular Dynamics (PIMD) implementation.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2010-2019 ABINIT group (GG,MT)
+!! Copyright (C) 2010-2020 ABINIT group (GG,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -28,8 +27,8 @@
 MODULE m_pimd
 
  use defs_basis
- use defs_abitypes
  use m_abicore
+ use m_dtset
  use m_errors
  use m_io_tools
  use m_random_zbq
@@ -308,18 +307,10 @@ subroutine pimd_destroy(pimd_param)
 
 !************************************************************************
 
- if (allocated(pimd_param%zeta_prev)) then
-   ABI_DEALLOCATE(pimd_param%zeta_prev)
- end if
- if (allocated(pimd_param%zeta)) then
-   ABI_DEALLOCATE(pimd_param%zeta)
- end if
- if (allocated(pimd_param%zeta_next)) then
-   ABI_DEALLOCATE(pimd_param%zeta_next)
- end if
- if (allocated(pimd_param%dzeta)) then
-   ABI_DEALLOCATE(pimd_param%dzeta)
- end if
+ ABI_SFREE(pimd_param%zeta_prev)
+ ABI_SFREE(pimd_param%zeta)
+ ABI_SFREE(pimd_param%zeta_next)
+ ABI_SFREE(pimd_param%dzeta)
 
  if (pimd_param%qtb_file_unit>0) then
    if (is_open(pimd_param%qtb_file_unit)) then
@@ -435,8 +426,6 @@ end subroutine pimd_init_qtb
 
 subroutine pimd_skip_qtb(pimd_param)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  type(pimd_type),intent(in) :: pimd_param
@@ -488,8 +477,6 @@ end subroutine pimd_skip_qtb
 
 function pimd_is_restart(mass,vel,vel_cell)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer :: pimd_is_restart
@@ -537,8 +524,6 @@ end function pimd_is_restart
 !! SOURCE
 
 function pimd_temperature(mass,vel)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -631,8 +616,6 @@ subroutine pimd_print(constraint,constraint_output,eharm,eharm_virial,epot,&
 &          forces,inertmass,irestart,itimimage,kt,natom,optcell,prtstress,&
 &          prtvolimg,rprimd,stress,temperature1,temperature2,traj_unit,&
 &          trotter,vel,vel_cell,xcart,xred)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -898,8 +881,6 @@ end subroutine pimd_print
 
 subroutine pimd_initvel(iseed,mass,natom,temperature,trotter,vel,constraint,wtatcon)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: constraint,natom,trotter
@@ -1023,8 +1004,6 @@ end subroutine pimd_initvel
 
 subroutine pimd_langevin_random(alea,irandom,iseed,langev,mass,natom,trotter,zeroforce)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: irandom,natom,trotter,zeroforce
@@ -1133,8 +1112,6 @@ end subroutine pimd_langevin_random
 
 subroutine pimd_langevin_random_qtb(alea,langev,mass,natom,qtb_file_unit,trotter,zeroforce)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,qtb_file_unit,trotter,zeroforce
@@ -1229,8 +1206,6 @@ end subroutine pimd_langevin_random_qtb
 
 subroutine pimd_langevin_random_bar(alea_bar,irandom,iseed)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: irandom
@@ -1303,8 +1278,6 @@ end subroutine pimd_langevin_random_bar
 
 subroutine pimd_langevin_random_init(irandom,iseed)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: irandom
@@ -1355,8 +1328,6 @@ end subroutine pimd_langevin_random_init
 !! SOURCE
 
 subroutine pimd_energies(eharm,eharm_virial,epot,etotal_img,forces,natom,spring,trotter,xcart)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1452,8 +1423,6 @@ end subroutine pimd_energies
 
 subroutine pimd_forces(forces,natom,spring,transform,trotter,xcart)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,transform,trotter
@@ -1542,8 +1511,6 @@ end subroutine pimd_forces
 subroutine pimd_langevin_forces(alea,forces,forces_langevin,friction,&
 &                               langev,mass,natom,trotter,vel)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom,trotter
@@ -1614,8 +1581,6 @@ end subroutine pimd_langevin_forces
 
 subroutine pimd_nosehoover_forces(dzeta,forces,forces_nosehoover,mass,natom,&
 &                                 nnos,trotter,vel)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1690,8 +1655,6 @@ end subroutine pimd_nosehoover_forces
 
 subroutine pimd_stresses(mass,natom,quantummass,stress_pimd,stressin,&
 &                        temperature,temperature_therm,trotter,vel,volume,xcart)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1827,8 +1790,6 @@ end subroutine pimd_stresses
 
 function pimd_diff_stress(stress_pimd,stress_target)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
 !arrays
@@ -1894,8 +1855,6 @@ end function pimd_diff_stress
 !! SOURCE
 
 subroutine pimd_predict_taylor(dtion,forces,mass,natom,trotter,vel,xcart,xcart_next)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -1964,8 +1923,6 @@ end subroutine pimd_predict_taylor
 !! SOURCE
 
 subroutine pimd_predict_verlet(dtion,forces,mass,natom,trotter,xcart,xcart_next,xcart_prev)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2048,8 +2005,6 @@ end subroutine pimd_predict_verlet
 
 subroutine pimd_nosehoover_propagate(dtion,dzeta,mass,natom,nnos,qmass,temperature,&
 &                                    trotter,vel,zeta,zeta_next,zeta_prev,itimimage,transform)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2222,8 +2177,6 @@ end subroutine pimd_nosehoover_propagate
 !! SOURCE
 
 subroutine pimd_coord_transform(array,ioption,natom,transform,trotter)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2413,8 +2366,6 @@ end subroutine pimd_coord_transform
 
 subroutine pimd_force_transform(forces,ioption,natom,transform,trotter)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ioption,natom,transform,trotter
@@ -2540,8 +2491,6 @@ end subroutine pimd_force_transform
 
 subroutine pimd_apply_constraint(constraint,constraint_output,forces,mass,natom,&
 &                                trotter,wtatcon,xcart)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -2672,8 +2621,6 @@ end subroutine pimd_apply_constraint
 !! SOURCE
 
 subroutine pimd_mass_spring(inertmass,kt,mass,natom,quantummass,spring,transform,trotter)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

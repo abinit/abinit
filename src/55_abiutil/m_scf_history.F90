@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_scf_history
 !! NAME
 !!  m_scf_history
@@ -9,7 +8,7 @@
 !!  as needed by the specific SCF algorithm.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2011-2019 ABINIT group (MT)
+!! Copyright (C) 2011-2020 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -33,10 +32,11 @@
 MODULE m_scf_history
 
  use defs_basis
- use defs_abitypes
  use m_abicore
+ use m_dtset
  use m_errors
 
+ use defs_abitypes, only : MPI_type
  use m_pawcprj,  only : pawcprj_type, pawcprj_free
  use m_pawrhoij, only : pawrhoij_type, pawrhoij_nullify, pawrhoij_free
 
@@ -117,7 +117,7 @@ MODULE m_scf_history
   integer,allocatable :: hindex(:)
    ! Indexes of SCF cycles in the history
    !
-   ! For the density-based schemes (with or without wavefunctions) : 
+   ! For the density-based schemes (with or without wavefunctions) :
    ! hindex(history_size)
    ! hindex(1) is the newest SCF cycle
    ! hindex(history_size) is the oldest SCF cycle
@@ -125,8 +125,8 @@ MODULE m_scf_history
    ! For wavefunction-based schemes (outer loop of a double loop SCF):
    ! hindex(2*history_size+1)
    ! The odd indices refer to the out wavefunction,
-   ! the even indices refer to the in wavefunction (not all such wavefunctions being stored, though). 
-   ! hindex(1:2) is the newest SCF cycle, hindex(3:4) is the SCF cycle before the newest one ... In case of an 
+   ! the even indices refer to the in wavefunction (not all such wavefunctions being stored, though).
+   ! hindex(1:2) is the newest SCF cycle, hindex(3:4) is the SCF cycle before the newest one ... In case of an
    ! algorithm based on a biorthogonal ensemble of wavefunctions, the reference is stored in hindex(2*history_size+1)
    ! When the index points to a location beyond history_size, the corresponding wavefunction set must be reconstructed
    ! from the existing wavefunctions sets (to be implemented)
@@ -204,14 +204,14 @@ CONTAINS !===========================================================
 !! INPUTS
 !!  dtset <type(dataset_type)>=all input variables in this dataset
 !!  mpi_enreg=MPI-parallelisation information
-!!  usecg= if ==0 => no handling of wfs (and eigenvalues), 
-!!         if==1 => handling of density/potential AND wfs and eigen, 
+!!  usecg= if ==0 => no handling of wfs (and eigenvalues),
+!!         if==1 => handling of density/potential AND wfs and eigen,
 !!         if==2 => ONLY handling of wfs and eigen
 !!
 !! SIDE EFFECTS
 !!  scf_history=<type(scf_history_type)>=scf_history datastructure
 !!    hindex is always allocated
-!!    The density/potential arrays that are possibly allocated are : atmrho_last, deltarhor, 
+!!    The density/potential arrays that are possibly allocated are : atmrho_last, deltarhor,
 !!      pawrhoij, pawrhoij_last, rhor_last, taur_last, xreddiff, xred_last.
 !!    The wfs arrays that are possibly allocated are : cg, cprj and eigen
 !!
@@ -223,8 +223,6 @@ CONTAINS !===========================================================
 !! SOURCE
 
 subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars
@@ -300,7 +298,7 @@ subroutine scf_history_init(dtset,mpi_enreg,usecg,scf_history)
      endif
      scf_history%hindex(:)=0
 
-     if (usecg<2) then 
+     if (usecg<2) then
        ABI_ALLOCATE(scf_history%deltarhor,(nfft,dtset%nspden,scf_history%history_size))
        ABI_ALLOCATE(scf_history%xreddiff,(3,dtset%natom,scf_history%history_size))
        ABI_ALLOCATE(scf_history%atmrho_last,(nfft))
@@ -350,8 +348,6 @@ end subroutine scf_history_init
 !! SOURCE
 
 subroutine scf_history_free(scf_history)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays
@@ -443,8 +439,6 @@ end subroutine scf_history_free
 !! SOURCE
 
 subroutine scf_history_nullify(scf_history)
-
- implicit none
 
 !Arguments ------------------------------------
 !arrays

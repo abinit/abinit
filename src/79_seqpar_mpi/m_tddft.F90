@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_tddft
 !! NAME
 !!  m_tddft
@@ -7,7 +6,7 @@
 !!  Routines for computing excitation energies within TDDFT
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (XG, JYR, MB, MBELAND, SHAMEL)
+!! Copyright (C) 1999-2020 ABINIT group (XG, JYR, MB, MBELAND, SHAMEL)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -30,16 +29,18 @@
 module m_tddft
 
  use defs_basis
- use defs_abitypes
  use m_abicore
  use m_xmpi
  use m_errors
  use m_wffile
  use m_sort
+ use m_dtset
+ use m_dtfil
 #if defined HAVE_MPI2
  use mpi
 #endif
 
+ use defs_abitypes, only : MPI_type
  use m_io_tools, only : get_unit
  use m_symtk,    only : matr3inv
  use m_time,     only : timab
