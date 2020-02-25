@@ -722,7 +722,7 @@ test "${sd_linalg_has_blas}" = "yes" -a "${sd_linalg_has_lapack}" = "yes" && sd_
 
 ABI_MSG_SECTION([Optimized FFT support])
 
-if test "${sd_linalg_enable}" == "yes"; then
+if test "${sd_linalg_enable}" = "yes"; then
   SD_FFT_INIT
 
   SD_FFT_DETECT
@@ -856,10 +856,15 @@ SD_LIBPAW_DETECT
                        # ------------------------------ #
 
 # Init BigDFT (requires knowledge about ABINIT Common and LibPAW)
-SD_BIGDFT_INIT([optional fail])
+if test "${sd_libxc_enable}" = "yes" -a "${sd_linalg_enable}" = "yes"; then
+  #SD_BIGDFT_INIT([optional fail])
+  SD_BIGDFT_INIT([optional warn])
 
-# BigDFT library support (requires linear algebra and LibXC)
-SD_BIGDFT_DETECT
+  # BigDFT library support (requires linear algebra and LibXC)
+  SD_BIGDFT_DETECT
+else
+  echo "Skip BIGDFT setting : libxc not enabled..."
+fi
 
                        # ------------------------------ #
 

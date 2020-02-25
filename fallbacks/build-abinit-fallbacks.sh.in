@@ -43,7 +43,7 @@ if test "$rc" = "0"; then
     if test "`${fallbacks_prefix}/bin/abinit-fallbacks-config --enabled ${i}`" = "yes"; then
       Prefix=`${fallbacks_prefix}/bin/abinit-fallbacks-config --incs ${i}`
       printf "\n$(tput bold)"
-      echo "with_${i}=${Prefix}" | sed '-e s/-I//;  s/include$//'
+      echo "with_${i}=${Prefix}" | sed '-e s/-I//;  s/include$//; s/netcdf4/netcdf/'
       printf "$(tput sgr0)"
     fi
   done
