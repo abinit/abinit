@@ -378,6 +378,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  if (rf2_dkdk>0.or.rf2_dkde>0) mpert=natom+11
 
 !Initialize the list of perturbations rfpert
+print *, 'mpert natom ', mpert, natom
  ABI_ALLOCATE(rfpert,(mpert))
  rfpert(:)=0
  if(rfphon==1)rfpert(dtset%rfatpol(1):dtset%rfatpol(2))=1
@@ -408,15 +409,15 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Set up the basis sphere of planewaves
  ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
  ABI_ALLOCATE(npwarr,(dtset%nkpt))
-print *, 'before kpgio', npwtot, dtset%nsppol, dtset%mpw, ' npwarr ', npwarr
+print *, 'before kpgio', npwtot, dtset%nsppol, dtset%mpw
 print *, ' dtset%istwfk ',  dtset%istwfk
-print *, ' kg ',  shape(kg), '   ', kg 
 print *, ' dtset%kptns ',  dtset%kptns
 print *, ' dtset%istwfk ',  dtset%istwfk
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet_for_kg,dtset%istwfk,kg,&
 & dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,dtset%mpw,npwarr,npwtot,&
 & dtset%nsppol)
 print *, 'after kpgio', npwtot, dtset%nsppol, dtset%mpw, ' npwarr ', npwarr
+print *, ' kg ',  shape(kg), '  ==  ', kg 
 
 !Set up the Ylm for each k point
  ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
@@ -476,16 +477,19 @@ print *, 'after kpgio', npwtot, dtset%nsppol, dtset%mpw, ' npwarr ', npwarr
 !Initialize wavefunction files and wavefunctions.
  ireadwf0=1
 
+
 !TODO: parallelize mband_mem here as well
  mcg=dtset%mpw*dtset%nspinor*dtset%mband_mem*dtset%mkmem*dtset%nsppol
- ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
+print *, 'mcg, spin ban k spp ', mcg, dtset%mpw,dtset%nspinor,dtset%mband_mem,dtset%mkmem,dtset%nsppol
+ ABI_ALLOCATE(cg,(2,mcg))
+ !ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
 
  ABI_ALLOCATE(eigen0,(dtset%mband*dtset%nkpt*dtset%nsppol))
  eigen0(:)=zero ; ask_accurate=1
  optorth=0
 
 ! Initialize the wave function type and read GS WFK
- ABI_ALLOCATE(distrb_flags,(nkpt_rbz,dtset%mband,dtset%nsppol))
+ ABI_ALLOCATE(distrb_flags,(dtset%nkpt,dtset%mband,dtset%nsppol))
  distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
  call wfk_read_my_kptbands(dtfil%fnamewffk, dtset, distrb_flags, spaceworld, &
 &            formeig, dtset%istwfk, dtset%kptns, dtset%nkpt, npwarr, &
@@ -493,15 +497,16 @@ print *, 'after kpgio', npwtot, dtset%nsppol, dtset%mpw, ' npwarr ', npwarr
  ABI_DEALLOCATE(distrb_flags)
 
 !DEBUG
- mcg=dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
- ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg), ierr)
+ mcg_tmp=dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
+print *, 'mcg_tmp, spin ban k spp ', mcg_tmp, dtset%mpw,dtset%nspinor,dtset%mband,dtset%mkmem,dtset%nsppol
+ ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
  ABI_MALLOC(eigen0_tmp,(dtset%mband*dtset%nkpt*dtset%nsppol))
  ABI_MALLOC(occ_tmp,(dtset%mband*dtset%nkpt*dtset%nsppol))
 
  hdr%rprimd=rprimd_for_kg ! We need the rprimd that was used to generate de G vectors
  call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen0_tmp,dtset%exchn2n3d,&
 & formeig,hdr,ireadwf0,dtset%istwfk,kg,dtset%kptns,&
-& dtset%localrdwf,dtset%mband,mcg,dtset%mkmem,mpi_enreg,dtset%mpw,&
+& dtset%localrdwf,dtset%mband,mcg_tmp,dtset%mkmem,mpi_enreg,dtset%mpw,&
 & dtset%nband,ngfft,dtset%nkpt,npwarr,dtset%nsppol,dtset%nsym,&
 & occ_tmp,optorth,dtset%symafm,dtset%symrel,dtset%tnons,&
 & dtfil%unkg,wffgs,wfftgs,dtfil%unwffgs,dtfil%fnamewffk,wvl)
