@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 13 Feb 2020.
-- ( at 16h33 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 16h49 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/TestBot_MPI1/v67mbpt_t03/t03.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t03/t03.in
 - output file    -> t03.out
 - root for input  files -> t03i
 - root for output files -> t03o
@@ -274,7 +274,7 @@ P           mkmem           5
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Wu Cohen functional - ixc=23
@@ -292,8 +292,8 @@ P           mkmem           5
          ecut(hartree)=      6.000   => boxcut(ratio)=   2.01533
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/01h_WC.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/01h_WC.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h_WC.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h_WC.fhi
 - OPIUM generated H potential
 -  1.00000   1.00000     70427                znucl, zion, pspdat
     6   23    0    0      1045   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -350,6 +350,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     322.875     322.842
   sigma(2 2)=  1.01963508E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.89009533E-04  sigma(2 1)=  0.00000000E+00
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [ 10.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,  10.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   4.5000000, ]
+lattice_lengths: [  10.00000,   10.00000,    4.50000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_volume:   4.5000000E+02
+convergence: {deltae:  1.998E-14, res2:  2.855E-16, residm:  9.565E-07, diffor: null, }
+etotal    :  -1.07933734E+00
+entropy   :   0.00000000E+00
+fermie    :  -2.00764076E-01
+cartesian_stress_tensor:
+- [  1.01963508E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   1.01963508E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.89009533E-04, ]
+pressure_GPa:  -4.8342E+00
+cartesian_forces:
+- [ -0.00000000E+00,  -0.00000000E+00,   4.97292859E-02, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -4.97292859E-02, ]
+force_length_stats: {min:   4.97292859E-02, max:   4.97292859E-02, mean:   4.97292859E-02, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -400,22 +426,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     322.875     322.842
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  8.38373251347370E-01
-    Hartree energy  =  6.70491698367194E-01
-    XC energy       = -5.99145274237393E-01
-    Ewald energy    =  6.96272876382725E-02
-    PspCore energy  = -1.08410116146500E-04
-    Loc. psp. energy= -2.05857589408691E+00
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -1.07933734108761E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.93702627027668E+01 ; Band energy (Ha)=  -6.5620419840E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.38373251347370E-01
+hartree             :  6.70491698367194E-01
+xc                  : -5.99145274237393E-01
+Ewald energy        :  6.96272876382725E-02
+psp_core            : -1.08410116146500E-04
+local_psp           : -2.05857589408691E+00
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -1.07933734108761E+00
+total_energy_eV     : -2.93702627027668E+01
+band_energy         : -6.56204198400169E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -430,7 +454,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     322.875     322.842
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -453,8 +477,8 @@ _setup2: Arith. and geom. avg. npw (full set) are     322.875     322.842
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/01h_WC.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/01h_WC.fhi
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h_WC.fhi
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h_WC.fhi
 - OPIUM generated H potential
 -  1.00000   1.00000     70427                znucl, zion, pspdat
     6   23    0    0      1045   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -650,7 +674,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     322.875     322.842
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -751,6 +775,7 @@ _setup2: Arith. and geom. avg. npw (full set) are     322.875     322.842
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   11.274
@@ -762,9 +787,10 @@ data: !SigmaeeData |
         2   0.238  -2.366  -0.481  -3.682   0.701  -0.427  -3.625  -1.259  -1.021
 ...
 
+
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -879,6 +905,7 @@ data: !SigmaeeData |
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 4, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   11.274
@@ -890,9 +917,10 @@ data: !SigmaeeData |
         2   0.238  -2.366  -0.505  -0.542   0.946  -0.057  -1.118   1.249   1.487
 ...
 
+
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1007,6 +1035,7 @@ data: !SigmaeeData |
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   11.274
@@ -1017,6 +1046,7 @@ data: !SigmaeeData |
         1 -11.036 -10.443 -27.105   6.045   0.579  -0.726 -16.594  -6.151 -17.187
         2   0.238  -2.366  -1.299  -0.924   0.933  -0.072  -2.232   0.134   0.372
 ...
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1280,10 +1310,10 @@ P           mkmem           5
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          5.7  wall=          5.8
+- Proc.   0 individual time (sec): cpu=          5.8  wall=          5.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  55 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.7  wall=          5.8
++Overall time at end (sec) : cpu=          5.8  wall=          5.9

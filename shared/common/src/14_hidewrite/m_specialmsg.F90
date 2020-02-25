@@ -420,7 +420,7 @@ end subroutine wrtout_unit
 !!
 !! INPUTS
 !!  msg=(character(len=*)) message to be written
-!!  unit=unit number for writing. The named constant dev_null defined in defs_basis can be used to avoid any printing.
+!!  units=unit number for writing. The named constant dev_null defined in defs_basis can be used to avoid any printing.
 !!  [mode_paral]= --optional argument--
 !!   'COLL' if all procs are calling the routine with the same message to be written once only. Default.
 !!   'PERS' if the procs are calling the routine with different messages each to be written,

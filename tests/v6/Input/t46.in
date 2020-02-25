@@ -81,7 +81,7 @@ jpawu2  0.0000 0.0  # values in Hartree
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = B. Amadon
-#%% keywords = DMFT
+#%% keywords = DMFT, PAW
 #%% description = 
 #%%   DMFT tests on Antiferromagnetic NiO (4 atoms), check DMFT loop with Hubbard I, DMFT
 #%%   self-consistency and density self-consistency : computes occupations and energy.

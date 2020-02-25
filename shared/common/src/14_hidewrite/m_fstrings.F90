@@ -1828,6 +1828,7 @@ integer pure function char_count(string, char)
  integer :: i
 
 ! *************************************************************************
+
  char_count = 0
  do i=1,len(string)
    if (string(i:i) == char) char_count = char_count + 1

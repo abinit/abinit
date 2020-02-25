@@ -86,6 +86,7 @@ program abitk
  ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(0)
+ !call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
 
  nargs = command_argument_count()
@@ -190,6 +191,7 @@ program abitk
      call edos%free()
 
    else if (command == "ebands_jdos") then
+     NOT_IMPLEMENTED_ERROR()
      !jdos = ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
      !call jdos%write(strcat(basename(path), "_EJDOS"))
      !call jdos%free()

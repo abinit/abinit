@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 13 Feb 2020.
-- ( at 16h52 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 18h30 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/TestBot_MPI4/paral_t25_MPI4/t25.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t25_MPI4/t25.in
 - output file    -> t25_MPI4.out
 - root for input  files -> t25_MPI4i
 - root for output files -> t25_MPI4o
@@ -124,7 +124,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    4
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -156,8 +156,8 @@ P           mkmem           1
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/6c_lda.paw
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c_lda.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -201,6 +201,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
  scprqt:  WARNING -
   nstep=    5 was not enough SCF cycles to converge;
   maximum energy difference=  1.358E-06 exceeds toldfe=  1.000E-10
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  0.0000000,   3.5000000,   3.5000000, ]
+- [  3.5000000,   0.0000000,   3.5000000, ]
+- [  3.5000000,   3.5000000,   0.0000000, ]
+lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_volume:   8.5750000E+01
+convergence: {deltae: -1.358E-06, res2:  2.634E-05, residm:  7.103E-10, diffor: null, }
+etotal    :  -1.04179435E+01
+entropy   :   0.00000000E+00
+fermie    :   4.73485197E-01
+cartesian_stress_tensor:
+- [ -8.18095953E-03,  -1.74492261E-03,  -1.74492261E-03, ]
+- [ -1.74492261E-03,  -8.18095953E-03,  -1.74492261E-03, ]
+- [ -1.74492261E-03,  -1.74492261E-03,  -8.18095953E-03, ]
+pressure_GPa:   2.4069E+02
+cartesian_forces:
+- [ -2.35488897E-01,  -2.35488897E-01,  -2.35488897E-01, ]
+- [  2.35488897E-01,   2.35488897E-01,   2.35488897E-01, ]
+force_length_stats: {min:   4.07878734E-01, max:   4.07878734E-01, mean:   4.07878734E-01, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -383,30 +409,32 @@ _setup2: Arith. and geom. avg. npw (full set) are     129.000     129.000
   -9.74588    8.15785   12.88419   12.88419   14.26116   14.26116   18.88489   22.02694
   26.88896   34.19753   34.19753   35.39545
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.71248281673118E+00
+hartree             :  1.52271844737656E+00
+xc                  : -3.90585490147840E+00
+Ewald energy        : -1.22408856604630E+01
+psp_core            :  5.49532697036699E-01
+local_psp           : -6.85236960731908E+00
+spherical_terms     :  1.79563444202389E+00
+total_energy        : -1.04187417660921E+01
+total_energy_eV     : -2.83508381535347E+02
+...
 
-    Kinetic energy  =  8.71248281673118E+00
-    Hartree energy  =  1.52271844737656E+00
-    XC energy       = -3.90585490147840E+00
-    Ewald energy    = -1.22408856604630E+01
-    PspCore energy  =  5.49532697036699E-01
-    Loc. psp. energy= -6.85236960731908E+00
-    Spherical terms =  1.79563444202389E+00
-    >>>>>>>>> Etotal= -1.04187417660921E+01
 
- "Double-counting" decomposition of free energy:
-    Band energy     =  1.77722282121333E+00
-    Ewald energy    =-1.22408856604630E+01
-    PspCore energy  =  5.49532697036699E-01
-    Dble-C XC-energy= -6.32076063598871E-01
-    Spherical terms =  1.28262697021136E-01
-    >>>> Etotal (DC)= -1.04179435087907E+01
-
-  >Total energy in eV           = -2.83508381535347E+02
-  >Total DC energy in eV        = -2.83486659849499E+02
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+iteration_state     : {dtset: 1, }
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         :  1.77722282121333E+00
+Ewald energy        : -1.22408856604630E+01
+psp_core            :  5.49532697036699E-01
+xc_dc               : -6.32076063598871E-01
+spherical_terms     :  1.28262697021136E-01
+total_energy_dc     : -1.04179435087907E+01
+total_energy_dc_eV  : -2.83486659849499E+02
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -570,10 +598,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.9  wall=          1.0
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  19 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.7  wall=          3.8
++Overall time at end (sec) : cpu=          5.1  wall=          5.4

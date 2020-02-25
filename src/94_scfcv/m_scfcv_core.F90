@@ -1133,8 +1133,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
        call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
      end if
 
-     !    if any nuclear dipoles are nonzero, compute the vector potential in real space (depends on
-     !    atomic position so should be done for nstep = 1 and for updated ion positions
+     ! if any nuclear dipoles are nonzero, compute the vector potential in real space (depends on
+     ! atomic position so should be done for nstep = 1 and for updated ion positions
      if ( any(abs(dtset%nucdipmom(:,:))>tol8) ) then
         with_vectornd = 1
      else

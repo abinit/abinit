@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu 13 Feb 2020.
-- ( at 16h53 )
+.Starting date : Sat 15 Feb 2020.
+- ( at 18h30 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/TestBot_MPI4/paral_t29_MPI4/t29.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t29_MPI4/t29.in
 - output file    -> t29_MPI4.out
 - root for input  files -> t29_MPI4i
 - root for output files -> t29_MPI4o
@@ -119,7 +119,7 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    4
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Zunger-Ceperley-Alder - ixc=2
@@ -151,8 +151,8 @@ P           mkmem           1
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/6c_lda.paw
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze/tests/Psps_for_tests/6c_lda.paw
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c_lda.paw
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c_lda.paw
 - Paw atomic data extracted from US-psp (D.Vanderbilt): carbon
 -  6.00000   4.00000  20041014                znucl, zion, pspdat
     7    2    1    0       467   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -196,6 +196,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      63.000      63.000
  scprqt:  WARNING -
   nstep=    5 was not enough SCF cycles to converge;
   maximum energy difference=  1.370E-06 exceeds toldfe=  1.000E-10
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+rprimd    :
+- [  0.0000000,   3.5000000,   3.5000000, ]
+- [  3.5000000,   0.0000000,   3.5000000, ]
+- [  3.5000000,   3.5000000,   0.0000000, ]
+lattice_lengths: [   4.94975,    4.94975,    4.94975, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_volume:   8.5750000E+01
+convergence: {deltae: -1.370E-06, res2:  2.076E-05, residm:  6.509E-10, diffor: null, }
+etotal    :  -1.04202714E+01
+entropy   :   0.00000000E+00
+fermie    :   4.73394044E-01
+cartesian_stress_tensor:
+- [ -8.20156771E-03,  -1.74753999E-03,  -1.74753999E-03, ]
+- [ -1.74753999E-03,  -8.20156771E-03,  -1.74753999E-03, ]
+- [ -1.74753999E-03,  -1.74753999E-03,  -8.20156771E-03, ]
+pressure_GPa:   2.4130E+02
+cartesian_forces:
+- [ -2.35566343E-01,  -2.35566343E-01,  -2.35566343E-01, ]
+- [  2.35566343E-01,   2.35566343E-01,   2.35566343E-01, ]
+force_length_stats: {min:   4.08012874E-01, max:   4.08012874E-01, mean:   4.08012874E-01, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -311,30 +337,32 @@ _setup2: Arith. and geom. avg. npw (full set) are      63.000      63.000
   -9.75403    8.15624   12.88171   12.88171   14.25498   14.25498   18.87756   22.02350
   26.87983   34.18287   34.18287   35.38247
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.71137783254295E+00
+hartree             :  1.52174712342111E+00
+xc                  : -3.90838840711389E+00
+Ewald energy        : -1.22408856604630E+01
+psp_core            :  5.49532697036699E-01
+local_psp           : -6.84948458615591E+00
+spherical_terms     :  1.79503905041291E+00
+total_energy        : -1.04210619503191E+01
+total_energy_eV     : -2.83571516958973E+02
+...
 
-    Kinetic energy  =  8.71137783254295E+00
-    Hartree energy  =  1.52174712342111E+00
-    XC energy       = -3.90838840711389E+00
-    Ewald energy    = -1.22408856604630E+01
-    PspCore energy  =  5.49532697036699E-01
-    Loc. psp. energy= -6.84948458615591E+00
-    Spherical terms =  1.79503905041291E+00
-    >>>>>>>>> Etotal= -1.04210619503191E+01
 
- "Double-counting" decomposition of free energy:
-    Band energy     =  1.77614051061920E+00
-    Ewald energy    =-1.22408856604630E+01
-    PspCore energy  =  5.49532697036699E-01
-    Dble-C XC-energy= -6.33621896339526E-01
-    Spherical terms =  1.28562953295622E-01
-    >>>> Etotal (DC)= -1.04202713958510E+01
-
-  >Total energy in eV           = -2.83571516958973E+02
-  >Total DC energy in eV        = -2.83550004877879E+02
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+iteration_state     : {dtset: 1, }
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         :  1.77614051061920E+00
+Ewald energy        : -1.22408856604630E+01
+psp_core            :  5.49532697036699E-01
+xc_dc               : -6.33621896339526E-01
+spherical_terms     :  1.28562953295622E-01
+total_energy_dc     : -1.04202713958510E+01
+total_energy_dc_eV  : -2.83550004877879E+02
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -498,10 +526,10 @@ P           mkmem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          0.8  wall=          0.8
+- Proc.   0 individual time (sec): cpu=          0.9  wall=          1.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered  19 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.1  wall=          3.2
++Overall time at end (sec) : cpu=          3.8  wall=          4.1
