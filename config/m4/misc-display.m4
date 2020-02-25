@@ -188,8 +188,8 @@ AC_DEFUN([ABI_MSG_NOTICE_L],[
   TPUT_BOLD="\$(tput bold)"
   TPUT_OFF="\$(tput sgr0)"
 
-  abi_msg_title="${abi_msg_title/__/$TPUT_BOLD}"
-  abi_msg_title="${abi_msg_title/__/$TPUT_OFF}"
+  abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_BOLD/")
+  abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_OFF/")
 
   test "${abi_msg_title}" = "" && abi_msg_title="\$(tput bold)IMPORTANT NOTE\$(tput sgr0)"
   let spacer=64
@@ -216,8 +216,8 @@ AC_DEFUN([ABI_MSG_NOTICE_L],[
     dnl Format and write message
 
     while read abi_msg_line; do
-      abi_msg_line="${abi_msg_line/__/$TPUT_BOLD}"
-      abi_msg_line="${abi_msg_line/__/$TPUT_OFF}"
+      abi_msg_line=$(echo "$abi_msg_line" | sed "s/__/$TPUT_BOLD/")
+      abi_msg_line=$(echo "$abi_msg_line" | sed "s/__/$TPUT_OFF/")
 
       let tput_spacer=0
       have_tput="`echo $abi_msg_line | grep tput`"
@@ -261,9 +261,8 @@ AC_DEFUN([ABI_MSG_NOTICE_S],[
   TPUT_BOLD="\$(tput bold)"
   TPUT_OFF="\$(tput sgr0)"
 
-  abi_msg_title="${abi_msg_title/__/$TPUT_BOLD}"
-  abi_msg_title="${abi_msg_title/__/$TPUT_OFF}"
-
+  abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_BOLD/")
+  abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_OFF/")
 
   test "${abi_msg_title}" = "" && abi_msg_title="\$(tput bold)IMPORTANT NOTE\$(tput sgr0)"
   let spacer=64
@@ -289,9 +288,9 @@ AC_DEFUN([ABI_MSG_NOTICE_S],[
   abi_msg_title="$2"
   if test "${abi_msg_title}" != ""; then
 
-      abi_msg_title="${abi_msg_title/__/$TPUT_BOLD}"
-      abi_msg_title="${abi_msg_title/__/$TPUT_OFF}"
-    
+      abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_BOLD/")
+      abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_OFF/")
+ 
       test "${abi_msg_title}" = "" && abi_msg_title="\$(tput bold)IMPORTANT NOTE\$(tput sgr0)"
       let spacer=64
       let tput_spacer=0

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Init
 fallbacks_prefix="@abinit_builddir@/fallbacks/install/@abi_fc_vendor@/@abi_fc_version@"
@@ -34,9 +34,9 @@ make -j 4 install
 rc=`echo $?`
 
 if test "$rc" = "0"; then
-  printf "$(tput bold)----------------------------------------------------------------------$(tput sgr0)\n"
+  printf "$(tput bold)----------------------------------------------------------------------$(tput sgr0)\n\n"
   echo "The fallbacks are now ready to use."; \
-  echo "You can tell Abinit by copying the options to your ac file.";
+  echo "You can tell Abinit by copying the options to your ac9 file.";
 
   list_of_fbks=( libxc netcdf4 netcdf4_fortran linalg )
   for i in "${list_of_fbks[@]}"; do

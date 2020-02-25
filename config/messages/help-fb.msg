@@ -7,4 +7,4 @@ __./build-abinit-fallbacks.sh__
 At the end of the process, options pointing
 to functional libraries will be proposed.
 
-Just __copy/paste__ the options in your ac file.  
+Just __copy/paste__ the options in your ac9 file.  
