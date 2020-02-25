@@ -191,10 +191,17 @@ New input variables : [[chrgat]], [[constraint_kind]], [[ratsm]].
 By X. Gonze.
 <a name="B.5"></a>
 
-**B.5** Large modifications of the build system + split of the source tree.
+**B.5** Large modifications of the build system 
+
 The build system relies on new <hostname>.ac9 files, superceeding the v8 <hostname>.ac files.
-The build system of ABINITv9 does not build the dependencies (Linalg, NetCDF, LibXC, ...), as this was not sustainable anymore (see B.5),
-MR 598, 517, 514, 477, 476
+Example files can be found in doc/build/config-examples (very verbose).
+The build system of ABINITv9 does not build the dependencies (Linalg, NetCDF, LibXC, Wannier90, MPI, ...), as this was not sustainable anymore.
+Three libraries are mandatory: linalg, NetCDF and LibXC. Failing to link to them will prevent building ABINIT.
+The other libraries are optional, there will only be a warning if they are not available.
+If the user does not provide the path to these libraries,
+the build system will try to find them in the "usual" directories, and inform the user that it has done so.
+The build system also can make suggestions to the user, to complete its *.ac9 file.
+
 By Y. Pouillon and JM Beuken
 
 **B.6** New command line interface
@@ -308,6 +315,11 @@ By JM Beuken (MR 513).
 **C.6** Enable the generation of a HTML side-by-side diff on the test farm when fldiff fail with a line count error and it was not caused by a crash of Abinit. The diff use a specialized heuristic to improve line synchronization and prevent weird matching.
 
 By Th. Cavignac (MR 526)
+
+**C.7** Split of the source tree (ongoing).
+In view of increased modularity, the source tree must be split in two parts, one for low-level routines, largely independent of ABINIT,
+and one for more specific routines to ABINIT. The low-level routines should become a separate library, with its own build system and make.. 
+At present the low-level library have been moved out of src, inside the shared/common/src directory.
 
 * * *
 
