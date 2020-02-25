@@ -329,7 +329,7 @@ By Th. Cavignac (MR 526)
 In view of increased modularity, the source tree must be split in two parts, one for low-level routines, largely independent of ABINIT,
 and one for more specific routines to ABINIT. The low-level routines should become a separate library, with its own build system and make.. 
 At present the low-level library have been moved out of src, inside the shared/common/src directory.
-See related information in Sec. 5.4 of [[Gonze2020]].
+See related information in Sec. 5.4 of [[cite:Gonze2020]].
 
 * * *
 
