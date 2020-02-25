@@ -920,7 +920,7 @@ subroutine yamldoc_add_real2d(self, label, arr, slist, tag, real_fmt, multiline_
      if (.not. present(slist)) then
        call yaml_print_real1d(self%stream, m, line, rfmt, vmax)
      else
-       call yaml_print_real1d(self%stream, m, line, rfmt, vmax, string=slist(i))
+       call yaml_print_real1d(self%stream, m, line, rfmt, vmax, string=trim(slist(i)))
      end if
    end do
  else
@@ -930,7 +930,7 @@ subroutine yamldoc_add_real2d(self, label, arr, slist, tag, real_fmt, multiline_
      if (.not. present(slist)) then
        call yaml_print_real1d(self%stream, n, line, rfmt, vmax)
      else
-       call yaml_print_real1d(self%stream, n, line, rfmt, vmax, string=slist(i))
+       call yaml_print_real1d(self%stream, n, line, rfmt, vmax, string=trim(slist(i)))
      end if
    end do
  end if
