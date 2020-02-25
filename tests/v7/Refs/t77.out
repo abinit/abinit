@@ -1789,7 +1789,7 @@ lattice_volume:   7.9373431E+01
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.952E-11, diffor:  0.000E+00, }
 etotal    :  -1.97426056E+02
 entropy   :   0.00000000E+00
-fermie    :   0.00000000E+00
+fermie    :   1.36195627E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 cartesian_forces: null
@@ -1859,7 +1859,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  == For each k-point of the path, gives the eigenvalues (in eV) of the Hamiltonian in the Wannier basis
 
-   (The band structure is shifted by fermie =       0.0000 eV )
+   (The band structure is shifted by fermie =       3.7060 eV )
 
  Wannier band structure for atom  1
  1      -1.254      -1.254      -1.254      -0.306      -0.306
