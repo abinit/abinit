@@ -31,7 +31,8 @@ fi
 # Set library-related status reports
 
 # Linalg
-if test "${with_linalg_libs}" = ""; then
+#if test "${with_linalg_libs}" = ""; then
+if test "${sd_linalg_flavor}" != "${sd_linalg_flavor_req}"; then
   tmp_rep_linalg_libs="auto-detected"
 else
   tmp_rep_linalg_libs="user-defined"
@@ -71,7 +72,8 @@ Core build parameters
 
   * LibXML2 enabled  : ${abi_libxml2_enable}
   * HDF5 enabled     : ${sd_hdf5_enable} (MPI support: ${sd_hdf5_mpi_ok})
-  * NetCDF enabled   : ${sd_netcdf_enable} (MPI support: C=${sd_netcdf_mpi_ok}, Fortran=${sd_netcdf_fortran_mpi_ok})
+  * NetCDF enabled   : ${sd_netcdf_enable} (MPI support: ${sd_netcdf_mpi_ok})
+  * NetCDF-F enabled : ${sd_netcdf_fortran_enable}  (MPI support: ${sd_netcdf_fortran_mpi_ok})
 
   * FFT flavor       : ${sd_fft_flavor} (libs: ${tmp_rep_fft_libs})
   * LINALG flavor    : ${sd_linalg_flavor} (libs: ${tmp_rep_linalg_libs})
@@ -115,7 +117,6 @@ AC_DEFUN([ABI_MSG_FC_BUGGY],[
 
   esac
 ]) # ABI_MSG_FC_BUGGY
-
 
 
 dnl ABI_MSG_NOTICE(FILE, TITLE)
@@ -168,6 +169,197 @@ AC_DEFUN([ABI_MSG_NOTICE],[
     AC_MSG_WARN([message file ${abi_msg_file} not found])
   fi
 ]) dnl ABI_MSG_NOTICE
+
+
+
+dnl ABI_MSG_NOTICE_L(FILE, TITLE)
+dnl ---------------------------
+dnl
+dnl Print a framed message to attract users' attention to something.
+dnl
+AC_DEFUN([ABI_MSG_NOTICE_L],[
+  dnl Do some sanity checking of the arguments
+  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl Init
+  abi_msg_file="${abinit_srcdir}/config/messages/$1.msg"
+  abi_msg_title="$2"
+
+  TPUT_BOLD="\$(tput bold)"
+  TPUT_OFF="\$(tput sgr0)"
+
+  abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_BOLD/")
+  abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_OFF/")
+
+  test "${abi_msg_title}" = "" && abi_msg_title="\$(tput bold)IMPORTANT NOTE\$(tput sgr0)"
+  let spacer=64
+  let tput_spacer=0
+  have_tput=`echo $abi_msg_title | grep tput`
+  if test "${have_tput}" != "" ; then
+     tput_spacer=10
+     abi_msg_title=`eval echo ${abi_msg_title}`
+  fi
+
+  dnl Format title
+  titlel=${#abi_msg_title}
+  let Fill=spacer-titlel+tput_spacer
+  abi_msg_title=`printf "${abi_msg_title}";printf ' %.0s' $(seq 1 $Fill)`
+
+  if test -s "${abi_msg_file}"; then
+
+    dnl Print header
+    echo ""
+    echo "  +------------------------------------------------------------------+"
+    echo "  | ${abi_msg_title} |"
+    echo "  +------------------------------------------------------------------+"
+  
+    dnl Format and write message
+
+    while read abi_msg_line; do
+      abi_msg_line=$(echo "$abi_msg_line" | sed "s/__/$TPUT_BOLD/")
+      abi_msg_line=$(echo "$abi_msg_line" | sed "s/__/$TPUT_OFF/")
+
+      let tput_spacer=0
+      have_tput="`echo $abi_msg_line | grep tput`"
+      if test "${have_tput}" != "" ; then
+         tput_spacer=10
+         abi_msg_line=`eval echo ${abi_msg_line}`
+      fi
+    
+      let linel=${#abi_msg_line}
+      let Fill=spacer-linel+tput_spacer
+      #test "$linel" -gt "64" || echo "too long... : $linel, Fill = $Fill"
+      abi_msg_line=`printf "${abi_msg_line}";printf ' %.0s' $(seq 1 $Fill)`
+    
+      echo "  | ${abi_msg_line} |"
+    done <"${abi_msg_file}"
+      
+    dnl Print footer
+    echo "  +------------------------------------------------------------------+"
+    echo ""
+
+  else
+    AC_MSG_WARN([message file ${abi_msg_file} not found])
+  fi
+]) dnl ABI_MSG_NOTICE_L
+
+
+
+
+dnl ABI_MSG_NOTICE_S(TITLE, SOLUTION)
+dnl ---------------------------------
+dnl
+dnl Print a framed message to attract users' attention to something.
+dnl
+AC_DEFUN([ABI_MSG_NOTICE_S],[
+  dnl Do some sanity checking of the arguments
+  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl Init
+  abi_msg_title="$1"
+
+  TPUT_BOLD="\$(tput bold)"
+  TPUT_OFF="\$(tput sgr0)"
+
+  abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_BOLD/")
+  abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_OFF/")
+
+  test "${abi_msg_title}" = "" && abi_msg_title="\$(tput bold)IMPORTANT NOTE\$(tput sgr0)"
+  let spacer=64
+  let tput_spacer=0
+  have_tput=`echo $abi_msg_title | grep tput`
+  if test "${have_tput}" != "" ; then
+    tput_spacer=10
+    abi_msg_title="`eval echo ${abi_msg_title}`"
+  fi
+
+  dnl Format title
+  titlel=${#abi_msg_title}
+  let Fill=spacer-titlel+tput_spacer
+  abi_msg_title=`printf "${abi_msg_title}";printf ' %.0s' $(seq 1 $Fill)`
+
+  dnl Print header
+  echo ""
+  echo "  +------------------------------------------------------------------+"
+  echo "  | ${abi_msg_title} |"
+  echo "  +------------------------------------------------------------------+"
+
+  dnl Format solution if provided
+  abi_msg_title="$2"
+  if test "${abi_msg_title}" != ""; then
+
+      abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_BOLD/")
+      abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_OFF/")
+ 
+      test "${abi_msg_title}" = "" && abi_msg_title="\$(tput bold)IMPORTANT NOTE\$(tput sgr0)"
+      let spacer=64
+      let tput_spacer=0
+      have_tput=`echo $abi_msg_title | grep tput`
+      if test "${have_tput}" != ""; then
+         tput_spacer=10
+         abi_msg_title=`eval echo ${abi_msg_title}`
+      fi
+      
+      dnl Format title
+      titlel=${#abi_msg_title}
+      let Fill=spacer-titlel+tput_spacer
+      #test "$titlel" -gt "64" || echo "too long... : $titlel, Fill = $Fill"
+      abi_msg_title=`printf "${abi_msg_title}";printf ' %.0s' $(seq 1 $Fill)`
+
+      echo "  | ${abi_msg_title} |"
+      echo "  +------------------------------------------------------------------+"
+  fi
+
+  echo ""
+
+]) dnl ABI_MSG_NOTICE_S
+
+
+
+dnl ABI_MSG_NOTICE_X(TITLE, SOLUTION)
+dnl ---------------------------------
+dnl
+dnl Print a framed message to attract users' attention to something.
+dnl
+AC_DEFUN([ABI_MSG_NOTICE_X],[
+  dnl Do some sanity checking of the arguments
+  m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
+
+  dnl Init
+  abi_msg_title="$1"
+  test "${abi_msg_title}" = "" && abi_msg_title="IMPORTANT NOTE"
+
+  dnl Format title
+  abi_msg_spacer="                                                                "
+  abi_msg_tmp1=`echo "${abi_msg_title}" | sed -e 's/./ /g'`
+  abi_msg_tmp2=`echo "${abi_msg_tmp1}" | grep "${abi_msg_spacer}"`
+  abi_msg_spacer=`echo "${abi_msg_spacer}" | sed -e "s/${abi_msg_tmp1}//"`
+  test "${abi_msg_tmp2}" = "" || abi_msg_spacer=""
+  abi_msg_title="${abi_msg_title}${abi_msg_spacer}"
+
+  dnl Print header
+  echo ""
+  echo "  +------------------------------------------------------------------+"
+  echo "  | ${abi_msg_title} |"
+  echo "  +------------------------------------------------------------------+"
+
+  dnl Format solution if provided
+  abi_msg_title="$2"
+  if test "${abi_msg_title}" != ""; then
+      abi_msg_spacer="                                                                "
+      abi_msg_tmp1=`echo "${abi_msg_title}" | sed -e 's/./ /g'`
+      abi_msg_tmp2=`echo "${abi_msg_tmp1}" | grep "${abi_msg_spacer}"`
+      abi_msg_spacer=`echo "${abi_msg_spacer}" | sed -e "s/${abi_msg_tmp1}//"`
+      test "${abi_msg_tmp2}" = "" || abi_msg_spacer=""
+      abi_msg_title="${abi_msg_title}${abi_msg_spacer}"
+      echo "  | ${abi_msg_title} |"
+      echo "  +------------------------------------------------------------------+"
+  fi
+
+  echo ""
+
+]) dnl ABI_MSG_NOTICE_X
+
 
 
 # ABI_MSG_SECTION(TITLE)

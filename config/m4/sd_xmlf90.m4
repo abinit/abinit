@@ -200,7 +200,11 @@ AC_DEFUN([SD_XMLF90_DETECT], [
         sd_xmlf90_ldflags=""
         sd_xmlf90_libs=""
       else
-        AC_MSG_FAILURE([invalid XMLF90 configuration])
+        if test "${sd_netcdf_policy}" = "fail"; then
+              AC_MSG_FAILURE([invalid XMLF90 configuration])
+        else
+              AC_MSG_WARN([invalid XMLF90 configuration])
+        fi
       fi
     fi
   else

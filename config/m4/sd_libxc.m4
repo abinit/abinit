@@ -232,7 +232,11 @@ AC_DEFUN([SD_LIBXC_DETECT], [
         sd_libxc_ldflags=""
         sd_libxc_libs=""
       else
-        AC_MSG_FAILURE([invalid LibXC configuration])
+        if test "${sd_netcdf_policy}" = "fail"; then
+              AC_MSG_FAILURE([invalid LibXC configuration])
+        else
+              AC_MSG_WARN([invalid LibXC configuration])
+        fi
       fi
     fi
   else

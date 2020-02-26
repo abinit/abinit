@@ -62,9 +62,9 @@ module m_build_info
 
 ! Info on optimizations
   character(len=*),parameter :: with_debug_flavor = &
-&   "@with_debug_flavor@"
+&   "@abi_debug_flavor@"
   character(len=*),parameter :: with_optim_flavor = &
-&   "@with_optim_flavor@"
+&   "@abi_optim_flavor@"
   character(len=*),parameter :: cpu_info = &
 &   "@abi_cpu_vendor@_@abi_cpu_model@"
 
