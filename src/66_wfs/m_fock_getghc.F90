@@ -25,6 +25,7 @@ module m_fock_getghc
 
  use defs_basis
  use m_abicore
+ use m_dtset
  use m_errors
  use m_xmpi
  use m_fock
@@ -104,6 +105,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
 !Arguments ------------------------------------
 ! Scalars
  type(MPI_type),intent(in) :: mpi_enreg
+ type(dataset_type) :: dtset
  type(gs_hamiltonian_type),target,intent(inout) :: gs_ham
 ! Arrays
  type(pawcprj_type),intent(inout) :: cwaveprj(:,:)
@@ -314,7 +316,7 @@ subroutine fock_getghc(cwavef,cwaveprj,ghc,gs_ham,mpi_enreg)
    call timab(1515,1,tsec)
    qvec_j(:)=gs_ham%kpt_k(:)-fockbz%kptns_bz(:,jkpt)
    qeq0=(qvec_j(1)**2+qvec_j(2)**2+qvec_j(3)**2<1.d-15)
-   call bare_vqg(qvec_j,fockcommon%gsqcut,gs_ham%gmet,fockcommon%usepaw,fockcommon%hyb_mixing,&
+   call bare_vqg(qvec_j,fockcommon%gsqcut,dtset%icutcoul,gs_ham%gmet,fockcommon%usepaw,fockcommon%hyb_mixing,&
 &   fockcommon%hyb_mixing_sr,fockcommon%hyb_range_fock,nfftf,fockbz%nkpt_bz,ngfftf,gs_ham%ucvol,vqg)
    call timab(1515,2,tsec)
 

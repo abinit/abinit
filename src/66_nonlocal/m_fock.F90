@@ -2051,6 +2051,7 @@ end subroutine fock_print
 !! INPUTS
 !!  qphon(3)=reduced coordinates for the phonon wavelength (needed if cplex==2).
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box. (gsqcut=(boxcut**2)*ecut/(2.d0*(Pi**2))
+!!  icutcoul=Option for the Coulomb potential cutoff technique
 !!  divgq0= value of the integration of the Coulomb singularity 4pi\int_BZ 1/q^2 dq. Used if q = Gamma
 !!  gmet(3,3)=metrix tensor in G space in Bohr**-2.
 !!  izero=if 1, unbalanced components of V(q,g) are set to zero
@@ -2076,11 +2077,11 @@ end subroutine fock_print
 !!
 !! SOURCE
 
-subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
+subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_fock,nfft,nkpt_bz,ngfft,ucvol,vqg)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: izero,nfft,nkpt_bz
+ integer,intent(in) :: izero,nfft,nkpt_bz,icutcoul
  real(dp),intent(in) :: gsqcut,hyb_mixing,hyb_mixing_sr,hyb_range_fock,ucvol
 !arrays
  integer,intent(in) :: ngfft(18)
@@ -2106,6 +2107,8 @@ subroutine bare_vqg(qphon,gsqcut,gmet,izero,hyb_mixing,hyb_mixing_sr,hyb_range_f
    msg='SR mixing<>0 while range separation=0!'
    MSG_BUG(msg)
  end if
+
+! Re-use variable defined initially in m_vcoul
 
 !Treatment of the divergence at q+g=zero
 !For the time being, only Spencer-Alavi scheme...
