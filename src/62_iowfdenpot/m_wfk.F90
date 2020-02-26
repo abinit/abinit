@@ -3340,11 +3340,11 @@ print *, 'spin_sym, spin,  nsppol, wfk_disk%nsppol ', spin_sym, spin, nsppol, wf
          end if
 
 ! if nband_me goes beyond the end of the bands on disk, just read those we have
-         nband_me_disk = min(mband,nband_me)
+         nband_me_disk = min(nband_k,nband_me)
 ! TODO : in parallel, iband+nband_me-1 could be larger than mband_disk
 !   we want to limit nband_me_disk in that case too, just for the last band procs
-         if (iband+nband_me-1 > mband) then
-           nband_me_disk = mband+1-iband
+         if (iband+nband_me-1 > nband_k) then
+           nband_me_disk = nband_k+1-iband
          end if
 
 ! may need to re-read if for a different equivalent k if I need other bands

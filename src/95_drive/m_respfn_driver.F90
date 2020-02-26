@@ -310,6 +310,7 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
  type(pawfgrtab_type),allocatable,save :: pawfgrtab(:)
  type(pawrhoij_type),allocatable :: pawrhoij(:),pawrhoij_read(:)
 
+integer :: icg, icg_tmp, ibdoffst, npw, iband_me
 ! ***********************************************************************
 
  DBG_ENTER("COLL")
@@ -516,6 +517,51 @@ print *, 'mcg_tmp, spin ban k spp ', mcg_tmp, dtset%mpw,dtset%nspinor,dtset%mban
  if (ireadwf0==1) then
    call WffClose(wffgs,ierr)
  end if
+
+
+   !transfer to local array
+   icg=0
+   icg_tmp=0
+   ibdoffst = 0
+print *, ' mcg, mcg_tmp ', mcg, mcg_tmp
+print *, 'shapes ', shape(cg), "  ", shape(cg_tmp)
+   do isppol=1, dtset%nsppol
+     do ikpt=1, dtset%nkpt
+       if (.not. any(mpi_enreg%proc_distrb(ikpt,:,isppol) == mpi_enreg%me_kpt)) cycle
+       npw = npwarr(ikpt)
+       iband_me = 0
+       do iband=1, dtset%nband(ikpt+dtset%nkpt*(isppol-1))
+!print *, 'mpi_enreg%proc_distrb(ikpt,iband,isppol) ', mpi_enreg%proc_distrb(ikpt,iband,isppol), &
+!&       ' meband ', mpi_enreg%me_band, ' mekpt ', mpi_enreg%me_kpt
+         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) then
+           icg_tmp = icg_tmp + npw
+           cycle
+         end if
+         iband_me = iband_me + 1
+!print *, 'is ik ib kpt icg ', isppol, ikpt, iband, kpt_rbz(:,ikpt), icg
+!if (sum(abs(cg(:,icg+1:icg+npw) + tol20 - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol6) then
+print *, 'is ik ib ', isppol, ikpt, iband
+print *, ' diff in cg ', isppol, ikpt, ' / ', dtset%nkpt
+print *, cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+print *, ' bare    cg '
+print *, cg(:,icg+1:icg+npw)
+!end if
+
+         !cg(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+         icg = icg + npw
+         icg_tmp = icg_tmp + npw
+       end do
+if (sum(abs(eigen0(ibdoffst+1:ibdoffst+dtset%nband(ikpt+dtset%nkpt*(isppol-1))) - &
+&        eigen0_tmp(ibdoffst+1:ibdoffst+dtset%nband(ikpt+dtset%nkpt*(isppol-1))))) > tol6) then
+print *, ' diff in eigen0 ', eigen0(ibdoffst+1:ibdoffst+dtset%nband(ikpt+dtset%nkpt*(isppol-1))) - &
+&        eigen0_tmp(ibdoffst+1:ibdoffst+dtset%nband(ikpt+dtset%nkpt*(isppol-1)))
+else
+write (401, *) 'is ik ib ', isppol, ikpt, iband, dtset%kptns(:,ikpt)
+end if
+       ibdoffst = ibdoffst + dtset%nband(ikpt+dtset%nkpt*(isppol-1))
+     end do
+   end do
+
 ABI_DEALLOCATE(cg_tmp)
 ABI_DEALLOCATE(eigen0_tmp)
 ABI_DEALLOCATE(occ_tmp)

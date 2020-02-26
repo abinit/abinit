@@ -1028,6 +1028,8 @@ print *, 'skipping for resid'
    dedt = zero
    call dotprod_g(dedt,doti,istwf_k,npw1*nspinor,1,conjgr,gresid,me_g0,mpi_enreg%comm_spinorfft)
    dedt=-two*two*dedt
+
+print *, 'gresid ', gresid(1:2,1:5)
    if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) call wrtout(std_out,' CGWF3_WARNING : dedt>0')
    ABI_ALLOCATE(gvnlx_direc,(2,npw1*nspinor))
    ABI_ALLOCATE(gh_direc,(2,npw1*nspinor))
@@ -1053,6 +1055,7 @@ print *, 'skipping for resid'
        gh_direc(1:2,ipw)=gh_direc(1:2,ipw)-eshift*conjgr(1:2,ipw)
      end do
    end if
+print *, 'gh_direc ', gh_direc(1:2,1:5)
 
    ! compute d2edt2, Eq.(30) of of PRB55, 10337 (1997) [[cite:Gonze1997]],
    ! with an additional factor of 2 for the difference
