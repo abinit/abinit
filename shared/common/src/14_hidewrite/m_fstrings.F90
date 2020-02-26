@@ -1516,9 +1516,8 @@ end function firstchar_1d
 !!
 !! SOURCE
 
-pure function startswith(string, prefix) result(ans)
+pure logical function startswith(string, prefix) result(ans)
 
- logical :: ans
  character(len=*),intent(in) :: string
  character(len=*),intent(in) :: prefix
 

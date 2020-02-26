@@ -1622,8 +1622,21 @@ type(poscar_t) function poscar_from_string(string, sep) result(new)
  ! 0.333333 0.666667 0.500000 B
  ! 0.666667 0.333333 0.500000 B
 
- write(std_out, "(3a)")" string:", ch10, trim(string)
- cnt = 0; start = 0; iatom = 0
+ write(std_out, "(3a)")" poscar_from_string:", ch10, trim(string)
+ cnt = 0; start = 1
+
+ !do while (string(start:start) /= " " .or. string(start:start) /= sep)
+ !  start = start +1
+ !end do
+
+ do
+   if (string(start:start) == " " .or. string(start:start) == sep) then
+     start = start + 1
+   else
+     exit
+   end if
+ end do
+
  do
    stp = index(string(start:), sep)
    if (stp == 0) exit
@@ -1634,15 +1647,29 @@ type(poscar_t) function poscar_from_string(string, sep) result(new)
      continue
    end if
 
-   stp = start + stp - 1
+   write(std_out, *)"start, stp", start, stp
+   stp = start + stp - 2
+
+   !if (start > stp) then
+   !  start = stp + 1
+   !  continue
+   !end if
+
+   ABI_CHECK(start < len_trim(string), sjoin("Error while parsing POSCAR string:", ch10, trim(string)))
+   line = string(start:stp)
+
+   !if (len_trim(adjustl(line)) == 0) then
+   !  start = stp + 1
+   !  continue
+   !end if
+
    cnt = cnt + 1
-   line = string(start:stp-1)
    write(std_out, "(2a,3(a,i0))")&
      " Parsing line: `", trim(line), "` with cnt: ", cnt, ", start: ", start, ", stp: ", stp
 
    select case (cnt)
    case (1)
-     new%header = line
+     new%header = trim(line)
 
    case (2)
      read(line, *, err=10) scaling_constant
@@ -1692,6 +1719,7 @@ type(poscar_t) function poscar_from_string(string, sep) result(new)
    case (7)
       ! number of atoms of each type.
       ! NOTE: Assuming ntypat == npsp thus alchemical mixing is not supported
+      ! There's a check in the main parser though.
       ABI_MALLOC(nattyp, (new%ntypat))
       read(line, *, err=10) nattyp
       new%natom = sum(nattyp)
@@ -1714,22 +1742,29 @@ type(poscar_t) function poscar_from_string(string, sep) result(new)
        MSG_ERROR(sjoin("Expecting `cartesian` or `direct` for the coordinate system but got:", system))
      end if
 
-   case (9:)
-     iatom = iatom + 1
-     ABI_CHECK(iatom <= new%natom, sjoin("iatom should be <= natom but:", itoa(iatom), ">", itoa(new%natom)))
-     read(line, *, err=10) new%xred(:, iatom), symbol
-     do itypat=1, new%ntypat
-       if (symbols(itypat) == symbol) then
-         new%typat(iatom) = itypat; exit
+   case (9)
+     do iatom=1,new%natom
+       read(line, *, err=10) new%xred(:, iatom), symbol
+       do itypat=1, new%ntypat
+         if (symbols(itypat) == symbol) then
+           new%typat(iatom) = itypat; exit
+         end if
+       end do
+       if (itypat == new%ntypat + 1) then
+         MSG_ERROR(sjoin("Cannot find symbol:", symbol, "in initial list. Check POSCAR string."))
        end if
+       start = stp + 2
+       stp = index(string(start:), sep)
+       stp = start + stp - 2
+       line = string(start:stp)
      end do
-     if (itypat == new%ntypat + 1) then
-       MSG_ERROR(sjoin("Cannot find symbol:", symbol, "in initial list. Check POSCAR string."))
-     end if
+     exit
+
+   case default
+     MSG_ERROR(sjoin("No handler for counter:", itoa(cnt)))
    end select
 
-   start = stp + 1
-   ABI_CHECK(start < len_trim(string), sjoin("Error while parsing POSCAR string:", ch10, trim(string)))
+   start = stp + 2
  end do
 
  ! Convert ang -> bohr

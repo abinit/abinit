@@ -3171,6 +3171,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' ph_wstep ph_intmeth ph_smear ph_nqshift ph_qshift'
  list_vars=trim(list_vars)//' plowan_bandi plowan_bandf plowan_compute plowan_iatom plowan_it plowan_lcalc'
  list_vars=trim(list_vars)//' plowan_natom plowan_nbl plowan_nt plowan_projcalc plowan_realspace'
+ list_vars=trim(list_vars)//' poscar '
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff ppmfrq ppmodel'
  list_vars=trim(list_vars)//' prepanl prepgkk papiopt'
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtcif prtden'

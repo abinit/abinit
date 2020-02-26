@@ -28,7 +28,7 @@ module m_parser
  use m_xmpi
 
  use m_io_tools,  only : open_file
- use m_fstrings,  only : sjoin, itoa, inupper
+ use m_fstrings,  only : sjoin, itoa, inupper, startswith
  use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
 
  implicit none
@@ -435,8 +435,8 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
  character :: blank=' '
 !scalars
  integer,save :: include_level=-1
- integer :: ii,ii1,ii2,ij,iline,ios,iost,lenc,lenstr_inc,mline,nline1,input_unit,ierr
- logical :: include_found,ex
+ integer :: ii,ii1,ii2,ij,iline,ios,iost,lenc,lenstr_inc,mline,nline1,input_unit,ierr, in_poscar
+ logical :: include_found, ex
  character(len=1) :: string1
  character(len=3) :: string3
  character(len=500) :: filnam_inc,msg
@@ -470,6 +470,8 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
  ! Initialize string to blanks
  string=blank
  lenstr=1
+
+ in_poscar = 0
 
  ! Set maximum number lines to be read to some large number
  mline=50000
@@ -602,22 +604,23 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
 
      ! Parsing POSCAR string is much easier if we have newlines in the token
      ! so append ch10 to the line if we are inside the poscar string.
-     !if (startswith(line, "poscar")) then
-     !  in_poscar = 1
-     !  line = line(1:lenc)//ch10; lenc = lenc + 1
-     !end if
-     !if (in_poscar /= 0) then
-     !   if startswith(line, '"') then
-     !     ! This terminates the poscar variable.
-     !     in_poscar = 0
-     !   else
-     !     in_poscar = in_poscar + 1
-     !     if (in_poscar > 1) then
-     !       line = line(1:lenc)//ch10; lenc = lenc + 1
-     !     end if
-     !   end if
-     !  end if
-     !end if
+     if (startswith(line, "poscar")) then
+       !print *, "in_poscar"
+       in_poscar = 1
+       line = line(1:lenc)//ch10; lenc = lenc + 1
+     end if
+
+     if (in_poscar /= 0) then
+       if (startswith(line, '"')) then
+         ! This terminates the poscar variable.
+         in_poscar = 0
+       else
+         in_poscar = in_poscar + 1
+         if (in_poscar > 1) then
+           line = line(1:lenc)//ch10; lenc = lenc + 1
+         end if
+       end if
+     end if
 
    else
      ! ii=0 means line starts with #, is entirely a comment line
@@ -697,7 +700,7 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
 
  !write(std_out, "(3a)")"string after instrng:", ch10, trim(string)
 
- include_level=include_level-1
+ include_level = include_level - 1
 
  DBG_EXIT("COLL")
 
@@ -997,8 +1000,8 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  character(len=*),intent(in) :: typevarphys
  character(len=*),optional,intent(out) :: key_value
 !arrays
- integer,intent(inout) :: intarr(marr) !vz_i
- real(dp),intent(inout) :: dprarr(marr) !vz_i
+ integer,intent(inout) :: intarr(marr)
+ real(dp),intent(inout) :: dprarr(marr)
 
 !Local variables-------------------------------
  character(len=1), parameter :: blank=' '
