@@ -1,4 +1,4 @@
-## Copyright (C) 2019 Yann Pouillon
+## Copyright (C) 2020 Yann Pouillon
 
 #
 # NetCDF I/O library - C++ interface
@@ -182,7 +182,8 @@ AC_DEFUN([SD_NETCDF_CXX_DETECT], [
     if test "${sd_netcdf_cxx_init}" = "def"; then
       sd_netcdf_cxx_enable="no"
     else
-      AC_MSG_ERROR([NetCDF is not available])
+      #AC_MSG_ERROR([NetCDF is not available])
+      AC_MSG_WARN([NetCDF is not available])
     fi
   fi
 
