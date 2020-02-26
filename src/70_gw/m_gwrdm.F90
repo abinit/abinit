@@ -36,7 +36,7 @@ module m_gwrdm
  private
 !!***
 
- public :: calc_rdm,calc_rdmc,natoccs,printdm1,print_wfk_gw_rdm
+ public :: calc_rdm,calc_rdmc,natoccs,printdm1,update_wfk_gw_rdm
 !!***
 
 contains
@@ -194,8 +194,8 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
  character(len=500) :: msg,msg2
  real(dp) :: toccs_k
 !arrays
- real(dp),allocatable :: occs(:),rwork(:)
- complex(dpc),allocatable :: work(:),dm1_tmp(:,:)
+ real(dp),allocatable :: occs(:),rwork(:),occs_tmp(:)
+ complex(dpc),allocatable :: work(:),dm1_tmp(:,:),eigenvect(:,:)
 !************************************************************************
 
  DBG_ENTER("COLL")
@@ -203,8 +203,10 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
  ndim=ib2-ib1+1
  lwork=2*ndim-1
  ABI_MALLOC(occs,(ndim))
+ ABI_MALLOC(occs_tmp,(ndim))
  ABI_MALLOC(work,(lwork))
  ABI_MALLOC(dm1_tmp,(ndim,ndim))
+ ABI_MALLOC(eigenvect,(ndim,ndim))
  ABI_MALLOC(rwork,(3*ndim-2))
 
  dm1_tmp=0.0d0
@@ -220,6 +222,14 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
  info=0
  call zheev('v','u',ndim,dm1_tmp,ndim,occs,work,lwork,rwork,info)
 
+
+ do ib1dm=1,ndim
+  occs_tmp(ib1dm)=occs(ndim-(ib1dm-1))
+  do ib2dm=1,ndim
+   eigenvect(ib1dm,ib2dm)=dm1_tmp(ndim-(ib1dm-1),ib2dm)
+  enddo
+ enddo
+
  if(info==0) then
    if(iinfo==0) then       
      write(msg,'(a51,3f10.5)') 'Occs. after updating with the exchange at k-point:',BSt%kptns(1:,kpoint)
@@ -230,12 +240,12 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
    call wrtout(ab_out,msg,'COLL')
    ib1dm=ndim-(ndim/10)*10
    do ib2dm=1,(ndim/10)*10,10
-     write(msg,'(10f10.5)') occs(ib2dm:ib2dm+9)
+     write(msg,'(f11.5,9f10.5)') occs_tmp(ib2dm:ib2dm+9)
      call wrtout(std_out,msg,'COLL')
      call wrtout(ab_out,msg,'COLL')
    enddo  
    ib1dm=(ndim/10)*10+1
-   write(msg,'(*(f10.5))') occs(ib1dm:)
+   write(msg,'(f11.5,*(f10.5))') occs_tmp(ib1dm:)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  else
@@ -248,10 +258,10 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
  toccs_k=0.0d0
  do ib1dm=1,ndim
    do ib2dm=1,ndim
-     nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),kpoint)=dm1_tmp(ib2dm,ib1dm)
+     nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),kpoint)=eigenvect(ib2dm,ib1dm)
    enddo
-   occs_ks(ib1+(ib1dm-1),kpoint)=occs(ib1dm)
-   toccs_k=toccs_k+occs(ib1dm)
+   occs_ks(ib1+(ib1dm-1),kpoint)=occs_tmp(ib1dm)
+   toccs_k=toccs_k+occs_tmp(ib1dm)
  enddo
 
  write(msg,'(a22,i5,a3,i5,a21,f10.5)') ' Total occ. from band ',ib1,' to', ib2,' at current k-point: ',toccs_k
@@ -265,26 +275,45 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
  ABI_FREE(occs)
  ABI_FREE(work)
  ABI_FREE(dm1_tmp)
+ ABI_FREE(eigenvect)
+ ABI_FREE(occs_tmp)
 
  DBG_EXIT("COLL")
 
 end subroutine natoccs
 !!***
 
-subroutine print_wfk_gw_rdm(wfd,nateigv,occs)
+subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt)
 !Arguments ------------------------------------
 !scalars
-type(wfd_t),intent(in) :: wfd
+ integer,intent(in) :: b1gw,b2gw
+ type(wfd_t),intent(inout) :: wfd_f
+ type(wfd_t),intent(in) :: wfd_i
+ type(ebands_t),target,intent(inout) :: BSt
 !arrays
-real(dp),intent(in) :: occs(:,:)
-complex(dpc),intent(in) :: nateigv(:,:,:)
+ real(dp),intent(in) :: occs(:,:)
+ complex(dpc),intent(in) :: nateigv(:,:,:)
 !Local variables ------------------------------
 !scalars
+ integer :: ib1dm,ib2dm,ikpoint,irecip_v,iname
 !arrays
 !************************************************************************
- write(*,*) wfd%Wave(1,2,1)%ug(1) ! see m_sigma_driver.F90 
-
-end subroutine print_wfk_gw_rdm        
+ !Wfd%Wave(1,2,1)%ug(1) ! BAND 1 , k-POINT 2, SPIN 1, UG="MO Coef" 1 
+ do ikpoint=1,BSt%nkpt
+   do ib1dm=b1gw,b2gw
+     do irecip_v=1,wfd_i%Kdata(ikpoint)%npw ! No spin used, setting nspinor=1 
+      wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v)=0.0d0 
+      do ib2dm=b1gw,b2gw
+        wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v)=wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v) &
+                +nateigv(ib2dm,ib1dm,ikpoint)*wfd_f%Wave(ib2dm,ikpoint,1)%ug(irecip_v)
+      enddo
+     enddo 
+   enddo
+ enddo
+ do ikpoint=1,BSt%nkpt
+   BSt%occ(b1gw:b2gw,ikpoint,1) = occs(b1gw:b2gw,ikpoint) ! No spin used
+ enddo
+end subroutine update_wfk_gw_rdm        
 !!***
 
 subroutine printdm1(ib1,ib2,dm1) ! Only used for debug of this file, do not use it with large arrays

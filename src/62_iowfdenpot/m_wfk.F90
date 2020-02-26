@@ -1805,7 +1805,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
  nband_disk   = Wfk%nband(ik_ibz,spin)
  nb_block     = (band_block(2) - band_block(1) + 1)
  npw_tot      = npw_disk * nspinor_disk * nb_block
-
+ 
  if (PRESENT(kg_k)) then
    ABI_CHECK(SIZE(kg_k,DIM=2) >= npw_disk,"kg_k too small")
  end if

@@ -113,7 +113,7 @@ module m_sigma_driver
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
 ! MRM density matrix module and Gaussian quadrature one
- use m_gwrdm,         only : calc_rdm, calc_rdmc, natoccs, printdm1, print_wfk_gw_rdm
+ use m_gwrdm,         only : calc_rdm, calc_rdmc, natoccs, printdm1, update_wfk_gw_rdm
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre
 
  implicit none
@@ -244,7 +244,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc) :: max_degw,cdummy
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
- character(len=fnlen) :: wfk_fname,pawden_fname
+ character(len=fnlen) :: wfk_fname,pawden_fname,gw1rdm_fname !MRM
  type(kmesh_t) :: Kmesh,Qmesh
  type(ebands_t) :: KS_BSt,QP_BSt
  type(vcoul_t) :: Vcp
@@ -723,9 +723,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  call wfd_init(Wfd,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
    Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
    Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
+
+ write(*,*) 'MRM ECUT_WFN',Dtset%ecutwfn
  
- ! MRM also initialize the Wfd_dm for GW 1-RDM if required 
- if (gwcalctyp==21) then 
+ ! MRM also initialize the Wfd_dm for GW 1-RDM if required.
+ ! Warning, this should be replaced by copy in the future. FIXME 
+ if (gwcalctyp==21) then
    call wfd_init(Wfd_dm,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
      Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
      Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
@@ -2207,7 +2210,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 &     gwx_ngfft,ngfftf,Dtset%prtvol,Dtset%pawcross)
       ! MRM compute 1-RDM correction?
       if(gwcalctyp==21) then 
-!       Compute for Sigma_x - Vxc
+!       Compute for Sigma_x - Vxc, DELTA Sigma_x - Vxc for hybrid functionals (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact)
         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         !call printdm1(ib1,ib2,potk)
         dm1k=0.0d0 
@@ -2275,14 +2278,13 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ABI_DEALLOCATE(sigcme_k)
      end do
    end if
-   !! MRM deallocate the 1-RDM arrays
+   !! MRM print WFK and DEN files. Finally, deallocate all arrays used for 1-RDM update
    if(gwcalctyp==21) then
      iinfo=1 ! Should be an input parameter
      if(iinfo==1) then
-
-       write(*,*) Wfd%Wave(1,2,1)%ug(1) !       MO COEF BAND 1 , K POINT 2, SPIN 1, UG=AO 1  
-       call print_wfk_gw_rdm(Wfd_dm,nateigv,occs) 
-
+       call update_wfk_gw_rdm(Wfd,Wfd_dm,nateigv,occs,b1gw,b2gw,KS_BSt)
+       gw1rdm_fname='gw_rdm_DS100_WFK' ! How to update dataset?
+       call Wfd_dm%write_wfk(Hdr_wfk,KS_BSt,gw1rdm_fname)
        Wfd_dm%bks_comm = xmpi_comm_null
        call Wfd_dm%free()
      endif

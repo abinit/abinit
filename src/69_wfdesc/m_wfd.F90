@@ -546,13 +546,12 @@ subroutine kdata_init(Kdata,Cryst,Psps,kpoint,istwfk,ngfft,MPI_enreg,ecut,kg_k)
  !@kdata_t
  Kdata%istwfk = istwfk
  Kdata%useylm = Psps%useylm
-
+ 
  if (PRESENT(ecut)) then
   ! Calculate G-sphere from input ecut.
   ltest = (.not.allocated(Kdata%kg_k))
   ABI_CHECK(ltest,"Kdata%kg_k is allocated!")
   call get_kg(kpoint,istwfk,ecut,Cryst%gmet,npw_k,Kdata%kg_k)
-
  else if (PRESENT(kg_k)) then
    ! Use input g-vectors.
    npw_k = SIZE(kg_k,DIM=2)
@@ -4938,9 +4937,11 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
    call wfkfile%open_write(Hdr,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self,write_hdr=.FALSE.,write_frm=.FALSE.)
  end if
 
+ MSG_WARNING("Skipping the check of wfd%ihave_ug(band,ik_ibz,spin,Stored") ! MRM
+
  do spin=1,Wfd%nsppol
    do ik_ibz=1,Wfd%nkibz
-     if (.not. wfd%ihave_ug(band,ik_ibz,spin,"Stored")) cycle
+     !if (.not. wfd%ihave_ug(band,ik_ibz,spin,"Stored")) cycle ! MRM why check this?
      nband_k = Wfd%nband(ik_ibz,spin)
      npw_k   = Wfd%npwarr(ik_ibz)
 
@@ -4965,7 +4966,6 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
      ! This works only if all the bands are on the same node.
      !band_block = [1, nband_k]
      !call wfd_extract_cgblock(Wfd,[(ii, ii=1,nband_k)],ik_ibz,spin,cg_k)
-
      do blk=1,nblocks
        band_block = blocks(:,blk)
        call wfd_extract_cgblock(Wfd,[(ii, ii=band_block(1),band_block(2))],ik_ibz,spin,cg_k)
@@ -5109,7 +5109,7 @@ subroutine wfd_read_wfk(Wfd, wfk_fname, iomode, out_hdr)
   do spin=1,Wfd%nsppol
     do ik_ibz=1,Wfd%nkibz
       if (all_countks(ik_ibz, spin) == 0) cycle
-      npw_disk   = Hdr%npwarr(ik_ibz)
+      npw_disk   = Hdr%npwarr(ik_ibz)  
       nband_disk = Hdr%nband(ik_ibz+(spin-1)*Hdr%nkpt)
       istwfk_disk = hdr%istwfk(ik_ibz)
       change_gsphere = istwfk_disk /= wfd%istwfk(ik_ibz)
