@@ -78,7 +78,7 @@ The input file has two datasets,
 the first to generate the *WFK* file, and the second to draw the band structure.
 Now you are ready to run Abinit. Issue the following:
 
-    abinit tfold2bloch_1.files > & tfold1bloch_1.log &
+    abinit < tfold2bloch_1.files > & tfold1bloch_1.log &
 
 This will generate a self consistent charge density for the 6 Hydrogen atom
 supercell structure, and the wave function file, *tfold2bloch_1o_WFK*, which is
@@ -107,7 +107,7 @@ Edit *plot_band.m* file and point to the newly created *tfold2bloch_1o_DS2_EIG.d
 
 Then, run the *plot_band.m* script in MatLab
 
-    >&gtplot;_band
+    plot_band.m
 
 This will plot the band structure of the 6 atom Hydrogen supercell created.
 
@@ -139,7 +139,7 @@ arguments. For this example the multiplicity used was (1:2:3)
 
 Execute the following command:
 
-    fold2Bloch tfold2bloch_WFK 1:2:3
+    fold2Bloch tfold2bloch_1o_DS2_WFK 1:2:3
 
 You should see the following:
 
@@ -156,16 +156,16 @@ You should see the following:
    97% Processing K point:    0.000000    0.000000    0.450000
   100% Processing K point:    0.000000    0.000000    0.500000
  Number of K points processed:          43
- Data was written to: fold2Bloch.out
+ Data was written to: fold2Bloch.f2b
  Data format: KX, KY, KZ, Eigenvalue(Ha), Weight
 ```
 
 That output tells us which K-point was processed, total number of K-points
 processed, output file, and the format that the data is written in.
 
-Now take a look at the *fold2Bloch.out*. The first few lines should be as follows:
+Now take a look at the *tfold2Bloch.f2b*. The first few lines should be as follows:
 
-    less fold2Bloch.out
+    less tfold2Bloch.f2b
 
     0.000000  -0.250000   0.000000  -0.317960   0.579542
     0.000000  -0.250000   0.333333  -0.317960   0.000000

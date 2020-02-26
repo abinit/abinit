@@ -329,7 +329,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      case(RUNL_RESPFN)
        call ydoc%add_ints("optdriver, rfddk, rfelfd, rfmagn, rfphon, rfstrs", &
          [dtset%optdriver, dtset%rfddk, dtset%rfelfd, dtset%rfmagn, dtset%rfphon, dtset%rfstrs], &
-         dict_key="meta")
+         ignore=0, dict_key="meta")
          ! dtset%rfdir ??
 
      case(RUNL_NONLINEAR)
@@ -363,11 +363,11 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        MSG_ERROR(msg)
      end select
 
-     if (dtset%use_yaml == 1) then
-       call ydoc%write_and_free(ab_out)
-     else
-       call ydoc%write_and_free(std_out)
-     end if
+     !if (dtset%use_yaml == 1) then
+     call ydoc%write_and_free(ab_out)
+     !else
+     !  call ydoc%write_and_free(std_out)
+     !end if
    end if
 
    if ( dtset%np_slk == 0 ) then

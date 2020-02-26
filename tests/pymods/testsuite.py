@@ -3746,6 +3746,10 @@ class AbinitTestSuite(object):
                     "lengthMenu": [[100, 200, -1], [100, 200, "All"]],
                     "paging":   true,
                     "ordering": true,
+                    // No ordering applied by DataTables during initialisation.
+                    // The rows are shown in the order they are read by DataTables
+                    // (i.e. the original order from the DOM
+                    "order": [],
                     "info":     true
                 });
             } );

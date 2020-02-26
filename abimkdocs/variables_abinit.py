@@ -19698,19 +19698,20 @@ that takes into account the maximum phonon frequency.
 """,
 ),
 
-Variable(
-    abivarname="frohl_params",
-    varset="gw",
-    topics=['SelfEnergy_expert'],
-    vartype="real",
-    defaultval=[0, 0, 0, 0],
-    dimensions=[4],
-    requires="[[optdriver]] in [7]",
-    mnemonics="FROHLich PARAMeterS",
-    text=r"""
-This variable is still under development.
-""",
-),
+# TODO: Remove
+#Variable(
+#    abivarname="frohl_params",
+#    varset="gw",
+#    topics=['SelfEnergy_expert'],
+#    vartype="real",
+#    defaultval=[0, 0, 0, 0],
+#    dimensions=[4],
+#    requires="[[optdriver]] in [7]",
+#    mnemonics="FROHLich PARAMeterS",
+#    text=r"""
+#This variable is still under development. User interface will change
+#""",
+#),
 
 Variable(
     abivarname="prteliash",
@@ -20161,6 +20162,8 @@ Possible values:
 !!! important
 
     eph_ecutosc cannot be greater than [[ecut]]
+
+This variable is still under development!
 """,
 ),
 

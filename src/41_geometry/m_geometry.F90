@@ -1665,7 +1665,6 @@ end subroutine mkrdim
 
 subroutine xcart2xred(natom,rprimd,xcart,xred)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: natom

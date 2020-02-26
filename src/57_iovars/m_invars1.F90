@@ -312,7 +312,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
       'Action: check the input file.'
      MSG_ERROR(msg)
    end if
-!  Check that natom is greater than 0
+
+   ! Check that natom is greater than 0
    if (dtsets(idtset)%natom<=0) then
      write(msg, '(a,i0,2a,i0,3a)' )&
       'Input natom must be > 0, but was ',dtsets(idtset)%natom,ch10,&
