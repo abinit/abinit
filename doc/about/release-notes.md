@@ -92,7 +92,7 @@ with many tests provided.
 List of tests: v9#50-61 and v8#44. New input variables: [[dvdb_qcache_mb]], 
 [[eph_phrange]], [[eph_tols_idelta]], [[eph_tols_idelta]], 
 eph_ecut_osc, [[eph_np_pqbks]], [[eph_restart]], 
-[[eph_stern]], eph_use_interp, [[frohl_params]], 
+[[eph_stern]], eph_use_interp, frohl_params (TO BE DOCUMENTED), 
 [[getdvdb]], [[getdvdb_path]], [[getkerange_path]],
 [[irddvdb]], [[prteliash]], [[sigma_bsum_range]], [[sigma_erange]],
 [[sigma_ngkpt]], [[sigma_nshiftk]], [[sigma_shiftk]], [[symv1scf]].
@@ -256,7 +256,7 @@ YAML sections are now generated in the output file, sometimes replacing text sec
 At present there is a YAML section for the components of the total energy, as well as a YAML section for GW calculations,
 and some YAML sections giving information about the iteration status..
 
-Example of tests: paral#86, v67mbpt#2. See the input variable [[use_yaml]].
+Example of tests: paral#86, v67mbpt#2. See the input variable use_yaml (TO BE DOCUMENTED).
 At the occasion of the development of this capability, and its adaptation to the test farm, the
 PERL script fldiff.pl has been replaced by a Python fldiff.py script. 
 See related information in Sec. 5.5 of [[cite:Gonze2020]].
