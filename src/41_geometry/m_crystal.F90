@@ -1599,7 +1599,8 @@ type(poscar_t) function poscar_from_string(string, sep) result(new)
  character(len=1),intent(in) :: sep
 
 !Local variables-------------------------------
- integer :: start, beg, stp, cnt, iatom, itypat, ierr, ii
+ integer,parameter :: marr = 3
+ integer :: start, beg, stp, cnt, iatom, itypat, ierr, ii, narr, b1
  real(dp) :: scaling_constant
  character(len=len(string)) :: line, system, symbol
 !arrays
@@ -1607,8 +1608,12 @@ type(poscar_t) function poscar_from_string(string, sep) result(new)
  logical,allocatable :: duplicated(:)
  character(len=5),allocatable :: symbols(:)
  real(dp),allocatable :: xcart(:,:)
+ integer :: intarr(marr)
+ real(dp):: dprarr(marr)
 
 !************************************************************************
+
+ ! Example of POSCAR:
 
  ! Mg1 B2
  ! 1.0
@@ -1622,6 +1627,8 @@ type(poscar_t) function poscar_from_string(string, sep) result(new)
  ! 0.333333 0.666667 0.500000 B
  ! 0.666667 0.333333 0.500000 B
 
+ ! See also https://github.com/ExpHP/vasp-poscar/blob/master/doc/format.md
+
  write(std_out, "(3a)")" poscar_from_string:", ch10, trim(string)
  cnt = 0; start = 1
 
@@ -1629,6 +1636,7 @@ type(poscar_t) function poscar_from_string(string, sep) result(new)
  !  start = start +1
  !end do
 
+ ! Ingore initial whitespaces and separators.
  do
    if (string(start:start) == " " .or. string(start:start) == sep) then
      start = start + 1
@@ -1638,12 +1646,12 @@ type(poscar_t) function poscar_from_string(string, sep) result(new)
  end do
 
  do
+   ABI_CHECK(start < len_trim(string), sjoin("Invalid poscar string:", string))
    stp = index(string(start:), sep)
    if (stp == 0) exit
    if (stp == 1) then
      ! Empty line
      start = start + 2
-     ABI_CHECK(start < len_trim(string), sjoin("Invalid poscar string:", string))
      continue
    end if
 
@@ -1667,16 +1675,20 @@ type(poscar_t) function poscar_from_string(string, sep) result(new)
    write(std_out, "(2a,3(a,i0))")&
      " Parsing line: `", trim(line), "` with cnt: ", cnt, ", start: ", start, ", stp: ", stp
 
+   if (cnt /= 1) then
+     ii = index(line, "#")
+     if (ii /= 0) line = line(:ii-1)
+   end if
+
    select case (cnt)
    case (1)
      new%header = trim(line)
 
    case (2)
-     read(line, *, err=10) scaling_constant
-     ABI_CHECK(scaling_constant > zero, sjoin("scaling constant must be > 0 but found:", ftoa(scaling_constant)))
+     read(line, *, err=10, end=20) scaling_constant
 
    case (3:5)
-     read(line, *, err=10) new%rprimd(:, cnt-2)
+     read(line, *, err=10, end=20) new%rprimd(:, cnt-2)
 
    case (6)
      ! Read line with the names of the atoms.
@@ -1709,6 +1721,7 @@ type(poscar_t) function poscar_from_string(string, sep) result(new)
          if (symbols(itypat) == symbols(ii)) duplicated(ii) = .True.
        end do
      end do
+
      if (any(duplicated)) then
        NOT_IMPLEMENTED_ERROR()
        !ABI_FREE(symbols)
@@ -1721,30 +1734,39 @@ type(poscar_t) function poscar_from_string(string, sep) result(new)
       ! NOTE: Assuming ntypat == npsp thus alchemical mixing is not supported
       ! There's a check in the main parser though.
       ABI_MALLOC(nattyp, (new%ntypat))
-      read(line, *, err=10) nattyp
+      read(line, *, err=10, end=20) nattyp
       new%natom = sum(nattyp)
       ABI_FREE(nattyp)
 
-      ! At this point, allocate Abinit variables.
+      ! At this point, we can allocate Abinit arrays.
       ABI_MALLOC(new%typat, (new%natom))
       ABI_MALLOC(new%znucl, (new%ntypat))
       ABI_MALLOC(new%xred, (3, new%natom))
 
+      ! Note that first letter should be capitalized, rest must be lower case
       do itypat=1,new%ntypat
-        ! TODO: Capitalize symbols in atomdata_t
         new%znucl(itypat) = symbol2znucl(symbols(itypat))
       end do
 
    case (8)
-     read(line, *, err=10) system
+     read(line, *, err=10, end=20) system
      system = tolower(system)
      if (system /= "cartesian" .and. system /= "direct") then
        MSG_ERROR(sjoin("Expecting `cartesian` or `direct` for the coordinate system but got:", system))
      end if
 
    case (9)
+     ! Parse atomic positions.
      do iatom=1,new%natom
-       read(line, *, err=10) new%xred(:, iatom), symbol
+       ii = index(line, "#")
+       if (ii /= 0) line = line(:ii-1)
+       read(line, *, err=10, end=20) new%xred(:, iatom), symbol
+
+       b1 = 1
+       !call inarray(b1, "poscar_coord_line", dprarr, intarr, marr, 3, line, "DPR")
+       !new%xred(:, iatom) = dprarr(1:3)
+       !read(line(b1:), *, err=10, end=20) symbol
+
        do itypat=1, new%ntypat
          if (symbols(itypat) == symbol) then
            new%typat(iatom) = itypat; exit
@@ -1768,7 +1790,15 @@ type(poscar_t) function poscar_from_string(string, sep) result(new)
  end do
 
  ! Convert ang -> bohr
- new%rprimd = scaling_constant * new%rprimd / Bohr_Ang
+ if (scaling_constant > zero) then
+   new%rprimd = scaling_constant * new%rprimd / Bohr_Ang
+ else
+   ABI_CHECK(scaling_constant > zero, sjoin("scaling constant must be > 0 but found:", ftoa(scaling_constant)))
+   ! In vasp, a negative scale factor is treated as a volume. We need
+   ! to translate this to a proper lattice vector scaling.
+   !vol = abs(det(lattice))
+   !lattice *= (-scale / vol) ** (1 / 3)
+ end if
 
  if (system == "cartesian") then
    ! Go from cartesian to reduced.
@@ -1780,10 +1810,10 @@ type(poscar_t) function poscar_from_string(string, sep) result(new)
 
  ABI_FREE(symbols)
  ABI_FREE(duplicated)
-
  return
 
  10 MSG_ERROR(sjoin("Error while parsing POSCAR string:", ch10, trim(string)))
+ 20 MSG_ERROR(sjoin("End-of-line error while parsing POSCAR line:", ch10, trim(line)))
 
 end function poscar_from_string
 !!***
@@ -1872,7 +1902,7 @@ subroutine poscar_print_abivars(self, unit)
  write(unit, sjoin("(a, ", itoa(self%ntypat), "(f5.1,1x))")) " znucl ", self%znucl
  write(unit, "(a)")" rprimd "
  do ii=1,3
-   write(unit, "(2x, 3(f11.7,1x))")self%rprimd(:, ii)
+   write(unit, "(2x, 3(f11.7,1x))") self%rprimd(:, ii)
  end do
  write(unit, "(a)")" xred"
  do ii=1,self%natom

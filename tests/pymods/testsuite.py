@@ -1937,7 +1937,7 @@ class BaseTest(object):
                 with open(self.stdin_fname, "wt") as fh:
                     fh.writelines(self.make_stdin())
                 stdin_fname = self.stdin_fname
-                bin_argstr = self.exec_args
+                bin_argstr = " " + self.exec_args
 
             else:
                 # New CLI mode: invoke exec with syntax `abinit run.abi`
@@ -1947,7 +1947,7 @@ class BaseTest(object):
                 self.prepare_new_cli_invokation()
 
                 path = os.path.join(self.workdir, os.path.basename(self.inp_fname))
-                bin_argstr = path + self.exec_args
+                bin_argstr = path + " " + self.exec_args
                 #print("Using .abi mode with bin_argstr", bin_argstr)
 
             self.run_etime = runner.run(self.nprocs, self.bin_path,

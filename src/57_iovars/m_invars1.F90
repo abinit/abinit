@@ -313,12 +313,13 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
        ABI_CHECK(intarr(1) == poscar%natom, "natom from variable and from poscar do not agree with each other")
      end if
      intarr(1) = poscar%natom
+     tread = 1
    end if
 
    !  Might also initialize natom from XYZ file
    if (tread==0) call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'_natom',tread,'INT')
 
-   if(tread==1)then
+   if (tread==1) then
      dtsets(idtset)%natom=intarr(1)
    else
      write(msg, '(a,i0,2a)' )&
