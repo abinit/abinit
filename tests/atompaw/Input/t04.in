@@ -48,7 +48,7 @@ nshiftk   4
 #%% use_files_file = yes
 #%% test_chain = t03.in, t04.in
 #%% [files]
-#%% files_to_test = t04.out, tolnlines=   88,   tolabs=  1.501e-2,    tolrel=  7.50e-2, fld_options = -easy
+#%% files_to_test = t04.out, tolnlines=   88,   tolabs=  3.1e-2,    tolrel=  7.50e-2, fld_options = -easy
 #%% psp_files = Ni.GGA-PBE-paw.abinit 
 #%% [paral_info]
 #%% max_nprocs = 1
