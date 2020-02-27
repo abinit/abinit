@@ -843,7 +843,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 !Local variables-------------------------------
 !scalars
  integer :: bandpp,bdtot_index,dimffnl,iband,iband_cprj,iband_last,ibg,icg,ider
- integer :: idir,ierr,ikg,ikpt,ilm,ipw,isppol,istwf_k,kk,ll
+ integer :: info,idir,ikg,ikpt,ilm,ipw,isppol,istwf_k,kk,ll
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: npw_k,spaceComm
  integer :: use_ACE_old
@@ -1103,8 +1103,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
      mkl=-mkl
 
 ! Cholesky factorisation of -mkl=Lx(trans(L)*. On output mkl=L
-     call zpotrf("L",nband_k,mkl,nband_k,ierr)
-     ABI_CHECK(ierr == 0, sjoin("ZPOTRF returned:", itoa(ierr)))
+     call zpotrf("L",nband_k,mkl,nband_k,info)
 
 ! calculate trans(L-1)
      ABI_ALLOCATE(bb,(2,nband_k,nband_k))
@@ -1112,8 +1111,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
      do kk=1,nband_k
        bb(1,kk,kk)=one
      end do
-     call ztrtrs("L","T","N",nband_k,nband_k,mkl,nband_k,bb,nband_k,ierr)
-     ABI_CHECK(ierr == 0, sjoin("ZTRTRS returned:", itoa(ierr)))
+     call ztrtrs("L","T","N",nband_k,nband_k,mkl,nband_k,bb,nband_k,info)
      fock%fockACE(ikpt,isppol)%xi=zero
 
 ! Calculate ksi

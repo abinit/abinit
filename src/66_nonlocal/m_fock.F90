@@ -2096,7 +2096,7 @@ subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hy
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05
  real(dp),parameter :: tolfix=1.000000001e0_dp ! Same value as the one used in hartre
  real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,rcut,divgq0
- character(len=100) :: msg
+ character(len=100) :: msg,method
 !arrays
  integer :: id(3)
  real(dp),allocatable :: gq(:,:)
@@ -2109,6 +2109,8 @@ subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hy
  end if
 
 ! Re-use variable defined initially in m_vcoul
+if (icutcoul == 0) method = 'SPHERE' ! Default value for the moment
+if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 
 !Treatment of the divergence at q+g=zero
 !For the time being, only Spencer-Alavi scheme...
@@ -2192,10 +2194,16 @@ subroutine bare_vqg(qphon,gsqcut,icutcoul,gmet,izero,hyb_mixing,hyb_mixing_sr,hy
 
          den=piinv/gs
 
-!        Spencer-Alavi screening
+         ! Treat the Coulomb potential cut-off by selected method
          if (abs(hyb_mixing)>tol8)then
-           vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
-!&         vqg(ii)=vqg(ii)+hyb_mixing*den
+           SELECT CASE ( trim(method) )
+           CASE ('SPHERE')
+             vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
+             !& vqg(ii)=vqg(ii)+hyb_mixing*den
+           CASE DEFAULT
+             msg = sjoin('Cut-off method: ',method)
+             MSG_ERROR(msg)
+           END SELECT  
          endif
 !        Erfc screening
          if (abs(hyb_mixing_sr)>tol8) then
