@@ -2196,14 +2196,14 @@ if (icutcoul /= 0) method = 'unknown' ! Default value for the moment
 
          ! Treat the Coulomb potential cut-off by selected method
          if (abs(hyb_mixing)>tol8)then
-           SELECT CASE ( trim(method) )
-           CASE ('SPHERE')
+!           SELECT CASE ( trim(method) )
+!           CASE ('SPHERE')
              vqg(ii)=vqg(ii)+hyb_mixing*den*(one-cos(rcut*sqrt(four_pi/den)))
              !& vqg(ii)=vqg(ii)+hyb_mixing*den
-           CASE DEFAULT
-             msg = sjoin('Cut-off method: ',method)
-             MSG_ERROR(msg)
-           END SELECT  
+!           CASE DEFAULT
+!             msg = sjoin('Cut-off method: ',method)
+!             MSG_ERROR(msg)
+!           END SELECT  
          endif
 !        Erfc screening
          if (abs(hyb_mixing_sr)>tol8) then
