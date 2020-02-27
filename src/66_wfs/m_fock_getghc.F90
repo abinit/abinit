@@ -843,7 +843,7 @@ subroutine fock2ACE(cg,cprj,fock,istwfk,kg,kpt,mband,mcg,mcprj,mgfft,mkmem,mpi_e
 !Local variables-------------------------------
 !scalars
  integer :: bandpp,bdtot_index,dimffnl,iband,iband_cprj,iband_last,ibg,icg,ider
- integer :: info,idir,ikg,ikpt,ilm,ipw,isppol,istwf_k,kk,ll
+ integer :: ierr,info,idir,ikg,ikpt,ilm,ipw,isppol,istwf_k,kk,ll
  integer :: mband_cprj,me_distrb,my_ikpt,my_nspinor,nband_k,nband_cprj_k,ndat,nkpg
  integer :: npw_k,spaceComm
  integer :: use_ACE_old
