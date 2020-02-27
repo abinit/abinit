@@ -26,6 +26,7 @@ module m_gwrdm
  use m_hide_blas
  use m_time
  use m_wfd           
+ use m_hdr
  use m_dtset
 
  use defs_datatypes,   only : ebands_t
@@ -283,13 +284,14 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
 end subroutine natoccs
 !!***
 
-subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt)
+subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: b1gw,b2gw
  type(wfd_t),intent(inout) :: wfd_f
  type(wfd_t),intent(in) :: wfd_i
  type(ebands_t),target,intent(inout) :: BSt
+ type(Hdr_type),intent(in) :: Hdr
 !arrays
  real(dp),intent(in) :: occs(:,:)
  complex(dpc),intent(in) :: nateigv(:,:,:)
@@ -313,6 +315,14 @@ subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt)
  do ikpoint=1,BSt%nkpt
    BSt%occ(b1gw:b2gw,ikpoint,1) = occs(b1gw:b2gw,ikpoint) ! No spin used
  enddo
+ if((size(Hdr%occ(:))/BSt%nkpt) < (b2gw-b1gw+1)) then
+   !Actually, we should never reach this point as the code should crash during Wfd initialization in m_sigma_driver.F90
+   MSG_ERROR("Impossible to use the read existing WFK to build a new one!")
+ endif
+   write(*,*) ' MRM' !!  correct npawarr and occ in Hdr file. 
+   write(*,*) size(Hdr%occ(:))/BSt%nkpt
+   write(*,*) Hdr%occ(:)
+   write(*,*) b1gw,b2gw
 end subroutine update_wfk_gw_rdm        
 !!***
 

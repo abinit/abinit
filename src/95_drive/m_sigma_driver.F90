@@ -724,10 +724,8 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
    Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
 
- write(*,*) 'MRM ECUT_WFN',Dtset%ecutwfn
- 
  ! MRM also initialize the Wfd_dm for GW 1-RDM if required.
- ! Warning, this should be replaced by copy in the future. FIXME 
+ ! Warning, this should be replaced by copy but copy fails. Do it in the future! FIXME 
  if (gwcalctyp==21) then
    call wfd_init(Wfd_dm,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
      Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
@@ -2282,7 +2280,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if(gwcalctyp==21) then
      iinfo=1 ! Should be an input parameter
      if(iinfo==1) then
-       call update_wfk_gw_rdm(Wfd,Wfd_dm,nateigv,occs,b1gw,b2gw,KS_BSt)
+       call update_wfk_gw_rdm(Wfd,Wfd_dm,nateigv,occs,b1gw,b2gw,KS_BSt,Hdr_wfk)
        gw1rdm_fname='gw_rdm_DS100_WFK' ! How to update dataset?
        call Wfd_dm%write_wfk(Hdr_wfk,KS_BSt,gw1rdm_fname)
        Wfd_dm%bks_comm = xmpi_comm_null
