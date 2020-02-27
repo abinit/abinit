@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 02h25 )
+.Starting date : Tue 25 Feb 2020.
+- ( at 00h25 )
   
-- input  file    -> t14.in
+- input  file    -> /opt/home/buildbot/ABINIT/ubu_intel_15.0_mpich/gmatteo_phdos/tests/Test_suite/bigdft_t14/t14.in
 - output file    -> t14.out
 - root for input  files -> t14i
 - root for output files -> t14o
-
-
+ 
+ 
  Symmetries : space group P1 (#  1); Bravais aP (primitive triclinic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1 (WVL).
@@ -31,7 +31,7 @@
       natom =      2     ntypat =      2    nstates =     11     nsppol =      1
 ================================================================================
 ================================================================================
-
+ 
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
@@ -85,34 +85,43 @@
              xred      4.0586591092E-01  5.0000000000E-01  5.0000000000E-01
                        5.9413408908E-01  5.0000000000E-01  5.0000000000E-01
             znucl       22.00000   11.00000
-
+ 
 ================================================================================
-
+ 
  chkinp: Checking input parameters for consistency.
-
+ 
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 -    --> not optimal distribution: autoparal keyword recommended in input file <--
  
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 1, mband: 11, nsppol: 1, nspinor: 1, nspden: 1, mpw: 0, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.30000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
-
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)= 25.0000000  0.0000000  0.0000000  G(1)=  0.0400000  0.0000000  0.0000000
  R(2)=  0.0000000 25.0000000  0.0000000  G(2)=  0.0000000  0.0400000  0.0000000
  R(3)=  0.0000000  0.0000000 25.0000000  G(3)=  0.0000000  0.0000000  0.0400000
  Unit cell volume ucvol=  1.5625000E+04 bohr^3
  Angles (23,13,12)=  9.00000000E+01  9.00000000E+01  9.00000000E+01 degrees
-
+ 
  getcut: wavevector=  0.0000  0.0000  0.0000  ngfft=  54  54  54
          ecut(hartree)=      5.000   => boxcut(ratio)=   2.14587
-
+ 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gonze/ABINIT/ABINITv8.0.2/trunk/8.0.2-private/tests/Psps_for_tests/22ti.12.khgh
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.2/trunk/8.0.2-private/tests/Psps_for_tests/22ti.12.khgh
+- pspini: atom type   1  psp file is /opt/home/buildbot/ABINIT/ubu_intel_15.0_mpich/gmatteo_phdos/tests/Psps_for_tests/22ti.12.khgh
+- pspatm: opening atomic psp file    /opt/home/buildbot/ABINIT/ubu_intel_15.0_mpich/gmatteo_phdos/tests/Psps_for_tests/22ti.12.khgh
 - Goedecker pseudopotential for Ti
 - 22.00000  12.00000     70301                znucl, zion, pspdat
    10   11    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -138,7 +147,7 @@
              k33 =                           0.0000000
   radii_cf(1)=   1.7297725; radii_cf(2)=   0.2425314; rad_cov=   0.5629513
 -  Local part computed in reciprocal space.
-
+ 
  pspatm : COMMENT -
   the projectors are not normalized,
   so that the KB energies are not consistent with 
@@ -150,9 +159,9 @@
              1   -0.100584    0.010589
              2   -0.006735
  pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/gonze/ABINIT/ABINITv8.0.2/trunk/8.0.2-private/tests/Psps_for_tests/HGH/11na.1.hgh
-- pspatm: opening atomic psp file    /home/gonze/ABINIT/ABINITv8.0.2/trunk/8.0.2-private/tests/Psps_for_tests/HGH/11na.1.hgh
+ 
+- pspini: atom type   2  psp file is /opt/home/buildbot/ABINIT/ubu_intel_15.0_mpich/gmatteo_phdos/tests/Psps_for_tests/HGH/11na.1.hgh
+- pspatm: opening atomic psp file    /opt/home/buildbot/ABINIT/ubu_intel_15.0_mpich/gmatteo_phdos/tests/Psps_for_tests/HGH/11na.1.hgh
 - Hartwigsen-Goedecker-Hutter psp for Na,  from PRB58, 3641 (1998)
 - 11.00000   1.00000     10605                znucl, zion, pspdat
     3    1    1    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -163,7 +172,7 @@
                     k11p=   0.0026230; k22p=   0.0000000; k33p=   0.0000000
   radii_cf(1)=   2.1988400; radii_cf(2)=   0.0000000; rad_cov=   1.2215778
 -  Local part computed in reciprocal space.
-
+ 
  pspatm : COMMENT -
   the projectors are not normalized,
   so that the KB energies are not consistent with 
@@ -174,18 +183,24 @@
              0    0.556226    1.932007
              1    1.545198
  pspatm: atomic psp has been read  and splines computed
-
+ 
    1.03731118E+02                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
-
+ 
  setup2: nwvl coarse and fine are   64871     474
-
+ 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 17, nstep: 2, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-06, }
+...
+ 
      iter   Etot(hartree)      deltaE(h)  grdnorm    nres2
- ETOT  1  -58.271557620551    -5.827E+01 1.648E-01 3.615E+01
- ETOT  2  -58.439575024301    -1.680E-01 5.511E-02 8.009E-02
-
+ ETOT  1  -58.271557620549    -5.827E+01 1.648E-01 3.615E+01
+ ETOT  2  -58.439575024299    -1.680E-01 5.511E-02 8.009E-02
+ 
  scprqt:  WARNING -
   nstep=    2 was not enough SCF cycles to converge;
   maximum grdnorm=  5.511E-02 exceeds tolwfr=  1.000E-06
@@ -194,27 +209,30 @@
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [ 24.3000000,   0.0000000,   0.0000000, ]
 - [  0.0000000,  21.6000000,   0.0000000, ]
 - [  0.0000000,   0.0000000,  21.6000000, ]
 lattice_lengths: [  24.30000,   21.60000,   21.60000, ]
-lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.1337408E+04
-convergence_: {deltae: -1.68E-01, res2:  8.01E-02, residm:  5.51E-02, diffor:  0.00E+00, }
+convergence: {deltae: -1.680E-01, res2:  8.009E-02, residm:  5.511E-02, diffor:  0.000E+00, }
 etotal    :  -5.84395750E+01
 entropy   :   0.00000000E+00
 fermie    :  -4.19599406E-03
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  3.5490E-01,   5.0000E-01,   5.0000E-01, Ti]
+- [  5.4859E-01,   5.0000E-01,   5.0000E-01, Na]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
 
 ================================================================================
-
+ 
  ----iterations are completed or convergence reached----
-
+ 
  Mean square residual over all n,k,spin=   0.0000E+00; max=  0.0000E+00
  reduced coordinates (array xred) for    2 atoms
        0.354896256094      0.500000000000      0.500000000000
@@ -222,7 +240,7 @@ force_length_stats: {min: null, max: null, mean: null, }
  rms dE/dt=  0.0000E+00; max dE/dt=  0.0000E+00; dE/dt below (all hartree)
     1       0.000000000000      0.000000000000      0.000000000000
     2       0.000000000000      0.000000000000      0.000000000000
-
+ 
  cartesian coordinates (angstrom) at end:
     1      4.56361314637343     5.71511385277200     5.71511385277200
     2      7.05429387091213     5.71511385277200     5.71511385277200
@@ -232,8 +250,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  Fermi (or HOMO) energy (hartree) =  -0.00420   Average Vxc (hartree)=  -0.01444
  Eigenvalues (hartree) for nkpt=   1  k points:
  kpt#   1, nband= 11, wtk=  1.00000, kpt=  0.0000  0.0000  0.0000 (reduced coord)
-  -2.04116  -1.14546  -1.14490  -1.08842  -0.12548  -0.05524  -0.00317  -0.00302
-   0.01305   0.01421   0.04011
+  -2.04116   -1.14546   -1.14490   -1.08842   -0.12548   -0.05524   -0.00317   -0.00302
+   0.01305    0.01421    0.04011
       occupation numbers for kpt#   1
    2.00000    2.00000    2.00000    2.00000    2.00000    2.00000    0.52866    0.47134
    0.00000    0.00000    0.00000
@@ -302,7 +320,7 @@ total_energy_dc     : -5.84395750242992E+01
              xred      3.5489625609E-01  5.0000000000E-01  5.0000000000E-01
                        5.4858779740E-01  5.0000000000E-01  5.0000000000E-01
             znucl       22.00000   11.00000
-
+ 
 ================================================================================
 
 
@@ -394,10 +412,10 @@ total_energy_dc     : -5.84395750242992E+01
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=        136.4  wall=        137.0
+- Proc.   0 individual time (sec): cpu=        101.0  wall=        101.3
  
 ================================================================================
-
+ 
  Calculation completed.
-.Delivered   4 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         15.8  wall=         15.8
+.Delivered   4 WARNINGs and   7 COMMENTs to log file.
++Overall time at end (sec) : cpu=        101.0  wall=        101.3

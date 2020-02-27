@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h46 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h43 )
   
 
 ================================================================================
@@ -85,7 +85,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.029  and twall      0.029 sec
+-begin at tcpu      0.034  and twall      0.035 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -212,6 +212,6 @@
 
 ================================================================================
 
-+Total cpu time      1.252  and wall time      1.256 sec
++Total cpu time      1.303  and wall time      1.346 sec
 
  anaddb : the run completed succesfully.

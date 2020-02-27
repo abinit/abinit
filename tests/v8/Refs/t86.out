@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h54 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 21h30 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t85-t86/t86.in
 - output file    -> t86.out
@@ -268,6 +268,15 @@ P          mk1mem          16
 == DATASET  5 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 16, mband: 8, nsppol: 2, nspinor: 1, nspden: 2, mpw: 95, }
+cutoff_energies: {ecut:   3.5, pawecutdg:   7.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  mkfilename : getddk/=0, take file _1WF from output of DATASET   3.
@@ -372,6 +381,12 @@ P          mk1mem          16
   ireadwf=   0
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF7
 
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-26, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   925.20893151349      9.252E+02 5.273E-27 0.000E+00
 
@@ -405,6 +420,12 @@ P          mk1mem          16
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF8
+
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-26, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   925.20893145256      9.252E+02 5.521E-27 0.000E+00
@@ -441,6 +462,12 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF8
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF9
 
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-26, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   249.07668637316      2.491E+02 9.690E-27 0.000E+00
 
@@ -476,6 +503,12 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF7
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF8
 
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-26, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   249.07668638792      2.491E+02 9.693E-27 0.000E+00
 
@@ -505,6 +538,15 @@ P          mk1mem          16
 ================================================================================
 == DATASET  6 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 6, }
+dimensions: {natom: 2, nkpt: 16, mband: 8, nsppol: 2, nspinor: 1, nspden: 2, mpw: 95, }
+cutoff_energies: {ecut:   3.5, pawecutdg:   7.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -575,6 +617,12 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t86o_DS4_1WF10
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF7
 
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-26, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -18955.682976654     -1.896E+04 9.565E-27 0.000E+00
 
@@ -610,6 +658,12 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t86o_DS5_1WF26
 -dfpt_looppert : read the wavefunctions from file: t86o_DS4_1WF11
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF8
+
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-26, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -18955.682977177     -1.896E+04 9.469E-27 0.000E+00
@@ -648,6 +702,12 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF8
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF9
 
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-26, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -6584.3812937301     -6.584E+03 9.170E-27 0.000E+00
 
@@ -684,6 +744,12 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t86o_DS4_1WF11
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF7
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF8
+
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-26, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -6584.3812938513     -6.584E+03 9.146E-27 0.000E+00
@@ -722,6 +788,12 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF9
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF8
 
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-26, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -6584.3812934906     -6.584E+03 9.167E-27 0.000E+00
 
@@ -759,6 +831,12 @@ P          mk1mem          16
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF8
 -dfpt_looppert : read the wavefunctions from file: t86o_DS3_1WF7
 
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 100, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-26, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -6584.3812936111     -6.584E+03 9.145E-27 0.000E+00
 
@@ -788,6 +866,15 @@ P          mk1mem          16
 ================================================================================
 == DATASET  7 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 7, }
+dimensions: {natom: 2, nkpt: 16, mband: 8, nsppol: 2, nspinor: 1, nspden: 2, mpw: 95, }
+cutoff_energies: {ecut:   3.5, pawecutdg:   7.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 5, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 

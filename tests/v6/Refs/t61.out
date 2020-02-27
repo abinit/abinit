@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h49 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h21 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t61/t61.in
 - output file    -> t61.out
@@ -136,6 +136,15 @@ P          mk1mem           1
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 1, mband: 30, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2401, }
+cutoff_energies: {ecut:  15.0, pawecutdg:  -1.0, }
+electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -172,6 +181,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    4801.000    4801.000
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 40, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-18, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1336722134624    -1.134E+00 2.668E-03 1.986E+01
  ETOT  2  -1.1365673616272    -2.895E-03 7.063E-06 2.596E+00
@@ -199,23 +214,26 @@ _setup2: Arith. and geom. avg. npw (full set) are    4801.000    4801.000
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [ 12.0000000,   0.0000000,   0.0000000, ]
 - [  0.0000000,  12.0000000,   0.0000000, ]
 - [  0.0000000,   0.0000000,  12.0000000, ]
 lattice_lengths: [  12.00000,   12.00000,   12.00000, ]
-lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.7280000E+03
 convergence: {deltae:  2.465E-14, res2:  1.873E-19, residm:  2.376E-08, diffor: null, }
 etotal    :  -1.13659330E+00
 entropy   :   0.00000000E+00
 fermie    :  -3.68287456E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  1.93039993E-05,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   1.08869151E-06,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   1.08869151E-06, ]
 pressure_GPa:  -2.1067E-01
-cartesian_forces:
+xred      :
+- [ -6.0312E-02,   0.0000E+00,   0.0000E+00,  H]
+- [  6.0312E-02,   0.0000E+00,   0.0000E+00,  H]
+cartesian_forces: # hartree/bohr
 - [  2.17308842E-02,   1.84281292E-15,   2.31563032E-15, ]
 - [ -2.17308842E-02,  -1.84281292E-15,  -2.31563032E-15, ]
 force_length_stats: {min:   2.17308842E-02, max:   2.17308842E-02, mean:   2.17308842E-02, }
@@ -292,6 +310,15 @@ band_energy         : -7.36574911837633E-01
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 1, mband: 30, nsppol: 1, nspinor: 1, nspden: 1, mpw: 4801, }
+cutoff_energies: {ecut:  15.0, pawecutdg:  -1.0, }
+electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfphon: 1, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  Exchange-correlation functional for the present dataset will be:
@@ -334,6 +361,12 @@ band_energy         : -7.36574911837633E-01
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 40, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-08, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   52.572168585250     -1.158E+02 7.987E-01 2.927E+04
@@ -387,6 +420,12 @@ band_energy         : -7.36574911837633E-01
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 40, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-08, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   52.572167359003     -1.158E+02 7.987E-01 2.927E+04
@@ -736,10 +775,10 @@ P          mk1mem           1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         17.7  wall=         18.1
+- Proc.   0 individual time (sec): cpu=         17.8  wall=         18.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and  21 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         17.7  wall=         18.1
++Overall time at end (sec) : cpu=         17.8  wall=         18.2

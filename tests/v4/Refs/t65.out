@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h35 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h16 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v4_t65/t65.in
 - output file    -> t65.out
@@ -305,6 +305,15 @@ P          mk1mem3         32
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 10, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 126, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -390,6 +399,12 @@ P newkpt: treating      4 bands with npw=     118 for ikpt=  10 by node    0
 _setup2: Arith. and geom. avg. npw (full set) are     119.625     119.602
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 60, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-12, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
 
@@ -612,23 +627,26 @@ _setup2: Arith. and geom. avg. npw (full set) are     119.625     119.602
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.5150000,   5.6650000,   5.6650000, ]
 - [  5.6650000,   0.5150000,   5.6650000, ]
 - [  5.6650000,   5.6650000,   0.5150000, ]
 lattice_lengths: [   8.02806,    8.02806,    8.02806, ]
-lattice_angles: [ 53.951,  53.951,  53.951, ]
+lattice_angles: [ 53.951,  53.951,  53.951, ] # degrees, (23, 13, 12)
 lattice_volume:   3.1415901E+02
 convergence: {deltae: -1.776E-15, res2:  1.725E-10, residm:  9.170E-13, diffor: null, }
 etotal    :  -8.63148733E+00
 entropy   :   0.00000000E+00
 fermie    :   1.73278318E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  6.53681009E-04,   1.68724536E-04,   1.68724536E-04, ]
 - [  1.68724536E-04,   6.53681009E-04,   1.68724536E-04, ]
 - [  1.68724536E-04,   1.68724536E-04,   6.53681009E-04, ]
 pressure_GPa:  -1.9232E+01
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01,  P]
+cartesian_forces: # hartree/bohr
 - [  1.87056243E-03,   1.87056243E-03,   1.87056243E-03, ]
 - [ -1.87056243E-03,  -1.87056243E-03,  -1.87056243E-03, ]
 force_length_stats: {min:   3.23990916E-03, max:   3.23990916E-03, mean:   3.23990916E-03, }
@@ -759,6 +777,15 @@ band_energy         :  2.10965347892709E-01
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 32, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 126, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -907,6 +934,12 @@ P newkpt: treating      4 bands with npw=     122 for ikpt=  29 by node    0
 P newkpt: treating      4 bands with npw=     120 for ikpt=  30 by node    0
 P newkpt: treating      4 bands with npw=     117 for ikpt=  31 by node    0
 P newkpt: treating      4 bands with npw=     122 for ikpt=  32 by node    0
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: -3, nstep: 60, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-12, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
@@ -1151,6 +1184,12 @@ P newkpt: treating      4 bands with npw=     120 for ikpt=  30 by node    0
 P newkpt: treating      4 bands with npw=     117 for ikpt=  31 by node    0
 P newkpt: treating      4 bands with npw=     122 for ikpt=  32 by node    0
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: -3, nstep: 60, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-12, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
 -ETOT  1  -8.6522399553358     -8.652E+00 7.133E-03 0.000E+00
@@ -1394,6 +1433,12 @@ P newkpt: treating      4 bands with npw=     120 for ikpt=  30 by node    0
 P newkpt: treating      4 bands with npw=     117 for ikpt=  31 by node    0
 P newkpt: treating      4 bands with npw=     122 for ikpt=  32 by node    0
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: -3, nstep: 60, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-12, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
 -ETOT  1  -8.6523697214353     -8.652E+00 8.366E-03 0.000E+00
@@ -1583,6 +1628,15 @@ P newkpt: treating      4 bands with npw=     122 for ikpt=  32 by node    0
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 32, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 126, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 3, rfstrs: 3, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  mkfilename : getddk/=0, take file _1WF from output of DATASET   2.
@@ -1732,6 +1786,12 @@ P newkpt: treating      4 bands with npw=     120 for ikpt=  30 by node    0
 P newkpt: treating      4 bands with npw=     117 for ikpt=  31 by node    0
 P newkpt: treating      4 bands with npw=     122 for ikpt=  32 by node    0
 -dfpt_looppert : read the wavefunctions from file: t65o_DS2_1WF7
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 60, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-12, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
@@ -1894,6 +1954,12 @@ P newkpt: treating      4 bands with npw=     120 for ikpt=  18 by node    0
 P newkpt: treating      4 bands with npw=     117 for ikpt=  19 by node    0
 P newkpt: treating      4 bands with npw=     118 for ikpt=  20 by node    0
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 60, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-12, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
 -ETOT  1   2.2210726252985     -3.564E+00 7.215E-03 1.953E+02
@@ -2037,6 +2103,12 @@ P newkpt: treating      4 bands with npw=     118 for ikpt=  17 by node    0
 P newkpt: treating      4 bands with npw=     120 for ikpt=  18 by node    0
 P newkpt: treating      4 bands with npw=     117 for ikpt=  19 by node    0
 P newkpt: treating      4 bands with npw=     118 for ikpt=  20 by node    0
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 60, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-12, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
@@ -2982,10 +3054,10 @@ P          mk1mem3         32
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          4.2  wall=          4.7
+- Proc.   0 individual time (sec): cpu=          4.4  wall=          7.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and  44 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.2  wall=          4.7
++Overall time at end (sec) : cpu=          4.4  wall=          7.6

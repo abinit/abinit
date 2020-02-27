@@ -351,15 +351,15 @@ subroutine scprqt(choice,cpus,deltae,diffor,dtset,&
      ydoc = yamldoc_open('BeginCycle')
      call ydoc%add_ints("iscf, nstep, nline, wfoptalg", &
                         [dtset%iscf, dtset%nstep, dtset%nline, dtset%wfoptalg], dict_key="solver")
-     call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff, vdw_df_threshold", &
-                        [tolwfr, toldff, toldfe, tolvrs, tolrff, vdw_df_threshold], &
+     call ydoc%add_reals("tolwfr, toldff, toldfe, tolvrs, tolrff", & ! , vdw_df_threshold", &
+                        [tolwfr, toldff, toldfe, tolvrs, tolrff], & !, vdw_df_threshold], &
                         real_fmt="(es8.2)", dict_key="tolerances", ignore=zero)
 
-     if (dtset%use_yaml == 1) then
-       call ydoc%write_and_free(ab_out, newline=.False.)
-     else
-       call ydoc%write_and_free(std_out, newline=.False.)
-     end if
+     !if (dtset%use_yaml == 1) then
+     call ydoc%write_and_free(ab_out, newline=.False.)
+     !else
+     !call ydoc%write_and_free(std_out, newline=.False.)
+     !end if
 
      call wrtout(ab_out,message,'COLL')
    end if

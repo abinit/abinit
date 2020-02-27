@@ -738,6 +738,15 @@ P           mkmem           2
 -   mpi_nproc: 24, omp_nthreads: -1 (-1 if OMP is not activated)
 -    --> not optimal distribution: autoparal keyword recommended in input file <--
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 5, nkpt: 32, mband: 50, nsppol: 1, nspinor: 1, nspden: 1, mpw: 762, }
+cutoff_energies: {ecut:  12.0, pawecutdg:  20.0, }
+electrons: {nelect:   4.10000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   3.67493254E-03, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
+...
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  7.2605000  0.0000000  0.0000000  G(1)=  0.1377316  0.0000000  0.0000000
  R(2)=  0.0000000  7.2605000  0.0000000  G(2)=  0.0000000  0.1377316  0.0000000
@@ -882,6 +891,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 17, nstep: 40, nline: 5, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-13, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
 
@@ -9184,23 +9199,29 @@ _setup2: Arith. and geom. avg. npw (full set) are     756.500     756.488
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  7.2605000,   0.0000000,   0.0000000, ]
 - [  0.0000000,   7.2605000,   0.0000000, ]
 - [  0.0000000,   0.0000000,   7.2605000, ]
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
-lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.8273624E+02
 convergence: {deltae: -2.558E-13, res2:  2.953E-14, residm:  4.088E-12, diffor: null, }
 etotal    :  -1.51928409E+02
 entropy   :   0.00000000E+00
 fermie    :   2.85423679E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  2.09030263E-03,  -4.07535560E-12,  -1.12337837E-12, ]
 - [ -4.07535560E-12,   2.09030261E-03,  -9.60140977E-13, ]
 - [ -1.12337837E-12,  -9.60140977E-13,   2.09030259E-03, ]
 pressure_GPa:  -6.1499E+01
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  V]
+- [  5.0000E-01,   5.0000E-01,   5.0000E-01, Sr]
+- [  5.0000E-01,   0.0000E+00,   0.0000E+00,  O]
+- [  0.0000E+00,   5.0000E-01,   0.0000E+00,  O]
+- [  0.0000E+00,   0.0000E+00,   5.0000E-01,  O]
+cartesian_forces: # hartree/bohr
 - [ -1.72800255E-11,  -2.77020482E-10,  -1.42202650E-10, ]
 - [  3.20797439E-10,   3.13242388E-10,  -2.28534853E-10, ]
 - [  2.62452018E-10,  -1.04287156E-10,  -2.10513224E-10, ]
@@ -10205,6 +10226,15 @@ total_energy_dc_eV  : -4.13418225919756E+03
 -   mpi_nproc: 24, omp_nthreads: -1 (-1 if OMP is not activated)
 -    --> not optimal distribution: autoparal keyword recommended in input file <--
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 5, nkpt: 32, mband: 50, nsppol: 1, nspinor: 1, nspden: 1, mpw: 762, }
+cutoff_energies: {ecut:  12.0, pawecutdg:  20.0, }
+electrons: {nelect:   4.10000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   3.67493254E-03, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
+
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -10865,12 +10895,12 @@ P newkpt: treating     50 bands with npw=     762 for ikpt=  32 by node   15
 --- !ResultsGS
 iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  7.2605000,   0.0000000,   0.0000000, ]
 - [  0.0000000,   7.2605000,   0.0000000, ]
 - [  0.0000000,   0.0000000,   7.2605000, ]
 lattice_lengths: [   7.26050,    7.26050,    7.26050, ]
-lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.8273624E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.993E-19, diffor:  0.000E+00, }
 etotal    :  -1.51928409E+02
@@ -10878,6 +10908,12 @@ entropy   :   0.00000000E+00
 fermie    :   2.85423679E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  V]
+- [  5.0000E-01,   5.0000E-01,   5.0000E-01, Sr]
+- [  5.0000E-01,   0.0000E+00,   0.0000E+00,  O]
+- [  0.0000E+00,   5.0000E-01,   0.0000E+00,  O]
+- [  0.0000E+00,   0.0000E+00,   5.0000E-01,  O]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -11605,6 +11641,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 24, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 5, nkpt: 32, mband: 50, nsppol: 1, nspinor: 1, nspden: 1, mpw: 762, }
+cutoff_energies: {ecut:  12.0, pawecutdg:  20.0, }
+electrons: {nelect:   4.10000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   3.67493254E-03, }
+meta: {optdriver: 3, gwcalctyp: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -12604,6 +12649,15 @@ Reading of the Wannier weights from data.plowann
 ================================================================================
 == DATASET  4 ==================================================================
 -   mpi_nproc: 24, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 5, nkpt: 32, mband: 50, nsppol: 1, nspinor: 1, nspden: 1, mpw: 762, }
+cutoff_energies: {ecut:  12.0, pawecutdg:  20.0, }
+electrons: {nelect:   4.10000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   3.67493254E-03, }
+meta: {optdriver: 4, gwcalctyp: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 

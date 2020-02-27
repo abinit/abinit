@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h32 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h15 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t62-t63/t62.in
 - output file    -> t62.out
@@ -181,6 +181,15 @@ P           mkmem          10
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 1, nkpt: 10, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 168, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   8.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -226,6 +235,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 7, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0929877300722    -2.093E+00 2.092E-02 7.905E-01
  ETOT  2  -2.0942894950597    -1.302E-03 2.182E-04 1.750E-02
@@ -245,23 +260,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   3.7800000,   3.7800000, ]
 - [  3.7800000,   0.0000000,   3.7800000, ]
 - [  3.7800000,   3.7800000,   0.0000000, ]
 lattice_lengths: [   5.34573,    5.34573,    5.34573, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0802030E+02
 convergence: {deltae: -9.211E-11, res2:  3.377E-09, residm:  5.935E-08, diffor: null, }
 etotal    :  -2.09429521E+00
 entropy   :   0.00000000E+00
 fermie    :   3.55100289E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  1.28848842E-05,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   1.28848842E-05,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   1.28848842E-05, ]
 pressure_GPa:  -3.7909E-01
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
@@ -340,6 +357,15 @@ band_energy         :  5.62179897135767E-01
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 1, nkpt: 10, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 168, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   8.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  Exchange-correlation functional for the present dataset will be:
@@ -363,6 +389,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 7, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0942952132894    -2.094E+00 7.025E-10 8.058E-12
  ETOT  2  -2.0942952132894    -3.331E-14 8.599E-12 3.793E-13
@@ -380,23 +412,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 --- !ResultsGS
 iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   3.7800000,   3.7800000, ]
 - [  3.7800000,   0.0000000,   3.7800000, ]
 - [  3.7800000,   3.7800000,   0.0000000, ]
 lattice_lengths: [   5.34573,    5.34573,    5.34573, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0802030E+02
 convergence: {deltae:  1.688E-14, res2:  9.642E-16, residm:  5.383E-13, diffor: null, }
 etotal    :  -2.09429521E+00
 entropy   :   0.00000000E+00
 fermie    :   3.55100324E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  1.28843989E-05,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   1.28843989E-05,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   1.28843989E-05, ]
 pressure_GPa:  -3.7907E-01
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
@@ -475,6 +509,15 @@ band_energy         :  5.62179982579728E-01
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 1, nkpt: 10, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 168, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   4.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  Exchange-correlation functional for the present dataset will be:
@@ -498,6 +541,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 7, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0931344042460    -2.093E+00 2.009E-10 8.601E-08
  ETOT  2  -2.0931344042891    -4.305E-11 8.400E-13 5.236E-09
@@ -515,23 +564,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 --- !ResultsGS
 iteration_state: {dtset: 3, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   3.7800000,   3.7800000, ]
 - [  3.7800000,   0.0000000,   3.7800000, ]
 - [  3.7800000,   3.7800000,   0.0000000, ]
 lattice_lengths: [   5.34573,    5.34573,    5.34573, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0802030E+02
 convergence: {deltae: -2.724E-12, res2:  2.611E-12, residm:  3.647E-13, diffor: null, }
 etotal    :  -2.09313440E+00
 entropy   :   0.00000000E+00
 fermie    :   3.55003332E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  1.70554289E-05,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   1.70554289E-05,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   1.70554289E-05, ]
 pressure_GPa:  -5.0179E-01
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
@@ -610,6 +661,15 @@ band_energy         :  5.62669008246722E-01
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 1, nkpt: 10, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 168, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   2.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   3.
 
  Exchange-correlation functional for the present dataset will be:
@@ -633,6 +693,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 7, nstep: 7, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0926910872873    -2.093E+00 3.834E-11 1.696E-08
  ETOT  2  -2.0926910872961    -8.766E-12 1.461E-13 1.029E-09
@@ -650,23 +716,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     163.313     163.296
 --- !ResultsGS
 iteration_state: {dtset: 4, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   3.7800000,   3.7800000, ]
 - [  3.7800000,   0.0000000,   3.7800000, ]
 - [  3.7800000,   3.7800000,   0.0000000, ]
 lattice_lengths: [   5.34573,    5.34573,    5.34573, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0802030E+02
 convergence: {deltae: -5.289E-13, res2:  4.289E-13, residm:  7.247E-14, diffor: null, }
 etotal    :  -2.09269109E+00
 entropy   :   0.00000000E+00
 fermie    :   3.58478821E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  1.53538812E-05,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   1.53538812E-05,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   1.53538812E-05, ]
 pressure_GPa:  -4.5173E-01
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
@@ -942,10 +1010,10 @@ P           mkmem          10
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.1  wall=          1.5
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  15 WARNINGs and   5 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.1  wall=          1.5
++Overall time at end (sec) : cpu=          1.2  wall=          1.3
