@@ -1172,6 +1172,8 @@ print *, ' diff in cg ', isppol, ikpt, ' / ', nkpt_rbz
 print *, cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
 print *, ' bare    cg '
 print *, cg(:,icg+1:icg+npw)
+print *, ' bare    cg_tmp '
+print *, cg_tmp(:,icg_tmp+1:icg_tmp+npw)
 end if 
 
          !cg(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
@@ -1659,8 +1661,9 @@ print *, ' mk1mem_rbz, ', mk1mem_rbz
          iband_me = iband_me + 1
 if (sum(abs(cg1(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol6) then
 print *, 'NB: this comparison does not seem to work, though the cg1 read above works fine in the tests'
-print *, 'is ik ib cg1 ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
+print *, 'is ik ib cg1 , icg, icg_tmp ', isppol, ikpt, iband, kpq_rbz(:,ikpt), icg, icg_tmp
 print *, ' diff in cg1 ', cg1(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
+!cg1(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
 else
 write (202, *) 'is ik ib cg1 ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
 end if
@@ -1671,6 +1674,8 @@ if (sum(abs(eigen1(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2)
 &        eigen_tmp(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2 ))) > tol6) then
 print *, ' diff in eigen1 ', eigen1(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2) - &
 &                         eigen_tmp(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2)
+!eigen1(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2) = &
+!&                         eigen_tmp(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2)
 else
 write (302, *) 'is ik ib ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
 end if

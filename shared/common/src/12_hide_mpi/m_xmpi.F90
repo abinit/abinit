@@ -3986,11 +3986,11 @@ subroutine xmpio_check_frmarkers(fh,offset,sc_mode,nfrec,bsize_frecord,ierr)
      ierr=2
    end if
    if (ANY(bufdelim4/=delim_record)) ierr=1
-   if (ierr==1) then
+!   if (ierr==1) then
      do irec=1,2*nfrec
        write(std_out,*)"irec, bufdelim4, delim_record: ",irec,bufdelim4(irec),delim_record(irec)
      end do
-   end if
+!   end if
    ABI_FREE(bufdelim4)
 
  CASE (8)

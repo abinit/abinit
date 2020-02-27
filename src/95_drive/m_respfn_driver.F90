@@ -538,14 +538,14 @@ print *, 'shapes ', shape(cg), "  ", shape(cg_tmp)
            cycle
          end if
          iband_me = iband_me + 1
-!print *, 'is ik ib kpt icg ', isppol, ikpt, iband, kpt_rbz(:,ikpt), icg
-!if (sum(abs(cg(:,icg+1:icg+npw) + tol20 - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol6) then
-print *, 'is ik ib ', isppol, ikpt, iband
-print *, ' diff in cg ', isppol, ikpt, ' / ', dtset%nkpt
+print *, 'respfn is ik ib kpt icg ', isppol, ikpt, iband, dtset%kptns(:,ikpt), icg
+if (sum(abs(cg(:,icg+1:icg+npw) + tol20 - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol6) then
+print *, 'respfn is ik ib ', isppol, ikpt, iband
+print *, 'respfn  diff in cg ', isppol, ikpt, ' / ', dtset%nkpt
 print *, cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
-print *, ' bare    cg '
+print *, 'respfn  bare    cg '
 print *, cg(:,icg+1:icg+npw)
-!end if
+end if
 
          !cg(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
          icg = icg + npw
@@ -553,10 +553,10 @@ print *, cg(:,icg+1:icg+npw)
        end do
 if (sum(abs(eigen0(ibdoffst+1:ibdoffst+dtset%nband(ikpt+dtset%nkpt*(isppol-1))) - &
 &        eigen0_tmp(ibdoffst+1:ibdoffst+dtset%nband(ikpt+dtset%nkpt*(isppol-1))))) > tol6) then
-print *, ' diff in eigen0 ', eigen0(ibdoffst+1:ibdoffst+dtset%nband(ikpt+dtset%nkpt*(isppol-1))) - &
+print *, 'respfn  diff in eigen0 ', eigen0(ibdoffst+1:ibdoffst+dtset%nband(ikpt+dtset%nkpt*(isppol-1))) - &
 &        eigen0_tmp(ibdoffst+1:ibdoffst+dtset%nband(ikpt+dtset%nkpt*(isppol-1)))
 else
-write (401, *) 'is ik ib ', isppol, ikpt, iband, dtset%kptns(:,ikpt)
+write (401, *) 'respfn is ik ib ', isppol, ikpt, iband, dtset%kptns(:,ikpt)
 end if
        ibdoffst = ibdoffst + dtset%nband(ikpt+dtset%nkpt*(isppol-1))
      end do

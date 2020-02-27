@@ -491,6 +491,7 @@ write (unit_me, *) 'vtowfk iband, eig1_k ', iband, eig1_k(ii+1:ii+min(10,nband_k
      else
 !      Compute the 0-order kinetic operator contribution (with cwavef)
        call meanvalue_g(ar,kinpw1,0,gs_hamkq%istwf_k,mpi_enreg,npw1_k,nspinor,cwavef,cwavef,0)
+print *, ' ik isppol iband ar kinpw1 ', ikpt, isppol, iband, ar, kinpw1(:) 
 !      There is an additional factor of 2 with respect to the bare matrix element
        ek0_k(iband)=energy_factor*ar
 !      Compute the 1-order kinetic operator contribution (with cwave1 and cwave0), if needed.

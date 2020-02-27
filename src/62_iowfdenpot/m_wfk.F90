@@ -352,6 +352,10 @@ subroutine wfk_open_read(Wfk,fname,formeig,iomode,funt,comm,Hdr_out)
  character(len=500) :: msg
 #ifdef HAVE_MPI_IO
  integer :: fform !,ncerr
+
+ integer :: nfrec
+ integer(XMPI_OFFSET_KIND) :: offset
+ integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
 #endif
 
 !************************************************************************
@@ -428,6 +432,12 @@ print *, 'wfk_open_read 421 Wfk%hdr_offset ', Wfk%hdr_offset
      call wfk_compute_offsets(Wfk)
    else
      MSG_ERROR("wfk_open_read hdr_offset <=0")
+   end if
+   if (Wfk%debug) then
+     !print *, 'checking offsets upon open_read : ', trim(Wfk%fname)
+     offset = Wfk%hdr_offset
+     call hdr_bsize_frecords(Wfk%Hdr,Wfk%formeig,nfrec,bsize_frecords)
+     call xmpio_check_frmarkers(Wfk%fh,offset,xmpio_collective,nfrec,bsize_frecords,ierr)
    end if
 #endif
 
@@ -1327,7 +1337,7 @@ print *, ' ik_ibz,spin ', ik_ibz,spin
        end do
      end if
 
-   case (1)
+   case (1) !formeig 1 for DFPT WF file
      npwso = npw_disk*nspinor_disk
      my_bcount = 0
      do band=1,nband_disk
@@ -1396,7 +1406,9 @@ print *, ' tmp_eigk(nband_disk+1:) ', tmp_eigk(nband_disk+1:)
 
      if (present(cg_k)) then
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG)
+print *, ' ik_ibz,spin Wfk%offset_ks(ik_ibz,spin,REC_CG) ', ik_ibz,spin, Wfk%offset_ks(ik_ibz,spin,REC_CG)
        sizes     = [npw_disk*nspinor_disk, nband_disk]
+print *, 'npw_disk, nspinor_disk, nband_disk wfk%chunk_bsize ', npw_disk, nspinor_disk, nband_disk, wfk%chunk_bsize
        subsizes  = [npw_disk*nspinor_disk, band_block(2)-band_block(1)+1]
        bufsz     = 2 * npw_disk * nspinor_disk * nb_block
        starts    = [1, band_block(1)]
@@ -3241,7 +3253,7 @@ print *, 'rbz2disk_sort ', rbz2disk_sort
      ! conversion of single spin AFM wfk file to full 2 component one in memory
      spin_sym=spin
      if (convnsppol1to2) spin_sym=1
-! this allows for reading fewer bands from disk than the maximum
+! this allows for reading fewer bands from disk than the disk version of nband
      nband_k = min(wfk_disk%nband(ik_disk,spin_sym), dtset%mband)
      ikg(ikpt) = jj
      ibdeig(ikpt,spin) = kk
@@ -3252,11 +3264,12 @@ print *, 'rbz2disk_sort ', rbz2disk_sort
 
      if (.not. any(distrb_flags(ikpt,:,spin))) cycle
 #ifdef DEV_MJV
-print *, 'icg counts ikpt, spin ', icg(ikpt,spin),ikpt,spin
+print *, 'icg counts ikpt, spin, nband_k ', icg(ikpt,spin),ikpt,spin, nband_k
 #endif
 ! TODO: this does not take into account variable nband(ik)
      icg(ikpt,spin) = ii
-     ii = ii+dtset%mband_mem*npwarr(ikpt)*dtset%nspinor
+! this allows for variable nband_k < mband_mem
+     ii = ii+min(nband_k,dtset%mband_mem)*npwarr(ikpt)*dtset%nspinor
    end do
  end do
 
@@ -3360,6 +3373,9 @@ print *, 'reading from file for iband, ik_disk, spin, formeig ', iband, ik_disk,
              call wfk_disk%read_band_block([iband,iband+nband_me_disk-1],ik_disk,spin,xmpio_single,&
                kg_k=kg_disk,cg_k=cg_disk,eig_k=eig_disk,occ_k=occ_disk)
            end if
+#ifdef DEV_MJV
+print *, ' cg_disk ',  cg_disk(:,1:10)
+#endif
            ! in nsppol=1 nspden=2 case the occupations are doubled
            if (convnsppol1to2) then
              occ_disk = half * occ_disk
@@ -3977,6 +3993,7 @@ subroutine wfk_compute_offsets(Wfk)
        base = Wfk%recn_ks(ik_ibz,spin,REC_CG)
        if (Wfk%formeig==0) then
 ! add records for each cg (iband), and account for offset of 1 added for REC_NPW
+!TODO check if variable nband(k) works here
          base = base + nband_k - 1
        else if (Wfk%formeig==1) then
 ! add records for each eig1(:,iband) and cg (iband), and account for offset of 1 added for REC_NPW
@@ -4032,18 +4049,23 @@ subroutine wfk_compute_offsets(Wfk)
        !---------------------------------------------------------------------------
        if (Wfk%formeig==0) then
          ! eigen(1:nband_k), occ(1:nband_k)
+!         offset = offset + 2*Wfk%mband*xmpi_bsize_dp + 2*bsize_frm
          offset = offset + 2*nband_k*xmpi_bsize_dp + 2*bsize_frm
          Wfk%offset_ks(ik_ibz,spin,REC_CG) = offset
          !
          ! Wavefunction coefficients
          ! do band=1,nband_k; write(unitwf) cg_k(1:2,npw_k*nspinor); end do
+         !offset = offset + Wfk%mband * (2*npw_k*Wfk%nspinor*xmpi_bsize_dp + 2*bsize_frm)
          offset = offset + nband_k * (2*npw_k*Wfk%nspinor*xmpi_bsize_dp + 2*bsize_frm)
 
        else if (Wfk%formeig==1) then
          ! read(unitwf) eigen(2*nband_k)
+         !Wfk%offset_ks(ik_ibz,spin,REC_CG) = offset + 2*Wfk%mband*xmpi_bsize_dp + 2*bsize_frm
          Wfk%offset_ks(ik_ibz,spin,REC_CG) = offset + 2*nband_k*xmpi_bsize_dp + 2*bsize_frm
 
          offset = offset + &
+!&          Wfk%mband * (2*npw_k*Wfk%nspinor*xmpi_bsize_dp + 2*bsize_frm) + &
+!&          Wfk%mband * (2*Wfk%mband*xmpi_bsize_dp + 2*bsize_frm)
 &          nband_k * (2*npw_k*Wfk%nspinor*xmpi_bsize_dp + 2*bsize_frm) + &
 &          nband_k * (2*nband_k*xmpi_bsize_dp + 2*bsize_frm)
 
