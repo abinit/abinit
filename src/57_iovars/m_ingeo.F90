@@ -37,8 +37,7 @@ module m_ingeo
  use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
  use m_symfind,    only : symfind, symanal, symlatt
  use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric
- use m_parser,     only : intagm
- use m_crystal,    only : poscar_t, poscar_from_string
+ use m_parser,     only : intagm, geo_t, geo_from_abivar_string
 
  implicit none
 
@@ -90,6 +89,7 @@ contains
 !! string*(*)=character string containing all the input data, used
 !!  only if choice=1 or 3. Initialized previously in instrng.
 !! supercell_latt(3,3)=supercell lattice
+!! comm: MPI communicator
 !!
 !! OUTPUT
 !! acell(3)=length of primitive vectors
@@ -142,17 +142,17 @@ contains
 !! SOURCE
 
 subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
-& genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
-& msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
-& nucdipmom,nzchempot,pawspnorb,&
-& ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
-& symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl)
+  genafm,iatfix,icoulomb,iimage,iout,jdtset,jellslab,lenstr,mixalch,&
+  msym,natom,nimage,npsp,npspalch,nspden,nsppol,nsym,ntypalch,ntypat,&
+  nucdipmom,nzchempot,pawspnorb,&
+  ptgroupma,ratsph,rprim,slabzbeg,slabzend,spgroup,spinat,string,supercell_lattice,symafm,&
+  symmorphi,symrel,tnons,tolsym,typat,vel,vel_cell,xred,znucl,comm)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iimage,iout,jdtset,lenstr,msym
  integer,intent(in) :: nimage,npsp,npspalch,nspden,nsppol
- integer,intent(in) :: ntypalch,ntypat,nzchempot,pawspnorb
+ integer,intent(in) :: ntypalch,ntypat,nzchempot,pawspnorb,comm
  integer,intent(inout) :: natom,symmorphi
  integer,intent(out) :: icoulomb,jellslab,ptgroupma,spgroup !vz_i
  integer,intent(inout) :: nsym !vz_i
@@ -181,13 +181,13 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  integer :: bckbrvltt,brvltt,chkprim,i1,i2,i3,iatom,iatom_supercell,idir,iexit,ii
  integer :: ipsp,irreducible,isym,itypat,jsym,marr,mu,multiplicity,natom_uc,natfix,natrd
  integer :: nobj,noncoll,nptsym,nsym_now,ntyppure,random_atpos,shubnikov,spgaxor,spgorig
- integer :: spgroupma,tacell,tangdeg,tgenafm,tnatrd,tread,trprim,tscalecart,tspgroupma, tread_poscar
+ integer :: spgroupma,tacell,tangdeg,tgenafm,tnatrd,tread,trprim,tscalecart,tspgroupma, tread_geo
  integer :: txangst,txcart,txred,txrandom,use_inversion
  real(dp) :: amu_default,a2,aa,cc,cosang,ucvol,sumalch
  character(len=500) :: msg
- character(len=lenstr) :: poscar_string
+ character(len=lenstr) :: geo_string
  type(atomdata_t) :: atom
- type(poscar_t) :: poscar
+ type(geo_t) :: geo
 !arrays
  integer,allocatable :: ptsymrel(:,:,:),typat_read(:),symrec(:,:,:),indsym(:,:,:)
  integer,allocatable :: intarr(:)
@@ -203,14 +203,14 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  ABI_ALLOCATE(intarr,(marr))
  ABI_ALLOCATE(dprarr,(marr))
 
- ! Try from poscar_string
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'poscar', tread_poscar, &
-             'KEY', key_value=poscar_string)
+ ! Try from geo_string
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'structure', tread_geo, &
+             'KEY', key_value=geo_string)
 
- if (tread_poscar /= 0) then
-   poscar = poscar_from_string(poscar_string, ch10)
+ if (tread_geo /= 0) then
+   geo = geo_from_abivar_string(geo_string, comm)
    acell = one
-   rprim = poscar%rprimd
+   rprim = geo%rprimd
    !call exclude("acell, rprim, angdeg")
 
  else
@@ -293,7 +293,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
      end if
    end if ! No problem if neither rprim nor angdeg are defined: use default rprim
 
- end if ! poscar or (acell, rprim, angdeg)
+ end if ! geo% or (acell, rprim, angdeg)
 
  ! Rescale rprim using scalecart (and set scalecart to one)
  scalecart(1:3)=one
@@ -309,7 +309,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  ! Compute the multiplicity of the supercell
  call mati3det(supercell_lattice,multiplicity)
 
- if (tread_poscar == 0) then
+ if (tread_geo == 0) then
    ! Get the number of atom in the unit cell. Read natom from string
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natom',tread,'INT')
 
@@ -318,7 +318,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
    if(tread==1) natom_uc=intarr(1)
  else
-   natom_uc = poscar%natom
+   natom_uc = geo%natom
  end if
 
  ! Store the rprimd of the unit cell
@@ -395,7 +395,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  ABI_ALLOCATE(typat_read,(natrd))
  typat_read(1)=1
 
- if (tread_poscar == 0) then
+ if (tread_geo == 0) then
    call intagm(dprarr,intarr,jdtset,marr,natrd,string(1:lenstr),'typat',tread,'INT')
 
    ! If not read, try the XYZ data
@@ -403,7 +403,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    if(tread==1) typat_read(1:natrd)=intarr(1:natrd)
 
  else
-   typat_read = poscar%typat
+   typat_read = geo%typat
  end if
 
  do iatom=1,natrd
@@ -438,7 +438,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  !This should not be printed if randomcellpos did nothing - it contains garbage. Spurious output anyway
  !end if
 
- if (tread_poscar == 0) then
+ if (tread_geo == 0) then
 
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xred',txred,'DPR')
    if(txred==1 .and. txrandom == 0) xred_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
@@ -463,7 +463,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  else
    txcart = 0; txangst = 0; txrandom = 0; txred = 1
-   xred_read = poscar%xred
+   xred_read = geo%xred
  end if
 
  if (txred + txcart + txangst + txrandom == 0) then
@@ -970,7 +970,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  ABI_DEALLOCATE(xred_read)
  ABI_DEALLOCATE(typat_read)
 
- call poscar%free()
+ call geo%free()
 
  ! Correct the default nsym value, if a symmetry group has not been generated.
  if (nsym==0) nsym=1

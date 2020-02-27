@@ -38,7 +38,7 @@ MODULE m_crystal
 
  use m_io_tools,       only : file_exists
  use m_numeric_tools,  only : set2unit
- use m_fstrings,       only : int2char10, sjoin, yesno, itoa, ftoa, tolower, next_token
+ use m_fstrings,       only : int2char10, sjoin, yesno, itoa
  use m_symtk,          only : mati3inv, sg_multable, symatm, print_symmetries
  use m_spgdata,        only : spgdata
  use m_geometry,       only : metric, xred2xcart, xcart2xred, remove_inversion, getspinrot, symredcart
@@ -232,54 +232,6 @@ MODULE m_crystal
  public :: prt_cif                 ! Print CIF file.
  public :: prtposcar               ! output VASP style POSCAR and FORCES files.
 !!***
-
-!----------------------------------------------------------------------
-
-!!****t* m_crystal/poscar_t
-!! NAME
-!! poscar_t
-!!
-!! FUNCTION
-!!
-!! SOURCE
-
- type,public :: poscar_t
-
-  integer :: natom
-  ! Number of atoms
-
-  integer :: ntypat
-  ! Number of type of atoms
-
-  character(len=500) :: header
-
-  integer,allocatable :: typat(:)
-  ! typat(natom)
-  ! Type of each natom.
-
-  real(dp) :: rprimd(3,3)
-
-  real(dp),allocatable :: xred(:,:)
-  ! xred(3,natom)
-  ! Reduced coordinates.
-
-  real(dp),allocatable :: znucl(:)
-  ! znucl(ntypat)
-  ! Nuclear charge for each type of pseudopotential
-  ! Note that ntypat must be equal to npsp --> no alchemical mixing
-
- contains
-
-   procedure :: free => poscar_free
-   ! Free memory.
-
-   procedure :: print_abivars => poscar_print_abivars
-   !  Print Abinit variables corresponding to POSCAR
-
- end type poscar_t
-
- public :: poscar_from_string    ! Build object from string with newlines.
- public :: poscar_from_filepath  ! Build object from POSCAR filepath.
 
 CONTAINS  !====================================================================================================
 !!***
@@ -1441,6 +1393,7 @@ end subroutine symrel2string
 !!  PHON from Dario Alfe' or frophon
 !!  IMPORTANT: the order of atoms is fixed such that typat is re-grouped.
 !!  First typat=1 then typat=2, etc...
+!!  Only master should call this routine in MPI-mode.
 !!
 !! INPUTS
 !!  fcart = forces on atoms in cartesian coordinates
@@ -1490,13 +1443,13 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
 
 !************************************************************************
 
- !output POSCAR file for positions, atom types etc
+ ! Output POSCAR file for positions, atom types etc
  if (open_file(trim(fnameradix)//"_POSCAR", msg, newunit=iout) /= 0) then
    MSG_ERROR(msg)
  end if
 
  natoms_this_type = 0
- do itypat=1, ntypat
+ do itypat=1,ntypat
    do iatom=1,natom
      if (typat(iatom) == itypat) natoms_this_type(itypat) = natoms_this_type(itypat) + 1
    end do
@@ -1515,19 +1468,23 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
    end if
    chem_formula = trim(chem_formula) // symbol // trim(natoms_this_type_str)
  end do
+
  write (iout,'(2a)') "ABINIT generated POSCAR file. Title string - should be chemical formula... ",trim(chem_formula)
 
  write (iout,'(E24.14)') -ucvol*Bohr_Ang*Bohr_Ang*Bohr_Ang
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,1) ! (angstr? bohr?)
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,2)
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,3)
+
  natoms_all_types = "   "
  do itypat=1, ntypat
    write (natoms_this_type_str, '(I7)') natoms_this_type(itypat)
    natoms_all_types = trim(natoms_all_types) // "   " // trim(natoms_this_type_str)
  end do
+
  write (iout,'(a)') trim(natoms_all_types)
  write (iout,'(a)') "Direct"
+
  do itypat=1, ntypat
    do iatom=1,natom
      if (typat(iatom) /= itypat) cycle
@@ -1558,358 +1515,6 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
  close (iout)
 
 end subroutine prtposcar
-!!***
-
-!!****f* m_crystal/poscar_free
-!! NAME
-!!  poscar_free
-!!
-!! FUNCTION
-!!  Free memory in poscar_t object.
-!!
-!! SOURCE
-
-subroutine poscar_free(self)
-
-!Arguments ------------------------------------
- class(poscar_t),intent(inout) :: self
-
-!************************************************************************
-
- ABI_SFREE(self%typat)
- ABI_SFREE(self%xred)
- ABI_SFREE(self%znucl)
-
-end subroutine poscar_free
-!!***
-
-!!****f* m_crystal/poscar_from_abistring
-!! NAME
-!!  poscar_from_abistring
-!!
-!! FUNCTION
-!!  Build object from string with seperator `sep`. Usually sep = newline = ch10
-!!
-!! SOURCE
-
-type(poscar_t) function poscar_from_string(string, sep) result(new)
-
-!Arguments ------------------------------------
- character(len=*),intent(in) :: string
- character(len=1),intent(in) :: sep
-
-!Local variables-------------------------------
- integer,parameter :: marr = 3
- integer :: start, beg, stp, cnt, iatom, itypat, ierr, ii, narr, b1
- real(dp) :: scaling_constant
- character(len=len(string)) :: line, system, symbol
-!arrays
- integer,allocatable :: nattyp(:)
- logical,allocatable :: duplicated(:)
- character(len=5),allocatable :: symbols(:)
- real(dp),allocatable :: xcart(:,:)
- integer :: intarr(marr)
- real(dp):: dprarr(marr)
-
-!************************************************************************
-
- ! Example of POSCAR:
-
- ! Mg1 B2
- ! 1.0
- ! 2.672554 1.543000 0.000000
- ! -2.672554 1.543000 0.000000
- ! 0.000000 0.000000 3.523000
- ! Mg B
- ! 1 2
- ! direct
- ! 0.000000 0.000000 0.000000 Mg
- ! 0.333333 0.666667 0.500000 B
- ! 0.666667 0.333333 0.500000 B
-
- ! See also https://github.com/ExpHP/vasp-poscar/blob/master/doc/format.md
-
- write(std_out, "(3a)")" poscar_from_string:", ch10, trim(string)
- cnt = 0; start = 1
-
- !do while (string(start:start) /= " " .or. string(start:start) /= sep)
- !  start = start +1
- !end do
-
- ! Ingore initial whitespaces and separators.
- do
-   if (string(start:start) == " " .or. string(start:start) == sep) then
-     start = start + 1
-   else
-     exit
-   end if
- end do
-
- do
-   ABI_CHECK(start < len_trim(string), sjoin("Invalid poscar string:", string))
-   stp = index(string(start:), sep)
-   if (stp == 0) exit
-   if (stp == 1) then
-     ! Empty line
-     start = start + 2
-     continue
-   end if
-
-   write(std_out, *)"start, stp", start, stp
-   stp = start + stp - 2
-
-   !if (start > stp) then
-   !  start = stp + 1
-   !  continue
-   !end if
-
-   ABI_CHECK(start < len_trim(string), sjoin("Error while parsing POSCAR string:", ch10, trim(string)))
-   line = string(start:stp)
-
-   !if (len_trim(adjustl(line)) == 0) then
-   !  start = stp + 1
-   !  continue
-   !end if
-
-   cnt = cnt + 1
-   write(std_out, "(2a,3(a,i0))")&
-     " Parsing line: `", trim(line), "` with cnt: ", cnt, ", start: ", start, ", stp: ", stp
-
-   if (cnt /= 1) then
-     ii = index(line, "#")
-     if (ii /= 0) line = line(:ii-1)
-   end if
-
-   select case (cnt)
-   case (1)
-     new%header = trim(line)
-
-   case (2)
-     read(line, *, err=10, end=20) scaling_constant
-
-   case (3:5)
-     read(line, *, err=10, end=20) new%rprimd(:, cnt-2)
-
-   case (6)
-     ! Read line with the names of the atoms.
-     new%ntypat = 0
-     do ii=1,2
-       if (ii == 2) then
-         ABI_MALLOC(symbols, (new%ntypat))
-       end if
-       itypat = 0; beg = 1
-       do
-         ierr = next_token(line, beg, symbol)
-         !print *, "ierr:", ierr, "beg:", beg, "symbol:", trim(symbol)
-         if (ierr /= 0) exit
-
-         if (ii == 1) new%ntypat = new%ntypat + 1
-         if (ii == 2) then
-           itypat = itypat + 1
-           symbols(itypat) = symbol
-         end if
-       end do
-     end do
-
-     write(std_out, *)"ntypat: ", new%ntypat, "symbols: ", symbols
-
-     ! TODO: Handle case in which atoms are not grouped by type
-     ABI_MALLOC(duplicated, (new%ntypat))
-     duplicated = .False.
-     do itypat=1,new%ntypat-1
-       do ii=itypat+1, new%ntypat
-         if (symbols(itypat) == symbols(ii)) duplicated(ii) = .True.
-       end do
-     end do
-
-     if (any(duplicated)) then
-       NOT_IMPLEMENTED_ERROR()
-       !ABI_FREE(symbols)
-       !new%ntypat = count(.not. duplicated)
-       !ABI_MALLOC(symbols, (new%ntypat))
-     end if
-
-   case (7)
-      ! number of atoms of each type.
-      ! NOTE: Assuming ntypat == npsp thus alchemical mixing is not supported
-      ! There's a check in the main parser though.
-      ABI_MALLOC(nattyp, (new%ntypat))
-      read(line, *, err=10, end=20) nattyp
-      new%natom = sum(nattyp)
-      ABI_FREE(nattyp)
-
-      ! At this point, we can allocate Abinit arrays.
-      ABI_MALLOC(new%typat, (new%natom))
-      ABI_MALLOC(new%znucl, (new%ntypat))
-      ABI_MALLOC(new%xred, (3, new%natom))
-
-      ! Note that first letter should be capitalized, rest must be lower case
-      do itypat=1,new%ntypat
-        new%znucl(itypat) = symbol2znucl(symbols(itypat))
-      end do
-
-   case (8)
-     read(line, *, err=10, end=20) system
-     system = tolower(system)
-     if (system /= "cartesian" .and. system /= "direct") then
-       MSG_ERROR(sjoin("Expecting `cartesian` or `direct` for the coordinate system but got:", system))
-     end if
-
-   case (9)
-     ! Parse atomic positions.
-     do iatom=1,new%natom
-       ii = index(line, "#")
-       if (ii /= 0) line = line(:ii-1)
-       read(line, *, err=10, end=20) new%xred(:, iatom), symbol
-
-       b1 = 1
-       !call inarray(b1, "poscar_coord_line", dprarr, intarr, marr, 3, line, "DPR")
-       !new%xred(:, iatom) = dprarr(1:3)
-       !read(line(b1:), *, err=10, end=20) symbol
-
-       do itypat=1, new%ntypat
-         if (symbols(itypat) == symbol) then
-           new%typat(iatom) = itypat; exit
-         end if
-       end do
-       if (itypat == new%ntypat + 1) then
-         MSG_ERROR(sjoin("Cannot find symbol:", symbol, "in initial list. Check POSCAR string."))
-       end if
-       start = stp + 2
-       stp = index(string(start:), sep)
-       stp = start + stp - 2
-       line = string(start:stp)
-     end do
-     exit
-
-   case default
-     MSG_ERROR(sjoin("No handler for counter:", itoa(cnt)))
-   end select
-
-   start = stp + 2
- end do
-
- ! Convert ang -> bohr
- if (scaling_constant > zero) then
-   new%rprimd = scaling_constant * new%rprimd / Bohr_Ang
- else
-   ABI_CHECK(scaling_constant > zero, sjoin("scaling constant must be > 0 but found:", ftoa(scaling_constant)))
-   ! In vasp, a negative scale factor is treated as a volume. We need
-   ! to translate this to a proper lattice vector scaling.
-   !vol = abs(det(lattice))
-   !lattice *= (-scale / vol) ** (1 / 3)
- end if
-
- if (system == "cartesian") then
-   ! Go from cartesian to reduced.
-   ABI_MALLOC(xcart, (3, new%natom))
-   xcart = new%xred
-   call xcart2xred(new%natom, new%rprimd, xcart, new%xred)
-   ABI_FREE(xcart)
- end if
-
- ABI_FREE(symbols)
- ABI_FREE(duplicated)
- return
-
- 10 MSG_ERROR(sjoin("Error while parsing POSCAR string:", ch10, trim(string)))
- 20 MSG_ERROR(sjoin("End-of-line error while parsing POSCAR line:", ch10, trim(line)))
-
-end function poscar_from_string
-!!***
-
-!!****f* m_crystal/poscar_from_filepath
-!! NAME
-!!  poscar_from_filepath
-!!
-!! FUNCTION
-!!
-!! SOURCE
-
-type(poscar_t) function poscar_from_filepath(filename, comm) result(new)
-
-!Arguments ------------------------------------
- character(len=*),intent(in) :: filename
- integer,intent(in) :: comm
-
-!Local variables-------------------------------
- integer,parameter :: master = 0
- integer :: unt, ierr, cnt, my_rank
- character(len=500) :: msg, line
- character(len=strlen) :: string
-
-!************************************************************************
-
- my_rank = xmpi_comm_rank(comm)
- msg = ""
-
- if (my_rank == master) then
-   if (open_file(filename, msg, newunit=unt, form='formatted', status='old', action="read") /= 0) then
-     MSG_ERROR(msg)
-   end if
-
-   ierr = 0; cnt = 0
-   do
-     ! Keeps reading lines until end of input file
-     read(unit=unt, fmt='(a)', iostat=ierr, iomsg=msg) line
-     if (ierr /= 0) exit
-     !ierr = read_string(string, unit) result(ierr)
-     if (len_trim(line) == 0) continue
-     ! store line in buffer and add EOL.
-     string(cnt+1:cnt+len_trim(line) + 1) = trim(line)//ch10
-     cnt = cnt + len_trim(line) + 1
-     if (ierr /= 0) exit
-   end do
-   close(unt)
-
-   ! Must exit because of EOF condition.
-   ABI_CHECK(ierr < 0, sjoin("IO-error:", msg))
- end if
-
- if (xmpi_comm_size(comm) > 1) call xmpi_bcast(string, master, comm, ierr)
-
- new = poscar_from_string(string, ch10)
-
-end function poscar_from_filepath
-!!***
-
-!!****f* m_crystal/poscar_print_abivars
-!! NAME
-!!  poscar_print_abivars
-!!
-!! FUNCTION
-!!  Print Abinit variables corresponding to POSCAR
-!!
-!! SOURCE
-
-subroutine poscar_print_abivars(self, unit)
-
-!Arguments ------------------------------------
- class(poscar_t),intent(in) :: self
- integer,intent(in) :: unit
-
-!Local variables-------------------------------
- integer :: ii
-
-!************************************************************************
-
- if (unit == dev_null) return
-
- write(unit, "(2a)")"# header: ", trim(self%header)
- write(unit, "(a, i0)")" natom ", self%natom
- write(unit, "(a, i0)")" ntypat ", self%ntypat
- write(unit, sjoin("(a, ", itoa(self%natom), "(i0,1x))")) " typat ", self%typat
- write(unit, sjoin("(a, ", itoa(self%ntypat), "(f5.1,1x))")) " znucl ", self%znucl
- write(unit, "(a)")" rprimd "
- do ii=1,3
-   write(unit, "(2x, 3(f11.7,1x))") self%rprimd(:, ii)
- end do
- write(unit, "(a)")" xred"
- do ii=1,self%natom
-   write(unit, "(2x, 3(f11.7,1x))") self%xred(:, ii)
- end do
-
-end subroutine poscar_print_abivars
 !!***
 
 END MODULE m_crystal

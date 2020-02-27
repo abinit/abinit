@@ -38,11 +38,10 @@ module m_invars1
 
  use m_fstrings, only : inupper, itoa, endswith, strcat, sjoin, startswith
  use m_geometry, only : mkrdim
- use m_parser,   only : intagm, chkint_ge, ab_dimensions
+ use m_parser,   only : intagm, chkint_ge, ab_dimensions, geo_t, geo_from_abivar_string
  use m_inkpts,   only : inkpts, inqpt
  use m_ingeo,    only : ingeo, invacuum
  use m_symtk,    only : mati3det
- use m_crystal,  only : poscar_t, poscar_from_string
 
 #if defined HAVE_GPU_CUDA
  use m_gpu_toolbox
@@ -117,22 +116,19 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos,cnt, tread_poscar
+ integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos,cnt, tread_geo
  integer :: treads, use_gpu_cuda, ierr
  real(dp) :: cpus
  character(len=500) :: msg
  character(len=fnlen) :: pp_dirpath, shell_var
  character(len=20*fnlen) :: pseudos_string ! DO NOT decrease len
- character(len=len(string)) :: poscar_string
- type(poscar_t) :: poscar
+ character(len=len(string)) :: geo_string
+ type(geo_t) :: geo
 !arrays
  integer,allocatable :: intarr(:), sidx(:)
  real(dp),allocatable :: dprarr(:)
 
-
 !******************************************************************
-
- ABI_UNUSED(comm)
 
  !write(std_out,"(3a)")"invars1 with string:", ch10, trim(string)
 
@@ -303,16 +299,16 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ! Read natom from string
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natom',tread,'INT')
 
-   ! or get it from poscar_string
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'poscar', tread_poscar, &
-               'KEY', key_value=poscar_string)
+   ! or get it from the structure variable
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'structure', tread_geo, &
+               'KEY', key_value=geo_string)
 
-   if (tread_poscar /= 0) then
-     poscar = poscar_from_string(poscar_string, ch10)
+   if (tread_geo /= 0) then
+     geo = geo_from_abivar_string(geo_string, comm)
      if (tread /= 0) then
-       ABI_CHECK(intarr(1) == poscar%natom, "natom from variable and from poscar do not agree with each other")
+       ABI_CHECK(intarr(1) == geo%natom, "natom from variable and from geo do not agree with each other")
      end if
-     intarr(1) = poscar%natom
+     intarr(1) = geo%natom
      tread = 1
    end if
 
@@ -356,11 +352,11 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntypat',tread,'INT')
    if (tread==1) dtsets(idtset)%ntypat=intarr(1)
 
-   if (tread_poscar /= 0) then
+   if (tread_geo /= 0) then
      if (tread == 1) then
-       ABI_CHECK(poscar%ntypat == dtsets(idtset)%ntypat, "ntypat and value from poscar do not agree with each other")
+       ABI_CHECK(geo%ntypat == dtsets(idtset)%ntypat, "ntypat and geo%ntypat do not agree with each other")
      end if
-     dtsets(idtset)%ntypat = poscar%ntypat
+     dtsets(idtset)%ntypat = geo%ntypat
    end if
 
    ! Check that ntypat is greater than 0
@@ -414,7 +410,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usewvl',tread,'INT')
    if(tread==1) dtsets(idtset)%usewvl=intarr(1)
 
-   call poscar%free()
+   call geo%free()
  end do
 
 !mxnatom =maxval(dtsets(1:ndtset_alloc)%natom)
@@ -1118,7 +1114,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: chksymbreak,found,ierr,iatom,ii,ikpt,iimage,index_blank,index_lower, tread_poscar
+ integer :: chksymbreak,found,ierr,iatom,ii,ikpt,iimage,index_blank,index_lower, tread_geo
  integer :: index_typsymb,index_upper,ipsp,iscf,intimage,itypat,leave,marr
  integer :: natom,nkpt,nkpthf,npsp,npspalch, ncid
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
@@ -1139,8 +1135,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
  character(len=32) :: cond_string(4)
  character(len=fnlen) :: key_value
- character(len=len(string)) :: poscar_string
- type(poscar_t) :: poscar
+ character(len=len(string)) :: geo_string
+ type(geo_t) :: geo
 
 !************************************************************************
 
@@ -1210,10 +1206,10 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  npsp=dtset%npsp
  ntypat=dtset%ntypat
 
- call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'poscar', tread_poscar, &
-             'KEY', key_value=poscar_string)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'structure', tread_geo, &
+             'KEY', key_value=geo_string)
 
- if (tread_poscar == 0) then
+ if (tread_geo == 0) then
    ! No default value for znucl
    call intagm(dprarr,intarr,jdtset,marr,dtset%npsp,string(1:lenstr),'znucl',tread,'DPR')
    if(tread==1) dtset%znucl(1:dtset%npsp)=dprarr(1:dtset%npsp)
@@ -1226,9 +1222,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
 
  else
-   poscar = poscar_from_string(poscar_string, ch10)
-   dtset%znucl(1:dtset%ntypat) = poscar%znucl
-   call poscar%free()
+   geo = geo_from_abivar_string(geo_string, comm)
+   dtset%znucl(1:dtset%ntypat) = geo%znucl
+   call geo%free()
  end if
 
  ! The default for ratsph has already been initialized
@@ -1415,8 +1411,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(ntypalch>0)then
    call intagm(dprarr,intarr,jdtset,marr,ntypalch,string(1:lenstr),'algalch',tread,'INT')
    if(tread==1) dtset%algalch(1:ntypalch)=intarr(1:ntypalch)
-   if (tread_poscar /= 0) then
-     MSG_ERROR("Alchemical mixing cannot be used wit poscar variables, use typat, znucl etc.")
+   if (tread_geo /= 0) then
+     MSG_ERROR("Alchemical mixing cannot be used with geo variable, use typat, znucl etc.")
    end if
  end if
 
@@ -1476,13 +1472,13 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    znucl(1:dtset%npsp)=dtset%znucl(1:dtset%npsp)
 
    call ingeo(acell,amu,bravais,chrgat,dtset,dtset%genafm(1:3),iatfix,&
-&   dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
-&   msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
-&   dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
-&   dtset%pawspnorb,dtset%ptgroupma,ratsph,&
-&   rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
-&   string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
-&   typat,vel,vel_cell,xred,znucl)
+    dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
+    msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
+    dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
+    dtset%pawspnorb,dtset%ptgroupma,ratsph,&
+    rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
+    string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
+    typat,vel,vel_cell,xred,znucl, comm)
 
    dtset%chrgat(1:natom)=chrgat(1:natom)
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
