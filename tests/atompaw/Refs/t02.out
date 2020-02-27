@@ -15,7 +15,7 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Wed 26 Feb 2020.
-- ( at 10h35 )
+- ( at 23h17 )
   
 - input  file    -> t02.in
 - output file    -> t02.out
@@ -155,6 +155,15 @@ P           mkmem          10
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 10, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 244, }
+cutoff_energies: {ecut:  16.0, pawecutdg:  50.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
@@ -178,8 +187,8 @@ P           mkmem          10
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.10918
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/beuken_develop/tests/TestBot_MPI1/atompaw_t01-t02/C.LDA-PW-paw.abinit
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/beuken_develop/tests/TestBot_MPI1/atompaw_t01-t02/C.LDA-PW-paw.abinit
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__beuken/tests/TestBot_MPI1/atompaw_t01-t02/C.LDA-PW-paw.abinit
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__beuken/tests/TestBot_MPI1/atompaw_t01-t02/C.LDA-PW-paw.abinit
 - Paw atomic data for element C - Generated with atompaw v4.1.0.6
 -  6.00000   4.00000  20200226                znucl, zion, pspdat
     7    7    1    0      1280   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -209,6 +218,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     234.438     234.421
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 17, nstep: 8, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-14, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2
  ETOT  1  -11.519908563970    -1.152E+01 1.189E-01 1.419E+01
  ETOT  2  -11.511256038222     8.653E-03 7.736E-03 1.359E+00
@@ -233,23 +248,26 @@ _setup2: Arith. and geom. avg. npw (full set) are     234.438     234.421
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   3.3703265,   3.3703265, ]
 - [  3.3703265,   0.0000000,   3.3703265, ]
 - [  3.3703265,   3.3703265,   0.0000000, ]
 lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6567759E+01
 convergence: {deltae:  2.568E-11, res2:  2.864E-10, residm:  9.408E-05, diffor: null, }
 etotal    :  -1.15091751E+01
 entropy   :   0.00000000E+00
 fermie    :   4.10776847E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  6.48564016E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   6.48564016E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   6.48564016E-04, ]
 pressure_GPa:  -1.9081E+01
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01,  C]
+cartesian_forces: # hartree/bohr
 - [  1.87248540E-29,   1.24832360E-30,  -2.12215012E-29, ]
 - [ -1.87248540E-29,  -1.24832360E-30,   2.12215012E-29, ]
 force_length_stats: {min:   2.83289707E-29, max:   2.83289707E-29, mean:   2.83289707E-29, }
@@ -562,10 +580,10 @@ P           mkmem          10
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.0  wall=          2.6
+- Proc.   0 individual time (sec): cpu=          2.0  wall=          6.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.0  wall=          2.6
++Overall time at end (sec) : cpu=          2.0  wall=          6.3
