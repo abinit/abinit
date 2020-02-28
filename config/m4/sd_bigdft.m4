@@ -199,7 +199,11 @@ AC_DEFUN([SD_BIGDFT_DETECT], [
         sd_bigdft_ldflags=""
         sd_bigdft_libs=""
       else
-        AC_MSG_FAILURE([invalid BigDFT configuration])
+        if test "${sd_bigdft_policy}" = "fail"; then
+              AC_MSG_FAILURE([invalid BigDFT configuration])
+        else
+              AC_MSG_WARN([invalid BigDFT configuration])
+        fi
       fi
     fi
   else
