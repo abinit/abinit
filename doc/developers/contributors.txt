@@ -26,7 +26,7 @@ in the ABINIT project in the past or currently :
 - University of West Virginia (A. Romero),
 
 Coming now to individuals,
-recent direct contributors to ABINIT (versions 8.0 to 8.11) are listed below.
+recent direct contributors to ABINIT (versions 8.0 to 9.0.0) are listed below.
 For reasons of privacy, we do not provide the e-mail address anymore.
 If you need to contact somebody, try the forum or the github.
 name                      
@@ -59,6 +59,7 @@ Olivier Gingras
 Yannick Gillet
 Xavier Gonze
 Felix Goudreault 
+Bogdan Guster
 Xu He
 Francois Jollet
 Jonathan Laflamme Janssen
