@@ -3510,7 +3510,7 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
 
 !Local variables-------------------------------
  integer :: ii
- character(len=len(string)) :: prefix, token
+ character(len=len(string)) :: prefix
 
 !************************************************************************
 
@@ -3521,9 +3521,13 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
  prefix = adjustl(string(1:ii-1))
 
  select case (prefix)
+
  case ("poscar")
    ! Get geo info from POSCAR from file.
    new = geo_from_poscar_path(string(ii+1:), comm)
+
+ !case ("abigeo")
+ !  new = geo_from_abigeo_path(string(ii+1:), comm)
 
  case ("abifile")
    if (endswith(string(ii+1:), ".nc")) then
@@ -3569,9 +3573,8 @@ type(geo_t) function geo_from_poscar_path(path, comm) result(new)
 
 !Local variables-------------------------------
  integer,parameter :: master = 0
- integer :: unt, ierr, my_rank
- character(len=500) :: msg, line
- character(len=strlen) :: string
+ integer :: unt, my_rank
+ character(len=500) :: msg
 
 !************************************************************************
 
@@ -3606,9 +3609,10 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
 
 !Local variables-------------------------------
  !integer,parameter :: marr = 3
- integer :: start, beg, stp, cnt, iatom, itypat, ierr, ii !, narr, b1
+ integer :: start, beg, cnt, iatom, itypat, ierr, ii !, narr, b1
  real(dp) :: scaling_constant
- character(len=500) :: line, system, symbol, iomsg
+ character(len=500) :: line, system, iomsg
+ character(len=5) :: symbol
 !arrays
  integer,allocatable :: nattyp(:)
  logical,allocatable :: duplicated(:)
@@ -3659,7 +3663,7 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
      if (ii == 1) new%ntypat = new%ntypat + 1
      if (ii == 2) then
        itypat = itypat + 1
-       symbols(itypat) = symbol
+       symbols(itypat) = trim(symbol)
      end if
    end do
  end do
@@ -3819,7 +3823,6 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
 #ifdef HAVE_NETCDF
 
  if (xmpi_comm_rank(comm) == master) then
-   !print *, "calling netcdf"
    NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
 
    if (endswith(path, "_HIST.nc")) then
@@ -3872,7 +3875,7 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
 
  call new%bcast(master, comm)
 
- call new%print_abivars(std_out)
+ !call new%print_abivars(std_out)
 
 end function geo_from_netcdf_path
 !!***
@@ -3938,9 +3941,6 @@ subroutine geo_malloc(self)
 
 end subroutine geo_malloc
 !!***
-
-
-
 
 !!****f* m_parser/geo_free
 !! NAME

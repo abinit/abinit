@@ -1655,7 +1655,7 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
  integer :: rprimd_id,acell_id,strten_id
  integer :: etotal_id,ekin_id,entropy_id,mdtime_id
  integer :: typat_id,znucl_id,amu_id,dtion_id,imgmov_id, two_id,mdtemp_id
- character(len=500) :: msg
+ !character(len=500) :: msg
 !arrays
  integer :: dim0(0),dim1(1),dim2(2),dim3(3),dim4(4)
 #endif

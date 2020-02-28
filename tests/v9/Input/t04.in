@@ -64,7 +64,7 @@ nband   8
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [shell]
-#%%  pre_commands = iw_cp t04_POSCAR t04_POSCAR
+#%% pre_commands = iw_cp t04_POSCAR t04_POSCAR
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = POSCAR
