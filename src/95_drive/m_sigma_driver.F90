@@ -270,7 +270,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
- real(dp),allocatable :: weights(:),freqs(:),occs(:,:) ! MRM
+ real(dp),allocatable :: weights(:),aux_ecuts(:),freqs(:),occs(:,:) ! MRM
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
@@ -2276,15 +2276,27 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ABI_DEALLOCATE(sigcme_k)
      end do
    end if
-   !! MRM print WFK and DEN files. Finally, deallocate all arrays used for 1-RDM update
+   ! MRM print WFK and DEN files. Finally, deallocate all arrays used for 1-RDM update
    if(gwcalctyp==21) then
      iinfo=1 ! Should be an input parameter
-     if(iinfo==1) then
+     if(iinfo==1) then      
        call update_wfk_gw_rdm(Wfd,Wfd_dm,nateigv,occs,b1gw,b2gw,QP_BSt,Hdr_wfk)
        gw1rdm_fname='gw_rdm_DS100_WFK' ! How to update dataset?
+       ! MRM update ecuts except ecutdg because it is used only with PAW
+       ABI_MALLOC(aux_ecuts,(3))
+       aux_ecuts(1)=Hdr_wfk%ecut
+       Hdr_wfk%ecut=Dtset%ecut
+       aux_ecuts(2)=Hdr_wfk%ecut_eff
+       Hdr_wfk%ecut_eff=Dtset%ecutwfn
+       aux_ecuts(3)=Hdr_wfk%ecutsm
+       Hdr_wfk%ecutsm=Dtset%ecutsm
        call Wfd_dm%write_wfk(Hdr_wfk,QP_BSt,gw1rdm_fname)
+       Hdr_wfk%ecut=aux_ecuts(1)
+       Hdr_wfk%ecut_eff=aux_ecuts(2)
+       Hdr_wfk%ecutsm=aux_ecuts(3)
        Wfd_dm%bks_comm = xmpi_comm_null
        call Wfd_dm%free()
+       ABI_FREE(aux_ecuts)
      endif
      ABI_FREE(dm1) 
      ABI_FREE(nateigv) 

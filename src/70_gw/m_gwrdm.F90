@@ -223,7 +223,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
  info=0
  call zheev('v','u',ndim,dm1_tmp,ndim,occs,work,lwork,rwork,info)
 
-
+ !Order from highes occ to lowest occ
  do ib1dm=1,ndim
   occs_tmp(ib1dm)=occs(ndim-(ib1dm-1))
   do ib2dm=1,ndim
@@ -250,7 +250,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  else
-   write(msg,'(a39,3f10.5)') 'Error computing the occs. for k-point: ',BSt%kptns(1:,kpoint)
+   write(msg,'(a36,3f10.5)') 'Error computing occs. for k-point: ',BSt%kptns(1:,kpoint)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  endif
@@ -291,13 +291,13 @@ subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr)
  type(wfd_t),intent(inout) :: wfd_f
  type(wfd_t),intent(in) :: wfd_i
  type(ebands_t),target,intent(inout) :: BSt
- type(Hdr_type),intent(in) :: Hdr
+ type(Hdr_type),intent(inout) :: Hdr
 !arrays
  real(dp),intent(in) :: occs(:,:)
  complex(dpc),intent(in) :: nateigv(:,:,:)
 !Local variables ------------------------------
 !scalars
- integer :: ib1dm,ib2dm,ikpoint,irecip_v,iname
+ integer :: ib1dm,ib2dm,dim_bands,ikpoint,irecip_v,nband_tot,nband_k
 !arrays
 !************************************************************************
  !Wfd%Wave(1,2,1)%ug(1) ! BAND 1 , k-POINT 2, SPIN 1, UG="MO Coef" 1 
@@ -317,12 +317,25 @@ subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr)
  enddo
  if((size(Hdr%occ(:))/BSt%nkpt) < (b2gw-b1gw+1)) then
    !Actually, we should never reach this point as the code should crash during Wfd initialization in m_sigma_driver.F90
-   MSG_ERROR("Impossible to use the read existing WFK to build a new one!")
+   MSG_ERROR("Impossible to use the existing read WFK to build a new one!")
  endif
-   write(*,*) ' MRM' !!  correct npawarr and occ in Hdr file. 
-   write(*,*) size(Hdr%occ(:))/BSt%nkpt
-   write(*,*) Hdr%occ(:)
-   write(*,*) b1gw,b2gw
+ ! Update occ in Hdr before printing
+ nband_tot=size(Hdr%occ(:))
+ nband_k=nband_tot/BSt%nkpt
+ do ikpoint=1,BSt%nkpt
+   ib2dm=1
+   dim_bands=size(BSt%occ(:,ikpoint,1))
+   do ib1dm=1+nband_k*(ikpoint-1),nband_k*(ikpoint)
+     if(ib2dm<=dim_bands) then 
+       Hdr%occ(ib1dm)=BSt%occ(ib2dm,ikpoint,1)
+       ib2dm=ib2dm+1
+     endif  
+   enddo
+   write(*,*) ' ' 
+   write(*,*) 'MRM Print occs' ! Clean blank spaces in Hdr occ? 
+   write(*,*) BSt%occ(:,ikpoint,1) 
+   write(*,*) ' ' 
+ enddo
 end subroutine update_wfk_gw_rdm        
 !!***
 
