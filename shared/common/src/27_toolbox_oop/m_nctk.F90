@@ -741,8 +741,8 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  else
    ! Note that here we don't enforce nf90_netcdf4 hence the netcdf file with be in classic model.
    call wrtout(std_out, sjoin("- Creating netcdf file WITHOUT MPI-IO support:", path))
-   ncerr = nf90_create(path, ior(nf90_clobber, nf90_write), ncid)
-   !ncerr = nf90_create(path, cmode=ior(ior(nf90_clobber, nf90_netcdf4), nf90_write), ncid=ncid)
+   !ncerr = nf90_create(path, ior(nf90_clobber, nf90_write), ncid)
+   ncerr = nf90_create(path, cmode=ior(ior(nf90_clobber, nf90_netcdf4), nf90_write), ncid=ncid)
    if (xmpi_comm_size(comm) > 1) then
      MSG_WARNING("netcdf without MPI-IO support with nprocs > 1!")
    end if
@@ -2080,8 +2080,8 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
        case ("open")
          ncerr = nf90_open(path, mode=nf90_write, ncid=ncid)
        case ("create")
-         ncerr = nf90_create(path, cmode=nf90_clobber, ncid=ncid)
-         !ncerr = nf90_create(path, cmode=ior(ior(nf90_clobber, nf90_netcdf4), nf90_write), ncid=ncid)
+         !ncerr = nf90_create(path, cmode=nf90_clobber, ncid=ncid)
+         ncerr = nf90_create(path, cmode=ior(ior(nf90_clobber, nf90_netcdf4), nf90_write), ncid=ncid)
        case default
          MSG_ERROR(strcat("Wrong action:", my_action))
        end select
@@ -2810,8 +2810,8 @@ integer :: ncerr
  ncid = 0
 #if defined HAVE_NETCDF
  ! Create the NetCDF file
- ncerr = nf90_create(path=filename,cmode=NF90_CLOBBER,ncid=ncid)
- !ncerr = nf90_create(path, cmode=ior(ior(nf90_clobber, nf90_netcdf4), nf90_write), ncid=ncid)
+ !ncerr = nf90_create(path=filename,cmode=NF90_CLOBBER,ncid=ncid)
+ ncerr = nf90_create(path=filename, cmode=ior(ior(nf90_clobber, nf90_netcdf4), nf90_write), ncid=ncid)
  NCF_CHECK_MSG(ncerr, sjoin('Error while creating:', filename))
  ncerr=nf90_def_dim(ncid,'one',1,one_id)
  NCF_CHECK_MSG(ncerr,'nf90_def_dim')
@@ -2964,8 +2964,8 @@ subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
  convrt=1.0_dp
 
 !1. Create netCDF file
- ncerr = nf90_create(path=trim(filename),cmode=NF90_CLOBBER, ncid=ncid)
- !ncerr = nf90_create(path, cmode=ior(ior(nf90_clobber, nf90_netcdf4), nf90_write), ncid=ncid)
+ !ncerr = nf90_create(path=trim(filename),cmode=NF90_CLOBBER, ncid=ncid)
+ ncerr = nf90_create(path=trim(filename), cmode=ior(ior(nf90_clobber, nf90_netcdf4), nf90_write), ncid=ncid)
  NCF_CHECK_MSG(ncerr," create netcdf EIG file")
 
 !2. Define dimensions
