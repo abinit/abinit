@@ -496,6 +496,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
      nband_k = nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
      nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+print *, ' vtorho nband_me ', nband_me
      istwf_k = istwfk_rbz(ikpt)
      npw_k   = npwarr(ikpt,1)
      npw1_k  = npwar1(ikpt,1)

@@ -3354,16 +3354,19 @@ print *, 'spin_sym, spin,  nsppol, wfk_disk%nsppol ', spin_sym, spin, nsppol, wf
 
 ! if nband_me goes beyond the end of the bands on disk, just read those we have
          nband_me_disk = min(nband_k,nband_me)
-! TODO : in parallel, iband+nband_me-1 could be larger than mband_disk
+
+! In parallel, iband+nband_me-1 could be larger than mband_disk
 !   we want to limit nband_me_disk in that case too, just for the last band procs
          if (iband+nband_me-1 > nband_k) then
            nband_me_disk = nband_k+1-iband
          end if
 
+#ifdef DEV_MJV
+print *, 'nband_me, nband_me_disk ', nband_me, nband_me_disk 
+#endif
 ! may need to re-read if for a different equivalent k if I need other bands
          if (iband /= iband_saved .or. nband_me_disk /= nband_me_saved .or. spin /= spin_saved) then
 #ifdef DEV_MJV
-print *, 'nband_me, nband_me_disk ', nband_me, nband_me_disk 
 print *, 'reading from file for iband, ik_disk, spin, formeig ', iband, ik_disk, spin, formeig
 #endif
            if (formeig > 0) then

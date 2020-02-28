@@ -2439,6 +2439,7 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 
 !Local variables-------------------------------
  integer :: inb,inb1,ind,ind0,nband_k,proc_max,proc_min
+ integer :: nband_k_sp2
  integer :: iiband,iikpt,iisppol,ikpt_this_proc,nbsteps,nproc_kpt,temp_unit
  integer :: iband_this_proc, iband
  integer :: kpt_distrb(nkpt)
@@ -2451,9 +2452,10 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
  if (mpi_enreg%paral_pert==1) nproc_kpt=nproc
 
 !Initialization of proc_distrb
+ mpi_enreg%proc_distrb = nproc+1
  do iisppol=1,nsppol
-   do iiband=1,mband
-     do iikpt=1,nkpt
+   do iikpt=1,nkpt
+     do iiband=1,nband(iikpt+(iisppol-1)*nkpt)
        mpi_enreg%proc_distrb(iikpt,iiband,iisppol)=nproc_kpt-1
      end do
    end do
@@ -2566,11 +2568,14 @@ print *, 'no band paral now'
        inb1=(nkpt*nsppol)/nproc;if (mod((nkpt*nsppol),nproc)/=0) inb1=inb1+1
        do iikpt=1,nkpt
          nband_k=nband(iikpt)
+         nband_k_sp2=nband(iikpt+nkpt*(nsppol-1))
          !ind=ind0/inb1
          ind=mod(ind0,nproc)
          do iiband=1,nband_k
            mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
-           if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=ind
+           if (nsppol==2 .and. iiband <= nband_k_sp2) then
+             mpi_enreg%proc_distrb(iikpt,iiband,2)=ind
+           end if
            !if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc-ind-1
          end do
          ind0=ind0+1
@@ -2593,12 +2598,16 @@ print *, 'yes band paral now'
        inb=nproc/(nkpt*nsppol)
        do iikpt=1,nkpt
          nband_k=nband(iikpt)
+         nband_k_sp2=nband(iikpt+nkpt*(nsppol-1))
          inb1=nband_k/inb
          if (mod(nband_k,inb)/=0) inb1=inb1+1
          do iiband=1,nband_k
            ind=(iiband-1)/inb1+ind0
            mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
-           if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=ind
+!TODO : could end up with 0 bands on certain procs with this configuration and nband(k) /= constant
+           if (nsppol==2 .and. iiband <= nband_k_sp2) then
+             mpi_enreg%proc_distrb(iikpt,iiband,2)=ind
+           end if
            !if (nsppol==2) mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc-ind-1
          end do
          ind0=ind+1
@@ -2641,6 +2650,7 @@ print *, 'yes band paral now'
        do iiband=1,nband_k
          mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
          if (nsppol==2) then 
+!TODO: why are these bands ordered in the opposite direction wrt spin 1??
            mpi_enreg%proc_distrb(iikpt,iiband,2)=nproc_kpt-ind-1
          end if
        end do

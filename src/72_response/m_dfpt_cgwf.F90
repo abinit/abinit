@@ -658,6 +658,7 @@ print *, ' band_procs(iband), mpi_enreg%comm_band ', band_procs(iband), mpi_enre
  end if ! ipert/=natom+10.and.ipert/=natom+11
 
  ! Filter the wavefunctions for large modified kinetic energy (see routine mkkin.f)
+! TODO: should this also be applied to cwaveq for the preconditioning with kinpw1 below?
  do ispinor=1,nspinor
    ipws=(ispinor-1)*npw1
 !$OMP PARALLEL DO PRIVATE(ipw) SHARED(cwavef,kinpw1,ipws,npw1)
@@ -667,6 +668,7 @@ print *, ' band_procs(iband), mpi_enreg%comm_band ', band_procs(iband), mpi_enre
      end if
    end do
  end do
+print *, 'cwavef 670 ', cwavef(:,23)
 
  ! Apply the orthogonality condition: <C1 k,q|C0 k+q>=0 (NCPP) or <C1 k,q|S0|C0 k+q>=0 (PAW)
  ! Project out all bands from cwavef, i.e. apply P_c projector on cwavef
@@ -689,6 +691,7 @@ print *, ' band_procs(iband), mpi_enreg%comm_band ', band_procs(iband), mpi_enre
      cwavef = work - (mpi_enreg%nproc_band-1)*cwavef
    end if
  end do
+print *, 'cwavef 692 ', cwavef(:,23)
 
 
  if(ipert/=natom+10.and.ipert/=natom+11) then
@@ -758,6 +761,7 @@ print *, 'skipping for buffer band'
  else
    call cg_zaxpy(npw1*nspinor, [-eshift, zero], cwavef,ghc)
  end if
+print *, 'cwavef 763 ', cwavef(:,23)
 
  ! Initialize resid, in case of nline==0
  resid=zero
@@ -837,6 +841,8 @@ print *, 'skipping for buffer band'
    end do
 
    call cg_zcopy(npw1*nspinor,gresid,direc)
+print *, ' gresid ', gresid (:,1:5)
+
    ! ======================================================================
    ! ============== CHECK FOR CONVERGENCE CRITERIA ========================
    ! ======================================================================
@@ -1029,7 +1035,7 @@ print *, 'skipping for resid'
    call dotprod_g(dedt,doti,istwf_k,npw1*nspinor,1,conjgr,gresid,me_g0,mpi_enreg%comm_spinorfft)
    dedt=-two*two*dedt
 
-print *, 'gresid ', gresid(1:2,1:5)
+print *, 'gresid 781 ', gresid(1:2,1:5)
    if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) call wrtout(std_out,' CGWF3_WARNING : dedt>0')
    ABI_ALLOCATE(gvnlx_direc,(2,npw1*nspinor))
    ABI_ALLOCATE(gh_direc,(2,npw1*nspinor))
@@ -1071,6 +1077,8 @@ print *, 'gh_direc ', gh_direc(1:2,1:5)
    ! ======================================================================
    ! ======= COMPUTE MIXING FACTOR - CHECK FOR CONVERGENCE ===============
    ! ======================================================================
+
+print *, 'dedt, d2edt2, theta ', dedt, d2edt2, theta
 
    ! see Eq.(31) of PRB55, 10337 (1997) [[cite:Gonze1997]]
    !
@@ -1121,6 +1129,17 @@ print *, 'skipping for theta below machine prec'
 
    if (skipme == 0) then
      call cg_zaxpy(npw1*nspinor, [theta, zero], conjgr,cwavef)
+ ! Filter the wavefunctions for large modified kinetic energy (see routine mkkin.f)
+     do ispinor=1,nspinor
+       ipws=(ispinor-1)*npw1
+!$OMP PARALLEL DO PRIVATE(ipw) SHARED(cwavef,kinpw1,ipws,npw1)
+       do ipw=1+ipws,npw1+ipws
+         if(kinpw1(ipw-ipws)>huge(zero)*1.d-11)then
+           cwavef(1:2,ipw)=zero
+         end if
+       end do
+     end do
+
      call cg_zaxpy(npw1*nspinor, [theta, zero], gh_direc,ghc)
      call cg_zaxpy(npw1*nspinor, [theta, zero], gvnlx_direc,gvnlxc)
   
@@ -1174,9 +1193,11 @@ print *, 'skipping for deltae diff'
 
    ! Note that there are five "exit" instruction inside the loop.
    nlines_done = nlines_done + 1
+print *, 'cgwf  cwavef  1180 ',cwavef(:,23)
  end do ! iline
 print *, 'shape ', shape(cwavef)
 print *, 'cgwf band,  cwavef', band, cwavef(:,1:5)
+print *, 'cgwf  cwavef  1183 ',cwavef(:,23)
 print *, 'cgwf band,  ghc', band, ghc(:,1:5)
 
 !--------------------------------------------------------------------------
