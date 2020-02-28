@@ -1,6 +1,6 @@
-###########################################
-# TEST STRUCTURE FROM POSCAR STRING
-###########################################
+################################################
+# TEST STRUCTURE VARIABLE. SEE DESCRIPTION BELOW
+################################################
 ndtset  2
 
 # MgB2 lattice structure
@@ -68,6 +68,13 @@ nband   8
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = POSCAR
-#%% description = Test poscar variable.
+#%% description = 
+#%%  Test the `structure` variable used to specify the crystalline structure
+#%%  without having to enter explicitly natom, ntypat, typat and znucl. 
+#%%  Different options are tested. Initialize structure from:
+#%%
+#%%    1) An external POSCAR file with symbols (VASP5 format)
+#%%    2) An external netcdf file produced by Abinit.
+#%% 
 #%% topics = UnitCell
 #%%<END TEST_INFO>

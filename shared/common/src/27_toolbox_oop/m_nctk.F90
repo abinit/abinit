@@ -2809,7 +2809,7 @@ integer :: ncerr
 
  ncid = 0
 #if defined HAVE_NETCDF
-!Create the NetCDF file
+ ! Create the NetCDF file
  ncerr = nf90_create(path=filename,cmode=NF90_CLOBBER,ncid=ncid)
  !ncerr = nf90_create(path, cmode=ior(ior(nf90_clobber, nf90_netcdf4), nf90_write), ncid=ncid)
  NCF_CHECK_MSG(ncerr, sjoin('Error while creating:', filename))

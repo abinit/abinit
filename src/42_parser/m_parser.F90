@@ -136,6 +136,10 @@ module m_parser
   integer :: ntypat
   ! Number of type of atoms
 
+  character(len=500) :: title = ""
+  character(len=500) :: fileformat = ""
+  ! poscar, netcdf
+
   integer,allocatable :: typat(:)
   ! typat(natom)
   ! Type of each natom.
@@ -3693,7 +3697,7 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
 
 !Local variables-------------------------------
  !integer,parameter :: marr = 3
- integer :: start, beg, cnt, iatom, itypat, ierr, ii !, narr, b1
+ integer :: beg, iatom, itypat, ierr, ii !, narr, b1
  real(dp) :: scaling_constant
  character(len=500) :: line, system, iomsg
  character(len=5) :: symbol
@@ -3722,19 +3726,18 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
  ! 0.333333 0.666667 0.500000 B
  ! 0.666667 0.333333 0.500000 B
 
- cnt = 0; start = 1
-
- read(unit, "(a)", err=10, iomsg=iomsg) line ! Ignore header
+ new%fileformat = "poscar"
+ read(unit, "(a)", err=10, iomsg=iomsg) new%title
  read(unit, *, err=10, iomsg=iomsg) scaling_constant
  do ii=1,3
    read(unit, *, err=10, iomsg=iomsg) new%rprimd(:, ii)
  end do
 
  ! Read line with the names of the atoms.
- new%ntypat = 0
  read(unit, "(a)", err=10, iomsg=iomsg) line
  !print *, "line:", trim(line)
 
+ new%ntypat = 0
  do ii=1,2
    if (ii == 2) then
      ABI_MALLOC(symbols, (new%ntypat))
@@ -3753,7 +3756,7 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
  end do
  !write(std_out, *)"ntypat: ", new%ntypat, "symbols: ", symbols
 
- ! TODO: Handle case in which atoms are not grouped by type
+ ! TODO: Handle case in which not all atoms are not grouped by type
  ABI_MALLOC(duplicated, (new%ntypat))
  duplicated = .False.
  do itypat=1,new%ntypat-1
@@ -3770,8 +3773,7 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
  end if
 
  ! number of atoms of each type.
- ! NOTE: Assuming ntypat == npsp thus alchemical mixing is not supported
- ! There's a check in the main parser though.
+ ! NOTE: Assuming ntypat == npsp thus alchemical mixing is not supported. There's a check in the main parser though.
  ABI_MALLOC(nattyp, (new%ntypat))
  read(unit, *, err=10, iomsg=iomsg) nattyp
  new%natom = sum(nattyp)
@@ -3861,23 +3863,28 @@ subroutine geo_print_abivars(self, unit)
  integer,intent(in) :: unit
 
 !Local variables-------------------------------
- integer :: ii
+ integer :: ii, iatom, itypat
 
 !************************************************************************
 
  if (unit == dev_null) return
 
+ if (len_trim(self%title) > 0) write(unit, "(2a)")"# ",trim(self%title)
+ !new%fileformat = "poscar"
  write(unit, "(a, i0)")" natom ", self%natom
  write(unit, "(a, i0)")" ntypat ", self%ntypat
  write(unit, sjoin("(a, ", itoa(self%natom), "(i0,1x))")) " typat ", self%typat
  write(unit, sjoin("(a, ", itoa(self%ntypat), "(f5.1,1x))")) " znucl ", self%znucl
- write(unit, "(a)")" rprimd "
+ write(unit, "(a)")" acell 1 1 1 Bohr"
+ write(unit, "(a)")" rprim "
  do ii=1,3
    write(unit, "(2x, 3(f11.7,1x))") self%rprimd(:, ii)
  end do
  write(unit, "(a)")" xred"
- do ii=1,self%natom
-   write(unit, "(2x, 3(f11.7,1x))") self%xred(:, ii)
+ do iatom=1,self%natom
+   itypat = self%typat(iatom)
+   write(unit, "(2x, 3(f11.7,1x),3x,2a)") &
+     self%xred(:, iatom) , " # ", trim(znucl2symbol(self%znucl(itypat)))
  end do
 
 end subroutine geo_print_abivars
@@ -3904,8 +3911,9 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
 
 !************************************************************************
 
-#ifdef HAVE_NETCDF
+ new%fileformat = "netcdf"
 
+#ifdef HAVE_NETCDF
  if (xmpi_comm_rank(comm) == master) then
    NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
 
@@ -3998,6 +4006,8 @@ subroutine geo_bcast(self, master, comm)
  call xmpi_bcast(self%xred, master, comm, ierr)
  call xmpi_bcast(self%typat, master, comm, ierr)
  call xmpi_bcast(self%znucl, master, comm, ierr)
+ call xmpi_bcast(self%title, master, comm, ierr)
+ call xmpi_bcast(self%fileformat, master, comm, ierr)
 
 end subroutine geo_bcast
 !!***

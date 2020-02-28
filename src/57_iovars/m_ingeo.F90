@@ -338,7 +338,12 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  call mkrdim(acell,rprim,rprimd)
  call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
 
- tolsym=tol8
+ tolsym = tol8
+ !if (tread_geo /= 0 .and. geo%filetype == "poscar") then
+ !  tolsym = tol4
+ !  MSG_COMMENT("Reading structure from POSCAR --> default value of tolsym is set to 1e-4")
+ !end if
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tolsym',tread,'DPR')
  if(tread==1) tolsym=dprarr(1)
 

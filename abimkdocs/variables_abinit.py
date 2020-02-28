@@ -19410,7 +19410,7 @@ Gives the atomic locations within unit cell in coordinates relative to real
 space primitive translations (**NOT in cartesian coordinates**). Thus these are
 fractional numbers typically between 0 and 1 and are dimensionless. The
 cartesian coordinates of atoms (in Bohr) are given by:
-R_cartesian = xred1*rprimd1+xred2*rprimd2+xred3*rprimd3
+R_cartesian = xred1 * rprimd1 + xred2 * rprimd2 + xred3 * rprimd3
 where (xred1,xred2,xred3) are the "reduced coordinates" given in columns of
 "[[xred]]", (rprimd1,rprimd2,rprimd3) are the columns of primitive vectors
 array "[[rprimd]]" in Bohr.
@@ -19744,6 +19744,7 @@ of their position with respect to the band edges (energy differences are **alway
 Only the k-points and the bands whose energy difference if less than this value will be included in the calculation.
 The first entry refers to holes, the second one to electrons.
 A negative entry can be used to exclude either holes or electrons from the calculation.
+This variable is not compatible with [[nkptgw]] and [[sigma_ngkpt]].
 
 !!! important
 
@@ -20300,6 +20301,69 @@ The directory where all pseudos are located can be specified with [[pp_dirpath]]
 !!! important
 
     Shell variables e.g. $HOME or tilde syntax `~` for user home are not supported.
+"""
+),
+
+Variable(
+    abivarname="structure",
+    varset="basic",
+    vartype="string",
+    topics=['crystal_useful'],
+    dimensions="scalar",
+    defaultval="",
+    mnemonics="initialize crystal STRUCTURE from ...",
+    text=r"""
+This variable (added in Abinit9)
+provides a simplified interface to build the crystalline structure from an external file.
+
+The string has the format: `filetype:filepath`
+where `filetype` specifies the format of the external file and `filepath` gives the path to the file
+**relative** to the directory where the code is executed.
+
+
+Variables such as [[natom]], [[ntypat]], [[typat]] and [[znucl]] are automatically initialized from
+the external file and need not to be specified in the input.
+
+
+To read the structure from an external netcdf file produced by Abinit use:
+
+    structure "abifile:out_GSR.nc"
+
+Other Abinit output files such as the `_WFK.nc`, the `_DEN.nc` and the `_HIST.nc` file
+are supported as well.
+In the case of structural relaxations, these files contain the final geometry (not necessarily converged)
+hence [[structure]] can be used to perform an in-place restart.
+
+To read the structure from an external POSCAR file, use:
+
+    structure "poscar:t04_POSCAR"
+
+
+Note the following:
+
+- The structure is initialized by the parser at the vey beginning
+  hence the external files must exists when Abinit starts to analyze the input file.
+  In a nutshell, the structure variable cannot be used to pass the geometry from one dataset to the next one.
+
+- Multidatasets are supported but mind that some variables such as
+  [[ntypat]], [[typat]] and [[znucl]] are tagged as [[NO_MULTI]].
+  In other words, you can read different files with [[structure]] provided these variables do not change.
+
+
+Limitations:
+
+- The specification of structures for Image calculations is not supported.
+
+- Alchemical mixing is not supported.
+
+
+!!! important
+
+    Several POSCAR files avaible on the internet give atomic position and lattice vectors with ~6 digits.
+    The ABINIT routines use tight tolerances to detect the space group so it may happen that ABINIT does not
+    detect all the symmetry operations with a consequent **INCREASE** of the number of k-points in the IBZ
+    and therefore of the computational cost. This is especially true for hexagonal or rhombohedral lattices.
+    A possible solution is to increase [[tolsym]] to e.g. 1e-4.
 """
 ),
 
