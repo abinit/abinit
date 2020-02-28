@@ -138,7 +138,7 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
+subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: filnamin
@@ -162,14 +162,14 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
  ! Note: this is done only by me=0, and then string and other output vars are BCASTED
 
  if (xmpi_comm_rank(comm) == master) then
-   !strlen from defs_basis module
+   ! strlen from defs_basis module
    option=1
    call instrng(filnamin,lenstr,option,strlen,string)
 
    ! Copy original file, without change of case
    string_raw=string
 
-   ! To make case-insensitive, map characters of string to upper case:
+   ! To make case-insensitive, map characters of string to upper case.
    call inupper(string(1:lenstr))
 
    ! Might import data from xyz file(s) into string
@@ -201,10 +201,14 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
 
  if (xmpi_comm_size(comm) > 1) then
    ! Broadcast data.
-   call xmpi_bcast(lenstr,master,comm,ierr)
-   call xmpi_bcast(ndtset,master,comm,ierr)
-   call xmpi_bcast(string,master,comm,ierr)
+   call xmpi_bcast(lenstr, master, comm, ierr)
+   call xmpi_bcast(ndtset, master, comm, ierr)
+   call xmpi_bcast(string, master, comm, ierr)
+   call xmpi_bcast(string_raw, master, comm, ierr)
  end if
+
+ ! Save input string in global variable so that we can access it in ntck_open_create
+ INPUT_STRING = string_raw
 
 end subroutine parsefile
 !!***
@@ -596,6 +600,25 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
      ! less than a blank (and '=') to become a blank.
      call incomprs(line(1:ii),lenc)
 
+     ! Parsing POSCAR string is much easier if we have newlines in the token
+     ! so append ch10 to the line if we are inside the poscar string.
+     !if (startswith(line, "poscar")) then
+     !  in_poscar = 1
+     !  line = line(1:lenc)//ch10; lenc = lenc + 1
+     !end if
+     !if (in_poscar /= 0) then
+     !   if startswith(line, '"') then
+     !     ! This terminates the poscar variable.
+     !     in_poscar = 0
+     !   else
+     !     in_poscar = in_poscar + 1
+     !     if (in_poscar > 1) then
+     !       line = line(1:lenc)//ch10; lenc = lenc + 1
+     !     end if
+     !   end if
+     !  end if
+     !end if
+
    else
      ! ii=0 means line starts with #, is entirely a comment line
      lenc=0;include_found=.false.
@@ -660,7 +683,6 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
  nline1=iline-1
  close (unit=input_unit)
 
-
  ! Make sure we don't have unmatched quotation marks
  ierr = 0
  do ii=1,len_trim(string)
@@ -672,6 +694,8 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
 
  write(msg,'(a,i0,3a)')'-instrng: ',nline1,' lines of input have been read from file ',trim(filnam),ch10
  call wrtout(std_out,msg,'COLL')
+
+ !write(std_out, "(3a)")"string after instrng:", ch10, trim(string)
 
  include_level=include_level-1
 

@@ -1,5 +1,5 @@
 
-.Version 8.11.14 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Jan 2020.
-- ( at 21h25 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h21 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v67mbpt_t02/t02.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t02/t02.in
 - output file    -> t02.out
 - root for input  files -> t02i
 - root for output files -> t02o
@@ -352,7 +352,6 @@ P           mkmem          16
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
            tolwfr      1.00000000E-10
             typat      1  1
-         use_yaml           1
               wtk        0.00463    0.03704    0.03704    0.01852    0.02778    0.11111
                          0.11111    0.11111    0.05556    0.02778    0.11111    0.05556
                          0.01389    0.11111    0.11111    0.05556
@@ -378,24 +377,21 @@ P           mkmem          16
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
---- !IterStart
-dtset:     1
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 16, mband: 30, nsppol: 1, nspinor: 1, nspden: 1, mpw: 302, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
 ...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
---- !IterStart
-timimage:     1
-...
-
---- !IterStart
-image:     1
-...
 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  5.1085000  5.1085000  G(1)= -0.0978761  0.0978761  0.0978761
@@ -408,8 +404,8 @@ image:     1
          ecut(hartree)=      8.000   => boxcut(ratio)=   2.17426
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -433,6 +429,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     288.181     288.126
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.8665583109188    -8.867E+00 4.904E-03 5.902E+00
  ETOT  2  -8.8716164865705    -5.058E-03 7.865E-06 1.499E-01
@@ -449,44 +451,34 @@ _setup2: Arith. and geom. avg. npw (full set) are     288.181     288.126
   sigma(3 3)=  2.76864062E-05  sigma(2 1)=  0.00000000E+00
 
 
---- !EtotSteps
-data: !EtotIters |
-    
-     iter   Etot(hartree)      deltaE(h)  residm     vres2
-        1  -8.8665583109188    -8.867E+00 4.904E-03 5.902E+00
-        2  -8.8716164865705    -5.058E-03 7.865E-06 1.499E-01
-        3  -8.8716870540284    -7.057E-05 9.162E-06 3.282E-03
-        4  -8.8716880857425    -1.032E-06 3.499E-07 1.367E-05
-        5  -8.8716880912518    -5.509E-09 1.992E-09 6.991E-09
-        6  -8.8716880912528    -9.681E-13 8.968E-11 2.131E-11
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1085000,   5.1085000, ]
+- [  5.1085000,   0.0000000,   5.1085000, ]
+- [  5.1085000,   5.1085000,   0.0000000, ]
+lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.6663072E+02
+convergence: {deltae: -9.681E-13, res2:  2.131E-11, residm:  8.968E-11, diffor: null, }
+etotal    :  -8.87168809E+00
+entropy   :   0.00000000E+00
+fermie    :   2.17655487E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.76864062E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.76864062E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.76864062E-05, ]
+pressure_GPa:  -8.1456E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
 
---- !ResultsGS
-comment   : Summary of ground state results
-natom     :        2
-nsppol    :        1
-nspinor   :        1
-nspden    :        1
-nelect    :  8.000000000000000E+000
-charge    :  0.000000000000000E+000
-cutoff_energies: {"ecut":  8.000000000000000E+000, "pawecutdg": -1.000000000000000E+000, }
-convergence: {
-    "deltae": -9.681144774731365E-013, "res2":  2.131351442608115E-011, 
-    "residm":  8.967595621369906E-011, "diffor": undef, 
-}
-abc       : [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-alpha_beta_gamma_angles: [ 6.000000000000001E+001,  6.000000000000001E+001,  6.000000000000001E+001, ]
-etotal    : -8.871688091252757E+000
-entropy   :  0.000000000000000E+000
-fermie    :  2.176554872776119E-001
-stress_tensor: !CartTensor
-- [ 2.768640617410755E-005,  0.000000000000000E+000,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  2.768640617410760E-005,  0.000000000000000E+000, ]
-- [ 0.000000000000000E+000,  0.000000000000000E+000,  2.768640617410760E-005, ]
-cartesian_forces: !CartForces
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-- [-0.000000000000000E+000, -0.000000000000000E+000, -0.000000000000000E+000, ]
-...
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -530,25 +522,8 @@ cartesian_forces: !CartForces
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.02923675082961E+00
-    Hartree energy  =  5.39965567979229E-01
-    XC energy       = -3.53945919029367E+00
-    Ewald energy    = -8.43581958561899E+00
-    PspCore energy  =  8.60437873155177E-02
-    Loc. psp. energy= -2.43330466453662E+00
-    NL   psp  energy=  1.88164924307216E+00
-    >>>>>>>>> Etotal= -8.87168809125276E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.41410910137269E+02 ; Band energy (Ha)=   2.3374776183E-01
---------------------------------------------------------------------------------
-
-
-
 --- !EnergyTerms
+iteration_state     : {dtset: 1, }
 comment             : Components of total free energy in Hartree
 kinetic             :  3.02923675082961E+00
 hartree             :  5.39965567979229E-01
@@ -558,9 +533,10 @@ psp_core            :  8.60437873155177E-02
 local_psp           : -2.43330466453662E+00
 non_local_psp       :  1.88164924307216E+00
 total_energy        : -8.87168809125276E+00
-band_energy         :  2.33747761834871E-01
 total_energy_eV     : -2.41410910137269E+02
+band_energy         :  2.33747761834871E-01
 ...
+
 
  Cartesian components of stress tensor (hartree/bohr^3)
   sigma(1 1)=  2.76864062E-05  sigma(3 2)=  0.00000000E+00
@@ -574,10 +550,15 @@ total_energy_eV     : -2.41410910137269E+02
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
---- !IterStart
-dtset:     2
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 16, mband: 15, nsppol: 1, nspinor: 1, nspden: 1, mpw: 274, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 0, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
@@ -601,8 +582,8 @@ dtset:     2
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/14si.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.pspnc
 -  Troullier-Martins psp for element  Si        Thu Oct 27 17:31:21 EDT 1994
 - 14.00000   4.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1068,10 +1049,15 @@ dtset:     2
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
---- !IterStart
-dtset:     3
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 16, mband: 25, nsppol: 1, nspinor: 1, nspden: 1, mpw: 274, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
@@ -1195,6 +1181,7 @@ dtset:     3
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.526
@@ -1209,12 +1196,18 @@ data: !SigmaeeData |
         6   8.449 -10.064  -5.792  -3.139   0.782  -0.278  -9.177   0.887   9.336
 ...
 
+
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
---- !IterStart
-dtset:     4
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 16, mband: 25, nsppol: 1, nspinor: 1, nspden: 1, mpw: 274, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
@@ -1338,6 +1331,7 @@ dtset:     4
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 4, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.526
@@ -1352,12 +1346,18 @@ data: !SigmaeeData |
         6   8.449 -10.064  -5.792  -3.139   0.782  -0.278  -9.177   0.887   9.336
 ...
 
+
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
---- !IterStart
-dtset:     5
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 16, mband: 25, nsppol: 1, nspinor: 1, nspden: 1, mpw: 274, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
@@ -1481,6 +1481,7 @@ dtset:     5
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    2.526
@@ -1494,6 +1495,7 @@ data: !SigmaeeData |
         5   8.449 -10.064  -5.793  -3.137   0.782  -0.278  -9.177   0.887   9.336
         6   8.449 -10.064  -5.792  -3.139   0.782  -0.278  -9.177   0.887   9.336
 ...
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -1758,7 +1760,6 @@ P           mkmem          16
                        0.0000000  0.0000000  0.0000000     0.2500000  0.2500000  0.2500000
            tolwfr      1.00000000E-10
             typat      1  1
-         use_yaml           1
               wtk        0.00463    0.03704    0.03704    0.01852    0.02778    0.11111
                          0.11111    0.11111    0.05556    0.02778    0.11111    0.05556
                          0.01389    0.11111    0.11111    0.05556
@@ -1855,10 +1856,10 @@ P           mkmem          16
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         57.4  wall=         57.5
+- Proc.   0 individual time (sec): cpu=         65.5  wall=         65.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered  13 WARNINGs and   9 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         57.5  wall=         57.6
++Overall time at end (sec) : cpu=         65.5  wall=         65.7

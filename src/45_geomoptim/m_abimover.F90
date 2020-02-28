@@ -30,6 +30,7 @@ module m_abimover
  use m_dtfil
 
  use m_geometry,  only : acrossb
+ !use m_fstrings,  only : sjoin, itoa
 
  implicit none
 
@@ -448,8 +449,7 @@ type(abimover_specs),intent(out) :: specs
 !###########################################################
 !### 01. Initialization of ab_mover
 
-!Copy or create pointers for the information from the Dataset (dtset)
-!to the ab_mover structure
+!Copy or create pointers for the information from the Dataset (dtset) to the ab_mover structure
  natom=dtset%natom
 
  ab_mover%delayperm   =dtset%delayperm
@@ -503,9 +503,7 @@ type(abimover_specs),intent(out) :: specs
 !Filename for _HIST file
  ab_mover%filnam_ds    =>dtfil%filnam_ds
 
-!!DEBUG
 !call abimover_print(ab_mover,ab_out)
-!!DEBUG
 
 !write(std_out,*) 'mover 02'
 !###########################################################
@@ -521,7 +519,7 @@ type(abimover_specs),intent(out) :: specs
    specs%isARused=.FALSE.
  end if
 
-!Velocities are never change except for ionmov=1,6,7,8
+!Velocities are never changed excepts for ionmov=1,6,7,8
  specs%isVused=.FALSE.
 
 !In general convergence is needed
@@ -571,7 +569,7 @@ type(abimover_specs),intent(out) :: specs
 !  This is the initialization for ionmov==4,5
 !  -------------------------------------------
  case (4,5)
-!  Values use in XML Output
+!  Values used in XML Output
    specs%type4xml='simple'
    specs%crit4xml='tolmxf'
 !  Name of specs%method
@@ -795,9 +793,11 @@ case (15)
    specs%method = 'training set generator'
 !  Number of history
    specs%nhist = -1
-case default
+ case default
    write(msg,"(a,i0)")"Wrong value for ionmov: ",ab_mover%ionmov
+   !MSG_ERROR(msg)
  end select
+
 end subroutine abimover_ini
 !!***
 

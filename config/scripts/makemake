@@ -379,6 +379,9 @@ if ( opts.run_clean ):
   run_script(my_name, "Removing abisrc output files",
     "rm -f abisrc.stderr abisrc.stdout")
 
+  run_script(my_name, "Removing misc files in fallbacks dir",
+    "cd fallbacks && ./wipeout.sh")
+
   # Remove LibPAW symlink
   libpaw_dir = [item for item in lcnf.sections() \
     if ( lcnf.get(item, "parent") == "libpaw" )][0]

@@ -200,7 +200,11 @@ AC_DEFUN([SD_LIBPSML_DETECT], [
         sd_libpsml_ldflags=""
         sd_libpsml_libs=""
       else
-        AC_MSG_FAILURE([invalid LibPSML configuration])
+        if test "${sd_netcdf_policy}" = "fail"; then
+              AC_MSG_FAILURE([invalid LibPSML configuration])
+        else
+              AC_MSG_WARN([invalid LibPSML configuration])
+        fi
       fi
     fi
   else

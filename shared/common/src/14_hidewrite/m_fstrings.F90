@@ -1828,6 +1828,7 @@ integer pure function char_count(string, char)
  integer :: i
 
 ! *************************************************************************
+
  char_count = 0
  do i=1,len(string)
    if (string(i:i) == char) char_count = char_count + 1
@@ -1864,6 +1865,7 @@ integer function next_token(string, start, ostr) result(ierr)
  integer :: ii,beg
 
 ! *************************************************************************
+ !print *, "string:", trim(string(start:))
 
  ierr = 1; beg = 0
  ! Find first non-empty char.

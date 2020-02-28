@@ -1,5 +1,5 @@
 
-.Version 8.11.14 of MULTIBINIT 
+.Version 9.0.0 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Jan 2020.
-- ( at 21h51 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 17h27 )
   
 -  nproc =    4
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/paral/Input/t95_DDB
+-/home/gmatteo/git_repos/abinit/tests/paral/Input/t95_DDB
  to initialize the multibinit input
 
 ================================================================================
@@ -1662,6 +1662,6 @@ dipdip_range         2         2         2
 
 ================================================================================
 
-+Total cpu time      1.347  and wall time      1.358 sec
++Total cpu time      1.378  and wall time      1.394 sec
 
  multibinit : the run completed succesfully.

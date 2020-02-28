@@ -1,5 +1,5 @@
 
-.Version 8.11.14 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 20 Jan 2020.
-- ( at 19h57 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h34 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_prepa9/tests/Test_suite/v8_t67-t68-t69-t70/t69.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t67-t68-t69-t70/t69.in
 - output file    -> t69.out
 - root for input  files -> t69i
 - root for output files -> t69o
@@ -132,7 +132,16 @@ P          mk1mem           8
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 1, nkpt: 8, mband: 16, nsppol: 1, nspinor: 2, nspden: 4, mpw: 630, }
+cutoff_energies: {ecut:  30.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfmagn: 1, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -151,8 +160,8 @@ P          mk1mem           8
          ecut(hartree)=     30.000   => boxcut(ratio)=   1.98828
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_prepa9/tests/Psps_for_tests/26fe.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_prepa9/tests/Psps_for_tests/26fe.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/26fe.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/26fe.pspnc
 -  Troullier-Martins psp for element  Fe        Thu Oct 27 17:35:05 EDT 1994
 - 26.00000   8.00000    940714                znucl, zion, pspdat
     1    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -247,6 +256,12 @@ P newkpt: treating     16 bands with npw=     630 for ikpt=   5 by node    0
 P newkpt: treating     16 bands with npw=     630 for ikpt=   6 by node    0
 P newkpt: treating     16 bands with npw=     610 for ikpt=   7 by node    0
 P newkpt: treating     16 bands with npw=     630 for ikpt=   8 by node    0
+
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-02, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   2.6318736225528      2.632E+00 1.809E-01 1.532E+03
@@ -476,10 +491,10 @@ P          mk1mem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         45.0  wall=         45.1
+- Proc.   0 individual time (sec): cpu=         50.8  wall=         57.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered  17 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         45.0  wall=         45.1
++Overall time at end (sec) : cpu=         50.8  wall=         57.4
