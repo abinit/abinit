@@ -208,13 +208,16 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
              'KEY', key_value=geo_string)
 
  if (tread_geo /= 0) then
+   ! Set up unit cell from external file.
    geo = geo_from_abivar_string(geo_string, comm)
    acell = one
    rprim = geo%rprimd
-   !call exclude("acell, rprim, angdeg")
+   !call exclude(jdtset, "acell, rprim, angdeg")
 
  else
-   ! 1) set up unit cell: acell, rprim and rprimd ---------------------
+   ! Set up unit cell from acell, rprim, angdeg
+   !call get_acell_rprim_angdeg(string, jdtset, iimage, marr, string(1:lenstr), acell, rprim, angdeg)
+
    acell(1:3)=one
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'acell',tacell,'LEN')
    if(tacell==1) acell(1:3)=dprarr(1:3)
@@ -223,8 +226,8 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    ! Check that input length scales acell(3) are > 0
    do mu=1,3
      if(acell(mu)<=zero) then
-       write(msg, '(a,i0,a, 1p,e14.6,a,a,a,a)' )&
-        'Length scale ',mu,' is input as acell=',acell(mu),ch10,&
+       write(msg, '(a,i0,a, 1p,e14.6,4a)' )&
+        'Length scale ',mu,' is input as acell: ',acell(mu),ch10,&
         'However, length scales must be > 0 ==> stop',ch10,&
         'Action: correct acell in input file.'
        MSG_ERROR(msg)
@@ -250,7 +253,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        do mu=1,3
          if(angdeg(mu)<=0.0_dp) then
            write(msg, '(a,i0,a,1p,e14.6,a,a,a,a)' )&
-            'Angle number ',mu,' is input as angdeg=',angdeg(mu),ch10,&
+            'Angle number ',mu,' is input as angdeg: ',angdeg(mu),ch10,&
             'However, angles must be > 0 ==> stop',ch10,&
             'Action: correct angdeg in the input file.'
            MSG_ERROR(msg)
@@ -261,7 +264,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
        if(angdeg(1)+angdeg(2)+angdeg(3)>=360.0_dp) then
          write(msg, '(a,a,a,es14.4,a,a,a)' )&
           'The sum of input angles (angdeg(1:3)) must be lower than 360 degrees',ch10,&
-          'while it is ',angdeg(1)+angdeg(2)+angdeg(3),'.',ch10,&
+          'while it is: ',angdeg(1)+angdeg(2)+angdeg(3),'.',ch10,&
           'Action: correct angdeg in the input file.'
          MSG_ERROR(msg)
        end if
@@ -441,24 +444,24 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  if (tread_geo == 0) then
 
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xred',txred,'DPR')
-   if(txred==1 .and. txrandom == 0) xred_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
+   if (txred==1 .and. txrandom == 0) xred_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
    call intagm_img(xred_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xred",txred,'DPR')
 
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xangst',txangst,'DPR')
-   if(txangst==1 .and. txrandom==0) xangst_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
+   if (txangst==1 .and. txrandom==0) xangst_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
    call intagm_img(xangst_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xangst",txangst,'DPR')
 
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xcart',txcart,'LEN')
-   if(txcart==1 .and. txrandom==0)xcart_read(:,1:natrd) = reshape( dprarr(1:3*natrd), [3, natrd])
+   if (txcart==1 .and. txrandom==0) xcart_read(:,1:natrd) = reshape( dprarr(1:3*natrd), [3, natrd])
    call intagm_img(xcart_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xcart",txcart,'LEN')
 
    ! Might initialize xred from XYZ file
-   if(txred+txcart+txangst+txrandom==0)then
+   if (txred+txcart+txangst+txrandom==0) then
      call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xred',txred,'DPR')
-     if(txred==1 .and. txrandom==0) xred_read(:,1:natrd) = reshape( dprarr(1:3*natrd), [3, natrd])
+     if (txred==1 .and. txrandom==0) xred_read(:,1:natrd) = reshape( dprarr(1:3*natrd), [3, natrd])
 
      call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xangst',txangst,'DPR')
-     if(txangst==1 .and. txrandom==0) xangst_read(:,1:natrd) = reshape( dprarr(1:3*natrd), [3, natrd])
+     if (txangst==1 .and. txrandom==0) xangst_read(:,1:natrd) = reshape( dprarr(1:3*natrd), [3, natrd])
    end if
 
  else
@@ -513,18 +516,16 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
 
  ! Check that nsym is not negative
  if (nsym<0) then
-   write(msg, '(a,i0,a,a,a,a)' )&
+   write(msg, '(a,i0,4a)' )&
     'Input nsym must be positive or 0, but was ',nsym,ch10,&
-    'This is not allowed.',ch10,&
-    'Action: correct nsym in your input file.'
+    'This is not allowed.',ch10,'Action: correct nsym in your input file.'
    MSG_ERROR(msg)
  end if
  ! Check that nsym is not bigger than msym
  if (nsym>msym) then
    write(msg, '(2(a,i0),5a)')&
     'Input nsym = ',nsym,' exceeds msym = ',msym,'.',ch10,&
-    'This is not allowed.',ch10,&
-    'Action: correct nsym in your input file.'
+    'This is not allowed.',ch10,'Action: correct nsym in your input file.'
    MSG_ERROR(msg)
  end if
  if (multiplicity>1) then

@@ -21,43 +21,27 @@ ndtset  2
 
 # Test "standard" POSCAR format
 # 
-structure1 "poscar:
-Mg1 B2
- 1.0
-2.672554406584 1.543000006065 0.000000000000
--2.672554406584 1.543000006065 0.000000000000
-0.000000000000 0.000000000000 3.523000013848
-Mg B
-1 2     
-direct
-0.000000000000 0.000000000000 0.000000000000 Mg
-0.333333333333 0.666666666667 0.500000000000 B
-0.666666666667 0.333333333333 0.500000000000 B
-"
+structure "poscar:t04_POSCAR"
 
-#structure2 "poscar_file:POSCAR"
-#structure3 "abi_file:out_GSR.nc"
-
-#0.000000 0.000000 0 Mg # This is a comment
-#  0.333333 0.666667 0.5 B
-#0.666667 0.333333 0.5 B
+#structure2 "poscar:POSCAR"
+#structure3 "abifile:out_GSR.nc"
 
 # Test POSCAR format with abinit extensions that may be useful
 # if the entries in the poscar do not have enough figures.
 #
-structure2 "poscar:
-Mg1 B2
-1.0
-  2.672554406584 1.543000006065 0.000000000000
- -2.672554406584 1.543000006065 0.000000000000
- 0.000000000000 0.000000000000 3.523000013848
-Mg B
-1 2     
-direct
-0.0 +0.0 +0.0 Mg # This is a comment 
-+1/3 2/3 1/2 B
-2/3 +1/3 0.5 B
-"
+#structure2 "poscar:
+#Mg1 B2
+#1.0
+#  2.672554406584 1.543000006065 0.000000000000
+# -2.672554406584 1.543000006065 0.000000000000
+# 0.000000000000 0.000000000000 3.523000013848
+#Mg B
+#1 2     
+#direct
+#0.0 +0.0 +0.0 Mg # This is a comment 
+#+1/3 2/3 1/2 B
+#2/3 +1/3 0.5 B
+#"
 
 # Global variables
 ngkpt   4 4 4
@@ -79,6 +63,8 @@ nband   8
 #%% psp_files = 12mg.pspnc, 05b.soft_tm
 #%% [paral_info]
 #%% max_nprocs = 2
+#%% [shell]
+#%%  pre_commands = iw_cp t04_POSCAR t04_POSCAR
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = POSCAR

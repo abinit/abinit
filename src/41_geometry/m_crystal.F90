@@ -1044,11 +1044,13 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
  symmorphic = yesno(cryst%isymmorphic())
 
  ! Define dimensions.
+ ! npsp added in v9.
  ncerr = nctk_def_dims(ncid, [ &
    nctkdim_t("complex", 2), nctkdim_t("symbol_length", 2),&
    nctkdim_t("character_string_length", 80), nctkdim_t("number_of_cartesian_directions", 3),&
    nctkdim_t("number_of_reduced_dimensions", 3), nctkdim_t("number_of_vectors", 3),&
    nctkdim_t("number_of_atoms", cryst%natom), nctkdim_t("number_of_atom_species", cryst%ntypat),&
+   nctkdim_t("number_of_atom_pseudopotentials", cryst%npsp),&
    nctkdim_t("number_of_symmetry_operations", cryst%nsym)], defmode=.True.)
  NCF_CHECK(ncerr)
 

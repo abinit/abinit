@@ -33,7 +33,7 @@ module m_parser
  use m_nctk
 
  use m_io_tools,  only : open_file
- use m_fstrings,  only : sjoin, strcat, itoa, inupper, startswith, ftoa, tolower, next_token, endswith
+ use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, next_token, endswith !startswith,
  use m_geometry,  only : xcart2xred
  use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
  !use m_crystal,   only : crystal_t
@@ -168,7 +168,6 @@ module m_parser
  end type geo_t
 
  public :: geo_from_abivar_string   ! Build object form abinit variable
- public :: geo_from_poscar_string   ! Build object from string with separator.
  public :: geo_from_poscar_path     ! Build object from POSCAR filepath.
 
 CONTAINS  !===========================================================
@@ -503,7 +502,7 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
  character :: blank=' '
 !scalars
  integer,save :: include_level=-1
- integer :: ii,ii1,ii2,ij,iline,ios,iost,lenc,lenstr_inc,mline,nline1,input_unit,ierr !, in_structure
+ integer :: ii,ii1,ii2,ij,iline,ios,iost,lenc,lenstr_inc,mline,nline1,input_unit,ierr
  logical :: include_found, ex
  character(len=1) :: string1
  character(len=3) :: string3
@@ -538,8 +537,6 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
  ! Initialize string to blanks
  string=blank
  lenstr=1
-
- !in_structure = 0
 
  ! Set maximum number lines to be read to some large number
  mline=50000
@@ -670,26 +667,6 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
      ! less than a blank (and '=') to become a blank.
      call incomprs(line(1:ii),lenc)
 
-     ! Parsing POSCAR string is much easier if we have newlines in the token
-     ! so append ch10 to the line if we are inside the poscar string.
-     !if (startswith(line, "structure")) then
-     !  !print *, "in_structure"
-     !  in_structure = 1
-     !  line = line(1:lenc)//ch10; lenc = lenc + 1
-     !end if
-
-     !if (in_structure /= 0) then
-     !  if (startswith(adjustl(line), '"')) then
-     !    ! This terminates the poscar variable.
-     !    in_structure = 0
-     !  else
-     !    in_structure = in_structure + 1
-     !    if (in_structure > 1) then
-     !      line = line(1:lenc)//ch10; lenc = lenc + 1
-     !    end if
-     !  end if
-     !end if
-
    else
      ! ii=0 means line starts with #, is entirely a comment line
      lenc=0;include_found=.false.
@@ -766,7 +743,7 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
  write(msg,'(a,i0,3a)')'-instrng: ',nline1,' lines of input have been read from file ',trim(filnam),ch10
  call wrtout(std_out,msg,'COLL')
 
- write(std_out, "(3a)")"string after instrng:", ch10, trim(string)
+ !write(std_out, "(3a)")"string after instrng:", ch10, trim(string)
 
  include_level = include_level - 1
 
@@ -1741,8 +1718,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
      if(b2==0) b2=strln-b1+1
 
      ! write(std_out,*)' inarray : strln=',strln
-     ! write(std_out,*)' inarray : b1=',b1
-     ! write(std_out,*)' inarray : b2=',b2
+     ! write(std_out,*)' inarray : b1=',b1, b2=',b2
      ! write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
      ! write(std_out,*)' typevarphys==',typevarphys
 
@@ -3514,38 +3490,15 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
 end subroutine chkvars_in_string
 !!***
 
-!!****f* m_parser/geo_free
-!! NAME
-!!  geo_free
-!!
-!! FUNCTION
-!!  Free memory in geo_t object.
-!!
-!! SOURCE
-
-subroutine geo_free(self)
-
-!Arguments ------------------------------------
- class(geo_t),intent(inout) :: self
-
-!************************************************************************
-
- ABI_SFREE(self%typat)
- ABI_SFREE(self%xred)
- ABI_SFREE(self%znucl)
-
-end subroutine geo_free
-!!***
-
 !!****f* m_parser/geo_from_abivar_string
 !! NAME
 !!  geo_from_abivars_string
 !!
 !! FUNCTION
-!!  Build object form abinit variable.
+!!  Build object form abinit `structure` variable
 !!
 !! INPUTS
-!!  comm=MPI communicator. Used for performing IO if `file:`
+!!  comm=MPI communicator. Used for performing IO.
 !!
 !! SOURCE
 
@@ -3561,7 +3514,7 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
 
 !************************************************************************
 
- print *, "in geo_from_abivar_string: `", trim(string), "`"
+ !print *, "in geo_from_abivar_string: `", trim(string), "`"
 
  ii = index(string, ":")
  ABI_CHECK(ii > 0, sjoin("Expecting string of the form `type:content`, got:", string))
@@ -3569,18 +3522,28 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
 
  select case (prefix)
  case ("poscar")
-   new = geo_from_poscar_string(string(ii+1:), ch10)
-
- case ("poscar_file")
+   ! Get geo info from POSCAR from file.
    new = geo_from_poscar_path(string(ii+1:), comm)
 
  case ("abifile")
    if (endswith(string(ii+1:), ".nc")) then
+     ! Get geo info from netcdf file.
      new = geo_from_netcdf_path(string(ii+1:), comm)
    else
      ! Assume Fortran file with Abinit header.
      MSG_ERROR("structure variable with Fortran file is not yet implemented.")
-     !new = geo_from_fortran_with_hdr(string(ii+1:), comm)
+     !new = geo_from_fortran_file_with_hdr(string(ii+1:), comm)
+     !cryst = crystal_from_file(string(ii+1:), comm)
+     !if (cryst%isalchemical()) then
+     !  MSG_ERROR("Alchemical mixing is not compatibile with `structure` input variable!")
+     !end if
+     !new%natom = cryst%natom
+     !new%ntypat = cryst%ntypat
+     !new%rprimd = cryst%rprimd
+     !call alloc_copy(cryst%typat, new%typat)
+     !call alloc_copy(cryst%xred, new%xred)
+     !call alloc_copy(cryst%znucl, new%znucl)
+     !call cryst%free()
    end if
 
  case default
@@ -3590,33 +3553,69 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
 end function geo_from_abivar_string
 !!***
 
-!!****f* m_parser/geo_from_poscar_string
+!!****f* m_parser/geo_from_poscar_path
 !! NAME
-!!  geo_from_poscar_string
+!!  geo_from_poscar_path
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+type(geo_t) function geo_from_poscar_path(path, comm) result(new)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+ integer,parameter :: master = 0
+ integer :: unt, ierr, my_rank
+ character(len=500) :: msg, line
+ character(len=strlen) :: string
+
+!************************************************************************
+
+ my_rank = xmpi_comm_rank(comm)
+
+ if (my_rank == master) then
+   if (open_file(path, msg, newunit=unt, form='formatted', status='old', action="read") /= 0) then
+     MSG_ERROR(msg)
+   end if
+   new = geo_from_poscar_unit(unt)
+   close(unt)
+ end if
+
+ if (xmpi_comm_size(comm) > 1) call new%bcast(master, comm)
+
+end function geo_from_poscar_path
+!!***
+
+!!****f* m_parser/geo_from_poscar_unit
+!! NAME
+!!  geo_from_poscar_unit
 !!
 !! FUNCTION
 !!  Build object from string with seperator `sep`. Usually sep = newline = ch10
 !!
 !! SOURCE
 
-type(geo_t) function geo_from_poscar_string(string, sep) result(new)
+type(geo_t) function geo_from_poscar_unit(unit) result(new)
 
 !Arguments ------------------------------------
- character(len=*),intent(in) :: string
- character(len=1),intent(in) :: sep
+ integer,intent(in) :: unit
 
 !Local variables-------------------------------
- integer,parameter :: marr = 3
- integer :: start, beg, stp, cnt, iatom, itypat, ierr, ii, narr, b1
+ !integer,parameter :: marr = 3
+ integer :: start, beg, stp, cnt, iatom, itypat, ierr, ii !, narr, b1
  real(dp) :: scaling_constant
- character(len=len(string)) :: line, system, symbol
+ character(len=500) :: line, system, symbol, iomsg
 !arrays
  integer,allocatable :: nattyp(:)
  logical,allocatable :: duplicated(:)
  character(len=5),allocatable :: symbols(:)
  real(dp),allocatable :: xcart(:,:)
- integer :: intarr(marr)
- real(dp):: dprarr(marr)
+ !integer :: intarr(marr)
+ !real(dp):: dprarr(marr)
 
 !************************************************************************
 
@@ -3635,171 +3634,99 @@ type(geo_t) function geo_from_poscar_string(string, sep) result(new)
  ! 0.333333 0.666667 0.500000 B
  ! 0.666667 0.333333 0.500000 B
 
- !write(std_out, "(3a)")" geo_from_poscar_string:", ch10, trim(string)
  cnt = 0; start = 1
 
- !do while (string(start:start) /= " " .or. string(start:start) /= sep)
- !  start = start +1
- !end do
-
- ! Ignore initial whitespaces and separators.
- do
-   if (string(start:start) == " " .or. string(start:start) == sep) then
-     start = start + 1
-   else
-     exit
-   end if
+ read(unit, "(a)", err=10, iomsg=iomsg) line ! Ignore header
+ read(unit, *, err=10, iomsg=iomsg) scaling_constant
+ do ii=1,3
+   read(unit, *, err=10, iomsg=iomsg) new%rprimd(:, ii)
  end do
 
- do
-   ABI_CHECK(start < len_trim(string), sjoin("Invalid poscar string:", string))
-   stp = index(string(start:), sep)
-   if (stp == 0) exit
-   if (stp == 1) then
-     ! Empty line
-     start = start + 2
-     continue
+ ! Read line with the names of the atoms.
+ new%ntypat = 0
+ read(unit, "(a)", err=10, iomsg=iomsg) line
+ !print *, "line:", trim(line)
+
+ do ii=1,2
+   if (ii == 2) then
+     ABI_MALLOC(symbols, (new%ntypat))
    end if
+   itypat = 0; beg = 1
+   do
+     ierr = next_token(line, beg, symbol)
+     !print *, "ierr:", ierr, "beg:", beg, "symbol:", trim(symbol)
+     if (ierr /= 0) exit
+     if (ii == 1) new%ntypat = new%ntypat + 1
+     if (ii == 2) then
+       itypat = itypat + 1
+       symbols(itypat) = symbol
+     end if
+   end do
+ end do
+ !write(std_out, *)"ntypat: ", new%ntypat, "symbols: ", symbols
 
-   write(std_out, *)"start, stp", start, stp
-   stp = start + stp - 2
+ ! TODO: Handle case in which atoms are not grouped by type
+ ABI_MALLOC(duplicated, (new%ntypat))
+ duplicated = .False.
+ do itypat=1,new%ntypat-1
+   do ii=itypat+1, new%ntypat
+     if (symbols(itypat) == symbols(ii)) duplicated(ii) = .True.
+   end do
+ end do
 
-   !if (start > stp) then
-   !  start = stp + 1
-   !  continue
-   !end if
+ if (any(duplicated)) then
+   NOT_IMPLEMENTED_ERROR()
+   !ABI_FREE(symbols)
+   !new%ntypat = count(.not. duplicated)
+   !ABI_MALLOC(symbols, (new%ntypat))
+ end if
 
-   ABI_CHECK(start < len_trim(string), sjoin("Error while parsing POSCAR string:", ch10, trim(string)))
-   line = string(start:stp)
+ ! number of atoms of each type.
+ ! NOTE: Assuming ntypat == npsp thus alchemical mixing is not supported
+ ! There's a check in the main parser though.
+ ABI_MALLOC(nattyp, (new%ntypat))
+ read(unit, *, err=10, iomsg=iomsg) nattyp
+ new%natom = sum(nattyp)
+ ABI_FREE(nattyp)
 
-   !if (len_trim(adjustl(line)) == 0) then
-   !  start = stp + 1
-   !  continue
-   !end if
+ ! At this point, we can allocate Abinit arrays.
+ call new%malloc()
 
-   cnt = cnt + 1
-   write(std_out, "(2a,3(a,i0))")&
-     " Parsing line: `", trim(line), "` with cnt: ", cnt, ", start: ", start, ", stp: ", stp
+ ! Note that first letter should be capitalized, rest must be lower case
+ do itypat=1,new%ntypat
+   new%znucl(itypat) = symbol2znucl(symbols(itypat))
+ end do
 
-   if (cnt /= 1) then
-     ii = index(line, "#")
-     if (ii /= 0) line = line(:ii-1)
+ read(unit, *, err=10, iomsg=iomsg) system
+ system = tolower(system)
+ if (system /= "cartesian" .and. system /= "direct") then
+   MSG_ERROR(sjoin("Expecting `cartesian` or `direct` for the coordinate system but got:", system))
+ end if
+
+ ! Parse atomic positions.
+ do iatom=1,new%natom
+   !ii = index(line, "#")
+   !if (ii /= 0) line = line(:ii-1)
+   ! Prepend black char to make inarray happy.
+   !line = ch10//trim(line)
+
+   ! This should implement the POSCAR format.
+   read(unit, *, err=10, iomsg=iomsg) new%xred(:, iatom), symbol
+
+   ! This is an extension in which e.g 1/3 is supported.
+   !b1 = 1
+   !call inarray(b1, strcat("poscar_coords_iatom_", itoa(iatom)), dprarr, intarr, marr, 3, line, "DPR")
+   !new%xred(:, iatom) = dprarr(1:3)
+   !read(line(b1:), *, err=10, end=20) symbol
+
+   do itypat=1, new%ntypat
+     if (symbols(itypat) == symbol) then
+       new%typat(iatom) = itypat; exit
+     end if
+   end do
+   if (itypat == new%ntypat + 1) then
+     MSG_ERROR(sjoin("Cannot find symbol:", symbol, "in initial list. Check POSCAR string."))
    end if
-
-   select case (cnt)
-   case (1)
-     ! Ignore header
-     continue
-
-   case (2)
-     read(line, *, err=10, end=20) scaling_constant
-
-   case (3:5)
-     read(line, *, err=10, end=20) new%rprimd(:, cnt-2)
-
-   case (6)
-     ! Read line with the names of the atoms.
-     new%ntypat = 0
-     do ii=1,2
-       if (ii == 2) then
-         ABI_MALLOC(symbols, (new%ntypat))
-       end if
-       itypat = 0; beg = 1
-       do
-         ierr = next_token(line, beg, symbol)
-         !print *, "ierr:", ierr, "beg:", beg, "symbol:", trim(symbol)
-         if (ierr /= 0) exit
-
-         if (ii == 1) new%ntypat = new%ntypat + 1
-         if (ii == 2) then
-           itypat = itypat + 1
-           symbols(itypat) = symbol
-         end if
-       end do
-     end do
-
-     !write(std_out, *)"ntypat: ", new%ntypat, "symbols: ", symbols
-
-     ! TODO: Handle case in which atoms are not grouped by type
-     ABI_MALLOC(duplicated, (new%ntypat))
-     duplicated = .False.
-     do itypat=1,new%ntypat-1
-       do ii=itypat+1, new%ntypat
-         if (symbols(itypat) == symbols(ii)) duplicated(ii) = .True.
-       end do
-     end do
-
-     if (any(duplicated)) then
-       NOT_IMPLEMENTED_ERROR()
-       !ABI_FREE(symbols)
-       !new%ntypat = count(.not. duplicated)
-       !ABI_MALLOC(symbols, (new%ntypat))
-     end if
-
-   case (7)
-      ! number of atoms of each type.
-      ! NOTE: Assuming ntypat == npsp thus alchemical mixing is not supported
-      ! There's a check in the main parser though.
-      ABI_MALLOC(nattyp, (new%ntypat))
-      read(line, *, err=10, end=20) nattyp
-      new%natom = sum(nattyp)
-      ABI_FREE(nattyp)
-
-      ! At this point, we can allocate Abinit arrays.
-      ABI_MALLOC(new%typat, (new%natom))
-      ABI_MALLOC(new%znucl, (new%ntypat))
-      ABI_MALLOC(new%xred, (3, new%natom))
-      !call new%allocate()
-
-      ! Note that first letter should be capitalized, rest must be lower case
-      do itypat=1,new%ntypat
-        new%znucl(itypat) = symbol2znucl(symbols(itypat))
-      end do
-
-   case (8)
-     read(line, *, err=10, end=20) system
-     system = tolower(system)
-     if (system /= "cartesian" .and. system /= "direct") then
-       MSG_ERROR(sjoin("Expecting `cartesian` or `direct` for the coordinate system but got:", system))
-     end if
-
-   case (9)
-     ! Parse atomic positions.
-     do iatom=1,new%natom
-       ii = index(line, "#")
-       if (ii /= 0) line = line(:ii-1)
-       ! Prepend black char to make inarray happy.
-       line = ch10//trim(line)
-
-       ! This should implement the POSCAR format.
-       !read(line, *, err=10, end=20) new%xred(:, iatom), symbol
-
-       ! This is an extension in which e.g 1/3 is supported.
-       b1 = 1
-       call inarray(b1, strcat("poscar_coords_iatom_", itoa(iatom)), dprarr, intarr, marr, 3, line, "DPR")
-       new%xred(:, iatom) = dprarr(1:3)
-       read(line(b1:), *, err=10, end=20) symbol
-
-       do itypat=1, new%ntypat
-         if (symbols(itypat) == symbol) then
-           new%typat(iatom) = itypat; exit
-         end if
-       end do
-       if (itypat == new%ntypat + 1) then
-         MSG_ERROR(sjoin("Cannot find symbol:", symbol, "in initial list. Check POSCAR string."))
-       end if
-       start = stp + 2
-       stp = index(string(start:), sep)
-       stp = start + stp - 2
-       line = string(start:stp)
-     end do
-     exit
-
-   case default
-     MSG_ERROR(sjoin("No handler for counter:", itoa(cnt)))
-   end select
-
-   start = stp + 2
  end do
 
  ! Convert ang -> bohr
@@ -3825,65 +3752,9 @@ type(geo_t) function geo_from_poscar_string(string, sep) result(new)
  ABI_FREE(duplicated)
  return
 
- 10 MSG_ERROR(sjoin("Error while parsing POSCAR string:", ch10, trim(string)))
- 20 MSG_ERROR(sjoin("End-of-line error while parsing POSCAR line:", ch10, trim(line)))
+ 10 MSG_ERROR(sjoin("Error while parsing POSCAR file,", ch10, "iomsg:", trim(iomsg)))
 
-end function geo_from_poscar_string
-!!***
-
-!!****f* m_parser/geo_from_poscar_path
-!! NAME
-!!  geo_from_poscar_path
-!!
-!! FUNCTION
-!!
-!! SOURCE
-
-type(geo_t) function geo_from_poscar_path(path, comm) result(new)
-
-!Arguments ------------------------------------
- character(len=*),intent(in) :: path
- integer,intent(in) :: comm
-
-!Local variables-------------------------------
- integer,parameter :: master = 0
- integer :: unt, ierr, cnt, my_rank
- character(len=500) :: msg, line
- character(len=strlen) :: string
-
-!************************************************************************
-
- my_rank = xmpi_comm_rank(comm)
- msg = ""
-
- if (my_rank == master) then
-   if (open_file(path, msg, newunit=unt, form='formatted', status='old', action="read") /= 0) then
-     MSG_ERROR(msg)
-   end if
-
-   ierr = 0; cnt = 0
-   do
-     ! Keeps reading lines until end of input file
-     read(unit=unt, fmt='(a)', iostat=ierr, iomsg=msg) line
-     if (ierr /= 0) exit
-     !ierr = read_string(string, unit) result(ierr)
-     if (len_trim(line) == 0) continue
-     ! store line in buffer and add EOL.
-     string(cnt+1:cnt+len_trim(line) + 1) = trim(line)//ch10
-     cnt = cnt + len_trim(line) + 1
-     if (ierr /= 0) exit
-   end do
-   close(unt)
-
-   ! Must exit because of EOF condition.
-   ABI_CHECK(ierr < 0, sjoin("IO-error:", msg))
- end if
-
- if (xmpi_comm_size(comm) > 1) call xmpi_bcast(string, master, comm, ierr)
-
- new = geo_from_poscar_string(string, ch10)
-
-end function geo_from_poscar_path
+end function geo_from_poscar_unit
 !!***
 
 !!****f* m_parser/geo_print_abivars
@@ -3940,28 +3811,60 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
 
 !Local variables-------------------------------
  integer, parameter :: master = 0
- integer :: ncid
+ integer :: ncid, npsp, dimid, itime
+ logical :: has_nimage
 
 !************************************************************************
 
 #ifdef HAVE_NETCDF
 
  if (xmpi_comm_rank(comm) == master) then
-   print *, "calling netcdf"
+   !print *, "calling netcdf"
    NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
 
-   NCF_CHECK(nctk_get_dim(ncid, "number_of_atoms", new%natom))
-   NCF_CHECK(nctk_get_dim(ncid, "number_of_atom_species", new%ntypat))
-   call new%malloc()
+   if (endswith(path, "_HIST.nc")) then
+     ! See def_file_hist.
+     MSG_ERROR("Cannot yet read structure from HIST.nc file")
+     NCF_CHECK(nctk_get_dim(ncid, "natom", new%natom))
+     NCF_CHECK(nctk_get_dim(ncid, "ntypat", new%ntypat))
 
-   ! TODO: Test if Alchemical.
-   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "primitive_vectors"), new%rprimd))
-   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "atom_species"), new%typat))
-   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "atomic_numbers"), new%znucl))
-   NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "reduced_atom_positions"), new%xred))
+     NCF_CHECK(nctk_get_dim(ncid, "npsp", npsp))
+     ABI_CHECK(npsp == new%ntypat, 'Geo from HIST file with alchemical mixing!')
+     has_nimage = nf90_inq_dimid(ncid, "nimage", dimid) /= nf90_noerr
+     ABI_CHECK(.not. has_nimage, "Cannot define structure if HIST.nc file contains images.")
 
-   ! Note the difference between (znucl|znucltypat) and znuclpsp !
-   !NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "atomic_numbers"), hdr%znucltypat))
+     call new%malloc()
+
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "typat"), new%typat))
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "znucl"), new%znucl))
+
+     ! time is NF90_UNLIMITED
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "time"), itime))
+
+     ! dim3 = [xyz_id, xyz_id, time_id]
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "rprimd"), new%rprimd, start=[1,1,itime]))
+
+     ! dim3 = [xyz_id, natom_id, time_id]
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "xred"), new%xred, start=[1,1,itime]))
+
+   else
+     ! Assume netcdf file produced by calling crystal%ncwrite
+     NCF_CHECK(nctk_get_dim(ncid, "number_of_atoms", new%natom))
+     NCF_CHECK(nctk_get_dim(ncid, "number_of_atom_species", new%ntypat))
+
+     ! Test if alchemical. NB: nsps added in crystal_ncwrite in v9.
+     if (nf90_inq_dimid(ncid, "number_of_pseudopotentials", dimid) /= nf90_noerr) then
+       NCF_CHECK(nf90_inquire_dimension(ncid, dimid, len=npsp))
+       ABI_CHECK(npsp == new%ntypat, 'Geo from HIST file with alchemical mixing!')
+     end if
+
+     call new%malloc()
+
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "primitive_vectors"), new%rprimd))
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "atom_species"), new%typat))
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "atomic_numbers"), new%znucl))
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "reduced_atom_positions"), new%xred))
+   end if
 
    NCF_CHECK(nf90_close(ncid))
  end if
@@ -3970,19 +3873,6 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
  call new%bcast(master, comm)
 
  call new%print_abivars(std_out)
-
- ! Assume netcdf file produced by calling crysta%ncwrite
- !cryst = crystal_from_file(string(ii+1:), comm)
- !if (cryst%isalchemical()) then
- !  MSG_ERROR("Alchemical mixing is not compatibile with `structure` input variable!")
- !end if
- !new%natom = cryst%natom
- !new%ntypat = cryst%ntypat
- !new%rprimd = cryst%rprimd
- !call alloc_copy(cryst%typat, new%typat)
- !call alloc_copy(cryst%xred, new%xred)
- !call alloc_copy(cryst%znucl, new%znucl)
- !call cryst%free()
 
 end function geo_from_netcdf_path
 !!***
@@ -4047,6 +3937,32 @@ subroutine geo_malloc(self)
  ABI_MALLOC(self%znucl, (self%ntypat))
 
 end subroutine geo_malloc
+!!***
+
+
+
+
+!!****f* m_parser/geo_free
+!! NAME
+!!  geo_free
+!!
+!! FUNCTION
+!!  Free memory in geo_t object.
+!!
+!! SOURCE
+
+subroutine geo_free(self)
+
+!Arguments ------------------------------------
+ class(geo_t),intent(inout) :: self
+
+!************************************************************************
+
+ ABI_SFREE(self%typat)
+ ABI_SFREE(self%xred)
+ ABI_SFREE(self%znucl)
+
+end subroutine geo_free
 !!***
 
 end module m_parser

@@ -173,7 +173,7 @@ contains  !=============================================================
 !! Initialize a hist structure - Target: scalar
 !!
 !! INPUTS
- 
+!!
 !!  natom = Number of atoms per unitary cell
 !!  mxhist = Maximal number of records to store
 !!  isVUsed,isARUsed=flags used to initialize hsit structure
@@ -1667,8 +1667,7 @@ subroutine def_file_hist(ncid,natom,nimage,ntypat,npsp,has_nimage)
 !1.Define the dimensions
 
  if (npsp/=ntypat) then
-   msg='HIST file does not support alchemical mixing!'
-   MSG_WARNING(msg)
+   MSG_WARNING('HIST file does not support alchemical mixing!')
  end if
 
  ncerr = nf90_def_dim(ncid,"natom",natom,natom_id)
