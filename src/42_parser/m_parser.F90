@@ -33,7 +33,7 @@ module m_parser
  use m_nctk
 
  use m_io_tools,  only : open_file
- use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, next_token, endswith !startswith,
+ use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, next_token, endswith, char_count !startswith,
  use m_geometry,  only : xcart2xred
  use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
  !use m_crystal,   only : crystal_t
@@ -210,8 +210,8 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0
- integer :: option,marr,tread,lenstr_noxyz,ierr,ii
+ integer,parameter :: master=0, option1= 1
+ integer :: marr,tread,lenstr_noxyz,ierr,ii
  character(len=strlen) :: string_raw
  character(len=500) :: msg
 !arrays
@@ -224,9 +224,9 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
  ! Note: this is done only by me=0, and then string and other output vars are BCASTED
 
  if (xmpi_comm_rank(comm) == master) then
+
    ! strlen from defs_basis module
-   option=1
-   call instrng(filnamin,lenstr,option,strlen,string)
+   call instrng(filnamin, lenstr, option1, strlen, string)
 
    ! Copy original file, without change of case
    string_raw=string
@@ -240,11 +240,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
    call importxyz(lenstr,string_raw,string,strlen)
 
    ! Make sure we don't have unmatched quotation marks
-   ierr = 0
-   do ii=1,len_trim(string)
-     if (string(ii:ii) == '"') ierr = ierr + 1
-   end do
-   if (mod(ierr, 2) /= 0) then
+   if (mod(char_count(string, '"'), 2) /= 0) then
      MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
    end if
 
@@ -3503,6 +3499,7 @@ end subroutine chkvars_in_string
 !! SOURCE
 
 type(geo_t) function geo_from_abivar_string(string, comm) result(new)
+!type(geo_t) function geo_from_structure_string(string, comm) result(new)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: string
@@ -3555,6 +3552,93 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
  end select
 
 end function geo_from_abivar_string
+!!***
+
+!!****f* m_parser/geo_from_abigeo_path
+!! NAME
+!!  geo_from_abigeo_path
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+type(geo_t) function geo_from_abigeo_path(path, comm) result(new)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+ integer,parameter :: master = 0, option1=1
+ integer :: my_rank, lenstr, ierr, ii, iatom, start, itypat, tread
+ character(len=500) :: msg
+ character(len=strlen) :: string
+ character(len=5),allocatable :: symbols(:)
+
+!************************************************************************
+
+! Master node reads string and broadcasts
+ my_rank = xmpi_comm_rank(comm)
+
+ if (my_rank == master) then
+    ! Below part copied from `parsefile`.
+    ! strlen from defs_basis module
+    call instrng(path, lenstr, option1, strlen, string)
+
+   ! To make case-insensitive, map characters of string to upper case.
+   call inupper(string(1:lenstr))
+
+   ! Make sure we don't have unmatched quotation marks
+   if (mod(char_count(string, '"'), 2) /= 0) then
+     MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
+   end if
+ end if
+
+ if (xmpi_comm_size(comm) > 1) then
+   call xmpi_bcast(string, master, comm, ierr)
+   call xmpi_bcast(lenstr, master, comm, ierr)
+ end if
+
+ ! ==============================
+ ! Now all procs parse the string
+ ! ==============================
+
+ ! Set up unit cell from acell, rprim, angdeg
+ !call parse_acell_rprim_angdeg(string, jdtset, iimage, marr, string(1:lenstr), acell, rprim, angdeg)
+
+ ! Get the number of atom in the unit cell. Read natom from string
+ !call intagm(dprarr, intarr, jdtset ,marr, 1, string(1:lenstr), 'natom', tread, 'INT')
+ ABI_CHECK(tread /= 0, sjoin("natom is required in file:", path))
+ !new%natom = intarr(1)
+
+ ! Parse atomic positions. Only xcart is supported here because it makes life easier
+ ! and we don't need to handle symbols + Units
+
+  ii = index(string(1:lenstr), "xred")
+  ABI_CHECK(ii /= 0, "In abigeo mode only `xred` with reduced_coords followed by atom symbol are supported")
+
+  ABI_MALLOC(new%typat, (new%natom))
+  ABI_MALLOC(new%xred, (3, new%natom))
+
+  ABI_MALLOC(symbols, (new%natom))
+  start = ii + 4
+  do iatom=1,new%natom
+    !call inarray(start, cs, dprarr, intarr, marr, narr, string, "DPR")
+    !read(string(cs:), *) symbols(iatom)
+  end do
+
+  !call find_unique(symbols, new%ntypat, new%typat)
+
+  ! Note that first letter should be capitalized, rest must be lower case
+  ABI_MALLOC(new%znucl, (new%ntypat))
+  !do itypat=1,new%ntypat
+  !  !iatom = new%typat(iat
+  !  new%znucl(itypat) = symbol2znucl(symbols(iatom))
+  !end do
+
+  ABI_FREE(symbols)
+
+end function geo_from_abigeo_path
 !!***
 
 !!****f* m_parser/geo_from_poscar_path
@@ -3856,7 +3940,7 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
      NCF_CHECK(nctk_get_dim(ncid, "number_of_atom_species", new%ntypat))
 
      ! Test if alchemical. NB: nsps added in crystal_ncwrite in v9.
-     if (nf90_inq_dimid(ncid, "number_of_pseudopotentials", dimid) /= nf90_noerr) then
+     if (nf90_inq_dimid(ncid, "number_of_pseudopotentials", dimid) == nf90_noerr) then
        NCF_CHECK(nf90_inquire_dimension(ncid, dimid, len=npsp))
        ABI_CHECK(npsp == new%ntypat, 'Geo from HIST file with alchemical mixing!')
      end if
@@ -3874,7 +3958,6 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
 #endif
 
  call new%bcast(master, comm)
-
  !call new%print_abivars(std_out)
 
 end function geo_from_netcdf_path

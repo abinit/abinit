@@ -212,11 +212,11 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    geo = geo_from_abivar_string(geo_string, comm)
    acell = one
    rprim = geo%rprimd
-   !call exclude(jdtset, "acell, rprim, angdeg")
+   !call exclude(jdtset, "acell, rprim, angdeg, scalecar")
 
  else
    ! Set up unit cell from acell, rprim, angdeg
-   !call get_acell_rprim_angdeg(string, jdtset, iimage, marr, string(1:lenstr), acell, rprim, angdeg)
+   !call parse_acell_rprim_angdeg(string, jdtset, iimage, marr, string(1:lenstr), acell, rprim, angdeg)
 
    acell(1:3)=one
    call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'acell',tacell,'LEN')
@@ -444,7 +444,7 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
  if (tread_geo == 0) then
 
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xred',txred,'DPR')
-   if (txred==1 .and. txrandom == 0) xred_read(:,1:natrd) = reshape( dprarr(1:3*natrd) , [3, natrd])
+   if (txred==1 .and. txrandom == 0) xred_read(:,1:natrd) = reshape(dprarr(1:3*natrd) , [3, natrd])
    call intagm_img(xred_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xred",txred,'DPR')
 
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xangst',txangst,'DPR')
@@ -452,16 +452,16 @@ subroutine ingeo (acell,amu,bravais,chrgat,dtset,&
    call intagm_img(xangst_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xangst",txangst,'DPR')
 
    call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'xcart',txcart,'LEN')
-   if (txcart==1 .and. txrandom==0) xcart_read(:,1:natrd) = reshape( dprarr(1:3*natrd), [3, natrd])
+   if (txcart==1 .and. txrandom==0) xcart_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
    call intagm_img(xcart_read,iimage,jdtset,lenstr,nimage,3,natrd,string,"xcart",txcart,'LEN')
 
    ! Might initialize xred from XYZ file
    if (txred+txcart+txangst+txrandom==0) then
      call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xred',txred,'DPR')
-     if (txred==1 .and. txrandom==0) xred_read(:,1:natrd) = reshape( dprarr(1:3*natrd), [3, natrd])
+     if (txred==1 .and. txrandom==0) xred_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
 
      call intagm(dprarr,intarr,jdtset,marr,3*natrd,string(1:lenstr),'_xangst',txangst,'DPR')
-     if (txangst==1 .and. txrandom==0) xangst_read(:,1:natrd) = reshape( dprarr(1:3*natrd), [3, natrd])
+     if (txangst==1 .and. txrandom==0) xangst_read(:,1:natrd) = reshape(dprarr(1:3*natrd), [3, natrd])
    end if
 
  else

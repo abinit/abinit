@@ -306,7 +306,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    if (tread_geo /= 0) then
      geo = geo_from_abivar_string(geo_string, comm)
      if (tread /= 0) then
-       ABI_CHECK(intarr(1) == geo%natom, "natom from variable and from geo do not agree with each other")
+       ABI_CHECK(intarr(1) == geo%natom, "natom from variable and from structure do not agree with each other")
      end if
      intarr(1) = geo%natom
      tread = 1
