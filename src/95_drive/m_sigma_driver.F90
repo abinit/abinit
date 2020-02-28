@@ -2173,7 +2173,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      nateigv=0.0d0
      do ikcalc=1,Sigp%nkptgw
        do ib=b1gw,b2gw
-         dm1(ib,ib,ikcalc)=KS_BSt%occ(ib,ikcalc,1)
+         dm1(ib,ib,ikcalc)=QP_BSt%occ(ib,ikcalc,1)
        enddo 
      enddo
      order_int=Sigp%nomegasi 
@@ -2212,16 +2212,16 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         !call printdm1(ib1,ib2,potk)
         dm1k=0.0d0 
-        call calc_rdm(ib1,ib2,ikcalc,0,iinfo,potk,dm1k,KS_BSt) ! Only restricted calcs 
+        call calc_rdm(ib1,ib2,ikcalc,0,iinfo,potk,dm1k,QP_BSt) ! Only restricted calcs 
 !       Print the exchange correction for debug?
         !call printdm1(ib1,ib2,dm1k)
 !       Update the full 1RDM with the exchange (k-point) one
         dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
 !       Compute NAT ORBS for exchange corrected 1-RDM?
         do ib1dm=ib1,ib2
-          dm1k(ib1dm,ib1dm)=dm1k(ib1dm,ib1dm)+KS_BSt%occ(ib1dm,ikcalc,1) ! Only restricted calcs 
+          dm1k(ib1dm,ib1dm)=dm1k(ib1dm,ib1dm)+QP_BSt%occ(ib1dm,ikcalc,1) ! Only restricted calcs 
         enddo
-        call natoccs(ib1,ib2,dm1k,nateigv,occs,KS_BSt,ikcalc,0) ! Only restricted calcs 
+        call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,0) ! Only restricted calcs 
       endif 
    end do
 
@@ -2264,14 +2264,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ! MRM compute 1-RDM correction and update dm1
        if(gwcalctyp==21) then
          dm1k=0.0d0 
-         call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,iinfo,Sr,weights,sigcme_k,KS_BSt,dm1k) ! Only restricted calcs 
+         call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,iinfo,Sr,weights,sigcme_k,QP_BSt,dm1k) ! Only restricted calcs 
 !        Update the full 1RDM with the correlation (k-point) one
          dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
 !        Print for debug?
          !call printdm1(ib1,ib2,dm1k)
          dm1k(ib1:ib2,ib1:ib2)=dm1(ib1:ib2,ib1:ib2,ikcalc) 
 !        Compute nat orbs and occ numbers
-         call natoccs(ib1,ib2,dm1k,nateigv,occs,KS_BSt,ikcalc,1) ! Only restricted calcs 
+         call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,1) ! Only restricted calcs 
        endif
        ABI_DEALLOCATE(sigcme_k)
      end do
@@ -2280,9 +2280,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if(gwcalctyp==21) then
      iinfo=1 ! Should be an input parameter
      if(iinfo==1) then
-       call update_wfk_gw_rdm(Wfd,Wfd_dm,nateigv,occs,b1gw,b2gw,KS_BSt,Hdr_wfk)
+       call update_wfk_gw_rdm(Wfd,Wfd_dm,nateigv,occs,b1gw,b2gw,QP_BSt,Hdr_wfk)
        gw1rdm_fname='gw_rdm_DS100_WFK' ! How to update dataset?
-       call Wfd_dm%write_wfk(Hdr_wfk,KS_BSt,gw1rdm_fname)
+       call Wfd_dm%write_wfk(Hdr_wfk,QP_BSt,gw1rdm_fname)
        Wfd_dm%bks_comm = xmpi_comm_null
        call Wfd_dm%free()
      endif
