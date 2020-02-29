@@ -19546,7 +19546,7 @@ For a "dummy" atom, with [[znucl]] = 0, as used in the case of calculations
 with only a jellium surface, ABINIT sets arbitrarily the covalent radius to one.
 """,
 ),
-#{"abinit_version": "8.7.3"},
+#{"abinit_version": "8.7.3"}
 Variable(
     abivarname="tmesh",
     varset="eph",
@@ -19588,6 +19588,7 @@ The option is ignored if PAW.
 """,
 ),
 
+#{"abinit_version": "9.0.0"}
 Variable(
     abivarname="sigma_ngkpt",
     varset="gw",
@@ -20311,19 +20312,21 @@ Variable(
     topics=['crystal_useful'],
     dimensions="scalar",
     defaultval="",
-    mnemonics="initialize crystal STRUCTURE from ...",
+    mnemonics="initialize the crystalline STRUCTURE from ...",
     text=r"""
-This variable (added in Abinit9)
-provides a simplified interface to build the crystalline structure from an external file.
+This variable (added in Abinit9) provides a simplified interface to build the crystalline structure
+from an external file.
 
 The string has the format: `filetype:filepath`
 where `filetype` specifies the format of the external file and `filepath` gives the path to the file
 **relative** to the directory where the code is executed.
-
-
 Variables such as [[natom]], [[ntypat]], [[typat]] and [[znucl]] are automatically initialized from
-the external file and need not to be specified in the input.
+the external file and need not to be specified in the ABINIT input
 
+At present ( |today| ) the allowed values for `filetype` are:
+
+* abifile --> An output file produced by Abinit (only netcdf files are supported for the time being)
+* poscar  --> POSCAR files in VASP5 format (symbols after atomic positions are required).
 
 To read the structure from an external netcdf file produced by Abinit use:
 
@@ -20338,32 +20341,38 @@ To read the structure from an external POSCAR file, use:
 
     structure "poscar:t04_POSCAR"
 
-
-Note the following:
-
-- The structure is initialized by the parser at the vey beginning
-  hence the external files must exists when Abinit starts to analyze the input file.
-  In a nutshell, the structure variable cannot be used to pass the geometry from one dataset to the next one.
-
-- Multidatasets are supported but mind that some variables such as
-  [[ntypat]], [[typat]] and [[znucl]] are tagged as [[NO_MULTI]].
-  In other words, you can read different files with [[structure]] provided these variables do not change.
-
-
-Limitations:
-
-- The specification of structures for Image calculations is not supported.
-
-- Alchemical mixing is not supported.
-
-
 !!! important
 
-    Several POSCAR files avaible on the internet give atomic position and lattice vectors with ~6 digits.
+    Several POSCAR files available on the internet give atomic positions and lattice vectors with ~6 digits.
     The ABINIT routines use tight tolerances to detect the space group so it may happen that ABINIT does not
     detect all the symmetry operations with a consequent **INCREASE** of the number of k-points in the IBZ
     and therefore of the computational cost. This is especially true for hexagonal or rhombohedral lattices.
     A possible solution is to increase [[tolsym]] to e.g. 1e-4.
+
+
+Note the following important remarks:
+
+- The structure is initialized by the parser at the vey beginning
+  hence the external files must exists when Abinit starts to analyze the input file.
+  In a nutshell, the [[structure]] variables cannot be used to pass the geometry from one dataset to the next one.
+
+- Multidatasets are supported but please mind that some variables such as
+  [[ntypat]], [[typat]] and [[znucl]] are tagged as [[NO_MULTI]].
+  In other words, you can read different files via [[structure]] provided these quantities do not change.
+
+- The value of [[typat]] and [[znucl]] given in the input file (if any) is ignored by the parser.
+  The value of [[natom]], [[ntypat]] is checked for consistency.
+  As a rule of thumb, don' try to mix the two approaches: either use `structure` or the standard approach
+  to define the unit cell.
+
+
+Limitations:
+
+- The specification of structures for calculations with images is not supported.
+
+- Alchemical mixing is not supported.
+
+In all these cases, one has to resort to the "standard" approach to define the list of atoms and their type.
 """
 ),
 
