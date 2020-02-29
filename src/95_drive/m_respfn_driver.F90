@@ -564,8 +564,6 @@ if (sum(abs(eigen0(ibdoffst+1:ibdoffst+dtset%nband(ikpt+dtset%nkpt*(isppol-1))) 
 &        eigen0_tmp(ibdoffst+1:ibdoffst+dtset%nband(ikpt+dtset%nkpt*(isppol-1))))) > tol6) then
 print *, 'respfn  diff in eigen0 ', eigen0(ibdoffst+1:ibdoffst+dtset%nband(ikpt+dtset%nkpt*(isppol-1))) - &
 &        eigen0_tmp(ibdoffst+1:ibdoffst+dtset%nband(ikpt+dtset%nkpt*(isppol-1)))
-else
-write (401, *) 'respfn is ik ib ', isppol, ikpt, iband, dtset%kptns(:,ikpt)
 end if
        ibdoffst = ibdoffst + dtset%nband(ikpt+dtset%nkpt*(isppol-1))
      end do

@@ -1197,8 +1197,6 @@ if (sum(abs(eigen0(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
 &        eigen_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))))) > tol6) then
 print *, ' diff in eigen0 ', eigen0(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
 &        eigen_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1)))
-else
-write (301, *) 'is ik ib ', isppol, ikpt, iband, kpt_rbz(:,ikpt)
 end if
        ibdoffst = ibdoffst + nband_rbz(ikpt+nkpt_rbz*(isppol-1))
      end do
@@ -1414,8 +1412,6 @@ print *, ' mkqmem_rbz, ', mkqmem_rbz
 if (sum(abs(cgq(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol6) then
 print *, 'is ik ib cgq ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
 print *, ' diff in cgq ', cgq(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
-else
-write (200, *) 'is ik ib cgq ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
 end if
          !cgq(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
          icg = icg + npw
@@ -1425,8 +1421,6 @@ if (sum(abs(eigenq(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
 &        eigen_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))))) > tol6) then
 print *, ' diff in eigenq ', eigenq(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
 &        eigen_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1)))
-else
-write (300, *) 'is ik ib ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
 end if
        ibdoffst = ibdoffst + nband_rbz(ikpt+nkpt_rbz*(isppol-1))
      end do
@@ -1691,8 +1685,6 @@ print *, 'NB: this comparison does not seem to work, though the cg1 read above w
 print *, 'is ik ib cg1 , icg, icg_tmp ', isppol, ikpt, iband, kpq_rbz(:,ikpt), icg, icg_tmp
 print *, ' diff in cg1 ', cg1(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
 !cg1(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
-else
-write (202, *) 'is ik ib cg1 ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
 end if
          icg = icg + npw
          icg_tmp = icg_tmp + npw
@@ -1703,8 +1695,6 @@ print *, ' diff in eigen1 ', eigen1(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rb
 &                         eigen_tmp(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2)
 !eigen1(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2) = &
 !&                         eigen_tmp(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2)
-else
-write (302, *) 'is ik ib ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
 end if
        ibdoffst = ibdoffst + 2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2
      end do

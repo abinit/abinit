@@ -608,7 +608,9 @@ print *, ' rf_hamkq%dkinpw_k w1 w0 ', rf_hamkq%dkinpw_k(23), cwave1(:,23),cwave0
 &     mpicomm=mpi_enreg%comm_kpt,proc_distrb=mpi_enreg%proc_distrb,to_be_gathered=.true.)
    end if
 
-write (unit_me, *) 'vtowfk iband cg1 : ', iband, cwave1(:,1:5)
+#ifdef DEV_MJV
+print *, 'vtowfk iband cg1 : ', iband, cwave1(:,1:5)
+#endif
  end do
 
 !======================================================================

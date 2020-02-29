@@ -801,7 +801,9 @@ print *, ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), &
      index1=cplex*dtset%nfft*nspden
      if (psps%usepaw==0) then
        rhor1(:,:)  =reshape(buffer1(1:index1),(/cplex*dtset%nfft,nspden/))
-write (*,*) 'vtorho rhor1 ', rhor1(1:5,:)
+#ifdef DEV_MJV
+print *, 'vtorho rhor1 ', rhor1(1:5,:)
+#endif
      else
        rho1wfr(:,:)=reshape(buffer1(1:index1),(/cplex*dtset%nfft,nspden/))
      end if

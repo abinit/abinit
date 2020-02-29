@@ -3194,8 +3194,6 @@ print *, 'wfk_disk%hdr%nkpt cryst%timrev ', wfk_disk%hdr%nkpt, cryst%timrev
    call mapkptsets(chksymbreak, cryst%gmet, iout, wfk_disk%hdr%kptns, wfk_disk%hdr%nkpt, kptns_in, nkpt_in, &
 &       nkirred_disk, cryst%nsym, symrelT, cryst%timrev-1, rbz2disk, xmpi_comm_self)
 
-write(201, *) 'rbz2disk mapkptsets'
-write(201, *) rbz2disk
  end if ! no accurate k
 
  dksqmax = zero
@@ -3204,8 +3202,6 @@ write(201, *) rbz2disk
 
 #ifdef DEV_MJV
 print *, ' dksqmax ', dksqmax
-write(202, *) 'rbz2disk listkk'
-write(202, *) rbz2disk
 #endif
 
  if (ask_accurate == 1) then
