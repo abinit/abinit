@@ -78,6 +78,11 @@ MODULE m_nctk
  integer,public,parameter :: nctk_slen=256
 #endif
 
+#ifdef HAVE_NETCDF
+ ! netcdf4-hdf5
+ integer,save,private :: def_cmode_for_seq_create = ior(ior(nf90_clobber, nf90_netcdf4), nf90_write)
+#endif
+
  character(len=5),private,parameter :: NCTK_IMPLICIT_DIMS(10) = [ &
    "one  ", "two  ", "three", "four ", "five ", "six  ", "seven", "eight", "nine ", "ten  "]
 
@@ -179,6 +184,8 @@ MODULE m_nctk
  end type nctkvar_t
  !!***
 
+ public :: nctk_use_classic_for_seq ! Use netcdf-classic for files that are used in sequential.
+                                    ! instead of the default that is netcdf4/hdf5.
  public :: nctk_idname              ! Return the nc identifier from the name of the variable.
  public :: nctk_ncify               ! Append ".nc" to ipath if ipath does not end with ".nc"
  public :: nctk_string_from_occopt  ! Return human-readable string with the smearing scheme.
@@ -257,6 +264,31 @@ MODULE m_nctk
  ! perform parallel IO and we use nctk_has_mpiio to select the IO algorithms.
 
 CONTAINS
+
+
+!!****f* m_nctk/nctk_set_default_for_seq
+!! NAME
+!!  nctk_set_default_for_seq
+!!
+!! FUNCTION
+!!  Use netcdf classic mode for new files when only sequential-IO needs to be performed
+!!
+!! PARENTS
+!!
+!! SOURCE
+
+subroutine nctk_use_classic_for_seq()
+
+! *********************************************************************
+
+#ifdef HAVE_NETCDF
+ ! Use netcdf classic mode.
+ def_cmode_for_seq_create = ior(nf90_clobber, nf90_write)
+ MSG_COMMENT("Using netcdf-classic mode")
+#endif
+
+end subroutine nctk_use_classic_for_seq
+!!***
 
 !!****f* m_nctk/nctk_idname
 !! NAME
@@ -542,7 +574,7 @@ subroutine nctk_test_mpiio()
  call xmpi_bcast(nctk_has_mpiio,master,xmpi_world,ierr)
 
  if (.not. nctk_has_mpiio) then
-   write(msg,"(5a)")&
+   write(msg,"(5a)") &
       "The netcdf library does not support parallel IO, see message above",ch10,&
       "Abinit won't be able to produce files in parallel e.g. when paral_kgb==1 is used.",ch10,&
       "Action: install a netcdf4+HDF5 library with MPI-IO support."
@@ -724,7 +756,7 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  character(len=*),intent(in) :: path
 
 !Local variables-------------------------------
- integer :: input_len
+ integer :: input_len, cmode
  character(len=strlen) :: my_string
 
 ! *********************************************************************
@@ -742,7 +774,8 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
    ! Note that here we don't enforce nf90_netcdf4 hence the netcdf file with be in classic model.
    call wrtout(std_out, sjoin("- Creating netcdf file WITHOUT MPI-IO support:", path))
    !ncerr = nf90_create(path, ior(nf90_clobber, nf90_write), ncid)
-   ncerr = nf90_create(path, cmode=ior(ior(nf90_clobber, nf90_netcdf4), nf90_write), ncid=ncid)
+   cmode = def_cmode_for_seq_create
+   ncerr = nf90_create(path, cmode=cmode, ncid=ncid)
    if (xmpi_comm_size(comm) > 1) then
      MSG_WARNING("netcdf without MPI-IO support with nprocs > 1!")
    end if
@@ -2026,7 +2059,7 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0
- integer :: ncid,varid,i3,nproc_fft,me_fft,i3_glob,n1,n2,n3,ispden
+ integer :: ncid,varid,i3,nproc_fft,me_fft,i3_glob,n1,n2,n3,ispden,cmode
  logical :: ionode
  character(len=nctk_slen) :: cplex_name,my_action
  !character(len=500) :: msg
@@ -2073,7 +2106,7 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
      end select
 #endif
    else
-     ! MPI-FFT without MPI-support. Only master does IO
+     ! MPI-FFT without MPI-support. Only master performs IO
      ionode = (me_fft == master)
      if (ionode) then
        select case(my_action)
@@ -2081,7 +2114,8 @@ integer function nctk_write_datar(varname,path,ngfft,cplex,nfft,nspden,&
          ncerr = nf90_open(path, mode=nf90_write, ncid=ncid)
        case ("create")
          !ncerr = nf90_create(path, cmode=nf90_clobber, ncid=ncid)
-         ncerr = nf90_create(path, cmode=ior(ior(nf90_clobber, nf90_netcdf4), nf90_write), ncid=ncid)
+         cmode = def_cmode_for_seq_create
+         ncerr = nf90_create(path, cmode=cmode, ncid=ncid)
        case default
          MSG_ERROR(strcat("Wrong action:", my_action))
        end select
@@ -2802,7 +2836,7 @@ character(len=*),intent(in) :: filename
 !Local variables-------------------------------
 #if defined HAVE_NETCDF
 integer :: one_id
-integer :: ncerr
+integer :: ncerr, cmode
 #endif
 
 ! *************************************************************************
@@ -2811,7 +2845,8 @@ integer :: ncerr
 #if defined HAVE_NETCDF
  ! Create the NetCDF file
  !ncerr = nf90_create(path=filename,cmode=NF90_CLOBBER,ncid=ncid)
- ncerr = nf90_create(path=filename, cmode=ior(ior(nf90_clobber, nf90_netcdf4), nf90_write), ncid=ncid)
+ cmode = def_cmode_for_seq_create
+ ncerr = nf90_create(path=filename, cmode=cmode, ncid=ncid)
  NCF_CHECK_MSG(ncerr, sjoin('Error while creating:', filename))
  ncerr=nf90_def_dim(ncid,'one',1,one_id)
  NCF_CHECK_MSG(ncerr,'nf90_def_dim')
@@ -2946,7 +2981,7 @@ subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
 
 !Local variables-------------------------------
 !scalars
- integer :: ncerr,ncid,ii
+ integer :: ncerr,ncid,ii, cmode
  integer :: xyz_id,nkpt_id,mband_id,nsppol_id
  integer :: eig_id,kpt_id,nbk_id,nbk
  integer :: ikpt,isppol,nband_k,band_index
@@ -2965,7 +3000,8 @@ subroutine write_eig(eigen,filename,kptns,mband,nband,nkpt,nsppol)
 
 !1. Create netCDF file
  !ncerr = nf90_create(path=trim(filename),cmode=NF90_CLOBBER, ncid=ncid)
- ncerr = nf90_create(path=trim(filename), cmode=ior(ior(nf90_clobber, nf90_netcdf4), nf90_write), ncid=ncid)
+ cmode = def_cmode_for_seq_create
+ ncerr = nf90_create(path=trim(filename), cmode=cmode, ncid=ncid)
  NCF_CHECK_MSG(ncerr," create netcdf EIG file")
 
 !2. Define dimensions

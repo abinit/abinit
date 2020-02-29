@@ -215,7 +215,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0, option1= 1
- integer :: marr,tread,lenstr_noxyz,ierr,ii
+ integer :: marr,tread,lenstr_noxyz,ierr !,ii
  character(len=strlen) :: string_raw
  character(len=500) :: msg
 !arrays
@@ -3574,8 +3574,8 @@ type(geo_t) function geo_from_abigeo_path(path, comm) result(new)
 
 !Local variables-------------------------------
  integer,parameter :: master = 0, option1=1
- integer :: my_rank, lenstr, ierr, ii, iatom, start, itypat, tread
- character(len=500) :: msg
+ integer :: my_rank, lenstr, ierr, ii, iatom, start, tread !itypat,
+ !character(len=500) :: msg
  character(len=strlen) :: string
  character(len=5),allocatable :: symbols(:)
 
