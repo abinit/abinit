@@ -1,4 +1,4 @@
-## Copyright (C) 2019 Yann Pouillon
+## Copyright (C) 2020 Yann Pouillon
 
 #
 # NetCDF I/O library - Fortran interface
@@ -182,7 +182,8 @@ AC_DEFUN([SD_NETCDF_FORTRAN_DETECT], [
     if test "${sd_netcdf_fortran_init}" = "def"; then
       sd_netcdf_fortran_enable="no"
     else
-      AC_MSG_ERROR([NetCDF is not available])
+      #AC_MSG_ERROR([NetCDF is not available])
+      AC_MSG_WARN([NetCDF is not available])
     fi
   fi
 
@@ -217,7 +218,11 @@ AC_DEFUN([SD_NETCDF_FORTRAN_DETECT], [
         sd_netcdf_fortran_ldflags=""
         sd_netcdf_fortran_libs=""
       else
-        AC_MSG_FAILURE([invalid NetCDF Fortran interface configuration])
+        if test "${sd_netcdf_policy}" = "fail"; then
+              AC_MSG_FAILURE([invalid NetCDF Fortran interface configuration])
+        else
+              AC_MSG_WARN([invalid NetCDF Fortran interface configuration])
+        fi
       fi
     fi
   else

@@ -23,9 +23,9 @@ the [official documentation](https://git-scm.com/).
 
 In the next sections, we explain how to configure *git* to interoperate with
 our [ABINIT gitlab server](https://gitlab.abinit.org/).
-It is assumed you already have an account on our **internal gitlab server**
+It is assumed you already have an account on our **internal gitlab server**.
 Note that having an account on gitlab.com or github.com is not enough since we run our own server 
-(you need to contact Jean-Michel to have an account created for you).
+(you need to contact Jean-Michel Beuken to have an account created for you).
     
 
 ## Initial configuration

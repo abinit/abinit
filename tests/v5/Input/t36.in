@@ -41,7 +41,7 @@ xred 3*0
 #%% max_nprocs = 12
 #%% [extra_info]
 #%% authors = J. Zwanziger
-#%% keywords = 
+#%% keywords = PAW
 #%% description = 
 #%%   BCC iron, ferromagnetic, computation of Fermi contact term with two spin densities.
 #%%   Coded and contributed by J. Zwanziger.

@@ -204,6 +204,9 @@ program anaddb
  call xmpi_bcast(string, master, comm, ierr)
  call xmpi_bcast(lenstr, master, comm, ierr)
 
+ ! Save input string in global variable so that we can access it in ntck_open_create
+ INPUT_STRING = string
+
  ! Read the inputs
  call invars9(inp, lenstr, natom, string)
 
@@ -634,6 +637,9 @@ program anaddb
 #ifdef HAVE_NETCDF
        iphl2 = 0
        call nctk_defwrite_nonana_terms(ana_ncid, iphl2, inp%nph2l, inp%qph2l, natom, phfrq, displ, "define")
+       if (inp%nlflag == 1) then
+         call nctk_defwrite_nonana_raman_terms(ana_ncid, iphl2, inp%nph2l, natom, rsus, "define")
+       end if
 #endif
      end if
 
@@ -667,6 +673,11 @@ program anaddb
        ! Write Raman susceptibilities
        if (inp%nlflag == 1) then
          call ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq,qphon,qphnrm(1),rsus,Crystal%ucvol)
+#ifdef HAVE_NETCDF
+         if (my_rank == master) then
+           call nctk_defwrite_nonana_raman_terms(ana_ncid, iphl2, inp%nph2l, natom, rsus, "write")
+         end if
+#endif
        end if
 
        ! Prepare the evaluation of the Lyddane-Sachs-Teller relation
@@ -755,6 +766,11 @@ program anaddb
 
    rsus = zero
    call ramansus(d2cart,dchide,dchidt,displ,mpert,natom,phfrq(1),qphon,qphnrm(1),rsus,Crystal%ucvol)
+#ifdef HAVE_NETCDF
+   if (my_rank == master) then
+     call nctk_defwrite_raman_terms(ana_ncid, natom, rsus, phfrq(1))
+   end if
+#endif
 
    call electrooptic(dchide,inp%dieflag,epsinf,fact_oscstr,natom,phfrq,inp%prtmbm,rsus,Crystal%ucvol)
  end if ! condition on nlflag

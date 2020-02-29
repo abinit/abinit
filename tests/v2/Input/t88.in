@@ -47,7 +47,7 @@ xcart
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t88.out, tolnlines = 42, tolabs = 2.000e-6, tolrel = 6.0e-3, fld_options = -medium
+#%%   t88.out, tolnlines = 50, tolabs = 2.000e-6, tolrel = 6.0e-3, fld_options = -medium
 #%% psp_files = 1h.pspnc, 8o.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1

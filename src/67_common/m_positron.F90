@@ -109,6 +109,7 @@ contains
 !!  gprimd(3,3)=dimensional primitive translations for reciprocal space
 !!  gmet(3,3)=reciprocal space metric
 !!  grchempottn(3,natom)=d(E_chemical_potential)/d(xred) (hartree)
+!!  grcondft(3,natom)=d(E_constrainedDFT)/d(xred) (hartree)
 !!  grewtn(3,natom)=d(Ewald)/d(xred) (hartree)
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D dispersion (hartree)
 !!  gsqcut=cutoff value on G**2 for sphere inside fft box
@@ -187,7 +188,8 @@ contains
 !! SOURCE
 
 subroutine setup_positron(atindx,atindx1,cg,cprj,dtefield,dtfil,dtset,ecore,eigen,etotal,electronpositron,&
-&          energies,fock,forces_needed,fred,gmet,gprimd,grchempottn,grewtn,grvdw,gsqcut,hdr,ifirst_gs,indsym,istep,istep_mix,kg,&
+&          energies,fock,forces_needed,fred,gmet,gprimd,grchempottn,&
+&          grcondft,grewtn,grvdw,gsqcut,hdr,ifirst_gs,indsym,istep,istep_mix,kg,&
 &          kxc,maxfor,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc,nattyp,nfft,ngfft,ngrvdw,nhat,nkxc,npwarr,nvresid,occ,optres,&
 &          paw_ij,pawang,pawfgr,pawfgrtab,pawrad,pawrhoij,pawtab,ph1d,ph1dc,psps,rhog,rhor,&
 &          rprimd,stress_needed,strsxc,symrec,ucvol,usecprj,vhartr,vpsp,vxc,vxctau,&
@@ -214,7 +216,7 @@ type(fock_type),pointer, intent(inout) :: fock
  integer,intent(in) :: atindx(dtset%natom),atindx1(dtset%natom),indsym(4,dtset%nsym,dtset%natom)
  integer,intent(in) :: kg(3,dtset%mpw*dtset%mkmem),nattyp(dtset%natom),ngfft(18)
  integer,intent(in) :: npwarr(dtset%nkpt),symrec(3,3,dtset%nsym)
- real(dp),intent(in) :: gmet(3,3),gprimd(3,3),grchempottn(3,dtset%natom)
+ real(dp),intent(in) :: gmet(3,3),gprimd(3,3),grchempottn(3,dtset%natom),grcondft(3,dtset%natom)
  real(dp),intent(in) :: grewtn(3,dtset%natom),grvdw(3,ngrvdw),kxc(nfft,nkxc)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom),ph1dc(2,(3*(2*dtset%mgfft+1)*dtset%natom)*dtset%usepaw)
  real(dp),intent(in) :: rprimd(3,3),strsxc(6),vhartr(nfft),vpsp(nfft),vxc(nfft,dtset%nspden)
@@ -386,7 +388,7 @@ type(fock_type),pointer, intent(inout) :: fock
        if (electronpositron%calctype==0) electronpositron%calctype=-100
        if (electronpositron%calctype==-1) n3xccc0=0  ! Note: if calctype=-1, previous calculation was positron
        call forstr(atindx1,cg,cprj,diffor_dum,dtefield,dtset,eigen,electronpositron,energies,&
-&       favg_dum,fcart_dum,fock,forold_dum,fred_tmp,grchempottn,gresid_dum,grewtn,grhf_dum,grvdw,grxc_dum,gsqcut,&
+&       favg_dum,fcart_dum,fock,forold_dum,fred_tmp,grchempottn,grcondft,gresid_dum,grewtn,grhf_dum,grvdw,grxc_dum,gsqcut,&
 &       indsym,kg,kxc,maxfor_dum,mcg,mcprj,mgfft,mpi_enreg,my_natom,n3xccc0,nattyp,nfft,ngfft,&
 &       ngrvdw,nhat,nkxc,npwarr,dtset%ntypat,nvresid,occ,optfor,optres,paw_ij,pawang,pawfgr,&
 &       pawfgrtab,pawrad,pawrhoij,pawtab,ph1dc,ph1d,psps,rhog,rhor,rprimd,optstr,strsxc,str_tmp,symrec,&
