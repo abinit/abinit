@@ -1005,7 +1005,9 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if(xmpi_paral==1) then
      ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt_rbz,dtset%mband,dtset%nsppol))
      call distrb2(dtset%mband,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,dtset%nsppol,mpi_enreg)
+#ifdef DEV_MJV
 print *, 'nkpt_rbz ', nkpt_rbz
+#endif
    else
      mpi_enreg%my_kpttab(:)=(/(ii,ii=1,nkpt_rbz)/)
    end if
@@ -1017,17 +1019,23 @@ print *, 'nkpt_rbz ', nkpt_rbz
 ! given number of reduced kpt, store distribution of bands across procs
    ABI_ALLOCATE(distrb_flags,(nkpt_rbz,dtset%mband,dtset%nsppol))
    distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
+#ifdef DEV_MJV
 print *, 'distrb_flags ', distrb_flags
+#endif
 
    _IBM6("IBM6 before kpgio")
 
 !  Set up the basis sphere of planewaves at k
    call timab(143,1,tsec)
+#ifdef DEV_MJV
 print *, 'before kpgio istwfk_rbz ec ec_eff ', istwfk_rbz, dtset%ecut, ecut_eff
+#endif
    call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
 &   kpt_rbz,mkmem_rbz,nband_rbz,nkpt_rbz,'PERS',mpi_enreg,mpw,npwarr,npwtot,dtset%nsppol)
    call timab(143,2,tsec)
+#ifdef DEV_MJV
 print *, 'after kpgio npwarr ', npwarr
+#endif
 
 !  Set up the spherical harmonics (Ylm) at k
    useylmgr=0; option=0 ; nylmgr=0
@@ -1089,10 +1097,12 @@ print *, 'after kpgio npwarr ', npwarr
    call hdr0%update(bantot_rbz,etotal,fermie,&
      residm,rprimd,occ_rbz,pawrhoij_pert,xred,dtset%amu_orig(:,1),&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
+#ifdef DEV_MJV
 print *, ' fermie ', fermie
 print *, " ebands_k%eig 1095 ", ebands_k%eig
 print *, " occ_rbz 1095 ", occ_rbz
 print *, 'istwfk_rbz ', istwfk_rbz
+#endif
 
 !  Initialize GS wavefunctions at k
    ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
@@ -1121,9 +1131,12 @@ print *, 'istwfk_rbz ', istwfk_rbz
 !   if (sum(abs(occ_rbz)) < tol12) then
 !     occ_rbz = occ_disk
 !   end if 
+#ifdef DEV_MJV
 print *, 'eigen0 1125 ', eigen0
 print *, " occ_rbz 1125 ", occ_rbz
+#endif
   
+#ifdef DEV_MJV
 !DEBUG
 !mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
    mcg_tmp = mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
@@ -1194,6 +1207,7 @@ end if
    ABI_DEALLOCATE(eigen_tmp)
    ABI_DEALLOCATE(occ_tmp)
 !ENDDEBUG
+#endif
 
    call timab(144,2,tsec)
 
@@ -1352,8 +1366,10 @@ end if
    if (dtfil%fnamewffq == dtfil%fnamewffk .and. sum(dtset%qptn(1:3)**2) < 1.d-14) then
      call wrtout(std_out, " qpt is Gamma, psi_k+q initialized from psi_k in memory")
      cgq = cg
+#ifdef DEV_MJV
 print *, ' mpw, mpw1 ', mpw, mpw1
 !print *, 'cgq ', cgq
+#endif
      eigenq = eigen0
    else
      call timab(144,1,tsec)
@@ -1361,6 +1377,7 @@ print *, ' mpw, mpw1 ', mpw, mpw1
 &            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1, &
 &            cgq, eigen=eigenq, occ=occ_disk)
      call timab(144,2,tsec)
+#ifdef DEV_MJV
 !DEBUG
 ! mcgq=      mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
    mcg_tmp = mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
@@ -1423,6 +1440,7 @@ end if
        call WffClose(wffkq,ierr)
      end if
 !ENDDEBUG
+#endif
 
      if (.not.kramers_deg) then
        !SPr: later "make" a separate WFQ file for "-q"
@@ -1518,11 +1536,15 @@ end if
      dosdeltae=zero ! the DOS is not computed with option=1
      maxocc=two/(dtset%nspinor*dtset%nsppol)
 
+#ifdef DEV_MJV
 print *, ' eigenq ', eigenq
+#endif
      call getnel(docckqde,dosdeltae,eigenq,entropy,fermie,maxocc,dtset%mband,&
 &     nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occkq,dtset%occopt,option,&
 &     dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz)
+#ifdef DEV_MJV
 print *, ' occkq ', occkq
+#endif
 !    Compare nelect at k and nelelect at k+q
      write(message, '(a,a,a,es16.6,a,es16.6,a)')&
 &     ' dfpt_looppert : total number of electrons, from k and k+q',ch10,&
@@ -1580,8 +1602,10 @@ print *, ' occkq ', occkq
      dim_eig2rf=1
    end if
    mcg1=mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol
+#ifdef DEV_MJV
 print *, 'mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol ', &
 & mpw1,dtset%nspinor,dtset%mband_mem,mk1mem_rbz,dtset%nsppol
+#endif
    if (one*mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol > huge(1)) then
      write (message,'(4a, 5(a,i0), 2a)')&
 &     "Default integer is not wide enough to store the size of the GS wavefunction array (WFK1, mcg1).",ch10,&
@@ -1624,12 +1648,15 @@ print *, 'mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol ', &
    call timab(144,1,tsec)
    if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &      (dtset%get1wf /= 0 .or. dtset%ird1wf /= 0)) then
+#ifdef DEV_MJV
 print *, 'init cg1 from disk ', shape(cg1)
+#endif
      call wfk_read_my_kptbands(fiwf1i, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1, &
 &            cg1, eigen=eigen1, ask_accurate_=0)
 
 
+#ifdef DEV_MJV
 !DEBUG
    mcg_tmp = mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
    ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
@@ -1691,9 +1718,12 @@ end if
        call WffClose(wff1,ierr)
      end if
 !ENDDEBUG
+#endif
 
    else
+#ifdef DEV_MJV
 print *, 'init cg1 to 0'
+#endif
      cg1 = zero
      eigen1 = zero
    end if
@@ -2269,7 +2299,9 @@ print *, 'init cg1 to 0'
 &                nband_rbz,nkpt_rbz,&
 &                dtset%nsppol,resid)
      ! Output 1st-order wavefunctions in file
+#ifdef DEV_MJV
 print *, 'calling wfk_write_my_kptbands nkpt_rbz spacecomm distrb_flags ', nkpt_rbz, spacecomm, distrb_flags
+#endif
      call wfk_write_my_kptbands(fiwf1o, dtset, distrb_flags, spacecomm, &
 &          formeig, hdr, nkpt_rbz, &
 &          cg1, kg1, eigen1)

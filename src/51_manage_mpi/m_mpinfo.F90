@@ -2251,16 +2251,20 @@ subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
        end do
      end do
      if (.not.allocated(ranks)) then
+#ifdef DEV_MJV
 print *, 'ranks not alloc'
+#endif
        ABI_ALLOCATE(ranks,(0))
      end if
 
      mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
      mpi_enreg%nproc_band=nrank
 !     mpi_enreg%me_band=mod(me, nrank)
+#ifdef DEV_MJV
 print *, ' spacecomm,nrank,ranks ', spacecomm,nrank,ranks
 print *, ' mpi_enreg%comm_band me ', mpi_enreg%comm_band, mpi_enreg%me_band, &
 &        " mod(me, nrank) ", mod(me, nrank)
+#endif
 
      ABI_DEALLOCATE(ranks)
    end if
@@ -2560,7 +2564,9 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 
 !    No possible band parallelization
      if (nproc<(nkpt*nsppol)) then
+#ifdef DEV_MJV
 print *, 'no band paral now'
+#endif
 
 !      Does not allow a processor to treat different spins
 !     NB: for odd nproc this will happen anyway for the middle proc - will this not unbalance things?
@@ -2592,7 +2598,9 @@ print *, 'no band paral now'
 
 !    Possible band parallelization
      else
+#ifdef DEV_MJV
 print *, 'yes band paral now'
+#endif
 !      Does not allow a processor to treat different spins
        ind0=0
        inb=nproc/(nkpt*nsppol)
@@ -2693,6 +2701,7 @@ print *, 'yes band paral now'
    end do
  end do
 
+#ifdef DEV_MJV
 print *, 'iisppol, iiband, iikpt, mpi_enreg%proc_distrb nkpt = ', nkpt
 do iisppol=1,nsppol
 do iikpt=1,nkpt
@@ -2701,6 +2710,7 @@ print *, iisppol, iiband, iikpt, mpi_enreg%proc_distrb(iikpt,iiband,iisppol)
 end do
 end do
 end do
+#endif
 
 end subroutine distrb2
 !!***

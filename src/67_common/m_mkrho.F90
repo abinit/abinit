@@ -331,7 +331,9 @@ subroutine mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phn
          if(mpi_enreg%paral_kgb /= 1) then  ! Not yet parallelized on spinors
            iband_me = 0
            do iband=1,nband_k
+#ifdef DEV_MJV
 print *, 'isppol,ikpt,iband,iband_me ', isppol,ikpt,iband,iband_me
+#endif
 !            if(paw_dmft%use_sc_dmft==1) then
 !            write(std_out,*) 'iband  ',iband,occ(iband+bdtot_index),paw_dmft%occnd(iband,iband,ikpt,isppol)
 !            else
@@ -361,13 +363,17 @@ print *, 'isppol,ikpt,iband,iband_me ', isppol,ikpt,iband,iband_me
                  locc_test = abs(occ(iband+bdtot_index))>tol8
                end if
 
+#ifdef DEV_MJV
 print *, ' isppol,ikpt,iband,locc_test ', isppol,ikpt,iband,locc_test 
+#endif
                if (locc_test) then
 !                Obtain Fourier transform in fft box and accumulate the density or the kinetic energy density
 !                Not yet parallise on nspinor if paral_kgb non equal to 1
                  ipwsp=(iband_me-1)*npw_k*my_nspinor +icg
                  cwavef(:,1:npw_k,1)=cg(:,1+ipwsp:ipwsp+npw_k)
+#ifdef DEV_MJV
 print *, 'cg ', cg(:,1+ipwsp:ipwsp+4)
+#endif
                  if (my_nspinor==2) cwavef(:,1:npw_k,2)=cg(:,ipwsp+npw_k+1:ipwsp+2*npw_k)
 
                  if(ioption==1)then

@@ -379,7 +379,9 @@ integer :: icg, icg_tmp, ibdoffst, npw, iband_me
  if (rf2_dkdk>0.or.rf2_dkde>0) mpert=natom+11
 
 !Initialize the list of perturbations rfpert
+#ifdef DEV_MJV
 print *, 'mpert natom ', mpert, natom
+#endif
  ABI_ALLOCATE(rfpert,(mpert))
  rfpert(:)=0
  if(rfphon==1)rfpert(dtset%rfatpol(1):dtset%rfatpol(2))=1
@@ -410,15 +412,19 @@ print *, 'mpert natom ', mpert, natom
 !Set up the basis sphere of planewaves
  ABI_ALLOCATE(kg,(3,dtset%mpw*dtset%mkmem))
  ABI_ALLOCATE(npwarr,(dtset%nkpt))
+#ifdef DEV_MJV
 print *, 'before kpgio', npwtot, dtset%nsppol, dtset%mpw
 print *, ' dtset%istwfk ',  dtset%istwfk
 print *, ' dtset%kptns ',  dtset%kptns
 print *, ' dtset%istwfk ',  dtset%istwfk
+#endif
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet_for_kg,dtset%istwfk,kg,&
 & dtset%kptns,dtset%mkmem,dtset%nband,dtset%nkpt,'PERS',mpi_enreg,dtset%mpw,npwarr,npwtot,&
 & dtset%nsppol)
+#ifdef DEV_MJV
 print *, 'after kpgio', npwtot, dtset%nsppol, dtset%mpw, ' npwarr ', npwarr
 print *, ' kg ',  shape(kg), '  ==  ', kg 
+#endif
 
 !Set up the Ylm for each k point
  ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
@@ -481,7 +487,9 @@ print *, ' kg ',  shape(kg), '  ==  ', kg
 
 !TODO: parallelize mband_mem here as well
  mcg=dtset%mpw*dtset%nspinor*dtset%mband_mem*dtset%mkmem*dtset%nsppol
+#ifdef DEV_MJV
 print *, 'mcg, spin ban k spp ', mcg, dtset%mpw,dtset%nspinor,dtset%mband_mem,dtset%mkmem,dtset%nsppol
+#endif
  ABI_ALLOCATE(cg,(2,mcg))
  !ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
 
@@ -497,6 +505,7 @@ print *, 'mcg, spin ban k spp ', mcg, dtset%mpw,dtset%nspinor,dtset%mband_mem,dt
 &            cg, eigen=eigen0)
  ABI_DEALLOCATE(distrb_flags)
 
+#ifdef DEV_MJV
 !DEBUG
  mcg_tmp=dtset%mpw*dtset%nspinor*dtset%mband*dtset%mkmem*dtset%nsppol
 print *, 'mcg_tmp, spin ban k spp ', mcg_tmp, dtset%mpw,dtset%nspinor,dtset%mband,dtset%mkmem,dtset%nsppol
@@ -566,6 +575,7 @@ ABI_DEALLOCATE(cg_tmp)
 ABI_DEALLOCATE(eigen0_tmp)
 ABI_DEALLOCATE(occ_tmp)
 !ENDDEBUG
+#endif
 
 
  if (psps%usepaw==1.and.ireadwf0==1) then
@@ -693,7 +703,9 @@ ABI_DEALLOCATE(occ_tmp)
  end if
 
  call getcut(boxcut,ecutf,gmet,gsqcut,dtset%iboxcut,std_out,k0,ngfftf)
+#ifdef DEV_MJV
 print *, 'past getcut'
+#endif
 
 !PAW: 1- Initialize values for several arrays depending only on atomic data
 !2- Check overlap
@@ -850,7 +862,9 @@ print *, 'past getcut'
    tim_mkrho=4
    paw_dmft%use_sc_dmft=0 ! respfn with dmft not implemented
    paw_dmft%use_dmft=0 ! respfn with dmft not implemented
+#ifdef DEV_MJV
 print *, ' call mkrho '
+#endif
    if (psps%usepaw==1) then
      ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
      ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
@@ -864,7 +878,9 @@ print *, ' call mkrho '
      call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,&
 &     mpi_enreg,npwarr,occ,paw_dmft,phnons,rhog,rhor,rprimd,tim_mkrho,ucvol,wvl%den,wvl%wfs)
    end if
+#ifdef DEV_MJV
 print *, ' after call mkrho '
+#endif
  end if ! getden
 
 !In PAW, compensation density has eventually to be added
@@ -1871,7 +1887,9 @@ print *, ' after call mkrho '
  ABI_DEALLOCATE(piezofrnl)
  call efmasdeg_free_array(efmasdeg)
  call efmasval_free_array(efmasval)
+#ifdef DEV_MJV
 print *, 'back in respfn'
+#endif
  ABI_DEALLOCATE(grxc)
  ABI_DEALLOCATE(indsym)
  ABI_DEALLOCATE(kxc)
@@ -1885,7 +1903,9 @@ print *, 'back in respfn'
  ABI_DEALLOCATE(vtrial)
  ABI_DEALLOCATE(ylm)
  ABI_DEALLOCATE(ylmgr)
+#ifdef DEV_MJV
 print *, 'respfn 1803'
+#endif
  call pawfgr_destroy(pawfgr)
  if (psps%usepaw==1) then
    call pawrhoij_free(pawrhoij)
@@ -1902,12 +1922,16 @@ print *, 'respfn 1803'
  if(rfphon==1.and.psps%n1xccc/=0)then
    ABI_DEALLOCATE(blkflgfrx1)
  end if
+#ifdef DEV_MJV
 print *, 'respfn 1820'
+#endif
 
  ! Clean the header
  call hdr%free()
 
+#ifdef DEV_MJV
 print *, 'respfn 1825'
+#endif
 
 !Clean GPU data
 #if defined HAVE_GPU_CUDA
@@ -1916,7 +1940,9 @@ print *, 'respfn 1825'
  end if
 #endif
 
+#ifdef DEV_MJV
 print *, 'respfn 1834'
+#endif
  call timab(138,2,tsec)
  call timab(132,2,tsec)
 

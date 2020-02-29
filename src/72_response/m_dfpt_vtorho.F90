@@ -496,7 +496,9 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
      nband_k = nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
      nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+#ifdef DEV_MJV
 print *, ' vtorho nband_me ', nband_me
+#endif
      istwf_k = istwfk_rbz(ikpt)
      npw_k   = npwarr(ikpt,1)
      npw1_k  = npwar1(ikpt,1)
@@ -550,10 +552,12 @@ print *, ' vtorho nband_me ', nband_me
 !    For each pair of active bands (m,n), generates the ratios
 !    rocceig(m,n)=(occ_kq(m)-occ_k(n))/(eig0_kq(m)-eig0_k(n))
 !    and decide to which band to attribute it.
+#ifdef DEV_MJV
 print *, doccde_k
 print *, doccde_kq
 print *, occ_k
 print *, occ_kq
+#endif
      call occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,dtset%occopt,occ_k,occ_kq,rocceig)
 
      ! These arrays are not needed anymore.
@@ -666,9 +670,11 @@ print *, occ_kq
          eloc0=eloc0+wtk_k*occ_k(iband)*eloc0_k(iband)
          enl0=enl0+wtk_k*occ_k(iband)*enl0_k(iband)
          enl1=enl1+wtk_k*occ_k(iband)*enl1_k(iband)
+#ifdef DEV_MJV
 print *, ' wtk_k ', wtk_k, occ_k(iband) 
 print *, ' iband en components ', iband, edocc_k(iband), eeig0_k(iband), &
 &   ek0_k(iband), ek1_k(iband), eloc0_k(iband), enl0_k(iband), enl1_k(iband)
+#endif
        end do
      end if
 

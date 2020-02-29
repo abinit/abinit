@@ -342,7 +342,9 @@ subroutine dfpt_vtowfk(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 
  call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ikpt,isppol,mband,&
 &  mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
+#ifdef DEV_MJV
 print *, 'band_procs  ', band_procs
+#endif
 
  iband_me = 0
  do iband=1,nband_k
@@ -385,17 +387,25 @@ unit_me = 6
 !  The GS wavefunctions should already be non-zero
    do ispinor=1,nspinor
      igs=(ispinor-1)*npw1_k
+#ifdef DEV_MJV
 print *, ' igs ', igs, '  huge 0, cutoff = ', huge(zero), huge(zero)*1.d-11
+#endif
      do ipw=1+igs,npw1_k+igs
+#ifdef DEV_MJV
 print *, 'ipw, igs kinpw1 ', ipw, igs, kinpw1(ipw-igs)
+#endif
        if(kinpw1(ipw-igs)>huge(zero)*1.d-20)then
+#ifdef DEV_MJV
 print *, 'zeroing ipw ', ipw
+#endif
          cwavef(1,ipw)=zero
          cwavef(2,ipw)=zero
        end if
      end do
    end do
+#ifdef DEV_MJV
 print *, ' cwavef elements filtered ', cwavef(:,23), cwavef(:,49), cwavef(:,50)
+#endif
 
 
 !  If electric field, the derivative of the wf should be read, and multiplied by i.
@@ -439,11 +449,13 @@ print *, ' cwavef elements filtered ', cwavef(:,23), cwavef(:,49), cwavef(:,50)
      if ( (ipert/=natom+10 .and. ipert/=natom+11) .or. abs(occ_k(iband))>tol8 ) then
        nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
 
+#ifdef DEV_MJV
 print *, ' vtowfk isppol.ikpt, nband_me ', isppol, ikpt, nband_me, iband, iband_me 
 print *, ' occ_k, eig0nk,eig0_kq ', occ_k(iband), eig0nk,eig0_kq
 print *, 'cgwf cwavef 444 ', cwavef(:,23)
 print *, 'cgwf cwave0 444 ', cwave0(:,1:5)
 print *, 'cgwf cgq 444 ', cgq(:,1:5)
+#endif
        call dfpt_cgwf(iband,iband_me,band_procs,dtset%berryopt,cgq,cwavef,cwave0,cwaveprj,cwaveprj0,&
 &       rf2,dcwavef,&
 &       eig0nk,eig0_kq,eig1_k,gh0c1,gh1c_n,grad_berry,gsc,gscq,gs_hamkq,gvnlxc,gvnlx1,icgq,&
@@ -454,7 +466,9 @@ print *, 'cgwf cgq 444 ', cgq(:,1:5)
      else
        resid_k(iband)=zero
      end if
+#ifdef DEV_MJV
 print *, 'cgwf cwavef 454 ', cwavef(:,23)
+#endif
 
      if (ipert/=natom+10 .and. ipert/= natom+11) then
 !    At this stage, the 1st order function cwavef is orthogonal to cgq (unlike
@@ -463,10 +477,12 @@ print *, 'cgwf cwavef 454 ', cwavef(:,23)
 !    PAW: note that dcwavef (1st-order change of WF due to overlap change)
 !         remains in the subspace orthogonal to cgq
        call proc_distrb_cycle_bands(cycle_bands, mpi_enreg%proc_distrb,ikpt,isppol,me)
+#ifdef DEV_MJV
 print *, 'prtfull1wf ', dtset%prtfull1wf
 print *, 'vtowfk after corrmetal iband, cwavef ', iband, cwavef(:,1:5)
 print *, 'cgwf cwavef 465 ', cwavef(:,23)
 print *, 'vtowfk after corrmetal iband, cwave1 ', iband, cwave1(:,1:5)
+#endif
        if (dtset%prtfull1wf>0) then
          call full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,eig1_k,fermie1,&
 &         eig0nk,eig0_kq,dtset%elph2_imagden,iband,ibgq,icgq,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
@@ -478,9 +494,11 @@ print *, 'vtowfk after corrmetal iband, cwave1 ', iband, cwave1(:,1:5)
 &         iband,ibgq,icgq,gs_hamkq%istwf_k,mcgq,mcprjq,mpi_enreg,natom,nband_k,npw1_k,nspinor,&
 &         occ_k,rocceig,0,gs_hamkq%usepaw,tocceig)
        end if
+#ifdef DEV_MJV
 print *,'vtowfk after corrmetal iband, cwave1 ', iband, cwave1(:,1:5)
 ii = (iband-1)*nband_k*2
 print *, 'vtowfk iband, eig1_k ', iband, eig1_k(ii+1:ii+min(10,nband_k))
+#endif
        ABI_DEALLOCATE (cycle_bands)
      else
        tocceig=0
@@ -501,9 +519,11 @@ print *, 'vtowfk iband, eig1_k ', iband, eig1_k(ii+1:ii+min(10,nband_k))
      else
 !      Compute the 0-order kinetic operator contribution (with cwavef)
        call meanvalue_g(ar,kinpw1,0,gs_hamkq%istwf_k,mpi_enreg,npw1_k,nspinor,cwavef,cwavef,0)
+#ifdef DEV_MJV
 print *, ' ik isppol iband ar kinpw1 ', ikpt, isppol, iband, ar, kinpw1(1:30) 
 print *, ' cwavef elements ', cwavef(:,23), cwavef(:,49), cwavef(:,50)
 print *, ' rf_hamkq%dkinpw_k w1 w0 ', rf_hamkq%dkinpw_k(23), cwave1(:,23),cwave0(:,23)
+#endif
 !      There is an additional factor of 2 with respect to the bare matrix element
        ek0_k(iband)=energy_factor*ar
 !      Compute the 1-order kinetic operator contribution (with cwave1 and cwave0), if needed.
@@ -942,7 +962,9 @@ subroutine corrmetalwf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,e
 ! I will save in _my_ array cwave1, if iband==iband_
  do iband_ = 1, nband
    if (bands_treated_now(iband_) == 0) cycle
+#ifdef DEV_MJV
 print *, 'iband_ ', iband_, ' nband ', nband
+#endif
 
    cwcorr = zero
    if (usepaw==1) then
@@ -960,7 +982,9 @@ print *, 'iband_ ', iband_, ' nband ', nband
      do ibandkq=1,nband
        if(cycle_bands(ibandkq)) cycle
        ibandkq_me = ibandkq_me + 1
+#ifdef DEV_MJV
 print *, 'ibandkq ', ibandkq, ibandkq_me, rocceig(ibandkq,iband_)
+#endif
 
 !      Select bands with variable occupation
        if (abs(rocceig(ibandkq,iband_))>tol8) then
@@ -976,7 +1000,9 @@ print *, 'ibandkq ', ibandkq, ibandkq_me, rocceig(ibandkq,iband_)
            factr=rocceig(ibandkq,iband_)*invocc*eig1(index_eig1)
          end if
          facti = rocceig(ibandkq,iband_)*invocc*eig1(index_eig1+1)
+#ifdef DEV_MJV
 print *, 'factr, facti ', factr, facti
+#endif
 
 !        Apply correction to 1st-order WF
 !$OMP PARALLEL DO PRIVATE(ii) SHARED(cgq,cwcorr,facti,factr,index_cgq,npw1,nspinor)
@@ -1024,7 +1050,9 @@ print *, 'factr, facti ', factr, facti
    end if
  end do ! loop over all bands presently running in parallel
 
+#ifdef DEV_MJV
 print *, 'edocc ', edocc
+#endif
 
 !In the PAW case, compute <Psi^(1)_ortho|H-Eig0_k.S|Psi^(1)_parallel> contribution to 2DTE
  if (usepaw==1.and.wf_corrected==1) then

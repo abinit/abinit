@@ -260,7 +260,10 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
  bands_treated_now = 0
  bands_treated_now(band) = 1
  call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
+#ifdef DEV_MJV
 print *, 'bands_treated_now ', bands_treated_now
+#endif
+
 
  skipme = 0
 
@@ -569,12 +572,16 @@ print *, 'bands_treated_now ', bands_treated_now
  ! in order to apply P_c+ projector (see PRB 73, 235101 (2006) [[cite:Audouze2006]], Eq. (71), (72))
  eig1_k_loc = zero
  do iband = 1, nband
+#ifdef DEV_MJV
 print *, 'iband, bands_treated_now(iband), bands_skipped_now(iband) ', iband, bands_treated_now(iband), bands_skipped_now(iband)
+#endif
    if (bands_treated_now(iband)-bands_skipped_now(iband) == 0) cycle
    if (iband == band) then
      work = gh1c
    end if
+#ifdef DEV_MJV
 print *, ' band_procs(iband), mpi_enreg%comm_band ', band_procs(iband), mpi_enreg%comm_band
+#endif
    call xmpi_bcast(work,band_procs(iband),mpi_enreg%comm_band,ierr)
 
    if(gen_eigenpb)then
@@ -668,7 +675,9 @@ print *, ' band_procs(iband), mpi_enreg%comm_band ', band_procs(iband), mpi_enre
      end if
    end do
  end do
+#ifdef DEV_MJV
 print *, 'cwavef 670 ', cwavef(:,23)
+#endif
 
  ! Apply the orthogonality condition: <C1 k,q|C0 k+q>=0 (NCPP) or <C1 k,q|S0|C0 k+q>=0 (PAW)
  ! Project out all bands from cwavef, i.e. apply P_c projector on cwavef
@@ -691,7 +700,9 @@ print *, 'cwavef 670 ', cwavef(:,23)
      cwavef = work - (mpi_enreg%nproc_band-1)*cwavef
    end if
  end do
+#ifdef DEV_MJV
 print *, 'cwavef 692 ', cwavef(:,23)
+#endif
 
 
  if(ipert/=natom+10.and.ipert/=natom+11) then
@@ -730,7 +741,9 @@ print *, 'cwavef 692 ', cwavef(:,23)
    end if
   
    skipme = 1
+#ifdef DEV_MJV
 print *, 'skipping for buffer band'
+#endif
  end if
 
  ! If not a buffer band, perform the optimisation
@@ -761,7 +774,9 @@ print *, 'skipping for buffer band'
  else
    call cg_zaxpy(npw1*nspinor, [-eshift, zero], cwavef,ghc)
  end if
+#ifdef DEV_MJV
 print *, 'cwavef 763 ', cwavef(:,23)
+#endif
 
  ! Initialize resid, in case of nline==0
  resid=zero
@@ -841,7 +856,9 @@ print *, 'cwavef 763 ', cwavef(:,23)
    end do
 
    call cg_zcopy(npw1*nspinor,gresid,direc)
+#ifdef DEV_MJV
 print *, ' gresid ', gresid (:,1:5)
+#endif
 
    ! ======================================================================
    ! ============== CHECK FOR CONVERGENCE CRITERIA ========================
@@ -896,7 +913,9 @@ print *, ' gresid ', gresid (:,1:5)
 
 !DEBUG     exit ! Exit from the loop on iline
      skipme = 1
+#ifdef DEV_MJV
 print *, 'skipping for u1h0me0u1'
+#endif
    end if
 
    ! If residual sufficiently small stop line minimizations
@@ -908,7 +927,9 @@ print *, 'skipping for u1h0me0u1'
      nskip=nskip+(nline-iline+1)  ! Number of two-way 3D ffts skipped
 !DEBUG     exit                         ! Exit from the loop on iline
      skipme = 1
+#ifdef DEV_MJV
 print *, 'skipping for resid'
+#endif
    end if
 
    ! If user require exiting the job, stop line minimisations
@@ -1035,7 +1056,9 @@ print *, 'skipping for resid'
    call dotprod_g(dedt,doti,istwf_k,npw1*nspinor,1,conjgr,gresid,me_g0,mpi_enreg%comm_spinorfft)
    dedt=-two*two*dedt
 
+#ifdef DEV_MJV
 print *, 'gresid 781 ', gresid(1:2,1:5)
+#endif
    if((prtvol==-level.or.prtvol==-19.or.prtvol==-20).and.dedt-tol14>0) call wrtout(std_out,' CGWF3_WARNING : dedt>0')
    ABI_ALLOCATE(gvnlx_direc,(2,npw1*nspinor))
    ABI_ALLOCATE(gh_direc,(2,npw1*nspinor))
@@ -1061,7 +1084,9 @@ print *, 'gresid 781 ', gresid(1:2,1:5)
        gh_direc(1:2,ipw)=gh_direc(1:2,ipw)-eshift*conjgr(1:2,ipw)
      end do
    end if
+#ifdef DEV_MJV
 print *, 'gh_direc ', gh_direc(1:2,1:5)
+#endif
 
    ! compute d2edt2, Eq.(30) of of PRB55, 10337 (1997) [[cite:Gonze1997]],
    ! with an additional factor of 2 for the difference
@@ -1078,7 +1103,9 @@ print *, 'gh_direc ', gh_direc(1:2,1:5)
    ! ======= COMPUTE MIXING FACTOR - CHECK FOR CONVERGENCE ===============
    ! ======================================================================
 
+#ifdef DEV_MJV
 print *, 'dedt, d2edt2, theta ', dedt, d2edt2, theta
+#endif
 
    ! see Eq.(31) of PRB55, 10337 (1997) [[cite:Gonze1997]]
    !
@@ -1108,7 +1135,9 @@ print *, 'dedt, d2edt2, theta ', dedt, d2edt2, theta
      write(msg,'(a)') 'DFPT_CGWF WARNING : d2edt2 is zero, skipping update'
      call wrtout(std_out,msg,'COLL')
      theta=zero
+#ifdef DEV_MJV
 print *, 'dedt, d2edt2, theta ', dedt, d2edt2, theta
+#endif
    end if
 
    ! Check that result is above machine precision
@@ -1119,7 +1148,9 @@ print *, 'dedt, d2edt2, theta ', dedt, d2edt2, theta
      end if
      nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
      skipme = 1
+#ifdef DEV_MJV
 print *, 'skipping for theta below machine prec'
+#endif
 !DEBUG     exit                        ! Exit from the loop on iline
    end if
 
@@ -1174,7 +1205,9 @@ print *, 'skipping for theta below machine prec'
        end if
        nskip=nskip+2*(nline-iline) ! Number of one-way 3D ffts skipped
        skipme = 1
+#ifdef DEV_MJV
 print *, 'skipping for deltae diff'
+#endif
 !DEBUG       exit                        ! Exit from the loop on iline
      end if
    end if
@@ -1193,12 +1226,16 @@ print *, 'skipping for deltae diff'
 
    ! Note that there are five "exit" instruction inside the loop.
    nlines_done = nlines_done + 1
+#ifdef DEV_MJV
 print *, 'cgwf  cwavef  1180 ',cwavef(:,23)
+#endif
  end do ! iline
+#ifdef DEV_MJV
 print *, 'shape ', shape(cwavef)
 print *, 'cgwf band,  cwavef', band, cwavef(:,1:5)
 print *, 'cgwf  cwavef  1183 ',cwavef(:,23)
 print *, 'cgwf band,  ghc', band, ghc(:,1:5)
+#endif
 
 !--------------------------------------------------------------------------
 !             DEBUG
@@ -1452,7 +1489,9 @@ print *, 'cgwf band,  ghc', band, ghc(:,1:5)
  end if
  ABI_DATATYPE_DEALLOCATE(conjgrprj)
 
+#ifdef DEV_MJV
 print *, 'band, resid    ', band, resid
+#endif
  if(band>max(1,nband-nbdbuf))then
    ! A small negative residual will be associated with these
    ! in the present algorithm all bands need to be in the loops over cgq etc... for the parallelization
