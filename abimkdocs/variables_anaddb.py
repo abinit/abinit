@@ -18,6 +18,7 @@ Variable(
     defaultval=2e-05,
     mnemonics="Alpha2F SMEARing factor",
     characteristics=['[[ENERGY]]'],
+    added_in_version="before_v9",
     text=r"""
 Smearing width for the Eliashberg $\\alpha^2$F function (similar to a phonon DOS),
 which is sampled on a finite q and k grid. The Dirac delta functions in energy
@@ -33,6 +34,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="ALign PHONon mode eigendisplacements",
+    added_in_version="before_v9",
     text=r"""
 In case **alphon** is set to 1, ANADDB will compute linear combinations of the
 eigendisplacements of modes that are degenerate (twice or three times), in
@@ -52,6 +54,7 @@ Variable(
     defaultval=1,
     mnemonics="Acoustic Sum Rule",
     commentdefault="was 0 before v5.3",
+    added_in_version="before_v9",
     text=r"""
 Governs the imposition of the Acoustic Sum Rule (ASR).
 
@@ -118,6 +121,7 @@ Variable(
     dimensions=['[[anaddb:natifc]]'],
     defaultval=0,
     mnemonics="AToms for IFC analysis",
+    added_in_version="before_v9",
     text=r"""
 The actual numbers of the atoms for which the interatomic force constant have
 to be written and eventually analysed.
@@ -138,6 +142,7 @@ Variable(
     defaultval=999.0,
     mnemonics="BAND GAP",
     characteristics=['[[ENERGY]]'],
+    added_in_version="before_v9",
     text=r"""
 Allow setting the target band gap, in eV. ([[anaddb:elphflag]]=1).
 """,
@@ -151,6 +156,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="BRAVais",
+    added_in_version="before_v9",
     text=r"""
 Allows to specify the Bravais lattice of the crystal, in order to help to
 generate a grid of special q points.
@@ -188,6 +194,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Integer for CHarge NEUTrality treatment",
+    added_in_version="before_v9",
     text=r"""
 Set the treatment of the Charge Neutrality requirement for the effective charges.
 
@@ -213,6 +220,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="DIElectric FLAG",
+    added_in_version="before_v9",
     text=r"""
 Frequency-dependent dielectric tensor flag.
 
@@ -258,6 +266,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="DIPole-DIPole interaction",
+    added_in_version="before_v9",
     text=r"""
   * 0 --> the dipole-dipole interaction is not handled separately in the treatment of the interatomic forces.
     This option is available for testing purposes or if effective charge and/or dielectric tensor is not available
@@ -278,6 +287,7 @@ Variable(
     dimensions="scalar",
     defaultval="4.5E-06 Hartree = 1 cm$^{-1}$",
     mnemonics="DOS DELTA in Energy",
+    added_in_version="before_v9",
     text=r"""
 The input variable **dosdeltae** is used to define the step of the frequency
 grid used to calculate the phonon density of states when [[anaddb:prtdos]] = 1.
@@ -293,6 +303,7 @@ Variable(
     defaultval="4.5E-05 Hartree = 10 cm$^{-1}$",
     mnemonics="DOS SMEARing value",
     characteristics=['[[ENERGY]]'],
+    added_in_version="before_v9",
     text=r"""
 **dossmear** defines the gaussian broadening used to calculate the phonon
 density of states when [[anaddb:prtdos]] = 1.
@@ -307,6 +318,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="DOS SUM",
+    added_in_version="before_v9",
     text=r"""
 Set the flag to 1 to calculate the two phonon dos density of states. Sum and
 Difference for the Gamma point. The DOS is converged and based on that, the
@@ -322,6 +334,7 @@ Variable(
     dimensions="scalar",
     defaultval=0.25,
     mnemonics="DOS TOLerance",
+    added_in_version="before_v9",
     text=r"""
 The relative tolerance on the phonon density of state. This number will
 determine when the series of grids with which the DOS is calculated can be
@@ -338,6 +351,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="EIgenVECtors",
+    added_in_version="before_v9",
     text=r"""
 * 0 --> do not write the phonon eigenvectors;
 * 1 or 2 --> write the phonon eigenvectors;
@@ -353,6 +367,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="ELAstic tensor FLAG",
+    added_in_version="before_v9",
     text=r"""
 Flag for calculation of elastic and compliance tensors
 
@@ -392,6 +407,7 @@ Variable(
     defaultval=0.0,
     mnemonics="ELectron-PHonon FERMI Energy",
     characteristics=['[[ENERGY]]'],
+    added_in_version="before_v9",
     text=r"""
 If non-zero, will fix artificially the value of the Fermi energy (e.g. for semiconductors),
 in the electron-phonon case. Note that [[anaddb:elph_fermie]] and [[anaddb:ep_extrael]] should not be used at the same time.
@@ -407,6 +423,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="ELectron-PHonon FLAG",
+    added_in_version="before_v9",
     text=r"""
 If **elphflag** is 1, anaddb performs an analysis of the electron-phonon coupling.
 """,
@@ -421,6 +438,7 @@ Variable(
     defaultval="0.01 Hartree",
     mnemonics="ELectron-PHonon SMEARing factor",
     characteristics=['[[ENERGY]]'],
+    added_in_version="before_v9",
     text=r"""
 Smearing width for the Fermi surface integration (in Hartree by default).
 """,
@@ -434,6 +452,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="ENergy UNITs",
+    added_in_version="before_v9",
     text=r"""
 Give the energy for the phonon frequency output (in the output file, not in
 the console log file, for which Hartree units are used).
@@ -452,6 +471,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Electron Phonon integration Band MAXimum",
+    added_in_version="before_v9",
     text=r"""
 When set, and [[anaddb:telphint]] is equal to 2, this variable determines the
 k-point integration weights which are used in the electron-phonon part of the
@@ -469,6 +489,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Electron Phonon integration Band MINimum",
+    added_in_version="before_v9",
     text=r"""
 As for [[anaddb:ep_b_max]], but **ep_b_min** is the lower bound on the band
 integration, instead of the upper bound. See also [[anaddb:telphint]].
@@ -483,6 +504,7 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="Electron-Phonon EXTRA ELectrons",
+    added_in_version="before_v9",
     text=r"""
 If non-zero, will fix artificially the number of extra electrons per unit cell
 (positive for electron doping), according to a doped case. (e.g. for
@@ -501,6 +523,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Electron-Phonon INTerpolation of GKK",
+    added_in_version="before_v9",
     text=r"""
 This flag determines whether the interpolation of the electron-phonon matrix
 elements over the coarse k-grid is done ( **ep_int_gkk** 1) before summing
@@ -517,6 +540,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Electron-Phonon KEEP dependence on electron BANDS",
+    added_in_version="before_v9",
     text=r"""
 This flag determines whether the dependency of the electron-phonon matrix
 elements on the electron band index is kept ( **ep_keepbands** 1), or whether
@@ -533,6 +557,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Electron Phonon Number of Q PoinTs",
+    added_in_version="before_v9",
     text=r"""
 In case a non-uniform grid of q-points is being used, for direct calculation
 of the electron-phonon quantities without interpolation, this specifies the
@@ -548,6 +573,7 @@ Variable(
     dimensions="scalar",
     defaultval=20,
     mnemonics="Electron Phonon Number for SPLINE interpolation",
+    added_in_version="before_v9",
     text=r"""
 The scale factor for cubic spline interpolation, only used in the relaxation
 time approximation ([[anaddb:ifltransport]]=3).
@@ -562,6 +588,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Electron Phonon PRinTout YAMBO data",
+    added_in_version="before_v9",
     text=r"""
 For electron-phonon calculations, print out matrix elements for use by the yambo code.
 """,
@@ -575,6 +602,7 @@ Variable(
     dimensions=[3, '[[anaddb:ep_nqpt]]'],
     defaultval="(3*[[anaddb:ep_nqpt]])*0",
     mnemonics="Electron Phonon Q PoinT LIST",
+    added_in_version="before_v9",
     text=r"""
 In case a non-uniform grid of q-points is being used, for direct calculation
 of the electron-phonon quantities without interpolation, this specifies the
@@ -591,6 +619,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="DO SCALar PRODuct for gkk matrix elements",
+    added_in_version="before_v9",
     text=r"""
 The input variable **ep_scalprod** is a flag determining whether the scalar
 product of the electron-phonon matrix elements (gkk) with the phonon
@@ -611,6 +640,7 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="FREEZE DISPLacement of phonons into supercells",
+    added_in_version="before_v9",
     text=r"""
 If different from zero, **freeze_displ** will be used as the amplitude of a
 phonon displacement. For each q-point and mode in the [[anaddb:qph1l]] list, a
@@ -640,6 +670,7 @@ Variable(
     dimensions="scalar",
     defaultval=10.0,
     mnemonics="FRequency MAXimum",
+    added_in_version="before_v9",
     text=r"""
 Value of the largest frequency for the frequency-dependent dielectric tensor, in Hartree.
 """,
@@ -653,6 +684,7 @@ Variable(
     dimensions="scalar",
     defaultval=0.0,
     mnemonics="FRequency MINimum",
+    added_in_version="before_v9",
     text=r"""
 Value of the lowest frequency for the frequency-dependent dielectric tensor, in Hartree.
 """,
@@ -666,6 +698,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="GKk for input Q grid to be WRITtEn to disk",
+    added_in_version="before_v9",
     text=r"""
 Flag to write out the reciprocal space matrix elements to a disk file named
 gkqfile. This reduces strongly the memory needed for an electron-phonon run.
@@ -680,6 +713,7 @@ Variable(
     dimensions=['[[anaddb:gruns_nddbs]]'],
     defaultval="Empty",
     mnemonics="GRUNeiSen DDBS",
+    added_in_version="before_v9",
     text=r"""
 List of strings with the paths of the DDB files used for the calculation of
 the Gruneisen parameters. Each string must be enclosed by quotation marks. The
@@ -700,6 +734,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="GRUNeiSen Number of DDB files",
+    added_in_version="before_v9",
     text=r"""
 This variable defines the number of DDB files (read from [[anaddb:gruns_ddbs]])
 used for the calculation of the Gruneisen parameters.
@@ -714,6 +749,7 @@ Variable(
     dimensions=['[[anaddb:natfix]]'],
     defaultval=0,
     mnemonics="Indices of the AToms that are FIXed",
+    added_in_version="before_v9",
     text=r"""
 Indices of the atoms that are fixed during a structural relaxation at
 constrained polarization. See [[anaddb:polflag]].
@@ -728,6 +764,7 @@ Variable(
     dimensions=['[[anaddb:natprj_bs]]'],
     defaultval="0*'[[anaddb:natprj_bs]]'",
     mnemonics="Indices of the AToms for the PRoJection of the phonon Band Structure",
+    added_in_version="before_v9",
     text=r"""
 Indices of the atoms that are chosen for projection of the phonon
 eigenvectors, giving a weighted phonon band structure file.
@@ -742,6 +779,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="IFC ANAlysis",
+    added_in_version="before_v9",
     text=r"""
   * 0 --> no analysis of interatomic force constants;
   * 1 --> analysis of interatomic force constants.
@@ -768,6 +806,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Interatomic Force Constants FLAG",
+    added_in_version="before_v9",
     text=r"""
   * 0 --> do all calculations directly from the DDB, without the use of the interatomic force constant.
   * 1 --> calculate and use the interatomic force constants for interpolating the phonon spectrum
@@ -799,6 +838,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="IFC OUTput",
+    added_in_version="before_v9",
     text=r"""
 For each atom in the list [[anaddb:atifc]] (generic atoms), **ifcout** give
 the number of neighbouring atoms for which the ifc's will be output (written)
@@ -815,6 +855,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="IFLag for TRANSPORT",
+    added_in_version="before_v9",
     text=r"""
 if **ifltransport** =1 (LOVA) or **ifltransport** =2 (non-LOVA), anaddb calculates the
 transport properties: electrical and thermal resistivities from electron-
@@ -831,6 +872,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="INternal STRain FLAG",
+    added_in_version="before_v9",
     text=r"""
 Internal strain tensor flag.
 
@@ -849,6 +891,7 @@ Variable(
     dimensions=['[[anaddb:nstrfix]]'],
     defaultval=0,
     mnemonics="Index of STRain FIXed",
+    added_in_version="before_v9",
     text=r"""
 Indices of the elements of the strain tensor that are fixed during a
 structural relaxation at constrained polarisation:
@@ -888,6 +931,7 @@ Variable(
     dimensions=[3, 3],
     defaultval="9*0",
     mnemonics="K PoinT Reciprocal LATTice",
+    added_in_version="before_v9",
     text=r"""
 Unnormalized lattice vectors for the k-point grid in reciprocal space (see
 [[kptrlatt]] abinit variable definitionas well). Input needed in electron-phonon
@@ -903,6 +947,7 @@ Variable(
     dimensions=[3, 3],
     defaultval="9*0",
     mnemonics="K PoinT Reciprocal LATTice for FINE grid",
+    added_in_version="before_v9",
     text=r"""
 As kptrlatt above, but for a finer grid of k-points. Under development.
 Does not work yet, as of |today|.
@@ -917,6 +962,7 @@ Variable(
     dimensions="scalar",
     defaultval=0.1,
     mnemonics="MU STAR",
+    added_in_version="before_v9",
     text=r"""
 Average electron-electron interaction strength, for the computation of the
 superconducting Tc using Mc-Millan's formula.
@@ -931,6 +977,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of AToms FIXed",
+    added_in_version="before_v9",
     text=r"""
 Number of atoms that are fixed during a structural optimisation at constrained
 polarization. See [[anaddb:polflag]].
@@ -945,6 +992,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of AToms for IFC analysis",
+    added_in_version="before_v9",
     text=r"""
 Give the number of atoms for which IFCs are written and eventually analysed.
 The list of these atoms is provided by [[anaddb:atifc]].
@@ -959,6 +1007,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of AToms for PRoJection of the Band Structure",
+    added_in_version="before_v9",
     text=r"""
 Give the number of atoms for which atomic-projected phonon band structures
 will be output. The list of these atoms is provided by [[anaddb:iatprj_bs]].
@@ -973,6 +1022,7 @@ Variable(
     dimensions="scalar",
     defaultval=800,
     mnemonics="Number of CHANnels",
+    added_in_version="before_v9",
     text=r"""
 The number of channels of width 1 cm$^{-1}$ used in calculating the phonon density
 of states through the histogram method, or, equivalently, the largest
@@ -988,6 +1038,7 @@ Variable(
     dimensions="scalar",
     defaultval=20,
     mnemonics="Number of DIVisions for the SMallest segment",
+    added_in_version="before_v9",
     text=r"""
 This variable defines the number of divisions used to sample the smallest
 segment of the q-path used for the phonon band structure. If ndivsm is
@@ -1004,6 +1055,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Number of FREQuencies",
+    added_in_version="before_v9",
     text=r"""
 Number of frequencies wanted for the frequency-dependent dielectric tensor.
 Should be positive. See [[anaddb:dieflag]]. The code will take **nfreq**
@@ -1019,6 +1071,7 @@ Variable(
     dimensions=[3],
     defaultval="3*0",
     mnemonics="Number of Grids points for Q PoinTs (grid 2)",
+    added_in_version="before_v9",
     text=r"""
 The Monkhorst-Pack grid linear dimensions, for the finer of the series of fine grids.
 Used for the integration of thermodynamical functions (Bose-Einstein distribution) or for the DOS.
@@ -1033,6 +1086,7 @@ Variable(
     dimensions=[3],
     defaultval="3*0",
     mnemonics="Number of Grids points for Q PoinTs",
+    added_in_version="before_v9",
     text=r"""
 The Monkhorst-Pack grid linear dimensions (coarse grid).
 Should correspond to the grid of points available in the DDB or to a sub-grid.
@@ -1047,6 +1101,7 @@ Variable(
     dimensions="scalar",
     defaultval=4,
     mnemonics="Number of GRIDS",
+    added_in_version="before_v9",
     text=r"""
 This number define the series of grids that will be used for the estimation of
 the phonon DOS. The coarsest will be tried first, then the next, ... then the
@@ -1063,6 +1118,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Non-Linear FLAG",
+    added_in_version="before_v9",
     text=r"""
 Non-linear properties flag.
 
@@ -1082,6 +1138,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of PHonons in List 1",
+    added_in_version="before_v9",
     text=r"""
 The number of wavevectors in phonon list 1, used for interpolation of the
 phonon frequencies. The values of these wavevectors will be specified by
@@ -1100,6 +1157,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of PHonons in List 2",
+    added_in_version="before_v9",
     text=r"""
 The number of wavevectors in phonon list 2, defining the directions along
 which the non-analytical splitting of phonon frequencies at Gamma will be
@@ -1126,6 +1184,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of Q wavevectors defining a PATH",
+    added_in_version="before_v9",
     text=r"""
 Number of q-points in the array [[anaddb:qpath]] defining the path along which
 the phonon band structure and phonon linewidths are interpolated.
@@ -1140,6 +1199,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Number of Q SHiFTs",
+    added_in_version="before_v9",
     text=r"""
 The number of vector shifts of the simple Monkhorst and Pack grid, needed to
 generate the coarse grid of q points (for the series of fine grids, the number
@@ -1157,6 +1217,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of atoms in SPHERe",
+    added_in_version="before_v9",
     text=r"""
 Number of atoms included in the cut-off sphere for interatomic force constant,
 see also the alternative [[anaddb:rifcsph]]. If **nsphere** = 0: maximum
@@ -1184,6 +1245,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Number of STRain components FIXed",
+    added_in_version="before_v9",
     text=r"""
 Number of strain component that are fixed during a structural optimisation at
 constrained polarization. See [[anaddb:polflag]].
@@ -1198,6 +1260,7 @@ Variable(
     dimensions="scalar",
     defaultval=10,
     mnemonics="Number of TEMPERatures",
+    added_in_version="before_v9",
     text=r"""
 Number of temperatures at which the thermodynamical quantities have to be
 evaluated. Now also used for the output of transport quantities in electron-
@@ -1218,6 +1281,7 @@ Variable(
     dimensions="scalar",
     defaultval=10,
     mnemonics="Number of Widths of CHANnels",
+    added_in_version="before_v9",
     text=r"""
 The width of the largest channel used to sample the frequencies. The
 code will generate different sets of channels, with decreasing widths (by step
@@ -1235,6 +1299,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="OUTput files for BOLTZTRAP code",
+    added_in_version="before_v9",
     text=r"""
 If set to 1, the phonon frequencies on the [[anaddb:ngqpt]] grid are output in a format
 legible by the BoltzTrap code, which does band interpolation and gets group
@@ -1250,6 +1315,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="OUTput files for Self Consistent PHONons",
+    added_in_version="before_v9",
     text=r"""
 If set to 1, the phonon frequency and eigenvector files needed for a Self
 Consistent phonon run (as in [[cite:Souvatzis2008]]) will be output to
@@ -1266,6 +1332,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="PIEZOelectric tensor FLAG",
+    added_in_version="before_v9",
     text=r"""
 Flag for calculation of piezoelectric tensors
 
@@ -1314,6 +1381,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="POLarization FLAG",
+    added_in_version="before_v9",
     text=r"""
 If activated, compute polarization in cartesian coordinates, and update
 lattice constants and atomic positions in order to perform a structural
@@ -1351,6 +1419,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT the Interatomic Force Constants",
+    added_in_version="before_v9",
     text=r"""
 Flag to print out the Interatomic Force Constants in real space to a file.
 The available options are:
@@ -1368,6 +1437,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT input files for BoLTZTRaP code.",
+    added_in_version="before_v9",
     text=r"""
 * 0 --> do not write the BoltzTraP input files;
 * 1 --> write out the input files for BoLTZTRaP code.
@@ -1382,6 +1452,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT the Derivative DataBase files",
+    added_in_version="before_v9",
     text=r"""
 Flag to print out the DDB file interpolated with the Interatomic Force Constants.
 
@@ -1400,6 +1471,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT the phonon Density Of States",
+    added_in_version="before_v9",
     text=r"""
 The **prtdos** variable is used to calculate the phonon density of states,
 PHDOS, by Fourier interpolating the interatomic force constants on the (dense)
@@ -1425,6 +1497,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT the Fermi SURFace",
+    added_in_version="before_v9",
     text=r"""
 Only for electron-phonon calculations. The available options are:
 
@@ -1453,6 +1526,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT Mode-By-Mode decomposition of the electrooptic tensor",
+    added_in_version="before_v9",
     text=r"""
   * 0 --> do not write the mode-by-mode decomposition of the electrooptic tensor;
   * 1 --> write out the contribution of the individual zone-center phonon modes to the electrooptic tensor.
@@ -1467,6 +1541,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT the NESTing function",
+    added_in_version="before_v9",
     text=r"""
 Only for electron-phonon calculations. This input variable is used to
 calculate the nesting function defined as:
@@ -1501,6 +1576,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="PRinT PHonon BANDS",
+    added_in_version="before_v9",
     text=r"""
 Only if [[anaddb:ifcflag]]=1. This option specifies the file format for the
 phonon band structure. Possible values:
@@ -1520,6 +1596,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT the Short-Range/Long-Range decomposition of phonon FREQuencies",
+    added_in_version="before_v9",
     text=r"""
 Only if [[anaddb:ifcflag]]=1. The available options are:
 
@@ -1539,6 +1616,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="PRinT VOLume",
+    added_in_version="before_v9",
     text=r"""
 Control the volume of printed output.
 """,
@@ -1552,6 +1630,7 @@ Variable(
     dimensions=['[[anaddb:nqshft]]'],
     defaultval=0,
     mnemonics="Q shifts for the grid number 1",
+    added_in_version="before_v9",
     text=r"""
 This vector gives the shifts needed to define the coarse q-point grid.
 
@@ -1606,6 +1685,7 @@ Variable(
     dimensions=[3],
     defaultval="3* 0",
     mnemonics="Q points SHiFTs for the grids 2",
+    added_in_version="before_v9",
     text=r"""
 Similar to [[anaddb:q1shft]], but for the series of fine grids.
 
@@ -1621,6 +1701,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Q GRID TYPE",
+    added_in_version="before_v9",
     text=r"""
 If **qgrid_type** is set to 1, the electron-phonon part of anaddb will use the
 [[anaddb:ep_nqpt]] and [[anaddb:ep_qptlist]] variables to determine which
@@ -1637,6 +1718,7 @@ Variable(
     dimensions=[3, '[[anaddb:nqpath]]'],
     defaultval=0.0,
     mnemonics="Q wavevectors defining a PATH",
+    added_in_version="before_v9",
     text=r"""
 It is used to generate the path along which the phonon band structure and
 phonon linewidths are interpolated. There are [[anaddb:nqpath]]-1 segments to
@@ -1655,6 +1737,7 @@ Variable(
     dimensions=[4, '[[anaddb:nph1l]]'],
     defaultval=0,
     mnemonics="Q for PHonon List 1",
+    added_in_version="before_v9",
     text=r"""
 List of [[anaddb:nph1l]] wavevectors, at which the phonon frequencies will be
 interpolated. Defined by 4 numbers: the wavevector is made by the three first
@@ -1677,6 +1760,7 @@ Variable(
     dimensions=[4, '[[anaddb:nph2l]]'],
     defaultval=0,
     mnemonics="PHonon List 2",
+    added_in_version="before_v9",
     text=r"""
 List of phonon wavevector _directions_ along which the non-analytical
 correction to the Gamma-point phonon frequencies will be calculated (for
@@ -1707,6 +1791,7 @@ Variable(
     dimensions=[3],
     defaultval=0,
     mnemonics="Q-point REFINEment order (experimental)",
+    added_in_version="before_v9",
     text=r"""
 If **qrefine** is superior to 1, attempts to initialize a first set of
 dynamical matrices from the DDB file, with a q-point grid which is
@@ -1726,6 +1811,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="RAMAN Sum-Rule",
+    added_in_version="before_v9",
     text=r"""
 Governs the imposition of the sum-rule on the Raman tensors.
 As in the case of the Born effective charges, the first-order derivatives of
@@ -1751,6 +1837,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="RELAXation of AToms",
+    added_in_version="before_v9",
     text=r"""
 If **relaxat** =1, relax atomic positions during a structural relaxation at
 constrained polarization. See [[anaddb:polflag]].
@@ -1765,6 +1852,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="RELAXation of STRain",
+    added_in_version="before_v9",
     text=r"""
 If **relaxstr** =1, relax lattice constants (lengths/angles) during a
 structural relaxation at constrained polarization. See [[anaddb:polflag]].
@@ -1779,6 +1867,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Response-Function METHod",
+    added_in_version="before_v9",
     text=r"""
 Select a particular set of Data Blocks in the DDB. (PRESENTLY, ONLY OPTION 1 IS AVAILABLE)
 
@@ -1798,6 +1887,7 @@ Variable(
     dimensions="scalar",
     defaultval="zero",
     mnemonics="Radius of the Interatomic Force Constant SPHere",
+    added_in_version="before_v9",
     text=r"""
 Cut-off radius for the sphere for interatomic force constant, see also the
 alternative [[anaddb:nsphere]]. If **rifcsph** = 0: maximum extent allowed by the grid.
@@ -1816,6 +1906,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="SeLECT Z",
+    added_in_version="before_v9",
     text=r"""
 Select some parts of the effective charge tensor. (This is done after the
 application or non-application of the ASR for effective charges). The
@@ -1841,6 +1932,7 @@ Variable(
     defaultval=1,
     mnemonics="SYMmetrize the DYNamical MATrix",
     commentdefault="(was 0 before v5.3)",
+    added_in_version="before_v9",
     text=r"""
 If **symdynmat** is equal to 1, the dynamical matrix is symmetrized before the diagonalization.
 This is especially useful when the set of primitive vectors of the unit cell
@@ -1860,6 +1952,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="SYMmetrize the GKk matrix elements for each Q",
+    added_in_version="before_v9",
     text=r"""
 If **symgkq** is equal to 1, the electron-phonon matrix elements are
 symmetrized over the small group of the q-point they correspond to. This
@@ -1875,6 +1968,7 @@ Variable(
     dimensions=[3],
     defaultval=0.0,
     mnemonics="TARGET POLarization",
+    added_in_version="before_v9",
     text=r"""
 Target value of the polarization in cartesian coordinates and in C/m$^2$. See [[anaddb:polflag]].
 """,
@@ -1888,6 +1982,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="Technique for ELectron-PHonon INTegration",
+    added_in_version="before_v9",
     text=r"""
 Flag controlling the Fermi surface integration technique used for electron-phonon quantities.
 
@@ -1905,6 +2000,7 @@ Variable(
     dimensions="scalar",
     defaultval=100.0,
     mnemonics="TEMPERature INCrease",
+    added_in_version="before_v9",
     text=r"""
 Increment of the temperature in Kelvin, for thermodynamical and el-phon
 transport properties. See the associated [[anaddb:tempermin]] and
@@ -1924,6 +2020,7 @@ Variable(
     dimensions="scalar",
     defaultval=100.0,
     mnemonics="TEMPERature MINimum",
+    added_in_version="before_v9",
     text=r"""
 Lowest temperature (Kelvin) at which the thermodynamical quantities have to be
 evaluated. Cannot be zero when [[anaddb:thmflag]] is 1.
@@ -1947,6 +2044,7 @@ Variable(
     mnemonics="THERMALized SUPERCELL lattice vectors",
     characteristics=['[[DEVELOP]]'],
     commentdefault="do not calculate any thermalized supercells",
+    added_in_version="before_v9",
     text=r"""
 Thermal_supercell defines the real space supercell in which a thermalized
 atomic configuration should be produced, following the prescription of
@@ -1975,6 +2073,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="THerMal FLAG",
+    added_in_version="before_v9",
     text=r"""
 Flag controlling the calculation of thermal quantities.
 
@@ -2008,6 +2107,7 @@ Variable(
     dimensions="scalar",
     defaultval=0.05,
     mnemonics="THerModynamic TOLerance",
+    added_in_version="before_v9",
     text=r"""
 The relative tolerance on the thermodynamical functions This number will
 determine when the series of channel widths with which the DOS is calculated
@@ -2024,6 +2124,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="USE K-grid FINEr than the coarse k-grid",
+    added_in_version="before_v9",
     text=r"""
 When set, [[anaddb:kptrlatt_fine]] is suggested to be given. For the present
 version, both eigenvalues (denser grid GKK, obtained from mrggkk with only the
@@ -2040,6 +2141,7 @@ Variable(
     dimensions=[2],
     defaultval="2*0.0d0",
     mnemonics="Speed of Sound Q-radius, TOLerance KiloMeter/Second",
+    added_in_version="before_v9",
     text=r"""
 This variable activates the calculation of the speed of sound (requires
 [[anaddb:ifcflag]] = 1). The first entry of the array defines the radius of
@@ -2063,6 +2165,7 @@ Variable(
     dimensions="scalar",
     defaultval="",
     mnemonics="DDB PATH",
+    added_in_version="before_v9",
     text=r"""
 This variable specifies the input DDB file when anaddb is invoked with the new syntax:
 
@@ -2086,6 +2189,7 @@ Variable(
     dimensions="scalar",
     defaultval="",
     mnemonics="OUTPUT file",
+    added_in_version="before_v9",
     text=r"""
 This variable specifies the name of the output file when anaddb is invoked with the new syntax:
 
@@ -2123,6 +2227,7 @@ Variable(
     dimensions="scalar",
     defaultval="",
     mnemonics="GKK PATH",
+    added_in_version="before_v9",
     text=r"""
 This variable specifies the name of the GKK file when anaddb is invoked with the new syntax:
 
@@ -2141,6 +2246,7 @@ Variable(
     dimensions="scalar",
     defaultval="",
     mnemonics="EPH PREFIX",
+    added_in_version="before_v9",
     text=r"""
 This variable specifies the prefix for the elphon output files when anaddb is invoked with the new syntax:
 
@@ -2159,6 +2265,7 @@ Variable(
     dimensions="scalar",
     defaultval="",
     mnemonics="DDK PATH",
+    added_in_version="before_v9",
     text=r"""
 This variable specifies the name the input file with the matrix elements of the velocity operator
 when anaddb is invoked with the new syntax:
