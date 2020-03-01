@@ -3047,6 +3047,7 @@ end subroutine wfk_read_eigenvalues
 !!  kg = plane wave coordinates
 !!  eigen = eigenvectors at all bands and my k
 !!  occ = occupations of all bands at my k
+!!  pawrhoij = PAW matrix elements in projectors
 !!
 !! NOTES
 !!
@@ -3058,7 +3059,7 @@ end subroutine wfk_read_eigenvalues
 
 subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
 &          formeig, istwfk_in, kptns_in, nkpt_in, npwarr, &
-&          cg, kg, eigen, occ, ask_accurate_)
+&          cg, kg, eigen, occ, pawrhoij, ask_accurate_)
 
 !Arguments ------------------------------------
 !scalars
@@ -3075,6 +3076,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  integer, intent(out), optional :: kg(3,dtset%mpw*nkpt_in)
  real(dp), intent(out), optional :: eigen(dtset%mband*(2*dtset%mband)**formeig*nkpt_in*dtset%nsppol)
  real(dp), intent(out), optional :: occ(dtset%mband*nkpt_in*dtset%nsppol)
+ type(pawrhoij_type),intent(out),optional,target :: pawrhoij(dtset%natom)
  integer, intent(in), optional :: ask_accurate_
 
 !Arguments ------------------------------------
@@ -3180,6 +3182,7 @@ print *, 'itimrev,dtset%kptopt ', itimrev, dtset%kptopt
  ask_accurate=1
  if (present(ask_accurate_)) ask_accurate=ask_accurate_
 
+!TODO remove the following, which is squashed by listkk below
  if (ask_accurate == 1) then
    chksymbreak = 0
    iout = 0
@@ -3195,6 +3198,7 @@ print *, 'wfk_disk%hdr%nkpt cryst%timrev ', wfk_disk%hdr%nkpt, cryst%timrev
 &       nkirred_disk, cryst%nsym, symrelT, cryst%timrev-1, rbz2disk, xmpi_comm_self)
 
  end if ! no accurate k
+!END remove
 
  dksqmax = zero
  call listkk(dksqmax, cryst%gmet, rbz2disk, wfk_disk%hdr%kptns, kptns_in, wfk_disk%hdr%nkpt, nkpt_in, cryst%nsym, &
@@ -3485,6 +3489,15 @@ print *, ' npw_kf == npwarr(ikf), istwf_kf, ecut_eff ecut ', npw_kf,npwarr(ikf),
  end if
  if(present(kg)) then
    call xmpi_sum(kg,comm,ierr)
+ end if
+
+ if(present(pawrhoij) .and. dtset%usepaw==1) then
+#ifdef DEV_MJV
+print *, ' rhoij dims ', shape(wfk_disk%hdr%pawrhoij), ' and ', shape(pawrhoij) 
+print *, 'wfk_disk%hdr%pawrhoij ', size(wfk_disk%hdr%pawrhoij)
+print *, 'wfk_disk%hdr%pawrhoij%p ', size(wfk_disk%hdr%pawrhoij(1)%rhoijp), size(wfk_disk%hdr%pawrhoij(2)%rhoijp)
+#endif
+   call pawrhoij_copy(wfk_disk%hdr%pawrhoij,pawrhoij)
  end if
 
  ABI_FREE(icg)

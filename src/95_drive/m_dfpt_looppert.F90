@@ -1005,9 +1005,6 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    if(xmpi_paral==1) then
      ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt_rbz,dtset%mband,dtset%nsppol))
      call distrb2(dtset%mband,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,dtset%nsppol,mpi_enreg)
-#ifdef DEV_MJV
-print *, 'nkpt_rbz ', nkpt_rbz
-#endif
    else
      mpi_enreg%my_kpttab(:)=(/(ii,ii=1,nkpt_rbz)/)
    end if
@@ -1019,23 +1016,14 @@ print *, 'nkpt_rbz ', nkpt_rbz
 ! given number of reduced kpt, store distribution of bands across procs
    ABI_ALLOCATE(distrb_flags,(nkpt_rbz,dtset%mband,dtset%nsppol))
    distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
-#ifdef DEV_MJV
-print *, 'distrb_flags ', distrb_flags
-#endif
 
    _IBM6("IBM6 before kpgio")
 
 !  Set up the basis sphere of planewaves at k
    call timab(143,1,tsec)
-#ifdef DEV_MJV
-print *, 'before kpgio istwfk_rbz ec ec_eff ', istwfk_rbz, dtset%ecut, ecut_eff
-#endif
    call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
 &   kpt_rbz,mkmem_rbz,nband_rbz,nkpt_rbz,'PERS',mpi_enreg,mpw,npwarr,npwtot,dtset%nsppol)
    call timab(143,2,tsec)
-#ifdef DEV_MJV
-print *, 'after kpgio npwarr ', npwarr
-#endif
 
 !  Set up the spherical harmonics (Ylm) at k
    useylmgr=0; option=0 ; nylmgr=0
@@ -1097,12 +1085,6 @@ print *, 'after kpgio npwarr ', npwarr
    call hdr0%update(bantot_rbz,etotal,fermie,&
      residm,rprimd,occ_rbz,pawrhoij_pert,xred,dtset%amu_orig(:,1),&
      comm_atom=mpi_enreg%comm_atom,mpi_atmtab=mpi_enreg%my_atmtab)
-#ifdef DEV_MJV
-print *, ' fermie ', fermie
-print *, " ebands_k%eig 1095 ", ebands_k%eig
-print *, " occ_rbz 1095 ", occ_rbz
-print *, 'istwfk_rbz ', istwfk_rbz
-#endif
 
 !  Initialize GS wavefunctions at k
    ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
@@ -1125,88 +1107,7 @@ print *, 'istwfk_rbz ', istwfk_rbz
    call wfk_read_my_kptbands(dtfil%fnamewffk, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpt_rbz, nkpt_rbz, npwarr, &
 &            cg, eigen=eigen0, occ=occ_disk)
-! if the occ are not fixed by the input file, read in from GS file
-!   if (dtset%occopt /= 2) then
-! how can I tell if the occ need to be read in from disk???
-!   if (sum(abs(occ_rbz)) < tol12) then
-!     occ_rbz = occ_disk
-!   end if 
-#ifdef DEV_MJV
-print *, 'eigen0 1125 ', eigen0
-print *, " occ_rbz 1125 ", occ_rbz
-#endif
   
-#ifdef DEV_MJV
-!DEBUG
-!mcg=mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
-   mcg_tmp = mpw*dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
-   ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
-   ABI_ALLOCATE(eigen_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
-   ABI_ALLOCATE(occ_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
-   occ_tmp = zero
-   call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen_tmp,dtset%exchn2n3d,&
-&   formeig,hdr0,ireadwf0,istwfk_rbz,kg,&
-&   kpt_rbz,dtset%localrdwf,dtset%mband,mcg_tmp,&
-&   mkmem_rbz,mpi_enreg,mpw,nband_rbz,dtset%ngfft,nkpt_rbz,npwarr,&
-&   dtset%nsppol,nsym,occ_tmp,optorth,dtset%symafm,&
-&   dtset%symrel,dtset%tnons,dtfil%unkg,wffgs,wfftgs,&
-&   dtfil%unwffgs,dtfil%fnamewffk,wvl)
-   call timab(144,2,tsec)
-print *, " occ_tmp 1143 ", occ_tmp
-!  Close wffgs%unwff, if it was ever opened (in inwffil)
-   if (ireadwf0==1) then
-     call WffClose(wffgs,ierr)
-   end if
-   !transfer to local array
-   icg=0
-   icg_tmp=0
-   ibdoffst = 0
-print *, 'mkmem_rbz ', mkmem_rbz
-print *, 'nband_rbz ', nband_rbz
-print *, ' mcg, mcg_tmp ', mcg, mcg_tmp
-print *, 'shapes ', shape(cg), "  ", shape(cg_tmp)
-   do isppol=1, nsppol
-     do ikpt=1, nkpt_rbz
-       if (.not. any(mpi_enreg%proc_distrb(ikpt,:,isppol) == mpi_enreg%me_kpt)) cycle
-       npw = npwarr(ikpt)
-       iband_me = 0
-       do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
-!print *, 'mpi_enreg%proc_distrb(ikpt,iband,isppol) ', mpi_enreg%proc_distrb(ikpt,iband,isppol), &
-!&       ' meband ', mpi_enreg%me_band, ' mekpt ', mpi_enreg%me_kpt
-         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) then
-           icg_tmp = icg_tmp + npw
-           cycle
-         end if
-         iband_me = iband_me + 1
-!print *, 'is ik ib kpt icg ', isppol, ikpt, iband, kpt_rbz(:,ikpt), icg
-if (sum(abs(cg(:,icg+1:icg+npw) + tol20 - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol6) then
-print *, 'is ik ib cg ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
-print *, ' diff in cg ', isppol, ikpt, ' / ', nkpt_rbz
-print *, cg(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
-print *, ' bare    cg '
-print *, cg(:,icg+1:icg+npw)
-print *, ' bare    cg_tmp '
-print *, cg_tmp(:,icg_tmp+1:icg_tmp+npw)
-end if 
-
-         !cg(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
-         icg = icg + npw
-         icg_tmp = icg_tmp + npw
-       end do
-if (sum(abs(eigen0(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
-&        eigen_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))))) > tol6) then
-print *, ' diff in eigen0 ', eigen0(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
-&        eigen_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1)))
-end if
-       ibdoffst = ibdoffst + nband_rbz(ikpt+nkpt_rbz*(isppol-1))
-     end do
-   end do
-   ABI_DEALLOCATE(cg_tmp)
-   ABI_DEALLOCATE(eigen_tmp)
-   ABI_DEALLOCATE(occ_tmp)
-!ENDDEBUG
-#endif
-
    call timab(144,2,tsec)
 
    ! Update energies GS energies at k
@@ -1364,77 +1265,14 @@ end if
    if (dtfil%fnamewffq == dtfil%fnamewffk .and. sum(dtset%qptn(1:3)**2) < 1.d-14) then
      call wrtout(std_out, " qpt is Gamma, psi_k+q initialized from psi_k in memory")
      cgq = cg
-#ifdef DEV_MJV
-print *, ' mpw, mpw1 ', mpw, mpw1
-!print *, 'cgq ', cgq
-#endif
      eigenq = eigen0
    else
+print *, 'not gamma or explicit wfq file'
      call timab(144,1,tsec)
      call wfk_read_my_kptbands(dtfil%fnamewffq, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1, &
 &            cgq, eigen=eigenq, occ=occ_disk)
      call timab(144,2,tsec)
-#ifdef DEV_MJV
-!DEBUG
-! mcgq=      mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
-   mcg_tmp = mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
-   ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
-   ABI_ALLOCATE(occ_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
-   ABI_ALLOCATE(eigen_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
-
-     call timab(144,1,tsec)
-!     call inwffil(ask_accurate,cgq,dtset,dtset%ecut,ecut_eff,eigenq,dtset%exchn2n3d,&
-!&     formeig,hdr,&
-!&     ireadwf0,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,dtset%mband,mcgq,&
-     call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen_tmp,dtset%exchn2n3d,&
-&     formeig,hdr,&
-&     ireadwf0,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,dtset%mband,mcg_tmp,&
-&     mkqmem_rbz,mpi_enreg,mpw1,nband_rbz,dtset%ngfft,nkpt_rbz,npwar1,&
-&     dtset%nsppol,nsym,occ_tmp,optorth,&
-&     dtset%symafm,dtset%symrel,dtset%tnons,&
-&     dtfil%unkg1,wffkq,wfftkq,dtfil%unwffkq,dtfil%fnamewffq,wvl)
-print *, ' mkqmem_rbz, ', mkqmem_rbz
-   !transfer to local array
-   icg=0
-   icg_tmp=0
-   ibdoffst=0
-   do isppol=1, nsppol
-     do ikpt=1, mkqmem_rbz
-       npw = npwar1(ikpt)
-       iband_me = 0
-       do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
-         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) then
-           icg_tmp = icg_tmp + npw
-           cycle
-         end if
-         iband_me = iband_me + 1
-if (sum(abs(cgq(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol6) then
-print *, 'is ik ib cgq ', isppol, ikpt, iband, kpq_rbz(:,ikpt)
-print *, ' diff in cgq ', cgq(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
-end if
-         !cgq(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
-         icg = icg + npw
-         icg_tmp = icg_tmp + npw
-       end do
-if (sum(abs(eigenq(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
-&        eigen_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))))) > tol6) then
-print *, ' diff in eigenq ', eigenq(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1))) - &
-&        eigen_tmp(ibdoffst+1:ibdoffst+nband_rbz(ikpt+nkpt_rbz*(isppol-1)))
-end if
-       ibdoffst = ibdoffst + nband_rbz(ikpt+nkpt_rbz*(isppol-1))
-     end do
-   end do
-   ABI_DEALLOCATE(eigen_tmp)
-   ABI_DEALLOCATE(occ_tmp)
-   ABI_DEALLOCATE(cg_tmp)
- 
-!    Close dtfil%unwffkq, if it was ever opened (in inwffil)
-     if (ireadwf0==1) then
-       call WffClose(wffkq,ierr)
-     end if
-!ENDDEBUG
-#endif
 
      if (.not.kramers_deg) then
        !SPr: later "make" a separate WFQ file for "-q"
@@ -1530,15 +1368,9 @@ end if
      dosdeltae=zero ! the DOS is not computed with option=1
      maxocc=two/(dtset%nspinor*dtset%nsppol)
 
-#ifdef DEV_MJV
-print *, ' eigenq ', eigenq
-#endif
      call getnel(docckqde,dosdeltae,eigenq,entropy,fermie,maxocc,dtset%mband,&
 &     nband_rbz,nelectkq,nkpt_rbz,dtset%nsppol,occkq,dtset%occopt,option,&
 &     dtset%tphysel,dtset%tsmear,fake_unit,wtk_rbz)
-#ifdef DEV_MJV
-print *, ' occkq ', occkq
-#endif
 !    Compare nelect at k and nelelect at k+q
      write(message, '(a,a,a,es16.6,a,es16.6,a)')&
 &     ' dfpt_looppert : total number of electrons, from k and k+q',ch10,&
@@ -1596,10 +1428,6 @@ print *, ' occkq ', occkq
      dim_eig2rf=1
    end if
    mcg1=mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol
-#ifdef DEV_MJV
-print *, 'mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol ', &
-& mpw1,dtset%nspinor,dtset%mband_mem,mk1mem_rbz,dtset%nsppol
-#endif
    if (one*mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol > huge(1)) then
      write (message,'(4a, 5(a,i0), 2a)')&
 &     "Default integer is not wide enough to store the size of the GS wavefunction array (WFK1, mcg1).",ch10,&
@@ -1642,78 +1470,10 @@ print *, 'mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol ', &
    call timab(144,1,tsec)
    if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &      (dtset%get1wf /= 0 .or. dtset%ird1wf /= 0)) then
-#ifdef DEV_MJV
-print *, 'init cg1 from disk ', shape(cg1)
-#endif
      call wfk_read_my_kptbands(fiwf1i, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpq_rbz, nkpt_rbz, npwar1, &
 &            cg1, eigen=eigen1, ask_accurate_=0)
-
-
-#ifdef DEV_MJV
-!DEBUG
-   mcg_tmp = mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol
-   ABI_MALLOC_OR_DIE(cg_tmp,(2,mcg_tmp), ierr)
-   ABI_ALLOCATE(occ_tmp,(dtset%mband*nkpt_rbz*dtset%nsppol))
-   ABI_ALLOCATE(eigen_tmp,(2*dtset%mband**2*nkpt_rbz*dtset%nsppol))
-
-     call timab(144,1,tsec)
-     call inwffil(ask_accurate,cg_tmp,dtset,dtset%ecut,ecut_eff,eigen_tmp,dtset%exchn2n3d,&
-&     formeig,hdr,&
-&     dtfil%ireadwf,istwfk_rbz,kg1,kpq_rbz,dtset%localrdwf,&
-&     dtset%mband,mcg_tmp,mk1mem_rbz,mpi_enreg,mpw1,nband_rbz,dtset%ngfft,nkpt_rbz,npwar1,&
-&     dtset%nsppol,nsym1,occ_tmp,optorth,&
-&     symaf1,symrl1,tnons1,dtfil%unkg1,wff1,wffnow,dtfil%unwff1,&
-&     fiwf1i,wvl)
-print *, ' mk1mem_rbz, ', mk1mem_rbz
-   !transfer to local array
-   icg=0
-   icg_tmp=0
-   ibdoffst=0
-   do isppol=1, nsppol
-     do ikpt=1, mk1mem_rbz
-       npw = npwar1(ikpt)
-       iband_me = 0
-       do iband=1, nband_rbz(ikpt+nkpt_rbz*(isppol-1))
-         if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) then
-           icg_tmp = icg_tmp + npw
-           cycle
-         end if
-         iband_me = iband_me + 1
-if (sum(abs(cg1(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw))) > tol6) then
-print *, 'NB: this comparison does not seem to work, though the cg1 read above works fine in the tests'
-print *, 'is ik ib cg1 , icg, icg_tmp ', isppol, ikpt, iband, kpq_rbz(:,ikpt), icg, icg_tmp
-print *, ' diff in cg1 ', cg1(:,icg+1:icg+npw) - cg_tmp(:,icg_tmp+1:icg_tmp+npw)
-!cg1(:,icg+1:icg+npw) = cg_tmp(:,icg_tmp+1:icg_tmp+npw)
-end if
-         icg = icg + npw
-         icg_tmp = icg_tmp + npw
-       end do
-if (sum(abs(eigen1(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2) - &
-&        eigen_tmp(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2 ))) > tol6) then
-print *, ' diff in eigen1 ', eigen1(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2) - &
-&                         eigen_tmp(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2)
-!eigen1(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2) = &
-!&                         eigen_tmp(ibdoffst+1:ibdoffst+2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2)
-end if
-       ibdoffst = ibdoffst + 2*nband_rbz(ikpt+nkpt_rbz*(isppol-1))**2
-     end do
-   end do
-   ABI_DEALLOCATE(eigen_tmp)
-   ABI_DEALLOCATE(occ_tmp)
-   ABI_DEALLOCATE(cg_tmp)
- 
-!    Close dtfil%unwffkq, if it was ever opened (in inwffil)
-     if (dtfil%ireadwf==1) then
-       call WffClose(wff1,ierr)
-     end if
-!ENDDEBUG
-#endif
-
    else
-#ifdef DEV_MJV
-print *, 'init cg1 to 0'
-#endif
      cg1 = zero
      eigen1 = zero
    end if
@@ -2289,9 +2049,6 @@ print *, 'init cg1 to 0'
 &                nband_rbz,nkpt_rbz,&
 &                dtset%nsppol,resid)
      ! Output 1st-order wavefunctions in file
-#ifdef DEV_MJV
-print *, 'calling wfk_write_my_kptbands nkpt_rbz spacecomm distrb_flags ', nkpt_rbz, spacecomm, distrb_flags
-#endif
      call wfk_write_my_kptbands(fiwf1o, dtset, distrb_flags, spacecomm, &
 &          formeig, hdr, nkpt_rbz, &
 &          cg1, kg1, eigen1)
