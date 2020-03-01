@@ -27,4 +27,6 @@ inp_files = [
 "t59.in",
 "t60.in",
 "t61.in",
+# Spin dynamics in multibinit
+"t80.in", 
 ]
