@@ -130,15 +130,17 @@ module m_parser
 
  type,public :: geo_t
 
-  integer :: natom
+  integer :: natom = 0
   ! Number of atoms
 
-  integer :: ntypat
+  integer :: ntypat = 0
   ! Number of type of atoms
 
   character(len=500) :: title = ""
+  ! Optional title read for external file e.g. POSCAR
+
   character(len=500) :: fileformat = ""
-  ! poscar, netcdf
+  ! (poscar, netcdf)
 
   integer,allocatable :: typat(:)
   ! typat(natom)
@@ -215,7 +217,7 @@ subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master=0, option1= 1
- integer :: marr,tread,lenstr_noxyz,ierr !,ii
+ integer :: marr,tread,lenstr_noxyz,ierr
  character(len=strlen) :: string_raw
  character(len=500) :: msg
 !arrays
@@ -502,7 +504,7 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
  character :: blank=' '
 !scalars
  integer,save :: include_level=-1
- integer :: ii,ii1,ii2,ij,iline,ios,iost,lenc,lenstr_inc,mline,nline1,input_unit,ierr
+ integer :: ii,ii1,ii2,ij,iline,ios,iost,lenc,lenstr_inc,mline,nline1,input_unit
  logical :: include_found, ex
  character(len=1) :: string1
  character(len=3) :: string3
@@ -571,6 +573,14 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
       'add the keyword ''end'' at the very beginning of the last line of your input file.'
      MSG_ERROR(msg)
    end if
+
+   ! TODO: Ignore sections inside TEST_INFO markers so that we don't need to prepend comment markers.
+   !in_testinfo = 0
+   !if startswith(line, "#%%<BEGIN TEST_INFO") in_testinfo = 1
+   !if (in_testinfo /= 0) cycle
+   !if startswith(line, "#%%<END TEST_INFO> ") then
+   !  in_testinfo = 0; cycle
+   !end if
 
    ! Find length of input line ignoring delimiter characters (# or !)
    ! and any characters beyond it (allows for comments beyond # or !)
@@ -732,20 +742,16 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
  close (unit=input_unit)
 
  ! Make sure we don't have unmatched quotation marks
- ierr = 0
- do ii=1,len_trim(string)
-   if (string(ii:ii) == '"') ierr = ierr + 1
- end do
- if (mod(ierr, 2) /= 0) then
+
+ if (mod(char_count(string, '"'), 2) /= 0) then
    MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
  end if
 
- write(msg,'(a,i0,3a)')'-instrng: ',nline1,' lines of input have been read from file ',trim(filnam),ch10
- call wrtout(std_out,msg,'COLL')
-
- !write(std_out, "(3a)")"string after instrng:", ch10, trim(string)
-
  include_level = include_level - 1
+
+ write(msg,'(a,i0,3a)')'-instrng: ',nline1,' lines of input have been read from file ',trim(filnam),ch10
+ call wrtout(std_out,msg)
+ !write(std_out, "(3a)")"string after instrng:", ch10, trim(string)
 
  DBG_EXIT("COLL")
 
@@ -1825,7 +1831,7 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
    ixyz=ixyz+1
    if(ixyz==1)then
      write(msg,'(80a)')('=',ii=1,80)
-     call wrtout(ab_out,msg,'COLL')
+     call wrtout(ab_out,msg)
    end if
 
    ! The xyzFILE token has been identified
@@ -1858,7 +1864,7 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
    xyz_fname=string_raw(index_xyz_fname:index_xyz_fname_end-1)
 
    write(msg, '(3a)') ch10, ' importxyz : Identified token XYZFILE, referring to file ',trim(xyz_fname)
-   call wrtout([std_out, ab_out],msg,'COLL')
+   call wrtout([std_out, ab_out],msg)
 
    ! Append the data from the xyz file to the string, and update the length of the string
    call append_xyz(dtset_char,lenstr,string_upper,xyz_fname,strln)
@@ -1882,7 +1888,7 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
    string_upper(1:1)=blank
    lenstr=lenstr+1
    write(msg,'(a,80a,a)')ch10,('=',ii=1,80),ch10
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout(ab_out,msg)
  end if
 
 end subroutine importxyz
@@ -1969,7 +1975,7 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
    MSG_ERROR(msg)
  end if
  write(msg, '(3a)')' importxyz : Opened file ',trim(xyz_fname),'; content stored in string_xyz'
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
 
  ! check number of atoms is correct
  read(unitxyz,*) natom
@@ -2162,7 +2168,7 @@ subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
      '   ',trim(cond_string(1)),', ',trim(cond_string(2)),' or ',trim(cond_string(3)),'.'
    end if
 
-   call wrtout(unit,msg,'COLL')
+   call wrtout(unit,msg)
    MSG_WARNING(msg)
  end if
 
@@ -2763,8 +2769,7 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
     '  Action: you should change one of the input variables ',trim(input_name),',',ch10,&
     '   ',trim(cond_string(1)),', ',trim(cond_string(2)),' or ',trim(cond_string(3)),'.'
  end if
- call wrtout(unit   ,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout([unit, std_out], msg)
 
 end subroutine chkint_prt
 !!***
@@ -3619,7 +3624,7 @@ type(geo_t) function geo_from_abigeo_path(path, comm) result(new)
  ! and we don't need to handle symbols + Units
 
   ii = index(string(1:lenstr), "xred")
-  ABI_CHECK(ii /= 0, "In abigeo mode only `xred` with reduced_coords followed by atom symbol are supported")
+  ABI_CHECK(ii /= 0, "In structure mode only `xred` with reduced_coords followed by atom symbol are supported")
 
   ABI_MALLOC(new%typat, (new%natom))
   ABI_MALLOC(new%xred, (3, new%natom))
@@ -3869,8 +3874,8 @@ subroutine geo_print_abivars(self, unit)
 
  if (unit == dev_null) return
 
+ write(unit, "(2a)")"# fileformat: ", trim(self%fileformat)
  if (len_trim(self%title) > 0) write(unit, "(2a)")"# ",trim(self%title)
- !new%fileformat = "poscar"
  write(unit, "(a, i0)")" natom ", self%natom
  write(unit, "(a, i0)")" ntypat ", self%ntypat
  write(unit, sjoin("(a, ", itoa(self%natom), "(i0,1x))")) " typat ", self%typat
@@ -3883,8 +3888,7 @@ subroutine geo_print_abivars(self, unit)
  write(unit, "(a)")" xred"
  do iatom=1,self%natom
    itypat = self%typat(iatom)
-   write(unit, "(2x, 3(f11.7,1x),3x,2a)") &
-     self%xred(:, iatom) , " # ", trim(znucl2symbol(self%znucl(itypat)))
+   write(unit, "(2x, 3(f11.7,1x),3x,2a)") self%xred(:, iatom) , " # ", trim(znucl2symbol(self%znucl(itypat)))
  end do
 
 end subroutine geo_print_abivars
@@ -3998,8 +4002,8 @@ subroutine geo_bcast(self, master, comm)
  call xmpi_bcast(list_int, master, comm, ierr)
 
  if (my_rank /= master) then
-  self%natom = list_int(1); self%ntypat = list_int(2)
-  call self%malloc()
+   self%natom = list_int(1); self%ntypat = list_int(2)
+   call self%malloc()
  end if
 
  call xmpi_bcast(self%rprimd, master, comm, ierr)
@@ -4017,7 +4021,7 @@ end subroutine geo_bcast
 !!  geo_malloc
 !!
 !! FUNCTION
-!!  Allocate memory
+!!  Allocate memory once %natom and %ntypat are know
 !!
 !! SOURCE
 
@@ -4040,7 +4044,7 @@ end subroutine geo_malloc
 !!  geo_free
 !!
 !! FUNCTION
-!!  Free memory in geo_t object.
+!!  Free memory.
 !!
 !! SOURCE
 

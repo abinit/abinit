@@ -3,6 +3,16 @@
 ################################################
 ndtset  2
 
+# This is just to test the prefix variables that replace the old files file.
+# Note the `varname = ""` format that will be searched by runtests,py to decided whether
+# prefix variables should be added to the initial input file or not before running.
+#
+indata_prefix = "t04.indata"
+outdata_prefix = "t04.outdata"
+tmpdata_prefix = "t04.tmpdata"
+output_file = "t04.output"
+pseudos = "12mg.pspnc, 05b.soft_tm"
+
 # MgB2 lattice structure
 ## ntypat  2
 ## znucl   12 5
@@ -59,12 +69,15 @@ nband   8
 #%% exec_args = --dry-run 
 #%% [files]
 #%% files_to_test = 
-#%%   t04.out, tolnlines = 0, tolabs = 1.1e-06, tolrel = 1.1e-04
+#%%   t04.output, tolnlines = 0, tolabs = 1.1e-06, tolrel = 1.1e-04
 #%% psp_files = 12mg.pspnc, 05b.soft_tm
 #%% [paral_info]
 #%% max_nprocs = 2
 #%% [shell]
-#%% pre_commands = iw_cp t04_POSCAR t04_POSCAR
+#%% pre_commands = 
+#%%   iw_cp t04_POSCAR t04_POSCAR;
+#%%   pw_cp 12mg.pspnc 12mg.pspnc;
+#%%   pw_cp 05b.soft_tm 05b.soft_tm;
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = POSCAR
@@ -75,6 +88,8 @@ nband   8
 #%%
 #%%    1) An external POSCAR file with symbols (VASP5 format)
 #%%    2) An external netcdf file produced by Abinit.
+#%%
+#%%  Test also the prefix variables that replace the old files file.
 #%% 
 #%% topics = UnitCell
 #%%<END TEST_INFO>

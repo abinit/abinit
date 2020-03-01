@@ -637,8 +637,7 @@ class AbinitTestInfoParser(object):
         try:
             start, stop = lines.index(HEADER), lines.index(FOOTER)
         except ValueError:
-            raise self.Error("{} does not contain any valid testcnf section!"
-                             .format(inp_fname))
+            raise self.Error("{} does not contain any valid testcnf section!".format(inp_fname))
 
         # Keep only test section lines and remove one space at the begining
         lines = [line[1:] if line.startswith(' ') else line
@@ -2526,13 +2525,16 @@ class AbinitTest(BaseTest):
 
     def prepare_new_cli_invokation(self):
         """Perform operations required to execute test with new CLI."""
-        # Need to add pseudopotential info to input.
+        # Read full input in line.
         with open(self.inp_fname, "rt") as fh:
             line = fh.read()
 
+        # Add extra variables for pseudos and output file if not already present.
         extra = ["# Added by runtests.py"]
         app = extra.append
-        app('output_file = "%s"' % (self.id + ".out"))
+
+        if 'output_file = "' not in line:
+            app('output_file = "%s"' % (self.id + ".out"))
 
         # This is needed for ATOMPAW as the pseudo will be generated at runtime.
         #dirname, pp_names = self.get_pseudo_paths(dir_and_names=True)
@@ -2545,7 +2547,9 @@ class AbinitTest(BaseTest):
         # This is to check whether the parser supports "long strings"
         #app('pseudos = "%s"' % (", ".join(self.get_pseudo_paths())))
 
-        app('pseudos = "%s"' % (",\n ".join(self.get_pseudo_paths())))
+        # Need to add pseudopotential info to input.
+        if 'pseudos = ' not in line:
+            app('pseudos = "%s"' % (",\n ".join(self.get_pseudo_paths())))
 
         #pp_paths = self.get_pseudo_paths()
         #app('pseudos = "%s"' % (", ".join(os.path.relpath(p, self.abenv.psps_dir) for p in pp_paths)))
@@ -2558,9 +2562,13 @@ class AbinitTest(BaseTest):
         # FIXME: Use temp prefix and change iofn
         t_prefix = self.id  + "t"
 
-        app('indata_prefix "%s"' % i_prefix)
-        app('outdata_prefix "%s"' % o_prefix)
-        app('tmpdata_prefix "%s"' % t_prefix)
+        if 'indata_prefix = ' not in line:
+            app('indata_prefix = "%s"' % i_prefix)
+        if 'outdata_prefix = ' not in line:
+            app('outdata_prefix = "%s"' % o_prefix)
+        if 'tmpdata_prefix = ' not in line:
+            app('tmpdata_prefix = "%s"' % t_prefix)
+
         app("# end runtests.py section\n\n")
 
         path = os.path.join(self.workdir, os.path.basename(self.inp_fname))

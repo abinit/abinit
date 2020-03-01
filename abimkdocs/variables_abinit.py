@@ -20579,6 +20579,26 @@ and second entry are included.
 ),
 
 Variable(
+    abivarname="transport_ngkpt",
+    varset="eph",
+    topics=['SelfEnergy_expert'],
+    vartype="integer",
+    defaultval=[0, 0, 0],
+    dimensions=[3],
+    mnemonics="TRANSPORT, Number of Grid points for K PoinTs generation",
+    added_in_version="9.0.0",
+    text=r"""
+This in an advanced option that is mainly used to donwsample the k-points used
+to compute the carrier mobility obtained in [[eph_task]] = -4.
+If this variable is not specified, the code uses the k-mesh specified by [[ngkpt]]
+(i.e. the k-mesh corresponding to the WFK file) for computing the mobility integral in the BZ.
+In some cases, however, one may want to employ a submesh of k-points to analyze the convergence behaviour.
+For instance one may have performed a calculation with a 100x100x100 k-mesh and may be interested in the values
+obtained with a 50x50x50 without having to perform a full lifetime calculation on a 50x50x50 from scratch.
+""",
+),
+
+Variable(
     abivarname="eph_restart",
     varset="eph",
     topics=['ElPhonInt_basic'],
@@ -20798,6 +20818,7 @@ at the input [[qpt]].
 #    dimensions="scalar",
 #    defaultval=0,
 #    mnemonics="EPH ALPHA times norm of GMIN.",
+#    added_in_version="9.0.0",
 #    text=r"""
 #This is an *advanced option* used to compute the long-range part of the DFTP potential.
 #TO BE DESCRIBED WHEN WE ENTER PRODUCTION
@@ -21076,7 +21097,11 @@ Variable(
     mnemonics="PseudoPotential DIRectory PATH",
     added_in_version="9.0.0",
     text=r"""
-Directory prependeded to the pseudopotential basename specified in [[pseudos]].
+This variable specifies the directory that will prependeded to the names of the pseudopotentials
+specified in [[pseudos]].
+This option is useful when all your pseudos are gathered in a single directory in your file system
+and you don not want to type the absolute path for each pseudopotential file.
+
 This variable is used when Abinit is executed with the new syntax:
 
     abinit run.abi > run.log 2> run.err &
@@ -21084,8 +21109,9 @@ This variable is used when Abinit is executed with the new syntax:
 The string must be quoted in double quotation marks:
 
     pp_dirpath = "/home/user/my_pseudos/"
+    pseudos = "al.psp8, as.psp8"
 
-If not present, the list in [[pseudos]] is used directly.
+If not present, the filenames specified in [[pseudos]] are used directly.
 """
 ),
 
@@ -21099,8 +21125,7 @@ Variable(
     mnemonics="PSEUDOpotentialS",
     added_in_version="9.0.0",
     text=r"""
-String defining the list of pseudopotential files
-when Abinit is executed with the new syntax:
+String defining the list of pseudopotential files when Abinit is executed with the new syntax:
 
     abinit run.abi > run.log 2> run.err &
 
@@ -21127,65 +21152,114 @@ Variable(
     mnemonics="initialize the crystalline STRUCTURE from ...",
     added_in_version="9.0.0",
     text=r"""
-This variable (added in Abinit9) provides a simplified interface to build the crystalline structure
-from an external file.
+This variable provides a simplified interface to build the crystalline structure from an external file.
+The idea is to keep the **geometrical information** separated from the input file so that one
+can perform multiple calculations in different input files with the same structure
+without having to copy & paste the decription of the unit cell.
+The single source of truth is now given by an external file that can be easily shared by multiple input files.
+As a side effect one can easily restart structure relaxations in place by reading
+the structure from the output file of a previous run.
 
-The string has the format: `filetype:filepath`
-where `filetype` specifies the format of the external file and `filepath` gives the path to the file
-**relative** to the directory where the code is executed.
+The [[structure]] variable is a string in the format: `filetype:filepath` where:
+
+* filetype` specifies the format of the external file
+* `filepath` gives the path to the file **relative** to the directory where the input file is located.
+
 Variables such as [[natom]], [[ntypat]], [[typat]] and [[znucl]] are automatically initialized from
-the external file and need not to be specified in the ABINIT input
+the external file and need not to be specified in the ABINIT input.
 
 At present ( |today| ) the allowed values for `filetype` are:
 
 * abifile --> An output file produced by Abinit (only netcdf files are supported for the time being)
-* poscar  --> POSCAR files in VASP5 format (symbols after atomic positions are required).
+* poscar  --> POSCAR files in VASP-5 format (element symbol after the atomic position is required).
 
-To read the structure from an external netcdf file produced by Abinit use:
+To read the structure from an external netcdf file produced by Abinit (e.g. *out_GSR.nc*)
+use the `abifile` prefix and the syntax:
 
     structure "abifile:out_GSR.nc"
 
-Other Abinit output files such as the `_WFK.nc`, the `_DEN.nc` and the `_HIST.nc` file
-are supported as well.
-In the case of structural relaxations, these files contain the final geometry (not necessarily converged)
-hence [[structure]] can be used to perform an in-place restart.
+Other Abinit output files such as the `WFK.nc`, the `DEN.nc` and the `HIST.nc` file
+are supported as well e.g.
+
+    structure "abifile:out_HIST.nc"
+
+In the case of structural relaxations, these files contain the final geometry (not necessarily relaxed
+within the given tolerance) hence [[structure]] can be used to perform an in-place restart by reading
+the output of a previous run.
 
 To read the structure from an external POSCAR file, use:
 
     structure "poscar:t04_POSCAR"
+
+where `t04_POSCAR` is the name of external file.
+Note that the ABINIT implementation assumes POSCAR files produced by VASP-5
+or any other tool compatible with the VASP-5 format.
+
+A typical POSCAR file for hexagonal MgB2 looks like (ignore comments):
+
+```
+Mg1 B2                                    # Title string.
+1.0                                       # Scaling factor for the volume.
+2.672554  1.543000 0.000000               # Lattice vectors in Angstrom (NOTE: ABINIT uses BOHR by default)
+-2.672554 1.543000 0.000000
+0.000000  0.000000 3.523000
+Mg B                                      # List of element symbols
+1 2                                       # Number of atoms for each symbol
+direct                                    # "direct" for reduced coordinates or "cartesian".
+0.000000 0.000000 0.0 Mg                  # Coordinates followed by the chemical symbol of the atom.
+0.333333 0.666667 0.5 B
+0.666667 0.333333 0.5 B
+```
+
+The [[typat]] variable is automatically initialized from the list of chemical symbols according to their
+position in the list.
+In this examaple, Mg is of type 1 while B is of type 2.
+The ABINIT variables associated to this POSCAR are therefore:
+
+    ntypat 2
+    typat 1 2 2
+    typat 1 2 2
+    znucl  12.0   5.0
+
 
 !!! important
 
     Several POSCAR files available on the internet give atomic positions and lattice vectors with ~6 digits.
     The ABINIT routines use tight tolerances to detect the space group so it may happen that ABINIT does not
     detect all the symmetry operations with a consequent **INCREASE** of the number of k-points in the IBZ
-    and therefore of the computational cost. This is especially true for hexagonal or rhombohedral lattices.
-    A possible solution is to increase [[tolsym]] to e.g. 1e-4.
-
+    and the associated computational cost. This is especially true for hexagonal or rhombohedral lattices.
+    A possible solution is to increase the value of [[tolsym]] in the input file to e.g. 1e-4
+    so that ABINIT will automatically refine the atomic positions.
 
 Note the following important remarks:
 
-- The structure is initialized by the parser at the vey beginning
-  hence the external files must exists when Abinit starts to analyze the input file.
-  In a nutshell, the [[structure]] variables cannot be used to pass the geometry from one dataset to the next one.
+- The structure is initialized by the parser at the vey beginning of the calculation
+  hence the external files **must exist** when Abinit starts to analyze the input file.
+  In a nutshell, [[structure]] variables cannot be used to pass the output geometry from one dataset
+  to the next one.
 
-- Multidatasets are supported but please mind that some variables such as
+- Multidatasets are supported but mind that some variables such as
   [[ntypat]], [[typat]] and [[znucl]] are tagged as [[NO_MULTI]].
-  In other words, you can read different files via [[structure]] provided these quantities do not change.
+  In other words, one can read different files via [[structure]] and the multidatset syntax
+  provided these quantities do not change.
+  ABINITs syntax such as `xred+` are, obviously, not supported.
 
 - The value of [[typat]] and [[znucl]] given in the input file (if any) is ignored by the parser.
   The value of [[natom]], [[ntypat]] is checked for consistency.
-  As a rule of thumb, don' try to mix the two approaches: either use `structure` or the standard approach
-  to define the unit cell.
+
+- As a rule of thumb, do not try to mix the two approaches: either use `structure` or the standard
+  (more verbose) approach based on [[ntypat]], [[typat]] and [[znucl]] to define the unit cell.
 
 
 Limitations:
 
 - The specification of structures for calculations with images is not supported.
-
 - Alchemical mixing is not supported.
+- Reading structure from Fortran file is not yet implemented. It is just a technical problem
+  that will be hopefully solved in the next releases.
 
-In all these cases, one has to resort to the "standard" approach to define the list of atoms and their type.
+In all these cases in which the [[structure]] variable is not supported,
+one has to resort to the **standard approach** to define the list of atoms and their type.
 """
 ),
 
