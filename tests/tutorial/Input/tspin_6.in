@@ -36,7 +36,7 @@
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = 
+#%% keywords = PAW 
 #%% description = 
 #%%   Bismuth atom, isolated, in a supercell - with and without spin-orbit coupling.
 #%%<END TEST_INFO>

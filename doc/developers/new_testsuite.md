@@ -221,10 +221,6 @@ with the associated YAML configuration file given by:
 
 {% dialog tests/paral/Input/t86.yaml %}
 
-!!! important
-
-    Until the basic document list is considered stable enough the printing of
-    YAML documents is disabled by default. To enable it, add [[use_yaml]] 1 in the input file 
 
 ### Our first example of YAML configuration file 
 

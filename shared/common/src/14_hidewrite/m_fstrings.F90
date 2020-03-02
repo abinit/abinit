@@ -7,7 +7,7 @@
 !!  This module contains basic tools to operate on Fortran strings.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, XG, MT, DC)
+!! Copyright (C) 2008-2020 ABINIT group (MG, XG, MT, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1828,6 +1828,7 @@ integer pure function char_count(string, char)
  integer :: i
 
 ! *************************************************************************
+
  char_count = 0
  do i=1,len(string)
    if (string(i:i) == char) char_count = char_count + 1
@@ -1864,6 +1865,7 @@ integer function next_token(string, start, ostr) result(ierr)
  integer :: ii,beg
 
 ! *************************************************************************
+ !print *, "string:", trim(string(start:))
 
  ierr = 1; beg = 0
  ! Find first non-empty char.

@@ -6,7 +6,7 @@
 !!  parameters and function for wave functions copy
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2001-2019 ABINIT group (CS,GZ,FB)
+!!  Copyright (C) 2001-2020 ABINIT group (CS,GZ,FB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~ABINIT/Infos/copyright
 !!  or http://www.gnu.org/copyleft/gpl.txt .

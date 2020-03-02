@@ -7,7 +7,7 @@
 !!  to store energies from GS calculations.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MT, DC)
+!! Copyright (C) 2008-2020 ABINIT group (MT, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, AR, MKV, FF, MM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -312,7 +312,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
       'Action: check the input file.'
      MSG_ERROR(msg)
    end if
-!  Check that natom is greater than 0
+
+   ! Check that natom is greater than 0
    if (dtsets(idtset)%natom<=0) then
      write(msg, '(a,i0,2a,i0,3a)' )&
       'Input natom must be > 0, but was ',dtsets(idtset)%natom,ch10,&
@@ -542,7 +543,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  if (use_gpu_cuda==1) then
 #if defined HAVE_GPU_CUDA && defined HAVE_GPU_CUDA_DP
    if (ii<=0) then
-     write(msg,'(3a)')&
+     write(msg,'(5a)')&
 &     'Input variables use_gpu_cuda is on',ch10,&
 &     'but no available GPU device has been detected !',ch10,&
 &     'Action: change the input variable use_gpu_cuda.'
@@ -993,7 +994,6 @@ subroutine indefo1(dtset)
  dtset%usepawu=0
  dtset%usepotzero=0
  dtset%use_slk=0
- dtset%use_yaml=0
 !V
  dtset%vel_orig(:,:,:)=zero
  dtset%vel_cell_orig(:,:,:)=zero
@@ -1175,11 +1175,6 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'wvl_bigdft_comp',tread,'INT')
    if(tread==1) dtset%wvl_bigdft_comp=intarr(1)
  end if
-
-!---------------------------------------------------------------------------
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_yaml',tread,'INT')
- if(tread==1) dtset%use_yaml=intarr(1)
 
 !---------------------------------------------------------------------------
 
@@ -2330,7 +2325,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%ixc=1
    dtsets(idtset)%ixc_sigma=1
    dtsets(idtset)%ixcpositron=1
-   dtsets(idtset)%ixcrot=3
+   dtsets(idtset)%ixcrot=1
 !  J
    dtsets(idtset)%f4of2_sla(:)=-one
    dtsets(idtset)%f6of2_sla(:)=-one
@@ -2630,7 +2625,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%strprecon=one
    dtsets(idtset)%strtarget(1:6)=zero
    dtsets(idtset)%symchi=1
-   dtsets(idtset)%symsigma=0
+   dtsets(idtset)%symsigma=1
 !  T
    dtsets(idtset)%td_maxene=zero
    dtsets(idtset)%td_mexcit=0
@@ -2750,7 +2745,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
 ! EPH variables
    dtsets(idtset)%asr = 1
    dtsets(idtset)%dipdip = 1
-   dtsets(idtset)%chneut = 0
+   dtsets(idtset)%chneut = 1
    dtsets(idtset)%symdynmat = 1
 
    dtsets(idtset)%ph_freez_disp_addStrain = 0

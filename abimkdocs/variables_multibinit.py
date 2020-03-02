@@ -208,7 +208,7 @@ Variable(
     text=r"""
 Flag to activate the generation of the anharmonic coefficient for the fit process
 
-**Related variables:** The  power range of the coefficients ([[multibinit:fit_rangePower]]), the cut off of the interactions ([[multibinit:fit_cutoff]]), the flag to add ahnarmonic strain ([[multibinit:fit_anhaStrain]]), the flag to add phonon strain coupling ([[multibinit:fit_SPCoupling]])
+**Related variables:** The  power range of the coefficients ([[multibinit:fit_rangePower]]), the cut off of the interactions ([[multibinit:fit_cutoff]]), the flag to add anharmonic strain ([[multibinit:fit_anhaStrain]]), the flag to add phonon strain coupling ([[multibinit:fit_SPCoupling]])
 """,
 ),
 
@@ -358,7 +358,7 @@ Variable(
     defaultval=0,
     mnemonics="FIT FIXed COEFFicients",
     text=r"""
-Indexes of the imposed coefficients during the fit process for the model:
+Indices of the imposed coefficients during the fit process for the model:
 """,
 ),
 
@@ -389,7 +389,7 @@ Variable(
     defaultval=0,
     mnemonics="FIT BANed COEFFicients",
     text=r"""
-Indexes of the banned coefficients during the fit process of the model
+Indices of the banned coefficients during the fit process of the model
 """,
 ),
 
@@ -428,7 +428,6 @@ Flag to activate the bound process:
 **Related variables:1 and 2** The number of maximum additional coefficient in the polynome ([[multibinit:bound_maxCoeff]]), the  power range for the additional coefficients ([[multibinit:bound_rangePower]]), the cut off of the additional interactions ([[multibinit:bound_cutoff]])
 
 *3 --> Check each anharmonic term in the effective potential. If the term contains has a negative coefficient and is even in its displacement or contains odd powers in the displacement generate high order bounding terms of the same combination of displacement within the range of powers defined by the user ([[multibinit:bound_rangePower]]). The coefficients of the added high-order terms are optimized until the precision of the original effective potential is retained. 
-
 """,
 ),
 
@@ -591,7 +590,6 @@ thermostats ([[qmass]]).
 
 
 * 120 --> Dummy mover. Atoms does not move. For testing only.
-
 """,
 
 ),
@@ -644,7 +642,7 @@ Variable(
     topics=['DynamicsMultibinit_basic'],
     dimensions="scalar",
     defaultval=1000,
-    mnemonics="LATTice dynamics relaxation time TAUT",
+    mnemonics="LATTice dynamics relaxation time TAUP",
     text=r"""
     Parameter used in Berendsen lattice dynamcis [[multibinit:dynamics]] =103, in which the pressure is relaxed exponentially to the target temperature, with the characteristic time of latt_taup.
     The unit is atomic unit, same as [[dtion]].
@@ -783,40 +781,41 @@ See [[abinit:restartxf]]
 """,
 ),
 
-Variable(
-    abivarname="spin_calc_correlation_obs@multibinit",
-    varset="multibinit",
-    vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="SPIN CALCulate CORRELATION OBServables",
-    text=r"""
-Flag to calculate spin correlation function based observables.
-
-* 0 --> do not calculate.
-
-* 1 --> calculate.
-""",
-),
-
-
-Variable(
-    abivarname="spin_calc_traj_obs@multibinit",
-    varset="multibinit",
-    vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="SPIN CALCulate TRAJectory based OBServables",
-    text=r"""
-Flag to calculate spin trajectory based observables. (Nothing included yet.)
-
-* 0 --> do not calculate.
-
-* 1 --> calculate.
-""",
-),
+# The below are not yet functioning, comment out temporarily. 
+#Variable(
+#    abivarname="spin_calc_correlation_obs@multibinit",
+#    varset="multibinit",
+#    vartype="integer",
+#    topics=['SpinDynamicsMultibinit_basic'],
+#    dimensions="scalar",
+#    defaultval=0,
+#    mnemonics="SPIN CALCulate CORRELATION OBServables",
+#    text=r"""
+#Flag to calculate spin correlation function based observables.
+#
+#* 0 --> do not calculate.
+#
+#* 1 --> calculate.
+#""",
+#),
+#
+#
+#Variable(
+#    abivarname="spin_calc_traj_obs@multibinit",
+#    varset="multibinit",
+#    vartype="integer",
+#    topics=['SpinDynamicsMultibinit_basic'],
+#    dimensions="scalar",
+#    defaultval=0,
+#    mnemonics="SPIN CALCulate TRAJectory based OBServables",
+#    text=r"""
+#Flag to calculate spin trajectory based observables. (Nothing included yet.)
+#
+#* 0 --> do not calculate.
+#
+#* 1 --> calculate.
+#""",
+#),
 
 
 Variable(
@@ -856,22 +855,23 @@ Gilbert damping factor in LLG equation for spin dynamics.
 """,
 ),
 
-Variable(
-    abivarname="spin_dipdip@multibinit",
-    varset="multibinit",
-    vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="SPIN DIPole DIPole interaction",
-    text=r"""
-* 0 --> Switch off spin dipole-dipole interaction.
 
-* 1 --> Switch on spin dipole-dipole interaction.
-    (Not yet implemented.)
-""",
-),
-
+#Variable(
+#    abivarname="spin_dipdip@multibinit",
+#    varset="multibinit",
+#    vartype="integer",
+#    topics=['SpinDynamicsMultibinit_basic'],
+#    dimensions="scalar",
+#    defaultval=0,
+#    mnemonics="SPIN DIPole DIPole interaction",
+#    text=r"""
+#* 0 --> Switch off spin dipole-dipole interaction.
+#
+#* 1 --> Switch on spin dipole-dipole interaction.
+#    (Not yet implemented.)
+#""",
+#),
+#
 Variable(
     abivarname="spin_dt@multibinit",
     varset="multibinit",
@@ -1074,7 +1074,7 @@ Variable(
     defaultval=0,
     mnemonics="SPIN Single Ion Anistropy ADD",
     text=r"""
-Add single ion anistropy term to the spin model hamiltonian.
+Add single ion anisotropy term to the spin model hamiltonian.
 with user defined values (see [[multibinit:spin_sia_k1amp]] and [[multibinit:spin_sia_k1dir]].
 
 * 0 --> Do not add, use the term defined in the spin model xml file.
@@ -1217,11 +1217,12 @@ Variable(
     mnemonics="TEST EFFective POTential",
     text=r"""
 * 0 --> nothing.
-* 1 --> Evaluate the effective potential with respect to given test-set and calculate mean square differences between ab-initio energy/forces and model energy/forces""",
+* 1 --> Evaluate the effective potential with respect to given test-set and calculate mean square differences between ab-initio energy/forces and model energy/forces
+""",
 ),
 
 Variable(
-    abivarname="analyze_anh_pot@multibinit",
+abivarname="analyze_anh_pot@multibinit",
     varset="multibinit",
     vartype="integer",
     topics=['LatticeModel_expert'],
@@ -1229,11 +1230,12 @@ Variable(
     defaultval=0,
     mnemonics="ANALYZE ANHarmonic POTential",
     text=r"""
-* 0 --> nothing.
+* 0 --> Nothing.
 * 1 --> Print energy contribution of each anharmonic term in the effective Potential. 
-        If it is a Molecular Dynamics (MD) run the contribution of each term is printed for each MD-step into MD_anharmonic_terms_energy.dat
-        If the effective potential is tested against a test set the contribution of each term for each configuration in the test is set is printed in TES_anharmonic_terms_energy.dat 
-        If the a effective potential is fitted the contribution of each selected term for each configuration in the training set is printed in TRS_anharmonic_terms_energy.dat""",
+        If it is a Molecular Dynamics (MD) run, the contribution of each term is printed for each MD-step into MD_anharmonic_terms_energy.dat .
+        If the effective potential is tested against a test set the contribution of each term for each configuration in the test set is printed in TES_anharmonic_terms_energy.dat .
+        If the effective potential is fitted, the contribution of each selected term for each configuration in the training set is printed in TRS_anharmonic_terms_energy.dat
+""",
 ),
 
 
@@ -1246,11 +1248,12 @@ Variable(
     defaultval=0,
     mnemonics="OPTimize EFFective POTential",
     text=r"""
-* 0 --> nothing.
-* 1 --> Turn on reading of optimization of effective potential keywords (opt_)
+* 0 --> Nothing.
+* 1 --> Turn on reading of optimization of effective potential keywords (opt_).
         The optimization process gives the user the ability to refit the coefficients of specified terms with respect to the training set while keeping the rest fixed.
 
-**Related variables:** The number of coefficients to refit ([[multibinit:opt_ncoeff]]), the  indexes of the coefficients to optimize ([[multibinit:opt_coeff]])""" 
+**Related variables:** The number of coefficients to refit ([[multibinit:opt_ncoeff]]), the  indices of the coefficients to optimize ([[multibinit:opt_coeff]]).
+""",
 ),
 
 Variable(
@@ -1262,7 +1265,9 @@ Variable(
     defaultval=0,
     mnemonics="OPTimize NUMBER of COEFFicients",
     text=r"""
-* Number of anharmonic terms to refit in the effective potential""" 
+* Number of anharmonic terms to refit in the effective potential. 
+**Related variables:** [[multibinit:opt_coeff]]
+""", 
 ),
 
 Variable(
@@ -1274,7 +1279,8 @@ Variable(
     defaultval=0,
     mnemonics="OPTimize Cofficients",
     text=r"""
-Indexes of the terms to refit in the effective potential. """,
+Indices of the terms to refit in the effective potential. 
+""",
 ),
 
 

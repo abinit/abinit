@@ -6,7 +6,7 @@
 !!  Initialize pseudopotential datastructures from files.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MT, FrD, AF, DRH, YP)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MT, FrD, AF, DRH, YP)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -80,7 +80,7 @@ contains
 !! Also compute ecore=[Sum(i) zion(i)] * [Sum(i) epsatm(i)] by calling pspcor.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MT)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -843,7 +843,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
  real(dp) :: tsec(2),ecut_tmp(3,2)
  real(dp),allocatable :: e990(:),e999(:),ekb1(:),ekb2(:),epspsp(:),rcpsp(:)
  real(dp),allocatable :: rms(:)
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
 !!  usexml= 0 for non xml ps format ; =1 for xml ps format
  character(len=3) :: atmsymb
  character(len=30) :: creator
@@ -921,7 +921,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
    else if (usexml == 1 .and. xmlpaw == 0) then
 
 ! the following is probably useless - already read in everything in inpspheads
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
      call psxml2abheader( psps%filpsp(ipsp), psphead, atmsymb, creator, 0 )
      znucl = psphead%znuclpsp
      zion = psphead%zionpsp
@@ -1150,7 +1150,7 @@ subroutine pspatm(dq,dtset,dtfil,ekb,epsatm,ffspl,indlmn,ipsp,pawrad,pawtab,&
 
    else if (pspcod==9)then
 
-#if defined HAVE_PSML
+#if defined HAVE_LIBPSML
      call psp9in(psps%filpsp(ipsp),ekb,epsatm,ffspl,indlmn,lloc,lmax,psps%lmnmax,psps%lnmax,mmax,&
 &     psps%mpsang,psps%mpssoang,psps%mqgrid_ff,psps%mqgrid_vl,nproj,psps%n1xccc, &
 &     psps%pspso(ipsp),qchrg,psps%qgrid_ff,psps%qgrid_vl,psps%useylm,vlspl,&

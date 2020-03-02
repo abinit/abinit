@@ -6,7 +6,7 @@
 !!  Solve the Eliashberg equations in the isotropic case
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MVer)
+!!  Copyright (C) 2008-2020 ABINIT group (MVer)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

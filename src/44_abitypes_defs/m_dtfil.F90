@@ -6,7 +6,7 @@
 !!   object and procedures dealing with input/output filenames
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG, MT)
+!!  Copyright (C) 2008-2020 ABINIT group (XG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1681,9 +1681,9 @@ subroutine iofn1(input_path, filnam, filstat, comm)
        ! file ext is present --> use prefix to initialize filnam
        i2 = index(input_path, ".", back=.True.)
        filnam(2) = input_path(:i2) // "abo"
-       filnam(3) = fname(:i1-1) // "i"
-       filnam(4) = fname(:i1-1) // "o"
-       filnam(5) = fname(:i1-1) // "t"
+       filnam(3) = fname(:i1) // "i"
+       filnam(4) = fname(:i1) // "o"
+       filnam(5) = fname(:i1) // "t"
      end if
 
      ! Read the file, stringify it and return the number of datasets.

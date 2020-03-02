@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
 #
-#    Copyright (C) 2003-2019 ABINIT group
+#    Copyright (C) 2003-2020 ABINIT group
 #
 #    Written by Gabriel Antonius in python (compatible v2.7).
 #    This is free software, and you are welcome to redistribute it

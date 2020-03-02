@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, MF, AR, MM, MT, FJ, MB, MT, TR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1249,8 +1249,7 @@ subroutine vtorho(afford,atindx,atindx1,cg,compch_fft,cprj,cpus,dbl_nnsclo,&
 
        if(dmft_ldaocc==0) then
          if(dtset%occopt/=3) then
-           message = ' occopt should be equal to 3 in dmft'
-           MSG_ERROR(message)
+           MSG_ERROR('occopt should be equal to 3 in dmft')
          end if
 !        ==  initialise edmft
          if(paw_dmft%use_dmft>=1) edmft = zero

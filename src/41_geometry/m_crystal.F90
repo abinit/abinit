@@ -6,7 +6,7 @@
 !! Module containing the definition of the crystal_t data type and methods used to handle it.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG, YP, MJV)
+!!  Copyright (C) 2008-2020 ABINIT group (MG, YP, MJV)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -38,10 +38,10 @@ MODULE m_crystal
 
  use m_io_tools,       only : file_exists
  use m_numeric_tools,  only : set2unit
- use m_fstrings,       only : int2char10, sjoin, yesno
+ use m_fstrings,       only : int2char10, sjoin, yesno, itoa, ftoa, tolower, next_token
  use m_symtk,          only : mati3inv, sg_multable, symatm, print_symmetries
  use m_spgdata,        only : spgdata
- use m_geometry,       only : metric, xred2xcart, remove_inversion, getspinrot, symredcart
+ use m_geometry,       only : metric, xred2xcart, xcart2xred, remove_inversion, getspinrot, symredcart
  use m_io_tools,       only : open_file
 
  implicit none
@@ -233,6 +233,54 @@ MODULE m_crystal
  public :: prtposcar               ! output VASP style POSCAR and FORCES files.
 !!***
 
+!----------------------------------------------------------------------
+
+!!****t* m_crystal/poscar_t
+!! NAME
+!! poscar_t
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+ type,public :: poscar_t
+
+  integer :: natom
+  ! Number of atoms
+
+  integer :: ntypat
+  ! Number of type of atoms
+
+  character(len=500) :: header
+
+  integer,allocatable :: typat(:)
+  ! typat(natom)
+  ! Type of each natom.
+
+  real(dp) :: rprimd(3,3)
+
+  real(dp),allocatable :: xred(:,:)
+  ! xred(3,natom)
+  ! Reduced coordinates.
+
+  real(dp),allocatable :: znucl(:)
+  ! znucl(ntypat)
+  ! Nuclear charge for each type of pseudopotential
+  ! Note that ntypat must be equal to npsp --> no alchemical mixing
+
+ contains
+
+   procedure :: free => poscar_free
+   ! Free memory.
+
+   procedure :: print_abivars => poscar_print_abivars
+   !  Print Abinit variables corresponding to POSCAR
+
+ end type poscar_t
+
+ public :: poscar_from_string    ! Build object from string with newlines.
+ public :: poscar_from_filepath  ! Build object from POSCAR filepath.
+
 CONTAINS  !====================================================================================================
 !!***
 
@@ -288,8 +336,8 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
-& zion,znucl,timrev,use_antiferro,remove_inv,title,&
-& symrel,tnons,symafm) ! Optional
+   zion,znucl,timrev,use_antiferro,remove_inv,title,&
+   symrel,tnons,symafm) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -672,7 +720,7 @@ subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
  integer :: ia,ii,itypat,jj
 ! *************************************************************************
 
- !  Fill the symbols array
+ ! Fill the symbols array
  do ia=1,natom
    symbols(ia) = adjustl(znucl2symbol(znucl(typat(ia))))
  end do
@@ -781,11 +829,9 @@ end function isymmorphic
 !!
 !! SOURCE
 
-pure function isalchemical(Cryst) result(ans)
+pure logical function isalchemical(Cryst) result(ans)
 
 !Arguments ------------------------------------
-!scalars
- logical :: ans
  class(crystal_t),intent(in) :: Cryst
 
 ! *************************************************************************
@@ -808,13 +854,12 @@ end function isalchemical
 !!
 !! SOURCE
 
-function adata_type(crystal, itypat) result(atom)
+type(atomdata_t) function adata_type(crystal, itypat) result(atom)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itypat
  class(crystal_t),intent(in) :: crystal
- type(atomdata_t) :: atom
 
 ! *************************************************************************
 
@@ -1036,7 +1081,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
 ! *************************************************************************
 
- ! TODO alchemy not treated correctly
+ ! TODO alchemy not treated correctly by ETSF_IO specs.
  if (cryst%isalchemical()) then
    write(msg,"(3a)")&
     "Alchemical crystals are not fully supported by the netcdf format",ch10,&
@@ -1090,7 +1135,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
  ! Set-up atomic symbols.
  do itypat=1,cryst%ntypat
-   call atomdata_from_znucl(atom,cryst%znucl(itypat))
+   call atomdata_from_znucl(atom, cryst%znucl(itypat))
    symbols(itypat) = atom%symbol
    write(symbols_long(itypat),'(a2,a78)') symbols(itypat),REPEAT(CHAR(0),78)
    write(psp_desc(itypat),'(2a)') &
@@ -1394,8 +1439,8 @@ end subroutine symrel2string
 !! FUNCTION
 !!  output VASP style POSCAR and FORCES files for use with frozen phonon codes, like
 !!  PHON from Dario Alfe' or frophon
-!!  IMPORTANT: the order of atoms is fixed such that typat is re-grouped. First typat=1
-!!  then typat=2, etc...
+!!  IMPORTANT: the order of atoms is fixed such that typat is re-grouped.
+!!  First typat=1 then typat=2, etc...
 !!
 !! INPUTS
 !!  fcart = forces on atoms in cartesian coordinates
@@ -1442,26 +1487,24 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
  character(len=7) :: natoms_this_type_str
  character(len=100) :: chem_formula, natoms_all_types
  character(len=500) :: msg
- character(len=fnlen) :: fname
 
 !************************************************************************
 
-!output POSCAR file for positions, atom types etc
- fname = trim(fnameradix)//"_POSCAR"
- if (open_file(fname,msg,newunit=iout) /= 0) then
+ !output POSCAR file for positions, atom types etc
+ if (open_file(trim(fnameradix)//"_POSCAR", msg, newunit=iout) /= 0) then
    MSG_ERROR(msg)
  end if
 
  natoms_this_type = 0
  do itypat=1, ntypat
    do iatom=1,natom
-     if (typat(iatom) == itypat) natoms_this_type(itypat) = natoms_this_type(itypat)+1
+     if (typat(iatom) == itypat) natoms_this_type(itypat) = natoms_this_type(itypat) + 1
    end do
  end do
 
  chem_formula = ""
  do itypat=1, ntypat
-   call atomdata_from_znucl(atom,znucl(itypat))
+   call atomdata_from_znucl(atom, znucl(itypat))
    symbol = atom%symbol
    if (natoms_this_type(itypat) < 10) then
      write (natoms_this_type_str, '(I1)') natoms_this_type(itypat)
@@ -1493,17 +1536,16 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
  end do
  close (iout)
 
-!output FORCES file for forces in same order as positions above
- fname = trim(fnameradix)//"_FORCES"
- if (open_file(fname,msg,newunit=iout) /= 0 ) then
+ ! output FORCES file for forces in same order as positions above
+ if (open_file(trim(fnameradix)//"_FORCES", msg, newunit=iout) /= 0 ) then
    MSG_ERROR(msg)
  end if
 
-!ndisplacements
-!iatom_displaced displacement_red_coord(3)
-!forces_cart_ev_Angstr(3)
-!...
-!<repeat for other displaced atoms>
+ !ndisplacements
+ !iatom_displaced displacement_red_coord(3)
+ !forces_cart_ev_Angstr(3)
+ !...
+ !<repeat for other displaced atoms>
  write (iout,'(I7)') 1
  write (iout,'(a)') '1 0 0 0        ! TO BE FILLED IN '
  do itypat=1, ntypat
@@ -1512,34 +1554,298 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
      write (iout,'(3(E24.14,1x))') Ha_eV/Bohr_Ang*fcart(:,iatom)
    end do
  end do
+
  close (iout)
 
 end subroutine prtposcar
 !!***
 
-!!! !!****f* m_crystal/crystal_yaml_write
-!!! !!
-!!! !! NAME
-!!! !! crystal_yaml_write
-!!! !!
-!!! !! FUNCTION
-!!! !! Write rystal info in YAML format
-!!! !!
-!!! !! PARENTS
-!!! !!
-!!! !! CHILDREN
-!!! !!
-!!! !! SOURCE
-!!!
-!!! subroutine neat_crystal(crystal, iout, comment)
-!!!  class(crystal_t),intent(in) :: crystal
-!!!  integer,intent(in) :: iout
-!!!  character(len=*),intent(in),optional :: comment
-!!!
-!!!  write(std_out, *)"Unused neat_crystal", crystal%natom, iout, trim(comment)
-!!!
-!!! end subroutine neat_crystal
-!!! !!***
+!!****f* m_crystal/poscar_free
+!! NAME
+!!  poscar_free
+!!
+!! FUNCTION
+!!  Free memory in poscar_t object.
+!!
+!! SOURCE
+
+subroutine poscar_free(self)
+
+!Arguments ------------------------------------
+ class(poscar_t),intent(inout) :: self
+
+!************************************************************************
+
+ ABI_SFREE(self%typat)
+ ABI_SFREE(self%xred)
+ ABI_SFREE(self%znucl)
+
+end subroutine poscar_free
+!!***
+
+!!****f* m_crystal/poscar_from_abistring
+!! NAME
+!!  poscar_from_abistring
+!!
+!! FUNCTION
+!!  Build object from string with seperator `sep`. Usually sep = newline = ch10
+!!
+!! SOURCE
+
+type(poscar_t) function poscar_from_string(string, sep) result(new)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: string
+ character(len=1),intent(in) :: sep
+
+!Local variables-------------------------------
+ integer :: start, beg, stp, cnt, iatom, itypat, ierr, ii
+ real(dp) :: scaling_constant
+ character(len=len(string)) :: line, system, symbol
+!arrays
+ integer,allocatable :: nattyp(:)
+ logical,allocatable :: duplicated(:)
+ character(len=5),allocatable :: symbols(:)
+ real(dp),allocatable :: xcart(:,:)
+
+!************************************************************************
+
+ ! Mg1 B2
+ ! 1.0
+ ! 2.672554 1.543000 0.000000
+ ! -2.672554 1.543000 0.000000
+ ! 0.000000 0.000000 3.523000
+ ! Mg B
+ ! 1 2
+ ! direct
+ ! 0.000000 0.000000 0.000000 Mg
+ ! 0.333333 0.666667 0.500000 B
+ ! 0.666667 0.333333 0.500000 B
+
+ write(std_out, "(3a)")" string:", ch10, trim(string)
+ cnt = 0; start = 0; iatom = 0
+ do
+   stp = index(string(start:), sep)
+   if (stp == 0) exit
+   if (stp == 1) then
+     ! Empty line
+     start = start + 2
+     ABI_CHECK(start < len_trim(string), sjoin("Invalid poscar string:", string))
+     continue
+   end if
+
+   stp = start + stp - 1
+   cnt = cnt + 1
+   line = string(start:stp-1)
+   write(std_out, "(2a,3(a,i0))")&
+     " Parsing line: `", trim(line), "` with cnt: ", cnt, ", start: ", start, ", stp: ", stp
+
+   select case (cnt)
+   case (1)
+     new%header = line
+
+   case (2)
+     read(line, *, err=10) scaling_constant
+     ABI_CHECK(scaling_constant > zero, sjoin("scaling constant must be > 0 but found:", ftoa(scaling_constant)))
+
+   case (3:5)
+     read(line, *, err=10) new%rprimd(:, cnt-2)
+
+   case (6)
+     ! Read line with the names of the atoms.
+     new%ntypat = 0
+     do ii=1,2
+       if (ii == 2) then
+         ABI_MALLOC(symbols, (new%ntypat))
+       end if
+       itypat = 0; beg = 1
+       do
+         ierr = next_token(line, beg, symbol)
+         !print *, "ierr:", ierr, "beg:", beg, "symbol:", trim(symbol)
+         if (ierr /= 0) exit
+
+         if (ii == 1) new%ntypat = new%ntypat + 1
+         if (ii == 2) then
+           itypat = itypat + 1
+           symbols(itypat) = symbol
+         end if
+       end do
+     end do
+
+     write(std_out, *)"ntypat: ", new%ntypat, "symbols: ", symbols
+
+     ! TODO: Handle case in which atoms are not grouped by type
+     ABI_MALLOC(duplicated, (new%ntypat))
+     duplicated = .False.
+     do itypat=1,new%ntypat-1
+       do ii=itypat+1, new%ntypat
+         if (symbols(itypat) == symbols(ii)) duplicated(ii) = .True.
+       end do
+     end do
+     if (any(duplicated)) then
+       NOT_IMPLEMENTED_ERROR()
+       !ABI_FREE(symbols)
+       !new%ntypat = count(.not. duplicated)
+       !ABI_MALLOC(symbols, (new%ntypat))
+     end if
+
+   case (7)
+      ! number of atoms of each type.
+      ! NOTE: Assuming ntypat == npsp thus alchemical mixing is not supported
+      ABI_MALLOC(nattyp, (new%ntypat))
+      read(line, *, err=10) nattyp
+      new%natom = sum(nattyp)
+      ABI_FREE(nattyp)
+
+      ! At this point, allocate Abinit variables.
+      ABI_MALLOC(new%typat, (new%natom))
+      ABI_MALLOC(new%znucl, (new%ntypat))
+      ABI_MALLOC(new%xred, (3, new%natom))
+
+      do itypat=1,new%ntypat
+        ! TODO: Capitalize symbols in atomdata_t
+        new%znucl(itypat) = symbol2znucl(symbols(itypat))
+      end do
+
+   case (8)
+     read(line, *, err=10) system
+     system = tolower(system)
+     if (system /= "cartesian" .and. system /= "direct") then
+       MSG_ERROR(sjoin("Expecting `cartesian` or `direct` for the coordinate system but got:", system))
+     end if
+
+   case (9:)
+     iatom = iatom + 1
+     ABI_CHECK(iatom <= new%natom, sjoin("iatom should be <= natom but:", itoa(iatom), ">", itoa(new%natom)))
+     read(line, *, err=10) new%xred(:, iatom), symbol
+     do itypat=1, new%ntypat
+       if (symbols(itypat) == symbol) then
+         new%typat(iatom) = itypat; exit
+       end if
+     end do
+     if (itypat == new%ntypat + 1) then
+       MSG_ERROR(sjoin("Cannot find symbol:", symbol, "in initial list. Check POSCAR string."))
+     end if
+   end select
+
+   start = stp + 1
+   ABI_CHECK(start < len_trim(string), sjoin("Error while parsing POSCAR string:", ch10, trim(string)))
+ end do
+
+ ! Convert ang -> bohr
+ new%rprimd = scaling_constant * new%rprimd / Bohr_Ang
+
+ if (system == "cartesian") then
+   ! Go from cartesian to reduced.
+   ABI_MALLOC(xcart, (3, new%natom))
+   xcart = new%xred
+   call xcart2xred(new%natom, new%rprimd, xcart, new%xred)
+   ABI_FREE(xcart)
+ end if
+
+ ABI_FREE(symbols)
+ ABI_FREE(duplicated)
+
+ return
+
+ 10 MSG_ERROR(sjoin("Error while parsing POSCAR string:", ch10, trim(string)))
+
+end function poscar_from_string
+!!***
+
+!!****f* m_crystal/poscar_from_filepath
+!! NAME
+!!  poscar_from_filepath
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+type(poscar_t) function poscar_from_filepath(filename, comm) result(new)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: filename
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+ integer,parameter :: master = 0
+ integer :: unt, ierr, cnt, my_rank
+ character(len=500) :: msg, line
+ character(len=strlen) :: string
+
+!************************************************************************
+
+ my_rank = xmpi_comm_rank(comm)
+ msg = ""
+
+ if (my_rank == master) then
+   if (open_file(filename, msg, newunit=unt, form='formatted', status='old', action="read") /= 0) then
+     MSG_ERROR(msg)
+   end if
+
+   ierr = 0; cnt = 0
+   do
+     ! Keeps reading lines until end of input file
+     read(unit=unt, fmt='(a)', iostat=ierr, iomsg=msg) line
+     if (ierr /= 0) exit
+     !ierr = read_string(string, unit) result(ierr)
+     if (len_trim(line) == 0) continue
+     ! store line in buffer and add EOL.
+     string(cnt+1:cnt+len_trim(line) + 1) = trim(line)//ch10
+     cnt = cnt + len_trim(line) + 1
+     if (ierr /= 0) exit
+   end do
+   close(unt)
+
+   ! Must exit because of EOF condition.
+   ABI_CHECK(ierr < 0, sjoin("IO-error:", msg))
+ end if
+
+ if (xmpi_comm_size(comm) > 1) call xmpi_bcast(string, master, comm, ierr)
+
+ new = poscar_from_string(string, ch10)
+
+end function poscar_from_filepath
+!!***
+
+!!****f* m_crystal/poscar_print_abivars
+!! NAME
+!!  poscar_print_abivars
+!!
+!! FUNCTION
+!!  Print Abinit variables corresponding to POSCAR
+!!
+!! SOURCE
+
+subroutine poscar_print_abivars(self, unit)
+
+!Arguments ------------------------------------
+ class(poscar_t),intent(in) :: self
+ integer,intent(in) :: unit
+
+!Local variables-------------------------------
+ integer :: ii
+
+!************************************************************************
+
+ if (unit == dev_null) return
+
+ write(unit, "(2a)")"# header: ", trim(self%header)
+ write(unit, "(a, i0)")" natom ", self%natom
+ write(unit, "(a, i0)")" ntypat ", self%ntypat
+ write(unit, sjoin("(a, ", itoa(self%natom), "(i0,1x))")) " typat ", self%typat
+ write(unit, sjoin("(a, ", itoa(self%ntypat), "(f5.1,1x))")) " znucl ", self%znucl
+ write(unit, "(a)")" rprimd "
+ do ii=1,3
+   write(unit, "(2x, 3(f11.7,1x))")self%rprimd(:, ii)
+ end do
+ write(unit, "(a)")" xred"
+ do ii=1,self%natom
+   write(unit, "(2x, 3(f11.7,1x))") self%xred(:, ii)
+ end do
+
+end subroutine poscar_print_abivars
+!!***
 
 END MODULE m_crystal
 !!***

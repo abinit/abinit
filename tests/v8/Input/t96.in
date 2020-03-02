@@ -59,6 +59,7 @@ occopt1? 7
 # Non-collinear case
  nspden 4  nspinor 2  
 #Computational parameters
+ tolvrs11 1.0d-7
  tolvrs 1.0d-8
  nstep  60
  ecut 5
@@ -73,7 +74,7 @@ occopt1? 7
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t96.out, tolnlines = 255, tolabs = 4.1, tolrel = 1.1, fld_options = -easy
+#%%   t96.out, tolnlines = 280, tolabs = 5.0, tolrel = 1.1, fld_options = -ridiculous
 #%% psp_files = 1h.pspnc
 #%% [paral_info]
 #%% max_nprocs = 1

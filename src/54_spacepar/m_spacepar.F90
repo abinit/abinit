@@ -7,7 +7,7 @@
 !!  Unlike the procedures in m_cgtools, the routines declared in this module can use mpi_type.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
+!!  Copyright (C) 2008-2020 ABINIT group (XG, BA, MT, DRH, DCA, GMR, MJV, JWZ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -336,11 +336,14 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
 !scalars
  integer,intent(in) :: cplex,izero,nfft
  real(dp),intent(in) :: gsqcut
+! REMEMBER to define the V_Coulomb type first before you uncomment this
+! For the moment we will leave optional the choice of cut-off technique 
+! type(vcoul_type), intent(in), optional :: icutcoul 
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: ngfft(18)
  real(dp),intent(in) :: rprimd(3,3),rhog(2,nfft)
- real(dp),intent(in),optional :: divgq0
+ real(dp),intent(inout),optional :: divgq0
  real(dp),intent(in),optional :: qpt(3)
  real(dp),intent(out) :: vhartr(cplex*nfft)
 
@@ -351,7 +354,7 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
  integer :: ig,ig1min,ig1,ig1max,ig2,ig2min,ig2max,ig3,ig3min,ig3max
  integer :: ii,ii1,ing,n1,n2,n3,qeq0,qeq05,me_fft,nproc_fft
  real(dp),parameter :: tolfix=1.000000001e0_dp
- real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,ucvol
+ real(dp) :: cutoff,den,gqg2p3,gqgm12,gqgm13,gqgm23,gs,gs2,gs3,ucvol,rcut
  character(len=500) :: message
 !arrays
  integer :: id(3)
@@ -426,6 +429,37 @@ subroutine hartre(cplex,gsqcut,izero,mpi_enreg,nfft,ngfft,rhog,rprimd,vhartr,&
 
  ABI_ALLOCATE(work1,(2,nfft))
  id1=n1/2+2;id2=n2/2+2;id3=n3/2+2
+
+ ! If there is a special treatment for the Coulomb singularity: 
+ ! Calculate it here only once before entering the loop over the grid points
+  if (PRESENT(divgq0)) then
+   rcut = (three*nfft*ucvol/four_pi)**(one/three)
+
+! SELECT CASE (singularity_mode)
+
+!   CASE('SPHERE') ! 0D 
+   ! Treatment of the divergence at the Gamma point
+   ! Spencer-Alavi scheme !!! ATT: Other methods will be gradually included
+   ! I am not completely convinced that this should be purely attributed to Spencer-Alavi  2008
+   ! since in Rozzi et al. 2006 they propose the same treatment for 0D case
+   divgq0 = two_pi*rcut**two
+
+!   CASE('CYLINDER') ! According to Rozzi et al 2006
+!     divgq0 = -pi*rcut**two*(2*log(rcut)-1)
+
+!   CASE('SURFACE') ! According to Rozzi et al 2006
+!     divgq0 = -two_pi*rcut**two
+
+!   CASE DEFAULT
+!     
+!     DEBUG
+!       call wrtout(std_out,"!!!No divergence treatment chosen!!!")
+!     ENDDEBUG
+
+! END SELECT
+ 
+ end if 
+
 
  ! Triple loop on each dimension
  do i3=1,n3

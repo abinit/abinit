@@ -6,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, FJ, MM, MT, SCE)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, FJ, MM, MT, SCE)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -97,6 +97,7 @@ contains
 !!   | wtatcon(3,natom,nconeq)=weights for atomic constraints
 !!  fock <type(fock_type)>= quantities to calculate Fock exact exchange
 !!  grchempottn(3,natom)=d(E_chemical potential)/d(xred) (hartree)
+!!  grcondft(3,natom)=d(E_constrainedDFT)/d(xred) (hartree)
 !!  grewtn(3,natom)=d(Ewald)/d(xred) (hartree)
 !!  grnl(3*natom)=gradients of Etot due to nonlocal contributions
 !!  grvdw(3,ngrvdw)=gradients of energy due to Van der Waals DFT-D dispersion (hartree)
@@ -173,7 +174,7 @@ contains
 !! SOURCE
 
 subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
-&                  forold,fred,grchempottn,gresid,grewtn,&
+&                  forold,fred,grchempottn,grcondft,gresid,grewtn,&
 &                  grhf,grnl,grvdw,grxc,gsqcut,indsym,&
 &                  maxfor,mgfft,mpi_enreg,n1xccc,n3xccc,&
 &                  nattyp,nfft,ngfft,ngrvdw,ntypat,&
@@ -197,7 +198,8 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !arrays
  integer,intent(in) :: atindx1(dtset%natom),indsym(4,dtset%nsym,dtset%natom)
  integer,intent(in) :: nattyp(ntypat),ngfft(18),symrec(3,3,dtset%nsym)
- real(dp),intent(in) :: grchempottn(3,dtset%natom),grewtn(3,dtset%natom),grvdw(3,ngrvdw),grnl(3*dtset%natom)
+ real(dp),intent(in) :: grchempottn(3,dtset%natom),grcondft(3,dtset%natom),grewtn(3,dtset%natom)
+ real(dp),intent(in) :: grvdw(3,ngrvdw),grnl(3*dtset%natom)
  real(dp),intent(in) :: ph1d(2,3*(2*mgfft+1)*dtset%natom)
  real(dp),intent(in) :: rhog(2,nfft),rhor(nfft,dtset%nspden),rprimd(3,3)
  real(dp),intent(in) :: vxc(nfft,dtset%nspden),vxctau(nfft,dtset%nspden,4*dtset%usekden)
@@ -527,8 +529,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
 !Collect grads of etot wrt reduced coordinates
 !This gives non-symmetrized Hellman-Feynman reduced gradients
  ABI_ALLOCATE(grtn,(3,dtset%natom))
- grtn(:,:)=grl(:,:)+grchempottn(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
-! grtn(:,:)=grl(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
+ grtn(:,:)=grl(:,:)+grchempottn(:,:)+grcondft(:,:)+grewtn(:,:)+synlgr(:,:)+grxc(:,:)
 
  if (usefock==1 .and. associated(fock)) then
    if (fock%fock_common%optfor) then
@@ -567,7 +568,7 @@ subroutine forces(atindx1,diffor,dtefield,dtset,favg,fcart,fock,&
    end if
  end if
  if (abs(ipositron)==1) then
-   grtn(:,:)=grtn(:,:)-grxc(:,:)-grchempottn(:,:)-grewtn(:,:)-gresid(:,:)-two*grl(:,:)
+   grtn(:,:)=grtn(:,:)-grxc(:,:)-grchempottn(:,:)-grcondft(:,:)-grewtn(:,:)-gresid(:,:)-two*grl(:,:)
 !  grtn(:,:)=grtn(:,:)-grxc(:,:)-grewtn(:,:)-gresid(:,:)-two*grl(:,:)
    grl(:,:)=-grl(:,:);grxc(:,:)=zero;gresid(:,:)=zero
    if (ngrvdw==dtset%natom) grtn(:,:)=grtn(:,:)-grvdw(:,:)

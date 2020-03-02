@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2014-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2014-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -25,7 +25,7 @@
 
 # Initialize Autoconf
 AC_PREREQ(2.62)
-AC_INIT([ABINIT-Bindings],[8.11.14],
+AC_INIT([ABINIT-Bindings],[9.0.1],
   [https://bugs.launchpad.net/abinit/],[abinit-bindings])
 AC_REVISION([Autotools support for the ABINIT Bindings])
 AC_CONFIG_AUX_DIR([config/gnu])

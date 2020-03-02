@@ -8,7 +8,7 @@
 !!  methods bound to the object.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, FB, GMR, VO, LR, RWG)
+!! Copyright (C) 2008-2020 ABINIT group (MG, FB, GMR, VO, LR, RWG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -411,11 +411,11 @@ end subroutine write_sigma_header
 !! SOURCE
 !!
 
-subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt,use_yaml)
+subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ikcalc,ikibz, use_yaml
+ integer,intent(in) :: ikcalc,ikibz
  type(ebands_t),intent(in) :: KS_BSt
  type(sigparams_t),intent(in) :: Sigp
  type(sigma_t),intent(in) :: Sr
@@ -457,11 +457,8 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt,use_yaml)
      '    Z     dSigC/dE  Sig[E(N)]  DeltaE  E(N)_pert E(N)_diago'
    end if
    call wrtout(std_out,msg,'COLL')
-   !call wrtout(ab_out,msg,'COLL')
 
-   ydoc = yamldoc_open('SelfEnergy_ee', "", width=11, real_fmt='(3f8.3)')
-   ydoc%use_yaml = use_yaml
-   ydoc%use_yaml = 1
+   ydoc = yamldoc_open('SelfEnergy_ee', width=11, real_fmt='(3f8.3)')
    call ydoc%add_real1d('kpoint', Sigp%kptgw(:,ikcalc))
    call ydoc%add_int('spin', is, int_fmt="(i1)")
    call ydoc%add_real('KS_gap', Sr%e0gap(ikibz,is)*Ha_eV)
@@ -516,13 +513,10 @@ subroutine write_sigma_results(ikcalc,ikibz,Sigp,Sr,KS_BSt,use_yaml)
      ! If all the gaps are zero, this means that it could not be computed in the calling routine
      write(msg,'(2a,f8.3)')ch10,' E^0_gap       ',Sr%e0gap(ikibz,is)*Ha_eV
      call wrtout(std_out,msg,'COLL')
-     !call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,f8.3)')      ' E^GW_gap      ',Sr%egwgap(ikibz,is)*Ha_eV
      call wrtout(std_out,msg,'COLL')
-     !call wrtout(ab_out,msg,'COLL')
      write(msg,'(a,f8.3,a)')    ' DeltaE^GW_gap ',Sr%degwgap(ikibz,is)*Ha_eV,ch10
      call wrtout(std_out,msg,'COLL')
-     !call wrtout(ab_out,msg,'COLL')
    end if
 
    call ydoc%write_and_free(ab_out)
@@ -713,7 +707,8 @@ subroutine print_Sigma_perturbative(Sr,ik_ibz,iband,isp,unit,prtvol,mode_paral,w
     end if
   end if
 
- else  ! PAW+U+GW calculation.
+ else
+   ! PAW+U+GW calculation.
    ABI_CHECK(Sr%nsig_ab==1,'LDA+U with spinor not implemented')
    write(msg,'(i5,10f8.3)')                   &
          iband,                               &
@@ -874,7 +869,8 @@ subroutine print_Sigma_QPSC(Sr,ik_ibz,iband,isp,KS_BSt,unit,prtvol,mode_paral,yd
      end if
    end if
 
- else ! PAW+U+GW calculation.
+ else
+   ! PAW+U+GW calculation.
    MSG_ERROR("PAW+U+GW not yet implemented")
  end if
 

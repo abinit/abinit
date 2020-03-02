@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1619,6 +1619,7 @@ subroutine kramerskronig_self(self,selflimit,selfhdc,filapp)
  &                 selfhdc(iatom)%mat(im,im1,isppol,ispinor,ispinor1))
                  self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
   &                       =cmplx(selftemp_re(ifreq),selftemp_imag(ifreq),kind=dp)/two
+  !&                       =cmplx(0.d0,selftemp_imag(ifreq),kind=dp)/two
 !  &                       =cmplx(selftemp_re(ifreq),0.d0,kind=dp)/two
   !               self%oper(ifreq)%matlu(iatom)%mat(im,im1,isppol,ispinor,ispinor1)&
   !&                       =cmplx(selftemp_re(ifreq),0.d0,kind=dp)/two

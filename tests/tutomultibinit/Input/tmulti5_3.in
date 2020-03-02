@@ -1,6 +1,5 @@
 ##############################################################################
-#Test for multibinit, just read xml and generate the effective potential into XML file
-# without regeneration of dipole-dipole just reading xml
+#Test for multibinit, 1-D spin chain, with 1st nearest neighbor AFM exchange and DMI
 ##############################################################################
 prt_model = 0
 

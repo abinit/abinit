@@ -8,7 +8,7 @@
 !!  operations of the space group etc.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
+!! Copyright (C) 2008-2020 ABINIT group (MG, XG, GMR, VO, LR, RWG, YMN, RS, TR, DC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

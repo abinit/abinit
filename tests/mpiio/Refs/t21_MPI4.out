@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h49 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 17h14 )
   
-- input  file    -> t21.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/mpiio_t21_MPI4/t21.in
 - output file    -> t21_MPI4.out
 - root for input  files -> t21_MPI4i
 - root for output files -> t21_MPI4o
@@ -394,1319 +394,32 @@ P           mkmem8          5
 
  chkinp: Checking input parameters for consistency, jdtset=   1.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=   2.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=   3.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=   4.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=   5.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=   6.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
  chkinp: Checking input parameters for consistency, jdtset=   7.
 
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
  chkinp: Checking input parameters for consistency, jdtset=   8.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    2
-   symrel is  -1  0  0  0 -1  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    4
-   symrel is  -1  0  0  0  0 -1  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    6
-   symrel is   0 -1  0  0  0 -1 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number    8
-   symrel is   0 -1  0 -1  0  0  0  0 -1
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   10
-   symrel is   0  0 -1 -1  0  0  0 -1  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
-
- chkinp: WARNING -
-   Chksymbreak=1 . Found potentially symmetry-breaking value of tnons, 
-   which is neither a rational fraction in 1/8th nor in 1/12th :
-   for the symmetry number   12
-   symrel is   0  0 -1  0 -1  0 -1  0  0
-   tnons is     2.200000E-01    2.200000E-01    2.200000E-01
-   Please, read the description of the input variable chksymbreak,
-   then, if you feel confident, you might switch it to zero, or consult with the forum.
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    4
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 1, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 106, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   0.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 1, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
@@ -1729,8 +442,8 @@ P           mkmem8          5
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.phoney_mod
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/14si.phoney_mod
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.phoney_mod
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/14si.phoney_mod
 - 2 bohr rc 15 hartree ec psp for silicon 8 November 1991 (new)
 - 14.00000   4.00000    980710                znucl, zion, pspdat
     5    3    2    2       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1755,6 +468,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -7.2427985059485    -7.243E+00 1.079E-03 4.514E+01
  ETOT  2  -7.2578387007116    -1.504E-02 5.212E-07 2.804E+00
@@ -1772,6 +491,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
   sigma(1 1)= -1.27964518E-03  sigma(3 2)= -2.72091505E-04
   sigma(2 2)= -1.27964518E-03  sigma(3 1)= -2.72091505E-04
   sigma(3 3)= -1.27964518E-03  sigma(2 1)= -2.72091505E-04
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae: -1.137E-13, res2:  3.749E-12, residm:  4.867E-16, diffor: null, }
+etotal    :  -7.25858483E+00
+entropy   :   0.00000000E+00
+fermie    :   2.92768399E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -1.27964518E-03,  -2.72091505E-04,  -2.72091505E-04, ]
+- [ -2.72091505E-04,  -1.27964518E-03,  -2.72091505E-04, ]
+- [ -2.72091505E-04,  -2.72091505E-04,  -1.27964518E-03, ]
+pressure_GPa:   3.7648E+01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.2000E-01,   2.2000E-01,   2.2000E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -1.08336442E-01,  -1.08336442E-01,  -1.08336442E-01, ]
+- [  1.08336442E-01,   1.08336442E-01,   1.08336442E-01, ]
+force_length_stats: {min:   1.87644222E-01, max:   1.87644222E-01, mean:   1.87644222E-01, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1817,22 +565,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
   -5.14299    5.44664    7.96663    7.96663    8.36806    8.36806    9.64528   10.40011
   13.55483   14.54558   14.54558   16.53844
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.06784172385295E+00
-    Hartree energy  =  8.43091006650371E-01
-    XC energy       = -2.50122326182724E+00
-    Ewald energy    = -8.26608138368135E+00
-    PspCore energy  = -1.04593088893961E-01
-    Loc. psp. energy= -2.93127395018919E+00
-    NL   psp  energy=  1.63365412075982E+00
-    >>>>>>>>> Etotal= -7.25858483332859E+00
-
- Other information on the energy :
-    Total energy(eV)= -1.97516138180078E+02 ; Band energy (Ha)=   1.1933916874E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  4.06784172385295E+00
+hartree             :  8.43091006650371E-01
+xc                  : -2.50122326182724E+00
+Ewald energy        : -8.26608138368135E+00
+psp_core            : -1.04593088893961E-01
+local_psp           : -2.93127395018919E+00
+non_local_psp       :  1.63365412075982E+00
+total_energy        : -7.25858483332859E+00
+total_energy_eV     : -1.97516138180078E+02
+band_energy         :  1.19339168738116E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1847,7 +593,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    4
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 1, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 106, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 1, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
@@ -1874,6 +629,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -7.2427985059485    -7.243E+00 1.079E-03 4.514E+01
  ETOT  2  -7.2578387007116    -1.504E-02 5.212E-07 2.804E+00
@@ -1891,6 +652,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
   sigma(1 1)= -1.27964518E-03  sigma(3 2)= -2.72091505E-04
   sigma(2 2)= -1.27964518E-03  sigma(3 1)= -2.72091505E-04
   sigma(3 3)= -1.27964518E-03  sigma(2 1)= -2.72091505E-04
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae: -1.137E-13, res2:  3.749E-12, residm:  4.867E-16, diffor: null, }
+etotal    :  -7.25858483E+00
+entropy   :   0.00000000E+00
+fermie    :   3.01007191E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -1.27964518E-03,  -2.72091505E-04,  -2.72091505E-04, ]
+- [ -2.72091505E-04,  -1.27964518E-03,  -2.72091505E-04, ]
+- [ -2.72091505E-04,  -2.72091505E-04,  -1.27964518E-03, ]
+pressure_GPa:   3.7648E+01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.2000E-01,   2.2000E-01,   2.2000E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -1.08336442E-01,  -1.08336442E-01,  -1.08336442E-01, ]
+- [  1.08336442E-01,   1.08336442E-01,   1.08336442E-01, ]
+force_length_stats: {min:   1.87644222E-01, max:   1.87644222E-01, mean:   1.87644222E-01, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1939,25 +729,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
   -5.14299    5.44664    7.96663    7.96663    8.36806    8.36806    9.64528   10.40011
   13.55483   14.54558   14.54558   16.53844
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.06784172385295E+00
-    Hartree energy  =  8.43091006650371E-01
-    XC energy       = -2.50122326182724E+00
-    Ewald energy    = -8.26608138368135E+00
-    PspCore energy  = -1.04593088893961E-01
-    Loc. psp. energy= -2.93127395018919E+00
-    NL   psp  energy=  1.63365412075982E+00
-    >>>>> Internal E= -7.25858483332859E+00
-
-    -kT*entropy     = -7.55261880796144E-19
-    >>>>>>>>> Etotal= -7.25858483332859E+00
-
- Other information on the energy :
-    Total energy(eV)= -1.97516138180078E+02 ; Band energy (Ha)=   1.1933916874E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 2, }
+comment             : Components of total free energy in Hartree
+kinetic             :  4.06784172385295E+00
+hartree             :  8.43091006650371E-01
+xc                  : -2.50122326182724E+00
+Ewald energy        : -8.26608138368135E+00
+psp_core            : -1.04593088893961E-01
+local_psp           : -2.93127395018919E+00
+non_local_psp       :  1.63365412075982E+00
+internal            : -7.25858483332859E+00
+'-kT*entropy'       : -7.55261880796144E-19
+total_energy        : -7.25858483332859E+00
+total_energy_eV     : -1.97516138180078E+02
+band_energy         :  1.19339168738116E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1972,7 +759,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    4
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 5, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 107, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   0.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 1, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
@@ -1999,6 +795,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -7.8941508694174    -7.894E+00 3.828E-04 1.259E+01
  ETOT  2  -7.8992884863621    -5.138E-03 2.015E-05 4.236E-01
@@ -2016,6 +818,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
   sigma(1 1)=  2.33256068E-05  sigma(3 2)= -2.51514433E-04
   sigma(2 2)=  2.33256068E-05  sigma(3 1)= -2.51514433E-04
   sigma(3 3)=  2.33256068E-05  sigma(2 1)= -2.51514433E-04
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae: -3.553E-14, res2:  1.095E-12, residm:  3.517E-08, diffor: null, }
+etotal    :  -7.89941901E+00
+entropy   :   0.00000000E+00
+fermie    :   2.24581389E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.33256068E-05,  -2.51514433E-04,  -2.51514433E-04, ]
+- [ -2.51514433E-04,   2.33256068E-05,  -2.51514433E-04, ]
+- [ -2.51514433E-04,  -2.51514433E-04,   2.33256068E-05, ]
+pressure_GPa:  -6.8626E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.2000E-01,   2.2000E-01,   2.2000E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -5.85164782E-02,  -5.85164782E-02,  -5.85164782E-02, ]
+- [  5.85164782E-02,   5.85164782E-02,   5.85164782E-02, ]
+force_length_stats: {min:   1.01353513E-01, max:   1.01353513E-01, mean:   1.01353513E-01, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2065,22 +896,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.06725042820958E+00
-    Hartree energy  =  5.78444795082999E-01
-    XC energy       = -2.38482548152874E+00
-    Ewald energy    = -8.26608138368135E+00
-    PspCore energy  = -1.04593088893961E-01
-    Loc. psp. energy= -2.57393839943798E+00
-    NL   psp  energy=  1.78432411596712E+00
-    >>>>>>>>> Etotal= -7.89941901428233E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.14954123068619E+02 ; Band energy (Ha)=   3.2473766995E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 3, }
+comment             : Components of total free energy in Hartree
+kinetic             :  3.06725042820958E+00
+hartree             :  5.78444795082999E-01
+xc                  : -2.38482548152874E+00
+Ewald energy        : -8.26608138368135E+00
+psp_core            : -1.04593088893961E-01
+local_psp           : -2.57393839943798E+00
+non_local_psp       :  1.78432411596712E+00
+total_energy        : -7.89941901428233E+00
+total_energy_eV     : -2.14954123068619E+02
+band_energy         :  3.24737669951459E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2095,7 +924,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    4
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 5, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 107, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 1, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
@@ -2122,6 +960,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -7.8941508694174    -7.894E+00 3.828E-04 1.259E+01
  ETOT  2  -7.8992884863621    -5.138E-03 2.015E-05 4.236E-01
@@ -2139,6 +983,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
   sigma(1 1)=  2.33256068E-05  sigma(3 2)= -2.51514433E-04
   sigma(2 2)=  2.33256068E-05  sigma(3 1)= -2.51514433E-04
   sigma(3 3)=  2.33256068E-05  sigma(2 1)= -2.51514433E-04
+
+
+--- !ResultsGS
+iteration_state: {dtset: 4, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae: -3.553E-14, res2:  1.095E-12, residm:  3.517E-08, diffor: null, }
+etotal    :  -7.89941901E+00
+entropy   :   0.00000000E+00
+fermie    :   2.36352156E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.33256068E-05,  -2.51514433E-04,  -2.51514433E-04, ]
+- [ -2.51514433E-04,   2.33256068E-05,  -2.51514433E-04, ]
+- [ -2.51514433E-04,  -2.51514433E-04,   2.33256068E-05, ]
+pressure_GPa:  -6.8626E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.2000E-01,   2.2000E-01,   2.2000E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -5.85164782E-02,  -5.85164782E-02,  -5.85164782E-02, ]
+- [  5.85164782E-02,   5.85164782E-02,   5.85164782E-02, ]
+force_length_stats: {min:   1.01353513E-01, max:   1.01353513E-01, mean:   1.01353513E-01, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2191,25 +1064,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.06725042820958E+00
-    Hartree energy  =  5.78444795082999E-01
-    XC energy       = -2.38482548152874E+00
-    Ewald energy    = -8.26608138368135E+00
-    PspCore energy  = -1.04593088893961E-01
-    Loc. psp. energy= -2.57393839943798E+00
-    NL   psp  energy=  1.78432411596712E+00
-    >>>>> Internal E= -7.89941901428233E+00
-
-    -kT*entropy     = -7.55261880796144E-19
-    >>>>>>>>> Etotal= -7.89941901428233E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.14954123068619E+02 ; Band energy (Ha)=   3.2473766995E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 4, }
+comment             : Components of total free energy in Hartree
+kinetic             :  3.06725042820958E+00
+hartree             :  5.78444795082999E-01
+xc                  : -2.38482548152874E+00
+Ewald energy        : -8.26608138368135E+00
+psp_core            : -1.04593088893961E-01
+local_psp           : -2.57393839943798E+00
+non_local_psp       :  1.78432411596712E+00
+internal            : -7.89941901428233E+00
+'-kT*entropy'       : -7.55261880796144E-19
+total_energy        : -7.89941901428233E+00
+total_energy_eV     : -2.14954123068619E+02
+band_energy         :  3.24737669951459E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2224,7 +1094,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    4
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 1, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 106, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   0.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 3, optcell: 0, iscf: 7, paral_kgb: 1, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
@@ -2259,6 +1138,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 5, itime: 1, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.2427985059485    -7.243E+00 1.079E-03 4.514E+01 1.075E-01 1.075E-01
  ETOT  2  -7.2578387007116    -1.504E-02 5.212E-07 2.804E+00 1.065E-03 1.086E-01
@@ -2275,6 +1160,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
   sigma(1 1)= -1.27964575E-03  sigma(3 2)= -2.72090811E-04
   sigma(2 2)= -1.27964575E-03  sigma(3 1)= -2.72090811E-04
   sigma(3 3)= -1.27964575E-03  sigma(2 1)= -2.72090811E-04
+
+
+--- !ResultsGS
+iteration_state: {dtset: 5, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae: -5.716E-12, res2:  5.681E-10, residm:  1.124E-14, diffor:  1.736E-07, }
+etotal    :  -7.25858483E+00
+entropy   :   0.00000000E+00
+fermie    :   2.92768397E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -1.27964575E-03,  -2.72090811E-04,  -2.72090811E-04, ]
+- [ -2.72090811E-04,  -1.27964575E-03,  -2.72090811E-04, ]
+- [ -2.72090811E-04,  -2.72090811E-04,  -1.27964575E-03, ]
+pressure_GPa:   3.7648E+01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.2000E-01,   2.2000E-01,   2.2000E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -1.08336465E-01,  -1.08336465E-01,  -1.08336465E-01, ]
+- [  1.08336465E-01,   1.08336465E-01,   1.08336465E-01, ]
+force_length_stats: {min:   1.87644262E-01, max:   1.87644262E-01, mean:   1.87644262E-01, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2303,6 +1217,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 5, itime: 2, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.3010345179412    -7.301E+00 2.317E-09 4.553E-01 8.435E-02 2.398E-02
  ETOT  2  -7.3011176931497    -8.318E-05 1.024E-11 9.658E-03 2.982E-03 2.697E-02
@@ -2319,6 +1239,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
   sigma(1 1)= -1.13046490E-03  sigma(3 2)= -6.16436784E-05
   sigma(2 2)= -1.13046490E-03  sigma(3 1)= -6.16436784E-05
   sigma(3 3)= -1.13046490E-03  sigma(2 1)= -6.16436784E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 5, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae: -2.096E-13, res2:  2.515E-12, residm:  5.361E-17, diffor:  1.139E-08, }
+etotal    :  -7.30111907E+00
+entropy   :   0.00000000E+00
+fermie    :   2.69769380E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -1.13046490E-03,  -6.16436784E-05,  -6.16436784E-05, ]
+- [ -6.16436784E-05,  -1.13046490E-03,  -6.16436784E-05, ]
+- [ -6.16436784E-05,  -6.16436784E-05,  -1.13046490E-03, ]
+pressure_GPa:   3.3259E+01
+xred      :
+- [ -1.0451E-02,  -1.0451E-02,  -1.0451E-02, Si]
+- [  2.3045E-01,   2.3045E-01,   2.3045E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -2.74266334E-02,  -2.74266334E-02,  -2.74266334E-02, ]
+- [  2.74266334E-02,   2.74266334E-02,   2.74266334E-02, ]
+force_length_stats: {min:   4.75043225E-02, max:   4.75043225E-02, mean:   4.75043225E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2351,6 +1300,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 5, itime: 3, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.3049046157340    -7.305E+00 2.910E-09 1.310E-02 2.838E-02 9.533E-04
  ETOT  2  -7.3049057831084    -1.167E-06 6.474E-13 2.502E-04 4.337E-05 9.099E-04
@@ -2366,6 +1321,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
   sigma(1 1)= -1.11809344E-03  sigma(3 2)=  1.98324816E-06
   sigma(2 2)= -1.11809344E-03  sigma(3 1)=  1.98324816E-06
   sigma(3 3)= -1.11809344E-03  sigma(2 1)=  1.98324816E-06
+
+
+--- !ResultsGS
+iteration_state: {dtset: 5, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae: -1.661E-13, res2:  5.118E-12, residm:  8.130E-16, diffor:  7.283E-09, }
+etotal    :  -7.30490583E+00
+entropy   :   0.00000000E+00
+fermie    :   2.60653233E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -1.11809344E-03,   1.98324816E-06,   1.98324816E-06, ]
+- [  1.98324816E-06,  -1.11809344E-03,   1.98324816E-06, ]
+- [  1.98324816E-06,   1.98324816E-06,  -1.11809344E-03, ]
+pressure_GPa:   3.2895E+01
+xred      :
+- [ -1.5162E-02,  -1.5162E-02,  -1.5162E-02, Si]
+- [  2.3516E-01,   2.3516E-01,   2.3516E-01, Si]
+cartesian_forces: # hartree/bohr
+- [  9.10677879E-04,   9.10677879E-04,   9.10677879E-04, ]
+- [ -9.10677879E-04,  -9.10677879E-04,  -9.10677879E-04, ]
+force_length_stats: {min:   1.57734036E-03, max:   1.57734036E-03, mean:   1.57734036E-03, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2398,6 +1382,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 5, itime: 4, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.3049104216011    -7.305E+00 4.323E-12 1.368E-06 9.120E-04 1.366E-06
  ETOT  2  -7.3049104217182    -1.170E-10 1.669E-16 2.499E-08 1.828E-07 1.548E-06
@@ -2410,6 +1400,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
   sigma(1 1)= -1.11808120E-03  sigma(3 2)= -3.29226570E-09
   sigma(2 2)= -1.11808120E-03  sigma(3 1)= -3.29226571E-09
   sigma(3 3)= -1.11808120E-03  sigma(2 1)= -3.29226571E-09
+
+
+--- !ResultsGS
+iteration_state: {dtset: 5, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae: -3.885E-12, res2:  1.010E-09, residm:  7.524E-16, diffor:  6.024E-08, }
+etotal    :  -7.30491042E+00
+entropy   :   0.00000000E+00
+fermie    :   2.59965066E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -1.11808120E-03,  -3.29226571E-09,  -3.29226571E-09, ]
+- [ -3.29226571E-09,  -1.11808120E-03,  -3.29226570E-09, ]
+- [ -3.29226571E-09,  -3.29226570E-09,  -1.11808120E-03, ]
+pressure_GPa:   3.2895E+01
+xred      :
+- [ -1.5000E-02,  -1.5000E-02,  -1.5000E-02, Si]
+- [  2.3500E-01,   2.3500E-01,   2.3500E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -1.60861911E-06,  -1.60861911E-06,  -1.60861911E-06, ]
+- [  1.60861911E-06,   1.60861911E-06,   1.60861911E-06, ]
+force_length_stats: {min:   2.78621003E-06, max:   2.78621003E-06, mean:   2.78621003E-06, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2479,22 +1498,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
   -4.96279    7.07397    7.07401    7.07401    9.20082    9.20082    9.20084    9.85630
   13.72279   14.38942   14.38942   17.25034
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.03530259074679E+00
-    Hartree energy  =  8.42601639634120E-01
-    XC energy       = -2.50138411293230E+00
-    Ewald energy    = -8.31456383428405E+00
-    PspCore energy  = -1.04593088893961E-01
-    Loc. psp. energy= -2.86840001941851E+00
-    NL   psp  energy=  1.60612640342586E+00
-    >>>>>>>>> Etotal= -7.30491042172205E+00
-
- Other information on the energy :
-    Total energy(eV)= -1.98776721548393E+02 ; Band energy (Ha)=   1.1950293521E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 5, itime: 4, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  4.03530259074679E+00
+hartree             :  8.42601639634120E-01
+xc                  : -2.50138411293230E+00
+Ewald energy        : -8.31456383428405E+00
+psp_core            : -1.04593088893961E-01
+local_psp           : -2.86840001941851E+00
+non_local_psp       :  1.60612640342586E+00
+total_energy        : -7.30491042172205E+00
+total_energy_eV     : -1.98776721548393E+02
+band_energy         :  1.19502935209407E+00
+...
 
  rms coord change=  1.5000E-02   atom, delta coord (reduced):
      1       -0.014999775783     -0.014999775783     -0.014999775783
@@ -2512,7 +1529,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ================================================================================
 == DATASET  6 ==================================================================
--   nproc =    4
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 6, }
+dimensions: {natom: 2, nkpt: 1, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 106, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 0, ionmov: 3, optcell: 0, iscf: 7, paral_kgb: 1, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
@@ -2547,6 +1573,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 6, itime: 1, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.2427985059485    -7.243E+00 1.079E-03 4.514E+01 1.075E-01 1.075E-01
  ETOT  2  -7.2578387007116    -1.504E-02 5.212E-07 2.804E+00 1.065E-03 1.086E-01
@@ -2563,6 +1595,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
   sigma(1 1)= -1.27964575E-03  sigma(3 2)= -2.72090811E-04
   sigma(2 2)= -1.27964575E-03  sigma(3 1)= -2.72090811E-04
   sigma(3 3)= -1.27964575E-03  sigma(2 1)= -2.72090811E-04
+
+
+--- !ResultsGS
+iteration_state: {dtset: 6, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae: -5.716E-12, res2:  5.681E-10, residm:  1.124E-14, diffor:  1.736E-07, }
+etotal    :  -7.25858483E+00
+entropy   :   0.00000000E+00
+fermie    :   3.01007147E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -1.27964575E-03,  -2.72090811E-04,  -2.72090811E-04, ]
+- [ -2.72090811E-04,  -1.27964575E-03,  -2.72090811E-04, ]
+- [ -2.72090811E-04,  -2.72090811E-04,  -1.27964575E-03, ]
+pressure_GPa:   3.7648E+01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.2000E-01,   2.2000E-01,   2.2000E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -1.08336465E-01,  -1.08336465E-01,  -1.08336465E-01, ]
+- [  1.08336465E-01,   1.08336465E-01,   1.08336465E-01, ]
+force_length_stats: {min:   1.87644262E-01, max:   1.87644262E-01, mean:   1.87644262E-01, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2591,6 +1652,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 6, itime: 2, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.3010345179412    -7.301E+00 2.317E-09 4.553E-01 8.435E-02 2.398E-02
  ETOT  2  -7.3011176931497    -8.318E-05 1.024E-11 9.658E-03 2.982E-03 2.697E-02
@@ -2607,6 +1674,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
   sigma(1 1)= -1.13046490E-03  sigma(3 2)= -6.16436784E-05
   sigma(2 2)= -1.13046490E-03  sigma(3 1)= -6.16436784E-05
   sigma(3 3)= -1.13046490E-03  sigma(2 1)= -6.16436784E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 6, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae: -2.096E-13, res2:  2.515E-12, residm:  5.361E-17, diffor:  1.139E-08, }
+etotal    :  -7.30111907E+00
+entropy   :   0.00000000E+00
+fermie    :   3.24866611E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -1.13046490E-03,  -6.16436784E-05,  -6.16436784E-05, ]
+- [ -6.16436784E-05,  -1.13046490E-03,  -6.16436784E-05, ]
+- [ -6.16436784E-05,  -6.16436784E-05,  -1.13046490E-03, ]
+pressure_GPa:   3.3259E+01
+xred      :
+- [ -1.0451E-02,  -1.0451E-02,  -1.0451E-02, Si]
+- [  2.3045E-01,   2.3045E-01,   2.3045E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -2.74266334E-02,  -2.74266334E-02,  -2.74266334E-02, ]
+- [  2.74266334E-02,   2.74266334E-02,   2.74266334E-02, ]
+force_length_stats: {min:   4.75043225E-02, max:   4.75043225E-02, mean:   4.75043225E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2639,6 +1735,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 6, itime: 3, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.3049046157340    -7.305E+00 2.910E-09 1.310E-02 2.838E-02 9.533E-04
  ETOT  2  -7.3049057831084    -1.167E-06 6.474E-13 2.502E-04 4.337E-05 9.099E-04
@@ -2654,6 +1756,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
   sigma(1 1)= -1.11809344E-03  sigma(3 2)=  1.98324816E-06
   sigma(2 2)= -1.11809344E-03  sigma(3 1)=  1.98324816E-06
   sigma(3 3)= -1.11809344E-03  sigma(2 1)=  1.98324816E-06
+
+
+--- !ResultsGS
+iteration_state: {dtset: 6, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae: -1.661E-13, res2:  5.118E-12, residm:  8.130E-16, diffor:  7.283E-09, }
+etotal    :  -7.30490583E+00
+entropy   :   0.00000000E+00
+fermie    :   3.29459133E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -1.11809344E-03,   1.98324816E-06,   1.98324816E-06, ]
+- [  1.98324816E-06,  -1.11809344E-03,   1.98324816E-06, ]
+- [  1.98324816E-06,   1.98324816E-06,  -1.11809344E-03, ]
+pressure_GPa:   3.2895E+01
+xred      :
+- [ -1.5162E-02,  -1.5162E-02,  -1.5162E-02, Si]
+- [  2.3516E-01,   2.3516E-01,   2.3516E-01, Si]
+cartesian_forces: # hartree/bohr
+- [  9.10677879E-04,   9.10677879E-04,   9.10677879E-04, ]
+- [ -9.10677879E-04,  -9.10677879E-04,  -9.10677879E-04, ]
+force_length_stats: {min:   1.57734036E-03, max:   1.57734036E-03, mean:   1.57734036E-03, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2686,6 +1817,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 6, itime: 4, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.3049104216011    -7.305E+00 4.323E-12 1.368E-06 9.120E-04 1.366E-06
  ETOT  2  -7.3049104217182    -1.170E-10 1.669E-16 2.499E-08 1.828E-07 1.548E-06
@@ -2698,6 +1835,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
   sigma(1 1)= -1.11808120E-03  sigma(3 2)= -3.29226570E-09
   sigma(2 2)= -1.11808120E-03  sigma(3 1)= -3.29226571E-09
   sigma(3 3)= -1.11808120E-03  sigma(2 1)= -3.29226571E-09
+
+
+--- !ResultsGS
+iteration_state: {dtset: 6, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae: -3.885E-12, res2:  1.010E-09, residm:  7.524E-16, diffor:  6.024E-08, }
+etotal    :  -7.30491042E+00
+entropy   :   0.00000000E+00
+fermie    :   3.29319495E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -1.11808120E-03,  -3.29226571E-09,  -3.29226571E-09, ]
+- [ -3.29226571E-09,  -1.11808120E-03,  -3.29226570E-09, ]
+- [ -3.29226571E-09,  -3.29226570E-09,  -1.11808120E-03, ]
+pressure_GPa:   3.2895E+01
+xred      :
+- [ -1.5000E-02,  -1.5000E-02,  -1.5000E-02, Si]
+- [  2.3500E-01,   2.3500E-01,   2.3500E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -1.60861911E-06,  -1.60861911E-06,  -1.60861911E-06, ]
+- [  1.60861911E-06,   1.60861911E-06,   1.60861911E-06, ]
+force_length_stats: {min:   2.78621003E-06, max:   2.78621003E-06, mean:   2.78621003E-06, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2770,25 +1936,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
   -4.96279    7.07397    7.07401    7.07401    9.20082    9.20082    9.20084    9.85630
   13.72279   14.38942   14.38942   17.25034
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.03530259074679E+00
-    Hartree energy  =  8.42601639634120E-01
-    XC energy       = -2.50138411293230E+00
-    Ewald energy    = -8.31456383428405E+00
-    PspCore energy  = -1.04593088893961E-01
-    Loc. psp. energy= -2.86840001941851E+00
-    NL   psp  energy=  1.60612640342586E+00
-    >>>>> Internal E= -7.30491042172205E+00
-
-    -kT*entropy     = -7.55261880796144E-19
-    >>>>>>>>> Etotal= -7.30491042172205E+00
-
- Other information on the energy :
-    Total energy(eV)= -1.98776721548393E+02 ; Band energy (Ha)=   1.1950293521E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 6, itime: 4, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  4.03530259074679E+00
+hartree             :  8.42601639634120E-01
+xc                  : -2.50138411293230E+00
+Ewald energy        : -8.31456383428405E+00
+psp_core            : -1.04593088893961E-01
+local_psp           : -2.86840001941851E+00
+non_local_psp       :  1.60612640342586E+00
+internal            : -7.30491042172205E+00
+'-kT*entropy'       : -7.55261880796144E-19
+total_energy        : -7.30491042172205E+00
+total_energy_eV     : -1.98776721548393E+02
+band_energy         :  1.19502935209407E+00
+...
 
  rms coord change=  1.5000E-02   atom, delta coord (reduced):
      1       -0.014999775783     -0.014999775783     -0.014999775783
@@ -2806,7 +1969,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     106.000     106.000
 
 ================================================================================
 == DATASET  7 ==================================================================
--   nproc =    4
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 7, }
+dimensions: {natom: 2, nkpt: 5, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 107, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   0.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 3, optcell: 0, iscf: 7, paral_kgb: 1, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
@@ -2841,6 +2013,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 7, itime: 1, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-07, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.8941508694174    -7.894E+00 3.828E-04 1.259E+01 5.631E-02 5.631E-02
  ETOT  2  -7.8992884863621    -5.138E-03 2.015E-05 4.236E-01 2.856E-03 5.917E-02
@@ -2859,6 +2037,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
   sigma(1 1)=  2.33256311E-05  sigma(3 2)= -2.51514458E-04
   sigma(2 2)=  2.33256311E-05  sigma(3 1)= -2.51514458E-04
   sigma(3 3)=  2.33256311E-05  sigma(2 1)= -2.51514458E-04
+
+
+--- !ResultsGS
+iteration_state: {dtset: 7, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae:  2.576E-14, res2:  4.237E-15, residm:  3.973E-08, diffor:  3.854E-10, }
+etotal    :  -7.89941901E+00
+entropy   :   0.00000000E+00
+fermie    :   2.24581390E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.33256311E-05,  -2.51514458E-04,  -2.51514458E-04, ]
+- [ -2.51514458E-04,   2.33256311E-05,  -2.51514458E-04, ]
+- [ -2.51514458E-04,  -2.51514458E-04,   2.33256311E-05, ]
+pressure_GPa:  -6.8626E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.2000E-01,   2.2000E-01,   2.2000E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -5.85164778E-02,  -5.85164778E-02,  -5.85164778E-02, ]
+- [  5.85164778E-02,   5.85164778E-02,   5.85164778E-02, ]
+force_length_stats: {min:   1.01353513E-01, max:   1.01353513E-01, mean:   1.01353513E-01, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2887,6 +2094,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 7, itime: 2, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-07, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.9149023350410    -7.915E+00 8.882E-06 3.253E-01 2.711E-02 3.140E-02
  ETOT  2  -7.9150505946906    -1.483E-04 3.166E-07 1.518E-03 1.241E-05 3.141E-02
@@ -2904,6 +2117,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
   sigma(1 1)=  1.06520547E-04  sigma(3 2)= -1.29686613E-04
   sigma(2 2)=  1.06520547E-04  sigma(3 1)= -1.29686613E-04
   sigma(3 3)=  1.06520547E-04  sigma(2 1)= -1.29686613E-04
+
+
+--- !ResultsGS
+iteration_state: {dtset: 7, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae:  1.155E-14, res2:  1.253E-14, residm:  1.623E-09, diffor:  3.849E-10, }
+etotal    :  -7.91505126E+00
+entropy   :   0.00000000E+00
+fermie    :   2.15021596E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.06520547E-04,  -1.29686613E-04,  -1.29686613E-04, ]
+- [ -1.29686613E-04,   1.06520547E-04,  -1.29686613E-04, ]
+- [ -1.29686613E-04,  -1.29686613E-04,   1.06520547E-04, ]
+pressure_GPa:  -3.1339E+00
+xred      :
+- [ -5.6450E-03,  -5.6450E-03,  -5.6450E-03, Si]
+- [  2.2565E-01,   2.2565E-01,   2.2565E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -3.16411391E-02,  -3.16411391E-02,  -3.16411391E-02, ]
+- [  3.16411391E-02,   3.16411391E-02,   3.16411391E-02, ]
+force_length_stats: {min:   5.48040605E-02, max:   5.48040605E-02, mean:   5.48040605E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2936,6 +2178,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 7, itime: 3, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-07, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.9235088665653    -7.924E+00 1.710E-04 1.366E-01 3.256E-02 9.207E-04
  ETOT  2  -7.9235523195658    -4.345E-05 5.664E-05 1.819E-03 4.626E-04 4.581E-04
@@ -2952,6 +2200,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
   sigma(1 1)=  1.48825309E-04  sigma(3 2)=  1.84051137E-06
   sigma(2 2)=  1.48825309E-04  sigma(3 1)=  1.84051137E-06
   sigma(3 3)=  1.48825309E-04  sigma(2 1)=  1.84051137E-06
+
+
+--- !ResultsGS
+iteration_state: {dtset: 7, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae:  0.000E+00, res2:  1.457E-12, residm:  6.656E-07, diffor:  7.834E-09, }
+etotal    :  -7.92355283E+00
+entropy   :   0.00000000E+00
+fermie    :   1.98701664E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.48825309E-04,   1.84051137E-06,   1.84051137E-06, ]
+- [  1.84051137E-06,   1.48825309E-04,   1.84051137E-06, ]
+- [  1.84051137E-06,   1.84051137E-06,   1.48825309E-04, ]
+pressure_GPa:  -4.3786E+00
+xred      :
+- [ -1.5181E-02,  -1.5181E-02,  -1.5181E-02, Si]
+- [  2.3518E-01,   2.3518E-01,   2.3518E-01, Si]
+cartesian_forces: # hartree/bohr
+- [  4.75918320E-04,   4.75918320E-04,   4.75918320E-04, ]
+- [ -4.75918320E-04,  -4.75918320E-04,  -4.75918320E-04, ]
+force_length_stats: {min:   8.24314710E-04, max:   8.24314710E-04, mean:   8.24314710E-04, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2984,6 +2261,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 7, itime: 4, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-07, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.9235555153552    -7.924E+00 5.595E-06 1.030E-05 4.785E-04 2.560E-06
  ETOT  2  -7.9235555181793    -2.824E-09 4.260E-04 1.743E-07 2.961E-06 4.007E-07
@@ -2998,6 +2281,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
   sigma(1 1)=  1.48837604E-04  sigma(3 2)=  7.38208966E-10
   sigma(2 2)=  1.48837604E-04  sigma(3 1)=  7.38208966E-10
   sigma(3 3)=  1.48837604E-04  sigma(2 1)=  7.38208966E-10
+
+
+--- !ResultsGS
+iteration_state: {dtset: 7, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae: -2.132E-14, res2:  1.249E-12, residm:  4.099E-04, diffor:  3.910E-09, }
+etotal    :  -7.92355552E+00
+entropy   :   0.00000000E+00
+fermie    :   1.98262008E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.48837604E-04,   7.38208966E-10,   7.38208966E-10, ]
+- [  7.38208966E-10,   1.48837604E-04,   7.38208966E-10, ]
+- [  7.38208966E-10,   7.38208966E-10,   1.48837604E-04, ]
+pressure_GPa:  -4.3790E+00
+xred      :
+- [ -1.5000E-02,  -1.5000E-02,  -1.5000E-02, Si]
+- [  2.3500E-01,   2.3500E-01,   2.3500E-01, Si]
+cartesian_forces: # hartree/bohr
+- [  1.58464983E-07,   1.58464983E-07,   1.58464983E-07, ]
+- [ -1.58464983E-07,  -1.58464983E-07,  -1.58464983E-07, ]
+force_length_stats: {min:   2.74469402E-07, max:   2.74469402E-07, mean:   2.74469402E-07, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3071,22 +2383,20 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.04405880673539E+00
-    Hartree energy  =  5.69182400504054E-01
-    XC energy       = -2.38288567127710E+00
-    Ewald energy    = -8.31456383429078E+00
-    PspCore energy  = -1.04593088893961E-01
-    Loc. psp. energy= -2.49534829490549E+00
-    NL   psp  energy=  1.76059416390379E+00
-    >>>>>>>>> Etotal= -7.92355551822410E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.15610910742417E+02 ; Band energy (Ha)=   3.4045301494E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 7, itime: 4, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  3.04405880673539E+00
+hartree             :  5.69182400504054E-01
+xc                  : -2.38288567127710E+00
+Ewald energy        : -8.31456383429078E+00
+psp_core            : -1.04593088893961E-01
+local_psp           : -2.49534829490549E+00
+non_local_psp       :  1.76059416390379E+00
+total_energy        : -7.92355551822410E+00
+total_energy_eV     : -2.15610910742417E+02
+band_energy         :  3.40453014935096E-01
+...
 
  rms coord change=  1.5000E-02   atom, delta coord (reduced):
      1       -0.015000083444     -0.015000083444     -0.015000083444
@@ -3104,7 +2414,16 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 ================================================================================
 == DATASET  8 ==================================================================
--   nproc =    4
+-   mpi_nproc: 4, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 8, }
+dimensions: {natom: 2, nkpt: 5, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 107, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 0, ionmov: 3, optcell: 0, iscf: 7, paral_kgb: 1, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
@@ -3139,6 +2458,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 8, itime: 1, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-07, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.8941508694174    -7.894E+00 3.828E-04 1.259E+01 5.631E-02 5.631E-02
  ETOT  2  -7.8992884863621    -5.138E-03 2.015E-05 4.236E-01 2.856E-03 5.917E-02
@@ -3157,6 +2482,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
   sigma(1 1)=  2.33256311E-05  sigma(3 2)= -2.51514458E-04
   sigma(2 2)=  2.33256311E-05  sigma(3 1)= -2.51514458E-04
   sigma(3 3)=  2.33256311E-05  sigma(2 1)= -2.51514458E-04
+
+
+--- !ResultsGS
+iteration_state: {dtset: 8, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae:  2.576E-14, res2:  4.237E-15, residm:  3.973E-08, diffor:  3.854E-10, }
+etotal    :  -7.89941901E+00
+entropy   :   0.00000000E+00
+fermie    :   2.36351741E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.33256311E-05,  -2.51514458E-04,  -2.51514458E-04, ]
+- [ -2.51514458E-04,   2.33256311E-05,  -2.51514458E-04, ]
+- [ -2.51514458E-04,  -2.51514458E-04,   2.33256311E-05, ]
+pressure_GPa:  -6.8626E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.2000E-01,   2.2000E-01,   2.2000E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -5.85164778E-02,  -5.85164778E-02,  -5.85164778E-02, ]
+- [  5.85164778E-02,   5.85164778E-02,   5.85164778E-02, ]
+force_length_stats: {min:   1.01353513E-01, max:   1.01353513E-01, mean:   1.01353513E-01, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3185,6 +2539,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 8, itime: 2, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-07, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.9149023350410    -7.915E+00 8.882E-06 3.253E-01 2.711E-02 3.140E-02
  ETOT  2  -7.9150505946906    -1.483E-04 3.166E-07 1.518E-03 1.241E-05 3.141E-02
@@ -3202,6 +2562,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
   sigma(1 1)=  1.06520547E-04  sigma(3 2)= -1.29686613E-04
   sigma(2 2)=  1.06520547E-04  sigma(3 1)= -1.29686613E-04
   sigma(3 3)=  1.06520547E-04  sigma(2 1)= -1.29686613E-04
+
+
+--- !ResultsGS
+iteration_state: {dtset: 8, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae:  1.155E-14, res2:  1.253E-14, residm:  1.623E-09, diffor:  3.849E-10, }
+etotal    :  -7.91505126E+00
+entropy   :   0.00000000E+00
+fermie    :   2.50376793E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.06520547E-04,  -1.29686613E-04,  -1.29686613E-04, ]
+- [ -1.29686613E-04,   1.06520547E-04,  -1.29686613E-04, ]
+- [ -1.29686613E-04,  -1.29686613E-04,   1.06520547E-04, ]
+pressure_GPa:  -3.1339E+00
+xred      :
+- [ -5.6450E-03,  -5.6450E-03,  -5.6450E-03, Si]
+- [  2.2565E-01,   2.2565E-01,   2.2565E-01, Si]
+cartesian_forces: # hartree/bohr
+- [ -3.16411391E-02,  -3.16411391E-02,  -3.16411391E-02, ]
+- [  3.16411391E-02,   3.16411391E-02,   3.16411391E-02, ]
+force_length_stats: {min:   5.48040605E-02, max:   5.48040605E-02, mean:   5.48040605E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3234,6 +2623,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 8, itime: 3, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-07, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.9235088665653    -7.924E+00 1.710E-04 1.366E-01 3.256E-02 9.207E-04
  ETOT  2  -7.9235523195658    -4.345E-05 5.664E-05 1.819E-03 4.626E-04 4.581E-04
@@ -3250,6 +2645,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
   sigma(1 1)=  1.48825309E-04  sigma(3 2)=  1.84051137E-06
   sigma(2 2)=  1.48825309E-04  sigma(3 1)=  1.84051137E-06
   sigma(3 3)=  1.48825309E-04  sigma(2 1)=  1.84051137E-06
+
+
+--- !ResultsGS
+iteration_state: {dtset: 8, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae:  0.000E+00, res2:  1.457E-12, residm:  6.656E-07, diffor:  7.834E-09, }
+etotal    :  -7.92355283E+00
+entropy   :   0.00000000E+00
+fermie    :   2.54998190E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.48825309E-04,   1.84051137E-06,   1.84051137E-06, ]
+- [  1.84051137E-06,   1.48825309E-04,   1.84051137E-06, ]
+- [  1.84051137E-06,   1.84051137E-06,   1.48825309E-04, ]
+pressure_GPa:  -4.3786E+00
+xred      :
+- [ -1.5181E-02,  -1.5181E-02,  -1.5181E-02, Si]
+- [  2.3518E-01,   2.3518E-01,   2.3518E-01, Si]
+cartesian_forces: # hartree/bohr
+- [  4.75918320E-04,   4.75918320E-04,   4.75918320E-04, ]
+- [ -4.75918320E-04,  -4.75918320E-04,  -4.75918320E-04, ]
+force_length_stats: {min:   8.24314710E-04, max:   8.24314710E-04, mean:   8.24314710E-04, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3282,6 +2706,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 8, itime: 4, icycle: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 114, }
+tolerances: {toldff: 1.00E-07, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2    diffor    maxfor
  ETOT  1  -7.9235555153552    -7.924E+00 5.595E-06 1.030E-05 4.785E-04 2.560E-06
  ETOT  2  -7.9235555181793    -2.824E-09 4.260E-04 1.743E-07 2.961E-06 4.007E-07
@@ -3296,6 +2726,35 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
   sigma(1 1)=  1.48837604E-04  sigma(3 2)=  7.38208966E-10
   sigma(2 2)=  1.48837604E-04  sigma(3 1)=  7.38208966E-10
   sigma(3 3)=  1.48837604E-04  sigma(2 1)=  7.38208966E-10
+
+
+--- !ResultsGS
+iteration_state: {dtset: 8, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.1830000,   5.1830000, ]
+- [  5.1830000,   0.0000000,   5.1830000, ]
+- [  5.1830000,   5.1830000,   0.0000000, ]
+lattice_lengths: [   7.32987,    7.32987,    7.32987, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.7846693E+02
+convergence: {deltae: -2.132E-14, res2:  1.249E-12, residm:  4.099E-04, diffor:  3.910E-09, }
+etotal    :  -7.92355552E+00
+entropy   :   0.00000000E+00
+fermie    :   2.48656062E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.48837604E-04,   7.38208966E-10,   7.38208966E-10, ]
+- [  7.38208966E-10,   1.48837604E-04,   7.38208966E-10, ]
+- [  7.38208966E-10,   7.38208966E-10,   1.48837604E-04, ]
+pressure_GPa:  -4.3790E+00
+xred      :
+- [ -1.5000E-02,  -1.5000E-02,  -1.5000E-02, Si]
+- [  2.3500E-01,   2.3500E-01,   2.3500E-01, Si]
+cartesian_forces: # hartree/bohr
+- [  1.58464983E-07,   1.58464983E-07,   1.58464983E-07, ]
+- [ -1.58464983E-07,  -1.58464983E-07,  -1.58464983E-07, ]
+force_length_stats: {min:   2.74469402E-07, max:   2.74469402E-07, mean:   2.74469402E-07, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -3372,25 +2831,22 @@ _setup2: Arith. and geom. avg. npw (full set) are     105.500     105.493
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.04405880673539E+00
-    Hartree energy  =  5.69182400504054E-01
-    XC energy       = -2.38288567127710E+00
-    Ewald energy    = -8.31456383429078E+00
-    PspCore energy  = -1.04593088893961E-01
-    Loc. psp. energy= -2.49534829490549E+00
-    NL   psp  energy=  1.76059416390379E+00
-    >>>>> Internal E= -7.92355551822410E+00
-
-    -kT*entropy     = -7.55261880796144E-19
-    >>>>>>>>> Etotal= -7.92355551822410E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.15610910742417E+02 ; Band energy (Ha)=   3.4045301494E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 8, itime: 4, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  3.04405880673539E+00
+hartree             :  5.69182400504054E-01
+xc                  : -2.38288567127710E+00
+Ewald energy        : -8.31456383429078E+00
+psp_core            : -1.04593088893961E-01
+local_psp           : -2.49534829490549E+00
+non_local_psp       :  1.76059416390379E+00
+internal            : -7.92355551822410E+00
+'-kT*entropy'       : -7.55261880796144E-19
+total_energy        : -7.92355551822410E+00
+total_energy_eV     : -2.15610910742417E+02
+band_energy         :  3.40453014935096E-01
+...
 
  rms coord change=  1.5000E-02   atom, delta coord (reduced):
      1       -0.015000083444     -0.015000083444     -0.015000083444
@@ -3717,322 +3173,319 @@ P           mkmem8          5
 
  Test the timer : 
   a combined call timab(*,1,tsec) + timab(*,2,tsec) is 
-- CPU time =    1.8874E-06 sec,    Wall time =    1.9350E-06 sec
+- CPU time =    1.9441E-06 sec,    Wall time =    1.9707E-06 sec
 
-- Total cpu        time (s,m,h):         63.1        1.05      0.018
-- Total wall clock time (s,m,h):         68.3        1.14      0.019
+- Total cpu        time (s,m,h):         85.9        1.43      0.024
+- Total wall clock time (s,m,h):         98.4        1.64      0.027
 -
 - For major independent code sections, cpu and wall times (sec),
 -  as well as % of the time and number of calls for node 0-
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           15.4, wall_time =           17.1
+- cpu_time =           16.0, wall_time =           24.7
 -
 - routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- vtowfk(ssdiag)                11.933  18.9     11.963  17.5             -1      -1.00        1.00       1.00
-- lobpcgwf2                     11.929  18.9     11.959  17.5            552      -1.00        1.00       1.00
-- fourwf%(pot)                   7.925  12.5      7.942  11.6          16560      -1.00        1.00       1.00
-- nonlop(apply)                  0.617   1.0      0.623   0.9          16560      -1.00        0.99       0.99
-- ewald                          0.568   0.9      0.573   0.8             20      -1.00        0.99       0.99
-- invars2                        0.407   0.6      0.407   0.6              8      -1.00        1.00       1.00
-- stress                         0.383   0.6      0.384   0.6             20      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             0.371   0.6      0.372   0.5             20      -1.00        1.00       1.00
-- pspini                         0.332   0.5      0.336   0.5              8      -1.00        0.99       0.99
-- fourdp                         0.294   0.5      0.296   0.4            820      -1.00        1.00       1.00
-- vtowfk(contrib)                0.218   0.3      0.219   0.3            432      -1.00        1.00       1.00
-- mkrho/=                        0.143   0.2      0.145   0.2            136      -1.00        0.99       0.99
-- getghc-other                   0.119   0.2      0.112   0.2             -1      -1.00        1.06       1.06
-- timing timab                   0.109   0.2      0.112   0.2             11      -1.00        0.98       0.98
-- abinit(2)                      0.091   0.1      0.093   0.1              1      -1.00        0.97       0.97
-- forces                         0.082   0.1      0.083   0.1            108      -1.00        0.99       0.99
-- symrhg(no FFT)                 0.073   0.1      0.073   0.1            136      -1.00        1.00       1.00
-- nonlop(forces)                 0.073   0.1      0.073   0.1           3312      -1.00        0.99       0.99
-- xc:pot/=fourdp                 0.069   0.1      0.069   0.1            156      -1.00        1.00       1.00
+- vtowfk(ssdiag)                12.269  14.3     12.375  12.6             -1      -1.00        0.99       0.99
+- lobpcgwf2                     12.265  14.3     12.371  12.6            552      -1.00        0.99       0.99
+- fourwf%(pot)                   8.121   9.5      8.194   8.3          16560      -1.00        0.99       0.99
+- nonlop(apply)                  0.651   0.8      0.661   0.7          16560      -1.00        0.98       0.98
+- ewald                          0.577   0.7      0.581   0.6             20      -1.00        0.99       0.99
+- invars2                        0.446   0.5      0.447   0.5              8      -1.00        1.00       1.00
+- stress                         0.394   0.5      0.396   0.4             20      -1.00        0.99       0.99
+- ewald2 (+vdw_dftd)             0.381   0.4      0.382   0.4             20      -1.00        1.00       1.00
+- pspini                         0.329   0.4      0.330   0.3              8      -1.00        1.00       1.00
+- fourdp                         0.303   0.4      0.308   0.3            820      -1.00        0.98       0.98
+- vtowfk(contrib)                0.223   0.3      0.226   0.2            432      -1.00        0.99       0.99
+- mkrho/=                        0.147   0.2      0.149   0.2            136      -1.00        0.98       0.98
+- getghc-other                   0.130   0.2      0.122   0.1             -1      -1.00        1.06       1.06
+- timing timab                   0.112   0.1      0.114   0.1             11      -1.00        0.99       0.99
+- abinit(2)                      0.096   0.1      0.098   0.1              1      -1.00        0.97       0.97
+- forces                         0.086   0.1      0.086   0.1            108      -1.00        0.99       0.99
+- nonlop(forces)                 0.076   0.1      0.077   0.1           3312      -1.00        0.99       0.99
+- symrhg(no FFT)                 0.074   0.1      0.074   0.1            136      -1.00        1.00       1.00
+- xc:pot/=fourdp                 0.073   0.1      0.073   0.1            156      -1.00        0.99       0.99
 - setsym                         0.012   0.0      0.012   0.0              8      -1.00        1.00       1.00
-- scfcv-scprqt                   0.008   0.0      0.010   0.0            136      -1.00        0.83       0.83
-- prep_bandfft_tabs              0.004   0.0      0.004   0.0            120      -1.00        0.99       0.99
-- newkpt(excl. rwwf   )          0.002   0.0      0.002   0.0             -1      -1.00        0.95       0.95
-- vtowfk  (1)                    0.001   0.0      0.001   0.0            432      -1.00        1.02       1.02
-- kpgsph                         0.001   0.0      0.001   0.0             48      -1.00        0.88       0.88
-- inwffil(excl. calls)           0.000   0.0      0.000   0.0              8      -1.00        1.00       1.00
-- others (108)                   0.000   0.0      0.000   0.0             -1      -1.00        0.00       0.00
+- scfcv-scprqt                   0.007   0.0      0.009   0.0            136      -1.00        0.80       0.80
+- prep_bandfft_tabs              0.005   0.0      0.005   0.0            120      -1.00        1.00       1.00
+- newkpt(excl. rwwf   )          0.001   0.0      0.001   0.0             -1      -1.00        0.94       0.94
+- vtowfk  (1)                    0.001   0.0      0.001   0.0            432      -1.00        1.00       1.00
+- kpgsph                         0.001   0.0      0.001   0.0             48      -1.00        0.87       0.87
+- others (109)                   0.000   0.0      0.000   0.0             -1      -1.00        1.02       1.02
 -<END_TIMER>
 -
-- subtotal                      35.764  56.6     35.863  52.5                                  1.00       1.00
+- subtotal                      36.777  42.8     37.095  37.7                                  0.99       0.99
 
 - For major independent code sections, cpu and wall times (sec),
 - as well as % of the total time and number of calls 
 
 -<BEGIN_TIMER mpi_nprocs = 4, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          63.1, wall_time =          68.3
+- cpu_time =          85.9, wall_time =          98.4
 -
 - routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
 -                                                                  (-1=no count)
-- vtowfk(ssdiag)                47.766  75.6     47.871  70.1             -4      -1.00        1.00       1.00
-- lobpcgwf2                     47.750  75.6     47.855  70.1           2208      -1.00        1.00       1.00
-- fourwf%(pot)                  31.726  50.2     31.795  46.6          66240      -1.00        1.00       1.00
-- nonlop(apply)                  2.492   3.9      2.516   3.7          66240      -1.00        0.99       0.99
-- ewald                          2.273   3.6      2.285   3.3             80      -1.00        0.99       0.99
-- invars2                        1.735   2.7      1.736   2.5             32      -1.00        1.00       1.00
-- stress                         1.528   2.4      1.531   2.2             80      -1.00        1.00       1.00
-- ewald2 (+vdw_dftd)             1.484   2.3      1.486   2.2             80      -1.00        1.00       1.00
-- fourdp                         1.319   2.1      1.325   1.9           3280      -1.00        1.00       1.00
-- pspini                         1.316   2.1      1.324   1.9             32      -1.00        0.99       0.99
-- vtowfk(contrib)                0.872   1.4      0.876   1.3           1728      -1.00        0.99       0.99
-- prep_bandfft_tabs              0.677   1.1      0.678   1.0            480      -1.00        1.00       1.00
-- mkrho/=                        0.587   0.9      0.590   0.9            544      -1.00        1.00       1.00
-- getghc-other                   0.487   0.8      0.462   0.7             -4      -1.00        1.05       1.05
-- timing timab                   0.440   0.7      0.453   0.7             44      -1.00        0.97       0.97
-- abinit(2)                      0.348   0.6      0.356   0.5              4      -1.00        0.98       0.98
-- forces                         0.327   0.5      0.328   0.5            432      -1.00        1.00       1.00
-- symrhg(no FFT)                 0.294   0.5      0.294   0.4            544      -1.00        1.00       1.00
-- nonlop(forces)                 0.291   0.5      0.293   0.4          13248      -1.00        0.99       0.99
-- xc:pot/=fourdp                 0.276   0.4      0.277   0.4            624      -1.00        1.00       1.00
-- scfcv-scprqt                   0.057   0.1      0.059   0.1            544      -1.00        0.96       0.96
-- setsym                         0.047   0.1      0.048   0.1             32      -1.00        0.98       0.98
-- kpgsph                         0.034   0.1      0.034   0.1            192      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )          0.007   0.0      0.007   0.0             -4      -1.00        0.99       0.99
+- vtowfk(ssdiag)                49.119  57.2     49.517  50.3             -4      -1.00        0.99       0.99
+- lobpcgwf2                     49.103  57.2     49.501  50.3           2208      -1.00        0.99       0.99
+- fourwf%(pot)                  32.557  37.9     32.848  33.4          66240      -1.00        0.99       0.99
+- prep_bandfft_tabs             12.758  14.8     12.763  13.0            480      -1.00        1.00       1.00
+- nonlop(apply)                  2.579   3.0      2.615   2.7          66240      -1.00        0.99       0.99
+- ewald                          2.310   2.7      2.323   2.4             80      -1.00        0.99       0.99
+- fourdp                         2.090   2.4      2.113   2.1           3280      -1.00        0.99       0.99
+- invars2                        1.911   2.2      1.922   2.0             32      -1.00        0.99       0.99
+- stress                         1.568   1.8      1.579   1.6             80      -1.00        0.99       0.99
+- ewald2 (+vdw_dftd)             1.519   1.8      1.527   1.6             80      -1.00        0.99       0.99
+- pspini                         1.328   1.5      1.330   1.4             32      -1.00        1.00       1.00
+- vtowfk(contrib)                0.891   1.0      0.902   0.9           1728      -1.00        0.99       0.99
+- mkrho/=                        0.585   0.7      0.591   0.6            544      -1.00        0.99       0.99
+- getghc-other                   0.479   0.6      0.453   0.5             -4      -1.00        1.06       1.06
+- timing timab                   0.463   0.5      0.466   0.5             44      -1.00        0.99       0.99
+- abinit(2)                      0.391   0.5      0.401   0.4              4      -1.00        0.98       0.98
+- forces                         0.340   0.4      0.340   0.3            432      -1.00        1.00       1.00
+- nonlop(forces)                 0.305   0.4      0.308   0.3          13248      -1.00        0.99       0.99
+- symrhg(no FFT)                 0.297   0.3      0.298   0.3            544      -1.00        1.00       1.00
+- xc:pot/=fourdp                 0.291   0.3      0.295   0.3            624      -1.00        0.99       0.99
+- scfcv-scprqt                   0.057   0.1      0.059   0.1            544      -1.00        0.97       0.97
+- setsym                         0.047   0.1      0.047   0.0             32      -1.00        0.99       0.99
+- kpgsph                         0.012   0.0      0.012   0.0            192      -1.00        0.99       0.99
+- newkpt(excl. rwwf   )          0.006   0.0      0.006   0.0             -4      -1.00        0.98       0.98
 - vtowfk  (1)                    0.005   0.0      0.005   0.0           1728      -1.00        1.02       1.02
-- inwffil(excl. calls)           0.000   0.0      0.000   0.0             32      -1.00        1.00       1.00
+- inwffil(excl. calls)           0.000   0.0      0.000   0.0             32      -1.00        1.01       1.01
 - others (108)                   0.000   0.0      0.000   0.0             -1      -1.00        0.00       0.00
 -<END_TIMER>
 
-- subtotal                     144.139 228.3    144.487 211.7                                  1.00       1.00
+- subtotal                     161.010 187.4    162.221 164.9                                  0.99       0.99
 
  Partitioning of abinit
-- abinit                        63.148 100.0     68.264 100.0              4                   0.93       0.93
+- abinit                        85.919 100.0     98.362 100.0              4                   0.87       0.87
  
-- abinit(1)                      0.084   0.1      0.084   0.1              4                   1.00       1.00
-- abinit(2)                      0.348   0.6      0.356   0.5              4                   0.98       0.98
-- indefo+macroin+invars2m        1.738   2.8      1.739   2.5              4                   1.00       1.00
-- abinit(4)                      2.488   3.9      2.523   3.7              4                   0.99       0.99
-- abinit(5)                      0.321   0.5      0.327   0.5              4                   0.98       0.98
-- driver                        59.837  94.8     64.859  95.0              4                   0.92       0.92
-- abinit(6)                      0.060   0.1      0.098   0.1              4                   0.61       0.61
-- timing timab                   0.440   0.7      0.453   0.7             44                   0.97       0.97
+- abinit(1)                      0.125   0.1      0.128   0.1              4                   0.98       0.98
+- abinit(2)                      0.391   0.5      0.401   0.4              4                   0.98       0.98
+- indefo+macroin+invars2m        1.915   2.2      1.926   2.0              4                   0.99       0.99
+- abinit(4)                      2.717   3.2      2.743   2.8              4                   0.99       0.99
+- abinit(5)                      0.378   0.4      0.382   0.4              4                   0.99       0.99
+- driver                        82.271  95.8     94.621  96.2              4                   0.87       0.87
+- abinit(6)                      0.063   0.1      0.122   0.1              4                   0.51       0.51
+- timing timab                   0.463   0.5      0.466   0.5             44                   0.99       0.99
 
-- subtotal                      63.148 100.0     68.264 100.0                                  0.93       0.93
+- subtotal                      85.919 100.0     98.362 100.0                                  0.87       0.87
 
  Partitioning of driver
-- driver                        59.837  94.8     64.859  95.0              4                   0.92       0.92
+- driver                        82.271  95.8     94.621  96.2              4                   0.87       0.87
  
-- gstateimg                     59.401  94.1     64.415  94.4             32                   0.92       0.92
-- driver(aft. select case)       0.427   0.7      0.436   0.6             32                   0.98       0.98
+- gstateimg                     80.891  94.1     93.226  94.8             32                   0.87       0.87
+- driver(aft. select case)       1.371   1.6      1.385   1.4             32                   0.99       0.99
 
-- subtotal                      59.837  94.8     64.859  95.0                                  0.92       0.92
+- subtotal                      82.271  95.8     94.621  96.2                                  0.87       0.87
 
  Partitioning of gstateimg+gstate
-- gstateimg                     59.401  94.1     64.415  94.4             32                   0.92       0.92
+- gstateimg                     80.891  94.1     93.226  94.8             32                   0.87       0.87
  
-- gstate->kpgsph                 0.120   0.2      0.121   0.2             64                   0.99       0.99
-- gstate(pspini)                 1.316   2.1      1.324   1.9             32                   0.99       0.99
-- gstate  (2)                    0.110   0.2      0.112   0.2             32                   0.98       0.98
-- gstate(...scfcv)              57.143  90.5     58.371  85.5             32                   0.98       0.98
-- gstate  (3)                    0.710   1.1      4.484   6.6             32                   0.16       0.16
+- gstate->kpgsph                 0.099   0.1      0.100   0.1             64                   0.99       0.99
+- gstate(pspini)                 1.328   1.5      1.330   1.4             32                   1.00       1.00
+- gstate  (2)                    0.110   0.1      0.111   0.1             32                   0.99       0.99
+- gstate(...scfcv)              76.708  89.3     85.161  86.6             32                   0.90       0.90
+- gstate  (3)                    2.644   3.1      6.522   6.6             32                   0.41       0.41
 
-- subtotal                      59.401  94.1     64.414  94.4                                  0.92       0.92
+- subtotal                      80.890  94.1     93.226  94.8                                  0.87       0.87
 
  Partitioning of scfcv_core
-- scfcv_core                    57.104  90.4     58.330  85.4             80                   0.98       0.98
+- scfcv_core                    76.670  89.2     85.120  86.5             80                   0.90       0.90
  
-- scfcv_core(iniloop, setv       2.589   4.1      2.603   3.8            544                   0.99       0.99
-- scfcv_core(vtorho(f))         51.059  80.9     51.179  75.0            544                   1.00       1.00
-- scfcv_core(etotfor)            0.318   0.5      0.319   0.5           1088                   1.00       1.00
-- scfcv-scprqt                   0.057   0.1      0.059   0.1            544                   0.96       0.96
-- scfcv_core(rhotov)             0.517   0.8      0.520   0.8            544                   1.00       1.00
-- scfcv_core(mix pot)            0.481   0.8      0.483   0.7            464                   1.00       1.00
-- scfcv_core(afterscfloop)       1.622   2.6      1.625   2.4             80                   1.00       1.00
-- scfcv_core(outscfcv)           0.430   0.7      1.511   2.2             80                   0.28       0.28
+- scfcv_core(iniloop, setv       3.371   3.9      3.390   3.4            544                   0.99       0.99
+- scfcv_core(vtorho(f))         64.527  75.1     64.966  66.0            544                   0.99       0.99
+- scfcv_core(etotfor)            0.331   0.4      0.331   0.3           1088                   1.00       1.00
+- scfcv-scprqt                   0.057   0.1      0.059   0.1            544                   0.97       0.97
+- scfcv_core(rhotov)             0.537   0.6      0.542   0.6            544                   0.99       0.99
+- scfcv_core(mix pot)            0.499   0.6      0.506   0.5            464                   0.99       0.99
+- scfcv_core(afterscfloop)       1.666   1.9      1.677   1.7             80                   0.99       0.99
+- scfcv_core(outscfcv)           5.647   6.6     13.609  13.8             80                   0.41       0.41
 
-- subtotal                      57.104  90.4     58.330  85.4                                  0.98       0.98
+- subtotal                      76.670  89.2     85.120  86.5                                  0.90       0.90
 
  Partitioning of rhotov
-- rhotov                         0.516   0.8      0.518   0.8            544                   1.00       1.00
+- rhotov                         0.535   0.6      0.540   0.5            544                   0.99       0.99
  
-- rhotov(rhotoxc)                0.242   0.4      0.242   0.4            544                   1.00       1.00
-- rhotov(other)                  0.050   0.1      0.050   0.1            544                   1.00       1.00
-- (other)                        0.215   0.3      0.217   0.3             -1                   0.99       0.99
+- rhotov(rhotoxc)                0.255   0.3      0.256   0.3            544                   0.99       0.99
+- rhotov(other)                  0.052   0.1      0.053   0.1            544                   0.98       0.98
+- (other)                        0.219   0.3      0.222   0.2             -1                   0.99       0.99
 
-- subtotal                       0.516   0.8      0.518   0.8                                  1.00       1.00
+- subtotal                       0.535   0.6      0.540   0.5                                  0.99       0.99
 
  Partitioning of vtorho
-- vtorho                        51.056  80.9     51.177  75.0            544                   1.00       1.00
+- vtorho                        64.524  75.1     64.964  66.0            544                   0.99       0.99
  
-- vtorho(bef. kpt  loop)         0.018   0.0      0.018   0.0            544                   0.99       0.99
-- vtorho(bef. vtowfk)            0.693   1.1      0.695   1.0           1728                   1.00       1.00
-- vtowfk                        48.643  77.0     48.752  71.4           1728                   1.00       1.00
-- vtorho(aft. kpt loop)          0.055   0.1      0.055   0.1            544                   1.00       1.00
-- vtorho(newocc)                 0.309   0.5      0.313   0.5            272                   0.99       0.99
-- vtorho(mkrho 1)                0.923   1.5      0.926   1.4            272                   1.00       1.00
-- vtorho(mkrho 2)                0.381   0.6      0.384   0.6            816                   0.99       0.99
-- (other)                        0.016   0.0      0.015   0.0             -1                   1.05       1.05
+- vtorho(bef. vtowfk)           12.777  14.9     12.782  13.0           1728                   1.00       1.00
+- vtowfk                        50.015  58.2     50.425  51.3           1728                   0.99       0.99
+- vtorho(aft. kpt loop)          0.056   0.1      0.056   0.1            544                   1.00       1.00
+- vtorho(newocc)                 0.303   0.4      0.309   0.3            272                   0.98       0.98
+- vtorho(mkrho 1)                0.932   1.1      0.946   1.0            272                   0.99       0.99
+- vtorho(mkrho 2)                0.390   0.5      0.395   0.4            816                   0.99       0.99
 
-- subtotal                      51.056  80.9     51.177  75.0                                  1.00       1.00
+- subtotal                      64.524  75.1     64.964  66.0                                  0.99       0.99
 
  Partitioning of vtowfk
-- vtowfk                        48.643  77.0     48.752  71.4           1728                   1.00       1.00
+- vtowfk                        50.015  58.2     50.425  51.3           1728                   0.99       0.99
  
-- vtowfk(2)                     47.764  75.6     47.868  70.1             -4                   1.00       1.00
-- prep_nonlop%vtowfk             0.326   0.5      0.327   0.5           5376                   0.99       0.99
-- prep_fourwf%vtow               0.481   0.8      0.483   0.7           5184                   1.00       1.00
-- vtowfk(3)                      0.065   0.1      0.065   0.1             -4                   1.00       1.00
+- vtowfk(2)                     49.117  57.2     49.515  50.3             -4                   0.99       0.99
+- prep_nonlop%vtowfk             0.332   0.4      0.336   0.3           5376                   0.99       0.99
+- prep_fourwf%vtow               0.488   0.6      0.492   0.5           5184                   0.99       0.99
+- vtowfk(3)                      0.071   0.1      0.074   0.1             -4                   0.96       0.96
 
-- subtotal                      48.643  77.0     48.752  71.4                                  1.00       1.00
+- subtotal                      50.015  58.2     50.425  51.3                                  0.99       0.99
 
  Partitioning of getghc
-- getghc                        34.705  55.0     34.773  50.9          66240                   1.00       1.00
+- getghc                        35.614  41.5     35.915  36.5          66240                   0.99       0.99
  
-- fourwf%getghc                 31.726  50.2     31.795  46.6          66240                   1.00       1.00
-- nonlop%getghc                  2.492   3.9      2.516   3.7          66240                   0.99       0.99
-- getghc-other                   0.487   0.8      0.462   0.7             -4                   1.05       1.05
+- fourwf%getghc                 32.557  37.9     32.848  33.4          66240                   0.99       0.99
+- nonlop%getghc                  2.579   3.0      2.615   2.7          66240                   0.99       0.99
+- getghc-other                   0.479   0.6      0.453   0.5             -4                   1.06       1.06
 
-- subtotal                      34.705  55.0     34.773  50.9                                  1.00       1.00
+- subtotal                      35.614  41.5     35.915  36.5                                  0.99       0.99
 
  Partitioning of fourwf (upwards partitioning)
-- fourwf                        32.628  51.7     32.702  47.9          69696                   1.00       1.00
+- fourwf                        33.466  39.0     33.765  34.3          69696                   0.99       0.99
  
-- fourwf%getghc                 31.726  50.2     31.795  46.6          66240                   1.00       1.00
-- fourwf%prep_four               0.903   1.4      0.907   1.3           3456                   1.00       1.00
+- fourwf%getghc                 32.557  37.9     32.848  33.4          66240                   0.99       0.99
+- fourwf%prep_four               0.910   1.1      0.917   0.9           3456                   0.99       0.99
 
-- subtotal                      32.628  51.7     32.702  47.9                                  1.00       1.00
+- subtotal                      33.466  39.0     33.765  34.3                                  0.99       0.99
 
  Partitioning of prep_getghc
-- prep_getghc                   36.021  57.0     36.092  52.9          66240                   1.00       1.00
+- prep_getghc                   37.177  43.3     37.487  38.1          66240                   0.99       0.99
  
-- prep_getghc(before if)         0.209   0.3      0.212   0.3          66240                   0.98       0.98
-- prep_getghc(alltoall)          0.814   1.3      0.822   1.2         132480                   0.99       0.99
-- prep_getghc(getghc - 1 )      34.899  55.3     34.963  51.2          66240                   1.00       1.00
-- (other)                        0.099   0.2      0.095   0.1             -1                   1.04       1.04
+- prep_getghc(before if)         0.216   0.3      0.218   0.2          66240                   0.99       0.99
+- prep_getghc(alltoall)          1.046   1.2      1.059   1.1         132480                   0.99       0.99
+- prep_getghc(getghc - 1 )      35.808  41.7     36.105  36.7          66240                   0.99       0.99
+- (other)                        0.107   0.1      0.104   0.1             -1                   1.03       1.03
 
-- subtotal                      36.021  57.0     36.092  52.9                                  1.00       1.00
+- subtotal                      37.177  43.3     37.487  38.1                                  0.99       0.99
 
  Partitioning of prep_fourwf
-- prep_fourwf                    0.987   1.6      0.990   1.5          10368                   1.00       1.00
+- prep_fourwf                    0.988   1.1      0.996   1.0          10368                   0.99       0.99
  
-- fourwf%prep_four               0.903   1.4      0.907   1.3           3456                   1.00       1.00
-- alltoall%prep_fo               0.047   0.1      0.048   0.1          10368                   0.99       0.99
+- fourwf%prep_four               0.910   1.1      0.917   0.9           3456                   0.99       0.99
+- alltoall%prep_fo               0.041   0.0      0.042   0.0          10368                   0.97       0.97
 
-- subtotal                       0.950   1.5      0.955   1.4                                  1.00       1.00
+- subtotal                       0.951   1.1      0.959   1.0                                  0.99       0.99
 
  Partitioning of prep_nonlop
-- prep_nonlop                    0.760   1.2      0.763   1.1          19104                   1.00       1.00
+- prep_nonlop                    0.790   0.9      0.794   0.8          19104                   0.99       0.99
  
-- nonlop%prep_nonl%vtowfk        0.259   0.4      0.261   0.4           5376                   0.99       0.99
-- nonlop%prep_nonl%forstrn       0.029   0.0      0.029   0.0            480                   0.99       0.99
-- prep_nonlop(alltoall)          0.067   0.1      0.069   0.1          19104                   0.98       0.98
-- (other)                        0.406   0.6      0.404   0.6             -1                   1.00       1.00
+- nonlop%prep_nonl%vtowfk        0.264   0.3      0.269   0.3           5376                   0.98       0.98
+- nonlop%prep_nonl%forstrn       0.032   0.0      0.032   0.0            480                   0.99       0.99
+- prep_nonlop(alltoall)          0.070   0.1      0.071   0.1          19104                   0.98       0.98
+- (other)                        0.425   0.5      0.422   0.4             -1                   1.01       1.01
 
-- subtotal                       0.760   1.2      0.763   1.1                                  1.00       1.00
+- subtotal                       0.790   0.9      0.794   0.8                                  0.99       0.99
 
  Partitioning of mkrho (upwards partitioning)
-- mkrho                          0.922   1.5      0.925   1.4            272                   1.00       1.00
+- mkrho                          0.931   1.1      0.944   1.0            272                   0.99       0.99
  
-- mkrho%vtorho                   0.922   1.5      0.925   1.4            272                   1.00       1.00
+- mkrho%vtorho                   0.931   1.1      0.944   1.0            272                   0.99       0.99
 
-- subtotal                       0.922   1.5      0.925   1.4                                  1.00       1.00
+- subtotal                       0.931   1.1      0.944   1.0                                  0.99       0.99
 
  Partitioning of inwffil
-- inwffil                        0.008   0.0      0.008   0.0             32                   0.99       0.99
+- inwffil                        0.007   0.0      0.007   0.0             32                   0.98       0.98
  
 
-- subtotal                       0.007   0.0      0.007   0.0                                  0.99       0.99
+- subtotal                       0.006   0.0      0.006   0.0                                  0.98       0.98
 
  Partitioning of newkpt
-- newkpt                         0.007   0.0      0.007   0.0             32                   0.99       0.99
+- newkpt                         0.006   0.0      0.006   0.0             32                   0.98       0.98
  
 
-- subtotal                       0.007   0.0      0.007   0.0                                  0.99       0.99
+- subtotal                       0.006   0.0      0.006   0.0                                  0.98       0.98
 
  Partitioning of newvtr
-- newvtr                         0.480   0.8      0.481   0.7            464                   1.00       1.00
+- newvtr                         0.497   0.6      0.505   0.5            464                   0.99       0.99
  
-- newvtr(call prcref_PMA)        0.334   0.5      0.334   0.5            464                   1.00       1.00
-- newvtr(aft. prcref_PMA)        0.118   0.2      0.119   0.2            464                   0.99       0.99
+- newvtr(call prcref_PMA)        0.343   0.4      0.349   0.4            464                   0.98       0.98
+- newvtr(aft. prcref_PMA)        0.125   0.1      0.127   0.1            464                   0.99       0.99
 
-- subtotal                       0.480   0.8      0.481   0.7                                  1.00       1.00
+- subtotal                       0.497   0.6      0.505   0.5                                  0.99       0.99
 
  Partitioning of  fourdp (upwards partitioning)
-- fourdp                         1.319   2.1      1.325   1.9           3280                   1.00       1.00
+- fourdp                         2.090   2.4      2.113   2.1           3280                   0.99       0.99
  
-- fourdp%(other)                 1.319   2.1      1.325   1.9           3280                   1.00       1.00
+- fourdp%(other)                 2.090   2.4      2.113   2.1           3280                   0.99       0.99
 
-- subtotal                       1.319   2.1      1.325   1.9                                  1.00       1.00
+- subtotal                       2.090   2.4      2.113   2.1                                  0.99       0.99
 
  Partitioning of afterscfloop
-- afterscfloop                   1.621   2.6      1.624   2.4             80                   1.00       1.00
+- afterscfloop                   1.665   1.9      1.677   1.7             80                   0.99       0.99
  
-- afterscfloop(forstr)           1.614   2.6      1.617   2.4             80                   1.00       1.00
+- afterscfloop(forstr)           1.658   1.9      1.669   1.7             80                   0.99       0.99
 
-- subtotal                       1.621   2.6      1.624   2.4                                  1.00       1.00
+- subtotal                       1.665   1.9      1.676   1.7                                  0.99       0.99
 
  Partitioning of forstr
-- forstr                         1.613   2.6      1.616   2.4             80                   1.00       1.00
+- forstr                         1.658   1.9      1.669   1.7             80                   0.99       0.99
  
-- forstr(forstrnps)              0.072   0.1      0.072   0.1             80                   1.00       1.00
-- forstr(stress)                 1.528   2.4      1.531   2.2             80                   1.00       1.00
+- forstr(forstrnps)              0.076   0.1      0.076   0.1             80                   1.00       1.00
+- forstr(stress)                 1.568   1.8      1.579   1.6             80                   0.99       0.99
 
-- subtotal                       1.613   2.6      1.616   2.4                                  1.00       1.00
+- subtotal                       1.657   1.9      1.669   1.7                                  0.99       0.99
 
  Partitioning of forstrnps
-- forstrnps                      0.072   0.1      0.072   0.1             80                   1.00       1.00
+- forstrnps                      0.076   0.1      0.076   0.1             80                   1.00       1.00
  
 - forstrnps(bef.loop band)       0.021   0.0      0.021   0.0            240                   1.00       1.00
-- forstrnps(nonlop+prep_ba       0.035   0.1      0.035   0.1            480                   1.00       1.00
+- forstrnps(nonlop+prep_ba       0.039   0.0      0.039   0.0            480                   1.00       1.00
 
-- subtotal                       0.072   0.1      0.072   0.1                                  1.00       1.00
+- subtotal                       0.076   0.1      0.076   0.1                                  1.00       1.00
 
  Partitioning of outscfcv
-- outscfcv                       0.430   0.7      1.511   2.2             80                   0.28       0.28
+- outscfcv                       5.646   6.6     13.609  13.8             80                   0.41       0.41
  
-- outscfcv([PAW]prtden)          0.034   0.1      0.821   1.2             80                   0.04       0.04
-- outscfcv(prtelf)               0.099   0.2      0.277   0.4             40                   0.36       0.36
-- outscfcv(calcdensph)           0.285   0.5      0.285   0.4             80                   1.00       1.00
+- outscfcv([PAW]prtden)          4.479   5.2     10.809  11.0             80                   0.41       0.41
+- outscfcv(prtelf)               0.182   0.2      0.964   1.0             40                   0.19       0.19
+- outscfcv(calcdenmagsph)        0.973   1.1      0.975   1.0             80                   1.00       1.00
 
-- subtotal                       0.419   0.7      1.384   2.0                                  0.30       0.30
+- subtotal                       5.635   6.6     12.749  13.0                                  0.44       0.44
 
  Partitioning of lobpcgwf2 core engine
-- lobpcgwf2                     47.750  75.6     47.855  70.1           2208                   1.00       1.00
+- lobpcgwf2                     49.103  57.2     49.501  50.3           2208                   0.99       0.99
  
-- lobpcg_init                    0.028   0.0      0.034   0.0           2208                   0.84       0.84
-- lobpcg_run                    47.276  74.9     47.376  69.4           2208                   1.00       1.00
-- lobpcg_orthoWrtPrev            0.773   1.2      0.774   1.1          55200                   1.00       1.00
-- lobpcg_Bortho                  2.568   4.1      2.576   3.8          68448                   1.00       1.00
-- lobpcg_RayleighRitz            6.335  10.0      6.351   9.3          68448                   1.00       1.00
-- lobpcg_maxResidu               0.436   0.7      0.440   0.6         119232                   0.99       0.99
-- lobpcg_run@getAX_BX           36.373  57.6     36.448  53.4          66240                   1.00       1.00
-- lobpcg_pcond                   0.077   0.1      0.077   0.1          52992                   1.00       1.00
-- lobpcg_RayleighRitz@hegv       1.733   2.7      1.738   2.5          68448                   1.00       1.00
+- lobpcg_init                    0.029   0.0      0.035   0.0           2208                   0.82       0.82
+- lobpcg_run                    48.609  56.6     49.001  49.8           2208                   0.99       0.99
+- lobpcg_orthoWrtPrev            0.782   0.9      0.784   0.8          55200                   1.00       1.00
+- lobpcg_Bortho                  2.616   3.0      2.633   2.7          68448                   0.99       0.99
+- lobpcg_RayleighRitz            6.440   7.5      6.496   6.6          68448                   0.99       0.99
+- lobpcg_maxResidu               0.438   0.5      0.447   0.5         119232                   0.98       0.98
+- lobpcg_run@getAX_BX           37.533  43.7     37.847  38.5          66240                   0.99       0.99
+- lobpcg_pcond                   0.081   0.1      0.081   0.1          52992                   0.99       0.99
+- lobpcg_RayleighRitz@hegv       1.725   2.0      1.743   1.8          68448                   0.99       0.99
 
-- subtotal                      95.600 151.4     95.812 140.4                                  1.00       1.00
+- subtotal                      98.253 114.4     99.067 100.7                                  0.99       0.99
 
  Partitioning of low-level xgBlock type
-- xgBlock_potrf                  0.150   0.2      0.151   0.2          68448                   0.99       0.99
+- xgBlock_potrf                  0.156   0.2      0.156   0.2          68448                   1.00       1.00
  
-- xgBlock_trsm                   1.199   1.9      1.208   1.8         205344                   0.99       0.99
-- xgBlock_gemm                   3.863   6.1      3.930   5.8         850080                   0.98       0.98
-- xgBlock_heev                   0.220   0.3      0.222   0.3          15456                   0.99       0.99
-- xgBlock_hegvx                  1.351   2.1      1.372   2.0          52992                   0.99       0.99
-- xgBlock_copy                   0.591   0.9      0.590   0.9         496800                   1.00       1.00
+- xgBlock_trsm                   1.213   1.4      1.231   1.3         205344                   0.99       0.99
+- xgBlock_gemm                   3.995   4.6      4.093   4.2         850080                   0.98       0.98
+- xgBlock_heev                   0.220   0.3      0.227   0.2          15456                   0.97       0.97
+- xgBlock_hegvx                  1.343   1.6      1.368   1.4          52992                   0.98       0.98
+- xgBlock_copy                   0.595   0.7      0.602   0.6         496800                   0.99       0.99
 - xgBlock_cshift                 0.090   0.1      0.092   0.1          52992                   0.98       0.98
 
-- subtotal                       7.315  11.6      7.412  10.9                                  0.99       0.99
+- subtotal                       7.455   8.7      7.611   7.7                                  0.98       0.98
 -
 -Synchronisation (=leave_test) and MPI calls 
-- communic.MPI                   0.314   0.5      0.313   0.5           4188                   1.00       1.00
+- communic.MPI                   1.008   1.2      1.009   1.0           4188                   1.00       1.00
 -
-- forstrnps:synchr               0.000   0.0      0.000   0.0             96                   1.03       1.03
-- mkrho :MPIrhor                 0.000   0.0      0.000   0.0            272                   0.99       0.99
-- alltoall%back_wf               1.075   1.7      1.067   1.6          69696                   1.01       1.01
-- alltoall%forw_wf               0.788   1.2      0.791   1.2          66240                   1.00       1.00
-- subtotal                       1.864   3.0      1.859   2.7                                  1.00       1.00
+- forstrnps:synchr               0.000   0.0      0.000   0.0             96                   0.98       0.98
+- mkrho :MPIrhor                 0.001   0.0      0.001   0.0            272                   0.68       0.68
+- alltoall%back_wf               1.179   1.4      1.178   1.2          69696                   1.00       1.00
+- alltoall%forw_wf               0.843   1.0      0.855   0.9          66240                   0.99       0.99
+- subtotal                       2.023   2.4      2.034   2.1                                  0.99       0.99
 
  Additional information
-- timana(1)                      0.000   0.0      0.000   0.0              4                   1.00       1.00
-- total timab                    6.265   9.9      6.448   9.4        3280508                   0.97       0.97
-- fourwf                        32.628  51.7     32.702  47.9          69696                   1.00       1.00
-- mklocl(2)                      0.085   0.1      0.085   0.1            432                   1.00       1.00
-- newocc                         0.308   0.5      0.312   0.5            272                   0.99       0.99
-- nonlop(total)                  3.070   4.9      3.099   4.5          85344                   0.99       0.99
+- timana(1)                      0.000   0.0      0.000   0.0              4                   1.01       1.01
+- total timab                    6.585   7.7      6.629   6.7        3280508                   0.99       0.99
+- fourwf                        33.466  39.0     33.765  34.3          69696                   0.99       0.99
+- mklocl(2)                      0.087   0.1      0.087   0.1            432                   1.00       1.00
+- newocc                         0.302   0.4      0.308   0.3            272                   0.98       0.98
+- nonlop(total)                  3.179   3.7      3.224   3.3          85344                   0.99       0.99
 
  timana : in multi dataset mode, the more detailed analysis is not done.
 
@@ -4058,7 +3511,24 @@ P           mkmem8          5
 - This paper is also available at http://www.arxiv.org/abs/0707.3405
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#bottin2008
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -4072,11 +3542,11 @@ P           mkmem8          5
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -4085,11 +3555,13 @@ P           mkmem8          5
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [4] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [5] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -4097,24 +3569,15 @@ P           mkmem8          5
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [5] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=         15.4  wall=         17.1
+- Proc.   0 individual time (sec): cpu=         16.0  wall=         24.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered 144 WARNINGs and  28 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         63.4  wall=         68.6
++Overall time at end (sec) : cpu=         86.3  wall=         98.7

@@ -1,7 +1,7 @@
 /* abi_common.h */
 
 /*
- * Copyright (C) 2008-2019 ABINIT Group (MG)
+ * Copyright (C) 2008-2020 ABINIT Group (MG)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source
@@ -313,6 +313,11 @@
  * */ 
 #define ABI_UNUSED_A(var) associate( var => var ) NEWLINE end associate 
 
+/* Macro to set the default the value of a local variable when optional arguments are used.
+Use if statement instead of Fortran merge. See https://software.intel.com/en-us/forums/intel-fortran-compiler/topic/640598
+*/
+
+#define ABI_DEFAULT(value, optional, default) value = default; if (present(optional)) value = optional
 
 #ifdef HAVE_PAPI
 #  define XPAPI_CHECK(check,msg) if (check/=PAPI_OK) call xpapi_handle_error(check, msg _FILE_LINE_ARGS_)

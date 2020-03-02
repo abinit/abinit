@@ -7,6 +7,7 @@
 ndtset   4
 gwpara   2
 enunit   1
+symsigma 0
 
 # Dataset1: usual self-consistent ground-state calculation
 # Definition of the k-point grid
@@ -62,7 +63,7 @@ shiftk4   0.0 0.0 0.0  # This grid contains the Gamma point
 istwfk4    *1           # Option needed for Gamma
 
  icutcoul4  3  # old deprecated value of icutcoul, only used for legacy
-#symsigma4   1
+
 
 nband4     20     # Bands to be used in the Self-Energy calculation
 ecuteps4    4.0

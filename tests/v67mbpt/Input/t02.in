@@ -8,7 +8,7 @@ ndtset      5
 gwpara      2
 fftgw       11  # Use the coarsest FFT mesh for oscillator (compatible with symmetries)
 
-use_yaml    1   # enable YAML document output for tests
+symsigma    0
 
 # Parameters for the calculation of the WFK file
 nband1      30         # Number of (occ and empty) bands to be computed in the GS part.
@@ -151,7 +151,7 @@ bdgw
 #%% [setup]
 #%% executable = abinit
 #%% [files]
-#%% files_to_test = 
+#%% files_to_test =
 #%%   t02.out, use_yaml = no, tolnlines = 12, tolabs = 6.0e-3, tolrel = 6.0e-2, fld_options =  -medium
 #%% psp_files = 14si.pspnc
 #%% [paral_info]
@@ -159,7 +159,7 @@ bdgw
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = NC, GW
-#%% description = 
+#%% description =
 #%%   GW calculation in Si: Hilbert transform method for the irreducible polarizability (gaussian approximant)
 #%%   and analytic continuation of sigma from imaginary- to real-axis. The spectral function is also
 #%%   obtained via Pade extrapolation. The following variables are tested spmeth=2, spbroad,

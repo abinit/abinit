@@ -6,7 +6,7 @@
 !! Determine the space group from the number and type of symmetry operations
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (RC)
+!!  Copyright (C) 2008-2020 ABINIT group (RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
