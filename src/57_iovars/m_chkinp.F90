@@ -422,7 +422,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &             '   tnons is ',dt%tnons(1:3,isym),ch10,&
 &             '   Please, read the description of the input variable chksymbreak,',ch10,&
 &             '   then, if you feel confident, you might switch it to zero, or consult with the forum.'
-             call wrtout(iout,msg,'COLL')
+             !call wrtout(iout,msg,'COLL')
              call wrtout(std_out,msg,'COLL')
              !ierr=ierr+1 ! moved this to a warning: for slab geometries arbitrary tnons can appear along the vacuum direction
            end if
@@ -437,10 +437,12 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      call chkint_eq(0,1,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),8,(/0,1,2,3,10,11,12,13/),iout)
      !Only potential self-consistency is currently allowed with constrained_dft
      if (dt%iscf>10) then
+       cond_string(1)='itypat';cond_values(1)=itypat
        cond_string(2)='iscf';cond_values(2)=dt%iscf
        call chkint_eq(2,2,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),1,(/0/),iout)
      endif
      if (dt%ionmov==4) then
+       cond_string(1)='itypat';cond_values(1)=itypat
        cond_string(2)='ionmov';cond_values(2)=dt%ionmov
        call chkint_eq(2,2,cond_string,cond_values,ierr,'constraint_kind',dt%constraint_kind(itypat),1,(/0/),iout)
      endif
@@ -2134,16 +2136,23 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &     'd3e_pert1_elfd, d3e_pert2_elfd, d3e_pert3_elfd, d3e_pert1_phon, d3e_pert2_phon, and d3e_pert3_phon in your input file.'
      MSG_ERROR_NOSTOP(msg, ierr)
    end if
-   if ((response==1 .and. dt%kptopt/=3)) then
-! TODO: check ddk case, which should accept kptopt 2
-     if (dt%rfddk/=0 .and. dt%kptopt/=2) then
-       write(msg,'(a,i3,4a)' )&
-&        'The input variable optdriver=',dt%optdriver,ch10,&
-&        'which implies response functions, and requires kptopt 3.',&
-&        'Set kptopt to 3 to let the code reduce the k with the correct small group of symmetries.', &
-&        'The only exception is a DDK calculation with kptopt 2 '
+   if (response==1 .and. (sum(dt%qptn(:)**2)>tol12 .or. nspden==4) .and. &
+&      .not.(dt%kptopt==3 .or. dt%kptopt==0 .or. dt%nsym==1 .or. dt%iscf<0)) then
+     write(msg,'(a,i3,2a,a,3f16.6,2a,2a,a)' )&
+&      'The input variable optdriver=',dt%optdriver,' which implies response functions.',ch10,&
+&      'Also qptn=',dt%qptn(:),' that is non-zero, or one has a calculation with non-collinear magnetism.',ch10,&
+&      'This requires kptopt 3 (or 0 for expert users) or nsym=1, or non-self-consistent calculation (iscf<0).',ch10,&
+&      'Set kptopt to 3 to let the code reduce the k with the correct small group of symmetries.'
        MSG_ERROR_NOSTOP(msg, ierr)
-     end if
+   end if
+   if (response==1 .and. (sum(dt%qptn(:)**2)<tol12 .and. nspden/=4) .and. &
+&      .not.(dt%kptopt==3 .or. dt%kptopt==0 .or. dt%kptopt==2 .or. dt%nsym==1 .or. dt%iscf<0)) then
+     write(msg,'(a,i3,2a,2a,2a,a)' )&
+&      'The input variable optdriver=',dt%optdriver,' which implies response functions.',ch10,&
+&      'Also qptn is null, and there is no non-collinear magnetism.',ch10,&
+&      'This requires kptopt 3 or 2 (or 0 for expert users) or nsym=1, or non-self-consistent calculation (iscf<0).',ch10,&
+&      'Set kptopt to 2 to let the code reduce the k with the correct small group of symmetries.'
+       MSG_ERROR_NOSTOP(msg, ierr)
    end if
    if(usepaw==1)then
      ! Is optdriver compatible with PAW?
@@ -3392,10 +3401,6 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if (dt%paral_kgb==1) then
      call chkint_eq(0,0,cond_string,cond_values,ierr,'use_slk',dt%use_slk,2,(/0,1/),iout)
    end if
-
-!  use_yaml
-   dt%use_yaml = 1
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'use_yaml',dt%use_yaml,2,(/0,1/),iout)
 
 !  vdw_xc
    call chkint_eq(0,1,cond_string,cond_values,ierr,'vdw_xc',dt%vdw_xc,9,(/0,1,2,5,6,7,10,11,14/),iout)

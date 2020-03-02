@@ -1,6 +1,6 @@
 
-.Version 8.0.3 of CUT3D 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of CUT3D 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  CUT3D comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 07h33 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h15 )
   
 
   What is the name of the 3D function (density, potential or wavef) file ?
@@ -27,7 +27,7 @@
  ECHO of the ABINIT file header 
  
  First record :
-.codvsn,headform,fform = 8.1.5    80    2
+.codvsn,headform,fform = 9.0.0      80    2
  
  Second record :
  bantot,intxc,ixc,natom  =    32     0     1     2
@@ -124,14 +124,14 @@
 
  wffile : kpgmax, bessargmax, nradint =     2.408319E+00    1.520000E+01   152
  Angular analysis (real spherical harmonics)
- 
+
  Atom #   1 is  Si, in-sphere charge =  0.014871
  l=0, charge= 0.002199, m=-l,l splitting: 0.002
  l=1, charge= 0.012261, m=-l,l splitting: 0.007 0.004 0.001
  l=2, charge= 0.000401, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000
  l=3, charge= 0.000009, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  l=4, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
- 
+
  Atom #   2 is  Si, in-sphere charge =  0.014871
  l=0, charge= 0.002199, m=-l,l splitting: 0.002
  l=1, charge= 0.012261, m=-l,l splitting: 0.007 0.004 0.001
@@ -139,7 +139,7 @@
  l=3, charge= 0.000009, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000
  l=4, charge= 0.000000, m=-l,l splitting: 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000 0.000
 
- Sum of angular contributions for all atomic spheres 
+ Sum of angular contributions for all atomic spheres
  l=0, charge = 0.004399 proportion = 0.147901
  l=1, charge = 0.024522 proportion = 0.824487
  l=2, charge = 0.000802 proportion = 0.026954
@@ -147,7 +147,7 @@
  l=4, charge = 0.000001 proportion = 0.000032
 
  Total over all atoms and l=0 to 4 :  0.029743
- 
+
  Charge in the sphere around each atom 
  Atom number    1 :  charge =    0.01384597
  Atom number    2 :  charge =    0.01384597

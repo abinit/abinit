@@ -3977,7 +3977,7 @@ end subroutine sigmaph_setup_kcalc
 pure logical function sigmaph_skip_mode(self, nu, wqnu) result(skip)
 
 !Arguments ------------------------------------
- class(sigmaph_t),target,intent(in) :: self
+ class(sigmaph_t),intent(in) :: self
  integer,intent(in) :: nu
  real(dp),intent(in) :: wqnu
 

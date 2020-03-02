@@ -207,6 +207,9 @@ program anaddb
  call xmpi_bcast(string, master, comm, ierr)
  call xmpi_bcast(lenstr, master, comm, ierr)
 
+ ! Save input string in global variable so that we can access it in ntck_open_create
+ INPUT_STRING = string
+
  ! Read the inputs
  call invars9(inp, lenstr, natom, string)
 

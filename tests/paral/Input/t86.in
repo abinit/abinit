@@ -5,7 +5,6 @@ ndtset 2
 jdtset 1 2
 
 use_yaml 1
-
 getwfk -1
 # nline1 7
 # nnsclo1 7

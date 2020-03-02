@@ -52,7 +52,8 @@ module m_stream_string
     integer :: length = 0
     type(stream_chunk), pointer :: head => null()
     contains
-      procedure :: flush => stream_flush
+      procedure :: flush => stream_flush_unit
+      procedure :: flush_units => stream_flush_units
       procedure :: free => stream_free
       procedure :: copy => stream_copy
       procedure :: push => stream_push
@@ -61,27 +62,73 @@ module m_stream_string
       procedure :: to_file => stream_to_file
       procedure :: transfer => stream_transfer
       procedure :: debug => stream_debug
+
   end type stream_string
 
 contains
 !!***
 
-subroutine stream_flush(stream, unit, newline)
+subroutine stream_flush_unit(stream, unit, newline)
+
   class(stream_string),intent(inout) :: stream
   integer,intent(in) :: unit
   logical,optional,intent(in) :: newline
 
   character(len=stream%length) :: s
 
+  if (unit == dev_null) then
+    call stream%free()
+    return
+  end if
+
   call stream%to_string(s)
+  write(unit, "(a)")trim(s)
+
   if (present(newline)) then
     if (newline) write(unit, "(a)")""
   end if
-  write(unit, "(a)")trim(s)
 
   call stream%free()
 
-end subroutine stream_flush
+end subroutine stream_flush_unit
+
+
+subroutine stream_flush_units(stream, units, newline)
+
+  class(stream_string),intent(inout) :: stream
+  integer,intent(in) :: units(:)
+  logical,optional,intent(in) :: newline
+
+!Local variables-------------------------------
+!scalars
+ integer :: ii, cnt
+ character(len=stream%length) :: s
+!arrays
+ integer :: my_units(size(units))
+
+!******************************************************************
+
+ ! Remove duplicated units (if any)
+ my_units(1) = units(1); cnt = 1
+ do ii=2,size(units)
+   if (any(units(ii) == my_units(1:cnt))) cycle
+   cnt = cnt + 1
+   my_units(cnt) = units(ii)
+ end do
+
+ call stream%to_string(s)
+
+ do ii=1,cnt
+   if (units(ii) == dev_null) cycle
+   write(units(ii), "(a)")trim(s)
+   if (present(newline)) then
+     if (newline) write(units(ii), "(a)")""
+   end if
+ end do
+
+ call stream%free()
+
+end subroutine stream_flush_units
 
 !!****f* m_stream_string/stream_free
 !! NAME

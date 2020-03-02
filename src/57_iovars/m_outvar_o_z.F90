@@ -1144,6 +1144,9 @@ contains
  intarr(1,:)=dtsets(:)%use_gemm_nonlop
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_gemm_nonlop','INT',0)
 
+ intarr(1,:)=dtsets(:)%use_yaml
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_yaml','INT',0)
+
  intarr(1,:)=dtsets(:)%use_nonscf_gkk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_nonscf_gkk','INT',0)
 
@@ -1197,9 +1200,6 @@ contains
 
  intarr(1,:)=dtsets(:)%use_slk
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_slk','INT',0, firstchar="-")
-
- intarr(1,:)=dtsets(:)%use_yaml
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'use_yaml','INT',0)
 
 
 !###########################################################

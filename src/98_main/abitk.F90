@@ -65,6 +65,7 @@ program abitk
  type(ebands_t) :: ebands !, ebands_kpath
  type(edos_t) :: edos
  type(crystal_t) :: cryst
+ type(poscar_t) :: poscar
 !arrays
  integer :: kptrlatt(3,3), new_kptrlatt(3,3)
  !integer,allocatable :: indkk(:,:) !, bz2ibz(:)
@@ -86,6 +87,7 @@ program abitk
  ! note that abimem.mocc files can easily be multiple GB in size so don't use this option normally
 #ifdef HAVE_MEM_PROFILING
  call abimem_init(0)
+ !call abimem_init(args%abimem_level, limit_mb=args%abimem_limit_mb)
 #endif
 
  nargs = command_argument_count()
@@ -127,6 +129,15 @@ program abitk
  call get_command_argument(1, command)
 
  select case (command)
+ case ("poscar")
+   call get_command_argument(2, path)
+   poscar = poscar_from_filepath(path, comm)
+   call poscar%print_abivars(std_out)
+   call poscar%free()
+
+ !case ("wfk_downsample")
+ ! e.g. go from a 8x8x8 WFK to a 4x4x4
+
  case ("hdr_print")
    ABI_CHECK(nargs > 1, "FILE argument is required.")
    call get_command_argument(2, path)
@@ -190,6 +201,7 @@ program abitk
      call edos%free()
 
    else if (command == "ebands_jdos") then
+     NOT_IMPLEMENTED_ERROR()
      !jdos = ebands_get_jdos(ebands, cryst, intmeth, step, broad, comm, ierr)
      !call jdos%write(strcat(basename(path), "_EJDOS"))
      !call jdos%free()

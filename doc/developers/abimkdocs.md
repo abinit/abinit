@@ -240,7 +240,7 @@ to the HTML meta section.
   Users may want to share or bookmarks links to the Abinit documentation so broken links should be avoided 
   as much as possible.
 
-* The fact the [wikilink syntax](markdown.md#wiki-links) facilitates the inclusion of hyperlinks does not 
+* The fact the [wikilink syntax](markdown.md#wikilinks) facilitates the inclusion of hyperlinks does not 
   mean that we have to add links *everywhere*. 
   This is especially true in the documentation of the input variables in which it does not make sense to
   put links to the same variable we are describing or the same link over and over again in the same paragraph.
@@ -341,7 +341,7 @@ Run the tests with:
 
 with pytest to validate your changes.
 
-In order to refer to a bibliography entry, use the [Wikilink syntax](markdown#wiki-links) with the "cite" namespace.
+In order to refer to a bibliography entry, use the [Wikilink syntax](markdown#wikilinks) with the "cite" namespace.
 
 ## Topics
 
@@ -412,7 +412,7 @@ for topic "parallelism" and topic "GW".
 
 ## Release Notes
 
-Release notes are written in Markdown so it is possible to use the [wikilink syntax](markdown.md#wiki-links)
+Release notes are written in Markdown so it is possible to use the [wikilink syntax](markdown.md#wikilinks)
 to insert links to new tests, new autoconf files and even links to pull-requests and issues that will redirect
 the reader to the Abinit repository on github.
 For example, the following markdown text

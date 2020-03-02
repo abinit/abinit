@@ -70,6 +70,6 @@ dmatpawu
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = Unknown
-#%% keywords = LDAU
+#%% keywords = LDAU, PAW
 #%% description = Fourth run of the DFT+U tutorial
 #%%<END TEST_INFO>

@@ -2992,7 +2992,7 @@ subroutine hdr_ncread(Hdr, ncid, fform)
 #ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
- integer :: nresolution,itypat
+ integer :: nresolution, itypat, ii
  character(len=500) :: msg
 !arrays
  integer,allocatable :: nband2d(:,:)
@@ -3017,7 +3017,10 @@ subroutine hdr_ncread(Hdr, ncid, fform)
 
  ! First, we read the declaration of code, fform ...
  ! pad the returned string with " " instead of "\0"
- NCF_CHECK(nf90_get_var(ncid, vid("codvsn"), hdr%codvsn))
+ !
+ ! Support for pre-v9 (length of codvsn was changed from 6 to 8)
+ NCF_CHECK(nctk_get_dim(ncid, "codvsnlen", ii))
+ NCF_CHECK(nf90_get_var(ncid, vid("codvsn"), hdr%codvsn(1:ii)))
  call replace_ch0(hdr%codvsn)
 
  ! Get ETSF dimensions

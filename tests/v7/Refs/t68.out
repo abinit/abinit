@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h35 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h23 )
   
-- input  file    -> t68.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t68/t68.in
 - output file    -> t68.out
 - root for input  files -> t68i
 - root for output files -> t68o
@@ -838,7 +838,16 @@ P           mkmem           6
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 6, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 92, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  40.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
@@ -863,8 +872,8 @@ P           mkmem           6
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -890,6 +899,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 250, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-15, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -11.728216697157    -1.173E+01 1.433E-02 1.559E+00
  ETOT  2  -11.729558941815    -1.342E-03 6.799E-04 3.389E-03
@@ -905,6 +920,35 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
   sigma(1 1)=  4.85646418E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  4.85646418E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  4.85646418E-03  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.3703265,   3.3703265, ]
+- [  3.3703265,   0.0000000,   3.3703265, ]
+- [  3.3703265,   3.3703265,   0.0000000, ]
+lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   7.6567759E+01
+convergence: {deltae:  5.862E-14, res2:  5.555E-16, residm:  1.644E-09, diffor: null, }
+etotal    :  -1.17295601E+01
+entropy   :   0.00000000E+00
+fermie    :   3.96241984E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  4.85646418E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   4.85646418E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   4.85646418E-03, ]
+pressure_GPa:  -1.4288E+02
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01,  C]
+cartesian_forces: # hartree/bohr
+- [  3.27240542E-25,   1.63620271E-24,  -6.21757029E-24, ]
+- [ -3.27240542E-25,  -1.63620271E-24,   6.21757029E-24, ]
+force_length_stats: {min:   6.43757920E-24, max:   6.43757920E-24, mean:   6.43757920E-24, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -984,22 +1028,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  Next minimum=    1.5001E-02  at reduced coord.    0.8000    0.7333    0.7333
    Integrated=    8.0000E+00
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  7.42746153805544E+00
-    Hartree energy  =  8.53940825218230E-01
-    XC energy       = -4.27325480542850E+00
-    Ewald energy    = -1.27864121744519E+01
-    PspCore energy  =  1.36841387056176E+00
-    Loc. psp. energy= -3.60688076094452E+00
-    NL   psp  energy= -7.12828627288616E-01
-    >>>>>>>>> Etotal= -1.17295601342781E+01
-
- Other information on the energy :
-    Total energy(eV)= -3.19177563322795E+02 ; Band energy (Ha)=   1.0005685439E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.42746153805544E+00
+hartree             :  8.53940825218230E-01
+xc                  : -4.27325480542850E+00
+Ewald energy        : -1.27864121744519E+01
+psp_core            :  1.36841387056176E+00
+local_psp           : -3.60688076094452E+00
+non_local_psp       : -7.12828627288616E-01
+total_energy        : -1.17295601342781E+01
+total_energy_eV     : -3.19177563322795E+02
+band_energy         :  1.00056854390748E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1014,7 +1056,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 6, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 70, }
+cutoff_energies: {ecut:   7.0, pawecutdg:  40.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 25, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1039,8 +1090,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1151,6 +1202,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :    8.820
@@ -1174,7 +1226,9 @@ data: !SigmaeeData |
        14    45.043   -11.529    45.043    48.179    -1.113     0.000     1.000     0.000    -1.113     2.023    47.066    47.067
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   10.773
@@ -1198,7 +1252,9 @@ data: !SigmaeeData |
        14    51.735   -13.056    51.735    55.493    -1.172     0.000     1.000     0.000    -1.172     2.585    54.320    54.323
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   11.068
@@ -1222,7 +1278,9 @@ data: !SigmaeeData |
        14    47.990   -13.983    47.990    52.083    -1.525     0.000     1.000     0.000    -1.525     2.567    50.558    50.560
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   19.831
@@ -1246,7 +1304,9 @@ data: !SigmaeeData |
        14    53.062   -12.687    53.062    56.671    -1.136     0.000     1.000     0.000    -1.136     2.473    55.535    55.538
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   10.896
@@ -1270,7 +1330,9 @@ data: !SigmaeeData |
        14    43.927   -13.918    43.927    48.017    -1.694     0.000     1.000     0.000    -1.694     2.396    46.323    46.324
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    5.231
@@ -1294,6 +1356,7 @@ data: !SigmaeeData |
        14    37.164   -11.329    37.164    40.268    -1.095     0.000     1.000     0.000    -1.095     2.009    39.173    39.176
 ...
 
+
  New Fermi energy :        4.520599E-01 Ha ,    1.230118E+01 eV
  New Exchange energy :    -1.059535E+00 Ha ,   -2.883141E+01 eV
 
@@ -1316,7 +1379,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 6, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 70, }
+cutoff_energies: {ecut:   7.0, pawecutdg:  40.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 25, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1437,6 +1509,7 @@ data: !SigmaeeData |
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :   11.875
@@ -1460,7 +1533,9 @@ data: !SigmaeeData |
        14    45.043   -11.529    47.067    48.183    -1.116     0.000     1.000     0.000    -1.116     0.001    47.067    47.067
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   13.957
@@ -1484,7 +1559,9 @@ data: !SigmaeeData |
        14    51.735   -13.056    54.323    55.499    -1.173     0.000     1.000     0.000    -1.173     0.003    54.326    54.326
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   14.312
@@ -1508,7 +1585,9 @@ data: !SigmaeeData |
        14    47.990   -13.983    50.560    52.087    -1.524     0.000     1.000     0.000    -1.524     0.003    50.562    50.562
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   23.786
@@ -1532,7 +1611,9 @@ data: !SigmaeeData |
        14    53.062   -12.687    55.538    56.678    -1.138     0.000     1.000     0.000    -1.138     0.002    55.540    55.540
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   14.138
@@ -1556,7 +1637,9 @@ data: !SigmaeeData |
        14    43.927   -13.918    46.324    48.020    -1.691     0.000     1.000     0.000    -1.691     0.004    46.328    46.328
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    8.058
@@ -1580,6 +1663,7 @@ data: !SigmaeeData |
        14    37.164   -11.329    39.176    40.269    -1.092     0.000     1.000     0.000    -1.092     0.001    39.177    39.177
 ...
 
+
  New Fermi energy :        4.520217E-01 Ha ,    1.230014E+01 eV
  New Exchange energy :    -1.060851E+00 Ha ,   -2.886722E+01 eV
 
@@ -1602,7 +1686,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 6, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 70, }
+cutoff_energies: {ecut:   7.0, pawecutdg:  40.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 25, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1723,6 +1816,7 @@ data: !SigmaeeData |
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 4, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :   11.886
@@ -1746,7 +1840,9 @@ data: !SigmaeeData |
        14    45.043   -11.529    47.067    48.183    -1.116     0.000     1.000     0.000    -1.116     0.000    47.067    47.067
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 4, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   13.970
@@ -1770,7 +1866,9 @@ data: !SigmaeeData |
        14    51.735   -13.056    54.326    55.499    -1.173     0.000     1.000     0.000    -1.173     0.000    54.326    54.326
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 4, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   14.316
@@ -1794,7 +1892,9 @@ data: !SigmaeeData |
        14    47.990   -13.983    50.562    52.087    -1.524     0.000     1.000     0.000    -1.524     0.001    50.563    50.563
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 4, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   23.779
@@ -1818,7 +1918,9 @@ data: !SigmaeeData |
        14    53.062   -12.687    55.540    56.678    -1.138     0.000     1.000     0.000    -1.138     0.000    55.541    55.541
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 4, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   14.148
@@ -1842,7 +1944,9 @@ data: !SigmaeeData |
        14    43.927   -13.918    46.328    48.020    -1.691     0.000     1.000     0.000    -1.691     0.001    46.329    46.329
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 4, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    8.097
@@ -1866,6 +1970,7 @@ data: !SigmaeeData |
        14    37.164   -11.329    39.177    40.269    -1.092     0.000     1.000     0.000    -1.092     0.000    39.177    39.177
 ...
 
+
  New Fermi energy :        4.520264E-01 Ha ,    1.230026E+01 eV
  New Exchange energy :    -1.060979E+00 Ha ,   -2.887071E+01 eV
 
@@ -1888,7 +1993,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 6, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 70, }
+cutoff_energies: {ecut:   7.0, pawecutdg:  40.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 25, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2009,6 +2123,7 @@ data: !SigmaeeData |
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :   11.887
@@ -2032,7 +2147,9 @@ data: !SigmaeeData |
        14    45.043   -11.529    47.067    48.183    -1.116     0.000     1.000     0.000    -1.116    -0.000    47.067    47.067
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   13.970
@@ -2056,7 +2173,9 @@ data: !SigmaeeData |
        14    51.735   -13.056    54.326    55.499    -1.173     0.000     1.000     0.000    -1.173     0.000    54.326    54.326
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   14.316
@@ -2080,7 +2199,9 @@ data: !SigmaeeData |
        14    47.990   -13.983    50.563    52.087    -1.524     0.000     1.000     0.000    -1.524     0.000    50.563    50.563
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   23.778
@@ -2104,7 +2225,9 @@ data: !SigmaeeData |
        14    53.062   -12.687    55.541    56.678    -1.138     0.000     1.000     0.000    -1.138     0.000    55.541    55.541
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   14.148
@@ -2128,7 +2251,9 @@ data: !SigmaeeData |
        14    43.927   -13.918    46.329    48.020    -1.691     0.000     1.000     0.000    -1.691     0.000    46.329    46.329
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 5, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    8.100
@@ -2152,6 +2277,7 @@ data: !SigmaeeData |
        14    37.164   -11.329    39.177    40.269    -1.092     0.000     1.000     0.000    -1.092     0.000    39.177    39.177
 ...
 
+
  New Fermi energy :        4.520258E-01 Ha ,    1.230025E+01 eV
  New Exchange energy :    -1.060990E+00 Ha ,   -2.887100E+01 eV
 
@@ -2174,7 +2300,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET  6 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 6, }
+dimensions: {natom: 2, nkpt: 6, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 70, }
+cutoff_energies: {ecut:   7.0, pawecutdg:  40.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 25, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2295,6 +2430,7 @@ data: !SigmaeeData |
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 6, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :   11.887
@@ -2318,7 +2454,9 @@ data: !SigmaeeData |
        14    45.043   -11.529    47.067    48.183    -1.116     0.000     1.000     0.000    -1.116    -0.000    47.067    47.067
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 6, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   13.970
@@ -2342,7 +2480,9 @@ data: !SigmaeeData |
        14    51.735   -13.056    54.326    55.499    -1.173     0.000     1.000     0.000    -1.173     0.000    54.326    54.326
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 6, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   14.316
@@ -2366,7 +2506,9 @@ data: !SigmaeeData |
        14    47.990   -13.983    50.563    52.087    -1.524     0.000     1.000     0.000    -1.524     0.000    50.563    50.563
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 6, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   23.778
@@ -2390,7 +2532,9 @@ data: !SigmaeeData |
        14    53.062   -12.687    55.541    56.678    -1.138     0.000     1.000     0.000    -1.138     0.000    55.541    55.541
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 6, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   14.148
@@ -2414,7 +2558,9 @@ data: !SigmaeeData |
        14    43.927   -13.918    46.329    48.020    -1.691     0.000     1.000     0.000    -1.691     0.000    46.329    46.329
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 6, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    8.100
@@ -2438,6 +2584,7 @@ data: !SigmaeeData |
        14    37.164   -11.329    39.177    40.269    -1.092     0.000     1.000     0.000    -1.092     0.000    39.177    39.177
 ...
 
+
  New Fermi energy :        4.520257E-01 Ha ,    1.230024E+01 eV
  New Exchange energy :    -1.060991E+00 Ha ,   -2.887103E+01 eV
 
@@ -2460,7 +2607,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET  7 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 7, }
+dimensions: {natom: 2, nkpt: 6, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 92, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  40.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2487,8 +2643,8 @@ data: !SigmaeeData |
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2514,6 +2670,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 7, }
+solver: {iscf: 7, nstep: 250, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-15, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -11.738682127851    -1.174E+01 2.137E-08 6.489E-03
  ETOT  2  -11.738802540716    -1.204E-04 6.708E-11 4.718E-05
@@ -2531,6 +2693,35 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
   sigma(1 1)=  5.08497160E-03  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  5.08497160E-03  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  5.08497160E-03  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 7, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.3703265,   3.3703265, ]
+- [  3.3703265,   0.0000000,   3.3703265, ]
+- [  3.3703265,   3.3703265,   0.0000000, ]
+lattice_lengths: [   4.76636,    4.76636,    4.76636, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   7.6567759E+01
+convergence: {deltae: -1.954E-14, res2:  2.488E-16, residm:  7.472E-17, diffor: null, }
+etotal    :  -1.17388041E+01
+entropy   :   0.00000000E+00
+fermie    :   3.45851839E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  5.08497160E-03,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   5.08497160E-03,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   5.08497160E-03, ]
+pressure_GPa:  -1.4961E+02
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  C]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01,  C]
+cartesian_forces: # hartree/bohr
+- [ -6.54481083E-25,  -1.24463329E-41,  -1.96344325E-24, ]
+- [  6.54481083E-25,   1.24463329E-41,   1.96344325E-24, ]
+force_length_stats: {min:   2.06965091E-24, max:   2.06965091E-24, mean:   2.06965091E-24, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2610,26 +2801,29 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  Next minimum=    1.4824E-02  at reduced coord.    0.8000    0.7333    0.7333
    Integrated=    8.0000E+00
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 7, }
+comment             : Components of total free energy in Hartree
+kinetic             :  7.38765111605584E+00
+hartree             :  8.49487029069005E-01
+xc                  : -3.21280207546013E+00
+Ewald energy        : -1.27864121744519E+01
+psp_core            :  1.36841387056176E+00
+local_psp           : -3.58211229461876E+00
+non_local_psp+x     : -1.76302961417242E+00
+total_energy        : -1.17388041430166E+01
+...
 
-    Kinetic energy  =  7.38765111605584E+00
-    Hartree energy  =  8.49487029069005E-01
-    XC energy       = -3.21280207546013E+00
-    Ewald energy    = -1.27864121744519E+01
-    PspCore energy  =  1.36841387056176E+00
-    Loc. psp. energy= -3.58211229461876E+00
-    NL(psp+X) energy= -1.76302961417242E+00
-    >>>>>>>>> Etotal= -1.17388041430166E+01
 
- "Double-counting" decomposition of free energy:
-    Band energy     = -6.51009459440130E-01
-    Ewald energy    =-1.27864121744519E+01
-    PspCore energy  =  1.36841387056176E+00
-    Dble-C XC-energy=  3.30203735014250E-01
-    >>>> Etotal (DC)= -1.17388040283160E+01
---------------------------------------------------------------------------------
-
+--- !EnergyTermsDC
+iteration_state     : {dtset: 7, }
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         : -6.51009459440130E-01
+Ewald energy        : -1.27864121744519E+01
+psp_core            :  1.36841387056176E+00
+xc_dc               :  3.30203735014250E-01
+total_energy_dc     : -1.17388040283160E+01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2644,7 +2838,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 ================================================================================
 == DATASET  8 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 8, }
+dimensions: {natom: 2, nkpt: 6, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 70, }
+cutoff_energies: {ecut:   7.0, pawecutdg:  40.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2669,8 +2872,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2892,7 +3095,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
 
 ================================================================================
 == DATASET  9 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 9, }
+dimensions: {natom: 2, nkpt: 6, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 70, }
+cutoff_energies: {ecut:   7.0, pawecutdg:  40.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -3004,6 +3216,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      81.281      81.110
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 9, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    5.231
@@ -3015,7 +3228,9 @@ data: !SigmaeeData |
         5  16.014 -15.169  -8.983  -3.940   0.846  -0.182 -13.269   1.900  17.914
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 9, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   11.068
@@ -3027,9 +3242,19 @@ data: !SigmaeeData |
         5  13.907 -13.336  -7.902  -4.219   0.852  -0.174 -12.301   1.035  14.943
 ...
 
+
 ================================================================================
 == DATASET 10 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 10, }
+dimensions: {natom: 2, nkpt: 6, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 70, }
+cutoff_energies: {ecut:   7.0, pawecutdg:  40.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 20, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -3266,7 +3491,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET 11 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 11, }
+dimensions: {natom: 2, nkpt: 6, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 70, }
+cutoff_energies: {ecut:   7.0, pawecutdg:  40.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 20, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -3399,6 +3633,7 @@ data: !SigmaeeData |
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 11, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :   11.887
@@ -3422,7 +3657,9 @@ data: !SigmaeeData |
        14    45.043   -11.529    47.067    56.580    -3.347    -6.166     0.647    -0.546    -9.513    -0.000    47.067    47.103
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 11, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   13.970
@@ -3446,7 +3683,9 @@ data: !SigmaeeData |
        14    51.735   -13.056    54.326    64.805    -3.519    -4.885     0.415    -1.409    -9.617     0.861    55.188    56.478
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 11, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   14.316
@@ -3470,7 +3709,9 @@ data: !SigmaeeData |
        14    47.990   -13.983    50.563    61.977    -4.573    -8.165     0.457    -1.188   -12.019    -0.605    49.958    49.253
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 11, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   23.778
@@ -3494,7 +3735,9 @@ data: !SigmaeeData |
        14    53.062   -12.687    55.541    65.764    -3.413     0.783    -0.531     2.884   -14.254    -4.031    51.510    63.566
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 11, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   14.148
@@ -3518,7 +3761,9 @@ data: !SigmaeeData |
        14    43.927   -13.918    46.329    57.843    -5.073    -5.698     0.699    -0.430   -10.994     0.519    46.848    47.082
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 11, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    8.101
@@ -3542,6 +3787,7 @@ data: !SigmaeeData |
        14    37.164   -11.329    39.177    48.500    -3.276    -5.751     0.819    -0.220    -9.080     0.242    39.419    39.604
 ...
 
+
  New Fermi energy :        4.877646E-01 Ha ,    1.327275E+01 eV
  New Exchange energy :    -3.182973E+00 Ha ,   -8.661309E+01 eV
 
@@ -3564,7 +3810,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET 12 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 12, }
+dimensions: {natom: 2, nkpt: 6, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 70, }
+cutoff_energies: {ecut:   7.0, pawecutdg:  40.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 20, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   7.
 
@@ -3799,7 +4054,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET 13 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 13, }
+dimensions: {natom: 2, nkpt: 6, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 70, }
+cutoff_energies: {ecut:   7.0, pawecutdg:  40.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   7.
 
@@ -3822,8 +4086,8 @@ data: !SigmaeeData |
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.psp8
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/C.psp8
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/C.psp8
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/C.psp8
 - C     ONCVPSP-3.2.3  r_core=   1.51078   1.70218
 -  6.00000   4.00000    160922                znucl, zion, pspdat
     8   11    1    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3930,6 +4194,7 @@ data: !SigmaeeData |
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 13, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    8.122
@@ -3941,7 +4206,9 @@ data: !SigmaeeData |
         5  17.533 -10.577  -5.922  -3.602   0.868  -0.153  -9.663   0.914  18.447
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 13, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   14.388
@@ -3952,6 +4219,7 @@ data: !SigmaeeData |
         4   0.710 -10.939 -13.649   4.269   0.848  -0.180  -9.618   1.321   2.031
         5  15.098  -9.402  -5.173  -3.870   0.872  -0.147  -9.089   0.313  15.411
 ...
+
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -4656,10 +4924,10 @@ P           mkmem           6
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         31.7  wall=         31.8
+- Proc.   0 individual time (sec): cpu=         34.5  wall=         36.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  50 WARNINGs and  22 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         34.1  wall=         34.8
++Overall time at end (sec) : cpu=         34.5  wall=         36.0
