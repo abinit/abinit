@@ -2453,7 +2453,9 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 !******************************************************************
 
  nproc_kpt=mpi_enreg%nproc_kpt
+print *, ' nproc_kpt, nproc, mpi_enreg%paral_pertmpi_enreg%nproc_pert ', nproc_kpt, nproc, mpi_enreg%paral_pert, mpi_enreg%nproc_pert
  if (mpi_enreg%paral_pert==1) nproc_kpt=nproc
+! if (mpi_enreg%paral_pert==1) nproc_kpt=nproc/mpi_enreg%nproc_pert
 
 !Initialization of proc_distrb
  mpi_enreg%proc_distrb = nproc+1

@@ -3060,12 +3060,13 @@ end subroutine wfk_read_eigenvalues
 !! SOURCE
 
 subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
-&          formeig, istwfk_in, kptns_in, nkpt_in, npwarr, &
+&          formeig, istwfk_in, kptns_in, mkmem_rbz, nkpt_in, npwarr, &
 &          cg, kg, eigen, occ, pawrhoij, ask_accurate_)
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: comm, nkpt_in, formeig
+ integer, intent(in) :: mkmem_rbz
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer, intent(in) :: istwfk_in(nkpt_in)
@@ -3074,7 +3075,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  logical, intent(in) :: distrb_flags(nkpt_in,dtset%mband,dtset%nsppol)
  real(dp), intent(in),target :: kptns_in(3,nkpt_in)
 
- real(dp), intent(out) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband_mem*dtset%mkmem*dtset%nsppol)
+ real(dp), intent(out) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband_mem*mkmem_rbz*dtset%nsppol)
  integer, intent(out), optional :: kg(3,dtset%mpw*nkpt_in)
  real(dp), intent(out), optional :: eigen(dtset%mband*(2*dtset%mband)**formeig*nkpt_in*dtset%nsppol)
  real(dp), intent(out), optional :: occ(dtset%mband*nkpt_in*dtset%nsppol)
@@ -3265,13 +3266,19 @@ print *, 'rbz2disk_sort ', rbz2disk_sort
      ll = ll+nband_k
 
      if (.not. any(distrb_flags(ikpt,:,spin))) cycle
+! TODO: this does not take into account variable nband(ik)
+     icg(ikpt,spin) = ii
 #ifdef DEV_MJV
 print *, 'icg counts ikpt, spin, nband_k ', icg(ikpt,spin),ikpt,spin, nband_k
 #endif
-! TODO: this does not take into account variable nband(ik)
-     icg(ikpt,spin) = ii
 ! this allows for variable nband_k < mband_mem
      ii = ii+min(nband_k,dtset%mband_mem)*npwarr(ikpt)*dtset%nspinor
+#ifdef DEV_MJV
+if (ii > size(cg, dim=2)) then
+print *, 'error : icg went past end of cg ii ', ii, ' ikpt, dtset%mkmem ', ikpt, dtset%mkmem, &
+&        ' spin, nband_k,dtset%mband_mem  ', spin, nband_k,dtset%mband_mem
+end if
+#endif
    end do
  end do
 
