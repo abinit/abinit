@@ -3808,6 +3808,14 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
    ! This should implement the POSCAR format.
    read(unit, *, err=10, iomsg=iomsg) new%xred(:, iatom), symbol
 
+   ! This to handle symbol + oxidation state e.g. Li1+
+   !do ii=2,len_trim(symbol)
+   !  if (is_digit(symbol(ii:ii))) then
+   !    symbol = symbol(:ii-1)
+   !    exit
+   !  end if
+   !end do
+
    ! This is an extension in which e.g 1/3 is supported.
    !b1 = 1
    !call inarray(b1, strcat("poscar_coords_iatom_", itoa(iatom)), dprarr, intarr, marr, 3, line, "DPR")

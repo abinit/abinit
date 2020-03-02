@@ -2530,6 +2530,7 @@ class AbinitTest(BaseTest):
             line = fh.read()
 
         # Add extra variables for pseudos and output file if not already present.
+        # Note that the code checks for the presence of `varname = "`
         extra = ["# Added by runtests.py"]
         app = extra.append
 
@@ -2634,16 +2635,25 @@ class AnaddbTest(BaseTest):
 
         extra = ["# Added by runtests.py"]
         app = extra.append
-        app('ddb_path = "%s"' % (self.get_ddb_path()))
-        app('output_file = "%s"' % (self.id + ".out"))
+
+        # Add extra variables for ddb_path, output_file if not already present.
+        # Note that the code checks for the presence of `varname = "`
+        if 'ddb_path = "' not in line:
+            app('ddb_path = "%s"' % (self.get_ddb_path()))
+
+        if 'output_file = "' not in line:
+            app('output_file = "%s"' % (self.id + ".out"))
 
         # EPH stuff
         gkk_path = self.get_gkk_path()
-        if gkk_path: app('gkk_path = "%s"' % gkk_path)
-        ddk_path = self.get_ddk_path()
-        if ddk_path: app('ddk_path = "%s"' % ddk_path)
+        if gkk_path and 'gkk_path = "' not in line:
+            app('gkk_path = "%s"' % gkk_path)
 
-        if gkk_path or ddk_path:
+        ddk_path = self.get_ddk_path()
+        if ddk_path and 'ddk_path = "' not in line:
+            app('ddk_path = "%s"' % ddk_path)
+
+        if (gkk_path or ddk_path) and 'eph_prefix = "' not in line:
             # EPH calculation
             app('eph_prefix = "%s"' % self.id)
 

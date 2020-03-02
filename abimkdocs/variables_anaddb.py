@@ -2165,7 +2165,7 @@ Variable(
     dimensions="scalar",
     defaultval="",
     mnemonics="DDB PATH",
-    added_in_version="before_v9",
+    added_in_version="9.0.0",
     text=r"""
 This variable specifies the input DDB file when anaddb is invoked with the new syntax:
 
@@ -2189,7 +2189,7 @@ Variable(
     dimensions="scalar",
     defaultval="",
     mnemonics="OUTPUT file",
-    added_in_version="before_v9",
+    added_in_version="9.0.0",
     text=r"""
 This variable specifies the name of the output file when anaddb is invoked with the new syntax:
 
@@ -2227,7 +2227,7 @@ Variable(
     dimensions="scalar",
     defaultval="",
     mnemonics="GKK PATH",
-    added_in_version="before_v9",
+    added_in_version="9.0.0",
     text=r"""
 This variable specifies the name of the GKK file when anaddb is invoked with the new syntax:
 
@@ -2246,7 +2246,7 @@ Variable(
     dimensions="scalar",
     defaultval="",
     mnemonics="EPH PREFIX",
-    added_in_version="before_v9",
+    added_in_version="9.0.0",
     text=r"""
 This variable specifies the prefix for the elphon output files when anaddb is invoked with the new syntax:
 
@@ -2265,15 +2265,27 @@ Variable(
     dimensions="scalar",
     defaultval="",
     mnemonics="DDK PATH",
-    added_in_version="before_v9",
+    added_in_version="9.0.0",
     text=r"""
-This variable specifies the name the input file with the matrix elements of the velocity operator
-when anaddb is invoked with the new syntax:
+This variable specifies the name of the input file from which the list of 3 files containing the matrix
+elements of the velocity operator are obained
+
+This option is needed when anaddb is invoked with the new syntax:
 
     anaddb t01.in > log 2> err
 
 instead of the legacy mode based on the files file.
 This variable is optional and used for performing transport calculations with [[elphflag@anaddb]].
+
+Example:
+
+    ddk_path = "t94.ddk"
+
+where t94.ddk contains the list of file names.
+
+    t90o_DS10_GKK4
+    t90o_DS10_GKK5
+    t90o_DS10_GKK6
 """,
 ),
 
