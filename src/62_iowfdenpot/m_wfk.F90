@@ -1406,9 +1406,11 @@ print *, ' tmp_eigk(nband_disk+1:) ', tmp_eigk(nband_disk+1:)
 
      if (present(cg_k)) then
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_CG)
-print *, ' ik_ibz,spin Wfk%offset_ks(ik_ibz,spin,REC_CG) ', ik_ibz,spin, Wfk%offset_ks(ik_ibz,spin,REC_CG)
        sizes     = [npw_disk*nspinor_disk, nband_disk]
+#ifdef DEV_MJV
+print *, ' ik_ibz,spin Wfk%offset_ks(ik_ibz,spin,REC_CG) ', ik_ibz,spin, Wfk%offset_ks(ik_ibz,spin,REC_CG)
 print *, 'npw_disk, nspinor_disk, nband_disk wfk%chunk_bsize ', npw_disk, nspinor_disk, nband_disk, wfk%chunk_bsize
+#endif
        subsizes  = [npw_disk*nspinor_disk, band_block(2)-band_block(1)+1]
        bufsz     = 2 * npw_disk * nspinor_disk * nb_block
        starts    = [1, band_block(1)]
