@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h27 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h16 )
   
-- input  file    -> t84.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v3_t84/t84.in
 - output file    -> t84.out
 - root for input  files -> t84i
 - root for output files -> t84o
@@ -367,7 +367,16 @@ P          mk1mem6          8
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 65, }
+cutoff_energies: {ecut:   2.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.00000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -385,8 +394,8 @@ P          mk1mem6          8
          ecut(hartree)=      2.000   => boxcut(ratio)=   2.09807
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/83bi.psphgh
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/83bi.psphgh
 - Hartwigsen-Goedecker-Hutter psp for Bismuth,  from PRB58, 3641 (1998) paper
 - 83.00000   5.00000    980509                znucl, zion, pspdat
     3    1    2    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -418,6 +427,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-16, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -10.677166430568    -1.068E+01 2.774E-04 2.718E+00
  ETOT  2  -10.688635049216    -1.147E-02 4.636E-09 2.247E-01
@@ -436,6 +451,35 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
   sigma(1 1)=  5.28010549E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  5.28010549E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  1.02442026E-03  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  4.9786925,   0.0000000,   7.4975077, ]
+- [ -2.4893462,   4.3116741,   7.4975077, ]
+- [ -2.4893462,  -4.3116741,   7.4975077, ]
+lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
+lattice_angles: [ 57.250,  57.250,  57.250, ] # degrees, (23, 13, 12)
+lattice_volume:   4.8283574E+02
+convergence: {deltae: -7.105E-15, res2:  2.358E-14, residm:  8.770E-17, diffor: null, }
+etotal    :  -1.06896184E+01
+entropy   :   0.00000000E+00
+fermie    :   4.30356439E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  5.28010549E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   5.28010549E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   1.02442026E-03, ]
+pressure_GPa:  -2.0403E+01
+xred      :
+- [  2.3100E-01,   2.3100E-01,   2.3100E-01, Bi]
+- [ -2.3100E-01,  -2.3100E-01,  -2.3100E-01, Bi]
+cartesian_forces: # hartree/bohr
+- [  3.01109970E-19,   1.46052327E-18,   1.01080394E-02, ]
+- [ -3.01109970E-19,  -1.46052327E-18,  -1.01080394E-02, ]
+force_length_stats: {min:   1.01080394E-02, max:   1.01080394E-02, mean:   1.01080394E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -477,22 +521,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.78249231858542E+00
-    Hartree energy  =  3.97190950930114E-01
-    XC energy       = -2.61261807790641E+00
-    Ewald energy    = -1.13058438878511E+01
-    PspCore energy  =  1.44126513565306E+00
-    Loc. psp. energy= -1.95539061080990E+00
-    NL   psp  energy=  5.63285760150852E-01
-    >>>>>>>>> Etotal= -1.06896184112479E+01
-
- Other information on the energy :
-    Total energy(eV)= -2.90879309905391E+02 ; Band energy (Ha)=  -1.2188978791E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.78249231858542E+00
+hartree             :  3.97190950930114E-01
+xc                  : -2.61261807790641E+00
+Ewald energy        : -1.13058438878511E+01
+psp_core            :  1.44126513565306E+00
+local_psp           : -1.95539061080990E+00
+non_local_psp       :  5.63285760150852E-01
+total_energy        : -1.06896184112479E+01
+total_energy_eV     : -2.90879309905391E+02
+band_energy         : -1.21889787908248E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -507,7 +549,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 8, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 65, }
+cutoff_energies: {ecut:   2.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.00000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -554,6 +605,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: -3, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-16, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -6.1449887817029     -6.145E+00 6.491E-03 0.000E+00
@@ -606,6 +663,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: -3, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-16, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -6.1449825508734     -6.145E+00 4.913E-03 0.000E+00
  ETOT  2  -6.1466092082448     -1.627E-03 8.006E-07 0.000E+00
@@ -656,6 +719,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: -3, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-16, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -6.1449887835867     -6.145E+00 6.491E-03 0.000E+00
@@ -716,7 +785,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 8, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 65, }
+cutoff_energies: {ecut:   2.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.00000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -799,6 +877,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-12, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   24.684944782428     -4.166E+01 6.108E-02 2.047E+03
  ETOT  2   2.5619223080046     -2.212E+01 5.318E-03 2.141E+01
@@ -854,6 +938,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 -dfpt_looppert : read the wavefunctions from file: t84o_DS2_1WF7
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-12, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -136.33899766961     -1.363E+02 9.973E-02 1.116E+03
@@ -1150,7 +1240,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 65, }
+cutoff_energies: {ecut:   2.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.00000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -1172,6 +1271,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-16, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -10.677166430571    -1.068E+01 2.774E-04 2.718E+00
  ETOT  2  -10.688635049217    -1.147E-02 4.636E-09 2.247E-01
@@ -1190,6 +1295,35 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
   sigma(1 1)=  6.93480452E-04  sigma(3 2)=  1.65469902E-04
   sigma(2 2)=  6.93480452E-04  sigma(3 1)=  1.65469902E-04
   sigma(3 3)=  6.93480452E-04  sigma(2 1)=  1.65469902E-04
+
+
+--- !ResultsGS
+iteration_state: {dtset: 4, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  8.3937734,   2.2961454,   2.2961454, ]
+- [  2.2961454,   8.3937734,   2.2961454, ]
+- [  2.2961454,   2.2961454,   8.3937734, ]
+lattice_lengths: [   9.00000,    9.00000,    9.00000, ]
+lattice_angles: [ 57.250,  57.250,  57.250, ] # degrees, (23, 13, 12)
+lattice_volume:   4.8283574E+02
+convergence: {deltae: -1.776E-15, res2:  2.358E-14, residm:  8.770E-17, diffor: null, }
+etotal    :  -1.06896184E+01
+entropy   :   0.00000000E+00
+fermie    :   4.30356439E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  6.93480452E-04,   1.65469902E-04,   1.65469902E-04, ]
+- [  1.65469902E-04,   6.93480452E-04,   1.65469902E-04, ]
+- [  1.65469902E-04,   1.65469902E-04,   6.93480452E-04, ]
+pressure_GPa:  -2.0403E+01
+xred      :
+- [  2.3100E-01,   2.3100E-01,   2.3100E-01, Bi]
+- [ -2.3100E-01,  -2.3100E-01,  -2.3100E-01, Bi]
+cartesian_forces: # hartree/bohr
+- [  5.83587926E-03,   5.83587926E-03,   5.83587926E-03, ]
+- [ -5.83587926E-03,  -5.83587926E-03,  -5.83587926E-03, ]
+force_length_stats: {min:   1.01080394E-02, max:   1.01080394E-02, mean:   1.01080394E-02, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1231,22 +1365,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.78249231859874E+00
-    Hartree energy  =  3.97190950927466E-01
-    XC energy       = -2.61261807791174E+00
-    Ewald energy    = -1.13058438878818E+01
-    PspCore energy  =  1.44126513566533E+00
-    Loc. psp. energy= -1.95539061079776E+00
-    NL   psp  energy=  5.63285760149936E-01
-    >>>>>>>>> Etotal= -1.06896184112498E+01
-
- Other information on the energy :
-    Total energy(eV)= -2.90879309905442E+02 ; Band energy (Ha)=  -1.2188978791E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 4, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.78249231859874E+00
+hartree             :  3.97190950927466E-01
+xc                  : -2.61261807791174E+00
+Ewald energy        : -1.13058438878818E+01
+psp_core            :  1.44126513566533E+00
+local_psp           : -1.95539061079776E+00
+non_local_psp       :  5.63285760149936E-01
+total_energy        : -1.06896184112498E+01
+total_energy_eV     : -2.90879309905442E+02
+band_energy         : -1.21889787907024E+00
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1261,7 +1393,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 8, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 65, }
+cutoff_energies: {ecut:   2.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.00000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   4.
 
@@ -1308,6 +1449,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: -3, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-16, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -6.1449887818661     -6.145E+00 6.491E-03 0.000E+00
@@ -1360,6 +1507,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: -3, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-16, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -6.1449825509955     -6.145E+00 4.913E-03 0.000E+00
  ETOT  2  -6.1466092083670     -1.627E-03 8.006E-07 0.000E+00
@@ -1410,6 +1563,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: -3, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-16, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -6.1449887836679     -6.145E+00 6.491E-03 0.000E+00
@@ -1470,7 +1629,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
 
 ================================================================================
 == DATASET  6 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 6, }
+dimensions: {natom: 2, nkpt: 8, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 65, }
+cutoff_energies: {ecut:   2.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.00000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   4.
 
@@ -1553,6 +1721,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-12, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   24.684944788237     -4.166E+01 6.108E-02 2.047E+03
  ETOT  2   2.5619223014588     -2.212E+01 5.318E-03 2.141E+01
@@ -1608,6 +1782,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      65.000      65.000
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 -dfpt_looppert : read the wavefunctions from file: t84o_DS5_1WF7
+
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-12, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -136.33899759957     -1.363E+02 9.973E-02 1.116E+03
@@ -2162,7 +2342,35 @@ P          mk1mem6          8
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
+- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
+-
+- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
+- interatomic force constants from density-functional perturbation theory,
+- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
+- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
+-
+- [4] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -2176,22 +2384,11 @@ P          mk1mem6          8
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
-- implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997
--
-- [3] Dynamical matrices, Born effective charges, dielectric permittivity tensors, and ,
-- interatomic force constants from density-functional perturbation theory,
-- X. Gonze and C. Lee, Phys. Rev. B55, 10355 (1997).
-- Comment: Non-vanishing rfphon and/or rfelfd, in the norm-conserving case.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze1997a
--
-- [4] ABINIT: First-principles approach of materials and nanosystem properties.
+- [5] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -2200,27 +2397,14 @@ P          mk1mem6          8
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [5] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=          1.9  wall=          2.3
+- Proc.   0 individual time (sec): cpu=          2.1  wall=          2.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  51 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.9  wall=          2.3
++Overall time at end (sec) : cpu=          2.1  wall=          2.5

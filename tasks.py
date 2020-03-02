@@ -12,8 +12,6 @@ Use: `pip install invoke --user` to install invoke package.
 """
 import os
 import sys
-PY2 = sys.version_info[0] <= 2
-
 import webbrowser
 
 from contextlib import contextmanager
@@ -165,10 +163,7 @@ def abichecks(ctx):
         for py_script in [f for f in os.listdir(script_dir) if f.endswith(".py")]:
             if py_script in exclude: continue
             py_script = os.path.join(script_dir, py_script)
-            #if PY2:
             print("Running", py_script, "... ")
-            #else:
-            #    print("Running", py_script, "... ", end="")
             start = time.time()
             result = ctx.run(py_script, warn=True, pty=True)
             #print(result.ok)
@@ -254,17 +249,77 @@ def fgrep(ctx, pattern):
         ctx.run(cmd, pty=True)
 
 
-#def pull_trunk(ctx):
-#    ctx.run("git stash")
-#    ctx.run("git pull trunk develop")
-#    ctx.run("git stash apply")
+@task
+def cgrep(ctx, pattern):
+    """
+    Grep for `pattern` in all C files contained in `src` and `shared` directories.
+    """
+    with cd(ABINIT_ROOTDIR):
+        cmd  = 'grep -r -i --color --include "*.c" "%s" src shared' % pattern
+        print("Executing:", cmd)
+        ctx.run(cmd, pty=True)
 
 
-#def move_to_master(ctx):
-#    ctx.run("git tag -a v%s -m \"v%s release\"" % (NEW_VER, NEW_VER))
-#    ctx.run("git push --tags")
-#    ctx.run("git checkout master")
-#    ctx.run("git pull")
-#    ctx.run("git merge develop")
-#    ctx.run("git push")
-#    ctx.run("git checkout develop")
+@task
+def tgrep(ctx, pattern):
+    """
+    Grep for `pattern` in all input files contained in the `tests` directory.
+    """
+    with cd(ABINIT_ROOTDIR):
+        cmd  = 'grep -r -i --color "%s" tests/*/Input/*' % pattern
+        print("Executing:", cmd)
+        ctx.run(cmd, pty=True)
+
+
+@task
+def vimt(ctx, tagname):
+    """
+    Execute `vim -t tagname` with tagname a ctags tag.
+    """
+    with cd(ABINIT_ROOTDIR):
+        if which("mvim") is not None:
+            cmd  = "mvim -t %s" % tagname
+        else:
+            cmd  = "vim -t %s" % tagname
+        print("Executing:", cmd)
+        ctx.run(cmd, pty=True)
+
+
+@task
+def pull_trunk(ctx):
+    """"git statsh && git pull trunk develop && git stash apply"""
+    ctx.run("git stash")
+    ctx.run("git pull trunk develop")
+    ctx.run("git stash apply")
+
+
+def which(cmd):
+    """
+    Returns full path to a executable.
+
+    Args:
+        cmd (str): Executable command to search for.
+
+    Returns:
+        (str) Full path to command. None if it is not found.
+
+    Example::
+
+        full_path_to_python = which("python")
+
+    Take from monty.path. See https://github.com/materialsvirtuallab/monty
+    """
+
+    def is_exe(fp):
+        return os.path.isfile(fp) and os.access(fp, os.X_OK)
+
+    fpath, fname = os.path.split(cmd)
+    if fpath:
+        if is_exe(cmd):
+            return cmd
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, cmd)
+            if is_exe(exe_file):
+                return exe_file
+    return None

@@ -1,4 +1,4 @@
-## Copyright (C) 2019 Yann Pouillon
+## Copyright (C) 2020 Yann Pouillon
 
 #
 # NetCDF I/O library
@@ -207,7 +207,11 @@ AC_DEFUN([SD_NETCDF_DETECT], [
         sd_netcdf_ldflags=""
         sd_netcdf_libs=""
       else
-        AC_MSG_FAILURE([invalid NetCDF configuration])
+        if test "${sd_netcdf_policy}" = "fail"; then
+              AC_MSG_FAILURE([invalid NetCDF configuration])
+        else
+              AC_MSG_WARN([invalid NetCDF configuration])
+        fi
       fi
     fi
   else

@@ -200,7 +200,11 @@ AC_DEFUN([SD_WANNIER90_DETECT], [
         sd_wannier90_ldflags=""
         sd_wannier90_libs=""
       else
-        AC_MSG_FAILURE([invalid Wannier90 configuration])
+        if test "${sd_netcdf_policy}" = "fail"; then
+              AC_MSG_FAILURE([invalid Wannier90 configuration])
+        else
+              AC_MSG_WARN([invalid Wannier90 configuration])
+        fi
       fi
     fi
   else

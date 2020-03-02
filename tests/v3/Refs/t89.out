@@ -1,6 +1,6 @@
 
-.Version 8.0.3 of MRGSCR 
-.(MPI version, prepared for a x86_64_linux_gnu5.3 computer) 
+.Version 9.0.0 of MRGSCR 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  MRGSCR comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon  4 Apr 2016.
-- ( at 07h33 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h16 )
   
 >>>  Enter the number of files to merge: 
 >>>  Enter the prefix for the final output file: 
@@ -100,8 +100,8 @@
         -------------------                         ------------
 
   calculation expects a epsm1           |  input file contains a epsm1
-. ABINIT  code version 8.0.5            |  ABINIT  code version 8.0.5
-. date 20160509 bantot   20 natom    2  |  date 20160509 bantot   20 natom    2
+. ABINIT  code version 9.0.0              |  ABINIT  code version 9.0.0
+. date 20200224 bantot   20 natom    2  |  date 20200224 bantot   20 natom    2
   nkpt   2 nsym 48 ngfft  16,  16,  16  |  nkpt   2 nsym 48 ngfft  16,  16,  16
   ntypat  1 ecut_eff   5.0727770        |  ntypat  1 ecut_eff   5.0727770
   usepaw  0                             |  usepaw  0

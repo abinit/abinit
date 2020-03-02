@@ -8604,6 +8604,8 @@ k-point lattice, as well as its shift with respect to the origin: [[ngkpt]] or
 
 A global additional shift can be provided by [[qptn]]
 
+The use of symmetries (spatial and/or time-reversal) is crucial to determine the action of [[kptopt]].
+
   * 0 --> read directly [[nkpt]], [[kpt]], [[kptnrm]] and [[wtk]].
   * 1 --> rely on [[ngkpt]] or [[kptrlatt]], as well as on [[nshiftk]] and [[shiftk]] to set up the k points.
     Take fully into account the symmetry to generate the k points in the Irreducible Brillouin Zone only,
@@ -8612,11 +8614,11 @@ A global additional shift can be provided by [[qptn]]
   * 2 --> rely on [[ngkpt]] or [[kptrlatt]], as well as on [[nshiftk]] and [[shiftk]] to set up the k points.
     Take into account only the time-reversal symmetry: k points will be generated in half the Brillouin zone,
     with the appropriate weights.
-    (This is to be used when preparing or executing a RF calculation at q=(0 0 0))
+    (This is the usual mode when preparing or executing a RF calculation at q=(0 0 0) without non-collinear magnetism)
 
   * 3 --> rely on [[ngkpt]] or [[kptrlatt]], as well as on [[nshiftk]] and [[shiftk]] to set up the k points.
     Do not take into account any symmetry: k points will be generated in the full Brillouin zone, with the appropriate weights.
-    (This is to be used when preparing or executing a RF calculation at non-zero q)
+    (This is the usual mode when preparing or executing a RF calculation at non-zero q, or with non-collinear magnetism)
 
   * 4 --> rely on [[ngkpt]] or [[kptrlatt]], as well as on [[nshiftk]] and [[shiftk]] to set up the k points.
    Take into account all the symmetries EXCEPT the time-reversal symmetry to generate the k points
@@ -9164,7 +9166,7 @@ This option **requires** the linkage with external FFT libraries (FFTW3 or MKL-D
 Tests showed a speedup of ~25% in calculations in which FFTs (in particular fourwf%pot) represent the dominant part.
 Typical examples are EPH calculation with [[optdriver]] = 7.
 
-At present (|today|), only selected kernels support mixed-precision, in particular MPI-FFTs
+At present ( |today| ), only selected kernels support mixed-precision, in particular MPI-FFTs
 in mixed precision **are not yet supported**.
 """,
 ),
@@ -11250,11 +11252,20 @@ Variable(
     vartype="integer",
     topics=['MolecularDynamics_basic', 'GeoOpt_basic'],
     dimensions="scalar",
-    defaultval=0,
+    defaultval="0 if ionmvov == 0, set to 1000 if ionvmov != 0 and imgmov != 0 and the variable is not specified.",
     mnemonics="Number of TIME steps",
     text=r"""
-Gives the number of molecular dynamics time steps or Broyden structural
+Gives the maximum number of molecular dynamics time steps or structural
 optimization steps to be done if [[ionmov]] is non-zero.
+Starting with Abinit9, ntime is automatically set to 1000 if [[ionmov]] is non-zero,
+[[ntimimage]] is zero and [[ntime]] is not specified in the input file.
+Users are encouraged to pass a **timelimit** to Abinit using the command line and the syntax:
+
+        abinit --timelimit hours:minutes:seconds
+
+so that the code will try to stop smoothly before the timelimit and produce the DEN and the WFK files
+that may be used to restart the calculation.
+
 Note that at the present the option [[ionmov]] = 1 is initialized with four
 Runge-Kutta steps which costs some overhead in the startup. By contrast, the
 initialisation of other [[ionmov]] values is only one SCF call.
@@ -17740,18 +17751,6 @@ If set to 1, enable the use of ScaLapack within LOBPCG.
 ),
 
 Variable(
-    abivarname="use_yaml",
-    varset="dev",
-    vartype="integer",
-    topics=[],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="USE YAML",
-    characteristics=['[[DEVELOP]]'],
-    text="If set to 1, enable the printing of YAML document in ouput.",
-),
-
-Variable(
     abivarname="usedmatpu",
     varset="paw",
     vartype="integer",
@@ -19699,19 +19698,20 @@ that takes into account the maximum phonon frequency.
 """,
 ),
 
-Variable(
-    abivarname="frohl_params",
-    varset="gw",
-    topics=['SelfEnergy_expert'],
-    vartype="real",
-    defaultval=[0, 0, 0, 0],
-    dimensions=[4],
-    requires="[[optdriver]] in [7]",
-    mnemonics="FROHLich PARAMeterS",
-    text=r"""
-This variable is still under development.
-""",
-),
+# TODO: Remove
+#Variable(
+#    abivarname="frohl_params",
+#    varset="gw",
+#    topics=['SelfEnergy_expert'],
+#    vartype="real",
+#    defaultval=[0, 0, 0, 0],
+#    dimensions=[4],
+#    requires="[[optdriver]] in [7]",
+#    mnemonics="FROHLich PARAMeterS",
+#    text=r"""
+#This variable is still under development. User interface will change
+#""",
+#),
 
 Variable(
     abivarname="prteliash",
@@ -19765,7 +19765,7 @@ Variable(
     mnemonics="EPH TOLeranceS on Integral of DELTA.",
     text=r"""
 This variable can be used to introduce a cutoff on the q-points when computing the imaginary
-part of the electron-phonon self-energy ([[eph_task]] = -4) with the tetrahedron method ([[eph_intmeth]] = 2)
+part of the electron-phonon self-energy ([[eph_task]] = -4) with the tetrahedron method ([[eph_intmeth]] = 2).
 The first entry refers to phonon absorption while the second one is associated to phonon emission.
 A q-point is included in the sum of the tetrahedron weights for phonon absorption/emission are larger that these values.
 """,
@@ -19832,7 +19832,7 @@ The number of line minimisations for the Sternheimer solver is defined by [[nlin
     replaced by $\Sigma_{n\kk}(\ee_{n\kk})$.
     This approximation is valid provided that **enough** bands above the states of interest are explicitly included.
     The calculation should therefore be converged with respect to the value of [[nband]].
-    Note however that the memory requirements and the computational cost of the Sternheimer solver increases with **nband**.
+    Note however that the memory requirements and the computational cost of the Sternheimer solver increases with **nband**
     as this part is not yet parallelized.
 """,
 ),
@@ -19862,7 +19862,7 @@ Variable(
     mnemonics="SYMmetrize V1 DFPT SCF potentials",
     text=r"""
 If *symv1scf* is equal to 1, the spatial-symmetry on the first-order DFPT potentials
-is enforced every time a set of potentials in the BZ is recostructed by symmetry
+is enforced every time a set of potentials in the BZ is reconstructed by symmetry
 starting from the initial values in the IBZ.
 This option is similar to [[symdynmat]] but it acts on the DFPT potentials instead of
 the dynamical matrix.
@@ -19930,7 +19930,7 @@ the discussion to the different calculations activated by [[eph_task]].
 
 The parallelization over perturbations (**np**) is network intensive but it allows one to decrease the memory
 needed for the DFPT potentials especially when computing the e-ph self-energy.
-The maximum valus for **np** is 3 * [[natom]] and the workload is equally distributed provided **np**
+The maximum value for **np** is 3 * [[natom]] and the workload is equally distributed provided **np**
 divides 3 * [[natom]] equally.
 Using **np** == [[natom]] usually gives good parallel efficiency.
 
@@ -19982,11 +19982,11 @@ Variable(
     defaultval=0,
     mnemonics="EPH FORCE Fourier Transform Interpolation of DFPT potentials.",
     text=r"""
-This is an *advanced option* used for testing/debugging the interpolation of the DFPT potentials when [[eph_task]] in (2, -2)
+This is an *advanced option* used for testing/debugging the interpolation of the DFPT potentials when [[eph_task]] in (2, -2).
 By default, the code seeks for the q-point in the input DVDB file when *eph_use_ftinterp* is set to zero (default)
 and stops is the q-point in not found in the file.
 When *eph_use_ftinterp* is set to 1, the input DVDB file (assumed to contain the [[ddb_ngqpt]] q-mesh)
-will be used to generate the real-space representation of the DFPT potentials and interpolated the potential
+will be used to generate the real-space representation of the DFPT potentials and interpolate the potential
 at the input [[qpt]].
 """,
 ),
@@ -20162,6 +20162,8 @@ Possible values:
 !!! important
 
     eph_ecutosc cannot be greater than [[ecut]]
+
+This variable is still under development!
 """,
 ),
 
@@ -20198,7 +20200,7 @@ Variable(
     defaultval=None,
     mnemonics="INput DATA PREFIX",
     text=r"""
-Prefix for input files. Replaces the analogous entry in the obsolete *files_file*
+Prefix for input files. Replaces the analogous entry in the obsolete *files_file* .
 This variable is used when Abinit is executed with the new syntax:
 
     abinit run.abi > run.log 2> run.err &
@@ -20211,7 +20213,7 @@ If the input file does not have a file extension, a default is provided.
 ),
 
 Variable(
-    abivarname="outdata_file",
+    abivarname="outdata_prefix",
     varset="files",
     vartype="string",
     topics=['Control_useful'],
@@ -20219,7 +20221,7 @@ Variable(
     defaultval=None,
     mnemonics="OUTput DATA PREFIX",
     text=r"""
-Prefix for output files. Replaces the analogous entry in the obsolete *files_file*
+Prefix for output files. Replaces the analogous entry in the obsolete *files_file* .
 This variable is used when Abinit is executed with the new syntax:
 
     abinit run.abi > run.log 2> run.err &
@@ -20240,7 +20242,7 @@ Variable(
     defaultval=None,
     mnemonics="TeMPorary DATA PREFIX",
     text=r"""
-Prefix for temporary files. Replaces the analogous entry in the obsolete *files_file*
+Prefix for temporary files. Replaces the analogous entry in the obsolete *files_file* .
 This variable is used when Abinit is executed with the new syntax:
 
     abinit run.abi > run.log 2> run.err &

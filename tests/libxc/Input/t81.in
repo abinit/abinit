@@ -79,7 +79,7 @@ getddk37     25
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   t81.out, tolnlines = 2, tolabs = 1.1e-3, tolrel = 1.0e-4, fld_options = -easy
+#%%   t81.out, tolnlines = 5, tolabs = 1.1e-3, tolrel = 1.0e-4, fld_options = -easy
 #%% psp_files = 14-Si.nlcc.fhi
 #%% [paral_info]
 #%% max_nprocs = 2
