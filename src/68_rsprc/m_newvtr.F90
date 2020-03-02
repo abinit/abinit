@@ -447,7 +447,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
    ABI_DEALLOCATE(vreswk)
  end if
 
-!Retrieve "input" Vtau from "output" one and potnetial residual
+!Retrieve "input" Vtau from "output" one and potential residual
  if (dtset%usekden==1) then
    vtau0(:,1:dtset%nspden)=vtau0(:,1:dtset%nspden)-vtauresid0(:,1:dtset%nspden)
  end if
@@ -712,7 +712,7 @@ subroutine newvtr(atindx,dbl_nnsclo,dielar,dielinv,dielstrt,&
 !When spin-polarized and fixed occupation numbers,
 !treat separately spin up and spin down.
 !Otherwise, use only global mean
- if (mix_mgga%iscf/=AB7_MIXING_NONE) then
+ if (mix%iscf/=AB7_MIXING_NONE) then
    do ispden=1,dtset%nspden
      if (dtset%nspden==2.and.dtset%occopt>=3.and. &
 &     abs(dtset%spinmagntarget+99.99_dp)<1.0d-10)then
