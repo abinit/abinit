@@ -29,10 +29,10 @@ spin_dt=1e-16 s
 #%% executable = multibinit
 #%% need_cpp_vars = HAVE_NETCDF, HAVE_XML
 #%% exclude_hosts = nag@abiref
-#%% system_xml = t80.xml
+#%% system_xml = t81.xml
 #%% [files]
 #%% files_to_test = 
-#%%   t80.out, tolnlines = 0, tolabs = 1e-4, tolrel = 0.01, fld_options = -medium;
+#%%   t81.out, tolnlines = 0, tolabs = 1e-6, tolrel = 0.000001, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]

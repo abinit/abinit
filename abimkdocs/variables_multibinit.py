@@ -781,40 +781,41 @@ See [[abinit:restartxf]]
 """,
 ),
 
-Variable(
-    abivarname="spin_calc_correlation_obs@multibinit",
-    varset="multibinit",
-    vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="SPIN CALCulate CORRELATION OBServables",
-    text=r"""
-Flag to calculate spin correlation function based observables.
-
-* 0 --> do not calculate.
-
-* 1 --> calculate.
-""",
-),
-
-
-Variable(
-    abivarname="spin_calc_traj_obs@multibinit",
-    varset="multibinit",
-    vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="SPIN CALCulate TRAJectory based OBServables",
-    text=r"""
-Flag to calculate spin trajectory based observables. (Nothing included yet.)
-
-* 0 --> do not calculate.
-
-* 1 --> calculate.
-""",
-),
+# The below are not yet functioning, comment out temporarily. 
+#Variable(
+#    abivarname="spin_calc_correlation_obs@multibinit",
+#    varset="multibinit",
+#    vartype="integer",
+#    topics=['SpinDynamicsMultibinit_basic'],
+#    dimensions="scalar",
+#    defaultval=0,
+#    mnemonics="SPIN CALCulate CORRELATION OBServables",
+#    text=r"""
+#Flag to calculate spin correlation function based observables.
+#
+#* 0 --> do not calculate.
+#
+#* 1 --> calculate.
+#""",
+#),
+#
+#
+#Variable(
+#    abivarname="spin_calc_traj_obs@multibinit",
+#    varset="multibinit",
+#    vartype="integer",
+#    topics=['SpinDynamicsMultibinit_basic'],
+#    dimensions="scalar",
+#    defaultval=0,
+#    mnemonics="SPIN CALCulate TRAJectory based OBServables",
+#    text=r"""
+#Flag to calculate spin trajectory based observables. (Nothing included yet.)
+#
+#* 0 --> do not calculate.
+#
+#* 1 --> calculate.
+#""",
+#),
 
 
 Variable(
@@ -854,22 +855,23 @@ Gilbert damping factor in LLG equation for spin dynamics.
 """,
 ),
 
-Variable(
-    abivarname="spin_dipdip@multibinit",
-    varset="multibinit",
-    vartype="integer",
-    topics=['SpinDynamicsMultibinit_basic'],
-    dimensions="scalar",
-    defaultval=0,
-    mnemonics="SPIN DIPole DIPole interaction",
-    text=r"""
-* 0 --> Switch off spin dipole-dipole interaction.
 
-* 1 --> Switch on spin dipole-dipole interaction.
-    (Not yet implemented.)
-""",
-),
-
+#Variable(
+#    abivarname="spin_dipdip@multibinit",
+#    varset="multibinit",
+#    vartype="integer",
+#    topics=['SpinDynamicsMultibinit_basic'],
+#    dimensions="scalar",
+#    defaultval=0,
+#    mnemonics="SPIN DIPole DIPole interaction",
+#    text=r"""
+#* 0 --> Switch off spin dipole-dipole interaction.
+#
+#* 1 --> Switch on spin dipole-dipole interaction.
+#    (Not yet implemented.)
+#""",
+#),
+#
 Variable(
     abivarname="spin_dt@multibinit",
     varset="multibinit",
