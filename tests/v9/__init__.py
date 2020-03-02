@@ -30,4 +30,5 @@ inp_files = [
 # Spin dynamics in multibinit
 "t81.in", 
 "t82.in", 
+"t83.in", 
 ]
