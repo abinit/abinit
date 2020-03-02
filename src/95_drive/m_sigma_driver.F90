@@ -264,13 +264,13 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  type(wfd_t),target :: Wfd,Wfdf,Wfd_dm ! MRM use Wfd_dm 
  type(wvl_data) :: Wvl
 !arrays
- integer :: gwc_ngfft(18),ngfftc(18),ngfftf(18),gwx_ngfft(18)
+ integer :: gwc_ngfft(18),ngfftc(18),ngfftf(18),gwx_ngfft(18),old_ngfft(3) ! MRM old_ngfft info 
  integer,allocatable :: nq_spl(:),nlmn_atm(:),my_spins(:)
  integer,allocatable :: tmp_gfft(:,:),ks_vbik(:,:),nband(:,:),l_size_atm(:),qp_vbik(:,:)
  integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
- real(dp),allocatable :: weights(:),aux_ecuts(:),freqs(:),occs(:,:) ! MRM
+ real(dp),allocatable :: weights(:),aux_ecuts(:),freqs(:),occs(:,:),gw_rhor(:,:) ! MRM
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
@@ -2162,7 +2162,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
  else
    if(gwcalctyp==21) then  !! MRM allocate the 1-RDM correction info if gwcalctyp=21
-     if(Sigp%nsppol/=1) MSG_WARNING("1-RDM GW correction only implemented for restricted closed-shell calculations!")
+     if(Sigp%nsppol/=1) MSG_ERROR("1-RDM GW correction only implemented for restricted closed-shell calculations!")
      iinfo=1  !! This should be input parameter, verbose mode 
      ABI_MALLOC(dm1,(b1gw:b2gw,b1gw:b2gw,Sigp%nkptgw))
      ABI_MALLOC(nateigv,(b1gw:b2gw,b1gw:b2gw,Sigp%nkptgw))
@@ -2210,11 +2210,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
       if(gwcalctyp==21) then 
 !       Compute for Sigma_x - Vxc, DELTA Sigma_x - Vxc for hybrid functionals (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact)
         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
-        !call printdm1(ib1,ib2,potk)
+        !call printdm1(ib1,ib2,potk) ! Print potk for debug?
         dm1k=0.0d0 
         call calc_rdm(ib1,ib2,ikcalc,0,iinfo,potk,dm1k,QP_BSt) ! Only restricted calcs 
-!       Print the exchange correction for debug?
-        !call printdm1(ib1,ib2,dm1k)
+        !call printdm1(ib1,ib2,dm1k) ! Print the exchange correction for debug?
 !       Update the full 1RDM with the exchange (k-point) one
         dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
 !       Compute NAT ORBS for exchange corrected 1-RDM?
@@ -2267,8 +2266,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
          call calc_rdmc(ib1,ib2,nomega_sigc,ikcalc,iinfo,Sr,weights,sigcme_k,QP_BSt,dm1k) ! Only restricted calcs 
 !        Update the full 1RDM with the correlation (k-point) one
          dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
-!        Print for debug?
-         !call printdm1(ib1,ib2,dm1k)
+         !call printdm1(ib1,ib2,dm1k) ! Print for debug?  
          dm1k(ib1:ib2,ib1:ib2)=dm1(ib1:ib2,ib1:ib2,ikcalc) 
 !        Compute nat orbs and occ numbers
          call natoccs(ib1,ib2,dm1k,nateigv,occs,QP_BSt,ikcalc,1) ! Only restricted calcs 
@@ -2280,23 +2278,33 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if(gwcalctyp==21) then
      iinfo=1 ! Should be an input parameter
      if(iinfo==1) then      
-       call update_wfk_gw_rdm(Wfd,Wfd_dm,nateigv,occs,b1gw,b2gw,QP_BSt,Hdr_wfk)
-       gw1rdm_fname='gw_rdm_DS100_WFK' ! How to update dataset?
-       ! MRM update ecuts except ecutdg because it is used only with PAW
+       ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
+       call update_wfk_gw_rdm(Wfd,Wfd_dm,nateigv,occs,b1gw,b2gw,QP_BSt,Hdr_wfk,Hdr_sigma)
+       gw1rdm_fname=dtfil%fnameabo_wfk
+       ! MRM update ngfft in the Header
+       old_ngfft(1:3)=Hdr_wfk%ngfft(1:3)
+       Hdr_wfk%ngfft(1:3)=dtset%ngfft(1:3)
+       ! MRM update ecuts (except ecutdg because it is used only with PAW)
        ABI_MALLOC(aux_ecuts,(3))
-       aux_ecuts(1)=Hdr_wfk%ecut
-       Hdr_wfk%ecut=Dtset%ecut
-       aux_ecuts(2)=Hdr_wfk%ecut_eff
-       Hdr_wfk%ecut_eff=Dtset%ecutwfn
-       aux_ecuts(3)=Hdr_wfk%ecutsm
-       Hdr_wfk%ecutsm=Dtset%ecutsm
-       call Wfd_dm%write_wfk(Hdr_wfk,QP_BSt,gw1rdm_fname)
+       aux_ecuts(1)=Hdr_wfk%ecut;     Hdr_wfk%ecut=Dtset%ecut
+       aux_ecuts(2)=Hdr_wfk%ecut_eff; Hdr_wfk%ecut_eff=Dtset%ecutwfn
+       aux_ecuts(3)=Hdr_wfk%ecutsm;   Hdr_wfk%ecutsm=Dtset%ecutsm
+       call Wfd_dm%write_wfk(Hdr_wfk,QP_BSt,gw1rdm_fname)           ! Print WFK file
+       gw1rdm_fname=dtfil%fnameabo_den
+       call Wfd%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor) ! Print DEN file
+       hdr_sigma%npwarr=wfd%npwarr ! Use the npw = ones used in GW calc
+       call fftdatar_write("density",gw1rdm_fname,dtset%iomode,hdr_sigma,&
+       Cryst,ngfftf,cplex1,nfftf,dtset%nspden,gw_rhor,mpi_enreg_seq,ebands=QP_BSt)
+       ! MRM Recover old values for ecuts and ngfft after writing the WFK file
        Hdr_wfk%ecut=aux_ecuts(1)
        Hdr_wfk%ecut_eff=aux_ecuts(2)
        Hdr_wfk%ecutsm=aux_ecuts(3)
+       Hdr_wfk%ngfft(1:3)=old_ngfft(1:3)
+       ABI_FREE(aux_ecuts)
+       ABI_FREE(gw_rhor)
+       ! MRM prepare deallocation of Wfd_dm
        Wfd_dm%bks_comm = xmpi_comm_null
        call Wfd_dm%free()
-       ABI_FREE(aux_ecuts)
      endif
      ABI_FREE(dm1) 
      ABI_FREE(nateigv) 

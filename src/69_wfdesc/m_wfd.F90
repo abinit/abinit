@@ -4852,7 +4852,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 !scalars
  character(len=*),intent(in) :: wfk_fname
  class(wfd_t),intent(in) :: Wfd
- type(Hdr_type),intent(inout) :: Hdr ! MRM in_out to hack it
+ type(Hdr_type),intent(inout) :: Hdr ! MRM inout to allow modifications it
  type(ebands_t),intent(in) :: Bands
 
 !Local variables ------------------------------
@@ -4868,7 +4868,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
  type(wfk_t) :: Wfkfile
 !arrays
  integer :: band_block(2),proc_ranks(Wfd%nproc),my_band_list(Wfd%mband)
- integer,allocatable :: blocks(:,:) !band_list(:),
+ integer,allocatable :: blocks(:,:) !
  integer, allocatable :: old_npw(:),old_nband(:) ! MRM
  real(dp),allocatable :: cg_k(:,:)
 
@@ -4893,9 +4893,9 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
  ABI_CHECK(Wfd%nsppol == Hdr%nsppol,"Different number of spins")
  ABI_CHECK(Wfd%nspinor == Hdr%nspinor,"Different number of spinors")
 
- ! *INITIALIZE HACK OF NUMBER OF BANDS PER K-POINT*
- ! MRM in GW 1-RDM correction, the number of bands used might be lower than the ones present in the WFK file.
- ! If that is the case, I prefer to print a WFK file consistent with the GW 1-RDM calc. performed!
+ ! *INITIALIZE MODIFICATION: NUMBER OF BANDS PER K-POINT*
+ ! MRM: In GW 1-RDM correction, the number of bands used might be lower than the ones present in the WFK file.
+ ! In that is the case, I prefer to print a WFK file consistent with the GW 1-RDM calc.
  mod_nband=.false.     
  if (any(Wfd%nband /= reshape(Hdr%nband, [Wfd%nkibz, Wfd%nsppol]))) then
    ! MRM print number of bands used and read
@@ -4911,7 +4911,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
    call wrtout(std_out,msg,'COLL')
    write(msg,'(a1)') ' '
    call wrtout(std_out,msg,'COLL')
-   MSG_COMMENT("Wfd%nband /= Hdr%nband (different number of bands used for the Self-energy and in WFK file)") ! MRM not error, comment!
+   MSG_COMMENT("Wfd%nband /= Hdr%nband (different number of bands used for the Self-energy and in WFK file)") ! MRM not error, just comment!
    ABI_MALLOC(old_nband,(Hdr%nkpt))
    old_nband=Hdr%nband   
    old_mband=maxval(Hdr%nband)
@@ -4958,14 +4958,14 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 
  ! Master node opens the file and writes the Abinit header.
  if (iam_master) then
- ! *INITIALIZE HACK THE HEADER*
- ! Recall that ecut, ecut_eff and ecutsm were hacked in 95_drive/m_sigma_driver.F90
- ! Recall that occs were hacked in 70_gw/m_gwrdm.F90
+ ! *INITIALIZE MODIFICATION: THE HEADER*
+ ! Recall that ecut, ecut_eff and ecutsm were modified in 95_drive/m_sigma_driver.F90
+ ! Recall that occs were modified in 70_gw/m_gwrdm.F90
    ABI_MALLOC(old_npw,(Wfd%nkibz))
    old_npw=Hdr%npwarr
    do ik_ibz=1,Wfd%nkibz
- ! *INITIALIZE HACK NUMBER OF PLANE WAVES*
- ! MRM nasty hack to allow printing WFK files when Hdr%npwarr(ik_ibz) /= size(Wfd%Kdata(ik_ibz)%kg_k,dim=2)
+ ! *INITIALIZE MODIFICATION: NUMBER OF PLANE WAVES*
+ ! MRM: modification to allow printing WFK files when Hdr%npwarr(ik_ibz) /= size(Wfd%Kdata(ik_ibz)%kg_k,dim=2)
  ! notice that size(Wfd%Kdata(ik_ibz)%kg_k,dim=2) is the actual size used in GW 1-RDM correction. 
  ! This problem is related to the difference between standard 'ecut' and the 'ecut' used in screening and self-energies. FIXME
      if (size(Wfd%Kdata(ik_ibz)%kg_k,dim=2)<Hdr%npwarr(ik_ibz)) then
@@ -4975,7 +4975,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
      end if
    end do
    call wfkfile%open_write(Hdr,wfk_fname,formeig0,iomode,get_unit(),xmpi_comm_self,write_hdr=.TRUE.,write_frm=.FALSE.)
- ! *END HACK THE HEADER*
+ ! *END MODIFICATION: THE HEADER*
  end if
 
  ! Other nodes wait here before opening the same file.
@@ -4986,7 +4986,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 
  do spin=1,Wfd%nsppol
    do ik_ibz=1,Wfd%nkibz
-     ! MRM skip the if from below because it is printing less k-points than asked FIXME
+     ! MRM: skip the if from below because it is printing less k-points than asked... FIXME
      !if (.not. wfd%ihave_ug(band,ik_ibz,spin,"Stored")) cycle ! MRM why check this?
      nband_k = Wfd%nband(ik_ibz,spin)
      npw_k   = Wfd%npwarr(ik_ibz)
@@ -5037,15 +5037,15 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
      ABI_FREE(blocks)
    end do
  end do
- ! MRM other nodes wait here before deallocating and recovering initial values.
+ ! MRM: other nodes wait here before deallocating and recovering initial values.
  call xmpi_barrier(Wfd%comm)
- ! MRM recover the correct sizes in Hdr%npwarr(ik_ibz) as it was read from previous WFK
+ ! MRM: recover the correct sizes in Hdr%npwarr(ik_ibz) as it was read from previous WFK
  !MSG_COMMENT("Recovering read variable: Hdr%npwarr(ik_ibz) after printing")
  if (iam_master) then
    Hdr%npwarr=old_npw
    ABI_FREE(old_npw)
- ! *END HACK NUMBER OF PLANE WAVES*
-   ! MRM recover size nband, max nband (mband) and bantot in Hdr before exit wfd_write_wfk
+ ! *END MODIFICATION: NUMBER OF PLANE WAVES*
+   ! MRM: recover size nband, max nband (mband) and bantot in Hdr before exit wfd_write_wfk
    if(mod_nband) then
      MSG_COMMENT("Recovering Hdr%nband and Hdr%mband after printing the WFK file") ! MRM not an error, just a comment!
      Hdr%bantot=old_bantot 
@@ -5054,7 +5054,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
      ABI_FREE(old_nband)
    end if
  endif  
- ! *END HACK OF NUMBER OF BANDS PER K-POINT*
+ ! *END MODIFICATION: NUMBER OF BANDS PER K-POINT*
  ! Close the file.
  call wfkfile%close()
 

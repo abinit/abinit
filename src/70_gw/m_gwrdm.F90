@@ -284,20 +284,20 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
 end subroutine natoccs
 !!***
 
-subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr)
+subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr,Hdr2)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: b1gw,b2gw
  type(wfd_t),intent(inout) :: wfd_f
  type(wfd_t),intent(in) :: wfd_i
  type(ebands_t),target,intent(inout) :: BSt
- type(Hdr_type),intent(inout) :: Hdr
+ type(Hdr_type),intent(inout) :: Hdr,Hdr2
 !arrays
  real(dp),intent(in) :: occs(:,:)
  complex(dpc),intent(in) :: nateigv(:,:,:)
 !Local variables ------------------------------
 !scalars
- integer :: ib1dm,ib2dm,dim_bands,ikpoint,irecip_v,nband_tot,nband_k
+ integer :: ib1dm,ib2dm,dim_bands,ikpoint,irecip_v
 !arrays
 !************************************************************************
  !Wfd%Wave(1,2,1)%ug(1) ! BAND 1 , k-POINT 2, SPIN 1, UG="MO Coef" 1 
@@ -307,11 +307,15 @@ subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr)
       wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v)=0.0d0 
       do ib2dm=b1gw,b2gw
         wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v)=wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v) &
-                +nateigv(ib2dm,ib1dm,ikpoint)*wfd_f%Wave(ib2dm,ikpoint,1)%ug(irecip_v)
+                +nateigv(ib2dm,ib1dm,ikpoint)*wfd_i%Wave(ib2dm,ikpoint,1)%ug(irecip_v)
       enddo
      enddo 
+     !write(*,'(*(f10.5))') real(nateigv(ib1dm,:,ikpoint)) Print for debug
    enddo
+     !write(*,*) ' ' Space for debug
  enddo
+ ! MRM BSt occ are changed and never recoverd
+ MSG_COMMENT("QP_BSt occupations were updated with nat. orb. ones")
  do ikpoint=1,BSt%nkpt
    BSt%occ(b1gw:b2gw,ikpoint,1) = occs(b1gw:b2gw,ikpoint) ! No spin used
  enddo
@@ -319,22 +323,17 @@ subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr)
    !Actually, we should never reach this point as the code should crash during Wfd initialization in m_sigma_driver.F90
    MSG_ERROR("Impossible to use the existing read WFK to build a new one!")
  endif
+ ! MRM change occs in Header Hdr
  ! Update occ in Hdr before printing
- nband_tot=size(Hdr%occ(:))
- nband_k=nband_tot/BSt%nkpt
+ MSG_COMMENT("Hdr and Hdr_sigma occupations were updated with nat. orb. ones")
+ ib1dm=1
  do ikpoint=1,BSt%nkpt
-   ib2dm=1
    dim_bands=size(BSt%occ(:,ikpoint,1))
-   do ib1dm=1+nband_k*(ikpoint-1),nband_k*(ikpoint)
-     if(ib2dm<=dim_bands) then 
-       Hdr%occ(ib1dm)=BSt%occ(ib2dm,ikpoint,1)
-       ib2dm=ib2dm+1
-     endif  
+   do ib2dm=1,dim_bands   
+     Hdr2%occ(ib1dm)=BSt%occ(ib2dm,ikpoint,1)
+     Hdr%occ(ib1dm)=BSt%occ(ib2dm,ikpoint,1)
+     ib1dm=ib1dm+1
    enddo
-   write(*,*) ' ' 
-   write(*,*) 'MRM Print occs' ! Clean blank spaces in Hdr occ? 
-   write(*,*) BSt%occ(:,ikpoint,1) 
-   write(*,*) ' ' 
  enddo
 end subroutine update_wfk_gw_rdm        
 !!***
@@ -356,7 +355,6 @@ subroutine printdm1(ib1,ib2,dm1) ! Only used for debug of this file, do not use 
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  enddo
-
 end subroutine printdm1
 !!***
 
