@@ -358,6 +358,10 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        call ydoc%add_ints("optdriver, eph_task", &
          [dtset%optdriver, dtset%eph_task] , dict_key="meta")
 
+     case(RUNL_LONGWAVE)
+       call ydoc%add_ints("optdriver", [dtset%optdriver], &
+         dict_key="meta")
+
      case default
        write(msg,'(a,i0,4a)')&
         'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
