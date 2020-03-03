@@ -486,7 +486,7 @@ integer :: icg, icg_tmp, ibdoffst, npw, iband_me
  ABI_ALLOCATE(distrb_flags,(dtset%nkpt,dtset%mband,dtset%nsppol))
  distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
  call wfk_read_my_kptbands(dtfil%fnamewffk, dtset, distrb_flags, spaceworld, &
-&            formeig, dtset%istwfk, dtset%kptns, dtset%mkmem, dtset%nkpt, npwarr, &
+&            formeig, dtset%istwfk, dtset%kptns, mcg, dtset%nkpt, npwarr, &
 &            cg, eigen=eigen0, pawrhoij=hdr%pawrhoij)
  ABI_DEALLOCATE(distrb_flags)
 

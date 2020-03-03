@@ -1102,13 +1102,16 @@ print *, ' dtset%mkmem, mkmem_rbz ', dtset%mkmem, mkmem_rbz
      MSG_ERROR(message)
    end if
    ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
+#ifdef DEV_MJV
+print *, 'shape cg 1 ', shape(cg)
+#endif
 
    ABI_ALLOCATE(eigen0,(dtset%mband*nkpt_rbz*dtset%nsppol))
    call timab(144,1,tsec)
 
 ! Initialize the wave function type and read GS WFK
    call wfk_read_my_kptbands(dtfil%fnamewffk, dtset, distrb_flags, spacecomm, &
-&            formeig, istwfk_rbz, kpt_rbz, mkmem_rbz, nkpt_rbz, npwarr, &
+&            formeig, istwfk_rbz, kpt_rbz, mcg, nkpt_rbz, npwarr, &
 &            cg, eigen=eigen0, occ=occ_disk)
   
    call timab(144,2,tsec)
@@ -1273,7 +1276,7 @@ print *, ' dtset%mkmem, mkmem_rbz ', dtset%mkmem, mkmem_rbz
 print *, 'not gamma or explicit wfq file'
      call timab(144,1,tsec)
      call wfk_read_my_kptbands(dtfil%fnamewffq, dtset, distrb_flags, spacecomm, &
-&            formeig, istwfk_rbz, kpq_rbz, mkmem_rbz, nkpt_rbz, npwar1, &
+&            formeig, istwfk_rbz, kpq_rbz, mcgq, nkpt_rbz, npwar1, &
 &            cgq, eigen=eigenq, occ=occ_disk)
      call timab(144,2,tsec)
 
@@ -1281,7 +1284,7 @@ print *, 'not gamma or explicit wfq file'
        !SPr: later "make" a separate WFQ file for "-q"
        call timab(144,1,tsec)
        call wfk_read_my_kptbands(dtfil%fnamewffq, dtset, distrb_flags, spacecomm, &
-&            formeig, istwfk_rbz, kmq_rbz, mkmem_rbz, nkpt_rbz, npwar1_mq, &
+&            formeig, istwfk_rbz, kmq_rbz, mcgmq, nkpt_rbz, npwar1_mq, &
 &            cg_mq, eigen=eigen_mq, occ=occ_tmp)
        call timab(144,2,tsec)
 
@@ -1475,7 +1478,7 @@ print *, 'not gamma or explicit wfq file'
 &      (dtset%get1wf /= 0 .or. dtset%ird1wf /= 0)) then
 print *, 'call read_my_kptbands'
      call wfk_read_my_kptbands(fiwf1i, dtset, distrb_flags, spacecomm, &
-&            formeig, istwfk_rbz, kpq_rbz, mkmem_rbz, nkpt_rbz, npwar1, &
+&            formeig, istwfk_rbz, kpq_rbz, mcg1, nkpt_rbz, npwar1, &
 &            cg1, eigen=eigen1, ask_accurate_=0)
 print *, 'out of read_my_kptbands'
    else
@@ -1492,7 +1495,7 @@ print *, 'out of read_my_kptbands'
      if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &        (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
        call wfk_read_my_kptbands(fiwf1i, dtset, distrb_flags, spacecomm, &
-&            formeig, istwfk_rbz, kmq_rbz, mkmem_rbz, nkpt_rbz, npwar1_mq, &
+&            formeig, istwfk_rbz, kmq_rbz, mcg1mq, nkpt_rbz, npwar1_mq, &
 &            cg1_mq, eigen=eigen1_mq, ask_accurate_=0)
      else
        cg1_mq = zero

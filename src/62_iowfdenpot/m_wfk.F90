@@ -3060,13 +3060,13 @@ end subroutine wfk_read_eigenvalues
 !! SOURCE
 
 subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
-&          formeig, istwfk_in, kptns_in, mkmem_rbz, nkpt_in, npwarr, &
+&          formeig, istwfk_in, kptns_in, mcg, nkpt_in, npwarr, &
 &          cg, kg, eigen, occ, pawrhoij, ask_accurate_)
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: comm, nkpt_in, formeig
- integer, intent(in) :: mkmem_rbz
+ integer, intent(in) :: mcg
  type(dataset_type),intent(in) :: dtset
 !arrays
  integer, intent(in) :: istwfk_in(nkpt_in)
@@ -3075,7 +3075,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  logical, intent(in) :: distrb_flags(nkpt_in,dtset%mband,dtset%nsppol)
  real(dp), intent(in),target :: kptns_in(3,nkpt_in)
 
- real(dp), intent(out) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband_mem*mkmem_rbz*dtset%nsppol)
+ real(dp), intent(out) :: cg(2,mcg)
  integer, intent(out), optional :: kg(3,dtset%mpw*nkpt_in)
  real(dp), intent(out), optional :: eigen(dtset%mband*(2*dtset%mband)**formeig*nkpt_in*dtset%nsppol)
  real(dp), intent(out), optional :: occ(dtset%mband*nkpt_in*dtset%nsppol)
@@ -3143,6 +3143,10 @@ print *, 'calling wfk_open_read with formeig = ', formeig, ' path ', trim(inpath
  if(present(kg)) then
    kg = 0
  end if
+#ifdef DEV_MJV
+print *, 'shape cg 2 ', shape(cg)
+#endif
+
 ! this initialization is needed in case we read a file with fewer bands and only fill part of cg
  cg = zero
 
@@ -3177,6 +3181,8 @@ print *, 'npwarr ',npwarr
 #ifdef DEV_MJV
 print *, 'itimrev,dtset%kptopt ', itimrev, dtset%kptopt
 print *, 'wfk_disk%hdr%nsym, wfk_disk%hdr%symrel ', wfk_disk%hdr%nsym, wfk_disk%hdr%symrel
+call wfk_disk%hdr%echo(ask_accurate,4)
+print *, 'fform ', ask_accurate
 #endif
  cryst = wfk_disk%hdr%get_crystal(itimrev + 1)
 
