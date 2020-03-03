@@ -1,5 +1,5 @@
 
-.Version 8.11.14 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Jan 2020.
-- ( at 21h42 )
+.Starting date : Tue  3 Mar 2020.
+- ( at 10h34 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v9_t57-t58-t59-t60-t61/t61.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Test_suite/v9_t57-t58-t59-t60-t61/t61.in
 - output file    -> t61.out
 - root for input  files -> t61i
 - root for output files -> t61o
@@ -280,8 +280,8 @@ P           mkmem3         29
          ecut(hartree)=     35.000   => boxcut(ratio)=   1.79502
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -295,8 +295,8 @@ P           mkmem3         29
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/09-F.psp
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -451,11 +451,11 @@ P           mkmem3         29
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         1    1.040868E+00   -2.245748E-17   -2.247888E-17
+         1         2   -2.245748E-17    1.040868E+00    2.243608E-17
          1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         1   -1.040868E+00    2.245748E-17    2.247888E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.243608E-17
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t61o_DS20_DDB
@@ -564,11 +564,11 @@ Interpolation of the electron-phonon coupling potential completed
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
+         1         1    1.040868E+00   -2.245748E-17   -2.247888E-17
+         1         2   -2.245748E-17    1.040868E+00    2.243608E-17
          1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
+         2         1   -1.040868E+00    2.245748E-17    2.247888E-17
+         2         2    2.245748E-17   -1.040868E+00   -2.243608E-17
          2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t61o_DS20_DDB
@@ -697,18 +697,18 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 K-point: [ 1.2500E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.226    2.202      0.1    0.000
-   4  -0.226    2.202      0.1    0.000
+   3  -0.226    2.197      0.1    0.000
+   4  -0.226    2.197      0.1    0.000
 ============================================================================================
 K-point: [ 2.5000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.306    0.988      0.3    0.000
-   4  -0.306    0.988      0.3    0.000
+   3  -0.306    0.987      0.3    0.000
+   4  -0.306    0.987      0.3    0.000
 ============================================================================================
 K-point: [ 1.2500E-01,  1.2500E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   3  -0.343    0.899      0.4    0.000
-   4  -0.343    0.899      0.4    0.000
+   3  -0.343    0.898      0.4    0.000
+   4  -0.343    0.898      0.4    0.000
 ============================================================================================
 K-point: [-2.5000E-01,  1.2500E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
@@ -721,7 +721,7 @@ K-point: [-1.2500E-01,  1.2500E-01,  0.0000E+00], T=    0.0 [K]
 Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
-          300.00        0.31E+02        0.00E+00      3851304.04            0.00
+          300.00        0.31E+02        0.00E+00      3851301.14            0.00
 
 == END DATASET(S) ==============================================================
 ================================================================================
@@ -928,10 +928,10 @@ P           mkmem3         29
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         28.4  wall=         28.6
+- Proc.   0 individual time (sec): cpu=         29.1  wall=         29.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   2 WARNINGs and  13 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         28.4  wall=         28.6
++Overall time at end (sec) : cpu=         29.1  wall=         29.3

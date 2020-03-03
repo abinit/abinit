@@ -1,5 +1,5 @@
 
-.Version 8.11.14 of ANADDB 
+.Version 9.0.0 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Jan 2020.
-- ( at 21h23 )
+.Starting date : Tue  3 Mar 2020.
+- ( at 10h40 )
   
 
 ================================================================================
@@ -87,7 +87,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.026  and twall      0.027 sec
+-begin at tcpu      0.021  and twall      0.021 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -190,12 +190,12 @@
   Mode number    1   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00 -3.40607352E-07 -4.50906597E-03
+-  1  0.00000000E+00 -6.74170148E-07  4.50906593E-03
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    2   Energy    0.000000E+00
  Attention : low frequency mode.
    (Could be unstable or acoustic mode)
--  1  0.00000000E+00  4.50906597E-03 -3.40607230E-07
+-  1  0.00000000E+00 -4.50906593E-03 -6.74170925E-07
 -     0.00000000E+00  0.00000000E+00  0.00000000E+00
   Mode number    3   Energy    0.000000E+00
  Attention : low frequency mode.
@@ -207,13 +207,13 @@
  Symmetry characters of vibration mode #   1
        degenerate with vibration modes #   2 to    3
   3.0 -3.0 -1.0  1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0  1.0 -1.0 -1.0  1.0
-  0.0 -0.0  0.0 -0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
- -0.0  0.0  0.0 -0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
+ -0.0  0.0 -0.0  0.0 -0.0  0.0  0.0 -0.0  1.0 -1.0 -1.0  1.0 -1.0  1.0  1.0 -1.0
+  0.0 -0.0 -0.0  0.0 -0.0  0.0 -0.0  0.0  1.0 -1.0  1.0 -1.0 -1.0  1.0 -1.0  1.0
 -
 - Proc.   0 individual time (sec): cpu=          1.0  wall=          1.1
 
 ================================================================================
 
-+Total cpu time      1.020  and wall time      1.089 sec
++Total cpu time      0.981  and wall time      1.082 sec
 
  anaddb : the run completed succesfully.

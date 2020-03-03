@@ -1,5 +1,5 @@
 
-.Version 8.11.14 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Jan 2020.
-- ( at 21h23 )
+.Starting date : Tue  3 Mar 2020.
+- ( at 10h40 )
   
-- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Test_suite/v5_t85-t86-t87-t88-t89-t90-t91-t92-t93-t94-t95/t85.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Test_suite/v5_t85-t86-t87-t88-t89-t90-t91-t92-t93-t94-t95/t85.in
 - output file    -> t85.out
 - root for input  files -> t85i
 - root for output files -> t85o
@@ -1713,8 +1713,8 @@ P          mk1mem10        64
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1842,7 +1842,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1860,7 +1859,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -1869,10 +1867,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  5.62405391917942E-03 -5.952E+00 4.769E-02 3.903E+00
- ETOT  2  2.09680877613749E-04 -5.414E-03 3.445E-05 7.323E-02
- ETOT  3  7.26025820529941E-05 -1.371E-04 6.152E-07 8.762E-05
- ETOT  4  7.22593583475373E-05 -3.432E-07 1.067E-09 1.760E-07
+-ETOT  1  5.62405391918297E-03 -5.952E+00 4.769E-02 3.903E+00
+ ETOT  2  2.09680877622631E-04 -5.414E-03 3.445E-05 7.323E-02
+ ETOT  3  7.26025820494414E-05 -1.371E-04 6.152E-07 8.762E-05
+ ETOT  4  7.22593583422082E-05 -3.432E-07 1.067E-09 1.760E-07
 
  At SCF step    4       vres2   =  1.76E-07 < tolvrs=  1.00E-05 =>converged.
 ================================================================================
@@ -1896,9 +1894,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.7225935835E-04 Ha. Also 2DEtotal=    0.196627713747E-02 eV
+ 2DEtotal=    0.7225935834E-04 Ha. Also 2DEtotal=    0.196627713733E-02 eV
     (2DErelax=   -5.9572910793E+00 Ha. 2DEnonrelax=    5.9573633386E+00 Ha)
-    (  non-var. 2DEtotal :    9.2285488707E-05 Ha)
+    (  non-var. 2DEtotal :    9.2285488703E-05 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -1910,7 +1908,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -1919,10 +1916,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
   ireadwf=   0
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  5.62405367215213E-03 -5.952E+00 6.457E-02 3.903E+00
- ETOT  2  2.09680629961184E-04 -5.414E-03 7.279E-05 7.323E-02
- ETOT  3  7.26022604027321E-05 -1.371E-04 8.251E-07 8.760E-05
- ETOT  4  7.22591079753698E-05 -3.432E-07 1.492E-09 1.754E-07
+-ETOT  1  5.62405367215035E-03 -5.952E+00 6.457E-02 3.903E+00
+ ETOT  2  2.09680629966513E-04 -5.414E-03 7.279E-05 7.323E-02
+ ETOT  3  7.26022603991794E-05 -1.371E-04 8.251E-07 8.760E-05
+ ETOT  4  7.22591079824753E-05 -3.432E-07 1.492E-09 1.754E-07
 
  At SCF step    4       vres2   =  1.75E-07 < tolvrs=  1.00E-05 =>converged.
 ================================================================================
@@ -1946,9 +1943,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.7225910798E-04 Ha. Also 2DEtotal=    0.196627032450E-02 eV
+ 2DEtotal=    0.7225910798E-04 Ha. Also 2DEtotal=    0.196627032469E-02 eV
     (2DErelax=   -5.9572910795E+00 Ha. 2DEnonrelax=    5.9573633386E+00 Ha)
-    (  non-var. 2DEtotal :    9.2242628227E-05 Ha)
+    (  non-var. 2DEtotal :    9.2242628231E-05 Ha)
 
 
 --------------------------------------------------------------------------------
@@ -1960,7 +1957,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -1971,8 +1967,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  5.62405363875662E-03 -5.952E+00 4.768E-02 3.903E+00
  ETOT  2  2.09680597018647E-04 -5.414E-03 7.279E-05 7.323E-02
- ETOT  3  7.26022275081561E-05 -1.371E-04 6.152E-07 8.760E-05
- ETOT  4  7.22590750914520E-05 -3.432E-07 1.492E-09 1.754E-07
+ ETOT  3  7.26022275152616E-05 -1.371E-04 6.152E-07 8.760E-05
+ ETOT  4  7.22590750896757E-05 -3.432E-07 1.492E-09 1.754E-07
 
  At SCF step    4       vres2   =  1.75E-07 < tolvrs=  1.00E-05 =>converged.
 ================================================================================
@@ -1996,9 +1992,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
  13,14 Frozen wf xc core corrections (1) and (2)
  frxc 1  =   0.00000000E+00  frxc 2 =   0.00000000E+00
  Resulting in :
- 2DEtotal=    0.7225907509E-04 Ha. Also 2DEtotal=    0.196626942968E-02 eV
+ 2DEtotal=    0.7225907509E-04 Ha. Also 2DEtotal=    0.196626942963E-02 eV
     (2DErelax=   -5.9572910796E+00 Ha. 2DEnonrelax=    5.9573633386E+00 Ha)
-    (  non-var. 2DEtotal :    9.2242595326E-05 Ha)
+    (  non-var. 2DEtotal :    9.2242595324E-05 Ha)
 
 ================================================================================
 
@@ -2051,10 +2047,10 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
   
    2    1   1    1        -0.0000000000         0.0000000000
    2    1   2    1         0.0000032802         0.0000000000
-   2    1   3    1        -0.0000000000         0.0000000000
+   2    1   3    1         0.0000000000         0.0000000000
   
    3    1   1    1         0.0000000000         0.0000000000
-   3    1   2    1        -0.0000000000         0.0000000000
+   3    1   2    1         0.0000000000         0.0000000000
    3    1   3    1         0.0000032802         0.0000000000
 
   Phonon wavevector (reduced coordinates) :  0.00000  0.00000  0.00000
@@ -2086,8 +2082,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89076
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2101,7 +2097,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2120,10 +2115,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2133,9 +2126,9 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 -ETOT  1   64.359153537597      3.967E+01 2.263E-01 1.756E+04
  ETOT  2   3.5449691660604     -6.081E+01 6.822E-02 6.794E+02
  ETOT  3  0.81418175060100     -2.731E+00 2.272E-03 7.245E-01
- ETOT  4  0.80971343364884     -4.468E-03 1.327E-05 1.235E-02
- ETOT  5  0.80953009685008     -1.833E-04 5.894E-08 7.134E-04
- ETOT  6  0.80951736035626     -1.274E-05 2.442E-09 7.520E-07
+ ETOT  4  0.80971343364885     -4.468E-03 1.327E-05 1.235E-02
+ ETOT  5  0.80953009685007     -1.833E-04 5.894E-08 7.134E-04
+ ETOT  6  0.80951736035627     -1.274E-05 2.442E-09 7.520E-07
 
  At SCF step    6       vres2   =  7.52E-07 < tolvrs=  1.00E-05 =>converged.
 ================================================================================
@@ -2172,10 +2165,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2223,10 +2214,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2336,8 +2325,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2351,7 +2340,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2369,10 +2357,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2421,10 +2407,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2473,10 +2457,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -2547,11 +2529,11 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
   
    1    1   1    1        -0.0443987094        -0.0000000000
    1    1   2    1         0.0000000000        -0.0000000000
-   1    1   3    1        -0.0000000000        -0.0000000000
+   1    1   3    1        -0.0000000000         0.0000000000
   
    2    1   1    1         0.0000000000        -0.0000000000
    2    1   2    1        -0.0443987094        -0.0000000000
-   2    1   3    1         0.0000000000         0.0000000000
+   2    1   3    1         0.0000000000        -0.0000000000
   
    3    1   1    1        -0.0000000000        -0.0000000000
    3    1   2    1         0.0000000000         0.0000000000
@@ -2586,8 +2568,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2601,7 +2583,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2620,7 +2601,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -2673,7 +2653,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -2726,7 +2705,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS1_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -2908,7 +2886,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -2927,7 +2904,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -2973,7 +2949,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -3019,7 +2994,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -3129,8 +3103,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89076
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3144,7 +3118,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3163,10 +3136,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3210,10 +3181,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3257,10 +3226,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3368,8 +3335,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
          ecut(hartree)=      4.000   => boxcut(ratio)=   1.89656
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3383,7 +3350,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3402,10 +3368,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3449,10 +3413,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3496,10 +3458,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
  dfpt_looppert : total number of electrons, from k and k+q
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
@@ -3607,8 +3567,8 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
          ecut(hartree)=      4.000   => boxcut(ratio)=   2.11524
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_develop/tests/Psps_for_tests/13al.981214.fhi
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/13al.981214.fhi
 - Aluminum, fhi98PP : Hamann-type, LDA CA PerdewWang, l=2 local
 - 13.00000   3.00000    981214                znucl, zion, pspdat
     6    7    2    2       493   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -3622,7 +3582,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -3641,7 +3600,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -3693,7 +3651,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -3745,7 +3702,6 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t85o_DS6_WFK
 --------------------------------------------------------------------------------
 
  dfpt_looppert : total number of electrons, from k and k+q
@@ -3803,7 +3759,7 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
               amu      2.69815390E+01
              ecut      4.00000000E+00 Hartree
            etotal1    -2.0828579336E+00
-           etotal2     7.2259075091E-05
+           etotal2     7.2259075090E-05
            etotal3    -1.7651111222E+00
            etotal4    -1.2484965416E+00
            etotal5    -1.4994491402E+02
@@ -5303,23 +5259,22 @@ P          mk1mem10        64
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
-- Computer Phys. Comm. 205, 106 (2016).
-- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
-- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
-- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
-- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
-- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
-- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
-- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
-- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
-- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
-- B.Xu, A.Zhou, J.W.Zwanziger.
-- Comment: the fourth generic paper describing the ABINIT project.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
 - The licence allows the authors to put it on the Web.
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
 -
 - [2] First-principles responses of solids to atomic displacements and homogeneous electric fields:,
 - implementation of a conjugate-gradient algorithm. X. Gonze, Phys. Rev. B55, 10337 (1997).
@@ -5338,7 +5293,25 @@ P          mk1mem10        64
 - Comment: Some pseudopotential generated using the FHI code were used.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#fuchs1999
 -
-- [5] ABINIT: First-principles approach of materials and nanosystem properties.
+- [5] Recent developments in the ABINIT software package.
+- Computer Phys. Comm. 205, 106 (2016).
+- X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
+- C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
+- D.Caliste, M.Cote, F.Dahm, F.Da Pieve, M.Delaveau, M.Di Gennaro,
+- B.Dorado, C.Espejo, G.Geneste, L.Genovese, A.Gerossier, M.Giantomassi,
+- Y.Gillet, D.R.Hamann, L.He, G.Jomard, J.Laflamme Janssen, S.Le Roux,
+- A.Levitt, A.Lherbier, F.Liu, I.Lukacevic, A.Martin, C.Martins,
+- M.J.T.Oliveira, S.Ponce, Y.Pouillon, T.Rangel, G.-M.Rignanese,
+- A.H.Romero, B.Rousseau, O.Rubel, A.A.Shukri, M.Stankovski, M.Torrent,
+- M.J.Van Setten, B.Van Troeye, M.J.Verstraete, D.Waroquier, J.Wiktor,
+- B.Xu, A.Zhou, J.W.Zwanziger.
+- Comment: the fourth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
+-
+- [6] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -5347,27 +5320,14 @@ P          mk1mem10        64
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [6] A brief introduction to the ABINIT software package.
-- Z. Kristallogr. 220, 558-562 (2005).
-- X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
-- M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
-- L. Reining, R. Godby, G. Onida, D.R. Hamann, and D.C. Allan.
-- Comment: the second generic paper describing the ABINIT project. Note that this paper
-- should be cited especially if you are using the GW part of ABINIT, as several authors
-- of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
-- the licence allows the authors to put it on the Web).
-- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- Proc.   0 individual time (sec): cpu=         10.6  wall=         11.6
+- Proc.   0 individual time (sec): cpu=         12.1  wall=         13.2
 
 ================================================================================
 
  Calculation completed.
-.Delivered 642 WARNINGs and 277 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         10.6  wall=         11.6
+.Delivered 592 WARNINGs and  13 COMMENTs to log file.
++Overall time at end (sec) : cpu=         12.1  wall=         13.2
