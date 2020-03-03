@@ -582,15 +582,18 @@ thermostats ([[qmass]]).
 **Related variables:** The time step ([[dtion]]), the temperatures
 ([[multibinit:temperature]]), the ion relaxation time [[multibinit:latt_taut]].
 
-* 104 --> NPT ensemble with method. Similar to option 103, except the pressure is also scaled. 
-**Purpose:** Molecular dynamics
-**Cell optimization:** No (Use [[optcell]]=0 only)
-**Related variables:** The time step ([[dtion]]), the temperatures
-([[multibinit:temperature]]), the ion relaxation time [[multibinit:latt_taut]], the pressure relaxation time [[multibinit:latt_taup]].
-
-
 * 120 --> Dummy mover. Atoms does not move. For testing only.
 """,
+
+# Not yet fully implemented. Need to be properly documented and tested. Disactivated temporarily. 
+#* 104 --> NPT ensemble with method. Similar to option 103, except the pressure is also scaled. 
+#**Purpose:** Molecular dynamics
+#**Cell optimization:** No (Use [[optcell]]=0 only)
+#**Related variables:** The time step ([[dtion]]), the temperatures
+#([[multibinit:temperature]]), the ion relaxation time [[multibinit:latt_taut]], the pressure relaxation time [[multibinit:latt_taup]].
+
+
+
 
 ),
 
@@ -616,7 +619,7 @@ Variable(
     defaultval=1e-4,
     mnemonics="LATTice dynamics FRICTION parameter",
     text=r"""
-    Parameter of the friction used in Langevin dynamcis [[multibinit:dynamics]] =101.
+    Parameter of the friction used in Langevin dynamcis [[multibinit:dynamics]] =102. 
 """,
 ),
 
@@ -660,7 +663,7 @@ Variable(
     defaultval=200,
     mnemonics="Number of TIME step",
     text=r"""
-Number of step for the dynamics
+Number of step for the dynamics.
 """,
 ),
 

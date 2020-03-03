@@ -28,7 +28,10 @@ inp_files = [
 "t60.in",
 "t61.in",
 # Spin dynamics in multibinit
-"t81.in", 
-"t82.in", 
-"t83.in", 
+"t81.in", # set initial spin using rotation q-modulation
+"t82.in", # damping
+# New lattice mover in multibinit
+"t83.in", # Langevin NVT 
+"t84.in", # Berendsen NVT
+"t85.in", # Velocity Verlet NVE
 ]

@@ -153,11 +153,15 @@ In particular, a spin model, described specifically in Sec. 4.1.2 of [[cite:Gonz
 >degrees of freedom (in particular using the inter-atomic force constants). 
 
 A tutorial for the multibinit spin model has been written, [[tutorial:spin_model]].
-List of tests in addition to those of the tutorial: v8#16, v8#23.
-New input variables: slc_coupling,
-[[spin_calc_correlation_obs@multibinit|spin_calc_correlation_obs]], 
+List of tests in addition to those of the tutorial: v8#16, v8#23, v9#81, v9#82.
+New input variables: 
+
+[comment]: #(slc_coupling,)
+
+[comment]: #([[spin_calc_correlation_obs@multibinit|spin_calc_correlation_obs]], )
+
+[comment]: #([[spin_calc_traj_obs@multibinit|spin_calc_traj_obs]], )
 [[spin_calc_thermo_obs@multibinit|spin_calc_thermo_obs]], 
-[[spin_calc_traj_obs@multibinit|spin_calc_traj_obs]], 
 [[spin_damping@multibinit|spin_damping]], 
 [[spin_init_orientation@multibinit|spin_init_orientation]], 
 [[spin_init_qpoint@multibinit|spin_init_qpoint]],
@@ -173,7 +177,7 @@ New input variables: slc_coupling,
 [[spin_var_temperature@multibinit|spin_var_temperature]], 
 [[spin_write_traj@multibinit|spin_write_traj]].
 
-By He Xu, Ph. Ghosez, M. Verstraete + ... ?
+By Xu He, Nicole Helbig, Ph. Ghosez, M. Verstraete + ... ?
 
 
 **B.4** Constrained DFT
@@ -342,13 +346,14 @@ Miscellaneous improvements have been made to the lattice part of Multibinit.
 See the new input variables below, also see the Sec. 4.1.1 of [[cite:Gonze2020]].
 See also v8#94, test of the supercell_latt input variable (NOT DOCUMENTED).
 
-New tests: v8#38, v8#94, v8#98, v8#99.
+New tests: v8#38, v8#94, v8#98, v8#99, v9#83, v9#84.
 New input variables :
 
 - [[analyze_anh_pot@multibinit|analyze_anh_pot]] v8#98
 - [[fit_anhaStrain@multibinit|fit_anhaStrain]] NOT TESTED
 - fit_iatom, tests in paral#81, 82, v8#13-15, but not documented. The tests were already existing.
-- latt_friction, NOT TESTED, NOT DOCUMENTED
+- [[latt_friction@multibinit|latt_friction]], test in v9#83
+- [[latt_taut@multibinit|latt_taut]], test in v9#84
 - [[opt_effpot@multibinit|opt_effpot]], test in v8#99
 - [[opt_ncoeff@multibinit|opt_ncoeff]], test in v8#99
 - [[opt_coeff@multibinit|opt_coeff]], test in v8#99
@@ -396,7 +401,7 @@ By M. Torrent (MR502).
 
 **D.9** Test wannier90 interface with nsppol=2 and nspden=2, wannier90#4.
 
-By He Xu
+By Xu He
 
 **D.10** Mixed precision calculations. New input variable [[mixprec]]
 see v8#44, v9#57, 60, 61.
@@ -477,7 +482,7 @@ By F. Jollet (MR 412)
 By F. Goudreault (MR 408)
 
 **D.27** Miscellaneous additional bug fixes and improvements of documentation.
-L. Baguet, JM Beuken, J. Bieder, E. Bousquet, F. Bruneval, T. Cavignac, M. Giantomassi,  X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, He Xu.
+L. Baguet, JM Beuken, J. Bieder, E. Bousquet, F. Bruneval, T. Cavignac, M. Giantomassi,  X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, Xu He.
 
 
 * * *
