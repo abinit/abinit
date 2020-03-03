@@ -158,9 +158,9 @@ New input variables:
 
 [comment]: #(slc_coupling,)
 
-[comment]: #([[spin_calc_correlation_obs@multibinit|spin_calc_correlation_obs]], )
+[comment]: #(spin_calc_correlation_obs@multibinit|spin_calc_correlation_obs )
 
-[comment]: #([[spin_calc_traj_obs@multibinit|spin_calc_traj_obs]], )
+[comment]: #(spin_calc_traj_obs@multibinit|spin_calc_traj_obs, )
 [[spin_calc_thermo_obs@multibinit|spin_calc_thermo_obs]], 
 [[spin_damping@multibinit|spin_damping]], 
 [[spin_init_orientation@multibinit|spin_init_orientation]], 
