@@ -950,7 +950,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mu(3,3)=reshape([4,9,8,9,5,7,8,7,6],[3,3]) ! Voigt indices
- integer :: ii,ilm,ipts,ir,ispden,iwarn,jj,kk,lm_size_eff,ndvxc,nd2vxc,ngrad
+ integer :: ii,ilm,ipts,ir,ispden,iwarn,jj,lm_size_eff,ndvxc,nd2vxc,ngrad
  integer :: nkxc_updn,npts,nspden_eff,nspden_updn,nspgrad,nu
  integer :: nvxcgrho,nvxclrho,nvxctau,order
  integer :: usecoretau,usegradient,usekden,uselaplacian
