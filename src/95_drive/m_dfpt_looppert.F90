@@ -1473,9 +1473,11 @@ print *, 'not gamma or explicit wfq file'
    call timab(144,1,tsec)
    if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &      (dtset%get1wf /= 0 .or. dtset%ird1wf /= 0)) then
+print *, 'call read_my_kptbands'
      call wfk_read_my_kptbands(fiwf1i, dtset, distrb_flags, spacecomm, &
 &            formeig, istwfk_rbz, kpq_rbz, mkmem_rbz, nkpt_rbz, npwar1, &
 &            cg1, eigen=eigen1, ask_accurate_=0)
+print *, 'out of read_my_kptbands'
    else
      cg1 = zero
      eigen1 = zero

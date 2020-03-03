@@ -3176,11 +3176,18 @@ print *, 'npwarr ',npwarr
  itimrev = kpts_timrev_from_kptopt(wfk_disk%hdr%kptopt)
 #ifdef DEV_MJV
 print *, 'itimrev,dtset%kptopt ', itimrev, dtset%kptopt
+print *, 'wfk_disk%hdr%nsym, wfk_disk%hdr%symrel ', wfk_disk%hdr%nsym, wfk_disk%hdr%symrel
 #endif
  cryst = wfk_disk%hdr%get_crystal(itimrev + 1)
 
  sppoldbl = 1
  ABI_ALLOCATE (rbz2disk, (sppoldbl*nkpt_in, 6))
+
+ ABI_ALLOCATE (symrelT, (3,3,cryst%nsym))
+! TODO: from Matteo, this should be symrel straight, not transposed. Perhaps the logic in mapkptsets is transposed?
+ do isym=1,cryst%nsym
+   symrelT(:,:,isym) = transpose(cryst%symrel(:,:,isym))
+ end do
 
  ask_accurate=1
  if (present(ask_accurate_)) ask_accurate=ask_accurate_
@@ -3189,11 +3196,6 @@ print *, 'itimrev,dtset%kptopt ', itimrev, dtset%kptopt
  if (ask_accurate == 1) then
    chksymbreak = 0
    iout = 0
-   ABI_ALLOCATE (symrelT, (3,3,cryst%nsym))
-! TODO: from Matteo, this should be symrel straight, not transposed. Perhaps the logic in mapkptsets is transposed?
-   do isym=1,cryst%nsym
-     symrelT(:,:,isym) = transpose(cryst%symrel(:,:,isym))
-   end do
 #ifdef DEV_MJV
 print *, 'wfk_disk%hdr%nkpt cryst%timrev ', wfk_disk%hdr%nkpt, cryst%timrev
 #endif
@@ -3514,9 +3516,7 @@ print *, 'wfk_disk%hdr%pawrhoij%p ', size(wfk_disk%hdr%pawrhoij(1)%rhoijp), size
  ABI_FREE(ibdeig)
  ABI_FREE(ibdocc)
 
- if (ask_accurate == 1) then
-   ABI_FREE(symrelT)
- end if
+ ABI_FREE(symrelT)
  ABI_FREE(iperm)
  ABI_FREE(rbz2disk_sort)
  ABI_FREE(rbz2disk)
