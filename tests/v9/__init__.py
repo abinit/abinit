@@ -14,6 +14,7 @@ inp_files = [
 "t01.in",
 "t02.in",
 "t03.in",
+"t04.in",
 #Electron-phonon
 "t50.in",
 "t51.in",

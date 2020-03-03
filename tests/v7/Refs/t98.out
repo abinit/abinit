@@ -118,10 +118,6 @@ _ WF disk file :      1.518 Mbytes ; DEN or POT disk file :      0.028 Mbytes.
            getwfk2          1
            getwfk3          0
            getwfk4          1
-           getwfq1          0
-           getwfq2          0
-           getwfq3          0
-           getwfq4          3
              iscf1          7
              iscf2          7
              iscf3         -2
@@ -1283,10 +1279,6 @@ tolerances: {tolvrs: 1.00E-16, }
            getwfk2          1
            getwfk3          0
            getwfk4          1
-           getwfq1          0
-           getwfq2          0
-           getwfq3          0
-           getwfq4          3
              iscf1          7
              iscf2          7
              iscf3         -2
