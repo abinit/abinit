@@ -485,9 +485,10 @@ integer :: icg, icg_tmp, ibdoffst, npw, iband_me
 ! Initialize the wave function type and read GS WFK
  ABI_ALLOCATE(distrb_flags,(dtset%nkpt,dtset%mband,dtset%nsppol))
  distrb_flags = (mpi_enreg%proc_distrb == mpi_enreg%me_kpt)
- call wfk_read_my_kptbands(dtfil%fnamewffk, dtset, distrb_flags, spaceworld, &
-&            formeig, dtset%istwfk, dtset%kptns, mcg, dtset%nkpt, npwarr, &
-&            cg, eigen=eigen0, pawrhoij=hdr%pawrhoij)
+ call wfk_read_my_kptbands(dtfil%fnamewffk, distrb_flags, spaceworld, dtset%ecut*(dtset%dilatmx)**2, &
+&          formeig, dtset%istwfk, dtset%kptns, dtset%kptopt, mcg, dtset%mband, dtset%mband_mem,dtset%mpw,&
+&          dtset%natom, dtset%nkpt, npwarr, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
+&          cg, eigen=eigen0, pawrhoij=hdr%pawrhoij)
  ABI_DEALLOCATE(distrb_flags)
 
  if (psps%usepaw==1.and.ireadwf0==1) then

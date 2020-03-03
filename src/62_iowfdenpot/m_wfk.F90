@@ -3035,7 +3035,6 @@ end subroutine wfk_read_eigenvalues
 !!
 !! INPUTS
 !!  inpath = file name
-!!  dtset <dataset_type>=all input variables for this dataset
 !!  distrb_flags = logical mask for band, k, spins on this processor
 !!  comm = mpi communicator
 !!  formeig = flag for GS or response function format of eigenvalues
@@ -3043,6 +3042,15 @@ end subroutine wfk_read_eigenvalues
 !!  kptns_in = requested k points, to be extracted from file or completed
 !!  nkpt_in = number of requested k
 !!  npwarr = array of number of plane waves at each k
+!!  istwfk_in = storage flag for plane waves
+!!  kptopt_in = option for kpoint reduction by symmetry
+!!  mcg = max size of cg array
+!!  mband_in = max number of bands over all k
+!!  mband_mem_in = max number of bands stored on each processor
+!!  nkpt_in = total number of k-points
+!!  nspinor_in = number of spinor components 1 or 2
+!!  nsppol_in = number of spin polarization channels
+!!  usepaw_in = enable PAW or not? (1/0)
 !!
 !! OUTPUT
 !!  cg = plane wave coefficients
@@ -3059,32 +3067,31 @@ end subroutine wfk_read_eigenvalues
 !!
 !! SOURCE
 
-subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
-&          formeig, istwfk_in, kptns_in, mcg, nkpt_in, npwarr, &
+subroutine wfk_read_my_kptbands(inpath, distrb_flags, comm, ecut_eff_in,&
+&          formeig, istwfk_in, kptns_in, kptopt_in, mcg, mband_in, mband_mem_in, mpw_in,&
+&          natom_in, nkpt_in, npwarr, nspinor_in, nsppol_in, usepaw_in,&
 &          cg, kg, eigen, occ, pawrhoij, ask_accurate_)
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: comm, nkpt_in, formeig
- integer, intent(in) :: mcg
- type(dataset_type),intent(in) :: dtset
+ integer, intent(in) :: mcg, mpw_in
+ integer, intent(in) :: kptopt_in, mband_in, mband_mem_in, natom_in, nspinor_in, nsppol_in, usepaw_in
+ real(dp), intent(in) :: ecut_eff_in 
+!=dtset%ecut*(dtset%dilatmx)**2 ! ecut * dilatmx**2
 !arrays
  integer, intent(in) :: istwfk_in(nkpt_in)
  integer, intent(in) :: npwarr(nkpt_in)
  character(len=fnlen), intent(in) :: inpath
- logical, intent(in) :: distrb_flags(nkpt_in,dtset%mband,dtset%nsppol)
+ logical, intent(in) :: distrb_flags(nkpt_in,mband_in,nsppol_in)
  real(dp), intent(in),target :: kptns_in(3,nkpt_in)
 
  real(dp), intent(out) :: cg(2,mcg)
- integer, intent(out), optional :: kg(3,dtset%mpw*nkpt_in)
- real(dp), intent(out), optional :: eigen(dtset%mband*(2*dtset%mband)**formeig*nkpt_in*dtset%nsppol)
- real(dp), intent(out), optional :: occ(dtset%mband*nkpt_in*dtset%nsppol)
- type(pawrhoij_type),intent(out),optional,target :: pawrhoij(dtset%natom)
+ integer, intent(out), optional :: kg(3,mpw_in*nkpt_in)
+ real(dp), intent(out), optional :: eigen(mband_in*(2*mband_in)**formeig*nkpt_in*nsppol_in)
+ real(dp), intent(out), optional :: occ(mband_in*nkpt_in*nsppol_in)
+ type(pawrhoij_type),intent(out),optional,target :: pawrhoij(natom_in)
  integer, intent(in), optional :: ask_accurate_
-
-!Arguments ------------------------------------
-!arrays
-! type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
 
 !Local variables-------------------------------
 !scalars
@@ -3098,7 +3105,7 @@ subroutine wfk_read_my_kptbands(inpath, dtset, distrb_flags, comm, &
  integer :: spin_saved, spin_sym
  integer :: itimrev_disk, ierr
  integer :: ask_accurate, sppoldbl
- real(dp) :: ecut_eff,cpu,wall,gflops, res
+ real(dp) :: cpu,wall,gflops, res
  real(dp) :: ecut_eff_disk
  real(dp) :: dksqmax
  character(len=500) :: msg
@@ -3151,26 +3158,25 @@ print *, 'shape cg 2 ', shape(cg)
  cg = zero
 
 #ifdef DEV_MJV
-print *, 'wfk_disk%mband, dtset%mband ', wfk_disk%mband, dtset%mband
+print *, 'wfk_disk%mband, mband_in ', wfk_disk%mband, mband_in
 print *, 'wfk_disk%Hdr%npwarr ',wfk_disk%Hdr%npwarr
 print *, 'npwarr ',npwarr
 #endif
-! ABI_CHECK(wfk_disk%mband >= dtset%mband, "input mband too large for this file")
+! ABI_CHECK(wfk_disk%mband >= mband_in, "input mband too large for this file")
  mband = wfk_disk%mband;
- ABI_CHECK(wfk_disk%nspinor == dtset%nspinor, "input nspinor does not agree with file")
+ ABI_CHECK(wfk_disk%nspinor == nspinor_in, "input nspinor does not agree with file")
  nspinor = wfk_disk%nspinor
 ! checks: impose each individual nband conserved wrt disk?
 
- ABI_CHECK(wfk_disk%nsppol <= dtset%nsppol, "nsppol can not decrease when reading from disk")
-! ABI_CHECK(wfk_disk%nsppol == dtset%nsppol, "nsppol does not agree with file")
- nsppol = dtset%nsppol;
+ ABI_CHECK(wfk_disk%nsppol <= nsppol_in, "nsppol can not decrease when reading from disk")
+! ABI_CHECK(wfk_disk%nsppol == nsppol_in, "nsppol does not agree with file")
+ nsppol = nsppol_in;
  convnsppol1to2=.false.
- if (wfk_disk%nsppol < dtset%nsppol) convnsppol1to2 = .true.
+ if (wfk_disk%nsppol < nsppol_in) convnsppol1to2 = .true.
 
 ! NB: npw can differ as can istwfk
  mpw_disk = maxval(wfk_disk%Hdr%npwarr)
  ecut_eff_disk = wfk_disk%hdr%ecut_eff    ! ecut * dilatmx**2
- ecut_eff = dtset%ecut*(dtset%dilatmx)**2 ! ecut * dilatmx**2
 
  ABI_MALLOC(kg_disk, (3, mpw_disk))
  ABI_MALLOC(cg_disk, (2, mpw_disk*nspinor*mband))
@@ -3179,7 +3185,7 @@ print *, 'npwarr ',npwarr
 
  itimrev = kpts_timrev_from_kptopt(wfk_disk%hdr%kptopt)
 #ifdef DEV_MJV
-print *, 'itimrev,dtset%kptopt ', itimrev, dtset%kptopt
+print *, 'itimrev,kptopt_in ', itimrev, kptopt_in
 print *, 'wfk_disk%hdr%nsym, wfk_disk%hdr%symrel ', wfk_disk%hdr%nsym, wfk_disk%hdr%symrel
 call wfk_disk%hdr%echo(ask_accurate,4)
 print *, 'fform ', ask_accurate
@@ -3265,7 +3271,7 @@ print *, 'rbz2disk_sort ', rbz2disk_sort
      spin_sym=spin
      if (convnsppol1to2) spin_sym=1
 ! this allows for reading fewer bands from disk than the disk version of nband
-     nband_k = min(wfk_disk%nband(ik_disk,spin_sym), dtset%mband)
+     nband_k = min(wfk_disk%nband(ik_disk,spin_sym), mband_in)
      ikg(ikpt) = jj
      ibdeig(ikpt,spin) = kk
      ibdocc(ikpt,spin) = ll
@@ -3280,11 +3286,11 @@ print *, 'rbz2disk_sort ', rbz2disk_sort
 print *, 'icg counts ikpt, spin, nband_k ', icg(ikpt,spin),ikpt,spin, nband_k
 #endif
 ! this allows for variable nband_k < mband_mem
-     ii = ii+min(nband_k,dtset%mband_mem)*npwarr(ikpt)*dtset%nspinor
+     ii = ii+min(nband_k,mband_mem_in)*npwarr(ikpt)*nspinor_in
 #ifdef DEV_MJV
 if (ii > size(cg, dim=2)) then
-print *, 'error : icg went past end of cg ii ', ii, ' ikpt, dtset%mkmem ', ikpt, dtset%mkmem, &
-&        ' spin, nband_k,dtset%mband_mem  ', spin, nband_k,dtset%mband_mem
+print *, 'error : icg went past end of cg ii ', ii, ' ikpt, mcg ', ikpt, mcg, &
+&        ' spin, nband_k,mband_mem_in  ', spin, nband_k,mband_mem_in
 end if
 #endif
    end do
@@ -3303,7 +3309,7 @@ print *, ' distrb_flags(:,:,:) ', distrb_flags
      k_disk = wfk_disk%hdr%kptns(:, ik_disk)
 
 ! this allows for reading fewer bands from disk than the maximum
-     nband_k = min(wfk_disk%nband(ik_disk,spin), dtset%mband)
+     nband_k = min(wfk_disk%nband(ik_disk,spin), mband_in)
      istwf_disk = wfk_disk%hdr%istwfk(ik_disk)
      npw_disk = wfk_disk%hdr%npwarr(ik_disk)
 
@@ -3456,16 +3462,16 @@ print *, 'npwarr is the same and irred kf, so just copy over'
            if (present(kg)) then
              kg(:,ikg(ikf)+1:ikg(ikf)+npw_kf) = kg_disk (:,1:npw_kf)
            end if
-           cg(:,icg(ikf,spin_sym)+1:icg(ikf,spin_sym)+npw_kf*nband_me_disk*dtset%nspinor) = &
-&             cg_disk(:,1:npw_kf*nband_me_disk*dtset%nspinor)
+           cg(:,icg(ikf,spin_sym)+1:icg(ikf,spin_sym)+npw_kf*nband_me_disk*nspinor_in) = &
+&             cg_disk(:,1:npw_kf*nband_me_disk*nspinor_in)
          else
 #ifdef DEV_MJV
 print *, 'npwarr change or need to convert the wf by symmetry, or complete it'
 #endif
            ! Compute G-sphere centered on kf
-           call get_kg(kf,istwf_kf,ecut_eff,cryst%gmet,npw_kf,kg_kf)
+           call get_kg(kf,istwf_kf,ecut_eff_in,cryst%gmet,npw_kf,kg_kf)
 #ifdef DEV_MJV
-print *, ' npw_kf == npwarr(ikf), istwf_kf, ecut_eff ecut ', npw_kf,npwarr(ikf),istwf_kf, ecut_eff, wfk_disk%hdr%ecut
+print *, ' npw_kf == npwarr(ikf), istwf_kf, ecut_eff_in ecut ', npw_kf,npwarr(ikf),istwf_kf, ecut_eff_in, wfk_disk%hdr%ecut
 #endif
            ! npw found for the present sphere must be equal to size of array for output
            ABI_CHECK(npw_kf == npwarr(ikf), "Wrong npw_kf")
@@ -3487,7 +3493,7 @@ print *, ' npw_kf == npwarr(ikf), istwf_kf, ecut_eff ecut ', npw_kf,npwarr(ikf),
            ! Rotate nband_k wavefunctions (output in cg)
            call cgtk_rotate(cryst,k_disk,isym,itimrev,g0,nspinor,nband_me_disk,&
 &            npw_disk,kg_disk,npw_kf,kg_kf,istwf_disk,istwf_kf,cg_disk,&
-&            cg(:,icg(ikf,spin_sym)+1:icg(ikf,spin_sym)+npw_kf*nband_me_disk*dtset%nspinor),&
+&            cg(:,icg(ikf,spin_sym)+1:icg(ikf,spin_sym)+npw_kf*nband_me_disk*nspinor_in),&
 &            work_ngfft,work)
 
            ABI_FREE(work)
@@ -3508,7 +3514,7 @@ print *, ' npw_kf == npwarr(ikf), istwf_kf, ecut_eff ecut ', npw_kf,npwarr(ikf),
    call xmpi_sum(kg,comm,ierr)
  end if
 
- if(present(pawrhoij) .and. dtset%usepaw==1) then
+ if(present(pawrhoij) .and. usepaw_in==1) then
 #ifdef DEV_MJV
 print *, ' rhoij dims ', shape(wfk_disk%hdr%pawrhoij), ' and ', shape(pawrhoij) 
 print *, 'wfk_disk%hdr%pawrhoij ', size(wfk_disk%hdr%pawrhoij)
@@ -3551,7 +3557,6 @@ end subroutine wfk_read_my_kptbands
 !!
 !! INPUTS
 !!  outpath = file name
-!!  dtset <dataset_type>=all input variables for this dataset
 !!  distrb_flags = logical mask for band, k, spins on this processor
 !!  comm = mpi communicator
 !!  formeig = flag for GS or response function format of eigenvalues
@@ -3574,27 +3579,23 @@ end subroutine wfk_read_my_kptbands
 !!
 !! SOURCE
 
-subroutine wfk_write_my_kptbands(outpath, dtset, distrb_flags, comm, &
-&          formeig, hdr, nkpt_in, &
+subroutine wfk_write_my_kptbands(outpath, distrb_flags, comm, &
+&          formeig, hdr, mband_in, mband_mem_in, mpw_in, nkpt_in, nspinor_in, nsppol_in, &
 &          cg, kg, eigen, occ)
 
 !Arguments ------------------------------------
 !scalars
  integer, intent(in) :: comm, nkpt_in, formeig
- type(dataset_type),intent(in) :: dtset
+ integer, intent(in) :: mband_in,mband_mem_in,mpw_in, nspinor_in, nsppol_in
  type(hdr_type),intent(in) :: hdr
 !arrays
  character(len=fnlen), intent(in) :: outpath
- logical, intent(in) :: distrb_flags(nkpt_in,dtset%mband,dtset%nsppol)
+ logical, intent(in) :: distrb_flags(nkpt_in,mband_in,nsppol_in)
 
- real(dp), intent(in) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband_mem*nkpt_in*dtset%nsppol)
- integer,  intent(in) :: kg(3,dtset%mpw*nkpt_in)
- real(dp), intent(in) :: eigen((dtset%mband*(2*dtset%mband)**formeig)*nkpt_in*dtset%nsppol)
- real(dp), intent(in),optional :: occ(dtset%mband*nkpt_in*dtset%nsppol)
-
-!Arguments ------------------------------------
-!arrays
-! type(pawtab_type),intent(in) :: pawtab(dtset%ntypat*psps%usepaw)
+ real(dp), intent(in) :: cg(2,mpw_in*nspinor_in*mband_mem_in*nkpt_in*nsppol_in)
+ integer,  intent(in) :: kg(3,mpw_in*nkpt_in)
+ real(dp), intent(in) :: eigen((mband_in*(2*mband_in)**formeig)*nkpt_in*nsppol_in)
+ real(dp), intent(in),optional :: occ(mband_in*nkpt_in*nsppol_in)
 
 !Local variables-------------------------------
 !scalars
@@ -3623,7 +3624,7 @@ print *, 'after wfk_disk%open_write  wfk_disk%hdr_offset ', wfk_disk%hdr_offset
  icg = 0
  ibdeig = 0
  ibdocc = 0
- do spin=1,dtset%nsppol
+ do spin=1,nsppol_in
    ikg = 0
    do ik_rbz=1,nkpt_in
 #ifdef DEV_MJV
@@ -3666,7 +3667,7 @@ print *, 'shapeocc ', shape(occ)
 #endif
        call wfk_disk%write_band_block([iband,iband+nband_me-1],ik_rbz,spin,xmpio_collective,&
 &        kg_k=kg(:,ikg+1:ikg+npw_k), &
-&        cg_k=cg(:,icg+1:icg+npw_k*nband_me*dtset%nspinor),&
+&        cg_k=cg(:,icg+1:icg+npw_k*nband_me*nspinor_in),&
 &        eig_k=eigen(ibdeig+1:ibdeig+nband_k*(2*nband_k)**formeig), &
 &        occ_k=occ(ibdocc+1:ibdocc+nband_k))
      else
@@ -3675,12 +3676,12 @@ print *, 'no occ, could be printing RF WFK formeig ', formeig
 #endif
        call wfk_disk%write_band_block([iband,iband+nband_me-1],ik_rbz,spin,xmpio_collective,&
 &        kg_k=kg(:,ikg+1:ikg+npw_k), &
-&        cg_k=cg(:,icg+1:icg+npw_k*nband_me*dtset%nspinor),&
+&        cg_k=cg(:,icg+1:icg+npw_k*nband_me*nspinor_in),&
 &        eig_k=eigen(ibdeig+1:ibdeig+nband_k*(2*nband_k)**formeig))
      end if
  
      ikg = ikg + npw_k
-     icg = icg + npw_k*nband_me*dtset%nspinor
+     icg = icg + npw_k*nband_me*nspinor_in
      ibdeig = ibdeig + nband_k*(2*nband_k)**formeig
      ibdocc = ibdocc + nband_k
 

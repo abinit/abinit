@@ -1110,9 +1110,10 @@ print *, 'shape cg 1 ', shape(cg)
    call timab(144,1,tsec)
 
 ! Initialize the wave function type and read GS WFK
-   call wfk_read_my_kptbands(dtfil%fnamewffk, dtset, distrb_flags, spacecomm, &
-&            formeig, istwfk_rbz, kpt_rbz, mcg, nkpt_rbz, npwarr, &
-&            cg, eigen=eigen0, occ=occ_disk)
+   call wfk_read_my_kptbands(dtfil%fnamewffk, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
+&          formeig, istwfk_rbz, kpt_rbz, dtset%kptopt, mcg, dtset%mband, dtset%mband_mem, mpw,&
+&          dtset%natom, nkpt_rbz, npwarr, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
+&          cg, eigen=eigen0, occ=occ_disk)
   
    call timab(144,2,tsec)
 
@@ -1275,17 +1276,19 @@ print *, 'shape cg 1 ', shape(cg)
    else
 print *, 'not gamma or explicit wfq file'
      call timab(144,1,tsec)
-     call wfk_read_my_kptbands(dtfil%fnamewffq, dtset, distrb_flags, spacecomm, &
-&            formeig, istwfk_rbz, kpq_rbz, mcgq, nkpt_rbz, npwar1, &
-&            cgq, eigen=eigenq, occ=occ_disk)
+     call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
+&          formeig, istwfk_rbz, kpq_rbz, dtset%kptopt, mcgq, dtset%mband, dtset%mband_mem, mpw1,&
+&          dtset%natom, nkpt_rbz, npwar1, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
+&          cgq, eigen=eigenq, occ=occ_disk)
      call timab(144,2,tsec)
 
      if (.not.kramers_deg) then
        !SPr: later "make" a separate WFQ file for "-q"
        call timab(144,1,tsec)
-       call wfk_read_my_kptbands(dtfil%fnamewffq, dtset, distrb_flags, spacecomm, &
-&            formeig, istwfk_rbz, kmq_rbz, mcgmq, nkpt_rbz, npwar1_mq, &
-&            cg_mq, eigen=eigen_mq, occ=occ_tmp)
+       call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm,dtset%ecut*(dtset%dilatmx)**2, &
+&          formeig, istwfk_rbz, kmq_rbz, dtset%kptopt, mcgmq, dtset%mband, dtset%mband_mem, mpw1_mq,&
+&          dtset%natom, nkpt_rbz, npwar1_mq, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
+&          cg_mq, eigen=eigen_mq, occ=occ_tmp)
        call timab(144,2,tsec)
 
      end if
@@ -1477,9 +1480,10 @@ print *, 'not gamma or explicit wfq file'
    if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &      (dtset%get1wf /= 0 .or. dtset%ird1wf /= 0)) then
 print *, 'call read_my_kptbands'
-     call wfk_read_my_kptbands(fiwf1i, dtset, distrb_flags, spacecomm, &
-&            formeig, istwfk_rbz, kpq_rbz, mcg1, nkpt_rbz, npwar1, &
-&            cg1, eigen=eigen1, ask_accurate_=0)
+     call wfk_read_my_kptbands(fiwf1i, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
+&          formeig, istwfk_rbz, kpq_rbz, dtset%kptopt, mcg1, dtset%mband, dtset%mband_mem, mpw1,&
+&          dtset%natom, nkpt_rbz, npwar1, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
+&          cg1, eigen=eigen1, ask_accurate_=0)
 print *, 'out of read_my_kptbands'
    else
      cg1 = zero
@@ -1494,9 +1498,10 @@ print *, 'out of read_my_kptbands'
      call timab(144,1,tsec)
      if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &        (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
-       call wfk_read_my_kptbands(fiwf1i, dtset, distrb_flags, spacecomm, &
-&            formeig, istwfk_rbz, kmq_rbz, mcg1mq, nkpt_rbz, npwar1_mq, &
-&            cg1_mq, eigen=eigen1_mq, ask_accurate_=0)
+       call wfk_read_my_kptbands(fiwf1i, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2, &
+&          formeig, istwfk_rbz, kmq_rbz, dtset%kptopt, mcg1mq, dtset%mband, dtset%mband_mem, mpw1_mq,&
+&          dtset%natom, nkpt_rbz, npwar1_mq, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
+&          cg1_mq, eigen=eigen1_mq, ask_accurate_=0)
      else
        cg1_mq = zero
        eigen1_mq = zero
@@ -2057,8 +2062,8 @@ print *, 'out of read_my_kptbands'
 &                nband_rbz,nkpt_rbz,&
 &                dtset%nsppol,resid)
      ! Output 1st-order wavefunctions in file
-     call wfk_write_my_kptbands(fiwf1o, dtset, distrb_flags, spacecomm, &
-&          formeig, hdr, nkpt_rbz, &
+     call wfk_write_my_kptbands(fiwf1o, distrb_flags, spacecomm, &
+&          formeig, hdr, dtset%mband, dtset%mband_mem, dtset%mpw, nkpt_rbz, dtset%nspinor, dtset%nsppol, &
 &          cg1, kg1, eigen1)
 
 !     call outwf(cg1,dtset,psps,eigen1,fiwf1o,hdr,kg1,kpt_rbz,&
