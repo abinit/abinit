@@ -16,7 +16,7 @@ You are supposed to know how to use ABINIT with _Norm-Conserving PseudoPotential
 
 This tutorial should take about 1.5 hour.
 
-[TUTORIAL_README]
+[TUTORIAL_README1]
 
 ## 1. Summary of the PAW method
 

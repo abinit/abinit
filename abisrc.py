@@ -247,9 +247,8 @@ def main():
     needs_reload = True
     if not options.regenerate and os.path.exists(AbinitProject.get_default_pickle_file()):
         proj = AbinitProject.pickle_load()
-	print("\nCoucou0\n")
-        needs_reload = proj.needs_reload()
-	print("\nCoucou1\n")
+	needs_reload = proj.needs_reload()
+	
         if needs_reload:
             cprint("Source tree changed. Need to parse source files again to rebuild dependency graph...", "yellow")
 
