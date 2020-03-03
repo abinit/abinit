@@ -209,7 +209,6 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
  real(dp),allocatable :: gberry(:,:),gh1c(:,:),gh_direc(:,:),gresid(:,:),gvnlx1_saved(:,:)
  real(dp),allocatable :: gs1c(:,:),gvnlx_direc(:,:),pcon(:),sconjgr(:,:)
  real(dp),allocatable :: scprod(:,:),work(:,:),work1(:,:),work2(:,:)
- real(dp),allocatable :: scprod_all(:,:)
  real(dp),pointer :: kinpw1(:)
  type(pawcprj_type),allocatable :: conjgrprj(:,:)
  type(pawcprj_type) :: cprj_dummy(0,0)
@@ -287,7 +286,6 @@ print *, 'bands_treated_now ', bands_treated_now
  ABI_ALLOCATE(gh1c,(2,npw1*nspinor))
  ABI_ALLOCATE(pcon,(npw1))
  ABI_ALLOCATE(scprod,(2,nband_me))
- ABI_ALLOCATE(scprod_all,(2,nband))
 
  if (berryopt== 4.or.berryopt== 6.or.berryopt== 7.or. berryopt==14.or.berryopt==16.or.berryopt==17) then
    ABI_ALLOCATE(gberry,(2,npw1*nspinor))

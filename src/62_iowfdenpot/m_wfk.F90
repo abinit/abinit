@@ -3143,8 +3143,8 @@ print *, 'calling wfk_open_read with formeig = ', formeig, ' path ', trim(inpath
  if(present(kg)) then
    kg = 0
  end if
-!! this initialization is needed in case we read a file with fewer bands and only fill part of cg
-! cg = zero
+! this initialization is needed in case we read a file with fewer bands and only fill part of cg
+ cg = zero
 
 #ifdef DEV_MJV
 print *, 'wfk_disk%mband, dtset%mband ', wfk_disk%mband, dtset%mband
@@ -3514,6 +3514,9 @@ print *, 'wfk_disk%hdr%pawrhoij%p ', size(wfk_disk%hdr%pawrhoij(1)%rhoijp), size
  ABI_FREE(ibdeig)
  ABI_FREE(ibdocc)
 
+ if (ask_accurate == 1) then
+   ABI_FREE(symrelT)
+ end if
  ABI_FREE(iperm)
  ABI_FREE(rbz2disk_sort)
  ABI_FREE(rbz2disk)
