@@ -4,19 +4,13 @@
 ##############################################################################
 prt_model = 0
 
-dynamics = 102  #102    # Langevin NVT
-ncell = 4 4 4 
+dynamics = 101  # Velocity Verlet NVE
+ncell = 6 6 6 
 temperature = 50
-ntime = 10
-nctime = 1
+ntime = 1000
+nctime = 10
 dtion = 10
-latt_friction=0.1
 
-#-------------------------------------------------------------
-#Spin dynamics
-#------------------------------------------------------------
-#slc_coupling = 1010
-#slc_coupling = 1111
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]
@@ -27,15 +21,14 @@ latt_friction=0.1
 #%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
-#%%   t83.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
+#%%   t85.out, tolnlines = 0, tolabs = 0.0, tolrel = 0.0, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = X. He 
 #%% keywords = Effective potential, multibinit
 #%% description = 
-#%%   read netcdf and run lattice dynamics using Langevin NVT (dynamics=102)
-#%%   need to run multibinit --F03 to use the new implementation.
+#%%   read netcdf and run lattice dynamics using Velocity Verlet NVE (dynamics=101)
 #%%   Disabled on nag@abiref because integer overflow (-C=intovf option of NAG compiler)
 #%%   is detected, which is needed by the random number generator.
 #%%   The random number generator in in 28_numeric_noabirule/m_random_xoroshiro128plus.F90
