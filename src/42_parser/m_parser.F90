@@ -33,8 +33,9 @@ module m_parser
  use m_nctk
 
  use m_io_tools,  only : open_file
- use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, next_token, endswith, char_count !startswith,
- use m_geometry,  only : xcart2xred
+ use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, next_token, &
+                         endswith, char_count, find_digit !, startswith,
+ use m_geometry,  only : xcart2xred, det3r
  use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
  !use m_crystal,   only : crystal_t
 
@@ -3702,7 +3703,7 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
 
 !Local variables-------------------------------
  !integer,parameter :: marr = 3
- integer :: beg, iatom, itypat, ierr, ii !, narr, b1
+ integer :: beg, iatom, itypat, ierr, ii
  real(dp) :: scaling_constant
  character(len=500) :: line, system, iomsg
  character(len=5) :: symbol
@@ -3771,7 +3772,7 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
  end do
 
  if (any(duplicated)) then
-   NOT_IMPLEMENTED_ERROR()
+   MSG_ERROR("POSCAR with duplicated symbols is not supported")
    !ABI_FREE(symbols)
    !new%ntypat = count(.not. duplicated)
    !ABI_MALLOC(symbols, (new%ntypat))
@@ -3800,27 +3801,22 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
 
  ! Parse atomic positions.
  do iatom=1,new%natom
-   !ii = index(line, "#")
-   !if (ii /= 0) line = line(:ii-1)
-   ! Prepend black char to make inarray happy.
-   !line = ch10//trim(line)
 
    ! This should implement the POSCAR format.
    read(unit, *, err=10, iomsg=iomsg) new%xred(:, iatom), symbol
+   if (len_trim(symbol) == 0) then
+     if (new%ntypat == 1) then
+       MSG_COMMENT("POTCAR without element symbol after coords but this is not critical because ntypat == 1")
+       symbol = symbols(1)
+     else
+       MSG_ERROR("POTCAR positions should be followed by element symbol.")
+     end if
+   end if
 
    ! This to handle symbol + oxidation state e.g. Li1+
-   !do ii=2,len_trim(symbol)
-   !  if (is_digit(symbol(ii:ii))) then
-   !    symbol = symbol(:ii-1)
-   !    exit
-   !  end if
-   !end do
-
-   ! This is an extension in which e.g 1/3 is supported.
-   !b1 = 1
-   !call inarray(b1, strcat("poscar_coords_iatom_", itoa(iatom)), dprarr, intarr, marr, 3, line, "DPR")
-   !new%xred(:, iatom) = dprarr(1:3)
-   !read(line(b1:), *, err=10, end=20) symbol
+   !print *, symbol
+   ii = find_digit(symbol)
+   if (ii /= 0) symbol = symbol(:ii-1)
 
    do itypat=1, new%ntypat
      if (symbols(itypat) == symbol) then
@@ -3828,19 +3824,18 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
      end if
    end do
    if (itypat == new%ntypat + 1) then
-     MSG_ERROR(sjoin("Cannot find symbol:", symbol, "in initial list. Check POSCAR string."))
+     MSG_ERROR(sjoin("Cannot find symbol:`", symbol, " `in initial symbol list. Typo or POSCAR without symbols?."))
    end if
  end do
 
  ! Convert ang -> bohr
  if (scaling_constant > zero) then
-   new%rprimd = scaling_constant * new%rprimd / Bohr_Ang
+   new%rprimd = scaling_constant * new%rprimd * Ang_Bohr
+ else if (scaling_constant < zero) then
+   ! A negative scale factor is treated as a volume. translate scaling_constant to a lattice vector scaling.
+   new%rprimd = Ang_Bohr * new%rprimd * (-scaling_constant / abs(det3r(new%rprimd))) ** (one / three)
  else
-   ABI_CHECK(scaling_constant > zero, sjoin("scaling constant must be > 0 but found:", ftoa(scaling_constant)))
-   ! In vasp, a negative scale factor is treated as a volume. We need
-   ! to translate this to a proper lattice vector scaling.
-   !vol = abs(det(lattice))
-   !lattice *= (-scale / vol) ** (1 / 3)
+   ABI_CHECK(scaling_constant > zero, sjoin("scaling constant must be /= 0 but found:", ftoa(scaling_constant)))
  end if
 
  if (system == "cartesian") then

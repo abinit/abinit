@@ -37,7 +37,7 @@ In particular:
 1. The build system relies on new `.ac9` files (see [B.5](#B.5)), superceeding the v8 `.ac` files.
    A bash script (`upgrade-build-config-file.sh`) located in the top level directory of the package can be used
    to convert from the old `.ac`format to `.ac9`.
-2. The build system of ABINITv9 does not build the hard dependencies (Linalg, NetCDF, HDF5, LibXC, ...), 
+2. The build system of ABINITv9 does not build the hard dependencies (Linalg, NetCDF4, HDF5, LibXC, ...), 
 as this was not sustainable anymore (see [B.5](#B.5)), but nowadays most users install themselves prerequired libraries.
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
     This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#B.8)). Note that the YAML output is still under development and modifications may appear in the next versions. A python API to extract the results of the calculation will be provided when the implementation is finalized.
@@ -211,7 +211,7 @@ By X. Gonze.
 
 The build system relies on new <hostname>.ac9 files, superceeding the v8 <hostname>.ac files.
 Fully documented example files can be found in doc/build/config-examples.
-The build system of ABINITv9 does not build the (hard and soft) dependencies (Linalg, NetCDF, HDF, LibXC, Wannier90, ...), as this was not sustainable anymore.
+The build system of ABINITv9 does not build the (hard and soft) dependencies (Linalg, NetCDF4, HDF, LibXC, Wannier90, ...), as this was not sustainable anymore.
 Three libraries are now mandatory: linalg, NetCDF4/HDF5 and LibXC. Failing to link to them will prevent building ABINIT.
 The other libraries are optional, there will only be a warning if they are not available.
 If the user does not provide the path to these libraries,
@@ -233,9 +233,8 @@ or
 
 where `run.abi` is the Abinit input file that now provides all the information related to pseudos 
 and the prefixes that were previously passed via the "files" file.
-
 A file extension for the input file is highly recommended (in this example we use `.abi`)
-as by default the parser will use the name before the file extension as root to build the prefixes 
+as by default the parser will use the string before the file extension as root to build the prefixes 
 for the input/output/temporary files.
 
 The user can specify the name of the main output file thanks to the [[output_file]] input variable,
@@ -303,7 +302,7 @@ At present there is a YAML section for the components of the total energy, the G
 Example of tests: paral#86, v67mbpt#2. See the input variable use_yaml (TO BE DOCUMENTED).
 -->
 At the occasion of the development of this capability, and its adaptation to the test farm, the
-PERL script fldiff.pl has been replaced by a Python version.
+perl script fldiff.pl has been replaced by a Python version 🙌.
 See related information in Sec. 5.5 of [[cite:Gonze2020]].
 
 By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze.
@@ -331,8 +330,8 @@ Try
 
     ./abisrc.py --help
 
-then follow the suggestions, to get info about files, directories, interfaces, to vizualize dependencies of the ABINIT subroutines,
-etc.
+then follow the suggestions, to get info about files, directories, interfaces, to visualize
+dependencies of the ABINIT subroutines, etc.
 
 Note that there are dependencies of abisrc.py, to be installed prior being able to use some of its capabilities.
 Use:
@@ -452,7 +451,7 @@ By He Xu
 **D.10** Mixed precision for FFT transforms. New input variable [[mixprec]]
 see [[test:v8_44]], [[test:v9_57]], [test:v9_60]], and [[test:v9_61]].
 
-From M. GIantomassi (MR491).
+From M. Giantomassi (MR491).
 
 **D.11** Multibinit interface with scale-up
 A whole set of new input variables... However not tested, not documented !
