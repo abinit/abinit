@@ -566,7 +566,7 @@ thermostats ([[qmass]]).
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** The time step ([[dtion]]), the temperatures
-([[multibinit:temperature]]).
+([[multibinit:temperature]]). The time step should be small enough to make the energy conserved. The temperature is set to intialize the velocities of the atoms, which is in principle not preserved during the NVE run. 
 
 
 * 102 --> NVT ensemble with Langevin algorithm. [[cite:Vanden2006]] . 
@@ -574,6 +574,7 @@ thermostats ([[qmass]]).
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** The time step ([[dtion]]), the temperatures
 ([[multibinit:temperature]]), the friction [[multibinit:latt_friction]].
+The atoms are coupled to the heat bath, which is represented by a gauss noise  in the forces, whose amplitude is defined by the temperature, and a friction term. 
 
 
 * 103 --> NVT ensemble. The temperature is approached by scaling the velocity of atoms. The method is proposed by Berendsen et al. in  J. Chem. Phys., 81 3684–3690 (1984) [[cite:Berendsen1984]]. Note that this method does NOT generate properly the thermostated ensemble. It does not have the correct distribution of the kinetic energy but have the correct average.  However, it approches the target temperature exponentially without oscillation, for which the steps can be easily controlled.
@@ -619,7 +620,7 @@ Variable(
     defaultval=1e-4,
     mnemonics="LATTice dynamics FRICTION parameter",
     text=r"""
-    Parameter of the friction used in Langevin dynamcis [[multibinit:dynamics]] =102. 
+    Parameter of the friction coefficient used in Langevin dynamcis [[multibinit:dynamics]] =102. Typical value is 1e-4 to 1e-2. 
 """,
 ),
 
