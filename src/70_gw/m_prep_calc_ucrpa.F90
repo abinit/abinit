@@ -891,7 +891,11 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
       ptr_rhot(im1,im2,spin,ispinor1,ispinor2)=&
       &ptr_rhot(im1,im2,spin,ispinor1,ispinor2)+&
       &rhotwg_ki(pwx,jb)*wanbz%psichi(jk_bz,wan_jb,iatom1)%atom(il1)%matl(im1,spin,ispinor1)*&
-      &conjg(wanbz%psichi(ik_bz,wan_ib_sum,iatom2)%atom(il2)%matl(im2,spin,ispinor2))*weight
+      &conjg(wanbz%psichi(ik_bz,wan_ib_sum,iatom2)%atom(il2)%matl(im2,spin,ispinor2))*weight&
+      *exp( cmplx(0.0,1.0) * two_pi * ( &
+      wanbz%kpt(1,ik_bz)* ( cryst%xred(1,wanbz%iatom_wan(iatom1)) - cryst%xred(1,wanbz%iatom_wan(iatom2)) )+&
+      wanbz%kpt(2,ik_bz)* ( cryst%xred(2,wanbz%iatom_wan(iatom1)) - cryst%xred(2,wanbz%iatom_wan(iatom2)) )+&
+      wanbz%kpt(3,ik_bz)* ( cryst%xred(3,wanbz%iatom_wan(iatom1)) - cryst%xred(3,wanbz%iatom_wan(iatom2)) )))
                                  enddo!im2
                                enddo!im1
                              enddo!il2
