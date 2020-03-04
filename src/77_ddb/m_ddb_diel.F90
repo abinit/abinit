@@ -3,9 +3,10 @@
 !! m_ddb_diel
 !!
 !! FUNCTION
-!!
+!! This module provides routines for the calculation of the dielectric constant (anaddb)
+!! 
 !! COPYRIGHT
-!!  Copyright (C) 1999-2020 ABINIT group (XG,XW, MVeithen)
+!!  Copyright (C) 1999-2020 ABINIT group (XG,XW, MVeithen, EB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,6 +44,7 @@ module m_ddb_diel
 !!***
 
  public :: ddb_diel
+ public :: ddb_diel_elec  ! electronic dielectric constant calculation
 !!***
 
 contains
@@ -320,20 +322,22 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 !In case the electronic dielectric tensor is needed
  if(dieflag==1.or.dieflag==2.or.dieflag==3 .or. dieflag==4)then
 
-   write(message, '(a,a)' ) ch10,' Electronic dielectric tensor'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(iout,message,'COLL')
+   call ddb_diel_elec(d2cart,natom,mpert,iout,epsinf)
+! EB: old stuff:
+!   write(message, '(a,a)' ) ch10,' Electronic dielectric tensor'
+!   call wrtout(std_out,message,'COLL')
+!   call wrtout(iout,message,'COLL')
 
-   do idir1=1,3
-     do idir2=1,3
-       epsinf(idir1,idir2)=d2cart(1,idir1,natom+2,idir2,natom+2)
-     end do
-     write(message, '(3f16.8)' )(epsinf(idir1,idir2),idir2=1,3)
-     call wrtout(std_out,message,'COLL')
-     call wrtout(iout,message,'COLL')
-   end do
-   call wrtout(iout, " ",'COLL')
-   call wrtout(std_out, " ",'COLL')
+!   do idir1=1,3
+!     do idir2=1,3
+!       epsinf(idir1,idir2)=d2cart(1,idir1,natom+2,idir2,natom+2)
+!     end do
+!     write(message, '(3f16.8)' )(epsinf(idir1,idir2),idir2=1,3)
+!     call wrtout(std_out,message,'COLL')
+!     call wrtout(iout,message,'COLL')
+!   end do
+!   call wrtout(iout, " ",'COLL')
+!   call wrtout(std_out, " ",'COLL')
 
  end if
 
@@ -506,6 +510,68 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 
 end subroutine ddb_diel
 !!***
+
+
+
+!!****f* ABINIT/ddb_diel_elec
+!!
+!! NAME
+!! ddb_diel_elec
+!!
+!! FUNCTION
+!! Compute the electronic response of the dielectric constant
+!!
+!! INPUTS
+!! iout=unit number for outputs
+!! d2cart(2,3,mpert,3,mpert)=
+!!  dynamical matrix, effective charges, dielectric tensor,....
+!!  all in cartesian coordinates
+!! natom=number of atoms in unit cell
+!!
+!! OUTPUT
+!! epsinf(3,3)= epsilon^infty = electronic contribution to epsilon
+!!
+!! PARENTS
+!!      ddb_diel
+!!
+!! CHILDREN
+!!
+
+subroutine ddb_diel_elec(d2cart,natom,mpert,iout,epsinf)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: iout,mpert,natom
+!arrays
+ real(dp),intent(in) :: d2cart(2,3,mpert,3,mpert)
+ real(dp),intent(out) :: epsinf(3,3)
+
+!Local variables -------------------------
+!scalars
+ integer :: idir1,idir2
+ character(len=500) :: message
+!arrays
+
+ write(message, '(a,a)' ) ch10,' Electronic dielectric tensor'
+ call wrtout(std_out,message,'COLL')
+ call wrtout(iout,message,'COLL')
+
+ !Compute the electronic contribution to the dielectric tensor
+ !Needs only the perturbations with E-field from the DDB 
+ do idir1=1,3
+   do idir2=1,3
+     epsinf(idir1,idir2)=d2cart(1,idir1,natom+2,idir2,natom+2)
+   end do
+   write(message, '(3f16.8)' )(epsinf(idir1,idir2),idir2=1,3)
+   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,message,'COLL')
+ end do
+ call wrtout(iout, " ",'COLL')
+ call wrtout(std_out, " ",'COLL')
+
+end subroutine ddb_diel_elec
+!!***
+
 
 !!****f* ABINIT/alignph
 !!
