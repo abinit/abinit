@@ -21152,27 +21152,29 @@ Variable(
     text=r"""
 This variable provides a simplified interface to build the crystalline structure from an external file.
 The idea is to keep the **geometrical information** separated from the input file so that one
-can perform multiple calculations in different input files with the same structure
-without having to copy & paste the decription of the unit cell.
-The single source of truth is now given by an external file that can be easily shared by multiple input files.
+can perform multiple calculations in different input files sharing the same structure
+without having to copy & paste the description of the unit cell inside the input.
+The single source of truth is now given by an external file that can be easily shared.
 As a side effect one can easily restart structure relaxations in place by reading
 the structure from the output file of a previous run.
 
-The [[structure]] variable is a string in the format: `filetype:filepath` where:
+The [[structure]] variable is a string in the format **filetype:filepath** where:
 
-* filetype` specifies the format of the external file
-* `filepath` gives the path to the file **relative** to the directory where the input file is located.
+* filetype specifies the format of the external file
+* filepath gives the path to the file *relative* to the directory where the input file is located.
 
 Variables such as [[natom]], [[ntypat]], [[typat]] and [[znucl]] are automatically initialized from
 the external file and need not to be specified in the ABINIT input.
 
-At present ( |today| ) the allowed values for `filetype` are:
+At present ( |today| ), the allowed values for **filetype** are:
 
 * abifile --> An output file produced by Abinit (only netcdf files are supported for the time being)
 * poscar  --> POSCAR files in VASP-5 format (element symbol after the atomic position is required).
 
+Some examples will help clarify.
+
 To read the structure from an external netcdf file produced by Abinit (e.g. *out_GSR.nc*)
-use the `abifile` prefix and the syntax:
+use the **abifile** prefix and the syntax:
 
     structure "abifile:out_GSR.nc"
 
@@ -21190,40 +21192,52 @@ To read the structure from an external POSCAR file, use:
     structure "poscar:t04_POSCAR"
 
 where `t04_POSCAR` is the name of external file.
-Note that the ABINIT implementation assumes POSCAR files produced by VASP-5
-or any other tool compatible with the VASP-5 format.
+
+!!! critical
+
+    Note that the Abinit parser does not support all the possible variants of the POSCAR format.
+    More specifically, we assume a subset of the POSCAR specifications in VASP-5 format.
+    This means that the list of element symbols must be present and **written on a single line**.
+    Only the "direct" and "cartesian" keywords before the atomic positions are allowed (case insensitive).
 
 A typical POSCAR file for hexagonal MgB2 looks like (ignore comments):
 
 ```
-Mg1 B2                                    # Title string.
-1.0                                       # Scaling factor for the volume.
-2.672554  1.543000 0.000000               # Lattice vectors in Angstrom (NOTE: ABINIT uses BOHR by default)
+Mg1 B2                           # Title string (ignored by Abinit)
+1.0                              # Scaling factor for lattice vectors.
+2.672554  1.543000 0.000000      # Lattice vectors in Angstrom (NOTE: ABINIT uses BOHR by default)
 -2.672554 1.543000 0.000000
 0.000000  0.000000 3.523000
-Mg B                                      # List of element symbols
-1 2                                       # Number of atoms for each symbol
-direct                                    # "direct" for reduced coordinates or "cartesian".
-0.000000 0.000000 0.0 Mg                  # Coordinates followed by the chemical symbol of the atom.
+Mg B                             # List of element symbols
+1 2                              # Number of atoms for each symbol
+direct                           # "direct" for reduced coordinates or "cartesian".
+0.000000 0.000000 0.0 Mg         # Coordinates followed by the chemical symbol of the atom.
 0.333333 0.666667 0.5 B
 0.666667 0.333333 0.5 B
 ```
 
-The [[typat]] variable is automatically initialized from the list of chemical symbols according to their
-position in the list.
-In this examaple, Mg is of type 1 while B is of type 2.
+A positive scaling factor can be used to rescale the lattice vectors
+whereas a negative value is interpreted as the volume of the unit cell in Angstrom**3.
+Obviously, zero is not allowed!
+
+The [[typat]] variable is automatically initialized from the list of chemical symbols
+according to their position in the list.
+In this example, Mg is of type 1 while B is of type 2.
+
 The ABINIT variables associated to this POSCAR are therefore:
 
     ntypat 2
     typat 1 2 2
-    typat 1 2 2
     znucl  12.0   5.0
 
+These are the **ONLY QUANTITIES** that are initialized from the external POSCAR so please make sure that
+your POSCAR resembles the example given above and do not expect ABINIT to understand other entries
+such as `Selective dynamics` or velocities.
 
 !!! important
 
     Several POSCAR files available on the internet give atomic positions and lattice vectors with ~6 digits.
-    The ABINIT routines use tight tolerances to detect the space group so it may happen that ABINIT does not
+    The ABINIT routines use tight tolerances to detect the space group thus it may happen that ABINIT does not
     detect all the symmetry operations with a consequent **INCREASE** of the number of k-points in the IBZ
     and the associated computational cost. This is especially true for hexagonal or rhombohedral lattices.
     A possible solution is to increase the value of [[tolsym]] in the input file to e.g. 1e-4
@@ -21231,7 +21245,7 @@ The ABINIT variables associated to this POSCAR are therefore:
 
 Note the following important remarks:
 
-- The structure is initialized by the parser at the vey beginning of the calculation
+- The structure is initialized by the parser at the very beginning of the calculation
   hence the external files **must exist** when Abinit starts to analyze the input file.
   In a nutshell, [[structure]] variables cannot be used to pass the output geometry from one dataset
   to the next one.
@@ -21240,12 +21254,12 @@ Note the following important remarks:
   [[ntypat]], [[typat]] and [[znucl]] are tagged as [[NO_MULTI]].
   In other words, one can read different files via [[structure]] and the multidatset syntax
   provided these quantities do not change.
-  ABINITs syntax such as `xred+` are, obviously, not supported.
+  ABINIT syntax such as `xred+` are, obviously, not supported.
 
 - The value of [[typat]] and [[znucl]] given in the input file (if any) is ignored by the parser.
   The value of [[natom]], [[ntypat]] is checked for consistency.
 
-- As a rule of thumb, do not try to mix the two approaches: either use `structure` or the standard
+- As a rule of thumb, do not try to mix the two approaches: either use [[structure]] or the standard
   (more verbose) approach based on [[ntypat]], [[typat]] and [[znucl]] to define the unit cell.
 
 

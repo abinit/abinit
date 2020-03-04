@@ -1,11 +1,11 @@
 ################################################
 # TEST STRUCTURE VARIABLE. SEE DESCRIPTION BELOW
 ################################################
-ndtset  2
+ndtset  3
 
-# This is just to test the prefix variables that replace the old files file.
-# Note the `varname = ""` format that will be searched by runtests,py to decided whether
-# prefix variables should be added to the initial input file or not before running.
+# This is just to test the prefix variables replacing the old files file.
+# Note the `varname = ""` format that will be searched by runtests,py to decide whether
+# prefix variables should be added to the initial input file before running.
 #
 indata_prefix = "t04.indata"
 outdata_prefix = "t04.outdata"
@@ -13,7 +13,7 @@ tmpdata_prefix = "t04.tmpdata"
 output_file = "t04.output"
 pseudos = "12mg.pspnc, 05b.soft_tm"
 
-# MgB2 lattice structure
+# MgB2 lattice structure.
 ## ntypat  2
 ## znucl   12 5
 ## natom   3
@@ -29,29 +29,13 @@ pseudos = "12mg.pspnc, 05b.soft_tm"
 ##  2/3  1/3  0.5 # B
 
 
-# Test "standard" POSCAR format
-# 
-structure "poscar:t04_POSCAR"
+# Test POSCAR format
+# Remember that positions and lattice vectors must be given with enough digits
+structure1 "poscar:t04_POSCAR"
 
-#structure2 "poscar:POSCAR"
-#structure3 "abifile:out_GSR.nc"
+structure2 "abifile:t04.outdata_DS1_GSR.nc"
 
-# Test POSCAR format with abinit extensions that may be useful
-# if the entries in the poscar do not have enough figures.
-#
-#structure2 "poscar:
-#Mg1 B2
-#1.0
-#  2.672554406584 1.543000006065 0.000000000000
-# -2.672554406584 1.543000006065 0.000000000000
-# 0.000000000000 0.000000000000 3.523000013848
-#Mg B
-#1 2     
-#direct
-#0.0 +0.0 +0.0 Mg # This is a comment 
-#+1/3 2/3 1/2 B
-#2/3 +1/3 0.5 B
-#"
+structure3 "abifile:t04.outdata_DS1_HIST.nc"
 
 # Global variables
 ngkpt   4 4 4
@@ -75,9 +59,11 @@ nband   8
 #%% max_nprocs = 2
 #%% [shell]
 #%% pre_commands = 
-#%%   iw_cp t04_POSCAR t04_POSCAR;
 #%%   pw_cp 12mg.pspnc 12mg.pspnc;
 #%%   pw_cp 05b.soft_tm 05b.soft_tm;
+#%%   iw_cp t04_POSCAR t04_POSCAR;
+#%%   iw_cp t04.outdata_DS1_GSR.nc t04.outdata_DS1_GSR.nc;
+#%%   iw_cp t04.outdata_DS1_HIST.nc t04.outdata_DS1_HIST.nc;
 #%% [extra_info]
 #%% authors = M. Giantomassi
 #%% keywords = POSCAR

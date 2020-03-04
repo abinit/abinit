@@ -1222,6 +1222,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    end if
 
  else
+   call wrtout(std_out, sjoin(" Initializing lattice and positions from:", geo_string))
    geo = geo_from_abivar_string(geo_string, comm)
    dtset%znucl(1:dtset%ntypat) = geo%znucl
    call geo%free()

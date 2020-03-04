@@ -290,7 +290,6 @@ List of new input variables that rely on this feature:
   See tests [[test:v8_52]] for a standard analysis of the DDB file and 
   [[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
 
-
 By M. Giantomassi
 
 <a name="B.8"></a>
@@ -302,13 +301,26 @@ At present there is a YAML section for the components of the total energy, the G
 Example of tests: paral#86, v67mbpt#2. See the input variable use_yaml (TO BE DOCUMENTED).
 -->
 At the occasion of the development of this capability, and its adaptation to the test farm, the
-perl script fldiff.pl has been replaced by a Python version 🙌.
-See related information in Sec. 5.5 of [[cite:Gonze2020]].
+perl script fldiff.pl has been replaced by a Python version.
+See related information in Sec. 5.5 of [[cite:Gonze2020.
 
 By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze.
 
 
-**B.9** New capabilities of abipy and abiflows 
+**B.9** New approach to define crystalline structures in the Abinit input
+
+The new variable [[structure]] can be used to initialize the lattice vectors 
+and the atomic positions from an external file.
+Variables such as [[natom]], [[ntypat]], [[typat]] and [[znucl]] are automatically initialized
+and need not to be specified in the ABINIT input.
+At present, the code can read ABINIT netcdf files produced (`GSR.nc`, `WFK.nc`, `DEN.nc`, `HIST.nc`)
+and POSCAR files in VASP-5 format.
+See the documentation for the syntax and limitations.
+
+By M. Giantomassi
+
+
+**B.10** New capabilities of abipy and abiflows 
 
 The abipy and abiflows projects have been significantly extended.
 See Sec. 6 of [[cite:Gonze2020]], as well as the [gallery of plotting scripts](http://abinit.github.io/abipy/gallery/index.html) &nbsp;

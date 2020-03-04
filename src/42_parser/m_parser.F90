@@ -743,7 +743,6 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
  close (unit=input_unit)
 
  ! Make sure we don't have unmatched quotation marks
-
  if (mod(char_count(string, '"'), 2) /= 0) then
    MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
  end if
@@ -3572,36 +3571,34 @@ end function geo_from_abivar_string
 !!
 !! SOURCE
 
-type(geo_t) function geo_from_abigeo_path(path, comm) result(new)
+type(geo_t) function geo_from_abigeo_path(path, jdtset, iimage, comm) result(new)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: path
- integer,intent(in) :: comm
+ integer,intent(in) :: jdtset, iimage, comm
 
 !Local variables-------------------------------
  integer,parameter :: master = 0, option1=1
- integer :: my_rank, lenstr, ierr, ii, iatom, start, tread !itypat,
+ integer :: my_rank, lenstr, ierr, ii, iatom, start, tread, marr !itypat,
  !character(len=500) :: msg
  character(len=strlen) :: string
+!arrays
+ integer,allocatable :: intarr(:)
+ real(dp),allocatable ::dprarr(:)
  character(len=5),allocatable :: symbols(:)
+
 
 !************************************************************************
 
-! Master node reads string and broadcasts
+ ! Master node reads string and broadcasts
  my_rank = xmpi_comm_rank(comm)
 
  if (my_rank == master) then
-    ! Below part copied from `parsefile`.
-    ! strlen from defs_basis module
+    ! Below part copied from `parsefile`. strlen from defs_basis module
     call instrng(path, lenstr, option1, strlen, string)
 
    ! To make case-insensitive, map characters of string to upper case.
    call inupper(string(1:lenstr))
-
-   ! Make sure we don't have unmatched quotation marks
-   if (mod(char_count(string, '"'), 2) /= 0) then
-     MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
-   end if
  end if
 
  if (xmpi_comm_size(comm) > 1) then
@@ -3617,36 +3614,43 @@ type(geo_t) function geo_from_abigeo_path(path, comm) result(new)
  !call parse_acell_rprim_angdeg(string, jdtset, iimage, marr, string(1:lenstr), acell, rprim, angdeg)
 
  ! Get the number of atom in the unit cell. Read natom from string
- !call intagm(dprarr, intarr, jdtset ,marr, 1, string(1:lenstr), 'natom', tread, 'INT')
+ marr = 1
+ ABI_MALLOC(intarr, (marr))
+ ABI_MALLOC(dprarr, (marr))
+ !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'natom', tread, 'INT')
  ABI_CHECK(tread /= 0, sjoin("natom is required in file:", path))
- !new%natom = intarr(1)
+ new%natom = intarr(1)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
 
  ! Parse atomic positions. Only xcart is supported here because it makes life easier
  ! and we don't need to handle symbols + Units
+ ii = index(string(1:lenstr), "xred_symbols")
+ ABI_CHECK(ii /= 0, "In structure mode only `xred_symbols` with coords followed by atom symbol are supported")
 
-  ii = index(string(1:lenstr), "xred")
-  ABI_CHECK(ii /= 0, "In structure mode only `xred` with reduced_coords followed by atom symbol are supported")
+ new%fileformat = "abivars"
+ ABI_MALLOC(new%typat, (new%natom))
+ ABI_MALLOC(new%xred, (3, new%natom))
 
-  ABI_MALLOC(new%typat, (new%natom))
-  ABI_MALLOC(new%xred, (3, new%natom))
+ ABI_MALLOC(symbols, (new%natom))
+ start = ii + 4
+ do iatom=1,new%natom
+   !call inarray(start, cs, dprarr, intarr, marr, narr, string, "DPR")
+   !read(string(cs:), *) symbols(iatom)
+ end do
 
-  ABI_MALLOC(symbols, (new%natom))
-  start = ii + 4
-  do iatom=1,new%natom
-    !call inarray(start, cs, dprarr, intarr, marr, narr, string, "DPR")
-    !read(string(cs:), *) symbols(iatom)
-  end do
+ !call find_unique(symbols, new%ntypat, new%typat)
 
-  !call find_unique(symbols, new%ntypat, new%typat)
+ ! Note that the first letter should be capitalized, rest must be lower case
+ ABI_MALLOC(new%znucl, (new%ntypat))
+ !do itypat=1,new%ntypat
+ !  !iatom = new%typat(iat
+ !  new%znucl(itypat) = symbol2znucl(symbols(iatom))
+ !end do
 
-  ! Note that first letter should be capitalized, rest must be lower case
-  ABI_MALLOC(new%znucl, (new%ntypat))
-  !do itypat=1,new%ntypat
-  !  !iatom = new%typat(iat
-  !  new%znucl(itypat) = symbol2znucl(symbols(iatom))
-  !end do
-
-  ABI_FREE(symbols)
+ ABI_FREE(symbols)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
 
 end function geo_from_abigeo_path
 !!***
@@ -3703,17 +3707,15 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
 
 !Local variables-------------------------------
  !integer,parameter :: marr = 3
- integer :: beg, iatom, itypat, ierr, ii
+ integer :: beg, iatom, itypat, ierr, ii, cnt
  real(dp) :: scaling_constant
  character(len=500) :: line, system, iomsg
  character(len=5) :: symbol
 !arrays
  integer,allocatable :: nattyp(:)
  logical,allocatable :: duplicated(:)
- character(len=5),allocatable :: symbols(:)
+ character(len=5),allocatable :: symbols(:), dupe_symbols(:)
  real(dp),allocatable :: xcart(:,:)
- !integer :: intarr(marr)
- !real(dp):: dprarr(marr)
 
 !************************************************************************
 
@@ -3771,19 +3773,28 @@ type(geo_t) function geo_from_poscar_unit(unit) result(new)
    end do
  end do
 
- if (any(duplicated)) then
-   MSG_ERROR("POSCAR with duplicated symbols is not supported")
-   !ABI_FREE(symbols)
-   !new%ntypat = count(.not. duplicated)
-   !ABI_MALLOC(symbols, (new%ntypat))
- end if
-
  ! number of atoms of each type.
- ! NOTE: Assuming ntypat == npsp thus alchemical mixing is not supported. There's a check in the main parser though.
+ ! NOTE: Assuming ntypat == npsp thus alchemical mixing is not supported.
+ ! There's a check in the main parser though.
  ABI_MALLOC(nattyp, (new%ntypat))
  read(unit, *, err=10, iomsg=iomsg) nattyp
  new%natom = sum(nattyp)
  ABI_FREE(nattyp)
+
+ if (any(duplicated)) then
+   ! Need to recompute ntypat and symbols taking into account duplication.
+   MSG_WARNING("Found POSCAR with duplicated symbols")
+   ABI_MOVE_ALLOC(symbols, dupe_symbols)
+   new%ntypat = count(.not. duplicated)
+   ABI_MALLOC(symbols, (new%ntypat))
+   cnt = 0
+   do ii=1,size(duplicated)
+     if (.not. duplicated(ii)) then
+       cnt = cnt + 1; symbols(cnt) = dupe_symbols(ii)
+     end if
+   end do
+   ABI_FREE(dupe_symbols)
+ end if
 
  ! At this point, we can allocate Abinit arrays.
  call new%malloc()
@@ -3926,14 +3937,14 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
 
    if (endswith(path, "_HIST.nc")) then
      ! See def_file_hist.
-     MSG_ERROR("Cannot yet read structure from HIST.nc file")
+     !MSG_ERROR("Cannot yet read structure from HIST.nc file")
      NCF_CHECK(nctk_get_dim(ncid, "natom", new%natom))
      NCF_CHECK(nctk_get_dim(ncid, "ntypat", new%ntypat))
 
      NCF_CHECK(nctk_get_dim(ncid, "npsp", npsp))
      ABI_CHECK(npsp == new%ntypat, 'Geo from HIST file with alchemical mixing!')
-     has_nimage = nf90_inq_dimid(ncid, "nimage", dimid) /= nf90_noerr
-     ABI_CHECK(.not. has_nimage, "Cannot define structure if HIST.nc file contains images.")
+     has_nimage = nf90_inq_dimid(ncid, "nimage", dimid) == nf90_noerr
+     ABI_CHECK(.not. has_nimage, "Cannot initialize structure from HIST.nc when file contains images.")
 
      call new%malloc()
 
@@ -3941,7 +3952,7 @@ type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
      NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "znucl"), new%znucl))
 
      ! time is NF90_UNLIMITED
-     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "time"), itime))
+     NCF_CHECK(nctk_get_dim(ncid, "time", itime))
 
      ! dim3 = [xyz_id, xyz_id, time_id]
      NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "rprimd"), new%rprimd, start=[1,1,itime]))
