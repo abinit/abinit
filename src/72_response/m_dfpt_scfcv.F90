@@ -2495,7 +2495,7 @@ subroutine dfpt_nselt(blkflg,cg,cg1,cplex,&
 ! asserts at least 1 band of the current k and spin is on present processor
 #ifdef DEV_MJV
 print *, ' ik, cycle, nband ', ikpt, proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me),&
-&        proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+&        proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
 #endif
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
        bdtot_index=bdtot_index+nband_k
@@ -2573,11 +2573,11 @@ print *, ' ik, cycle, nband ', ikpt, proc_distrb_cycle(mpi_enreg%proc_distrb,ikp
 
 !    Shift array memory
      if (mkmem/=0) then
-       icg=icg+npw_k*nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+       icg=icg+npw_k*nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
        ikg=ikg+npw_k
      end if
      if (mk1mem/=0) then
-       icg1=icg1+npw1_k*nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+       icg1=icg1+npw1_k*nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
        ikg1=ikg1+npw1_k
      end if
      ABI_DEALLOCATE(ylm_k)
@@ -3211,7 +3211,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 
 #ifdef DEV_MJV
 print *, 'nstdy cycle, ik,isppol, nband ', proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me),&
-&        ikpt, isppol, proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+&        ikpt, isppol, proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
 #endif
 
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
@@ -3276,11 +3276,11 @@ print *, 'nstdy cycle, ik,isppol, nband ', proc_distrb_cycle(mpi_enreg%proc_dist
 
 !    Shift arrays memory
      if (mkmem/=0) then
-       icg=icg+npw_k*dtset%nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+       icg=icg+npw_k*dtset%nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
        ikg=ikg+npw_k
      end if
      if (mk1mem/=0) then
-       icg1=icg1+npw1_k*dtset%nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+       icg1=icg1+npw1_k*dtset%nspinor*proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
        ikg1=ikg1+npw1_k
      end if
 
@@ -3821,7 +3821,7 @@ subroutine dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 
 #ifdef DEV_MJV
 print *, ' cycle, nband ', proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me),&
-&       proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+&       proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
 #endif
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then
        eigen1(1+bd2tot_index : 2*nband_k**2+bd2tot_index) = zero
@@ -4033,7 +4033,7 @@ print *, ' cycle, nband ', proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_
      bdtot_index=bdtot_index+nband_k
      bd2tot_index=bd2tot_index+2*nband_k**2
 
-     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
 !    Shift array memory
      if (mkmem/=0) then
        ibg=ibg+nband_me

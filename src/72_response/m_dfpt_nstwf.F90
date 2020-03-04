@@ -832,7 +832,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
        istwf_k=istwfk_rbz(ikpt)
        npw_k=npwarr(ikpt)
        npw1_k=npwar1(ikpt)
-       nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+       nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
 
 !      Skip loop if this k-point is not to be treated by this proc
        if (proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,isppol,me)) then

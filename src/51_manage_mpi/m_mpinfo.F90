@@ -785,11 +785,11 @@ end function proc_distrb_cycle
 !!
 !! SOURCE
 
-function proc_distrb_nband(distrb,ikpt,isppol,me)
+function proc_distrb_nband(distrb,ikpt,nband_k,isppol,me)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: ikpt,isppol,me
+ integer,intent(in) :: ikpt,isppol,me,nband_k
  integer,allocatable,intent(in) :: distrb(:,:,:)
  integer :: proc_distrb_nband
 
@@ -799,9 +799,9 @@ function proc_distrb_nband(distrb,ikpt,isppol,me)
  if (allocated(distrb)) then
    if (isppol==-1) then
 !TODO: check this is used correctly : in nsppol 2 case you could end up with 2*nband
-     proc_distrb_nband=(count(distrb(ikpt,:,:)==me))
+     proc_distrb_nband=(count(distrb(ikpt,1:nband_k,:)==me))
    else
-     proc_distrb_nband=(count(distrb(ikpt,:,isppol)==me))
+     proc_distrb_nband=(count(distrb(ikpt,1:nband_k,isppol)==me))
    end if
  end if
 

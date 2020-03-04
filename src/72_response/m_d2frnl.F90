@@ -487,7 +487,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !  Loop over k points
    do ikpt=1,dtset%nkpt
      nband_k=dtset%nband(ikpt+(isppol-1)*dtset%nkpt)
-     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
      call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ikpt,isppol,dtset%mband,&
 &      mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
 

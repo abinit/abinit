@@ -84,7 +84,7 @@ module m_dfpt_loopert
  use m_initylmg,   only : initylmg
  use m_dfpt_scfcv, only : dfpt_scfcv
  use m_dfpt_mkrho, only : dfpt_mkrho
- use m_mpinfo,     only : initmpi_band, distrb2, proc_distrb_cycle, proc_distrb_nband
+ use m_mpinfo,     only : initmpi_band, distrb2, proc_distrb_cycle
  use m_atm2fft,    only : dfpt_atm2fft
  use m_berrytk,    only : smatrix
  use m_common,     only : prteigrs

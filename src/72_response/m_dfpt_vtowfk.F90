@@ -448,7 +448,7 @@ print *, ' cwavef elements filtered ', cwavef(:,23), cwavef(:,49), cwavef(:,50)
      if (ipert==natom+2.and.gs_hamkq%usepaw==1.and.inonsc==1) opt_gvnlx1=2
 
      if ( (ipert/=natom+10 .and. ipert/=natom+11) .or. abs(occ_k(iband))>tol8 ) then
-       nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+       nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
 
 #ifdef DEV_MJV
 print *, ' vtowfk isppol.ikpt, nband_me ', isppol, ikpt, nband_me, iband, iband_me 

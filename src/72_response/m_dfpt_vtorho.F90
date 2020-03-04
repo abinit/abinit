@@ -496,7 +496,7 @@ subroutine dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,dbl_nnsclo,&
 
      nband_k = nband_rbz(ikpt+(isppol-1)*nkpt_rbz)
 ! enables variable nband less than the block size in serial case
-     nband_me = min(proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me), nband_k)
+     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
 #ifdef DEV_MJV
 print *, ' vtorho nband_me ', nband_me
 #endif

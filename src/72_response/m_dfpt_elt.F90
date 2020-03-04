@@ -1467,7 +1467,7 @@ subroutine dfpt_eltfrkin(cg,eltfrkin,ecut,ecutsm,effmass_free,&
      end if
 
 ! find number of bands I will actually treat
-     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+     nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
 
      ABI_ALLOCATE(gbound,(2*mgfft+8,2))
      kpoint(:)=kptns(:,ikpt)

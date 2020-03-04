@@ -1416,7 +1416,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 !TODO: band parallelize this routine, and call dfpt_cgwf with only limited cg arrays
 !  in the meanwhile should make a test for paralbd, to exclude it, I think
              band_me = band_ks
-             !nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,isppol,me)
+             !nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_kq,isppol,me)
              nband_me = nband_kq
              call dfpt_cgwf(band_ks, band_me, band_procs, berryopt0, cgq, cg1s_kq(:,:,ipc, ib_k), kets_k(:,:,ib_k), &
                cwaveprj, cwaveprj0, rf2, dcwavef, &
