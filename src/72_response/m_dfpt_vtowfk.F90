@@ -357,6 +357,7 @@ print *, 'band_procs  ', band_procs
 unit_me = 6
 !  Get ground-state wavefunctions
    ptr = 1+(iband_me-1)*npw_k*nspinor+icg
+print *, 'vtowfk icg, iband_me, ptr ', icg, iband_me, ptr
    call cg_zcopy(npw_k*nspinor,cg(1,ptr),cwave0)
 
 !  Get PAW ground state projected WF (cprj)
