@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_builtin_tests
 !! NAME
 !!  m_builtin_tests
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA,XG,GMR)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA,XG,GMR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

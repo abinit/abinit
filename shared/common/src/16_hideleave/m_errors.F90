@@ -7,7 +7,7 @@
 !!  This module contains low-level procedures to check assertions and handle errors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG,YP,NCJ,MT)
+!! Copyright (C) 2008-2020 ABINIT group (MG,YP,NCJ,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1470,7 +1470,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
  character(len=5000) :: msg
 #ifdef HAVE_MEM_PROFILING
  integer :: ii,ierr,unt
- integer(i8b) :: memtot, nalloc, nfree
+ integer(i8b) :: memtot, nalloc, nfree, nalloc_c, nfree_c
  character(len=fnlen) :: path
  character(len=5000) :: errmsg
 #endif
@@ -1484,25 +1484,45 @@ subroutine abinit_doctor(prefix, print_mem_report)
  errmsg = ""; ierr = 0
 
  ! Test on memory leaks.
- call abimem_get_info(nalloc, nfree, memtot)
+ call abimem_get_info(nalloc, nfree, memtot, nalloc_c, nfree_c)
  call abimem_shutdown()
 
  if (do_mem_report == 1) then
+
+   ! Check memory allocated in C.
+   if (nalloc_c == nfree_c) then
+     write(msg,'(2a, 2(a,i0), a)') &
+       '- [ALL OK] MEMORY CONSUMPTION REPORT FOR C CODE:',ch10, &
+       '-   There were ',nalloc_c,' allocations and ',nfree_c,' deallocations in C code'
+   else
+     ! This msg will make the test fail if the memory leak occurs on master (no dash in the first column)
+     write(msg,'(2a,2(a,i0),3a)') &
+       'MEMORY CONSUMPTION REPORT FOR C CODE:',ch10, &
+       '   There were ',nalloc_c,' allocations and ',nfree_c,' deallocations in C code',ch10, &
+       "   Check your C code for memory leaks. Note that the abimem.py script does not support allocations in C"
+     ! And this will make the code call mpi_abort if the leak occurs on my_rank != master
+     ierr = ierr + 1
+     errmsg = strcat(errmsg, ch10, msg)
+   end if
+   if (my_rank == master) call wrtout(ab_out, msg)
+   call wrtout(std_out, msg)
+
+   ! Check memory allocated in Fortran.
    if (nalloc == nfree .and. memtot == 0) then
      write(msg,'(3a,i0,a,i0,3a,i0)') &
-       '- MEMORY CONSUMPTION REPORT:',ch10, &
-       '-   There were ',nalloc,' allocations and ',nfree,' deallocations',ch10, &
+       '- [ALL OK] MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:',ch10, &
+       '-   There were ',nalloc,' allocations and ',nfree,' deallocations in Fortran',ch10, &
        '-   Remaining memory at the end of the calculation is ',memtot
    else
      ! This msg will make the test fail if the memory leak occurs on master (no dash in the first column)
      write(msg,'(2a,2(a,i0),3a,f12.4,1x,11a)') &
-       'MEMORY CONSUMPTION REPORT:',ch10, &
-       '   There were ',nalloc,' allocations and ',nfree,' deallocations',ch10, &
+       'MEMORY CONSUMPTION REPORT FOR FORTRAN CODE:',ch10, &
+       '   There were ',nalloc,' allocations and ',nfree,' deallocations in Fortran',ch10, &
        '   Remaining memory at the end of the calculation: ',memtot * b2Mb, " (Mb)", ch10, &
        '   As a help for debugging, you might set call abimem_init(2) in the main program,', ch10, &
        '   or use the command line option `abinit --abimem-level 2`', ch10, &
        '   then use tests/Scripts/abimem.py to analyse the file abimem_rank[num].mocc that has been created,',ch10, &
-       '   e.g. from tests/Scripts issue the command: ./abimem.py leaks ../<dir>/<subdir>/abimem_rank0.mocc .',ch10, &
+       '   e.g. from tests/Scripts issue the command: ./abimem.py leaks ../<dir>/<subdir>/abimem_rank0.mocc',ch10, &
        '   Note that abimem files can easily be multiple GB in size so do not use this option normally!'
      ! And this will make the code call mpi_abort if the leak occurs on my_rank != master
      ierr = ierr + 1
@@ -1515,6 +1535,7 @@ subroutine abinit_doctor(prefix, print_mem_report)
      '- Memory profiling is activated but not yet usable when bigdft is used'
  end if
  if (my_rank == master) call wrtout(ab_out, msg)
+ call wrtout(std_out, msg)
 
  ! Test whether all logical units have been closed.
  ! If you wonder why I'm doing this, remember that there's a per-user
@@ -1531,9 +1552,11 @@ subroutine abinit_doctor(prefix, print_mem_report)
    write(msg, "(a,i0,2a)")"Leaking ",ii," Fortran logical units. See: ",trim(path)
    errmsg = strcat(errmsg, ch10, msg)
    ierr = ierr + 1
+   if (my_rank == master) call wrtout(ab_out, msg)
+   call wrtout(std_out, msg)
  end if
 
- if (my_rank == master) call wrtout(ab_out, msg)
+ call xmpi_barrier(xmpi_world)
  if (ierr /= 0) then
    MSG_ERROR(errmsg)
  end if
@@ -1546,7 +1569,6 @@ subroutine abinit_doctor(prefix, print_mem_report)
  if (xmpi_count_requests /= 0) then
    write(msg, "(a,i0,a)")"Leaking ", xmpi_count_requests, " MPI requests at the end of the run"
    MSG_WARNING(msg)
-   !MSG_ERROR(msg)
 #ifdef HAVE_MEM_PROFILING
    MSG_ERROR(msg)
 #endif

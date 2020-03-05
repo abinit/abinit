@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_uj
 !! NAME
 !!  m_paw_uj
@@ -8,7 +7,7 @@
 !!    in PAW+U context (linear response method according to Phys. Rev. B 71, 035105)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (DJA)
+!! Copyright (C) 2018-2020 ABINIT group (DJA)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

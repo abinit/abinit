@@ -1,0 +1,120 @@
+# Testing CTQMC options
+#
+# == Convergency and starting
+# DATASET 1: LDA 
+# DATASET 2: DMFT
+ndtset 2 
+jdtset 1 2 
+prtvol    4
+pawprtvol 3
+getwfk2 1
+nline2 10
+nnsclo2 10
+getden3 1
+
+##### CONVERGENCE PARAMETERS
+nstep1   30
+nstep2   1
+nstep3   30
+ecut      20
+pawecutdg 60
+tolvrs 1.0d-10
+nband     30
+occopt 3 tsmear 1200 K
+
+##### PHYSICAL PARAMETERS
+natom 5 ntypat 3 typat 1 2 3 3 3
+znucl  23.0 38.0 8.0
+# V Sr O*3
+xred 0.00 0.00 0.00  #vectors (X) of atom positions in REDuced coordinates
+     0.50 0.50 0.50
+     0.50 0.00 0.00
+     0.00 0.50 0.00
+     0.00 0.00 0.50
+acell   3*7.2605
+rprim 1.0 0.0 0.0    #Real space PRIMitive translations
+      0.0 1.0 0.0
+      0.0 0.0 1.0
+
+# == Points k and symetries
+kptopt 1
+ngkpt 6 6 6 
+nshiftk 4
+shiftk 1/2 1/2 1/2
+       1/2 0.0 0.0
+       0.0 1/2 0.0
+       0.0 0.0 1/2
+istwfk *1
+
+# == LDA+DMFT
+usedmft1 0
+usedmft2 1
+usedmft3 1
+dmftbandi 21
+dmftbandf 23
+dmft_nwlo 1600
+dmft_nwli 100000
+dmft_iter 10
+dmftcheck 0
+dmft_rslf 0
+dmft_mxsf 0.8
+dmft_dc 1
+dmft_t2g 1
+
+# == CTQMC
+dmft_solv 5 # CTQMC
+dmftqmc_l 800
+dmftqmc_n 1.d8
+dmftqmc_therm 10000
+# In general the correct value for dmftctqmc_basis is 1 (the default)
+dmftctqmc_basis   2   # to preserve the test: 
+dmftctqmc_check   0   # check calculations
+dmftctqmc_correl  1   # correlations
+dmftctqmc_grnns   0   # green noise
+dmftctqmc_meas    1   # modulo de mesure E
+dmftctqmc_mrka    0   # markov analysis
+dmftctqmc_mov     0   # movie
+dmftctqmc_order   050   # perturbation
+
+
+
+# == LDA+U
+usepawu     1  #  For density matrix printout.
+dmatpuopt  1   # The density matrix: the simplest expression.
+lpawu  2 -1 -1
+f4of2_sla  0.0  0.0  0.0 
+upawu1  0.0  0.0  0.0  eV
+jpawu1  0.0  0.0  0.0  eV
+upawu2  3.1333333333333333  0.0  0.0  eV
+jpawu2  0.7583333333333333  0.0  0.0  eV
+upawu3  0.0000000000000000  0.0  0.0  eV
+jpawu3  0.0000000000000000  0.0  0.0  eV
+#upawu3  3.1333333333333333  0.0  0.0  eV
+#jpawu3  0.7583333333333333  0.0  0.0  eV
+##jpawu  1.1666666666666663  0.0  0.0  eV
+
+
+################################
+#BANDSTRUCTURE
+################################
+dmft_rslf3 1
+tolwfr3 1.0d-12
+nbandkss3  20
+kssform3   3
+
+pawfatbnd3  1
+dmft_kspectralfunc3 1
+
+#Parameters (to uncomment) for bands structure 
+iscf3      -2                                    
+kptopt3     -4                           
+#ndivk3      4 5 5 7
+ndivk3      90 50 50 70
+#ndivk3      9 5 5 7
+kptbounds3  1/2 1/2 1/2 #R'
+            0.0 0.0 0.0 #Gamma
+            1/2 0.0 0.0 #X
+            1/2 1/2 0.0 #M
+            0.0 0.0 0.0 #Gamma
+
+

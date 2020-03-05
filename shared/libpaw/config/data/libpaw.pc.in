@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libpaw
+Description: Projector-Augmented Wave Library
+Version: @VERSION@
+Libs: -L${libdir} -lpaw
+Cflags: -I${includedir}

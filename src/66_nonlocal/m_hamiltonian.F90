@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_hamiltonian
 !! NAME
 !! m_hamiltonian
@@ -15,7 +14,7 @@
 !!  Client code should make sure they always point contiguous targets.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2009-2019 ABINIT group (MG, MT)
+!! Copyright (C) 2009-2020 ABINIT group (MG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

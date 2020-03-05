@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_nesting
 !! NAME
 !!  m_nesting
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, MJV)
+!! Copyright (C) 2008-2020 ABINIT group (MG, MJV)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

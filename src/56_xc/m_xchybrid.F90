@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_xchybrid
 !! NAME
 !!  m_xchybrid
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2015-2019 ABINIT group (FA,MT,FJ)
+!!  Copyright (C) 2015-2020 ABINIT group (FA,MT,FJ)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

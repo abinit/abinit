@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/vdw_dftd3_data
 !!
 !! NAME
@@ -10,7 +9,7 @@
 !! dispersion coefficients C6, the supporting points of the interpolation
 !! and the cut-off radii (R0) for the dispersion correction
 !! COPYRIGHT
-!! Copyright (C) 2015-2019 ABINIT group (BVT)
+!! Copyright (C) 2015-2020 ABINIT group (BVT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

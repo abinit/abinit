@@ -40,7 +40,7 @@ xred     0.000000000000000   0.000000000000000   0.000000000000000
 #%% executable = abinit
 #%% [files]
 #%% files_to_test = 
-#%%   tnuc_2.out, tolnlines=  9, tolabs=  4.1e-09, tolrel=  3.000e-03
+#%%   tnuc_2.out, tolnlines=  12, tolabs=  4.1e-09, tolrel=  3.000e-03
 #%% psp_files = Sn-GGA-PBE-rpaw-2.70.abinit, O-GGA-PBE-rpaw-1.41.abinit
 #%% [paral_info]
 #%% max_nprocs = 4

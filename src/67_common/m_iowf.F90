@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_iowf
 !! NAME
 !! m_iowf
@@ -7,7 +6,7 @@
 !! Procedures for the IO of the WFK file.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, AR, MB, MVer, MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -226,21 +225,24 @@ subroutine outwf(cg,dtset,psps,eigen,filnam,hdr,kg,kptns,mband,mcg,mkmem,&
 
 !Compute mean square and maximum residual over all bands and k points and spins
 !(disregard k point weights and occupation numbers here)
- band_index=sum(nband(1:nkpt*nsppol))
- resims=sum(resid(1:band_index))/dble(band_index)
-
+ resims=zero
 !Find largest residual over bands, k points, and spins, except for nbdbuf highest bands
 !Already AVAILABLE in hdr ?!
- ibdkpt=1
  residm=zero
+ ibdkpt=0
+ band_index=0
  do spin=1,nsppol
    do ikpt=1,nkpt
      nband_k=nband(ikpt+(spin-1)*nkpt)
      nband_eff=max(1,nband_k-dtset%nbdbuf)
-     residm=max(residm,maxval(resid(ibdkpt:ibdkpt+nband_eff-1)))
+     residm=max(residm,maxval(resid(ibdkpt+1:ibdkpt+nband_eff)))
+     resims=resims    +   sum(resid(ibdkpt+1:ibdkpt+nband_eff))
      ibdkpt=ibdkpt+nband_k
+     band_index=band_index+nband_eff
    end do
  end do
+ !band_index=sum(nband(1:nkpt*nsppol))
+ resims = resims/dble(band_index)
 
  write(msg,'(a,2p,e12.4,a,e12.4)')' Mean square residual over all n,k,spin= ',resims,'; max=',residm
  call wrtout([std_out, ab_out], msg)

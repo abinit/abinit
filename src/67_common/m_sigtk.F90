@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sigtk
 !! NAME
 !!  m_sigtk
@@ -9,7 +8,7 @@
 !!      - Define list of k-points and bands in sel-energy matrix elements from input variables.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -556,6 +555,7 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  integer,parameter :: master = 0, pertcase0 = 0, image1 = 1
  integer :: ii, my_rank, nprocs, spin, ikf_ibz, band, nkpt_inerange, gap_err, unt, ncid, cnt, ncerr
  real(dp) :: ee, cmin, vmax
+ character(len=8) :: codvsn
  character(len=500) :: msg
  character(len=fnlen) :: path
  type(ebands_t) :: fine_ebands
@@ -629,7 +629,9 @@ subroutine sigtk_kpts_in_erange(dtset, cryst, ebands, psps, pawtab, prefix, comm
  call fine_gaps%print(header="Gaps from interpolated eigenvalues", unit=std_out)
 
  ! Build new header with fine k-mesh (note kptrlatt_orig == kptrlatt)
- call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, ABINIT_VERSION, pertcase0, &
+ codvsn="        "
+ codvsn(1:min(len_trim(ABINIT_VERSION),8))=ABINIT_VERSION(1:min(len_trim(ABINIT_VERSION),8))
+ call hdr_init_lowlvl(fine_hdr, fine_ebands, psps, pawtab, dummy_wvl, codvsn, pertcase0, &
    dtset%natom, dtset%nsym, dtset%nspden, dtset%ecut, dtset%pawecutdg, dtset%ecutsm, dtset%dilatmx, &
    dtset%intxc, dtset%ixc, dtset%stmbias, dtset%usewvl, dtset%pawcpxocc, dtset%pawspnorb, dtset%ngfft, dtset%ngfftdg, &
    dtset%so_psp, dtset%qptn, cryst%rprimd, cryst%xred, cryst%symrel, cryst%tnons, cryst%symafm, cryst%typat, &

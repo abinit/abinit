@@ -1,7 +1,7 @@
 /* cuda_rec_cut.cu */
 
 /*
- * Copyright (C) 2008-2019 ABINIT Group (MMancini)
+ * Copyright (C) 2008-2020 ABINIT Group (MMancini)
  *
  * This file is part of the ABINIT software package. For license information,
  * please see the COPYING file in the top-level directory of the ABINIT source

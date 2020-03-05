@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****f* ABINIT/contstr25a
 !! NAME
 !! contstr25a
@@ -12,7 +11,7 @@
 !! tensors.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DRH)
+!! Copyright (C) 1998-2020 ABINIT group (DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

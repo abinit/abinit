@@ -1,0 +1,60 @@
+%YAML 1.2
+---
+timestamp: "@paw_timestamp@"
+
+info:
+    version: "@PACKAGE_VERSION@"
+
+target:
+    cpu: "@target_cpu@"
+    vendor: "@target_vendor@"
+    os: "@target_os@"
+
+compilers:
+    CPP: "@CPP@"
+    CPPFLAGS: "@CPPFLAGS@"
+    CC: "@CC@"
+    CFLAGS: "@CFLAGS@"
+    FC: "@FC@"
+    FCFLAGS: "@FCFLAGS@"
+    LDFLAGS: "@LDFLAGS@"
+    LIBS: "@LIBS@"
+
+envvars:
+    LIBPAW_EMBED: "@LIBPAW_EMBED@"
+
+defaults:
+    blocksize: "@paw_blocksize_def@"
+    debug_enable: "@paw_blocking_enable_def@"
+    debug_enable: "@paw_cluster_enable_def@"
+    debug_enable: "@paw_debug_enable_def@"
+    mpi_enable: "@paw_mpi_enable_def@"
+
+options:
+    blocksize: "@paw_blocksize@"
+    enable_debug: "@enable_blocking@"
+    enable_debug: "@enable_cluster@"
+    enable_debug: "@enable_debug@"
+    with_mpi: "@with_mpi@"
+
+triggers:
+    debug_enable: "@paw_debug_enable@"
+    debug_enable: "@paw_blocking_enable@"
+    debug_enable: "@paw_cluster_enable@"
+    mpi_enable: "@paw_mpi_enable@"
+
+inits:
+    debug: "@paw_blocking_init@"
+    debug: "@paw_cluster_init@"
+    debug: "@paw_debug_init@"
+    mpi: "@paw_mpi_init@"
+
+mpi_internals:
+    cc_set: "@paw_mpi_cc_set@"
+    fc_set: "@paw_mpi_fc_set@"
+
+internals:
+    ARCH_SUFFIX: "@LIBPAW_ARCH_SUFFIX@"
+    MCFG_SUFFIX: "@LIBPAW_MCFG_SUFFIX@"
+
+...

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_init
 !! NAME
 !!  m_paw_init
@@ -7,7 +6,7 @@
 !!  This module contains routines related tp PAW calculations initialization.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (FJ, MT)
+!! Copyright (C) 2018-2020 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -77,7 +76,7 @@ CONTAINS  !=====================================================================
 !! 7-Compute Ex-correlation energy for the core density
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (FJ, MT)
+!! Copyright (C) 1998-2020 ABINIT group (FJ, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

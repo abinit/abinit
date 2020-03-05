@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_efield
 !! NAME
 !!  m_paw_efield
@@ -7,7 +6,7 @@
 !!  This module contains routines related to the treatment of electric field in the PAW approach.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (FJ, PH)
+!! Copyright (C) 2018-2020 ABINIT group (FJ, PH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -51,7 +50,7 @@ CONTAINS  !=====================================================================
 !! Compute the PAW term for polarization, named expected value term
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (FJ, PH)
+!! Copyright (C) 1998-2020 ABINIT group (FJ, PH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

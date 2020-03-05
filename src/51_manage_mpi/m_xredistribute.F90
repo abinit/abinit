@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_xredistribute
 !! NAME
 !!  m_xredistribute
@@ -8,7 +7,7 @@
 !!  results on different procs.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MMANCINI)
+!! Copyright (C) 2008-2020 ABINIT group (MMANCINI)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

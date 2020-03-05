@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_symfind
 !! NAME
 !!  m_symfind
@@ -7,7 +6,7 @@
 !!  Symmetry finder high-level API.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2000-2019 ABINIT group (XG, RC)
+!!  Copyright (C) 2000-2020 ABINIT group (XG, RC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -125,10 +124,10 @@ contains
  integer :: isym,jj,kk,natom0,nclass,ntrial,printed,trialafm,trialok
  real(dp) :: det,ndnorm,nucdipmomcl2,nucdipmomcl20
  real(dp) :: spinat2,spinatcl2,spinatcl20
-! TRUE if antiferro symmetries are used with non-collinear magnetism. 
- integer :: afm_noncoll=1 !For noncoll==1.  If 1, all symops are permitted ; if 0 symafm must be 1. 
+! TRUE if antiferro symmetries are used with non-collinear magnetism.
+ integer :: afm_noncoll=1 !For noncoll==1.  If 1, all symops are permitted ; if 0 symafm must be 1.
 !For noncoll=1. If noncoll_orthorhombic1, require the symmetry operations to be a subset of the orthorhombic symmetries, except if all spinat=0..
- integer :: noncoll_orthorhombic=0 
+ integer :: noncoll_orthorhombic=0
  logical :: test_sameabsspin,test_samechrg
  logical :: test_samenucdipmom
  character(len=500) :: message
@@ -1130,6 +1129,7 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
  character(len=500) :: message
  character(len=128) :: label
 !arrays
+ integer :: ivec1(3), ivec2(3)
  integer :: n_axes(31),n_axest(31),prime(5),test_direction(3),symrel_uni(3,3)
  integer :: uniaxis(3),uniaxis_try(3)
  integer,allocatable :: determinant(:),symrelconv(:,:,:),t_axes(:)
@@ -1437,7 +1437,8 @@ subroutine symspgr(bravais,nsym,spgroup,symrel,tnons,tolsym)
      do ii=1,3
        jj=ii+1 ; if(jj==4)jj=1
 !      Cross product
-       uniaxis=symrel_uni(ii,:).x.symrel_uni(jj,:)
+       ivec1 = symrel_uni(ii,:); ivec2 = symrel_uni(jj,:)
+       uniaxis = ivec1 .x. ivec2
        if(sum(uniaxis**2)/=0)then
          found=1 ; exit
        end if

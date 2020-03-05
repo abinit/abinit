@@ -1,0 +1,10 @@
+## Copyright (C) 2018-2019 Yann Pouillon <devops@materialsevolution.es>
+
+#
+# Makefile for the documentation of LibPAW
+#
+
+# Additional files
+EXTRA_DIST = \
+  logo-libpaw-500x500.png \
+  logo-libpaw.svg

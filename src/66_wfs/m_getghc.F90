@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_getghc
 !! NAME
 !!  m_getghc
@@ -7,7 +6,7 @@
 !! Compute <G|H|C> for input vector |C> expressed in reciprocal space;
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LSI, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -759,7 +758,7 @@ end subroutine getghc
 !! for input vector |C> expressed in reciprocal space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LSI, MT, JWZ)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, MT, JWZ)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1017,7 +1016,7 @@ end subroutine getghc_nucdip
 !! Compute metaGGA contribution to <G|H|C> for input vector |C> expressed in reciprocal space.
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, LSI, MT)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, LSI, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1483,7 +1482,7 @@ end subroutine getgsc
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2019 ABINIT group (JB)
+!! Copyright (C) 2016-2020 ABINIT group (JB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

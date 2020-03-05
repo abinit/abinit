@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_fef
 !! NAME
 !!  m_dfpt_fef
@@ -7,7 +6,7 @@
 !!  Response calculations in finite electric field.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2004-2019 ABINIT group (XW).
+!!  Copyright (C) 2004-2020 ABINIT group (XW).
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -699,7 +698,7 @@ end subroutine dfptff_initberry
 !! Calculation of the gradient of Berry-phase term in finite electric field.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2004-2019 ABINIT group (XW).
+!! Copyright (C) 2004-2020 ABINIT group (XW).
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

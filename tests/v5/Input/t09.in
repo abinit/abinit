@@ -67,7 +67,7 @@
 #%% max_nprocs = 1
 #%% [extra_info]
 #%% authors = S. Mazevet, M. Torrent
-#%% keywords = 
+#%% keywords = PAW
 #%% description = 
 #%%   Test to prepare a conductivity calculation (test v5#t10)
 #%%   Ground state calculation for 4 Al atoms
