@@ -318,7 +318,12 @@ P          mk1mem6          2
              nqpt4          0
              nqpt5          1
              nqpt6          1
-            nstep         100
+            nstep1        100
+            nstep2        100
+            nstep3        100
+            nstep4        100
+            nstep5         10
+            nstep6        100
              nsym          48
            ntypat           2
               occ1     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
@@ -402,7 +407,7 @@ P          mk1mem6          2
            tolwfr2     1.00000000E-12
            tolwfr3     0.00000000E+00
            tolwfr4     1.00000000E-16
-           tolwfr5     1.00000000E-12
+           tolwfr5     1.00000000E-20
            tolwfr6     0.00000000E+00
             typat      1  2
            useylm1          0
@@ -1460,7 +1465,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
  ETOT  9  -27.969629469469     -1.178E-11 3.635E-12 0.000E+00
  ETOT 10  -27.969629469469      7.105E-15 9.464E-13 0.000E+00
 
- At SCF step   10   max residual=  9.46E-13 < tolwfr=  1.00E-12 =>converged.
+ scprqt:  WARNING -
+  nstep=   10 was not enough SCF cycles to converge;
+  maximum residual=  9.464E-13 exceeds tolwfr=  1.000E-20
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1517,7 +1524,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
  ETOT  9  -27.969723652667     -7.972E-12 5.263E-12 0.000E+00
  ETOT 10  -27.969723652667      7.105E-15 5.826E-13 0.000E+00
 
- At SCF step   10   max residual=  5.83E-13 < tolwfr=  1.00E-12 =>converged.
+ scprqt:  WARNING -
+  nstep=   10 was not enough SCF cycles to converge;
+  maximum residual=  5.826E-13 exceeds tolwfr=  1.000E-20
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -1574,7 +1583,9 @@ _setup2: Arith. and geom. avg. npw (full set) are    1495.750    1495.745
  ETOT  9  -27.969718604821     -1.516E-11 5.030E-12 0.000E+00
  ETOT 10  -27.969718604821     -1.066E-14 9.943E-13 0.000E+00
 
- At SCF step   10   max residual=  9.94E-13 < tolwfr=  1.00E-12 =>converged.
+ scprqt:  WARNING -
+  nstep=   10 was not enough SCF cycles to converge;
+  maximum residual=  9.943E-13 exceeds tolwfr=  1.000E-20
 ================================================================================
 
  ----iterations are completed or convergence reached----
@@ -2052,7 +2063,12 @@ P          mk1mem6          2
              nqpt4          0
              nqpt5          1
              nqpt6          1
-            nstep         100
+            nstep1        100
+            nstep2        100
+            nstep3        100
+            nstep4        100
+            nstep5         10
+            nstep6        100
              nsym          48
            ntypat           2
               occ1     2.000000  2.000000  2.000000  2.000000  2.000000  2.000000
@@ -2140,7 +2156,7 @@ P          mk1mem6          2
            tolwfr2     1.00000000E-12
            tolwfr3     0.00000000E+00
            tolwfr4     1.00000000E-16
-           tolwfr5     1.00000000E-12
+           tolwfr5     1.00000000E-20
            tolwfr6     0.00000000E+00
             typat      1  2
            useylm1          0

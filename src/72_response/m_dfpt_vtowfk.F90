@@ -404,9 +404,6 @@ print *, 'zeroing ipw ', ipw
        end if
      end do
    end do
-#ifdef DEV_MJV
-print *, ' cwavef elements filtered ', cwavef(:,23), cwavef(:,49), cwavef(:,50)
-#endif
 
 
 !  If electric field, the derivative of the wf should be read, and multiplied by i.
@@ -453,7 +450,7 @@ print *, ' cwavef elements filtered ', cwavef(:,23), cwavef(:,49), cwavef(:,50)
 #ifdef DEV_MJV
 print *, ' vtowfk isppol.ikpt, nband_me ', isppol, ikpt, nband_me, iband, iband_me 
 print *, ' occ_k, eig0nk,eig0_kq ', occ_k(iband), eig0nk,eig0_kq
-print *, 'cgwf cwavef 444 ', cwavef(:,23)
+print *, 'cgwf cwavef 444 ', cwavef(:,1:5)
 print *, 'cgwf cwave0 444 ', cwave0(:,1:5)
 print *, 'cgwf cgq 444 ', cgq(:,1:5)
 #endif
@@ -467,9 +464,6 @@ print *, 'cgwf cgq 444 ', cgq(:,1:5)
      else
        resid_k(iband)=zero
      end if
-#ifdef DEV_MJV
-print *, 'cgwf cwavef 454 ', cwavef(:,23)
-#endif
 
      if (ipert/=natom+10 .and. ipert/= natom+11) then
 !    At this stage, the 1st order function cwavef is orthogonal to cgq (unlike
@@ -480,9 +474,8 @@ print *, 'cgwf cwavef 454 ', cwavef(:,23)
        call proc_distrb_cycle_bands(cycle_bands, mpi_enreg%proc_distrb,ikpt,isppol,me)
 #ifdef DEV_MJV
 print *, 'prtfull1wf ', dtset%prtfull1wf
-print *, 'vtowfk after corrmetal iband, cwavef ', iband, cwavef(:,1:5)
-print *, 'cgwf cwavef 465 ', cwavef(:,23)
-print *, 'vtowfk after corrmetal iband, cwave1 ', iband, cwave1(:,1:5)
+print *, 'vtowfk before corrmetal iband, cwavef ', iband, cwavef(:,1:5)
+print *, 'vtowfk before corrmetal iband, cwave1 ', iband, cwave1(:,1:5)
 #endif
        if (dtset%prtfull1wf>0) then
          call full_active_wf1(cgq,cprjq,cwavef,cwave1,cwaveprj,cwaveprj1,cycle_bands,eig1_k,fermie1,&
@@ -521,9 +514,7 @@ print *, 'vtowfk iband, eig1_k ', iband, eig1_k(ii+1:ii+min(10,nband_k))
 !      Compute the 0-order kinetic operator contribution (with cwavef)
        call meanvalue_g(ar,kinpw1,0,gs_hamkq%istwf_k,mpi_enreg,npw1_k,nspinor,cwavef,cwavef,0)
 #ifdef DEV_MJV
-print *, ' ik isppol iband ar kinpw1 ', ikpt, isppol, iband, ar, kinpw1(1:30) 
-print *, ' cwavef elements ', cwavef(:,23), cwavef(:,49), cwavef(:,50)
-print *, ' rf_hamkq%dkinpw_k w1 w0 ', rf_hamkq%dkinpw_k(23), cwave1(:,23),cwave0(:,23)
+print *, ' ik isppol iband ar kinpw1 ', ikpt, isppol, iband, ar, kinpw1(1:5) 
 #endif
 !      There is an additional factor of 2 with respect to the bare matrix element
        ek0_k(iband)=energy_factor*ar

@@ -218,7 +218,7 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
      nband_k = dtset%nband(ikpt)
      npw_k = npwar1(ikpt)
      icg = icg + dtset%nspinor*npw_k* &
-&       proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,1,nband_k,mpi_enreg%me_band)
+&       proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,1,mpi_enreg%me_band)
 
    end do
  end do

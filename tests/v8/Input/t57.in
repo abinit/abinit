@@ -56,6 +56,8 @@
   # Response Function calculation : d/dk  at the specific points, with added bands.
     rfelfd5   2         # Activate the calculation of the d/dk perturbation (required for effective mass calc.)
     iscf5    -2
+    nstep5    10        # limit number of steps - should be ample for convergence
+    tolwfr5   1.e-20    # use low tolerance to force all steps to be used - for portability
   
     getden5   1
     getwfk5   4
@@ -67,8 +69,6 @@
               0.00 0.50 0.50   # X
               
                                                                                                           
-    tolwfr5   1.0d-12  # Must use tolwfr for non-self-consistent calculations.
-  
     efmas5       1     # Triggers the calculation of effective mass tensors for the specified k-points.
     efmas_bands5 6 9   # The range of bands for which the effective mass tensors will be computed, for each k-point.
                  7 9   
@@ -133,7 +133,7 @@ nstep 100
 #%% post_commands =
 #%% [files]
 #%% files_to_test =
-#%%   t57.out, tolnlines = 4, tolabs = 1.1e-6, tolrel = 9.0e-5, fld_options=-medium;
+#%%   t57.out, tolnlines = 45, tolabs = 1.1e-6, tolrel = 9.0e-5, fld_options=-medium;
 #%% psp_files = Ca.psp8, O.psp8
 #%% [paral_info]
 #%% max_nprocs = 1
