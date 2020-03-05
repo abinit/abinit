@@ -213,6 +213,20 @@ Flag to activate the generation of the anharmonic coefficient for the fit proces
 ),
 
 Variable(
+    abivarname="fit_iatom@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="FIT anharmonic terms around ATOM I",
+    text=r"""Gives the index of the atom in the reference structure around which the anharmonic terms will be generated. 
+If 0 (default) a loop over all atoms in the reference structure will be perforemed and fit_ncoeff coefficienst will be fitted and selected per atom. 
+If -1 all possible cross terms will be generated (e.G. (A_x-B_x)^2*(C_y-D_y)^1. This options generates much more terms. 
+""",
+),
+
+Variable(
     abivarname="fit_initializeData@multibinit",
     varset="multibinit",
     vartype="integer",
