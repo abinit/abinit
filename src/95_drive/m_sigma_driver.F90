@@ -2291,7 +2291,11 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        aux_ecuts(1)=Hdr_wfk%ecut;     Hdr_wfk%ecut=Dtset%ecut
        aux_ecuts(2)=Hdr_wfk%ecut_eff; Hdr_wfk%ecut_eff=Dtset%ecutwfn
        aux_ecuts(3)=Hdr_wfk%ecutsm;   Hdr_wfk%ecutsm=Dtset%ecutsm
-       call Wfd_dm%write_wfk(Hdr_wfk,QP_BSt,gw1rdm_fname)                   ! Print WFK file, QP_BSt contains nat. orbs.
+       if(xmpi_comm_size(Wfd%comm)==1) then
+         call Wfd_dm%write_wfk(Hdr_wfk,QP_BSt,gw1rdm_fname)                 ! Print WFK file, QP_BSt contains nat. orbs.
+       else
+         MSG_WARNING("Unable to print WFK files in parallel mode")          ! FIXME
+       endif
        gw1rdm_fname=dtfil%fnameabo_den
        call Wfd%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)         ! Construct the density
        hdr_sigma%npwarr=wfd%npwarr ! Use the npw = ones used in GW calc
