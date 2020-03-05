@@ -205,7 +205,8 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(present(prt_anh))then
    if(prt_anh == 1) need_prt_anh = .TRUE.
  end if
- need_prt_files = .TRUE. 
+ need_prt_files = .TRUE.
+
  if(present(prt_files))need_prt_files=prt_files
  need_only_even_power = .FALSE.
  if(present(only_even_power)) need_only_even_power = only_even_power
@@ -1741,6 +1742,7 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
  R = one; C = one;
  FERR = zero; BERR = zero
  IWORK = 0; WORK = 0
+ 
 
 !1-Get forces and stresses from the model and fill A
 !  Fill alsor B with the forces and stresses from

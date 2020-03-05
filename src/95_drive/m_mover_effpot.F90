@@ -666,7 +666,7 @@ ABI_DEALLOCATE(xcart)
          call fit_polynomial_coeff_fit(effective_potential,(/0/),listcoeff,hist,1,&
 &         inp%bound_rangePower,0,inp%bound_maxCoeff,ncoeff,1,comm,cutoff_in=inp%bound_cutoff,&
 &         max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%bound_SPCoupling==1,&
-&         anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.)
+&         anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.,fit_on=inp%fit_on,sel_on=inp%sel_on)
 
 !        Store the max number of coefficients after the fit process
          ncoeff_max = effective_potential%anharmonics_terms%ncoeff
@@ -713,7 +713,7 @@ ABI_DEALLOCATE(xcart)
 !          Reset the simulation and set the coefficients of the model
            call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,ncoeff+ii)
            call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
-&           -1,1,comm,verbose=.true.,positive=.false.)
+&           -1,1,comm,verbose=.true.,positive=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on)
            call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
            dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
            acell(:) = one
@@ -979,7 +979,7 @@ ABI_DEALLOCATE(xcart)
 &       ncoeff+model_ncoeffbound)
 
        call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
-&       -1,1,comm,verbose=.false.)
+&       -1,1,comm,verbose=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on)
 
        write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit bound process: '
        call wrtout(ab_out,message,'COLL')
