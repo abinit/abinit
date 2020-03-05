@@ -564,6 +564,34 @@ Set the Dynamics option for Multibinit. This option is equivalent to [[abinit:io
 
 * 0 --> do nothing
 
+  * 1 --> Move atoms using molecular dynamics with optional viscous damping (friction linearly proportional to velocity). The viscous damping is controlled by the parameter "[[vis]]". If actual undamped molecular dynamics is desired, set [[vis]] to 0. The implemented algorithm is the generalisation of the Numerov technique (6th order), but is NOT invariant upon time-reversal, so that the energy is not conserved. The value [[ionmov]] = 6 will usually be preferred, although the algorithm that is implemented is lower-order. The time step is governed by [[dtion]].
+**Purpose:** Molecular dynamics (if [[vis]] = 0), Structural optimization (if
+[[vis]] >0)
+**Cell optimization:** No (Use [[optcell]] = 0 only)
+**Related variables:** Viscous parameter [[vis]], time step [[dtion]], index
+of atoms fixed [[iatfix]]
+
+  * 2 --> Conduct structural optimization using the Broyden-Fletcher-Goldfarb-Shanno minimization (BFGS). This is much more efficient for structural optimization than viscous damping, when there are less than about 10 degrees of freedom to optimize. Another version of the BFGS is available with [[ionmov]]==22, and is apparently more robust and efficient than [[ionmov]]==2.
+**Purpose:** Structural optimization
+**Cell optimization:** Yes (if [[optcell]]/=0)
+**Related variables:**
+
+  * 6 --> Molecular dynamics using the Verlet algorithm, see [[cite:Allen1987a]] p 81]. The only related parameter is the time step ([[dtion]]).
+**Purpose:** Molecular dynamics
+**Cell optimization:** No (Use [[optcell]] = 0 only)
+**Related variables:** time step [[dtion]], index of atoms fixed [[iatfix]]
+
+  * 7 --> Quenched Molecular dynamics using the Verlet algorithm, and stopping each atom for which the scalar product of velocity and force is negative. The only related parameter is the time step ([[dtion]]). The goal is not to produce a realistic dynamics, but to go as fast as possible to the minimum. For this purpose, it is advised to set all the masses to the same value (for example, use the Carbon mass, i.e. set [[amu]] to 12 for all type of atoms).
+**Purpose:** Structural optimization
+**Cell optimization:** No (Use [[optcell]] = 0 only)
+**Related variables:** time step [[dtion]], index of atoms fixed [[iatfix]]
+
+  * 9 --> Langevin molecular dynamics.
+**Purpose:** Molecular dynamics
+**Cell optimization:** No (Use [[optcell]] = 0 only)
+**Related variables:** time step ([[dtion]]), temperatures ([[mdtemp]]) and
+friction coefficient ([[friction]]).
+
 * 12 --> Isokinetic ensemble molecular dynamics. The equation of motion of the ions in contact with a thermostat are solved with the algorithm proposed by Zhang [J. Chem. Phys. 106, 6102 (1997)], as worked out by Minary et al [J. Chem. Phys. 188, 2510 (2003)]. The conservation of the kinetic energy is obtained within machine precision, at each step.
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
@@ -577,12 +605,29 @@ addition.
 ([[mdtemp]]), the number of thermostats ([[nnos]]), and the masses of
 thermostats ([[qmass]]).
 
+  * 22 --> Conduct structural optimization using the Limited-memory Broyden-Fletcher-Goldfarb-Shanno minimization (L-BFGS) [[cite:Nocedal1980]]. The working routines were based on the original implementation of J. Nocedal available on netlib.org. This algorithm can be much better than the native implementation of BFGS in ABINIT ([[ionmov]] = 2) when one approaches convergence, perhaps because of better treatment of numerical details.
+**Purpose:** Structural optimization
+**Cell optimization:** Yes (if [[optcell]]/=0)
+**Related variables:**
+
+  * 24 --> Simple constant energy molecular dynamics using the velocity Verlet symplectic algorithm (second order), see [[cite:Hairer2003]]. The only related parameter is the time step ([[dtion]]).
+**Purpose:** Molecular dynamics
+**Cell optimization:** No (Use [[optcell]] = 0 only)
+**Related variables:** time step [[dtion]]
+
+  * 25 --> Hybrid Monte Carlo sampling of the ionic positions at fixed temperature and unit cell geometry (NVT ensemble). The underlying molecular dynamics corresponds to [[ionmov]]=24. The related parameters are the time step ([[dtion]]) and thermostat temperature ([[mdtemp]]).
+Within the HMC algorithm [[cite:Duane1987]], the trial states are generated via short $NVE$ trajectories (ten [[ionmov]]=24 steps in current implementation).
+ The initial momenta for each trial are randomly sampled from Boltzmann distribution, and the final trajectory state is either accepted or rejected based on the Metropolis criterion.
+ Such strategy allows to simultaneously update all reduced coordinates, achieve higher acceptance ratio than classical Metropolis Monte Carlo and better sampling efficiency for shallow energy landscapes [[cite:Prokhorenko2018]].
+**Purpose:** Monte Carlo sampling
+**Cell optimization:** No (Use [[optcell]] = 0 only)
+**Related variables:** time step [[dtion]], thermostat temperature [[mdtemp]],
+
 * 101 --> NVE ensemble with velocity Verlet algorithm  [[cite:Swope1982]] . 
 **Purpose:** Molecular dynamics
 **Cell optimization:** No (Use [[optcell]]=0 only)
 **Related variables:** The time step ([[dtion]]), the temperatures
 ([[multibinit:temperature]]).
-
 
 * 102 --> NVT ensemble with Langevin algorithm. [[cite:Vanden2006]] . 
 **Purpose:** Molecular dynamics
@@ -608,6 +653,37 @@ thermostats ([[qmass]]).
 
 """,
 
+),
+
+Variable(
+    abivarname="dyn_chksym@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Delta Time for IONs",
+    text=r"""
+Flag to activate symmetry finder and imposition of symmetry of the restart structure before dynamics run, when restartxf is negativ.  
+Useful to do symmetry constrained relaxation with structural realxations algorithms. 
+Be cautious to use it with large number of atoms, symmetry detection might take a long time. 
+
+**Related variables:** Restart flag for multibinit dynamcis ([[multibinit:restartxf]]), symmetry on symmetry finder ([[multibinit:dyn_tolsym]]))
+""",
+),
+
+Variable(
+    abivarname="dyn_tolsym@multibinit",
+    varset="multibinit",
+    vartype="real",
+    topics=['DynamicsMultibinit_basic'],
+    dimensions="scalar",
+    defaultval=1d-10,
+    mnemonics="Delta Time for IONs",
+    text=r"""
+Tolerance on symmetry finder.
+**Related variables:** Activation flag for symmetry finder ([[multibinit:dyn_chksym]])
+""",
 ),
 
 Variable(
