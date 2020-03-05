@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dfpt_scfcv
 !! NAME
 !!  m_dfpt_scfcv
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (XG, DRH, MB, XW, MT, SPr, XW, MV, MM, AR)
+!!  Copyright (C) 1999-2020 ABINIT group (XG, DRH, MB, XW, MT, SPr, XW, MV, MM, AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -434,7 +433,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp) :: zeff_red(3),zeff_bar(3,3)
  real(dp) :: intgden(dtset%nspden,dtset%natom),dentot(dtset%nspden)
 !real(dp) :: zdmc_red(3),zdmc_bar(3,3),mean_rhor1(1) !dynamic magnetic charges and mean density
- real(dp),allocatable :: dielinv(:,:,:,:,:)
+ real(dp),allocatable :: dielinv(:,:,:,:,:),gr_dum(:,:,:)
  real(dp),allocatable :: fcart(:,:),nhat1(:,:),nhat1gr(:,:,:),nhatfermi(:,:),nvresid1(:,:),nvresid2(:,:)
  real(dp),allocatable :: qmat(:,:,:,:,:,:),resid2(:),rhog2(:,:),rhor2(:,:),rhorfermi(:,:)
  real(dp),allocatable :: susmat(:,:,:,:,:),vhartr1(:),vxc1(:,:)
@@ -977,8 +976,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    end if
 
 !  SPr: don't remove the following comments for debugging
-!  call calcdenmagsph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-!&   dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
+!  call calcdenmagsph(gr_dum,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+!&   dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
 !&   idir+1,cplex,intgden=intgden,rhomag=rhomag)
 !  call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,idir+1,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
 
@@ -1405,9 +1404,11 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    prtopt=1
    if(ipert==dtset%natom+5) then
      prtopt=idir+1;
-     call calcdenmagsph(gmet,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
-&     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,ucvol,xred,&
+     ABI_ALLOCATE(gr_dum,(3,nspden,dtset%natom))
+     call calcdenmagsph(gr_dum,mpi_enreg,dtset%natom,nfftf,ngfftf,nspden,&
+&     dtset%ntypat,dtset%ratsm,dtset%ratsph,rhor1,rprimd,dtset%typat,xred,&
 &     prtopt,cplex,intgden=intgden,dentot=dentot,rhomag=rhomag)
+     ABI_DEALLOCATE(gr_dum)
      call  prtdenmagsph(cplex,intgden,dtset%natom,nspden,dtset%ntypat,ab_out,prtopt,dtset%ratsm,dtset%ratsph,rhomag,dtset%typat)
      !debug: write out the vtk first-order density components
 !    call appdig(pertcase,dtfil%fnameabo_den,fi1o_vtk)

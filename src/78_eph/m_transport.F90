@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_transport
 !! NAME
 !!  m_transport
@@ -8,7 +7,7 @@
 !!  Initially for electron mobility limited by electron-phonon scattering.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2018 ABINIT group (HM)
+!!  Copyright (C) 2008-2020 ABINIT group (HM)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -774,7 +773,7 @@ subroutine transport_rta_compute_mobility(self, cryst, dtset, comm)
  ! Compute index of valence band
  max_occ = two/(self%nspinor*self%nsppol)
  ! TODO: should add nelect0 to ebands to keep track of intrinsic
- nvalence = nint(self%ebands%nelect - self%eph_extrael)/max_occ
+ nvalence = nint((self%ebands%nelect - self%eph_extrael)/max_occ)
 
  ABI_CALLOC(self%ne,(self%ntemp))
  ABI_CALLOC(self%nh,(self%ntemp))

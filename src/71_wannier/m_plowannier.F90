@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_plowannier
 !! NAME
 !!  m_plowannier
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon,AGerossier)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon,AGerossier)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

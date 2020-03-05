@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_green
 !! NAME
 !!  m_green
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -915,6 +914,7 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
 !     enddo
    endif
    if (option==4) then
+         sf=czero
      do isppol = 1 , nsppol
        do ikpt = 1, nkpt
          do ib=1,mbandc
@@ -925,18 +925,18 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
        enddo
      enddo
    endif
-   if(paw_dmft%dmft_kspectralfunc==0) then
-     sf_corr=czero
+   if(paw_dmft%dmft_kspectralfunc==1) then
      do iatom=1,natom
-       call int2char4(iatom,tag_at)
-       ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
-       tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_spectralfunction_orb_'//trim(char1)//'_iatom'//trim(tag_at)
-       if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
-         MSG_ERROR(message)
-       end if
-       write(message,*) "#", nspinor,nsppol,ndim,green%nw
-       call wrtout(spcorb_unt,message,'COLL')
        if(green%oper(1)%matlu(iatom)%lpawu.ne.-1) then
+         sf_corr=czero
+         call int2char4(iatom,tag_at)
+         ABI_CHECK((tag_at(1:1)/='#'),'Bug: string length too short!')
+         tmpfil = trim(paw_dmft%filapp)//'_DFTDMFT_spectralfunction_orb_'//trim(char1)//'_iatom'//trim(tag_at)
+         if (open_file(tmpfil, message, newunit=spcorb_unt, status='unknown', form='formatted') /= 0) then
+           MSG_ERROR(message)
+         end if
+         write(message,*) "#", nspinor,nsppol,ndim,green%nw
+         call wrtout(spcorb_unt,message,'COLL')
          write(message,*) "#", green%oper(1)%matlu(iatom)%lpawu
          call wrtout(spcorb_unt,message,'COLL')
          ndim=2*green%oper(1)%matlu(iatom)%lpawu+1
@@ -949,12 +949,12 @@ subroutine print_green(char1,green,option,paw_dmft,pawprtvol,opt_wt,opt_decim)
              enddo
            enddo
          enddo
+         do ifreq=1,green%nw
+           write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/3.141592653589793238_dp
+           call wrtout(spcorb_unt,message,'COLL')
+         enddo
+         close(spcorb_unt)
        endif
-       do ifreq=1,green%nw
-         write(message,*) green%omega(ifreq),(-aimag(sf_corr(ifreq)))/3.141592653589793238_dp
-         call wrtout(spcorb_unt,message,'COLL')
-       enddo
-       close(spcorb_unt)
      enddo
    endif
    if (option==4) then
@@ -2357,7 +2357,7 @@ end subroutine compa_occup_ks
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2444,7 +2444,7 @@ end subroutine add_int_fct
 !! Do integration in matsubara space
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2572,7 +2572,7 @@ end subroutine int_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -2711,7 +2711,7 @@ end subroutine fourier_fct
 !! (A spline is performed )
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3001,7 +3001,7 @@ end subroutine occup_green_tau
 !! Compute levels for ctqmc
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3091,7 +3091,7 @@ end subroutine occup_green_tau
 !!  Compute Fermi level for DMFT or LDA.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3237,7 +3237,7 @@ end subroutine fermi_green
 !!  Compute root of a function with newton methods (newton/halley)
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -3605,7 +3605,7 @@ end subroutine newton
 !! do the fourier transformation and print it
 !!
 !! COPYRIGHT
-!! Copyright (C) 1999-2019 ABINIT group (BAmadon)
+!! Copyright (C) 1999-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_dmft
 !! NAME
 !!  m_paw_dmft
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -777,6 +776,7 @@ subroutine init_dmft(dmatpawu, dtset, fermie_lda, fnametmp_app, fnamei, nspinor,
      tmpfil = trim(paw_dmft%filapp)//'_spectralfunction_realfrequencygrid'
      inquire(file=trim(tmpfil),exist=lexist)!,recl=nrecl)
    !  write(6,*) "inquire",lexist
+   grid_unt=2000
      if((.not.lexist)) then
        iexist2=0
        write(message,'(4x,a,i5,3a)') "File number",grid_unt,&

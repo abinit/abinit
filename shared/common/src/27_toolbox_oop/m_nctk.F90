@@ -7,7 +7,7 @@
 !!  Tools and wrappers for NETCDF-IO.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (MG)
+!!  Copyright (C) 2008-2020 ABINIT group (MG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -43,6 +43,7 @@ MODULE m_nctk
 
  use m_fstrings,  only : itoa, sjoin, lstrip, char_count, strcat, endswith, startswith, ltoa
  use m_io_tools,  only : pick_aname, delete_file, file_exists
+ use m_yaml,      only : DTSET_IDX
 
  implicit none
 
@@ -229,6 +230,9 @@ MODULE m_nctk
  public :: nctk_read_datar
  public :: nctk_defwrite_nonana_terms  ! Write phonon frequencies and displacements for q-->0
                                        ! in the presence of non-analytical behaviour.
+ public :: nctk_defwrite_nonana_raman_terms   ! Write raman susceptiblities for q-->0
+ public :: nctk_defwrite_raman_terms   ! Write raman susceptiblities and frequencies for q=0
+
 #endif
  public :: create_nc_file              ! FIXME: Deprecated
  public :: write_var_netcdf            ! FIXME: Deprecated
@@ -719,6 +723,10 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
  integer,intent(in) :: comm
  character(len=*),intent(in) :: path
 
+!Local variables-------------------------------
+ integer :: input_len
+ character(len=strlen) :: my_string
+
 ! *********************************************************************
 
  ! Always use mpiio mode (i.e. hdf5) if available so that one perform parallel parallel IO
@@ -750,6 +758,26 @@ integer function nctk_open_create(ncid, path, comm) result(ncerr)
 
  ! Define the basic dimensions used in ETSF-IO files.
  NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
+
+ if (len_trim(INPUT_STRING) /= 0) then
+   ! Write string with input.
+   my_string = trim(INPUT_STRING)
+   if (DTSET_IDX /= -1 .and. index(INPUT_STRING, "jdtset ") == 0) then
+     my_string = "jdtset " // itoa(DTSET_IDX) // ch10 // trim(INPUT_STRING)
+   end if
+
+   input_len = len_trim(my_string)
+   NCF_CHECK(nctk_def_dims(ncid, nctkdim_t("input_len", input_len)))
+   NCF_CHECK(nctk_def_arrays(ncid, nctkarr_t("input_string", "c", "input_len")))
+   !print *, trim(INPUT_STRING)
+
+   if (xmpi_comm_rank(comm) == 0) then
+     NCF_CHECK(nctk_set_datamode(ncid))
+     ! Pass my_string(1:input_len)) instead from trim(string) to avoid SIGSEV on higgs_intel_19.0_serial
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "input_string"), my_string(1:input_len)))
+     NCF_CHECK(nctk_set_defmode(ncid))
+   end if
+ end if
 
 end function nctk_open_create
 !!***
@@ -2616,6 +2644,126 @@ subroutine nctk_defwrite_nonana_terms(ncid, iphl2, nph2l, qph2l, natom, phfrq, c
  end select
 
 end subroutine nctk_defwrite_nonana_terms
+!!***
+
+!!****f* m_nctk/nctk_defwrite_nonana_raman_terms
+!! NAME
+!! nctk_defwrite_nonana_raman_terms
+!!
+!! FUNCTION
+!! Write the Raman susceptiblities for q-->0 along different directions in the netcdf file.
+!!
+!! INPUTS
+!!  ncid=netcdf file id.
+!!  iphl2=Index of the q-point to be written to file.
+!!  nph2l=Number of qpoints.
+!!  rsus(3*natom,3,3)=List of Raman susceptibilities along the direction corresponding to iphl2.
+!!  natom=Number of atoms
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! PARENTS
+!!      anaddb
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nctk_defwrite_nonana_raman_terms(ncid, iphl2, nph2l, natom, rsus, mode)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid,natom,iphl2,nph2l
+ character(len=*),intent(in) :: mode
+!arrays
+ real(dp),intent(in) :: rsus(3*natom,3,3)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncerr, raman_sus_varid
+
+! *************************************************************************
+
+!Fake use of nph2l, to keep it as argument. This should be removed when nph2l will be used.
+ if(.false.)then
+  ncerr=nph2l
+ endif
+
+ select case (mode)
+ case ("define")
+   NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
+   ncerr = nctk_def_arrays(ncid, [ nctkarr_t("non_analytical_raman_sus", "dp", &
+"number_of_non_analytical_directions,number_of_phonon_modes,number_of_cartesian_directions,number_of_cartesian_directions")])
+   NCF_CHECK(ncerr)
+
+   NCF_CHECK(nctk_set_datamode(ncid))
+
+ case ("write")
+
+   NCF_CHECK(nf90_inq_varid(ncid, "non_analytical_raman_sus", raman_sus_varid))
+   ncerr = nf90_put_var(ncid,raman_sus_varid,rsus,&
+     start=[iphl2,1,1,1], count=[1,3*natom,3,3])
+   NCF_CHECK(ncerr)
+
+ case default
+   MSG_ERROR(sjoin("Wrong value for mode", mode))
+ end select
+
+end subroutine nctk_defwrite_nonana_raman_terms
+!!***
+
+!!****f* m_nctk/nctk_defwrite_raman_terms
+!! NAME
+!! nctk_defwrite_raman_terms
+!!
+!! FUNCTION
+!! Write the Raman susceptiblities for q=0 and also the phonon frequncies at gamma.
+!!
+!! INPUTS
+!!  ncid=netcdf file id.
+!!  rsus(3*natom,3,3)=List of Raman susceptibilities.
+!!  natom=Number of atoms
+!!
+!! OUTPUT
+!!  Only writing.
+!!
+!! PARENTS
+!!      anaddb
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine nctk_defwrite_raman_terms(ncid, natom, rsus, phfrq)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ncid,natom
+!arrays
+ real(dp),intent(in) :: rsus(3*natom,3,3)
+ real(dp),intent(in) :: phfrq(3*natom)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ncerr, raman_sus_varid, phmodes_varid
+
+! *************************************************************************
+
+ NCF_CHECK(nctk_def_basedims(ncid, defmode=.True.))
+ ncerr = nctk_def_arrays(ncid, [ nctkarr_t("raman_sus", "dp", &
+  "number_of_phonon_modes,number_of_cartesian_directions,number_of_cartesian_directions"), &
+  nctkarr_t("gamma_phonon_modes", "dp", "number_of_phonon_modes")])
+ NCF_CHECK(ncerr)
+
+ NCF_CHECK(nctk_set_datamode(ncid))
+
+ NCF_CHECK(nf90_inq_varid(ncid, "raman_sus", raman_sus_varid))
+ NCF_CHECK(nf90_put_var(ncid,raman_sus_varid,rsus))
+ NCF_CHECK(nf90_inq_varid(ncid, "gamma_phonon_modes", phmodes_varid))
+ NCF_CHECK(nf90_put_var(ncid,phmodes_varid,phfrq*Ha_eV))
+
+end subroutine nctk_defwrite_raman_terms
 !!***
 
 #endif

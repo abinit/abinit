@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_geometry
 !! NAME
 !!  m_geometry
@@ -7,7 +6,7 @@
 !!  This module contains basic tools to operate on vectors expressed in reduced coordinates.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA, DRH)
+!! Copyright (C) 2008-2020 ABINIT group (MG, MT, FJ, TRangel, DCA, XG, AHR, DJA, DRH)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -72,7 +71,7 @@ MODULE m_geometry
  public :: irreducible_set_pert  ! Determines a set of perturbations that form a basis
  public :: wedge_basis        ! compute rprimd x gprimd vectors needed for generalized cross product
  public :: wedge_product      ! compute wedge product given wedge basis
- 
+
  interface normv
   module procedure normv_rdp_vector
   module procedure normv_int_vector
@@ -480,7 +479,7 @@ subroutine wedge_basis(gprimd,rprimd,wedge,normalize)
  else
     nvec = .FALSE.
  end if
- 
+
  do irprimd = 1, 3
     do igprimd = 1, 3
        wedge(1,irprimd,igprimd) = rprimd(2,irprimd)*gprimd(3,igprimd) - rprimd(3,irprimd)*gprimd(2,igprimd)
@@ -1258,7 +1257,6 @@ end subroutine fixsym
 
 subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
 
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iout
@@ -1293,7 +1291,7 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
  end if
  if (ucvol<zero)then
    write(message,'(2a,3(a,3es16.6,a),7a)')&
-     'Current rprimd gives negative (R1xR2).R3 . ',ch10,&
+     'Current rprimd gives negative (R1 x R2) . R3 . ',ch10,&
      'Rprimd =',rprimd(:,1),ch10,&
      '        ',rprimd(:,2),ch10,&
      '        ',rprimd(:,3),ch10,&
@@ -1666,7 +1664,6 @@ end subroutine mkrdim
 !! SOURCE
 
 subroutine xcart2xred(natom,rprimd,xcart,xred)
-
 
 !Arguments ------------------------------------
 !scalars
@@ -2749,8 +2746,8 @@ end subroutine ioniondist
 !! INPUTS
 !!  v1,v2
 !!  rprimd: dimensions of the unit cell. if not given 1,0,0/0,1,0/0,0,1 is assumed
-!!  option: 0 v1, v2 given in cartesian coordinates (default) 
-!!          1 v1,v2 given in reduced coordinates 
+!!  option: 0 v1, v2 given in cartesian coordinates (default)
+!!          1 v1,v2 given in reduced coordinates
 !!         -1 v1 and v2 are supposed equal, and the routine returns the length of the smallest Bravais lattice vector
 !!
 !! OUTPUT
@@ -3238,7 +3235,7 @@ subroutine stresssym(gprimd,nsym,stress,sym)
 !Convert back stress tensor (symmetrized) in cartesian coordinates
 ! stress = gprimd * symrec * rprimd^T * input * rprimd symrec^T * gprimd^T
 ! symrec_cart = gprimd * symrec * rprimd^T
-! sym_cart    = symrec_cart^-1 ^T = rprimd * sym * gprimd^T 
+! sym_cart    = symrec_cart^-1 ^T = rprimd * sym * gprimd^T
  call strconv(strfrac,gprimd,stress)
 
 end subroutine stresssym

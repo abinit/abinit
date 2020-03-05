@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_sigma_driver
 !! NAME
 !!  m_sigma_driver
@@ -7,7 +6,7 @@
 !! Calculate the matrix elements of the self-energy operator.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1999-2019 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!!  Copyright (C) 1999-2020 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -204,7 +203,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !Arguments ------------------------------------
 !scalars
  logical,intent(out) :: converged
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(Datafiles_type),intent(in) :: Dtfil
  type(Dataset_type),intent(inout) :: Dtset
  type(Pawang_type),intent(inout) :: Pawang
@@ -473,7 +472,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if (psp_gencond==1.or. call_pawinit) then
      call timab(553,1,tsec)
      gsqcut_shp=two*abs(dtset%diecut)*dtset%dilatmx**2/pi**2
-     call pawinit(gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
+     call pawinit(Dtset%effmass_free,gnt_option,gsqcut_shp,zero,Dtset%pawlcutd,Dtset%pawlmix,&
        Psps%mpsang,Dtset%pawnphi,Cryst%nsym,Dtset%pawntheta,Pawang,Pawrad,&
        Dtset%pawspnorb,Pawtab,Dtset%pawxcdev,Dtset%xclevel,0,Dtset%usepotzero)
      call timab(553,2,tsec)
@@ -2225,7 +2224,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        end if
      end do
 
-     if (wfd%iam_master()) call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,KS_BSt,dtset%use_yaml)
+     if (wfd%iam_master()) call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,KS_BSt)
    end do !ikcalc
 
    call timab(425,2,tsec) ! solve_dyson
@@ -2487,7 +2486,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  character(len=*),intent(in) :: wfk_fname
  type(Datafiles_type),intent(in) :: Dtfil
  type(Dataset_type),intent(inout) :: Dtset
@@ -2631,6 +2630,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  if (Sigp%symsigma/=0.and.gwcalctyp>=20) then
    MSG_WARNING("SC-GW with symmetries is still under development. Use at your own risk!")
+   MSG_ERROR("SC-GW requires symsigma == 0 in input. New default in Abinit9 is symsigma 1!")
  end if
 
  ! Setup parameters for Spectral function.

@@ -45,7 +45,7 @@ class CartTensor(Matrix33):
         return True
 
     def is_antisymmetric(self, tol_abs=1e-8):
-        """Return true if tensor is anti-symmetric withing absolute tolerance tol_abs."""
+        """Return true if tensor is anti-symmetric within absolute tolerance tol_abs."""
         for i in range(3):
             for j in range(i, 3):
                 if abs(self[i, j] + self[j, i]) > tol_abs: return False

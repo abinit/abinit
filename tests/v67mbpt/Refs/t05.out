@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h32 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h21 )
   
-- input  file    -> t05.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t04-t05/t05.in
 - output file    -> t05.out
 - root for input  files -> t05i
 - root for output files -> t05o
@@ -219,7 +219,16 @@ P           mkmem           6
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 6, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 70, }
+cutoff_energies: {ecut:   7.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -240,8 +249,8 @@ P           mkmem           6
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -336,6 +345,7 @@ P           mkmem           6
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :    8.226
@@ -353,7 +363,9 @@ data: !SigmaeeData |
         8  27.315 -15.766  -6.819  -5.232   0.830  -0.205 -12.682   3.083  30.399
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :    9.926
@@ -371,7 +383,9 @@ data: !SigmaeeData |
         8  27.568 -14.931  -5.655  -5.988   0.821  -0.218 -12.231   2.700  30.268
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   10.135
@@ -389,7 +403,9 @@ data: !SigmaeeData |
         8  33.419 -16.023  -4.879  -6.772   0.789  -0.268 -12.575   3.448  36.867
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   19.559
@@ -407,7 +423,9 @@ data: !SigmaeeData |
         8  26.269 -15.429  -6.468  -5.634   0.826  -0.210 -12.679   2.750  29.018
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    9.269
@@ -425,7 +443,9 @@ data: !SigmaeeData |
         8  29.916 -12.642  -3.706  -6.198   0.824  -0.214 -10.387   2.256  32.172
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 1, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    4.890
@@ -443,6 +463,7 @@ data: !SigmaeeData |
         8  25.745 -15.802  -6.896  -6.140   0.814  -0.228 -13.549   2.252  27.997
 ...
 
+
  New Fermi energy :        6.620014E-01 Ha ,    1.801397E+01 eV
  New Exchange energy :    -2.972205E+00 Ha ,   -8.087781E+01 eV
 
@@ -454,7 +475,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 6, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 70, }
+cutoff_energies: {ecut:   7.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -557,6 +587,7 @@ data: !SigmaeeData |
  Perturbative Calculation
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :    8.226
@@ -574,7 +605,9 @@ data: !SigmaeeData |
         8  27.315 -15.766  -6.819  -5.105   0.833  -0.201 -12.566   3.199  30.515
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :    9.926
@@ -592,7 +625,9 @@ data: !SigmaeeData |
         8  27.568 -14.931  -5.655  -5.795   0.825  -0.212 -12.060   2.871  30.440
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   10.135
@@ -610,7 +645,9 @@ data: !SigmaeeData |
         8  33.419 -16.023  -4.879  -6.619   0.793  -0.262 -12.437   3.586  37.005
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   19.559
@@ -628,7 +665,9 @@ data: !SigmaeeData |
         8  26.269 -15.429  -6.468  -5.502   0.829  -0.206 -12.560   2.869  29.138
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    9.269
@@ -646,7 +685,9 @@ data: !SigmaeeData |
         8  29.916 -12.642  -3.706  -5.844   0.831  -0.203 -10.073   2.570  32.486
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 2, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    4.890
@@ -664,6 +705,7 @@ data: !SigmaeeData |
         8  25.745 -15.802  -6.896  -5.986   0.818  -0.222 -13.413   2.389  28.134
 ...
 
+
  New Fermi energy :        6.672170E-01 Ha ,    1.815590E+01 eV
  New Exchange energy :    -2.972205E+00 Ha ,   -8.087781E+01 eV
 
@@ -675,7 +717,16 @@ data: !SigmaeeData |
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 6, mband: 20, nsppol: 1, nspinor: 1, nspden: 1, mpw: 70, }
+cutoff_energies: {ecut:   7.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 28, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -795,6 +846,7 @@ data: !SigmaeeData |
  Self-Consistent on Energies and Wavefunctions
 
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [  -0.250,   -0.250,    0.000, ]
 spin       : 1
 KS_gap     :    9.395
@@ -812,7 +864,9 @@ data: !SigmaeeData |
         8    27.315   -15.766    31.030    43.071    -6.818    -5.474     1.000     0.000   -12.292    -0.251    30.779    30.779
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [  -0.250,    0.250,    0.000, ]
 spin       : 1
 KS_gap     :   11.277
@@ -830,7 +884,9 @@ data: !SigmaeeData |
         8    27.568   -14.931    30.870    42.571    -5.768    -6.161     1.000     0.000   -11.928    -0.227    30.643    30.643
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.500,    0.500,    0.000, ]
 spin       : 1
 KS_gap     :   11.280
@@ -848,7 +904,9 @@ data: !SigmaeeData |
         8    33.419   -16.023    37.801    49.427    -4.861    -7.272     1.000     0.000   -12.134    -0.507    37.294    37.301
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [  -0.250,    0.500,    0.250, ]
 spin       : 1
 KS_gap     :   21.762
@@ -866,7 +924,9 @@ data: !SigmaeeData |
         8    26.269   -15.429    29.619    41.676    -6.455    -5.821     1.000     0.000   -12.276    -0.219    29.400    29.400
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.500,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :   10.485
@@ -884,7 +944,9 @@ data: !SigmaeeData |
         8    29.916   -12.642    32.644    42.578    -3.756    -6.303     1.000     0.000   -10.059    -0.125    32.519    32.519
 ...
 
+
 --- !SelfEnergy_ee
+iteration_state: {dtset: 3, }
 kpoint     : [   0.000,    0.000,    0.000, ]
 spin       : 1
 KS_gap     :    6.224
@@ -901,6 +963,7 @@ data: !SigmaeeData |
         7    20.572   -15.038    23.444    35.601    -7.949    -4.337     1.000     0.000   -12.285    -0.128    23.316    23.316
         8    25.745   -15.802    28.512    41.537    -7.000    -6.210     1.000     0.000   -13.210    -0.184    28.327    28.329
 ...
+
 
  New Fermi energy :        6.697506E-01 Ha ,    1.822484E+01 eV
  New Exchange energy :    -2.969186E+00 Ha ,   -8.079566E+01 eV
@@ -1093,7 +1156,24 @@ P           mkmem           6
 - Comment: in case gwcalctyp >= 10.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#bruneval2006
 -
-- [2] Recent developments in the ABINIT software package.
+- [2] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [3] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1107,11 +1187,11 @@ P           mkmem           6
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [3] ABINIT: First-principles approach of materials and nanosystem properties.
+- [4] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1120,11 +1200,13 @@ P           mkmem           6
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [4] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [5] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -1132,24 +1214,15 @@ P           mkmem           6
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [5] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=          5.9  wall=          6.0
+- Proc.   0 individual time (sec): cpu=          5.8  wall=          5.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  15 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.9  wall=          6.0
++Overall time at end (sec) : cpu=          5.8  wall=          5.9

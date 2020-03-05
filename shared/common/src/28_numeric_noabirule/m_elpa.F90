@@ -8,7 +8,7 @@
 !! See http://elpa.mpcdf.mpg.de
 !!
 !! COPYRIGHT
-!! Copyright (C) 2016-2019 ABINIT group (MT)
+!! Copyright (C) 2016-2020 ABINIT group (MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h25 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h15 )
   
-- input  file    -> t80.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v1_t80/t80.in
 - output file    -> t80.out
 - root for input  files -> t80i
 - root for output files -> t80o
@@ -171,7 +171,16 @@ P           mkmem          16
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 1, nkpt: 16, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 53, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 2, optcell: 2, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -196,8 +205,8 @@ P           mkmem          16
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/12mg.pspnc
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/12mg.pspnc
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/12mg.pspnc
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/12mg.pspnc
 -  Troullier-Martins psp for element  Mg        Thu Oct 27 17:30:49 EDT 1994
 - 12.00000   2.00000    940714                znucl, zion, pspdat
     1    1    2    2      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -229,6 +238,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1033273243287    -1.103E+00 9.663E-07 8.598E-02
  ETOT  2  -1.1033988585038    -7.153E-05 3.225E-12 7.962E-03
@@ -245,6 +260,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  1.37876430E-04  sigma(3 2)= -4.21348651E-05
   sigma(2 2)=  1.60133842E-04  sigma(3 1)=  1.14650542E-06
   sigma(3 3)=  1.84598763E-04  sigma(2 1)=  4.49302179E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   4.3350000,   4.4200000, ]
+- [  4.3350000,   0.0000000,   4.5050000, ]
+- [  4.4200000,   4.5050000,   0.0000000, ]
+lattice_lengths: [   6.19101,    6.25198,    6.31121, ]
+lattice_angles: [ 60.948,  60.012,  59.040, ] # degrees, (23, 13, 12)
+lattice_volume:   1.7263791E+02
+convergence: {deltae: -7.105E-15, res2:  3.556E-14, residm:  2.584E-17, diffor: null, }
+etotal    :  -1.10340763E+00
+entropy   :   0.00000000E+00
+fermie    :   5.22200788E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.37876430E-04,   4.49302179E-05,   1.14650542E-06, ]
+- [  4.49302179E-05,   1.60133842E-04,  -4.21348651E-05, ]
+- [  1.14650542E-06,  -4.21348651E-05,   1.84598763E-04, ]
+pressure_GPa:  -4.7329E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -283,6 +325,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1038755869301    -1.104E+00 1.814E+00 4.730E-05
  ETOT  2  -1.1038756330730    -4.614E-08 2.904E-08 2.070E-06
@@ -297,6 +345,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  1.30044321E-04  sigma(3 2)= -3.60466738E-05
   sigma(2 2)=  1.51709418E-04  sigma(3 1)=  6.43558652E-07
   sigma(3 3)=  1.74556319E-04  sigma(2 1)=  3.79221401E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0119904,   4.3253488,   4.4064815, ]
+- [  4.3167593,  -0.0002973,   4.4797533, ]
+- [  4.3895729,   4.4714424,   0.0110850, ]
+lattice_lengths: [   6.17461,    6.22114,    6.26596, ]
+lattice_angles: [ 60.834,  60.014,  59.169, ] # degrees, (23, 13, 12)
+lattice_volume:   1.7014802E+02
+convergence: {deltae: -7.438E-14, res2:  4.206E-13, residm:  3.841E-16, diffor: null, }
+etotal    :  -1.10387564E+00
+entropy   :   0.00000000E+00
+fermie    :   5.40001642E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.30044321E-04,   3.79221401E-05,   6.43558652E-07, ]
+- [  3.79221401E-05,   1.51709418E-04,  -3.60466738E-05, ]
+- [  6.43558652E-07,  -3.60466738E-05,   1.74556319E-04, ]
+pressure_GPa:  -4.4750E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -339,6 +414,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 3, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1057556600286    -1.106E+00 4.840E-05 4.803E-03
  ETOT  2  -1.1057586171740    -2.957E-06 5.571E-13 1.402E-04
@@ -354,6 +435,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)= -2.98500428E-05  sigma(3 2)=  7.63794102E-05
   sigma(2 2)= -3.26230800E-05  sigma(3 1)= -7.43977864E-08
   sigma(3 3)= -2.72178969E-05  sigma(2 1)= -8.15378503E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.1327238,   4.2034224,   4.2413140, ]
+- [  4.1115609,  -0.0017700,   4.1944422, ]
+- [  4.0591881,   4.1042585,   0.1262031, ]
+lattice_lengths: [   5.97287,    5.87352,    5.77390, ]
+lattice_angles: [ 59.501,  59.990,  60.572, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4327361E+02
+convergence: {deltae: -1.088E-14, res2:  1.420E-13, residm:  2.198E-17, diffor: null, }
+etotal    :  -1.10575878E+00
+entropy   :   0.00000000E+00
+fermie    :   8.85783216E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -2.98500428E-05,  -8.15378503E-05,  -7.43977864E-08, ]
+- [ -8.15378503E-05,  -3.26230800E-05,   7.63794102E-05, ]
+- [ -7.43977864E-08,   7.63794102E-05,  -2.72178969E-05, ]
+pressure_GPa:   8.7960E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -396,6 +504,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 4, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1060503408851    -1.106E+00 6.685E-11 5.477E-04
  ETOT  2  -1.1060510001236    -6.592E-07 4.389E-14 2.658E-05
@@ -411,6 +525,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  2.53535077E-05  sigma(3 2)=  2.65604972E-05
   sigma(2 2)=  3.29816120E-05  sigma(3 1)= -5.46784395E-07
   sigma(3 3)=  4.07926147E-05  sigma(2 1)= -2.96246130E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0910670,   4.2233874,   4.2715542, ]
+- [  4.1633743,  -0.0011024,   4.2654650, ]
+- [  4.1542829,   4.2082676,   0.0862001, ]
+lattice_lengths: [   6.00762,    5.96053,    5.91397, ]
+lattice_angles: [ 59.937,  60.003,  60.125, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4981691E+02
+convergence: {deltae: -1.221E-14, res2:  6.448E-14, residm:  4.443E-17, diffor: null, }
+etotal    :  -1.10605105E+00
+entropy   :   0.00000000E+00
+fermie    :   7.53830839E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.53535077E-05,  -2.96246130E-05,  -5.46784395E-07, ]
+- [ -2.96246130E-05,   3.29816120E-05,   2.65604972E-05, ]
+- [ -5.46784395E-07,   2.65604972E-05,   4.07926147E-05, ]
+pressure_GPa:  -9.7215E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -453,6 +594,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 5, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1060993136300    -1.106E+00 3.081E-11 9.923E-06
  ETOT  2  -1.1060993178969    -4.267E-09 1.081E-16 3.834E-07
@@ -467,6 +614,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  1.64420450E-05  sigma(3 2)=  2.40847020E-05
   sigma(2 2)=  2.27154536E-05  sigma(3 1)= -5.89366747E-07
   sigma(3 3)=  2.87719139E-05  sigma(2 1)= -2.66005558E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 5, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0873716,   4.2086158,   4.2544088, ]
+- [  4.1538058,  -0.0007056,   4.2512251, ]
+- [  4.1483107,   4.1999925,   0.0829557, ]
+lattice_lengths: [   5.98499,    5.94365,    5.90384, ]
+lattice_angles: [ 59.932,  60.001,  60.122, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4856513E+02
+convergence: {deltae: -2.776E-14, res2:  1.392E-13, residm:  5.650E-17, diffor: null, }
+etotal    :  -1.10609932E+00
+entropy   :   0.00000000E+00
+fermie    :   7.67671545E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.64420450E-05,  -2.66005558E-05,  -5.89366747E-07, ]
+- [ -2.66005558E-05,   2.27154536E-05,   2.40847020E-05, ]
+- [ -5.89366747E-07,   2.40847020E-05,   2.87719139E-05, ]
+pressure_GPa:  -6.6618E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -538,22 +712,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.35143640109722E-01
-    Hartree energy  =  1.96609032303908E-03
-    XC energy       = -6.79478897302022E-01
-    Ewald energy    = -1.09064893054983E+00
-    PspCore energy  = -2.07846687601071E-02
-    Loc. psp. energy=  1.09759136778017E-01
-    NL   psp  energy=  2.37944311190386E-01
-    >>>>>>>>> Etotal= -1.10609931821080E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.00984931351182E+01 ; Band energy (Ha)=   8.2198753487E-02
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, itime: 5, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  3.35143640109722E-01
+hartree             :  1.96609032303908E-03
+xc                  : -6.79478897302022E-01
+Ewald energy        : -1.09064893054983E+00
+psp_core            : -2.07846687601071E-02
+local_psp           :  1.09759136778017E-01
+non_local_psp       :  2.37944311190386E-01
+total_energy        : -1.10609931821080E+00
+total_energy_eV     : -3.00984931351182E+01
+band_energy         :  8.21987534872671E-02
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -568,7 +740,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 1, nkpt: 16, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 53, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 2, optcell: 2, iscf: 7, paral_kgb: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -612,6 +793,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 2, itime: 1, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1060993182108    -1.106E+00 9.351E-23 4.436E-16
  ETOT  2  -1.1060993182108     2.220E-16 2.909E-26 2.861E-17
@@ -624,6 +811,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  1.64420340E-05  sigma(3 2)=  2.40847132E-05
   sigma(2 2)=  2.27154421E-05  sigma(3 1)= -5.89368036E-07
   sigma(3 3)=  2.87719036E-05  sigma(2 1)= -2.66005706E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0873716,   4.2086158,   4.2544088, ]
+- [  4.1538058,  -0.0007056,   4.2512251, ]
+- [  4.1483107,   4.1999925,   0.0829557, ]
+lattice_lengths: [   5.98499,    5.94365,    5.90384, ]
+lattice_angles: [ 59.932,  60.001,  60.122, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4856513E+02
+convergence: {deltae: -1.110E-15, res2:  1.219E-19, residm:  2.367E-22, diffor: null, }
+etotal    :  -1.10609932E+00
+entropy   :   0.00000000E+00
+fermie    :   7.67671564E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.64420340E-05,  -2.66005706E-05,  -5.89368036E-07, ]
+- [ -2.66005706E-05,   2.27154421E-05,   2.40847132E-05, ]
+- [ -5.89368036E-07,   2.40847132E-05,   2.87719036E-05, ]
+pressure_GPa:  -6.6618E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -662,6 +876,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 2, itime: 2, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1061261393922    -1.106E+00 1.868E-10 7.223E-06
  ETOT  2  -1.1061261514936    -1.210E-08 6.965E-16 3.751E-07
@@ -676,6 +896,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  1.45773763E-05  sigma(3 2)=  1.79187116E-05
   sigma(2 2)=  2.04910943E-05  sigma(3 1)= -4.63596645E-07
   sigma(3 3)=  2.57536701E-05  sigma(2 1)= -1.97094336E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0804610,   4.1994603,   4.2446517, ]
+- [  4.1519061,  -0.0002189,   4.2477035, ]
+- [  4.1529708,   4.2036313,   0.0769615, ]
+lattice_lengths: [   5.97152,    5.93981,    5.90962, ]
+lattice_angles: [ 59.967,  59.998,  60.074, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4826188E+02
+convergence: {deltae: -5.551E-15, res2:  3.512E-14, residm:  1.288E-17, diffor: null, }
+etotal    :  -1.10612615E+00
+entropy   :   0.00000000E+00
+fermie    :   7.66103424E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.45773763E-05,  -1.97094336E-05,  -4.63596645E-07, ]
+- [ -1.97094336E-05,   2.04910943E-05,   1.79187116E-05, ]
+- [ -4.63596645E-07,   1.79187116E-05,   2.57536701E-05, ]
+pressure_GPa:  -5.9648E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -718,6 +965,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 2, itime: 3, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1061689815522    -1.106E+00 4.320E-08 8.343E-05
  ETOT  2  -1.1061691162961    -1.347E-07 1.201E-14 4.207E-06
@@ -732,6 +985,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  6.15647914E-06  sigma(3 2)= -3.75503761E-06
   sigma(2 2)=  9.99118986E-06  sigma(3 1)=  1.19335617E-07
   sigma(3 3)=  1.26450215E-05  sigma(2 1)=  4.36910769E-06
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0568531,   4.1661063,   4.2087817, ]
+- [  4.1441256,   0.0013561,   4.2331976, ]
+- [  4.1675153,   4.2139621,   0.0564329, ]
+lattice_lengths: [   5.92229,    5.92400,    5.92696, ]
+lattice_angles: [ 60.076,  59.989,  59.915, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4701292E+02
+convergence: {deltae: -4.907E-14, res2:  4.088E-13, residm:  1.677E-16, diffor: null, }
+etotal    :  -1.10616913E+00
+entropy   :   0.00000000E+00
+fermie    :   7.72463318E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  6.15647914E-06,   4.36910769E-06,   1.19335617E-07, ]
+- [  4.36910769E-06,   9.99118986E-06,  -3.75503761E-06, ]
+- [  1.19335617E-07,  -3.75503761E-06,   1.26450215E-05, ]
+pressure_GPa:  -2.8237E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -774,6 +1054,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 2, itime: 4, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1061708307683    -1.106E+00 4.237E-10 1.621E-07
  ETOT  2  -1.1061708308585    -9.014E-11 4.042E-18 6.560E-09
@@ -786,6 +1072,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  5.13496043E-06  sigma(3 2)= -3.30329932E-06
   sigma(2 2)=  8.57098249E-06  sigma(3 1)=  8.93866280E-08
   sigma(3 3)=  1.09272666E-05  sigma(2 1)=  3.78857377E-06
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0574076,   4.1650930,   4.2073380, ]
+- [  4.1431813,   0.0012652,   4.2312843, ]
+- [  4.1660351,   4.2119434,   0.0568302, ]
+lattice_lengths: [   5.92056,    5.92197,    5.92449, ]
+lattice_angles: [ 60.068,  59.991,  59.926, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4686276E+02
+convergence: {deltae: -6.332E-12, res2:  8.961E-11, residm:  2.766E-14, diffor: null, }
+etotal    :  -1.10617083E+00
+entropy   :   0.00000000E+00
+fermie    :   7.73905892E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  5.13496043E-06,   3.78857377E-06,   8.93866280E-08, ]
+- [  3.78857377E-06,   8.57098249E-06,  -3.30329932E-06, ]
+- [  8.93866280E-08,  -3.30329932E-06,   1.09272666E-05, ]
+pressure_GPa:  -2.4158E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -828,6 +1141,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 2, itime: 5, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1061755911326    -1.106E+00 4.308E-13 6.190E-06
  ETOT  2  -1.1061755950145    -3.882E-09 1.187E-16 2.520E-07
@@ -842,6 +1161,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)= -9.84178183E-07  sigma(3 2)=  2.60662310E-08
   sigma(2 2)= -1.60211865E-07  sigma(3 1)= -5.02871248E-08
   sigma(3 3)=  3.25279874E-07  sigma(2 1)= -2.00139032E-07
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, itime: 5, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0611100,   4.1594457,   4.1990206, ]
+- [  4.1376654,   0.0007691,   4.2197367, ]
+- [  4.1569013,   4.1994495,   0.0596548, ]
+lattice_lengths: [   5.91071,    5.90986,    5.90921, ]
+lattice_angles: [ 60.012,  60.000,  59.994, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4596558E+02
+convergence: {deltae: -1.732E-14, res2:  8.468E-14, residm:  2.612E-17, diffor: null, }
+etotal    :  -1.10617560E+00
+entropy   :   0.00000000E+00
+fermie    :   7.82469311E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -9.84178183E-07,  -2.00139032E-07,  -5.02871248E-08, ]
+- [ -2.00139032E-07,  -1.60211865E-07,   2.60662310E-08, ]
+- [ -5.02871248E-08,   2.60662310E-08,   3.25279874E-07, ]
+pressure_GPa:   8.0330E-03
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -913,22 +1259,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.39248397041017E-01
-    Hartree energy  =  2.08057929511351E-03
-    XC energy       = -6.82410759819676E-01
-    Ewald energy    = -1.09711659306680E+00
-    PspCore energy  = -2.11548289434287E-02
-    Loc. psp. energy=  1.13200319405519E-01
-    NL   psp  energy=  2.39977290803279E-01
-    >>>>>>>>> Etotal= -1.10617559528497E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.01005687398634E+01 ; Band energy (Ha)=   8.8612694923E-02
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 2, itime: 5, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  3.39248397041017E-01
+hartree             :  2.08057929511351E-03
+xc                  : -6.82410759819676E-01
+Ewald energy        : -1.09711659306680E+00
+psp_core            : -2.11548289434287E-02
+local_psp           :  1.13200319405519E-01
+non_local_psp       :  2.39977290803279E-01
+total_energy        : -1.10617559528497E+00
+total_energy_eV     : -3.01005687398634E+01
+band_energy         :  8.86126949227814E-02
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -943,7 +1287,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 1, nkpt: 16, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 53, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   2.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 2, optcell: 2, iscf: 7, paral_kgb: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -987,6 +1340,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 1, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1061755952850    -1.106E+00 5.050E-23 3.654E-16
  ETOT  2  -1.1061755952850    -4.441E-16 2.005E-26 2.374E-17
@@ -999,6 +1358,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)= -9.84189683E-07  sigma(3 2)=  2.60556341E-08
   sigma(2 2)= -1.60222877E-07  sigma(3 1)= -5.02853004E-08
   sigma(3 3)=  3.25268656E-07  sigma(2 1)= -2.00125853E-07
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0611100,   4.1594457,   4.1990206, ]
+- [  4.1376654,   0.0007691,   4.2197367, ]
+- [  4.1569013,   4.1994495,   0.0596548, ]
+lattice_lengths: [   5.91071,    5.90986,    5.90921, ]
+lattice_angles: [ 60.012,  60.000,  59.994, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4596558E+02
+convergence: {deltae:  0.000E+00, res2:  9.165E-20, residm:  2.163E-22, diffor: null, }
+etotal    :  -1.10617560E+00
+entropy   :   0.00000000E+00
+fermie    :   7.82469324E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -9.84189683E-07,  -2.00125853E-07,  -5.02853004E-08, ]
+- [ -2.00125853E-07,  -1.60222877E-07,   2.60556341E-08, ]
+- [ -5.02853004E-08,   2.60556341E-08,   3.25268656E-07, ]
+pressure_GPa:   8.0333E-03
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1037,6 +1423,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 2, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1061699849837    -1.106E+00 1.285E-11 1.031E-05
  ETOT  2  -1.1061700029951    -1.801E-08 3.951E-15 5.306E-07
@@ -1051,6 +1443,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  1.70402691E-06  sigma(3 2)=  5.53148275E-06
   sigma(2 2)= -3.68058928E-07  sigma(3 1)=  1.09510188E-05
   sigma(3 3)= -4.69505505E-06  sigma(2 1)= -2.90202587E-06
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0535222,   4.1645339,   4.1975191, ]
+- [  4.1516511,   0.0033933,   4.2233097, ]
+- [  4.1584394,   4.1970970,   0.0745866, ]
+lattice_lengths: [   5.91315,    5.92221,    5.90879, ]
+lattice_angles: [ 59.816,  59.811,  59.981, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4588028E+02
+convergence: {deltae:  0.000E+00, res2:  3.634E-15, residm:  4.247E-18, diffor: null, }
+etotal    :  -1.10617000E+00
+entropy   :   0.00000000E+00
+fermie    :   7.93370821E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.70402691E-06,  -2.90202587E-06,   1.09510188E-05, ]
+- [ -2.90202587E-06,  -3.68058928E-07,   5.53148275E-06, ]
+- [  1.09510188E-05,   5.53148275E-06,  -4.69505505E-06, ]
+pressure_GPa:   3.2943E-02
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1093,6 +1512,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 3, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1060587201178    -1.106E+00 6.046E-10 1.131E-04
  ETOT  2  -1.1060589133150    -1.932E-07 5.041E-14 5.729E-06
@@ -1107,6 +1532,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  1.19656070E-05  sigma(3 2)=  2.45782029E-05
   sigma(2 2)= -1.47274153E-06  sigma(3 1)=  4.82751189E-05
   sigma(3 3)= -2.67428370E-05  sigma(2 1)= -1.19824072E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 3, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0278645,   4.1818834,   4.1874402, ]
+- [  4.2022520,   0.0122693,   4.2304112, ]
+- [  4.1669153,   4.1892838,   0.1250580, ]
+lattice_lengths: [   5.91807,    5.96284,    5.91007, ]
+lattice_angles: [ 59.113,  59.167,  59.991, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4551675E+02
+convergence: {deltae: -3.131E-14, res2:  4.554E-14, residm:  9.237E-17, diffor: null, }
+etotal    :  -1.10605893E+00
+entropy   :   0.00000000E+00
+fermie    :   8.38710175E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.19656070E-05,  -1.19824072E-05,   4.82751189E-05, ]
+- [ -1.19824072E-05,  -1.47274153E-06,   2.45782029E-05, ]
+- [  4.82751189E-05,   2.45782029E-05,  -2.67428370E-05, ]
+pressure_GPa:   1.5936E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1149,6 +1601,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 4, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1060517785037    -1.106E+00 2.752E-09 1.051E-07
  ETOT  2  -1.1060517785329    -2.917E-11 4.756E-17 2.590E-09
@@ -1161,6 +1619,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  1.44460412E-05  sigma(3 2)=  2.46502639E-05
   sigma(2 2)= -1.48604190E-06  sigma(3 1)=  4.85584409E-05
   sigma(3 3)= -3.03934759E-05  sigma(2 1)= -1.20238634E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 4, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0277425,   4.1820856,   4.1827279, ]
+- [  4.2058360,   0.0122022,   4.2259145, ]
+- [  4.1702075,   4.1894168,   0.1252302, ]
+lattice_lengths: [   5.91488,    5.96218,    5.91249, ]
+lattice_angles: [ 59.069,  59.159,  60.042, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4547589E+02
+convergence: {deltae: -1.262E-12, res2:  1.596E-11, residm:  3.134E-15, diffor: null, }
+etotal    :  -1.10605178E+00
+entropy   :   0.00000000E+00
+fermie    :   8.42177842E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  1.44460412E-05,  -1.20238634E-05,   4.85584409E-05, ]
+- [ -1.20238634E-05,  -1.48604190E-06,   2.46502639E-05, ]
+- [  4.85584409E-05,   2.46502639E-05,  -3.03934759E-05, ]
+pressure_GPa:   1.7097E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1203,6 +1688,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 5, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1060253658647    -1.106E+00 2.157E-08 7.314E-06
  ETOT  2  -1.1060253737865    -7.922E-09 1.877E-15 2.906E-07
@@ -1217,6 +1708,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  2.93302252E-05  sigma(3 2)=  2.07630736E-05
   sigma(2 2)= -1.38044204E-06  sigma(3 1)=  4.20596123E-05
   sigma(3 3)= -5.03697717E-05  sigma(2 1)= -1.04137313E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 5, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0326473,   4.1797949,   4.1528125, ]
+- [  4.2191965,   0.0097734,   4.1936182, ]
+- [  4.1908603,   4.1921351,   0.1152664, ]
+lattice_lengths: [   5.89216,    5.94879,    5.92879, ]
+lattice_angles: [ 58.921,  59.244,  60.390, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4528302E+02
+convergence: {deltae: -6.439E-15, res2:  5.705E-14, residm:  3.400E-17, diffor: null, }
+etotal    :  -1.10602537E+00
+entropy   :   0.00000000E+00
+fermie    :   8.55860825E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.93302252E-05,  -1.04137313E-05,   4.20596123E-05, ]
+- [ -1.04137313E-05,  -1.38044204E-06,   2.07630736E-05, ]
+- [  4.20596123E-05,   2.07630736E-05,  -5.03697717E-05, ]
+pressure_GPa:   2.1987E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1259,6 +1777,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 6, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1060302968134    -1.106E+00 8.543E-12 2.242E-07
  ETOT  2  -1.1060302972074    -3.940E-10 1.089E-16 1.152E-08
@@ -1272,6 +1796,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  2.97207823E-05  sigma(3 2)=  1.99400043E-05
   sigma(2 2)= -1.17849309E-06  sigma(3 1)=  4.03659296E-05
   sigma(3 3)= -5.04359004E-05  sigma(2 1)= -1.00350686E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 6, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0338393,   4.1792870,   4.1518950, ]
+- [  4.2180156,   0.0093913,   4.1918829, ]
+- [  4.1915463,   4.1926903,   0.1130256, ]
+lattice_lengths: [   5.89116,    5.94673,    5.92963, ]
+lattice_angles: [ 58.939,  59.271,  60.407, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4529642E+02
+convergence: {deltae: -1.037E-13, res2:  6.882E-14, residm:  1.542E-16, diffor: null, }
+etotal    :  -1.10603030E+00
+entropy   :   0.00000000E+00
+fermie    :   8.54751102E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.97207823E-05,  -1.00350686E-05,   4.03659296E-05, ]
+- [ -1.00350686E-05,  -1.17849309E-06,   1.99400043E-05, ]
+- [  4.03659296E-05,   1.99400043E-05,  -5.04359004E-05, ]
+pressure_GPa:   2.1471E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1314,6 +1865,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 7, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1060317737371    -1.106E+00 3.482E-15 9.689E-09
  ETOT  2  -1.1060317737530    -1.586E-11 2.765E-18 4.821E-10
@@ -1326,6 +1883,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  2.97364501E-05  sigma(3 2)=  1.98315930E-05
   sigma(2 2)= -1.00751720E-06  sigma(3 1)=  3.99988949E-05
   sigma(3 3)= -5.02437732E-05  sigma(2 1)= -9.96518701E-06
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 7, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0341048,   4.1793757,   4.1520041, ]
+- [  4.2176533,   0.0093634,   4.1917534, ]
+- [  4.1915734,   4.1929335,   0.1126124, ]
+lattice_lengths: [   5.89131,    5.94638,    5.92981, ]
+lattice_angles: [ 58.945,  59.275,  60.408, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4530865E+02
+convergence: {deltae: -1.019E-12, res2:  2.722E-12, residm:  3.139E-15, diffor: null, }
+etotal    :  -1.10603177E+00
+entropy   :   0.00000000E+00
+fermie    :   8.54311307E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.97364501E-05,  -9.96518701E-06,   3.99988949E-05, ]
+- [ -9.96518701E-06,  -1.00751720E-06,   1.98315930E-05, ]
+- [  3.99988949E-05,   1.98315930E-05,  -5.02437732E-05, ]
+pressure_GPa:   2.1100E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1368,6 +1952,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 8, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1060323906656    -1.106E+00 1.973E-14 3.285E-09
  ETOT  2  -1.1060323906692    -3.584E-12 3.863E-19 1.453E-10
@@ -1380,6 +1970,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  2.98029345E-05  sigma(3 2)=  1.98495849E-05
   sigma(2 2)= -7.57173769E-07  sigma(3 1)=  3.98199882E-05
   sigma(3 3)= -5.00948872E-05  sigma(2 1)= -9.94426349E-06
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 8, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0342451,   4.1796764,   4.1521601, ]
+- [  4.2175370,   0.0094020,   4.1917320, ]
+- [  4.1916285,   4.1932317,   0.1124819, ]
+lattice_lengths: [   5.89163,    5.94629,    5.93006, ]
+lattice_angles: [ 58.947,  59.276,  60.409, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4532452E+02
+convergence: {deltae: -2.323E-13, res2:  1.372E-12, residm:  6.858E-16, diffor: null, }
+etotal    :  -1.10603239E+00
+entropy   :   0.00000000E+00
+fermie    :   8.54027460E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.98029345E-05,  -9.94426349E-06,   3.98199882E-05, ]
+- [ -9.94426349E-06,  -7.57173769E-07,   1.98495849E-05, ]
+- [  3.98199882E-05,   1.98495849E-05,  -5.00948872E-05, ]
+pressure_GPa:   2.0643E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1422,6 +2039,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 9, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1060324206952    -1.106E+00 2.883E-14 5.867E-09
  ETOT  2  -1.1060324206985    -3.376E-12 2.284E-19 2.348E-10
@@ -1434,6 +2057,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  2.99614899E-05  sigma(3 2)=  1.99789358E-05
   sigma(2 2)= -2.98535648E-07  sigma(3 1)=  3.97455428E-05
   sigma(3 3)= -4.99332608E-05  sigma(2 1)= -9.95864799E-06
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 9, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0343228,   4.1803238,   4.1523958, ]
+- [  4.2176249,   0.0095079,   4.1917888, ]
+- [  4.1917537,   4.1937422,   0.1125519, ]
+lattice_lengths: [   5.89226,    5.94639,    5.93051, ]
+lattice_angles: [ 58.947,  59.273,  60.411, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4535172E+02
+convergence: {deltae: -2.318E-13, res2:  3.110E-12, residm:  1.127E-15, diffor: null, }
+etotal    :  -1.10603242E+00
+entropy   :   0.00000000E+00
+fermie    :   8.53766884E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.99614899E-05,  -9.95864799E-06,   3.97455428E-05, ]
+- [ -9.95864799E-06,  -2.98535648E-07,   1.99789358E-05, ]
+- [  3.97455428E-05,   1.99789358E-05,  -4.99332608E-05, ]
+pressure_GPa:   1.9879E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1476,6 +2126,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 10, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1060318471581    -1.106E+00 2.071E-15 2.277E-09
  ETOT  2  -1.1060318471607    -2.653E-12 3.420E-19 1.056E-10
@@ -1488,6 +2144,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  3.00488389E-05  sigma(3 2)=  2.00675494E-05
   sigma(2 2)= -8.56418323E-08  sigma(3 1)=  3.98573556E-05
   sigma(3 3)= -4.99227087E-05  sigma(2 1)= -9.99115245E-06
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 10, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0342510,   4.1806556,   4.1524524, ]
+- [  4.2178305,   0.0095574,   4.1918704, ]
+- [  4.1918210,   4.1939620,   0.1127388, ]
+lattice_lengths: [   5.89253,    5.94659,    5.93072, ]
+lattice_angles: [ 58.945,  59.269,  60.411, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4536296E+02
+convergence: {deltae: -1.743E-13, res2:  9.730E-13, residm:  6.757E-16, diffor: null, }
+etotal    :  -1.10603185E+00
+entropy   :   0.00000000E+00
+fermie    :   8.53786062E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.00488389E-05,  -9.99115245E-06,   3.98573556E-05, ]
+- [ -9.99115245E-06,  -8.56418323E-08,   2.00675494E-05, ]
+- [  3.98573556E-05,   2.00675494E-05,  -4.99227087E-05, ]
+pressure_GPa:   1.9574E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1530,6 +2213,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 11, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1060314552556    -1.106E+00 8.525E-15 7.360E-10
  ETOT  2  -1.1060314552569    -1.259E-12 1.707E-19 3.762E-11
@@ -1542,6 +2231,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  3.00665570E-05  sigma(3 2)=  2.00772343E-05
   sigma(2 2)= -3.81381696E-08  sigma(3 1)=  3.99601264E-05
   sigma(3 3)= -4.99548644E-05  sigma(2 1)= -1.00077877E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 11, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0341738,   4.1807238,   4.1524153, ]
+- [  4.2179528,   0.0095503,   4.1919181, ]
+- [  4.1918342,   4.1940056,   0.1128399, ]
+lattice_lengths: [   5.89255,    5.94671,    5.93076, ]
+lattice_angles: [ 58.944,  59.267,  60.411, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4536437E+02
+convergence: {deltae: -8.171E-14, res2:  1.955E-13, residm:  1.720E-16, diffor: null, }
+etotal    :  -1.10603146E+00
+entropy   :   0.00000000E+00
+fermie    :   8.53855861E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.00665570E-05,  -1.00077877E-05,   3.99601264E-05, ]
+- [ -1.00077877E-05,  -3.81381696E-08,   2.00772343E-05, ]
+- [  3.99601264E-05,   2.00772343E-05,  -4.99548644E-05, ]
+pressure_GPa:   1.9542E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1584,6 +2300,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 12, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1060313526693    -1.106E+00 8.671E-16 1.674E-10
  ETOT  2  -1.1060313526696    -2.989E-13 7.793E-20 8.601E-12
@@ -1596,6 +2318,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  3.00581344E-05  sigma(3 2)=  2.00509824E-05
   sigma(2 2)= -3.21973167E-08  sigma(3 1)=  4.00018433E-05
   sigma(3 3)= -4.99730679E-05  sigma(2 1)= -1.00092382E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 12, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0341379,   4.1807092,   4.1523707, ]
+- [  4.2179842,   0.0095253,   4.1919337, ]
+- [  4.1918272,   4.1940127,   0.1128531, ]
+lattice_lengths: [   5.89251,    5.94675,    5.93076, ]
+lattice_angles: [ 58.944,  59.267,  60.411, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4536372E+02
+convergence: {deltae: -1.910E-14, res2:  4.046E-14, residm:  5.965E-17, diffor: null, }
+etotal    :  -1.10603135E+00
+entropy   :   0.00000000E+00
+fermie    :   8.53882001E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.00581344E-05,  -1.00092382E-05,   4.00018433E-05, ]
+- [ -1.00092382E-05,  -3.21973167E-08,   2.00509824E-05, ]
+- [  4.00018433E-05,   2.00509824E-05,  -4.99730679E-05, ]
+pressure_GPa:   1.9562E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1638,6 +2387,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 3, itime: 13, icycle: 1, }
+solver: {iscf: 7, nstep: 8, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -1.1060313654914    -1.106E+00 1.181E-15 1.278E-10
  ETOT  2  -1.1060313654917    -2.269E-13 4.656E-20 6.543E-12
@@ -1650,6 +2405,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
   sigma(1 1)=  3.00418484E-05  sigma(3 2)=  2.00115372E-05
   sigma(2 2)= -2.27125012E-08  sigma(3 1)=  4.00185093E-05
   sigma(3 3)= -4.99818876E-05  sigma(2 1)= -1.00047941E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, itime: 13, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [ -0.0341193,   4.1806866,   4.1523259, ]
+- [  4.2179805,   0.0094943,   4.1919377, ]
+- [  4.1918132,   4.1940286,   0.1128323, ]
+lattice_lengths: [   5.89246,    5.94675,    5.93076, ]
+lattice_angles: [ 58.945,  59.266,  60.412, ] # degrees, (23, 13, 12)
+lattice_volume:   1.4536316E+02
+convergence: {deltae: -1.465E-14, res2:  3.118E-14, residm:  4.543E-17, diffor: null, }
+etotal    :  -1.10603137E+00
+entropy   :   0.00000000E+00
+fermie    :   8.53882749E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.00418484E-05,  -1.00047941E-05,   4.00185093E-05, ]
+- [ -1.00047941E-05,  -2.27125012E-08,   2.00115372E-05, ]
+- [  4.00185093E-05,   2.00115372E-05,  -4.99818876E-05, ]
+pressure_GPa:   1.9577E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Mg]
+cartesian_forces: # hartree/bohr
+- [  0.00000000E+00,   0.00000000E+00,   0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1720,22 +2502,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      49.438      49.400
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  3.40364723017561E-01
-    Hartree energy  =  2.11191255791837E-03
-    XC energy       = -6.83116251040945E-01
-    Ewald energy    = -1.09857861841421E+00
-    PspCore energy  = -2.12424999467773E-02
-    Loc. psp. energy=  1.13917685329791E-01
-    NL   psp  energy=  2.40511683004990E-01
-    >>>>>>>>> Etotal= -1.10603136549167E+00
-
- Other information on the energy :
-    Total energy(eV)= -3.00966440475938E+01 ; Band energy (Ha)=   9.0233061729E-02
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 3, itime: 13, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  3.40364723017561E-01
+hartree             :  2.11191255791837E-03
+xc                  : -6.83116251040945E-01
+Ewald energy        : -1.09857861841421E+00
+psp_core            : -2.12424999467773E-02
+local_psp           :  1.13917685329791E-01
+non_local_psp       :  2.40511683004990E-01
+total_energy        : -1.10603136549167E+00
+total_energy_eV     : -3.00966440475938E+01
+band_energy         :  9.02330617287577E-02
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1857,7 +2637,24 @@ P           mkmem          16
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1871,11 +2668,11 @@ P           mkmem          16
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT: First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1884,11 +2681,13 @@ P           mkmem          16
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -1896,24 +2695,15 @@ P           mkmem          16
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [4] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.5
+- Proc.   0 individual time (sec): cpu=          2.5  wall=          2.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered   7 WARNINGs and  31 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.3  wall=          2.5
++Overall time at end (sec) : cpu=          2.5  wall=          2.8

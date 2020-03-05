@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_dft_energy
 !! NAME
 !!  m_dft_energy
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
+!!  Copyright (C) 1998-2020 ABINIT group (DCA, XG, GMR, AR, MB, MT, EB)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -167,8 +166,9 @@ contains
 !!  vhartr(nfftf)=work space to hold Hartree potential in real space (hartree)
 !!  vtrial(nfftf,nspden)=total local potential (hartree)
 !!  vxc(nfftf,nspden)=work space to hold Vxc(r) in real space (hartree)
-!!  [vxctau(nfftf,dtset%nspden,4*dtset%usekden)]=derivative of XC energy density with respect to
-!!    kinetic energy density (metaGGA cases) (optional output)
+!!  [vxctau(nfft,nspden,4*usekden)]=(only for meta-GGA): derivative of XC energy density
+!!    with respect to kinetic energy density (depsxcdtau). The arrays vxctau contains also
+!!    the gradient of vxctau (gvxctau) in vxctau(:,:,2:4)
 !!
 !! SIDE EFFECTS
 !!  electronpositron <type(electronpositron_type)>=quantities for the electron-positron annihilation (optional argument)
@@ -229,8 +229,8 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 & energies,eigen,etotal,gsqcut,indsym,irrzon,kg,mcg,mpi_enreg,my_natom,nfftf,ngfftf,nhat,&
 & nhatgr,nhatgrdim,npwarr,n3xccc,occ,optene,paw_dmft,paw_ij,pawang,pawfgr,&
 & pawfgrtab,pawrhoij,pawtab,phnons,ph1d,psps,resid,rhog,rhor,rprimd,strsxc,symrec,&
-& taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,vxctau,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
-& add_tfw) ! optional argument
+& taug,taur,usexcnhat,vhartr,vtrial,vpsp,vxc,wfs,wvl,wvl_den,wvl_e,xccc3d,xred,ylm,&
+& add_tfw,vxctau) ! optional argument
 
 !Arguments ------------------------------------
 !scalars
@@ -268,7 +268,7 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  real(dp), intent(out) :: strsxc(6)
  real(dp), intent(in) :: rprimd(3,3),vpsp(nfftf),xccc3d(n3xccc),xred(3,dtset%natom)
  real(dp), intent(out) :: vhartr(nfftf),vtrial(nfftf,dtset%nspden),vxc(nfftf,dtset%nspden)
- real(dp),intent(out) :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
+ real(dp),intent(out),optional,target :: vxctau(nfftf,dtset%nspden,4*dtset%usekden)
  real(dp), intent(in) :: ylm(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm)
  type(paw_ij_type), intent(in) :: paw_ij(my_natom*psps%usepaw)
  type(pawfgrtab_type),intent(inout) :: pawfgrtab(my_natom)
@@ -292,14 +292,15 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 !arrays
  integer,allocatable :: kg_k(:,:)
  real(dp) :: gmet(3,3),gprimd(3,3),kpg_dum(0,0),kpoint(3),nonlop_out(1,1)
- real(dp) :: qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1)
- real(dp) :: vzeeman(4)
+ real(dp) :: qpt(3),rhodum(1),rmet(3,3),tsec(2),ylmgr_dum(1,1,1),vzeeman(4)
+ real(dp),target :: vxctau_dum(0,0,0)
  real(dp),allocatable :: buffer(:),cgrvtrial(:,:)
  real(dp),allocatable :: cwavef(:,:),eig_k(:),enlout(:),ffnl(:,:,:,:),ffnl_sav(:,:,:,:)
  real(dp),allocatable :: kinpw(:),kinpw_sav(:),kxc(:,:),occ_k(:),occblock(:)
  real(dp),allocatable :: ph3d(:,:,:),ph3d_sav(:,:,:)
  real(dp),allocatable :: resid_k(:),rhowfg(:,:),rhowfr(:,:),vlocal(:,:,:,:)
  real(dp),allocatable :: vlocal_tmp(:,:,:),vxctaulocal(:,:,:,:,:),ylm_k(:,:),v_constr_dft_r(:,:)
+ real(dp),pointer :: vxctau_(:,:,:)
  type(bandfft_kpt_type),pointer :: my_bandfft_kpt => null()
  type(pawcprj_type),target,allocatable :: cwaveprj(:,:)
  type(pawcprj_type),pointer :: cwaveprj_gat(:,:)
@@ -310,7 +311,8 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
  DBG_ENTER("COLL")
 
 !Check that usekden is not 0 if want to use vxctau
- with_vxctau = (dtset%usekden/=0)
+ with_vxctau = (present(vxctau).and.dtset%usekden/=0)
+ vxctau_ => vxctau_dum ; if (with_vxctau) vxctau_ => vxctau
 
 !Test size of FFT grids (1 grid in norm-conserving, 2 grids in PAW)
  nfftotf=PRODUCT(ngfftf(1:3))
@@ -369,14 +371,14 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
 &       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd,strsxc, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata,taur=taur,vhartr=vhartr, &
-&       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
+&       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      else
        call rhotoxc(energies%e_xc,kxc, &
 &       mpi_enreg,nfftf,ngfftf,nhat,psps%usepaw,nhatgr,nhatgrdim, &
 &       nkxc,nk3xc,non_magnetic_xc,n3xccc,option,rhor,rprimd,strsxc, &
 &       usexcnhat,vxc,vxcavg,xccc3d,xcdata, &
 &       electronpositron=electronpositron,taur=taur,vhartr=vhartr, &
-&       vxctau=vxctau,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
+&       vxctau=vxctau_,exc_vdw_out=energies%e_xc_vdw,add_tfw=add_tfw_)
      end if
      ABI_DEALLOCATE(kxc)
    else if (dtset%usewvl == 0) then
@@ -567,6 +569,14 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
        ABI_ALLOCATE(cgrvtrial,(dtset%nfft,dtset%nspden))
        call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,rhodum,rhodum,cgrvtrial,vtrial)
        call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,cgrvtrial,vlocal,2)
+       if(with_vxctau) then
+         do ispden=1,4
+           call transgrid(1,mpi_enreg,dtset%nspden,-1,0,0,dtset%paral_kgb,pawfgr,&
+&                         rhodum,rhodum,cgrvtrial,vxctau(:,:,ispden))
+           call fftpac(isppol,mpi_enreg,dtset%nspden,n1,n2,n3,n4,n5,n6,dtset%ngfft,&
+&                      cgrvtrial,vxctaulocal(:,:,:,:,ispden),2)
+         end do
+       end if
        ABI_DEALLOCATE(cgrvtrial)
      end if
    else
@@ -882,16 +892,18 @@ subroutine energy(cg,compch_fft,constrained_dft,dtset,electronpositron,&
    ABI_ALLOCATE(rhowfr,(dtset%nfft,dtset%nspden))
    ABI_ALLOCATE(rhowfg,(2,dtset%nfft))
    rhowfr(:,:)=zero
-
    call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,&
 &   npwarr,occ,paw_dmft,phnons,rhowfg,rhowfr,rprimd,tim_mkrho,ucvol_local,wvl_den,wfs)
-
    call transgrid(1,mpi_enreg,dtset%nspden,+1,1,0,dtset%paral_kgb,pawfgr,rhowfg,rhodum,rhowfr,rhor)
-   ABI_DEALLOCATE(rhowfr)
-   ABI_DEALLOCATE(rhowfg)
    rhor(:,:)=rhor(:,:)+nhat(:,:)
    call fourdp(1,rhog,rhor(:,1),-1,mpi_enreg,nfftf,1,ngfftf,0)
-
+   if(dtset%usekden==1)then
+     call mkrho(cg,dtset,gprimd,irrzon,kg,mcg,mpi_enreg,npwarr,occ,paw_dmft,phnons,&
+&               rhowfg,rhowfr,rprimd,tim_mkrho,ucvol,wvl_den,wfs,option=1)
+     call transgrid(1,mpi_enreg,dtset%nspden,+1,1,1,dtset%paral_kgb,pawfgr,rhowfg,taug,rhowfr,taur)
+   end if
+   ABI_DEALLOCATE(rhowfr)
+   ABI_DEALLOCATE(rhowfg)
  end if
 
  MSG_COMMENT('New density rho(r) made from input wfs')

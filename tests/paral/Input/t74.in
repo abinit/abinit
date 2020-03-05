@@ -36,6 +36,8 @@
      nband1    10
 
      gwpara     2
+     symsigma   0
+
 # Calculation of the dielectric matrix - iteration 1
 # localrdwf2     0      # testing localdrwf=0 in parallel
  optdriver2     3

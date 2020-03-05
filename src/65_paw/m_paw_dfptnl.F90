@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_dfptnl
 !! NAME
 !!  m_paw_dfptnl
@@ -8,7 +7,7 @@
 !!   or 2nd-order PAW occupancies.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (LB)
+!! Copyright (C) 2018-2020 ABINIT group (LB)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -188,7 +187,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    ABI_ALLOCATE(nhat1_1,(cplex_1*mesh_size,lm_size_all,nspden*usexcnhat))
    call pawdensities(compch,cplex_1,iatom_tot,lmselect_tmp,lmselect_1,&
 &   lm_size_all,nhat1_1,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
-&   pawrad(itypat),pawrhoij_1(iatom),pawtab(itypat),rho1_1,trho1_1,0)
+&   pawrad(itypat),pawrhoij_1(iatom),pawtab(itypat),rho1_1,trho1_1)
 !  Compute on-site 1st-order densities (pert2)
    ABI_ALLOCATE(lmselect_2,(lm_size_all))
    lmselect_2(:)=paw_an0(iatom)%lmselect(:)
@@ -197,7 +196,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    ABI_ALLOCATE(nhat1_2,(cplex_2*mesh_size,lm_size_all,nspden*usexcnhat))
    call pawdensities(compch,cplex_2,iatom_tot,lmselect_tmp,lmselect_2,&
 &   lm_size_all,nhat1_2,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
-&   pawrad(itypat),pawrhoij_2(iatom),pawtab(itypat),rho1_2,trho1_2,0)
+&   pawrad(itypat),pawrhoij_2(iatom),pawtab(itypat),rho1_2,trho1_2)
 !  Compute on-site 1st-order densities (pert3)
    ABI_ALLOCATE(lmselect_3,(lm_size_all))
    lmselect_3(:)=paw_an0(iatom)%lmselect(:)
@@ -206,7 +205,7 @@ subroutine paw_dfptnl_energy(d3exc,ixc,my_natom,natom,ntypat,&
    ABI_ALLOCATE(nhat1_3,(cplex_3*mesh_size,lm_size_all,nspden*usexcnhat))
    call pawdensities(compch,cplex_3,iatom_tot,lmselect_tmp,lmselect_3,&
 &   lm_size_all,nhat1_3,nspden,nzlmopt,opt_compch,1-usexcnhat,-1,0,pawang,pawprtvol,&
-&   pawrad(itypat),pawrhoij_3(iatom),pawtab(itypat),rho1_3,trho1_3,0)
+&   pawrad(itypat),pawrhoij_3(iatom),pawtab(itypat),rho1_3,trho1_3)
    ABI_DEALLOCATE(lmselect_tmp)
 
    call paw_dfptnl_xc(cplex_1,cplex_2,cplex_3,d3exc1_iat,ixc,paw_an0(iatom)%k3xc1,lm_size_all,&

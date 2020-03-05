@@ -93,6 +93,6 @@ jpawu  0.0000  # values in Hartree
 #%% max_nprocs = 10
 #%% [extra_info]
 #%% authors = J. Bieder, B. Amadon
-#%% keywords = DMFT, CTQMC, FAILS_IFMPI
+#%% keywords = PAW, DMFT, CTQMC, FAILS_IFMPI
 #%% description = Test CT-QMC options only. Not realistic
 #%%<END TEST_INFO>

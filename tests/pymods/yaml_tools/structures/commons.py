@@ -1,6 +1,6 @@
-'''
+"""
 Define basic structures.
-'''
+"""
 from __future__ import print_function, division, unicode_literals
 from ..register_tag import yaml_auto_map, yaml_implicit_scalar
 
@@ -66,3 +66,13 @@ class AbinitInfo(AbinitMessage):
 @yaml_auto_map
 class AbinitComment(AbinitMessage):
     __yaml_tag = 'COMMENT'
+
+
+@yaml_auto_map
+class DatasetInfo(object):
+    __yaml_tag = 'DatasetInfo'
+
+
+@yaml_auto_map
+class BeginCycle(object):
+    __yaml_tag = 'BeginCycle'

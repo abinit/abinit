@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_hdr
 !! NAME
 !! m_hdr
@@ -11,7 +10,7 @@
 !!   hdr_mpio_skip, hdr_fort_read, hdr_fort_write, hdr_ncread, hdr_ncwrite
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (XG, MB, MT, DC, MG)
+!! Copyright (C) 2008-2020 ABINIT group (XG, MB, MT, DC, MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -225,7 +224,7 @@ module m_hdr
   real(dp), allocatable :: znucltypat(:)
   ! znucltypat(ntypat) from alchemy
 
-  character(len=6) :: codvsn
+  character(len=8) :: codvsn
   ! version of the code
 
   character(len=132), allocatable :: title(:)
@@ -922,7 +921,7 @@ subroutine hdr_init(ebands,codvsn,dtset,hdr,pawtab,pertcase,psps,wvl, &
 !scalars
  integer,intent(in) :: pertcase
  integer,intent(in),optional :: comm_atom
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(ebands_t),intent(in) :: ebands
  type(dataset_type),intent(in) :: dtset
  type(hdr_type),intent(inout) :: hdr !vz_i
@@ -1305,7 +1304,7 @@ subroutine hdr_init_lowlvl(hdr,ebands,psps,pawtab,wvl,&
  integer,intent(in) :: kptopt,nshiftk_orig,nshiftk,icoulomb
  integer, intent(in),optional :: comm_atom
  real(dp),intent(in) :: ecut,ecutsm,dilatmx,stmbias,pawecutdg,nelect,charge
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(ebands_t),intent(in) :: ebands
  type(pseudopotential_type),intent(in) :: psps
  type(wvl_internal_type),intent(in) :: wvl
@@ -1682,7 +1681,7 @@ subroutine hdr_mpio_skip(mpio_fh, fform, offset)
 #ifdef HAVE_MPI_IO
 !Reading the first record of the file -------------------------------------
 !read (unitfi)   codvsn,headform,..............
- positloc = bsize_frm + 6*xmpi_bsize_ch
+ positloc = bsize_frm + 8*xmpi_bsize_ch
  call MPI_FILE_READ_AT(mpio_fh,positloc,fform,1,MPI_INTEGER,statux,ierr)
 
  if (ANY(fform == [1,2,51,52,101,102] )) then
@@ -2086,7 +2085,7 @@ subroutine hdr_echo(hdr, fform, rdwr, unit, header)
  if (rdwr==4) write(ount, '(a)' ) ' ECHO of the ABINIT file header '
  write(ount, '(a)' ) ' '
  write(ount, '(a)' ) ' First record :'
- write(ount, '(a,a6,2i5)' )  '.codvsn,headform,fform = ',hdr%codvsn, hdr%headform, fform
+ write(ount, '(a,a8,2i5)' )  '.codvsn,headform,fform = ',hdr%codvsn, hdr%headform, fform
  write(ount, '(a)' ) ' '
  write(ount, '(a)' ) ' Second record :'
  write(ount, '(a,4i6)') ' bantot,intxc,ixc,natom  =',hdr%bantot, hdr%intxc, hdr%ixc, hdr%natom
@@ -2290,7 +2289,8 @@ subroutine hdr_skip_wfftype(wff,ierr)
 !Local variables-------------------------------
  integer :: headform,mu,npsp,unit,usepaw !,fform
  integer :: integers(17)
- character(len=6) :: codvsn
+ character(len=6) :: codvsn6
+ character(len=8) :: codvsn
  character(len=500) :: msg,errmsg
 #if defined HAVE_MPI_IO
  integer(kind=MPI_OFFSET_KIND) :: delim_record,posit,positloc
@@ -2306,8 +2306,13 @@ subroutine hdr_skip_wfftype(wff,ierr)
 
    rewind(unit, err=10, iomsg=errmsg)
 
-!  Pick off headform from WF file
-   read(unit, err=10, iomsg=errmsg) codvsn,headform ! fform
+!  Pick off headform from WF file. Support for pre-v9 (length of codvsn was changed from 6 to 8) is implemented.
+   read(unit, err=20, iomsg=errmsg) codvsn,headform ! fform
+   goto 30
+20 read(unit, err=10, iomsg=errmsg) codvsn6,headform ! fform
+   codvsn='        '
+   codvsn(1:6)=codvsn6
+30 continue
 
    if (headform==1   .or. headform==2   .or. &
        headform==51  .or. headform==52  .or. &
@@ -2725,7 +2730,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
  list_size=npsp+1 + npsp
  ABI_MALLOC(list_char,(list_size))
  if (master==me)then
-   list_char(1)       =hdr%codvsn  ! Only 6 characters are stored in list_char(1)
+   list_char(1)       =hdr%codvsn  ! Only 8 characters are stored in list_char(1)
    list_char(2:npsp+1)=hdr%title
    list_char(npsp+2:) =hdr%md5_pseudos
  end if
@@ -2734,7 +2739,7 @@ subroutine hdr_bcast(hdr, master, me, comm)
 
  if(master/=me)then
    list_tmp=list_char(1)
-   hdr%codvsn=list_tmp(1:6)
+   hdr%codvsn=list_tmp(1:8)
    do ipsp=2,npsp+1
      list_tmp =list_char(ipsp)
      hdr%title(ipsp-1) =list_tmp(1:fnlen)
@@ -2857,8 +2862,9 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
  type(hdr_type),intent(out) :: hdr
 
 !Local variables-------------------------------
- integer :: ipsp
+ integer :: ipsp, ierr
  character(len=500) :: msg,errmsg
+ character(len=6) :: codvsn6
  real(dp),allocatable :: occ3d(:,:,:)
 
 !*************************************************************************
@@ -2872,7 +2878,12 @@ subroutine hdr_fort_read(Hdr,unit,fform,rewind)
 
  ! Reading the first record of the file ------------------------------------
  ! fform is not a record of hdr_type
- read(unit, err=10, iomsg=errmsg) hdr%codvsn,hdr%headform,fform
+ read(unit, iostat=ierr) hdr%codvsn,hdr%headform,fform
+ if (ierr /= 0) then
+   ! Support for pre-v9 (length of codvsn was changed from 6 to 8) is implemented.
+   read(unit, err=10, iomsg=errmsg) codvsn6, hdr%headform, fform
+   hdr%codvsn(1:6) = codvsn6
+ end if
 
  if (hdr%headform < 80) then
    write(msg,'(3a,i0,4a)') &
@@ -2981,7 +2992,7 @@ subroutine hdr_ncread(Hdr, ncid, fform)
 #ifdef HAVE_NETCDF
 !Local variables-------------------------------
 !scalars
- integer :: nresolution,itypat
+ integer :: nresolution, itypat, ii
  character(len=500) :: msg
 !arrays
  integer,allocatable :: nband2d(:,:)
@@ -3006,7 +3017,10 @@ subroutine hdr_ncread(Hdr, ncid, fform)
 
  ! First, we read the declaration of code, fform ...
  ! pad the returned string with " " instead of "\0"
- NCF_CHECK(nf90_get_var(ncid, vid("codvsn"), hdr%codvsn))
+ !
+ ! Support for pre-v9 (length of codvsn was changed from 6 to 8)
+ NCF_CHECK(nctk_get_dim(ncid, "codvsnlen", ii))
+ NCF_CHECK(nf90_get_var(ncid, vid("codvsn"), hdr%codvsn(1:ii)))
  call replace_ch0(hdr%codvsn)
 
  ! Get ETSF dimensions
@@ -3419,7 +3433,7 @@ integer function hdr_ncwrite(hdr, ncid, fform, nc_define) result(ncerr)
 
    ! Define dimensions.
    ncerr = nctk_def_dims(ncid, [&
-     nctkdim_t("npsp", hdr%npsp), nctkdim_t("codvsnlen", 6), nctkdim_t("psptitlen", 132)&
+     nctkdim_t("npsp", hdr%npsp), nctkdim_t("codvsnlen", 8), nctkdim_t("psptitlen", 132)&
    ])
    NCF_CHECK(ncerr)
 

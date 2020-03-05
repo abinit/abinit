@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_bfgs
 !! NAME
 !!  m_bfgs
@@ -8,7 +7,7 @@
 !!  Broyden-Fletcher-Goldfarb-Shanno (BFGS) minimization algorithm.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2012-2019 ABINIT group (XG,JCC)
+!! Copyright (C) 2012-2020 ABINIT group (XG,JCC)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

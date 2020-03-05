@@ -1,8 +1,8 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h30 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h20 )
   
-- input  file    -> t33.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t33/t33.in
 - output file    -> t33.out
 - root for input  files -> t33i
 - root for output files -> t33o
@@ -30,11 +30,11 @@
      lnmax =       1     mgfft =      40  mpssoang =       1    mqgrid =    3001
      natom =       1  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        3668          nfft =       64000          nkpt =           1
 ================================================================================
-P This job should need less than                      18.234 Mbytes of memory.
+P This job should need less than                      20.052 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.058 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 ================================================================================
@@ -47,11 +47,11 @@ _ WF disk file :      0.058 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
      lnmax =       1     mgfft =      40  mpssoang =       1    mqgrid =    3001
      natom =       1  nloc_mem =       1    nspden =       1   nspinor =       1
     nsppol =       1      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        3668          nfft =       64000          nkpt =           1
 ================================================================================
-P This job should need less than                      18.234 Mbytes of memory.
+P This job should need less than                      20.052 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.058 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
 ================================================================================
@@ -64,11 +64,11 @@ _ WF disk file :      0.058 Mbytes ; DEN or POT disk file :      0.490 Mbytes.
      lnmax =       1     mgfft =      40  mpssoang =       1    mqgrid =    3001
      natom =       1  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        3668          nfft =       64000          nkpt =           1
 ================================================================================
-P This job should need less than                      28.056 Mbytes of memory.
+P This job should need less than                      33.292 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.114 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
 ================================================================================
@@ -81,11 +81,11 @@ _ WF disk file :      0.114 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
      lnmax =       1     mgfft =      40  mpssoang =       1    mqgrid =    3001
      natom =       1  nloc_mem =       1    nspden =       2   nspinor =       1
     nsppol =       2      nsym =      48    n1xccc =       0    ntypat =       1
-    occopt =       1   xclevel =       1
+    occopt =       1   xclevel =       2
 -    mband =           1        mffmem =           1         mkmem =           1
        mpw =        3668          nfft =       64000          nkpt =           1
 ================================================================================
-P This job should need less than                      28.056 Mbytes of memory.
+P This job should need less than                      33.292 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.114 Mbytes ; DEN or POT disk file :      0.979 Mbytes.
 ================================================================================
@@ -187,7 +187,16 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 3668, }
+cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   Meta-GGA fake3 - ixc=33
@@ -203,8 +212,8 @@ P           mkmem           1
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -230,6 +239,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1 -0.44930356617566    -4.493E-01 9.331E-05 2.577E+01
  ETOT  2 -0.44958178869618    -2.782E-04 1.158E-10 4.442E+00
@@ -241,8 +256,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
 
  At SCF step    7, etot is converged : 
   for the second time, diff in etot=  1.822E-13 < toldfe=  1.000E-10
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 
@@ -257,6 +270,33 @@ Result for kinetic energy density :
   sigma(1 1)=  3.74396444E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.74396444E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.74396444E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  6.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   6.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.1600000E+02
+convergence: {deltae: -1.822E-13, res2:  1.318E-10, residm:  2.387E-15, diffor: null, }
+etotal    :  -4.49675471E-01
+entropy   :   0.00000000E+00
+fermie    :  -2.07625734E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.74396444E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.74396444E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.74396444E-05, ]
+pressure_GPa:  -1.1015E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  H]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -290,22 +330,20 @@ Result for kinetic energy density :
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.20763
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.08598150264220E-01
-    Hartree energy  =  7.70545031149983E-02
-    XC energy       = -2.33181055046844E-01
-    Ewald energy    = -2.36441456623389E-01
-    PspCore energy  =  7.27220521664304E-07
-    Loc. psp. energy= -4.65706340249064E-01
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -4.49675471319556E-01
-
- Other information on the energy :
-    Total energy(eV)= -1.22362918625029E+01 ; Band energy (Ha)=  -2.0762573367E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  4.08598150264220E-01
+hartree             :  7.70545031149984E-02
+xc                  : -2.33181055046844E-01
+Ewald energy        : -2.36441456623389E-01
+psp_core            :  7.27220521664304E-07
+local_psp           : -4.65706340249064E-01
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -4.49675471319556E-01
+total_energy_eV     : -1.22362918625029E+01
+band_energy         : -2.07625733673120E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -320,7 +358,16 @@ Result for kinetic energy density :
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 3668, }
+cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   Meta-GGA fake4 - ixc=34
@@ -336,8 +383,8 @@ Result for kinetic energy density :
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -362,6 +409,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1 -0.44935934318101    -4.494E-01 9.812E-05 2.518E+01
  ETOT  2 -0.44960418756432    -2.448E-04 1.449E-10 4.284E+00
@@ -373,8 +426,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
 
  At SCF step    7, etot is converged : 
   for the second time, diff in etot=  2.607E-13 < toldfe=  1.000E-10
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 
@@ -389,6 +440,33 @@ Result for kinetic energy density :
   sigma(1 1)=  2.94500559E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.94500559E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.94500559E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 2, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  6.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   6.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.1600000E+02
+convergence: {deltae: -2.607E-13, res2:  1.857E-10, residm:  5.467E-16, diffor: null, }
+etotal    :  -4.49691906E-01
+entropy   :   0.00000000E+00
+fermie    :  -2.07670267E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.94500559E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.94500559E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.94500559E-05, ]
+pressure_GPa:  -8.6645E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  H]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -422,22 +500,20 @@ Result for kinetic energy density :
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.20767
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.08547624780343E-01
-    Hartree energy  =  7.70382022671886E-02
-    XC energy       = -2.33182915994811E-01
-    Ewald energy    = -2.36441456623389E-01
-    PspCore energy  =  7.27220521664304E-07
-    Loc. psp. energy= -4.65654087278912E-01
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -4.49691905629060E-01
-
- Other information on the energy :
-    Total energy(eV)= -1.22367390628072E+01 ; Band energy (Ha)=  -2.0767026656E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 2, }
+comment             : Components of total free energy in Hartree
+kinetic             :  4.08547624780343E-01
+hartree             :  7.70382022671886E-02
+xc                  : -2.33182915994811E-01
+Ewald energy        : -2.36441456623389E-01
+psp_core            :  7.27220521664304E-07
+local_psp           : -4.65654087278912E-01
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -4.49691905629060E-01
+total_energy_eV     : -1.22367390628072E+01
+band_energy         : -2.07670266561365E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -452,7 +528,16 @@ Result for kinetic energy density :
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 2, nspinor: 1, nspden: 2, mpw: 3668, }
+cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   Meta-GGA fake3 - ixc=33
@@ -468,8 +553,8 @@ Result for kinetic energy density :
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -494,6 +579,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1 -0.48102908244408    -4.810E-01 9.331E-05 2.232E+02
  ETOT  2 -0.48229000743437    -1.261E-03 5.967E-10 4.629E+01
@@ -502,12 +593,10 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
  ETOT  5 -0.48230278232310    -2.021E-08 8.566E-09 1.594E-04
  ETOT  6 -0.48230278264980    -3.267E-10 2.124E-10 5.597E-06
  ETOT  7 -0.48230278269439    -4.459E-11 1.860E-12 3.863E-07
- ETOT  8 -0.48230278270281    -8.420E-12 1.469E-14 2.691E-09
+ ETOT  8 -0.48230278270281    -8.419E-12 1.469E-14 2.691E-09
 
  At SCF step    8, etot is converged : 
-  for the second time, diff in etot=  8.420E-12 < toldfe=  1.000E-10
-
- Compute kinetic energy density
+  for the second time, diff in etot=  8.419E-12 < toldfe=  1.000E-10
 
 Result for kinetic energy density :
 
@@ -537,6 +626,33 @@ Result for kinetic energy density :
   sigma(1 1)=  3.87263165E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  3.87263165E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  3.87263165E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 3, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  6.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   6.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.1600000E+02
+convergence: {deltae: -8.419E-12, res2:  2.691E-09, residm:  1.469E-14, diffor: null, }
+etotal    :  -4.82302783E-01
+entropy   :   0.00000000E+00
+fermie    :  -2.46234391E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  3.87263165E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   3.87263165E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   3.87263165E-05, ]
+pressure_GPa:  -1.1394E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  H]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -578,22 +694,20 @@ Result for kinetic energy density :
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.07068
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.50263299915499E-01
-    Hartree energy  =  8.89909319194634E-02
-    XC energy       = -2.77557049325048E-01
-    Ewald energy    = -2.36441456623389E-01
-    PspCore energy  =  7.27220521664304E-07
-    Loc. psp. energy= -5.07559235809862E-01
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -4.82302782702814E-01
-
- Other information on the energy :
-    Total energy(eV)= -1.31241261568725E+01 ; Band energy (Ha)=  -2.4623439080E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 3, }
+comment             : Components of total free energy in Hartree
+kinetic             :  4.50263299915499E-01
+hartree             :  8.89909319194634E-02
+xc                  : -2.77557049325048E-01
+Ewald energy        : -2.36441456623389E-01
+psp_core            :  7.27220521664304E-07
+local_psp           : -5.07559235809862E-01
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -4.82302782702814E-01
+total_energy_eV     : -1.31241261568724E+01
+band_energy         : -2.46234390795149E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -608,7 +722,16 @@ Result for kinetic energy density :
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 1, nkpt: 1, mband: 1, nsppol: 2, nspinor: 1, nspden: 2, mpw: 3668, }
+cutoff_energies: {ecut:  50.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   Meta-GGA fake4 - ixc=34
@@ -624,8 +747,8 @@ Result for kinetic energy density :
          ecut(hartree)=     50.000   => boxcut(ratio)=   2.09440
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/01h.bare
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.bare
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/01h.bare
 - Bare (erfc) Goedecker-Teter-Hutter  Wed May  8 14:27:44 EDT 1996
 -  1.00000   1.00000    960508                znucl, zion, pspdat
     2    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -650,6 +773,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1 -0.48109635041399    -4.811E-01 9.812E-05 2.209E+02
  ETOT  2 -0.48230469672966    -1.208E-03 6.871E-10 4.556E+01
@@ -662,8 +791,6 @@ _setup2: Arith. and geom. avg. npw (full set) are    3668.000    3668.000
 
  At SCF step    8, etot is converged : 
   for the second time, diff in etot=  7.754E-12 < toldfe=  1.000E-10
-
- Compute kinetic energy density
 
 Result for kinetic energy density :
 
@@ -693,6 +820,33 @@ Result for kinetic energy density :
   sigma(1 1)=  2.88099829E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.88099829E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.88099829E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 4, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  6.0000000,   0.0000000,   0.0000000, ]
+- [  0.0000000,   6.0000000,   0.0000000, ]
+- [  0.0000000,   0.0000000,   6.0000000, ]
+lattice_lengths: [   6.00000,    6.00000,    6.00000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.1600000E+02
+convergence: {deltae: -7.754E-12, res2:  2.728E-09, residm:  1.947E-14, diffor: null, }
+etotal    :  -4.82316382E-01
+entropy   :   0.00000000E+00
+fermie    :  -2.46272413E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.88099829E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.88099829E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.88099829E-05, ]
+pressure_GPa:  -8.4762E-01
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00,  H]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic and magnetization densities in atomic spheres:
  ---------------------------------------------------------------------
@@ -734,22 +888,20 @@ Result for kinetic energy density :
  kpt#   1, nband=  1, wtk=  1.00000, kpt=  0.2500  0.2500  0.2500 (reduced coord)
   -0.07076
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  4.50211962819034E-01
-    Hartree energy  =  8.89743420986071E-02
-    XC energy       = -2.77553201611615E-01
-    Ewald energy    = -2.36441456623389E-01
-    PspCore energy  =  7.27220521664304E-07
-    Loc. psp. energy= -5.07508755776699E-01
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -4.82316381873539E-01
-
- Other information on the energy :
-    Total energy(eV)= -1.31244962091272E+01 ; Band energy (Ha)=  -2.4627241305E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 4, }
+comment             : Components of total free energy in Hartree
+kinetic             :  4.50211962819034E-01
+hartree             :  8.89743420986071E-02
+xc                  : -2.77553201611615E-01
+Ewald energy        : -2.36441456623389E-01
+psp_core            :  7.27220521664304E-07
+local_psp           : -5.07508755776699E-01
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -4.82316381873539E-01
+total_energy_eV     : -1.31244962091272E+01
+band_energy         : -2.46272413050379E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -878,7 +1030,24 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -892,11 +1061,11 @@ P           mkmem           1
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT: First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -905,11 +1074,13 @@ P           mkmem           1
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -917,24 +1088,15 @@ P           mkmem           1
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- And optionally:
--
-- [4] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
--
-- Proc.   0 individual time (sec): cpu=          6.0  wall=          6.1
+- Proc.   0 individual time (sec): cpu=          5.6  wall=          6.7
 
 ================================================================================
 
  Calculation completed.
 .Delivered   9 WARNINGs and  16 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.0  wall=          6.1
++Overall time at end (sec) : cpu=          5.6  wall=          6.7

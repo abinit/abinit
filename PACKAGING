@@ -60,7 +60,6 @@ Other external packages
 Abinit may use the following other packages:
 
   * FFTW3;
-  * GSL;
   * ScaLAPACK.
 
 
@@ -71,7 +70,7 @@ Building Abinit
 The configure script of Abinit provides many options, in order to keep
 manual adjustments of the environment variables at the minimum. It is
 also possible to store the options in a config file (see
-~abinit/doc/build/config-template.ac for details), in order to facilitate
+~abinit/doc/build/config-template.ac9 for details), in order to facilitate
 the reuse of platform-specific options. When packaging Abinit you will
 likely want to disable this mechanism, by using the
 --disable-config-file option of configure, or provide your own version

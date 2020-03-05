@@ -79,7 +79,6 @@ tests/TestBot_MPI*/*
 /config.pc
 /config.sh
 /config.status
-/config/split
 /directories.dot
 /dump_fb_version.py
 /stamp-h1
@@ -91,7 +90,6 @@ tests/TestBot_MPI*/*
 /bindings/autom4te.cache
 /bindings/configure
 /bindings/config.log
-/bindings/config.mk
 /bindings/config.sh
 /bindings/config.status
 /bindings/config/gnu/compile
@@ -117,6 +115,7 @@ tests/TestBot_MPI*/*
 /config/gnu/missing
 /config/gnu/mkinstalldirs
 /config/local/*
+/config/split
 /config/wrappers/wrap-fc
 /config/wrappers/wrap-mpicc
 /config/wrappers/wrap-mpicxx
@@ -230,10 +229,10 @@ mkdocs_plugins/dist
 /src/98_main/mrggkk
 /src/98_main/mrgscr
 /src/98_main/multibinit
-src/98_main/tdep
-src/98_main/dummy_tests
+/src/98_main/testtransposer
+/src/98_main/tdep
+/src/98_main/dummy_tests
 /src/98_main/optic
-src/98_main/tdep
 /src/98_main/ujdet
 /src/98_main/fold2Bloch
 /src/98_main/vdw_kernelgen
