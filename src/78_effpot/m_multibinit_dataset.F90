@@ -845,9 +845,9 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%fit_EFS=(/0,1,1/)
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fit_EFS',tread,'INT')
  if(tread==1) multibinit_dtset%fit_EFS(1:3)=intarr(1:3)
- if(multibint_dtset%fit_EFS(1) == 1)multibinit_dtset%fit_on(3) = .TRUE.
- if(multibint_dtset%fit_EFS(2) == 0)multibinit_dtset%fit_on(1) = .FALSE.
- if(multibint_dtset%fit_EFS(3) == 0)multibinit_dtset%fit_on(2) = .FALSE.
+ if(multibinit_dtset%fit_EFS(1) == 1)multibinit_dtset%fit_on(3) = .TRUE.
+ if(multibinit_dtset%fit_EFS(2) == 0)multibinit_dtset%fit_on(1) = .FALSE.
+ if(multibinit_dtset%fit_EFS(3) == 0)multibinit_dtset%fit_on(2) = .FALSE.
  if(any(multibinit_dtset%fit_EFS<0) .or. any(multibinit_dtset%fit_EFS>1))then
    write(message, '(a,i8,a,a,a)' )&
 &   'fit_EFS is',multibinit_dtset%fit_EFS,', but the only allowed values are 0 and 1',ch10,&
@@ -858,9 +858,9 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  multibinit_dtset%sel_EFS=(/0,1,1/)
  call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'sel_EFS',tread,'INT')
  if(tread==1) multibinit_dtset%sel_EFS(1:3)=intarr(1:3)
- if(multibint_dtset%sel_EFS(1) == 1)multibinit_dtset%fit_on(3) = .TRUE.
- if(multibint_dtset%sel_EFS(2) == 0)multibinit_dtset%fit_on(1) = .FALSE.
- if(multibint_dtset%sel_EFS(3) == 0)multibinit_dtset%fit_on(2) = .FALSE.
+ if(multibinit_dtset%sel_EFS(1) == 1)multibinit_dtset%fit_on(3) = .TRUE.
+ if(multibinit_dtset%sel_EFS(2) == 0)multibinit_dtset%fit_on(1) = .FALSE.
+ if(multibinit_dtset%sel_EFS(3) == 0)multibinit_dtset%fit_on(2) = .FALSE.
  if(any(multibinit_dtset%sel_EFS<0) .or. any(multibinit_dtset%sel_EFS>1))then
    write(message, '(a,i8,a,a,a)' )&
 &   'sel_EFS is',multibinit_dtset%sel_EFS,', but the only allowed values are 0 and 1',ch10,&

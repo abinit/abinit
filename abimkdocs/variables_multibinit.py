@@ -185,6 +185,23 @@ Variable(
 ),
 
 Variable(
+    abivarname="fit_EFS@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_basic'],
+    dimensions=[3],
+    defaultval=0 1 1,
+    mnemonics="FIT on Energy, Forces, and or, Stresses",
+    text=r"""
+Specifies on which first-principles quantities the anharmonic coefficients will be fitted. 
+The first number flags the fitting on the energies, the second the fitting on the forces, and the third on the stressses. 
+
+Default value is 0 1 1, so anharmonic coefficients get fitted on Forces and Stresses but not on energies
+""",
+),
+
+
+Variable(
     abivarname="fit_ncoeff@multibinit",
     varset="multibinit",
     vartype="integer",
@@ -870,6 +887,22 @@ Variable(
     mnemonics="RESTART from (X,F) history",
     text=r"""
 See [[abinit:restartxf]]
+""",
+),
+
+Variable(
+    abivarname="sel_EFS@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_basic'],
+    dimensions=[3],
+    defaultval=0 1 1,
+    mnemonics="FIT on Energy, Forces, and or, Stresses",
+    text=r"""
+Specifies on which goal function quantities the anharmonic coefficients will be selected. 
+The first number flags the selecting on the energies, the second the fitting on the forces, and the third on the stressses. 
+
+Default value is 0 1 1, so anharmonic coefficients get selected on Forces and Stresses but not on energies
 """,
 ),
 

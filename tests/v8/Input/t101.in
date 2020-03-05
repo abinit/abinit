@@ -17,6 +17,7 @@ dynamics = 2     # Molecular dynamic flag:
                  #  13 = NPT simulation.
 ncell = 2 2 1  # Size of the supercell for the simulation
 dyn_chksym = 1 #Check and impose symmetry of start structure
+dyn_tolsym = 1d-8
 ntime  = 20     # Number of step in the simulation.
 nctime = 1        # NetCdf TIME between output of molecular dynamics informations (default = 1)
 temperature = 300  # Temperature of the simulation (default = 325K).
