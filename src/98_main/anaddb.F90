@@ -247,7 +247,7 @@ program anaddb
  call ddb_from_file(ddb,filnam(3),inp%brav,natom,inp%natifc,inp%atifc,Crystal,comm, prtvol=inp%prtvol)
  nsym = Crystal%nsym
 
- ! MR: a new ddb is necessary for the quadrupoles due to incompability of it with authomatic reshapes
+ ! MR: a new ddb is necessary for the longwave quantities due to incompability of it with authomatic reshapes
  ! that ddb%val and ddb%flg experience when passed as arguments of some routines
  if (mtyp==33) then
    call ddb_lw_copy(ddb,ddb_lw,mpert,natom,ntypat)

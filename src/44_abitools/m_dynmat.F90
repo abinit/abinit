@@ -5471,6 +5471,7 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
 !scalars
  integer,parameter :: nqpt1=1,option2=2,sumg0=0,plus1=1,iqpt1=1
  integer :: i1,i2,ib,nsize
+ integer :: dipquad_, quadquad_
 !arrays
  real(dp) :: qphon(3)
  real(dp),allocatable :: dq(:,:,:,:,:),dyew(:,:,:,:,:)
@@ -5478,6 +5479,10 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
 ! *********************************************************************
 
  ABI_ALLOCATE(dq,(2,3,natom,3,natom))
+
+ ! Define quadrupolar options
+ dipquad_=0; if(present(dipquad)) dipquad_=dipquad
+ quadquad_=0; if(present(quadquad)) quadquad_=quadquad
 
  ! Get the normalized wavevector
  if(abs(qphnrm)<1.0d-7)then
@@ -5494,14 +5499,14 @@ subroutine gtdyn9(acell,atmfrc,dielt,dipdip,dyewq0,d2cart,gmet,gprim,mpert,natom
  ! phase is modified, in order to recover the usual (xred) coordinate of atoms.
  call dymfz9(dq,natom,nqpt1,gprim,option2,qphon,trans)
 
- if (dipdip==1) then
+ if (dipdip==1.or.dipquad_==1.or.quadquad_==1) then
    ! Add the non-analytical part
    ! Compute dyew(2,3,natom,3,natom)= Ewald part of the dynamical matrix,
    ! second energy derivative wrt xred(3,natom) in Hartrees (Denoted A-bar in the notes)
    ABI_ALLOCATE(dyew,(2,3,natom,3,natom))
 
    call ewald9(acell,dielt,dyew,gmet,gprim,natom,qphon,rmet,rprim,sumg0,ucvol,xred,zeff,&
-      qdrp_cart,ewald_option,dipquad=dipquad,quadquad=quadquad)
+      qdrp_cart,ewald_option,dipquad=dipquad_,quadquad=quadquad_)
    call q0dy3_apply(natom,dyewq0,dyew)
    call nanal9(dyew,dq,iqpt1,natom,nqpt1,plus1)
 

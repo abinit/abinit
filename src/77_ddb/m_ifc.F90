@@ -416,8 +416,8 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  Ifc%asr = asr
  Ifc%brav = brav
  Ifc%dipdip = abs(dipdip)
- if (present(dipquad)) Ifc%dipquad = dipquad
- if (present(quadquad)) Ifc%quadquad = quadquad
+ Ifc%dipquad=0; if (present(dipquad)) Ifc%dipquad = dipquad
+ Ifc%quadquad=0; if (present(quadquad)) Ifc%quadquad = quadquad
  Ifc%symdynmat = symdynmat
  Ifc%nqshft = nqshft
  call alloc_copy(q1shft(:,1:Ifc%nqshft),Ifc%qshft)
@@ -431,14 +431,14 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  call chkrp9(Ifc%brav,rprim)
 
  dyewq0 = zero
- if (Ifc%dipdip==1 .and. (Ifc%asr==1.or.Ifc%asr==2)) then
+ if ((Ifc%dipdip==1.or.Ifc%dipquad==1.or.Ifc%quadquad==1).and. (Ifc%asr==1.or.Ifc%asr==2)) then
    ! Calculation of the non-analytical part for q=0
    sumg0=0
    qpt(:)=zero
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
-   if (present(dipquad).or.present(quadquad)) then
+   if (Ifc%dipquad==1.or.Ifc%quadquad==1) then
    call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
-               Crystal%xred,zeff,qdrp_cart,ifc%ewald_option,dipquad=dipquad,quadquad=quadquad)
+               Crystal%xred,zeff,qdrp_cart,ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
    else
    call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                Crystal%xred,zeff,qdrp_cart,ifc%ewald_option)
@@ -527,7 +527,7 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
  ABI_MALLOC(dynmatfull,(2,3,natom,3,natom,nqbz))
  dynmatfull=Ifc%dynmat
 
- if (Ifc%dipdip==1) then
+ if (Ifc%dipdip==1.or.Ifc%dipquad==1.or.Ifc%quadquad==1) then
    ! Take off the dipole-dipole part of the dynamical matrix
    call wrtout(std_out, " Will extract the dipole-dipole part for every wavevector")
    ABI_MALLOC(dyew,(2,3,natom,3,natom))
@@ -538,9 +538,9 @@ subroutine ifc_init(ifc,crystal,ddb,brav,asr,symdynmat,dipdip,&
      end if
      qpt(:)=qbz(:,iqpt)
      sumg0=0
-     if (present(dipquad).or.present(quadquad)) then
+     if (Ifc%dipquad==1.or.Ifc%quadquad==1) then
        call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
-                 Crystal%xred,zeff,qdrp_cart,ifc%ewald_option,dipquad=dipquad,quadquad=quadquad)
+                 Crystal%xred,zeff,qdrp_cart,ifc%ewald_option,dipquad=Ifc%dipquad,quadquad=Ifc%quadquad)
      else
        call ewald9(ddb%acell,dielt,dyew,Crystal%gmet,gprim,natom,qpt,Crystal%rmet,rprim,sumg0,Crystal%ucvol,&
                  Crystal%xred,zeff,qdrp_cart,ifc%ewald_option)
@@ -916,8 +916,6 @@ end subroutine ifc_print
 !!       "cart" if qpt defines a direction in Cartesian coordinates
 !!       "reduced" if qpt defines a direction in reduced coordinates
 !!  [comm]: MPI communicator
-!! [dipquad] = if 1, atmfrc has been build without dipole-quadrupole part
-!! [quadquad] = if 1, atmfrc has been build without quadrupole-quadrupole part
 !!
 !! OUTPUT
 !!  phfrq(3*natom) = Phonon frequencies in Hartree
@@ -1097,7 +1095,7 @@ subroutine ifc_get_dwdq(ifc, cryst, qpt, phfrq, eigvec, dwdq, comm)
    dddq(:,:,:,ii) = dddq(:,:,:,ii) * ifc%acell(ii)
  end do
 
- if (ifc%dipdip == 1) then
+ if (ifc%dipdip == 1.or.ifc%dipquad == 1.or.ifc%quadquad == 1) then
    ! Add the gradient of the non-analytical part.
    ! Note that we dddq is in cartesian cordinates.
    ! For the time being, the gradient is computed with finite difference and step hh.
