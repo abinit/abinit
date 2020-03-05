@@ -3563,97 +3563,97 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
 end function geo_from_abivar_string
 !!***
 
-!!****f* m_parser/geo_from_abigeo_path
-!! NAME
-!!  geo_from_abigeo_path
-!!
-!! FUNCTION
-!!
-!! SOURCE
-
-type(geo_t) function geo_from_abigeo_path(path, jdtset, iimage, comm) result(new)
-
-!Arguments ------------------------------------
- character(len=*),intent(in) :: path
- integer,intent(in) :: jdtset, iimage, comm
-
-!Local variables-------------------------------
- integer,parameter :: master = 0, option1=1
- integer :: my_rank, lenstr, ierr, ii, iatom, start, tread, marr !itypat,
- !character(len=500) :: msg
- character(len=strlen) :: string
-!arrays
- integer,allocatable :: intarr(:)
- real(dp),allocatable ::dprarr(:)
- character(len=5),allocatable :: symbols(:)
-
-
-!************************************************************************
-
- ! Master node reads string and broadcasts
- my_rank = xmpi_comm_rank(comm)
-
- if (my_rank == master) then
-    ! Below part copied from `parsefile`. strlen from defs_basis module
-    call instrng(path, lenstr, option1, strlen, string)
-
-   ! To make case-insensitive, map characters of string to upper case.
-   call inupper(string(1:lenstr))
- end if
-
- if (xmpi_comm_size(comm) > 1) then
-   call xmpi_bcast(string, master, comm, ierr)
-   call xmpi_bcast(lenstr, master, comm, ierr)
- end if
-
- ! ==============================
- ! Now all procs parse the string
- ! ==============================
-
- ! Set up unit cell from acell, rprim, angdeg
- !call parse_acell_rprim_angdeg(string, jdtset, iimage, marr, string(1:lenstr), acell, rprim, angdeg)
-
- ! Get the number of atom in the unit cell. Read natom from string
- marr = 1
- ABI_MALLOC(intarr, (marr))
- ABI_MALLOC(dprarr, (marr))
- !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'natom', tread, 'INT')
- ABI_CHECK(tread /= 0, sjoin("natom is required in file:", path))
- new%natom = intarr(1)
- ABI_FREE(intarr)
- ABI_FREE(dprarr)
-
- ! Parse atomic positions. Only xcart is supported here because it makes life easier
- ! and we don't need to handle symbols + Units
- ii = index(string(1:lenstr), "xred_symbols")
- ABI_CHECK(ii /= 0, "In structure mode only `xred_symbols` with coords followed by atom symbol are supported")
-
- new%fileformat = "abivars"
- ABI_MALLOC(new%typat, (new%natom))
- ABI_MALLOC(new%xred, (3, new%natom))
-
- ABI_MALLOC(symbols, (new%natom))
- start = ii + 4
- do iatom=1,new%natom
-   !call inarray(start, cs, dprarr, intarr, marr, narr, string, "DPR")
-   !read(string(cs:), *) symbols(iatom)
- end do
-
- !call find_unique(symbols, new%ntypat, new%typat)
-
- ! Note that the first letter should be capitalized, rest must be lower case
- ABI_MALLOC(new%znucl, (new%ntypat))
- !do itypat=1,new%ntypat
- !  !iatom = new%typat(iat
- !  new%znucl(itypat) = symbol2znucl(symbols(iatom))
- !end do
-
- ABI_FREE(symbols)
- ABI_FREE(intarr)
- ABI_FREE(dprarr)
-
-end function geo_from_abigeo_path
-!!***
+!!!! !!****f* m_parser/geo_from_abigeo_path
+!!!! !! NAME
+!!!! !!  geo_from_abigeo_path
+!!!! !!
+!!!! !! FUNCTION
+!!!! !!
+!!!! !! SOURCE
+!!!!
+!!!! type(geo_t) function geo_from_abigeo_path(path, jdtset, iimage, comm) result(new)
+!!!!
+!!!! !Arguments ------------------------------------
+!!!!  character(len=*),intent(in) :: path
+!!!!  integer,intent(in) :: jdtset, iimage, comm
+!!!!
+!!!! !Local variables-------------------------------
+!!!!  integer,parameter :: master = 0, option1=1
+!!!!  integer :: my_rank, lenstr, ierr, ii, iatom, start, tread, marr !itypat,
+!!!!  !character(len=500) :: msg
+!!!!  character(len=strlen) :: string
+!!!! !arrays
+!!!!  integer,allocatable :: intarr(:)
+!!!!  real(dp),allocatable ::dprarr(:)
+!!!!  character(len=5),allocatable :: symbols(:)
+!!!!
+!!!!
+!!!! !************************************************************************
+!!!!
+!!!!  ! Master node reads string and broadcasts
+!!!!  my_rank = xmpi_comm_rank(comm)
+!!!!
+!!!!  if (my_rank == master) then
+!!!!     ! Below part copied from `parsefile`. strlen from defs_basis module
+!!!!     call instrng(path, lenstr, option1, strlen, string)
+!!!!
+!!!!    ! To make case-insensitive, map characters of string to upper case.
+!!!!    call inupper(string(1:lenstr))
+!!!!  end if
+!!!!
+!!!!  if (xmpi_comm_size(comm) > 1) then
+!!!!    call xmpi_bcast(string, master, comm, ierr)
+!!!!    call xmpi_bcast(lenstr, master, comm, ierr)
+!!!!  end if
+!!!!
+!!!!  ! ==============================
+!!!!  ! Now all procs parse the string
+!!!!  ! ==============================
+!!!!
+!!!!  ! Set up unit cell from acell, rprim, angdeg
+!!!!  !call parse_acell_rprim_angdeg(string, jdtset, iimage, marr, string(1:lenstr), acell, rprim, angdeg)
+!!!!
+!!!!  ! Get the number of atom in the unit cell. Read natom from string
+!!!!  marr = 1
+!!!!  ABI_MALLOC(intarr, (marr))
+!!!!  ABI_MALLOC(dprarr, (marr))
+!!!!  !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'natom', tread, 'INT')
+!!!!  ABI_CHECK(tread /= 0, sjoin("natom is required in file:", path))
+!!!!  new%natom = intarr(1)
+!!!!  ABI_FREE(intarr)
+!!!!  ABI_FREE(dprarr)
+!!!!
+!!!!  ! Parse atomic positions. Only xcart is supported here because it makes life easier
+!!!!  ! and we don't need to handle symbols + Units
+!!!!  ii = index(string(1:lenstr), "xred_symbols")
+!!!!  ABI_CHECK(ii /= 0, "In structure mode only `xred_symbols` with coords followed by atom symbol are supported")
+!!!!
+!!!!  new%fileformat = "abivars"
+!!!!  ABI_MALLOC(new%typat, (new%natom))
+!!!!  ABI_MALLOC(new%xred, (3, new%natom))
+!!!!
+!!!!  ABI_MALLOC(symbols, (new%natom))
+!!!!  start = ii + 4
+!!!!  do iatom=1,new%natom
+!!!!    !call inarray(start, cs, dprarr, intarr, marr, narr, string, "DPR")
+!!!!    !read(string(cs:), *) symbols(iatom)
+!!!!  end do
+!!!!
+!!!!  !call find_unique(symbols, new%ntypat, new%typat)
+!!!!
+!!!!  ! Note that the first letter should be capitalized, rest must be lower case
+!!!!  ABI_MALLOC(new%znucl, (new%ntypat))
+!!!!  !do itypat=1,new%ntypat
+!!!!  !  !iatom = new%typat(iat
+!!!!  !  new%znucl(itypat) = symbol2znucl(symbols(iatom))
+!!!!  !end do
+!!!!
+!!!!  ABI_FREE(symbols)
+!!!!  ABI_FREE(intarr)
+!!!!  ABI_FREE(dprarr)
+!!!!
+!!!! end function geo_from_abigeo_path
+!!!! !!***
 
 !!****f* m_parser/geo_from_poscar_path
 !! NAME
