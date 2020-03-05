@@ -1305,13 +1305,6 @@ end subroutine mkkpgcart
 
 subroutine mkkin_metdqdq(dqdqkinpw,effmass,gprimd,idir,kg,kpt,npw,qdir)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'mkkin_metdqdq'
-!End of the abilint section
-
  implicit none
 
 !Arguments -------------------------------

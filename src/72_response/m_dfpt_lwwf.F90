@@ -162,13 +162,6 @@ subroutine dfpt_qdrpwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
 &               rmet,ucvol,useylmgr,vhxc1_atdis,vhxc1_efield,wfk_t_atdis,wfk_t_efield,wfk_t_ddk,   &
 &               wfk_t_dkdk,wtk_k,xred,ylm_k,ylmgr_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_qdrpwf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1057,13 +1050,6 @@ subroutine dfpt_ciflexowf(cg,cplex,dtset,elflexowf_k,elflexowf_t1_k,elflexowf_t2
      &  pert_efield,pert_strain,ph1d,psps,q1grad,q1q2grad,rhog,rmet,ucvol,useylmgr, &
      &  vhxc1_efield,vhxc1_strain,wfk_t_efield,wfk_t_ddk, &
      &  wfk_t_dkdk,wfk_t_strain,wtk_k,ylm_k,ylmgr_k)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_ciflexowf'
-!End of the abilint section
 
  implicit none
 
@@ -1957,13 +1943,6 @@ subroutine dfpt_ddmdqwf(atindx,cg,cplex,ddmdqwf_k,ddmdqwf_t1_k,ddmdqwf_t2_k,&
      &  vhxc1_atdis,wfk_t_atdis,wfk_t_ddk, &
      &  wtk_k,xred,ylm_k,ylmgr_k)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_ddmdqwf'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -2612,12 +2591,6 @@ subroutine dfpt_isdqwf(atindx,cg,cplex,dtset,gs_hamkq,gsqcut,icg,ikpt,indkpt1,is
      &  pert_atdis,pert_strain,ph1d,psps,q1grad,rhog,rmet,ucvol,useylmgr, &
      &  vhxc1_atdis,vhxc1_strain,wfk_t_atdis,wfk_t_ddk, &
      &  wfk_t_strain,wtk_k,xred,ylm_k,ylmgr_k)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_isdqwf'
-!End of the abilint section
 
  implicit none
 
@@ -3571,12 +3544,6 @@ subroutine dfpt_isdqfr(atindx,cg,dtset,frwfdq_k,gs_hamkq,gsqcut,icg,ikpt,&
        &  isppol,istwf_k,kg_k,kpt,mkmem,mpi_enreg,matom,mpw,natpert,nattyp,nband_k,nfft,&
        &  ngfft,npw_k,nq1grad,nspden,nsppol,nstrpert,nylmgr,occ_k,pert_atdis,   &
        &  pert_strain,ph1d,psps,rmet,ucvol,useylmgr,wtk_k,ylm_k,ylmgr_k)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_isdqfr'
-!End of the abilint section
 
  implicit none
 

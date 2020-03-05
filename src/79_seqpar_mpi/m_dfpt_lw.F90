@@ -164,13 +164,6 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
 &          nspden,nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &          timrev,ucvol,xred)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_qdrpole'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1135,13 +1128,6 @@ subroutine dfpt_qdrpout(d3etot,eqgradhart,gprimd,kptopt,matom,mpert,natpert, &
          & nq1grad,nq2grad,pert_atdis,prtvol,q1grad,q2grad,qdrflg,qdrpwf,qdrpwf_t1,qdrpwf_t2, & 
          & qdrpwf_t3,qdrpwf_t4,qdrpwf_t5,rprimd,ucvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_qdrpout'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1649,13 +1635,6 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
 &          mpi_enreg,nattyp,nfft,ngfft,nkpt,nkxc,&
 &          nspden,nsppol,occ,pawrhoij,pawtab,pertsy,psps,rmet,rprimd,rhog,rhor,&
 &          timrev,ucvol,xred)
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_flexo'
-!End of the abilint section
 
  implicit none
 
@@ -3105,13 +3084,6 @@ end subroutine dfpt_flexo
     & elqgradhart,gprimd,kptopt,matom,mpert,nefipert,&
     & nstrpert,nq1grad,pert_efield,pert_strain,prtvol,q1grad,rprimd,ucvol)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_ciflexoout'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -3656,13 +3628,6 @@ end subroutine dfpt_ciflexoout
  subroutine dfpt_ddmdqout(ddmdq_flg,ddmdq_qgradhart,ddmdqwf,ddmdqwf_t1,ddmdqwf_t2,ddmdqwf_t3,d3etot, &
  & dyewdq,gprimd,kptopt,matom,mpert,natpert,nq1grad,pert_atdis,prtvol,q1grad,rprimd)
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_ciflexoout'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -4043,12 +4008,6 @@ end subroutine dfpt_ciflexoout
  subroutine dfpt_isdqout(d3etot,dyewdqdq,frwfdq,gprimd,isdq_flg,isdq_qgradhart,isdqwf,isdqwf_t1,isdqwf_t2,&
    & isdqwf_t3,isdqwf_t4,isdqwf_t5,kptopt,matom,mpert,natpert, &
    & nstrpert,nq1grad,pert_atdis,pert_strain,prtvol,q1grad,rprimd,ucvol)
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'dfpt_isdqout'
-!End of the abilint section
 
  implicit none
 

@@ -1347,13 +1347,6 @@ subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
 &          idir,ipert,mpi_enreg,optlocal,optnl,qdir1,rf_hamkq,&
 &          qdir2)                                                        !optional
 
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getgh1dqc'
-!End of the abilint section
-
  implicit none
 
 !Arguments ------------------------------------
@@ -1589,13 +1582,6 @@ subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qd
 &                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                            ! In
 &                nkpg,nkpg1,kpg_k,kpg1_k,dqdqkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&       ! Out
 &                qdir2)                                                                  ! Optional
-
-
-!This section has been created automatically by the script Abilint (TD).
-!Do not modify the following lines by hand.
-#undef ABI_FUNC
-#define ABI_FUNC 'getgh1dqc_setup'
-!End of the abilint section
 
  implicit none
 
