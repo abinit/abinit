@@ -126,7 +126,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 &                                   max_power_strain,initialize_data,&
 &                                   fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS,&
 &                                   positive,verbose,anharmstr,spcoupling,&
-&                                   only_odd_power,only_even_power,prt_names,prt_anh,& 
+&                                   only_odd_power,only_even_power,prt_anh,& 
 &                                   fit_iatom,prt_files,fit_on,sel_on)
 
  implicit none
@@ -140,7 +140,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  integer,intent(in) :: power_disps(2)
  type(effective_potential_type),target,intent(inout) :: eff_pot
  type(abihist),intent(inout) :: hist
- integer,optional,intent(in) :: max_power_strain,prt_names,prt_anh,fit_iatom
+ integer,optional,intent(in) :: max_power_strain,prt_anh,fit_iatom
  real(dp),optional,intent(in) :: cutoff_in,fit_tolMSDF,fit_tolMSDS,fit_tolMSDE,fit_tolMSDFS
  logical,optional,intent(in) :: verbose,positive,anharmstr,spcoupling
  logical,optional,intent(in) :: only_odd_power,only_even_power
@@ -150,7 +150,7 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
 !scalar
  integer :: ii,icoeff,my_icoeff,icycle,icycle_tmp,ierr,info,index_min,iproc,isweep,jcoeff
  integer :: master,max_power_strain_in,my_rank,my_ncoeff,ncoeff_model,ncoeff_tot,natom_sc,ncell,ncycle
- integer :: ncycle_tot,ncycle_max,need_prt_names,nproc,ntime,nsweep,size_mpi,ncoeff_fix
+ integer :: ncycle_tot,ncycle_max,nproc,ntime,nsweep,size_mpi,ncoeff_fix
  integer :: rank_to_send,unit_names,unit_anh,fit_iatom_in
  real(dp) :: cutoff,factor,time,tolMSDF,tolMSDS,tolMSDE,tolMSDFS
  real(dp),parameter :: HaBohr_meVAng = 27.21138386 / 0.529177249
@@ -201,8 +201,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  if(present(spcoupling)) need_spcoupling = spcoupling
  need_only_odd_power = .FALSE.
  if(present(only_odd_power)) need_only_odd_power = only_odd_power
- need_prt_names = 0
- if(present(prt_names)) need_prt_names = prt_names
  need_prt_anh = .FALSE. 
  if(present(prt_anh))then
    if(prt_anh == 1) need_prt_anh = .TRUE.
@@ -401,33 +399,6 @@ subroutine fit_polynomial_coeff_fit(eff_pot,bancoeff,fixcoeff,hist,generateterm,
  !wait everybody
  call xmpi_barrier(comm)
   
- if(need_prt_names == 1 .and. nproc == 1)then
-   unit_names = get_unit()
-   write (powerstr,'(I0,A1,I0)') power_disps(1),'-',power_disps(2)
-   write (rangestr,'(F4.2)') cutoff 
-   namefile='name-of-terms_range-'//trim(rangestr)//'_power-'//trim(powerstr)//'.out'
-   namefile=trim(namefile)
-   write(message,'(a)') " Printing of list of terms is asked"
-   call wrtout(std_out,message,'COLL')
-   write(message,'(a,a)') " Write list of generated terms to file: ",namefile
-   call wrtout(std_out,message,'COLL')
-   open(unit_names,file=namefile,status='replace')
-   do icoeff=1,ncoeff_tot
-       write(unit_names,*) icoeff, trim(my_coeffs(icoeff)%name ) ! Marcus Write name of coefficient to file
-   enddo
-   close(unit_names)
- else if(need_prt_names == 1 .and. nproc /= 1)then
-   write(message, '(15a)' )ch10,&
-&        ' --- !WARNING',ch10,&
-&        '     The printing of the list of generated Terms has been requested.',ch10,&
-&        '     This option is currently limited to serial execution of multibinit ',ch10,&
-&        '     The terms are not printed.',ch10,&
-&        '     Action: Rerun in serial.',ch10,&
-&        ' ---',ch10
-     call wrtout(std_out,message,"COLL")
- endif
-
-
 !Reset the output (we free the memory)
  call effective_potential_freeCoeffs(eff_pot)
 

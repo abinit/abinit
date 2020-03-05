@@ -115,7 +115,6 @@ module m_multibinit_dataset
   integer :: nsphere
   integer :: optcell
   integer :: prt_model
-  integer :: prt_names
   integer :: dipdip_prt
   integer :: prt_phfrq
   integer :: prt_ifc
@@ -389,7 +388,6 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%opt_effpot=0
  multibinit_dtset%opt_coeff=0
  multibinit_dtset%prt_model=0
- multibinit_dtset%prt_names=0
  multibinit_dtset%prt_phfrq=0
  multibinit_dtset%prt_ifc = 0
  multibinit_dtset%strcpling = -1
@@ -1301,16 +1299,6 @@ end if
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%prt_names=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_names',tread,'INT')
- if(tread==1) multibinit_dtset%prt_names=intarr(1)
- if(multibinit_dtset%prt_names<0.or.multibinit_dtset%prt_names>1)then
-   write(message, '(a,i8,a,a,a,a,a)' )&
-&   'prt_names is',multibinit_dtset%prt_names,', but the only allowed values',ch10,&
-&   'are 0 and 1.',ch10,&
-&   'Action: correct prt_names in your input file.'
-   MSG_ERROR(message)
- end if
 
  multibinit_dtset%prt_phfrq=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_phfrq',tread,'INT')
