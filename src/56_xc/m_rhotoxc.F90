@@ -843,6 +843,7 @@ subroutine rhotoxc(enxc,kxc,mpi_enreg,nfft,ngfft, &
          if (ixc==31.or.ixc==35) then
            coeff=one-(one/1.01_dp)
            if (nspden_updn==1) then
+             coeff=half*coeff
              do ipts=1,npts
                exc_b(ipts)=exc_b(ipts)-coeff*xcctau3d(ifft+ipts-1) &
 &                         /rho_b_updn(ipts,1)

@@ -1335,6 +1335,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
        if (ixc==31.or.ixc==35) then
          factor=one-(one/1.01_dp)
          if (nspden_updn==1) then
+           factor=factor*half
            do ii=1,nrad
              exci(ii)=exci(ii)-factor*coretau(ii)/rho_updn(ii,1)
            end do
