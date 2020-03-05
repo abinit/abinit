@@ -1044,7 +1044,7 @@ meta: {optdriver: 1, rfphon: 1, }
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
- mkfilename : getwfq/=0, take file _WFQ from output of DATASET   3.
+ mkfilename: getwfq from: t98o_DS3_WFQ
 
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
