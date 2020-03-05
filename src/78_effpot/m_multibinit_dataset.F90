@@ -87,12 +87,8 @@ module m_multibinit_dataset
   integer :: fit_ncoeff
   integer :: fit_nbancoeff
   integer :: fit_nfixcoeff
-  integer :: fit_E
-  integer :: fit_EFS
-  integer :: fit_FS
-  integer :: sel_E 
-  integer :: sel_EFS 
-  integer :: sel_FS 
+  integer :: fit_EFS(3)
+  integer :: sel_EFS(3) 
   integer :: opt_effpot 
   integer :: opt_ncoeff 
   integer :: ts_option
@@ -349,12 +345,8 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_iatom=0
  multibinit_dtset%ts_option=0
  multibinit_dtset%fit_nfixcoeff=0
- multibinit_dtset%fit_E=0
- multibinit_dtset%fit_EFS=0
- multibinit_dtset%fit_FS=1
- multibinit_dtset%sel_E=0
- multibinit_dtset%sel_EFS=0
- multibinit_dtset%sel_FS=1
+ multibinit_dtset%fit_EFS = (/ 0, 1, 1 /)
+ multibinit_dtset%sel_EFS = (/ 0, 1, 1 /)
  multibinit_dtset%fit_option=0
  multibinit_dtset%fit_SPCoupling=1
  multibinit_dtset%fit_SPC_maxS=1
@@ -850,146 +842,31 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
-
- multibinit_dtset%fit_FS=1
- multibinit_dtset%fit_on(1) = .TRUE.
- multibinit_dtset%fit_on(2) = .TRUE.
- multibinit_dtset%fit_on(3) = .FALSE.
- multibinit_dtset%fit_E=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_E',tread,'INT')
- if(tread==1)then
-   if(intarr(1) == 1)then  
-     multibinit_dtset%fit_E=intarr(1)
-     multibinit_dtset%fit_on(1) = .FALSE.
-     multibinit_dtset%fit_on(2) = .FALSE.
-     multibinit_dtset%fit_on(3) = .TRUE.
-     multibinit_dtset%fit_FS=0
-   endif
- endif 
- if(multibinit_dtset%fit_E<0 .or. multibinit_dtset%fit_E>1)then
-   write(message, '(a,i8,a,a,a)' )&
-&   'fit_E is',multibinit_dtset%fit_E,', but the only allowed values are 0 and 1',ch10,&
-&   'Action: correct fit_E in your input file.'
-   MSG_ERROR(message)
- end if
- 
- multibinit_dtset%fit_EFS=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_EFS',tread,'INT')
- if(tread==1)then 
-   if(intarr(1) == 1)then  
-      multibinit_dtset%fit_EFS=intarr(1)
-      multibinit_dtset%fit_on(1) = .TRUE.
-      multibinit_dtset%fit_on(2) = .TRUE.
-      multibinit_dtset%fit_on(3) = .TRUE.
-      multibinit_dtset%fit_FS=0
-   endif
- endif
- if(multibinit_dtset%fit_EFS<0 .or. multibinit_dtset%fit_EFS>1)then
+ multibinit_dtset%fit_EFS=(/0,1,1/)
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fit_EFS',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_EFS(1:3)=intarr(1:3)
+ if(multibint_dtset%fit_EFS(1) == 1)multibinit_dtset%fit_on(3) = .TRUE.
+ if(multibint_dtset%fit_EFS(2) == 0)multibinit_dtset%fit_on(1) = .FALSE.
+ if(multibint_dtset%fit_EFS(3) == 0)multibinit_dtset%fit_on(2) = .FALSE.
+ if(any(multibinit_dtset%fit_EFS<0) .or. any(multibinit_dtset%fit_EFS>1))then
    write(message, '(a,i8,a,a,a)' )&
 &   'fit_EFS is',multibinit_dtset%fit_EFS,', but the only allowed values are 0 and 1',ch10,&
 &   'Action: correct fit_EFS in your input file.'
    MSG_ERROR(message)
  end if
  
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'fit_FS',tread,'INT')
- if(tread==1) multibinit_dtset%fit_FS=intarr(1)
- if(multibinit_dtset%fit_FS<0 .or. multibinit_dtset%fit_FS>1)then
-   write(message, '(a,i8,a,a,a)' )&
-&   'fit_FS is',multibinit_dtset%fit_FS,', but the only allowed values are 0 and 1',ch10,&
-&   'Action: correct fit_FS in your input file.'
-   MSG_ERROR(message)
- end if
-
-if(multibinit_dtset%fit_E==1 .and. multibinit_dtset%fit_EFS==1)then 
-   write(message, '(a,a,a)' )&
-&   'fit_E is and fit_EFS are both 1, but the only one can be set to 1 at a time',ch10,&
-&   'Action: correct fit_E and fit_EFS in your input file.'
-   MSG_ERROR(message)
-end if
-
-if(multibinit_dtset%fit_E==1 .and. multibinit_dtset%fit_FS==1)then 
-   write(message, '(a,a,a)' )&
-&   'fit_E is and fit_FS are both 1, but the only one can be set to 1 at a time',ch10,&
-&   'Action: correct fit_E and fit_FS in your input file.'
-   MSG_ERROR(message)
-end if
-
-if(multibinit_dtset%fit_EFS==1 .and. multibinit_dtset%fit_FS==1)then 
-   write(message, '(a,a,a)' )&
-&   'fit_EFS is and fit_FS are both 1, but the only one can be set to 1 at a time',ch10,&
-&   'Action: correct fit_EFS and fit_FS in your input file.'
-   MSG_ERROR(message)
-end if
-
- multibinit_dtset%sel_FS=1
- multibinit_dtset%sel_on(1) = .TRUE.
- multibinit_dtset%sel_on(2) = .TRUE.
- multibinit_dtset%sel_on(3) = .FALSE.
- multibinit_dtset%sel_E=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'sel_E',tread,'INT')
- if(tread==1)then  
-   if(intarr(1) == 1)then  
-    multibinit_dtset%sel_E=intarr(1)
-    multibinit_dtset%sel_on(1) = .FALSE.
-    multibinit_dtset%sel_on(2) = .FALSE.
-    multibinit_dtset%sel_on(3) = .TRUE.
-    multibinit_dtset%sel_FS=0
-  endif 
- endif 
- if(multibinit_dtset%sel_E<0 .or. multibinit_dtset%sel_E>1)then
-   write(message, '(a,i8,a,a,a)' )&
-&   'sel_E is',multibinit_dtset%sel_E,', but the only allowed values are 0 and 1',ch10,&
-&   'Action: correct sel_E in your input file.'
-   MSG_ERROR(message)
- end if
- 
- multibinit_dtset%sel_EFS=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'sel_EFS',tread,'INT')
- if(tread==1)then 
-   if(intarr(1) == 1)then  
-    multibinit_dtset%sel_EFS=intarr(1)
-    multibinit_dtset%sel_on(1) = .TRUE.
-    multibinit_dtset%sel_on(2) = .TRUE.
-    multibinit_dtset%sel_on(3) = .TRUE.
-    multibinit_dtset%sel_FS=0
-   endif
- endif
- if(multibinit_dtset%sel_EFS<0 .or. multibinit_dtset%sel_EFS>1)then
+ multibinit_dtset%sel_EFS=(/0,1,1/)
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'sel_EFS',tread,'INT')
+ if(tread==1) multibinit_dtset%sel_EFS(1:3)=intarr(1:3)
+ if(multibint_dtset%sel_EFS(1) == 1)multibinit_dtset%fit_on(3) = .TRUE.
+ if(multibint_dtset%sel_EFS(2) == 0)multibinit_dtset%fit_on(1) = .FALSE.
+ if(multibint_dtset%sel_EFS(3) == 0)multibinit_dtset%fit_on(2) = .FALSE.
+ if(any(multibinit_dtset%sel_EFS<0) .or. any(multibinit_dtset%sel_EFS>1))then
    write(message, '(a,i8,a,a,a)' )&
 &   'sel_EFS is',multibinit_dtset%sel_EFS,', but the only allowed values are 0 and 1',ch10,&
 &   'Action: correct sel_EFS in your input file.'
    MSG_ERROR(message)
  end if
- 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'sel_FS',tread,'INT')
- if(tread==1) multibinit_dtset%sel_FS=intarr(1)
- if(multibinit_dtset%sel_FS<0 .or. multibinit_dtset%sel_FS>1)then
-   write(message, '(a,i8,a,a,a)' )&
-&   'sel_FS is',multibinit_dtset%sel_FS,', but the only allowed values are 0 and 1',ch10,&
-&   'Action: correct sel_FS in your input file.'
-   MSG_ERROR(message)
- end if
-
-if(multibinit_dtset%sel_E==1 .and. multibinit_dtset%sel_EFS==1)then 
-   write(message, '(a,a,a)' )&
-&   'sel_E is and sel_EFS are both 1, but the only one can be set to 1 at a time',ch10,&
-&   'Action: correct sel_E and sel_EFS in your input file.'
-   MSG_ERROR(message)
-end if
-
-if(multibinit_dtset%sel_E==1 .and. multibinit_dtset%sel_FS==1)then 
-   write(message, '(a,a,a)' )&
-&   'sel_E is and sel_FS are both 1, but the only one can be set to 1 at a time',ch10,&
-&   'Action: correct sel_E and sel_FS in your input file.'
-   MSG_ERROR(message)
-end if
-
-if(multibinit_dtset%sel_EFS==1 .and. multibinit_dtset%sel_FS==1)then 
-   write(message, '(a,a,a)' )&
-&   'sel_EFS is and sel_FS are both 1, but the only one can be set to 1 at a time',ch10,&
-&   'Action: correct sel_EFS and sel_FS in your input file.'
-   MSG_ERROR(message)
-end if
 
  multibinit_dtset%ts_option=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ts_option',tread,'INT')
