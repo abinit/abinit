@@ -166,6 +166,20 @@ Variable(
 """,
 ),
 
+Variable(
+    abivarname="test_prt_ph@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['LatticeModel_expert'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Prt test-set evaluation into file ph_test.nc",
+    text=r"""
+Flag to activate the printing of the evaluation of the effective potential on to a test set into  a seperate netcdf file called ph_test.nc. 
+
+Forces, Energies, Stresses and Atomic Positions are written in ph_test.nc. 
+""",
+),
 
 Variable(
     abivarname="fit_coeff@multibinit",
@@ -315,7 +329,7 @@ Variable(
     topics=['FitProcess_basic'],
     dimensions="scalar",
     defaultval=1,
-    mnemonics="FIT anharmonic Strain-Phonon COUPLING coefficients",
+    mnemonics="FIT Strain Phonon Coupling maximum Strain",
     text=r"""
 Set maximum power of strain body in strain-phonon coupling terms. 
 """,
@@ -691,7 +705,7 @@ Variable(
     topics=['DynamicsMultibinit_basic'],
     dimensions="scalar",
     defaultval=0,
-    mnemonics="Delta Time for IONs",
+    mnemonics="DYNamics CHeK SYMmetry",
     text=r"""
 Flag to activate symmetry finder and imposition of symmetry of the restart structure before dynamics run, when restartxf is negativ.  
 Useful to do symmetry constrained relaxation with structural realxations algorithms. 
@@ -708,7 +722,7 @@ Variable(
     topics=['DynamicsMultibinit_basic'],
     dimensions="scalar",
     defaultval=1d-10,
-    mnemonics="Delta Time for IONs",
+    mnemonics="DYNamics TOLerance on SYMmetries",
     text=r"""
 Tolerance on symmetry finder.
 **Related variables:** Activation flag for symmetry finder ([[multibinit:dyn_chksym]])
@@ -909,7 +923,7 @@ Variable(
     topics=['FitProcess_basic'],
     dimensions=[3],
     defaultval=0 1 1,
-    mnemonics="FIT on Energy, Forces, and or, Stresses",
+    mnemonics="Select on Energy, Forces, and or, Stresses",
     text=r"""
 Specifies on which goal function quantities the anharmonic coefficients will be selected. 
 The first number flags the selecting on the energies, the second the fitting on the forces, and the third on the stressses. 
