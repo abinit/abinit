@@ -100,26 +100,6 @@ AC_DEFUN([SD_FFT_DETECT], [
           sd_fft_ok="yes"
         fi
         ;;
-      fftw3-mkl)
-        sd_fftw3_enable="yes"
-        sd_fftw3_init="mkl"
-        sd_fftw3_cppflags="${sd_linalg_cppflags} -I${MKLROOT}/include/fftw"
-        sd_fftw3_cflags="${sd_linalg_cflags}"
-        sd_fftw3_cxxflags="${sd_linalg_cxxflags}"
-        sd_fftw3_fcflags="${sd_linalg_fcflags} -I${MKLROOT}/include/fftw"
-        sd_fftw3_ldflags="${sd_linalg_ldflags}"
-        sd_fftw3_libs="${sd_linalg_libs}"
-        SD_FFTW3_DETECT
-        if test "${sd_fftw3_ok}" = "yes"; then
-          sd_fft_ok="yes"
-        fi
-        sd_fftw3_cppflags="-I${MKLROOT}/include/fftw"
-        sd_fftw3_cflags=""
-        sd_fftw3_cxxflags=""
-        sd_fftw3_fcflags="-I${MKLROOT}/include/fftw"
-        sd_fftw3_ldflags=""
-        sd_fftw3_libs=""
-        ;;
       fftw3-mpi)
         if test "${sd_mpi_ok}" = "yes"; then
           SD_FFTW3_DETECT
@@ -339,11 +319,6 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
     if test "${sd_mpi_ok}" = "yes"; then
       sd_fft_selected_flavors="fftw3-mpi ${sd_fft_selected_flavors}"
     fi
-  fi
-
-  # Prepend FFTW3-in-MKL if MKL is present and FFTW3 is not set
-  if test "${tmp_linalg_has_mkl}" != "" -a "${sd_fftw3_enable}" = "no"; then
-    sd_fft_selected_flavors="fftw3-mkl ${sd_fft_selected_flavors}"
   fi
 
   # Prepend DFTI if linear algebra is MKL
