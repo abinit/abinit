@@ -122,7 +122,10 @@ contains
     call self%oiju%finalize()
     call self%oRjlist%finalize()
     call self%oRulist%finalize()
-    !call self%tijuv%finalize()
+    call self%tijuv%finalize()
+    call self%tRjlist%finalize()
+    call self%tRulist%finalize()
+    call self%tRvlist%finalize()
     nullify(self%primcell)
     self%nspin=0
     self%natom=0
@@ -766,6 +769,8 @@ contains
     end do
     
     call scpot%liu_sc%group_by_1dim(ngroup, i1list, ise)
+    ABI_SFREE(i1list)
+    ABI_SFREE(ise)
 
   end subroutine set_liu_sc
 
@@ -817,6 +822,8 @@ contains
     end do
     
     call scpot%niuv_sc%group_by_1dim(ngroup, i1list, ise)
+    ABI_SFREE(i1list)
+    ABI_SFREE(ise)
 
   end subroutine set_niuv_sc
 
@@ -869,6 +876,8 @@ contains
     end do
     
     call scpot%oiju_sc%group_by_1dim(ngroup, i1list, ise)
+    ABI_SFREE(i1list)
+    ABI_SFREE(ise)
 
   end subroutine set_oiju_sc
 
@@ -922,6 +931,8 @@ contains
     end do
     
     call scpot%tijuv_sc%group_by_1dim(ngroup, i1list, ise)
+    ABI_SFREE(i1list)
+    ABI_SFREE(ise)
 
   end subroutine set_tijuv_sc
 
