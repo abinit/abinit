@@ -108,7 +108,7 @@ dmatpawu
 #%% max_nprocs = 2
 #%% [extra_info]
 #%% authors = B. Amadon
-#%% keywords = DMFT
+#%% keywords = DMFT, PAW
 #%% description = 
 #%%   DMFT tests on ferromagnetic NiO (2 atoms), check DMFT for several
 #%%   values of dmft_solv : computes occupations and energy.

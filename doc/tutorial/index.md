@@ -34,14 +34,15 @@ The following schema should help you to understand these dependencies.
 <area shape="rect" coords="70  ,395 ,180 ,420 " href="fold2bloch/index.html" />
 <area shape="rect" coords="70  ,425 ,180 ,445 " href="wannier90/index.html" />
 <area shape="rect" coords="70  ,450 ,180 ,475" href="source_code/index.html" />
-<area shape="rect" coords="225  ,135 ,335 ,199 " href="rf1/index.html" />
-<area shape="rect" coords="225  ,210 ,335 ,240 " href="optic/index.html" />
-<area shape="rect" coords="225  ,250 ,335 ,280 " href="rf2/index.html" />
-<area shape="rect" coords="225  ,290 ,335 ,330 " href="elastic/index.html" />
-<area shape="rect" coords="225  ,340 ,335 ,369 " href="nlo/index.html" />
-<area shape="rect" coords="225  ,370 ,335 ,400 " href="lattice_model/index.html" />
-<area shape="rect" coords="225  ,425 ,335 ,449 " href="eph/index.html" />
-<area shape="rect" coords="225  ,450 ,335 ,485 " href="tdepes/index.html" />
+<area shape="rect" coords="210  ,135 ,330 ,199 " href="rf1/index.html" />
+<area shape="rect" coords="210  ,210 ,330 ,240 " href="optic/index.html" />
+<area shape="rect" coords="210  ,250 ,330 ,280 " href="rf2/index.html" />
+<area shape="rect" coords="210  ,300 ,330 ,325 " href="elastic/index.html" />
+<area shape="rect" coords="210  ,326 ,289 ,379 " href="lattice_model/index.html" />
+<area shape="rect" coords="290  ,326 ,330 ,379 " href="spin_model/index.html" />
+<area shape="rect" coords="210  ,390 ,330 ,420 " href="nlo/index.html" />
+<area shape="rect" coords="210  ,435 ,330 ,464 " href="eph/index.html" />
+<area shape="rect" coords="210  ,465 ,330 ,495 " href="tdepes/index.html" />
 <area shape="rect" coords="355  ,400 ,440 ,440 " href="gw1/index.html" />
 <area shape="rect" coords="355  ,460 ,440 ,479 " href="gw2/index.html" />
 <area shape="rect" coords="355  ,480 ,440 ,500 " href="bse/index.html" />
@@ -53,7 +54,7 @@ The following schema should help you to understand these dependencies.
 <area shape="rect" coords="475  ,360 ,615 ,410 " href="paral_dfpt/index.html" />
 <area shape="rect" coords="415  ,420 ,615 ,470 " href="paral_mbt/index.html" />
 </map>
-<img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v8.png" usemap="#map1"/>
+<img style="height: 540px; width: 720px;" alt="Schema 1" src="index_assets/tutorial_flowchart_v9.png" usemap="#map1"/>
 </center>
 
 The "base" tutorials are presented at the top, in orange. The blocks in red represents additional tutorials related

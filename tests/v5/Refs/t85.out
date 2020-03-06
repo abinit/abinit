@@ -1695,7 +1695,16 @@ P          mk1mem10        64
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 1, nkpt: 8, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 44, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -1733,6 +1742,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 800, nline: 8, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-14, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0827043012104    -2.083E+00 2.448E-03 9.129E-02
  ETOT  2  -2.0828522229659    -1.479E-04 2.027E-07 3.005E-03
@@ -1749,6 +1764,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
   sigma(1 1)=  7.93449314E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  7.93449314E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  7.93449314E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.7500000,   3.7500000, ]
+- [  3.7500000,   0.0000000,   3.7500000, ]
+- [  3.7500000,   3.7500000,   0.0000000, ]
+lattice_lengths: [   5.30330,    5.30330,    5.30330, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0546875E+02
+convergence: {deltae:  2.176E-14, res2:  9.880E-19, residm:  9.193E-15, diffor: null, }
+etotal    :  -2.08285793E+00
+entropy   :   0.00000000E+00
+fermie    :   2.64727165E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  7.93449314E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   7.93449314E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   7.93449314E-05, ]
+pressure_GPa:  -2.3344E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -1788,25 +1830,22 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  8.82393798943335E-01
-    Hartree energy  =  4.71648238760596E-03
-    XC energy       = -8.14998047623223E-01
-    Ewald energy    = -2.75091724446829E+00
-    PspCore energy  =  3.87714100950770E-02
-    Loc. psp. energy=  1.02939391833612E-01
-    NL   psp  energy=  4.54388401693477E-01
-    >>>>> Internal E= -2.08270580713840E+00
-
-    -kT*entropy     = -1.52126468499939E-04
-    >>>>>>>>> Etotal= -2.08285793360690E+00
-
- Other information on the energy :
-    Total energy(eV)= -5.66774467572238E+01 ; Band energy (Ha)=   3.8689770164E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.82393798943335E-01
+hartree             :  4.71648238760596E-03
+xc                  : -8.14998047623223E-01
+Ewald energy        : -2.75091724446829E+00
+psp_core            :  3.87714100950770E-02
+local_psp           :  1.02939391833612E-01
+non_local_psp       :  4.54388401693477E-01
+internal            : -2.08270580713840E+00
+'-kT*entropy'       : -1.52126468499939E-04
+total_energy        : -2.08285793360690E+00
+total_energy_eV     : -5.66774467572238E+01
+band_energy         :  3.86897701641940E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -1821,7 +1860,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 1, nkpt: 64, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 51, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 1, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1865,6 +1913,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-05, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  5.62405391918297E-03 -5.952E+00 4.769E-02 3.903E+00
@@ -1915,6 +1969,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-05, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  5.62405367215035E-03 -5.952E+00 6.457E-02 3.903E+00
  ETOT  2  2.09680629966513E-04 -5.414E-03 7.279E-05 7.323E-02
@@ -1963,6 +2023,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-05, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  5.62405363875662E-03 -5.952E+00 4.768E-02 3.903E+00
@@ -2061,7 +2127,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 1, nkpt: 64, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 51, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 1, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2122,6 +2197,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-05, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   64.359153537597      3.967E+01 2.263E-01 1.756E+04
  ETOT  2   3.5449691660604     -6.081E+01 6.822E-02 6.794E+02
@@ -2172,6 +2253,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-05, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -1.2229001074006     -8.557E+00 1.018E-01 3.230E+01
  ETOT  2  -1.6583386152577     -4.354E-01 4.464E-04 5.618E+00
@@ -2220,6 +2307,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-05, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -1.2229366418227     -8.557E+00 3.836E-02 3.230E+01
@@ -2304,7 +2397,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 ================================================================================
 == DATASET  4 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 1, nkpt: 64, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 51, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 1, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2364,6 +2466,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-05, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   38.093462918627      1.948E+01 7.212E-02 4.145E+03
  ETOT  2   72.213051577850      3.412E+01 1.006E-02 4.597E+03
@@ -2414,6 +2522,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-05, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   38.093402789005      1.948E+01 7.214E-02 4.145E+03
  ETOT  2   72.212906440865      3.412E+01 1.006E-02 4.597E+03
@@ -2463,6 +2577,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 7, nstep: 800, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-05, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   52.995232549291      4.219E+01 3.536E-02 3.535E+03
@@ -2547,7 +2667,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 ================================================================================
 == DATASET  5 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 1, nkpt: 64, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 51, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2608,6 +2737,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: -3, nstep: 800, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-14, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -149.94490772851     -1.499E+02 2.321E-02 0.000E+00
  ETOT  2  -149.94491402592     -6.297E-06 1.278E-05 0.000E+00
@@ -2659,6 +2794,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: -3, nstep: 800, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-14, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -149.94490772527     -1.499E+02 2.321E-02 0.000E+00
@@ -2712,6 +2853,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: -3, nstep: 800, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-14, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -149.94490772200     -1.499E+02 2.321E-02 0.000E+00
  ETOT  2  -149.94491401941     -6.297E-06 1.278E-05 0.000E+00
@@ -2757,7 +2904,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 ================================================================================
 == DATASET  6 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 6, }
+dimensions: {natom: 1, nkpt: 64, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 44, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -2782,6 +2938,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 1, nline: 1, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-14, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -2.0828579336108    -2.083E+00 9.195E-15 2.077E-23
 
@@ -2791,6 +2953,33 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
   sigma(1 1)=  7.93449314E-05  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  7.93449314E-05  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  7.93449314E-05  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 6, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.7500000,   3.7500000, ]
+- [  3.7500000,   0.0000000,   3.7500000, ]
+- [  3.7500000,   3.7500000,   0.0000000, ]
+lattice_lengths: [   5.30330,    5.30330,    5.30330, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.0546875E+02
+convergence: {deltae: -2.083E+00, res2:  2.077E-23, residm:  9.195E-15, diffor: null, }
+etotal    :  -2.08285793E+00
+entropy   :   0.00000000E+00
+fermie    :   2.64727165E-01
+cartesian_stress_tensor: # hartree/bohr^3
+- [  7.93449314E-05,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   7.93449314E-05,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   7.93449314E-05, ]
+pressure_GPa:  -2.3344E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -2830,25 +3019,22 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  8.82393798940289E-01
-    Hartree energy  =  4.71648238806934E-03
-    XC energy       = -8.14998047623499E-01
-    Ewald energy    = -2.75091724446829E+00
-    PspCore energy  =  3.87714100950770E-02
-    Loc. psp. energy=  1.02939391839643E-01
-    NL   psp  energy=  4.54388401686426E-01
-    >>>>> Internal E= -2.08270580714228E+00
-
-    -kT*entropy     = -1.52126468500082E-04
-    >>>>>>>>> Etotal= -2.08285793361078E+00
-
- Other information on the energy :
-    Total energy(eV)= -5.66774467573294E+01 ; Band energy (Ha)=   3.8689770168E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 6, }
+comment             : Components of total free energy in Hartree
+kinetic             :  8.82393798940289E-01
+hartree             :  4.71648238806934E-03
+xc                  : -8.14998047623499E-01
+Ewald energy        : -2.75091724446829E+00
+psp_core            :  3.87714100950770E-02
+local_psp           :  1.02939391839643E-01
+non_local_psp       :  4.54388401686426E-01
+internal            : -2.08270580714228E+00
+'-kT*entropy'       : -1.52126468500082E-04
+total_energy        : -2.08285793361078E+00
+total_energy_eV     : -5.66774467573294E+01
+band_energy         :  3.86897701675729E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -2863,7 +3049,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 ================================================================================
 == DATASET  7 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 7, }
+dimensions: {natom: 1, nkpt: 64, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 51, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 1, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   6.
 
@@ -3080,7 +3275,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 ================================================================================
 == DATASET  8 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 8, }
+dimensions: {natom: 1, nkpt: 64, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 51, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 1, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   6.
 
@@ -3312,7 +3516,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 ================================================================================
 == DATASET  9 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 9, }
+dimensions: {natom: 1, nkpt: 64, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 51, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 1, rfphon: 1, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   6.
 
@@ -3544,7 +3757,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
 
 ================================================================================
 == DATASET 10 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 10, }
+dimensions: {natom: 1, nkpt: 64, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 51, }
+cutoff_energies: {ecut:   4.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   6.
 
@@ -3607,6 +3829,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 10, }
+solver: {iscf: -3, nstep: 1, nline: 1, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-14, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -149.94450180477     -1.499E+02 1.581E+00 0.000E+00
 
@@ -3658,6 +3886,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 10, }
+solver: {iscf: -3, nstep: 1, nline: 1, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-14, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -149.94450152787     -1.499E+02 1.674E+00 0.000E+00
 
@@ -3708,6 +3942,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      41.203      41.144
   fully or partially occupied states are    3.000000E+00 and    3.000000E+00.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 10, }
+solver: {iscf: -3, nstep: 1, nline: 1, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-14, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -149.94450125096     -1.499E+02 1.674E+00 0.000E+00

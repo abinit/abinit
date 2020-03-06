@@ -721,6 +721,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_gemm_nonlop',tread,'INT')
  if(tread==1) dtset%use_gemm_nonlop=intarr(1)
 
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'use_yaml',tread,'INT')
+ if(tread==1) dtset%use_yaml=intarr(1)
+
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'boxcutmin',tread,'DPR')
  if(tread==1) dtset%boxcutmin=dprarr(1)
 
@@ -959,7 +962,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) dtset%rcut=dprarr(1)
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'zcut',tread,'ENE')
- if(tread==1) dtset%zcut=dprarr(1)
+ if(tread==1) dtset%zcut = dprarr(1)
+ !else
+ !  ! Change default value in EPH calculations
+ !  !if (dtset%optdriver == RUNL_EPH) then
+ !  !  dtset%zcut = 0.001_dp * eV_Ha
+ !  !end if
+ !end if
 
  ! q-points for long wave-length limit.
  if (dtset%gw_nqlwl>0) then
@@ -1246,7 +1255,9 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    dtset%eph_intmeth = intarr(1)
  else
    ! eph_intmeth depends on eph_task.
-   if (abs(dtset%eph_task) == 4) dtset%eph_intmeth = 1
+   !if (abs(dtset%eph_task) == 4) dtset%eph_intmeth = 1
+   if (dtset%eph_task == +4) dtset%eph_intmeth = 1
+   if (dtset%eph_task == -4 .and. dtset%symsigma == 0) dtset%eph_intmeth = 1
  end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'eph_extrael',tread,'DPR')
@@ -2292,6 +2303,15 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntime',tread,'INT')
  if(tread==1) dtset%ntime=intarr(1)
+
+ if (tread == 0) then
+   ! if ntime is not given but ionmov > 0 and imgmv is != 0, use a reasonable number of iterations!
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ionmov',tread,'INT')
+   if (tread == 1 .and. intarr(1) /= 0 .and. dtset%imgmov == 0) then
+     dtset%ntime = 1000
+     MSG_COMMENT("Found ionmov /= 0 without ntime in the input. ntime has been set automatically to 1000")
+   end if
+ end if
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nctime',tread,'INT')
  if(tread==1) dtset%nctime=intarr(1)

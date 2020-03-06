@@ -88,6 +88,9 @@ _ WF disk file :      5.095 Mbytes ; DEN or POT disk file :      0.152 Mbytes.
               amu      6.94100000E+00  1.89984032E+01
         boxcutmin      1.70000000E+00
              ecut      3.50000000E+01 Hartree
+      eph_phrange1       0    0
+      eph_phrange2       0    0
+      eph_phrange3       1    6
          eph_task1          1
          eph_task2          5
          eph_task3         -4
@@ -258,7 +261,16 @@ P           mkmem3         29
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 7, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1151, }
+cutoff_energies: {ecut:  35.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
 
@@ -356,6 +368,30 @@ P           mkmem3         29
   7.2626E-01  7.5202E-01  9.0361E-01  9.1668E-01
   prteigrs : nnsclo,ikpt=   30    7 max resid (incl. the buffer)=  1.88966E-13
 
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   3.8515040,   3.8515040, ]
+- [  3.8515040,   0.0000000,   3.8515040, ]
+- [  3.8515040,   3.8515040,   0.0000000, ]
+lattice_lengths: [   5.44685,    5.44685,    5.44685, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   1.1426706E+02
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.796E-17, diffor:  0.000E+00, }
+etotal    :  -2.52026287E+01
+entropy   :   0.00000000E+00
+fermie    :  -7.09476690E-03
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Li]
+- [  5.0000E-01,   5.0000E-01,   5.0000E-01,  F]
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -401,7 +437,16 @@ P           mkmem3         29
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 8, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1131, }
+cutoff_energies: {ecut:  35.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: 5, }
+...
 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
 
@@ -511,7 +556,16 @@ Interpolation of the electron-phonon coupling potential completed
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 29, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1151, }
+cutoff_energies: {ecut:  35.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: -4, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -731,6 +785,9 @@ Transport calculation results
               amu      6.94100000E+00  1.89984032E+01
         boxcutmin      1.70000000E+00
              ecut      3.50000000E+01 Hartree
+      eph_phrange1       0    0
+      eph_phrange2       0    0
+      eph_phrange3       1    6
          eph_task1          1
          eph_task2          5
          eph_task3         -4

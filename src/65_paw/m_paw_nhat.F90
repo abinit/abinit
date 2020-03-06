@@ -134,7 +134,7 @@ subroutine pawmknhat(compch_fft,cplex,ider,idir,ipert,izero,gprimd,&
  integer,intent(in) :: nhatgrdim,nspden,ntypat
  integer,optional,intent(in) :: me_g0,comm_atom,comm_fft,mpi_comm_wvl,paral_kgb
  real(dp),intent(in) :: ucvol
- real(dp),intent(out) :: compch_fft
+ real(dp),intent(inout) :: compch_fft
  type(distribfft_type),optional,intent(in),target :: distribfft
  type(pawang_type),intent(in) :: pawang
 !arrays

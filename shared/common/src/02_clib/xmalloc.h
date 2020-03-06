@@ -22,7 +22,7 @@
 #define _XMALLOC_H_
 
 extern void* xmalloc (size_t);
-extern void* xrealloc (void *, size_t);
+/* extern void* xrealloc (void *, size_t); */
 extern void  xfree (void *);
 
 #endif /* _XMALLOC_H_ */

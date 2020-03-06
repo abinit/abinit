@@ -3301,7 +3301,7 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
 ! *************************************************************************
 
  ! Open netcdf file
- msg = "No message"
+ msg = "Netcdf not activated at configure time!"
 #ifdef HAVE_NETCDF
  ierr = 0
 
@@ -3377,15 +3377,15 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  NCF_CHECK(nf90_get_var(ncid, vid("eph_fermie"), eph_fermie))
  NCF_CHECK(nf90_get_var(ncid, vid("ph_wstep"), ph_wstep))
  NCF_CHECK(nf90_get_var(ncid, vid("ph_smear"), ph_smear))
- ABI_CHECK(eph_fsewin  == dtset%eph_fsewin,  "netcdf eph_fsewin != input file")
- ABI_CHECK(eph_fsmear  == dtset%eph_fsmear,  "netcdf eph_fsmear != input file")
- ABI_CHECK(ph_wstep    == dtset%ph_wstep,    "netcdf ph_wstep != input file")
- ABI_CHECK(ph_smear    == dtset%ph_smear,    "netcdf ph_smear != input file")
+ ABI_CHECK(eph_fsewin  == dtset%eph_fsewin, "netcdf eph_fsewin != input file")
+ ABI_CHECK(eph_fsmear  == dtset%eph_fsmear, "netcdf eph_fsmear != input file")
+ ABI_CHECK(ph_wstep    == dtset%ph_wstep, "netcdf ph_wstep != input file")
+ ABI_CHECK(ph_smear    == dtset%ph_smear, "netcdf ph_smear != input file")
  if (present(extrael_fermie)) then
    extrael_fermie = [eph_extrael, eph_fermie]
  else
    ABI_CHECK(eph_extrael == dtset%eph_extrael, "netcdf eph_extrael != input file")
-   ABI_CHECK(eph_fermie  == dtset%eph_fermie,  "netcdf eph_feremie != input file")
+   ABI_CHECK(eph_fermie  == dtset%eph_fermie, "netcdf eph_feremie != input file")
  end if
 
  NCF_CHECK(nf90_get_var(ncid, vid("eph_task"), eph_task))
@@ -3393,10 +3393,10 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  NCF_CHECK(nf90_get_var(ncid, vid("ph_intmeth"), ph_intmeth))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_intmeth"), eph_intmeth))
  NCF_CHECK(nf90_get_var(ncid, vid("eph_transport"), eph_transport))
- ABI_CHECK(symdynmat     == dtset%symdynmat,    "netcdf symdynmat != input file")
- ABI_CHECK(ph_intmeth    == dtset%ph_intmeth,   "netcdf ph_intmeth != input file")
- ABI_CHECK(eph_intmeth   == dtset%eph_intmeth,  "netcdf eph_intmeth != input file")
- ABI_CHECK(eph_transport == dtset%eph_transport,"netcdf eph_transport != input file")
+ ABI_CHECK(symdynmat     == dtset%symdynmat, "netcdf symdynmat != input file")
+ ABI_CHECK(ph_intmeth    == dtset%ph_intmeth, "netcdf ph_intmeth != input file")
+ ABI_CHECK(eph_intmeth   == dtset%eph_intmeth, "netcdf eph_intmeth != input file")
+ ABI_CHECK(eph_transport == dtset%eph_transport, "netcdf eph_transport != input file")
 
  NCF_CHECK(nf90_get_var(ncid, vid("eph_ngqpt_fine"), eph_ngqpt_fine))
  NCF_CHECK(nf90_get_var(ncid, vid("ddb_ngqpt"), ddb_ngqpt))
@@ -3414,11 +3414,11 @@ type(sigmaph_t) function sigmaph_read(path, dtset, comm, msg, ierr, keep_open, e
  end if
 
  ABI_CHECK(all(dtset%eph_ngqpt_fine == eph_ngqpt_fine),"netcdf eph_ngqpt_fine != input file")
- ABI_CHECK(all(dtset%ddb_ngqpt      == ddb_ngqpt),     "netcdf ddb_ngqpt != input file")
- ABI_CHECK(all(dtset%ph_ngqpt       == ph_ngqpt),      "netcdf ph_ngqpt != input file")
- ABI_CHECK(all(dtset%sigma_ngkpt    == sigma_ngkpt),   "netcdf sigma_ngkpt != input file")
+ ABI_CHECK(all(dtset%ddb_ngqpt      == ddb_ngqpt), "netcdf ddb_ngqpt != input file")
+ ABI_CHECK(all(dtset%ph_ngqpt       == ph_ngqpt), "netcdf ph_ngqpt != input file")
+ ABI_CHECK(all(dtset%sigma_ngkpt    == sigma_ngkpt), "netcdf sigma_ngkpt != input file")
  !ABI_CHECK(all(abs(dtset%frohl_params - frohl_params) < tol6), "netcdf frohl_params != input file")
- !ABI_CHECK(all(abs(dtset%sigma_erange - sigma_erange) < tol6),  "netcdf sigma_erange != input file")
+ !ABI_CHECK(all(abs(dtset%sigma_erange - sigma_erange) < tol6), "netcdf sigma_erange != input file")
 
  call cwtime_report(" sigmaph_read", cpu, wall, gflops)
 
@@ -3542,12 +3542,12 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
        do itemp=1,self%ntemp
          ! Read SERTA lifetimes
          ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vals_e0ks"),&
-                 linewidth_serta(itemp,band_ks,ikpt,spin), start=[2,itemp,iband,ikcalc,spin])
+                 linewidth_serta(itemp,band_ks,ikpt,spin), start=[2, itemp, iband, ikcalc, spin])
          NCF_CHECK(ncerr)
          ! Read MRTA lifetimes
          if (has_mrta) then
             ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "linewidth_mrta"),&
-                                 linewidth_mrta(itemp,band_ks,ikpt,spin), start=[itemp,iband,ikcalc,spin])
+                                 linewidth_mrta(itemp,band_ks,ikpt,spin), start=[itemp, iband, ikcalc, spin])
             NCF_CHECK(ncerr)
          end if
        end do
@@ -3556,13 +3556,13 @@ type(ebands_t) function sigmaph_get_ebands(self, cryst, ebands, linewidth_serta,
        if (has_vel) then
          if (has_car_vel) then
            ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vcar_calc"),&
-                                velocity(:,band_ks,ikpt,spin), start=[1,iband,ikcalc,spin])
+                                velocity(:,band_ks,ikpt,spin), start=[1, iband, ikcalc, spin])
            NCF_CHECK(ncerr)
          end if
          ! TODO: This section of code can be removed because we don't write vred_calc anymore
          if (has_red_vel) then
            ncerr = nf90_get_var(self%ncid, nctk_idname(self%ncid, "vred_calc"),&
-                                vk_red(1,:), start=[1,iband,ikcalc,spin])
+                                vk_red(1,:), start=[1, iband, ikcalc, spin])
            NCF_CHECK(ncerr)
            call ddk_red2car(cryst%rprimd, vk_red, vk_car)
            velocity(:,band_ks,ikpt,spin) = vk_car(1,:)
@@ -3987,7 +3987,7 @@ end subroutine sigmaph_setup_kcalc
 pure logical function sigmaph_skip_mode(self, nu, wqnu) result(skip)
 
 !Arguments ------------------------------------
- class(sigmaph_t),target,intent(in) :: self
+ class(sigmaph_t),intent(in) :: self
  integer,intent(in) :: nu
  real(dp),intent(in) :: wqnu
 

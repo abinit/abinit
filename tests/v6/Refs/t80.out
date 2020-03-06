@@ -1,5 +1,5 @@
 
-.Version 8.11.14 of ANADDB 
+.Version 9.0.0 of ANADDB 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 15 Jan 2020.
-- ( at 21h25 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h21 )
   
 
 ================================================================================
@@ -76,7 +76,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.026  and twall      0.026 sec
+-begin at tcpu      0.034  and twall      0.034 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :       32
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -715,10 +715,10 @@
  Phonon energies in Kelvin  :
 -  1.258274E+02  1.258274E+02  4.234511E+02
 -
-- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.0
+- Proc.   0 individual time (sec): cpu=          0.0  wall=          0.1
 
 ================================================================================
 
-+Total cpu time      0.039  and wall time      0.040 sec
++Total cpu time      0.049  and wall time      0.051 sec
 
  anaddb : the run completed succesfully.

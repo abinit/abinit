@@ -90,7 +90,7 @@
 
  Calculation of the interatomic forces 
 
--begin at tcpu      0.026  and twall      0.026 sec
+-begin at tcpu      0.035  and twall      0.036 sec
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00

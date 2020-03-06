@@ -2224,7 +2224,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        end if
      end do
 
-     if (wfd%iam_master()) call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,KS_BSt,dtset%use_yaml)
+     if (wfd%iam_master()) call write_sigma_results(ikcalc,ik_ibz,Sigp,Sr,KS_BSt)
    end do !ikcalc
 
    call timab(425,2,tsec) ! solve_dyson

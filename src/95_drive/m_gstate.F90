@@ -792,8 +792,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    else if(ios==0)then
      write(message, '(a,a,i4,a)' )ch10,&
 &     ' gstate : reading',ab_xfh%nxfh,' (x,f) history pairs from input wf file.'
-     call wrtout(std_out,message,'COLL')
-     call wrtout(ab_out,message,'COLL')
+     call wrtout([std_out, ab_out], message)
    end if
 !  WARNING : should check that restartxf is not negative
 !  WARNING : should check that restartxf /= only when dtfil%ireadwf is activated
@@ -1283,8 +1282,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
    call dtfil_init_time(dtfil,0)
 
    write(message,'(a,80a)')ch10,('=',mu=1,80)
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
 
    if (dtset%ionmov==0 .or. dtset%imgmov==6) then
 
@@ -1337,8 +1335,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 
  write(message, '(80a,a,a,a,a)' ) ('=',mu=1,80),ch10,ch10,&
 & ' ----iterations are completed or convergence reached----',ch10
- call wrtout(ab_out,message,'COLL')
- call wrtout(std_out,  message,'COLL')
+ call wrtout([std_out, ab_out], message)
 
 !Mark this GS computation as done
  initialized=1
@@ -1453,10 +1450,8 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      write(message,'(a,a)')   ch10, 'Constant reduced ebar and d calculation  - final values:'
    end if
 
-   call wrtout(ab_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
    call prtefield(dtset,dtefield,ab_out,rprimd)
-
-   call wrtout(std_out,message,'COLL')
    call prtefield(dtset,dtefield,std_out,rprimd)
 
 !  To check if the final electric field is below the critical field
@@ -1470,13 +1465,10 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
 &   '  As a rough estimate,',ch10,&
 &   '  to be below the critical field, the bandgap of your system',ch10,&
 &   '  should be larger than ',maxval(efield_band)*Ha_eV,' eV.',ch10
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+   call wrtout([std_out, ab_out], message)
 
    write(message,'(a)')  '--------------------------------------------------------------------------------'
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
-
+   call wrtout([std_out, ab_out], message)
  end if
 
 !Open the formatted derivative database file, and write the preliminary information
@@ -1722,6 +1714,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
  call timab(32,2,tsec)
 
  DBG_EXIT("COLL")
+
 end subroutine gstate
 !!***
 
@@ -1807,17 +1800,14 @@ subroutine setup2(dtset,npwtot,start,wfs,xred)
 
 !  Ensure portability of output thanks to tol8
      if (dtset%usewvl == 0) then
-       write(message, '(a,2f12.3)' ) &
-&       '_setup2: Arith. and geom. avg. npw (full set) are',arith+tol8,geom
+       write(message, '(a,2f12.3)' ) '_setup2: Arith. and geom. avg. npw (full set) are',arith+tol8,geom
      else
 #if defined HAVE_BIGDFT
        write(message, '(a,2I8)' ) ' setup2: nwvl coarse and fine are', &
 &       wfs%ks%lzd%Glr%wfd%nvctr_c, wfs%ks%lzd%Glr%wfd%nvctr_f
 #endif
      end if
-     call wrtout(ab_out,  message,'COLL')
-     call wrtout(std_out, message,'COLL')
-
+     call wrtout([std_out, ab_out], message)
    end if
 
 #if !defined HAVE_BIGDFT
@@ -2263,92 +2253,82 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
 !scalars
  integer :: iatom,mu
  real(dp) :: devsqr,grchempot2
- character(len=500) :: message
+ character(len=500) :: msg
+ integer :: units(2)
 
 ! *************************************************************************
-!
-!DEBUG
+
 !write(std_out,*)' clnup2 : enter '
-!ENDDEBUG
 
 !Only print additional info for scf calculations
  if (iscf>=0) then
 
-   if((prtvol>=10).and.(prtfor>0))then
+   if(prtvol >= 10 .and. prtfor > 0) then
+     write(msg, '(a,10x,a)' ) ch10, '===> extra information on forces <==='
+     call wrtout(ab_out,msg)
 
-     write(message, '(a,10x,a)' ) ch10,&
-&     '===> extra information on forces <==='
-     call wrtout(ab_out,message,'COLL')
-
-     write(message, '(a)' ) ' ewald contribution to reduced grads'
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out, ' ewald contribution to reduced grads')
      do iatom=1,natom
-       write(message,format01020) iatom,(grewtn(mu,iatom),mu=1,3)
-       call wrtout(ab_out,message,'COLL')
+       write(msg,format01020) iatom,(grewtn(mu,iatom),mu=1,3)
+       call wrtout(ab_out,msg)
      end do
 
      grchempot2=sum(grchempottn(:,:)**2)
      if(grchempot2>tol16)then
-       write(message, '(a)' ) ' chemical potential contribution to reduced grads'
-       call wrtout(ab_out,message,'COLL')
+       call wrtout(ab_out, ' chemical potential contribution to reduced grads')
        do iatom=1,natom
-         write(message,format01020) iatom,(grchempottn(mu,iatom),mu=1,3)
-         call wrtout(ab_out,message,'COLL')
+         write(msg,format01020) iatom,(grchempottn(mu,iatom),mu=1,3)
+         call wrtout(ab_out,msg)
        end do
      end if
 
-     write(message, '(a)' ) ' nonlocal contribution to red. grads'
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,' nonlocal contribution to red. grads')
      do iatom=1,natom
-       write(message,format01020) iatom,(synlgr(mu,iatom),mu=1,3)
-       call wrtout(ab_out,message,'COLL')
+       write(msg,format01020) iatom,(synlgr(mu,iatom),mu=1,3)
+       call wrtout(ab_out,msg)
      end do
 
-     write(message, '(a)' ) ' local psp contribution to red. grads'
-     call wrtout(ab_out,message,'COLL')
-     if (n1xccc/=0) then
+     call wrtout(ab_out, ' local psp contribution to red. grads')
+     if (n1xccc /= 0) then
        do iatom=1,natom
-         write(message,format01020) iatom,fred(:,iatom)-&
-&         (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+grxc(:,iatom)+gresid(:,iatom))
-         call wrtout(ab_out,message,'COLL')
+         write(msg,format01020) iatom,fred(:,iatom) - &
+          (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+grxc(:,iatom)+gresid(:,iatom))
+         call wrtout(ab_out,msg)
        end do
      else
        do iatom=1,natom
-         write(message,format01020) iatom,fred(:,iatom)-&
-&         (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+gresid(:,iatom))
-         call wrtout(ab_out,message,'COLL')
+         write(msg,format01020) iatom,fred(:,iatom) - &
+         (grewtn(:,iatom)+grchempottn(:,iatom)+synlgr(:,iatom)+gresid(:,iatom))
+         call wrtout(ab_out,msg)
        end do
      end if
 
-     if (n1xccc/=0) then
-       write(message, '(a)' ) ' core charge xc contribution to reduced grads'
-       call wrtout(ab_out,message,'COLL')
+     if (n1xccc /= 0) then
+       call wrtout(ab_out,' core charge xc contribution to reduced grads')
        do iatom=1,natom
-         write(message,format01020) iatom,(grxc(mu,iatom),mu=1,3)
-         call wrtout(ab_out,message,'COLL')
+         write(msg,format01020) iatom,(grxc(mu,iatom),mu=1,3)
+         call wrtout(ab_out,msg)
        end do
      end if
 
-     if (ngrvdw==natom) then
-       write(message, '(a)' ) ' Van der Waals DFT-D contribution to reduced grads'
-       call wrtout(ab_out,message,'COLL')
+     if (ngrvdw == natom) then
+       call wrtout(ab_out,' Van der Waals DFT-D contribution to reduced grads')
        do iatom=1,natom
-         write(message,format01020) iatom,(grvdw(mu,iatom),mu=1,3)
-         call wrtout(ab_out,message,'COLL')
+         write(msg,format01020) iatom,(grvdw(mu,iatom),mu=1,3)
+         call wrtout(ab_out,msg)
        end do
      end if
 
-     write(message, '(a)' ) ' residual contribution to red. grads'
-     call wrtout(ab_out,message,'COLL')
+     call wrtout(ab_out,' residual contribution to red. grads')
      do iatom=1,natom
-       write(message,format01020) iatom,(gresid(mu,iatom),mu=1,3)
-       call wrtout(ab_out,message,'COLL')
+       write(msg,format01020) iatom,(gresid(mu,iatom),mu=1,3)
+       call wrtout(ab_out,msg)
      end do
 
    end if
 
 !  Compute mean squared deviation from starting coords
-   devsqr=0.0_dp
+   devsqr=zero
    do iatom=1,natom
      do mu=1,3
        devsqr=devsqr+(xred(mu,iatom)-start(mu,iatom))**2
@@ -2357,69 +2337,50 @@ subroutine clnup2(n1xccc,fred,grchempottn,gresid,grewtn,grvdw,grxc,iscf,natom,ng
 
 !  When shift is nonnegligible then print values
    if (devsqr>1.d-14) then
-     write(message, '(a,1p,e12.4,3x,a)' ) &
-&     ' rms coord change=',sqrt(devsqr/dble(3*natom)),&
-&     'atom, delta coord (reduced):'
-     call wrtout(ab_out,message,'COLL')
+     write(msg, '(a,1p,e12.4,3x,a)' )' rms coord change=',sqrt(devsqr/dble(3*natom)),'atom, delta coord (reduced):'
+     call wrtout(ab_out,msg)
      do iatom=1,natom
-       write(message, '(1x,i5,2x,3f20.12)' ) iatom,&
-&       (xred(mu,iatom)-start(mu,iatom),mu=1,3)
-       call wrtout(ab_out,message,'COLL')
+       write(msg, '(1x,i5,2x,3f20.12)' ) iatom, (xred(mu,iatom)-start(mu,iatom),mu=1,3)
+       call wrtout(ab_out,msg)
      end do
    end if
 
-!  Write out stress results
-   if (prtstr>0) then
-     write(message, '(a,a)' ) ch10,&
-&     ' Cartesian components of stress tensor (hartree/bohr^3)'
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+   if (prtstr > 0) then
+     !  Write out stress results
+     units = [std_out, ab_out]
+     write(msg, '(a,a)' ) ch10,' Cartesian components of stress tensor (hartree/bohr^3)'
+     call wrtout(units, msg)
 
-     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&     '  sigma(1 1)=',strten(1),'  sigma(3 2)=',strten(4)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&     '  sigma(2 2)=',strten(2),'  sigma(3 1)=',strten(5)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&     '  sigma(3 3)=',strten(3),'  sigma(2 1)=',strten(6)
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) '  sigma(1 1)=',strten(1),'  sigma(3 2)=',strten(4)
+     call wrtout(units, msg)
+     write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) '  sigma(2 2)=',strten(2),'  sigma(3 1)=',strten(5)
+     call wrtout(units, msg)
+     write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) '  sigma(3 3)=',strten(3),'  sigma(2 1)=',strten(6)
+     call wrtout(units, msg)
 
-!    Also output the pressure (minus one third the trace of the stress
-!    tensor.
-     write(message, '(a,a,es12.4,a)' ) ch10,&
-&     '-Cartesian components of stress tensor (GPa)         [Pressure=',&
-&     -(strten(1)+strten(2)+strten(3))*HaBohr3_GPa/3.0_dp,' GPa]'
+     !  Also output the pressure (minus one third the trace of the stress tensor).
+     write(msg, '(a,a,es12.4,a)' ) ch10,&
+     '-Cartesian components of stress tensor (GPa)         [Pressure=',&
+      -(strten(1)+strten(2)+strten(3))*HaBohr3_GPa/3.0_dp,' GPa]'
+     call wrtout(units, msg)
 
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-
-     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&     '- sigma(1 1)=',strten(1)*HaBohr3_GPa,&
-&     '  sigma(3 2)=',strten(4)*HaBohr3_GPa
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&     '- sigma(2 2)=',strten(2)*HaBohr3_GPa,&
-&     '  sigma(3 1)=',strten(5)*HaBohr3_GPa
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
-     write(message, '(a,1p,e16.8,a,1p,e16.8)' ) &
-&     '- sigma(3 3)=',strten(3)*HaBohr3_GPa,&
-&     '  sigma(2 1)=',strten(6)*HaBohr3_GPa
-     call wrtout(ab_out,message,'COLL')
-     call wrtout(std_out,  message,'COLL')
+     write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) &
+       '- sigma(1 1)=',strten(1)*HaBohr3_GPa,&
+       '  sigma(3 2)=',strten(4)*HaBohr3_GPa
+     call wrtout(units, msg)
+     write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) &
+       '- sigma(2 2)=',strten(2)*HaBohr3_GPa,&
+       '  sigma(3 1)=',strten(5)*HaBohr3_GPa
+     call wrtout(units, msg)
+     write(msg, '(a,1p,e16.8,a,1p,e16.8)' ) &
+       '- sigma(3 3)=',strten(3)*HaBohr3_GPa,&
+       '  sigma(2 1)=',strten(6)*HaBohr3_GPa
+     call wrtout(units, msg)
    end if
 
-!  Last end if above refers to iscf > 0
- end if
+ end if ! iscf > 0
 
-!DEBUG
-!write(std_out,*)' clnup2 : exit '
-!ENDDEBUG
+ !write(std_out,*)' clnup2 : exit '
 
 end subroutine clnup2
 !!***
