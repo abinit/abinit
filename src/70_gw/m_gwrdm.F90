@@ -300,20 +300,29 @@ subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr,Hdr2)
  integer :: ib1dm,ib2dm,dim_bands,ikpoint,irecip_v
 !arrays
 !************************************************************************
- !Wfd%Wave(1,2,1)%ug(1) ! BAND 1 , k-POINT 2, SPIN 1, UG="MO Coef" 1 
- do ikpoint=1,BSt%nkpt
-   do ib1dm=b1gw,b2gw
-     do irecip_v=1,wfd_i%Kdata(ikpoint)%npw ! No spin used, setting nspinor=1 
-      wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v)=0.0d0 
-      do ib2dm=b1gw,b2gw
-        wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v)=wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v) &
-                +nateigv(ib2dm,ib1dm,ikpoint)*wfd_i%Wave(ib2dm,ikpoint,1)%ug(irecip_v)
-      enddo
-     enddo 
-     !write(*,'(*(f10.5))') real(nateigv(ib1dm,:,ikpoint)) Print for debug
+ !Wfd%Wave(1,2,1)%ug(1) ! BAND 1 , k-POINT 2, SPIN 1, UG="MO Coef" 1
+
+ call xmpi_barrier(Wfd_i%comm)
+
+ if(xmpi_comm_rank(Wfd_i%comm)==0) then 
+   do ikpoint=1,BSt%nkpt
+     !write(*,'(a27,i5,a8,i5,i5,a6,i5)') ' Nat. eigenvectors k-point ',ikpoint,' bands: ',b1gw,b2gw,' npw: ',wfd_i%Kdata(ikpoint)%npw ! Print for debug
+     do ib1dm=b1gw,b2gw
+       do irecip_v=1,wfd_i%Kdata(ikpoint)%npw ! No spin used, setting nspinor=1 
+        wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v)=0.0d0 
+        do ib2dm=b1gw,b2gw
+          wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v)=wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v) &
+                  +nateigv(ib2dm,ib1dm,ikpoint)*wfd_i%Wave(ib2dm,ikpoint,1)%ug(irecip_v)
+        enddo
+       enddo
+       !write(*,'(*(f10.5))') real(nateigv(ib1dm,:,ikpoint)) !Print for debug
+     enddo
+     !write(*,*) ' ' !Space for debug
    enddo
-     !write(*,*) ' ' Space for debug
- enddo
+ endif
+ 
+ call xmpi_barrier(Wfd_i%comm)
+
  ! MRM BSt occ are changed and never recoverd
  MSG_COMMENT("QP_BSt occupations were updated with nat. orb. ones")
  do ikpoint=1,BSt%nkpt
@@ -335,6 +344,7 @@ subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr,Hdr2)
      ib1dm=ib1dm+1
    enddo
  enddo
+
 end subroutine update_wfk_gw_rdm        
 !!***
 
