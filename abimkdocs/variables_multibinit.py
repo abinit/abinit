@@ -308,6 +308,18 @@ Flag to activate the strain  phonon coupling. This option will add coefficients 
 """,
 ),
 
+Variable(
+    abivarname="fit_SPC_maxS@multibinit",
+    varset="multibinit",
+    vartype="integer",
+    topics=['FitProcess_basic'],
+    dimensions="scalar",
+    defaultval=1,
+    mnemonics="FIT anharmonic Strain-Phonon COUPLING coefficients",
+    text=r"""
+Set maximum power of strain body in strain-phonon coupling terms. 
+""",
+),
 
 Variable(
     abivarname="fit_tolMSDE@multibinit",
