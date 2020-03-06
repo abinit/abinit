@@ -2279,7 +2279,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    end if
    ! MRM print WFK and DEN files. Finally, deallocate all arrays used for 1-RDM update
    if(gwcalctyp==21) then
-     if(dtset%useric==0) then      
+     if(dtset%useric==0 .and. (Dtset%gwpara==1 .or. Dtset%gwpara==0)) then      
        write(msg,'(a1)')' '
        call wrtout(std_out,msg,'COLL')
        write(msg,'(a46)')' Computing Nat. Orbs. to store them in Wfd_dm'
@@ -2328,6 +2328,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        Wfd_dm%bks_comm = xmpi_comm_null
        call Wfd_dm%free()
      endif
+     if(dtset%useric==0 .and. Dtset%gwpara==2) then     
+       MSG_WARNING("Unable to print DEN files with gwpara=2 (band parallelization)")          ! FIXME
+     endif 
      ABI_FREE(dm1) 
      ABI_FREE(nateigv) 
      ABI_FREE(freqs)

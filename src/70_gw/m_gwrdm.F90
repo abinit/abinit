@@ -297,16 +297,20 @@ subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr,Hdr2)
  complex(dpc),intent(in) :: nateigv(:,:,:)
 !Local variables ------------------------------
 !scalars
+ character(len=500) :: msg
  integer :: ib1dm,ib2dm,dim_bands,ikpoint,irecip_v
 !arrays
 !************************************************************************
- !Wfd%Wave(1,2,1)%ug(1) ! BAND 1 , k-POINT 2, SPIN 1, UG="MO Coef" 1
+ DBG_ENTER("COLL")
 
- call xmpi_barrier(Wfd_i%comm)
+ !call xmpi_barrier(Wfd_i%comm)
 
- if(xmpi_comm_rank(Wfd_i%comm)==0) then 
+ ! Only master
+ !if(xmpi_comm_rank(Wfd_i%comm)==0) then 
+ !Wfd%Wave(6,2,1)%ug(3) ! BAND 6 , k-POINT 2, SPIN 1, UG="MO Coef"= 3
    do ikpoint=1,BSt%nkpt
-     !write(*,'(a27,i5,a8,i5,i5,a6,i5)') ' Nat. eigenvectors k-point ',ikpoint,' bands: ',b1gw,b2gw,' npw: ',wfd_i%Kdata(ikpoint)%npw ! Print for debug
+     write(msg,'(a31,i5,a9,i5,a1,i5,a7,i5)') ' Calc. nat. orbs coefs k-point: ',ikpoint,', bands: ',b1gw,'-',b2gw,', npw: ',wfd_i%Kdata(ikpoint)%npw ! Print for debug
+     call wrtout(std_out,msg,'COLL')
      do ib1dm=b1gw,b2gw
        do irecip_v=1,wfd_i%Kdata(ikpoint)%npw ! No spin used, setting nspinor=1 
         wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v)=0.0d0 
@@ -319,9 +323,9 @@ subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr,Hdr2)
      enddo
      !write(*,*) ' ' !Space for debug
    enddo
- endif
+ !endif
  
- call xmpi_barrier(Wfd_i%comm)
+ !call xmpi_barrier(Wfd_i%comm)
 
  ! MRM BSt occ are changed and never recoverd
  MSG_COMMENT("QP_BSt occupations were updated with nat. orb. ones")
@@ -344,6 +348,8 @@ subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr,Hdr2)
      ib1dm=ib1dm+1
    enddo
  enddo
+
+ !call xmpi_barrier(Wfd_i%comm)
 
 end subroutine update_wfk_gw_rdm        
 !!***
