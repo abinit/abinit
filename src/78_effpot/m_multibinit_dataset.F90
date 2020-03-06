@@ -86,6 +86,8 @@ module m_multibinit_dataset
   integer :: fit_ncoeff
   integer :: fit_nbancoeff
   integer :: fit_nfixcoeff
+  integer :: fit_EFS(3)
+  integer :: sel_EFS(3) 
   integer :: opt_effpot 
   integer :: opt_ncoeff 
   integer :: ts_option
@@ -108,7 +110,6 @@ module m_multibinit_dataset
   integer :: nsphere
   integer :: optcell
   integer :: prt_model
-  integer :: prt_names
   integer :: dipdip_prt
   integer :: prt_phfrq
   integer :: prt_ifc
@@ -156,6 +157,7 @@ module m_multibinit_dataset
   real(dp) :: conf_power_fact_disp
   real(dp) :: conf_power_fact_strain
   real(dp) :: delta_df
+  real(dp) :: dyn_tolsym
   real(dp) :: energy_reference
   real(dp) :: bound_cutoff
   real(dp) :: bound_Temp
@@ -216,8 +218,16 @@ module m_multibinit_dataset
 
   !integer, allocatable :: spin_sublattice(:) ! TODO hexu: difficult to use, better in xml?
 
+! Logical array 
+  logical :: fit_on(3)
+  ! fit_on(1) == TRUE, fit on energy, fit_on(2,3)=TRUE fit on forces stresses, fit_on(1,2,3)=TRUE fit on EFS 
+
+  logical :: sel_on(3)
+  ! sel_on(1) == TRUE, select on energy, sel_on(2,3)=TRUE select on forces stresses, fit_on(1,2,3)=TRUE select on EFS 
+
   real(dp), allocatable :: qmass(:)
   ! qmass(nnos)
+
 
 
 ! Real arrays
@@ -315,6 +325,7 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%dtion=100
  multibinit_dtset%dynamics=0
  multibinit_dtset%dyn_chksym=0
+ multibinit_dtset%dyn_tolsym=1d-10
  multibinit_dtset%eivec=0
  multibinit_dtset%energy_reference= zero
  multibinit_dtset%enunit=0
@@ -333,6 +344,8 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%fit_iatom=0
  multibinit_dtset%ts_option=0
  multibinit_dtset%fit_nfixcoeff=0
+ multibinit_dtset%fit_EFS = (/ 0, 1, 1 /)
+ multibinit_dtset%sel_EFS = (/ 0, 1, 1 /)
  multibinit_dtset%fit_option=0
  multibinit_dtset%fit_SPCoupling=1
  multibinit_dtset%fit_SPC_maxS=1
@@ -366,7 +379,6 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%opt_effpot=0
  multibinit_dtset%opt_coeff=0
  multibinit_dtset%prt_model=0
- multibinit_dtset%prt_names=0
  multibinit_dtset%prt_phfrq=0
  multibinit_dtset%prt_ifc = 0
  multibinit_dtset%strcpling = -1
@@ -829,6 +841,33 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ multibinit_dtset%fit_EFS=(/0,1,1/)
+ multibinit_dtset%fit_on = (/ .TRUE.,.TRUE.,.FALSE. /)
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'fit_EFS',tread,'INT')
+ if(tread==1) multibinit_dtset%fit_EFS(1:3)=intarr(1:3)
+ if(multibinit_dtset%fit_EFS(1) == 1)multibinit_dtset%fit_on(3) = .TRUE.
+ if(multibinit_dtset%fit_EFS(2) == 0)multibinit_dtset%fit_on(1) = .FALSE.
+ if(multibinit_dtset%fit_EFS(3) == 0)multibinit_dtset%fit_on(2) = .FALSE.
+ if(any(multibinit_dtset%fit_EFS<0) .or. any(multibinit_dtset%fit_EFS>1))then
+   write(message, '(a,i8,a,a,a)' )&
+&   'fit_EFS is',multibinit_dtset%fit_EFS,', but the only allowed values are 0 and 1',ch10,&
+&   'Action: correct fit_EFS in your input file.'
+   MSG_ERROR(message)
+ end if
+ 
+ multibinit_dtset%sel_EFS=(/0,1,1/)
+ multibinit_dtset%sel_on = (/ .TRUE.,.TRUE.,.FALSE. /)
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'sel_EFS',tread,'INT')
+ if(tread==1) multibinit_dtset%sel_EFS(1:3)=intarr(1:3)
+ if(multibinit_dtset%sel_EFS(1) == 1)multibinit_dtset%sel_on(3) = .TRUE.
+ if(multibinit_dtset%sel_EFS(2) == 0)multibinit_dtset%sel_on(1) = .FALSE.
+ if(multibinit_dtset%sel_EFS(3) == 0)multibinit_dtset%sel_on(2) = .FALSE.
+ if(any(multibinit_dtset%sel_EFS<0) .or. any(multibinit_dtset%sel_EFS>1))then
+   write(message, '(a,i8,a,a,a)' )&
+&   'sel_EFS is',multibinit_dtset%sel_EFS,', but the only allowed values are 0 and 1',ch10,&
+&   'Action: correct sel_EFS in your input file.'
+   MSG_ERROR(message)
+ end if
 
  multibinit_dtset%ts_option=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ts_option',tread,'INT')
@@ -939,11 +978,20 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if(tread==1) multibinit_dtset%dyn_chksym=intarr(1)
  if(multibinit_dtset%dyn_chksym<0 .or. multibinit_dtset%dyn_chksym>1)then
    write(message, '(a,i0,a,a,a)' )&
-&   'dyn_chksym is',multibinit_dtset%ntime,', but the only allowed values are 0 and 1.',ch10,&
+&   'dyn_chksym is',multibinit_dtset%dyn_chksym,', but the only allowed values are 0 and 1.',ch10,&
 &   'Action: correct dyn_chksym in your input file.'
    MSG_ERROR(message)
  end if
 
+ multibinit_dtset%dyn_tolsym=1d-10
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dyn_tolsym',tread,'DPR')
+ if(tread==1) multibinit_dtset%dyn_tolsym=dprarr(1)
+ if(multibinit_dtset%dyn_tolsym<0)then
+   write(message, '(a,i0,a,a,a)' )&
+&   'dyn_tolsym is',multibinit_dtset%dyn_tolsym,', but the only allowed values are positive.',ch10,&
+&   'Action: correct dyn_tolsym in your input file.'
+   MSG_ERROR(message)
+ end if
 !L
  multibinit_dtset%latt_compressibility=0.0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'latt_compressibility',tread,'DPR')
@@ -1129,16 +1177,6 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
- multibinit_dtset%prt_names=0
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_names',tread,'INT')
- if(tread==1) multibinit_dtset%prt_names=intarr(1)
- if(multibinit_dtset%prt_names<0.or.multibinit_dtset%prt_names>1)then
-   write(message, '(a,i8,a,a,a,a,a)' )&
-&   'prt_names is',multibinit_dtset%prt_names,', but the only allowed values',ch10,&
-&   'are 0 and 1.',ch10,&
-&   'Action: correct prt_names in your input file.'
-   MSG_ERROR(message)
- end if
 
  multibinit_dtset%prt_phfrq=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prt_phfrq',tread,'INT')

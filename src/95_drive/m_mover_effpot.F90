@@ -352,16 +352,16 @@ ABI_DEALLOCATE(xcart)
       ABI_ALLOCATE(symrel,(3,3,msym))
       ABI_ALLOCATE(symrec,(3,3,msym))
       ABI_ALLOCATE(tnons,(3,msym))
+      tolsym = inp%dyn_tolsym
       call checksymmetrygroup(hist_tmp%rprimd,hist_tmp%xred,&
 &                             effective_potential%supercell%typat,msym,effective_potential%supercell%natom,&
-&                             ptgroupma,spgroup,symrel,tnons,nsym)
+&                             ptgroupma,spgroup,symrel,tnons,nsym,tolsym)
       dtset%nsym = nsym
       do ii=1,nsym
         call mati3inv(symrel(:,:,ii),symrec(:,:,ii))
       end do
       !Get Indsym
       ABI_ALLOCATE(indsym,(4,dtset%nsym,dtset%natom))
-      tolsym = tol10
       call symatm(indsym,dtset%natom,dtset%nsym,symrec,tnons,tolsym,effective_potential%supercell%typat,hist_tmp%xred)
       call alloc_copy(symrel,dtset%symrel)
       call alloc_copy(tnons,dtset%tnons)
@@ -665,7 +665,7 @@ ABI_DEALLOCATE(xcart)
          call fit_polynomial_coeff_fit(effective_potential,(/0/),listcoeff,hist,1,&
 &         inp%bound_rangePower,0,inp%bound_maxCoeff,ncoeff,1,comm,cutoff_in=inp%bound_cutoff,&
 &         max_power_strain=2,verbose=.true.,positive=.true.,spcoupling=inp%bound_SPCoupling==1,&
-&         anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.)
+&         anharmstr=inp%bound_anhaStrain==1,only_even_power=.true.,fit_on=inp%fit_on,sel_on=inp%sel_on)
 
 !        Store the max number of coefficients after the fit process
          ncoeff_max = effective_potential%anharmonics_terms%ncoeff
@@ -712,7 +712,7 @@ ABI_DEALLOCATE(xcart)
 !          Reset the simulation and set the coefficients of the model
            call effective_potential_setCoeffs(coeffs_tmp(1:ncoeff+ii),effective_potential,ncoeff+ii)
            call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
-&           -1,1,comm,verbose=.true.,positive=.false.)
+&           -1,1,comm,verbose=.true.,positive=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on)
            call effective_potential_setSupercell(effective_potential,comm,ncell=sc_size)
            dtset%rprimd_orig(:,:,1) = effective_potential%supercell%rprimd
            acell(:) = one
@@ -978,7 +978,7 @@ ABI_DEALLOCATE(xcart)
 &       ncoeff+model_ncoeffbound)
 
        call fit_polynomial_coeff_fit(effective_potential,(/0/),(/0/),hist,0,(/0,0/),0,0,&
-&       -1,1,comm,verbose=.false.)
+&       -1,1,comm,verbose=.false.,fit_on=inp%fit_on,sel_on=inp%sel_on)
 
        write(message, '(3a)') ch10,' Fitted coefficients at the end of the fit bound process: '
        call wrtout(ab_out,message,'COLL')
@@ -1106,7 +1106,7 @@ end subroutine mover_effpot
 !!
 !! SOURCE
 
-subroutine checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup,symrel_out,tnons_out,nsym)
+subroutine checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup,symrel_out,tnons_out,nsym,tolsym)
 
   implicit none
 
@@ -1115,6 +1115,7 @@ subroutine checksymmetrygroup(rprimd,xred,typat,msym,natom,ptgroupma,spgroup,sym
   integer,intent(in) :: msym,natom
   integer,intent(in)  :: typat(natom)
   integer,intent(out) :: ptgroupma,spgroup,nsym
+  real(dp),intent(inout) :: tolsym
 ! Arrays
   real(dp),intent(in) :: rprimd(3,3),xred(3,natom)
   integer,intent(out) :: symrel_out(3,3,msym)
@@ -1141,13 +1142,15 @@ spinat   = 0
 efield   = 0
 chkprim  = 0
 use_inversion = 0
+
+!write(std_out,*) "tolsym", tolsym, "tol3", tol3
  
   call symlatt(bravais,msym,nptsym,ptsymrel,rprimd,tol4)
 !write(std_out,*) 'nptsym', nptsym
 
   call matr3inv(rprimd,gprimd)
   call symfind(berryopt,efield,gprimd,jellslab,msym,natom,noncoll,nptsym,nsym,&
-&           nzchempot,0,ptsymrel,spinat,symafm,symrel,tnons,tol3,typat,use_inversion,xred)
+&           nzchempot,0,ptsymrel,spinat,symafm,symrel,tnons,tolsym,typat,use_inversion,xred)
 
 !write(std_out,*) 'nsym', nsym
   call symanal(bravais,chkprim,genafm,msym,nsym,ptgroupma,rprimd,spgroup,symafm,symrel,tnons,tol3)
