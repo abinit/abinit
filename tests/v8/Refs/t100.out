@@ -1,5 +1,5 @@
 
-.Version 8.11.14 of MULTIBINIT 
+.Version 9.0.0 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  6 Feb 2020.
-- ( at 14h41 )
+.Starting date : Fri  6 Mar 2020.
+- ( at 16h00 )
   
--  nproc =    2
+-  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t100_model.xml
+-t100_model.xml
  to initialize the multibinit input
 
 ================================================================================
@@ -41,7 +41,7 @@
    bound_maxCoeff   4
        bound_temp  3.25000000E+02
        bound_step   1000
- bound_rangePower  4  8
+ bound_rangePower  6  6
  Miscellaneous information :
          asr         2
  Interatomic Force Constants Inputs :
@@ -64,8 +64,8 @@ dipdip_range         2         2         2
 
 ================================================================================
 
--Opening the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t100_model.xml
--Reading the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t100_model.xml with LibXML library
+-Opening the file t100_model.xml
+-Reading the file t100_model.xml with LibXML library
 
  Bound for ifc SR:
 
@@ -152,8 +152,8 @@ dipdip_range         2         2         2
 
  Read the coefficients of the polynomial fit from XML and perform some checks
 
--Opening the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t100_model.xml
--Reading the file /home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t100_model.xml with LibXML library
+-Opening the file t100_model.xml
+-Reading the file t100_model.xml with LibXML library
 
 ================================================================================
 
@@ -162,7 +162,7 @@ dipdip_range         2         2         2
 ================================================================================
 
 -Reading the training-set file :
--/home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t98.nc
+-t98.nc
 
 
 ================================================================================
@@ -177,9 +177,9 @@ Bound Process 3: Generate equivalent high order terms
    Energy          :   1.6185234206508687E+02
  Goal function values of the effective.potential
  with respect to the test-set (eV^2/A^2):
-   Forces+Stresses :   1.3115575625609522E-02
-   Forces          :   2.6521374308483012E-03
-   Stresses        :   1.0463438194761220E-02
+   Forces+Stresses :   1.3115575625609506E-02
+   Forces          :   2.6521374308482891E-03
+   Stresses        :   1.0463438194761218E-02
 
 
 ________________________________________________________________________________
@@ -192,43 +192,13 @@ ________________________________________________________________________________
  -> Filter Displacement
 
 
- ==> high order term: (Ti_y-O1_y)^4 created
-
-
-   ==> Optimizing coefficient
-
-
  ==> high order term: (Ti_y-O1_y)^6 created
 
 
    ==> Optimizing coefficient
 
 
- ==> high order term: (Ti_y-O1_y)^8 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (Ti_y-O1_y[1 1 0])^4 created
-
-
-   ==> Optimizing coefficient
-
-
  ==> high order term: (Ti_y-O1_y[1 1 0])^6 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (Ti_y-O1_y[1 1 0])^8 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^2 created
 
 
    ==> Optimizing coefficient
@@ -246,43 +216,7 @@ ________________________________________________________________________________
    ==> Optimizing coefficient
 
 
- ==> high order term: (Ti_y-O1_y)^6(Ti_y-O1_y[1 1 0])^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^6 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^4 created
-
-
-   ==> Optimizing coefficient
-
-
  ==> high order term: (Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^2(eta_1)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (Ti_y-O1_y)^4(Ti_y-O1_y[1 1 0])^2(eta_1)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^4(eta_1)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (Ti_y-O1_y)^2(Ti_y-O1_y[1 1 0])^2(eta_1)^4 created
 
 
    ==> Optimizing coefficient
@@ -298,7 +232,7 @@ ________________________________________________________________________________
  -> Filter Displacement
 
 
- ==> high order term: (Ti_y-O1_y[1 1 0])^4 created
+ ==> high order term: (Ti_y-O1_y[1 1 0])^6 created
 
 
    ==> Term exists already. We cycle
@@ -308,36 +242,6 @@ ________________________________________________________________________________
 
 
    ==> Term exists already. We cycle
-
-
- ==> high order term: (Ti_y-O1_y[1 1 0])^8 created
-
-
-   ==> Term exists already. We cycle
-
-
- ==> high order term: (Ti_y-O1_y[1 1 0])^4 created
-
-
-   ==> Term exists already. We cycle
-
-
- ==> high order term: (Ti_y-O1_y[1 1 0])^6 created
-
-
-   ==> Term exists already. We cycle
-
-
- ==> high order term: (Ti_y-O1_y[1 1 0])^8 created
-
-
-   ==> Term exists already. We cycle
-
-
- ==> high order term: (Ti_y-O1_y[1 1 0])^2(eta_2)^2 created
-
-
-   ==> Optimizing coefficient
 
 
  ==> high order term: (Ti_y-O1_y[1 1 0])^4(eta_2)^2 created
@@ -352,55 +256,13 @@ ________________________________________________________________________________
    ==> Optimizing coefficient
 
 
- ==> high order term: (Ti_y-O1_y[1 1 0])^6(eta_2)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (Ti_y-O1_y[1 1 0])^2(eta_2)^6 created
-
-
-   ==> Optimizing coefficient
-
-
 ________________________________________________________________________________
 
 
  Chreate high order strain terms 
 
 
- ==> high order term: (eta_1)^4 created
-
-
-   ==> Optimizing coefficient
-
-
  ==> high order term: (eta_1)^6 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^8 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^6(eta_2)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^6(eta_4)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^6(eta_5)^2 created
 
 
    ==> Optimizing coefficient
@@ -412,49 +274,7 @@ ________________________________________________________________________________
    ==> Optimizing coefficient
 
 
- ==> high order term: (eta_1)^4(eta_2)^4 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^4(eta_2)^2(eta_3)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^4(eta_2)^2(eta_4)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^4(eta_2)^2(eta_5)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^4(eta_2)^2(eta_6)^2 created
-
-
-   ==> Optimizing coefficient
-
-
  ==> high order term: (eta_1)^4(eta_4)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^4(eta_4)^4 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^4(eta_4)^2(eta_5)^2 created
 
 
    ==> Optimizing coefficient
@@ -466,31 +286,7 @@ ________________________________________________________________________________
    ==> Optimizing coefficient
 
 
- ==> high order term: (eta_1)^4(eta_5)^4 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^4(eta_5)^2(eta_6)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^2(eta_2)^2 created
-
-
-   ==> Optimizing coefficient
-
-
  ==> high order term: (eta_1)^2(eta_2)^2(eta_3)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^2(eta_2)^2(eta_3)^2(eta_4)^2 created
 
 
    ==> Optimizing coefficient
@@ -502,37 +298,7 @@ ________________________________________________________________________________
    ==> Optimizing coefficient
 
 
- ==> high order term: (eta_1)^2(eta_2)^2(eta_4)^4 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^2(eta_2)^2(eta_4)^2(eta_5)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^2(eta_2)^2(eta_4)^2(eta_6)^2 created
-
-
-   ==> Optimizing coefficient
-
-
  ==> high order term: (eta_1)^2(eta_2)^2(eta_6)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^2(eta_2)^2(eta_6)^4 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^2(eta_4)^2 created
 
 
    ==> Optimizing coefficient
@@ -544,37 +310,7 @@ ________________________________________________________________________________
    ==> Optimizing coefficient
 
 
- ==> high order term: (eta_1)^2(eta_4)^6 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^2(eta_4)^4(eta_5)^2 created
-
-
-   ==> Optimizing coefficient
-
-
  ==> high order term: (eta_1)^2(eta_4)^2(eta_5)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^2(eta_4)^2(eta_5)^4 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^2(eta_4)^2(eta_5)^2(eta_6)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^2(eta_5)^2 created
 
 
    ==> Optimizing coefficient
@@ -586,25 +322,7 @@ ________________________________________________________________________________
    ==> Optimizing coefficient
 
 
- ==> high order term: (eta_1)^2(eta_5)^6 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_1)^2(eta_5)^4(eta_6)^2 created
-
-
-   ==> Optimizing coefficient
-
-
  ==> high order term: (eta_1)^2(eta_5)^2(eta_6)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_4)^4 created
 
 
    ==> Optimizing coefficient
@@ -616,37 +334,7 @@ ________________________________________________________________________________
    ==> Optimizing coefficient
 
 
- ==> high order term: (eta_4)^8 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_4)^6(eta_5)^2 created
-
-
-   ==> Optimizing coefficient
-
-
  ==> high order term: (eta_4)^4(eta_5)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_4)^4(eta_5)^4 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_4)^4(eta_5)^2(eta_6)^2 created
-
-
-   ==> Optimizing coefficient
-
-
- ==> high order term: (eta_4)^2(eta_5)^2 created
 
 
    ==> Optimizing coefficient
@@ -666,12 +354,12 @@ ________________________________________________________________________________
 
  Mean Standard Deviation values of the effective-potential
  with respect to the training-set after attempted bounding (meV^2/atm):
-   Energy          :   1.4790524877062020E+02
+   Energy          :   1.5528146672680532E+02
  Goal function values of the effective.potential
  with respect to the test-set (eV^2/A^2):
-   Forces+Stresses :   1.3349539495435369E-02
-   Forces          :   2.7314376100066929E-03
-   Stresses        :   1.0618101885428676E-02
+   Forces+Stresses :   1.3141283395479922E-02
+   Forces          :   2.6444053028263745E-03
+   Stresses        :   1.0496878092653547E-02
 
 
 ================================================================================
@@ -681,10 +369,10 @@ ________________________________________________________________________________
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=         14.1  wall=         14.1
+- Proc.   0 individual time (sec): cpu=          2.5  wall=          2.5
 
 ================================================================================
 
-+Total cpu time     28.119  and wall time     28.210 sec
++Total cpu time      2.450  and wall time      2.452 sec
 
  multibinit : the run completed succesfully.

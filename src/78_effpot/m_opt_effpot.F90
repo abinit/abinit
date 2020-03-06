@@ -127,9 +127,9 @@ subroutine opt_effpot(eff_pot,opt_ncoeff,opt_coeff,hist,comm,print_anh)
  iam_master = (my_rank == master)
 
  !fit_on !TODO set up keyword opt_on
-  fit_on(1) = .FALSE. 
+  fit_on(1) = .TRUE. 
   fit_on(2) = .TRUE. 
-  fit_on(3) = .TRUE. 
+  fit_on(3) = .FALSE. 
 
  !Setting/Initializing Variables
   ntime = hist%mxhist

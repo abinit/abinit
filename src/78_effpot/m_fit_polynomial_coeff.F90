@@ -1743,7 +1743,6 @@ subroutine fit_polynomial_coeff_solve(coefficients,fcart_coeffs,fcart_diff,energ
  FERR = zero; BERR = zero
  IWORK = 0; WORK = 0
  
-
 !1-Get forces and stresses from the model and fill A
 !  Fill alsor B with the forces and stresses from
 !  the DFT snapshot and the model
