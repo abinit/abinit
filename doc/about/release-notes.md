@@ -284,7 +284,7 @@ List of new input variables that rely on this feature:
 - [[getwfq_path]], an alternative to [[getwfq]] or [[irdwfq]], see test [[test:v7_98]]
 - [[getkerange_path]], see test [[test:v9_60]]
 - [[getpot_path]], see test [[test:v8_44]]
-- [[pseudos]], [[indata_prefix]], [[outdata_prefix]], [[tmpdata_prefix]], [[output_file]], see test [test:v9_04] REACTIVATE ME
+- [[pseudos]], [[indata_prefix]], [[outdata_prefix]], [[tmpdata_prefix]], [[output_file]], see test [[test:v9_04]]
 - [[pp_dirpath]]: cannot be tested  EXPLICITLY because system dependent but used by runtests.py when generating the input file. 
 - [[output@anaddb]], [[ddb_path@anaddb]], [[gkk_path@anaddb]], [[eph_prefix@anaddb]].
   See tests [[test:v8_52]] for a standard analysis of the DDB file and 
