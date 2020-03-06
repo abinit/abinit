@@ -2265,10 +2265,10 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    end if
 
    !Long-wave DFPT calculation function only for LDA 
-   allow=(dt%ixc>=0).and.(dt%ixc>9)
+   allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
    if(allow)then
-     cond_string(1)='ixc' ; cond_values(1)=dt%ixc
-     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
+     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'xclevel',dt%xclevel,1,(/1/),iout)
    end if
 
 !  optforces

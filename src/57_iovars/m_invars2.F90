@@ -3058,7 +3058,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
 !In case of longwave calculation put response = 1
 !in order to set istwfk = 1 at all k-points
- if ( dtset%optdriver==10 ) then
+ if ( dtset%optdriver==RUNL_LONGWAVE ) then
    response = 1
  end if
 
