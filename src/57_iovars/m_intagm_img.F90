@@ -94,8 +94,6 @@ CONTAINS  !===========================================================
 
 subroutine intagm_img_1D(dp_data,iimage,jdtset,lenstr,nimage,size1,string,token,tread_ok,typevarphys)
 
- implicit none
-
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: iimage,jdtset,lenstr,nimage,size1
@@ -228,8 +226,6 @@ end subroutine intagm_img_1D
 !! SOURCE
 
 subroutine intagm_img_2D(dp_data,iimage,jdtset,lenstr,nimage,size1,size2,string,token,tread_ok,typevarphys)
-
- implicit none
 
 !Arguments ------------------------------------
 !scalars

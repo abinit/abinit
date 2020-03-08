@@ -34,6 +34,7 @@ MODULE m_fstrings
 
  public :: is_letter       ! Returns .TRUE. if ch is a letter and .FALSE. otherwise
  public :: is_digit        ! Returns .TRUE. if ch is a digit (0,1,...,9) and .FALSE. otherwise
+ public :: find_digit      ! Returns the position of the first digit in string. 0 if not found.
  public :: upper           ! Convert lower case letters to UPPER CASE
  public :: toupper         ! Convert lower case letters to UPPER CASE (function version)
  public :: lower           ! Convert UPPER CASE letters to lower case
@@ -182,6 +183,30 @@ pure function is_digit_0D(ch) result(ans)
  end select
 
 end function is_digit_0D
+!!***
+
+!!****f* m_fstrings/find_digit
+!! NAME
+!!  find_digit
+!!
+!! FUNCTION
+!!  Returns the position of the first digit in string. 0 if not found.
+!!
+!! SOURCE
+
+integer pure function find_digit(string) result(ii)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: string
+
+! *********************************************************************
+
+ do ii=1,len_trim(string)
+   if (is_digit(string(ii:ii))) return
+ end do
+ ii = 0
+
+end function find_digit
 !!***
 
 !!****f* m_fstrings/upper
@@ -1516,9 +1541,8 @@ end function firstchar_1d
 !!
 !! SOURCE
 
-pure function startswith(string, prefix) result(ans)
+pure logical function startswith(string, prefix) result(ans)
 
- logical :: ans
  character(len=*),intent(in) :: string
  character(len=*),intent(in) :: prefix
 
