@@ -49,6 +49,7 @@ program abitk
  use m_unittests,      only : tetra_unittests, kptrank_unittests
  use m_argparse,       only : get_arg, get_arg_list, parse_kargs
  use m_common,         only : ebands_from_file, crystal_from_file
+ use m_parser,         only : geo_t, geo_from_poscar_path
 
  implicit none
 
@@ -65,7 +66,7 @@ program abitk
  type(ebands_t) :: ebands !, ebands_kpath
  type(edos_t) :: edos
  type(crystal_t) :: cryst
- type(poscar_t) :: poscar
+ type(geo_t) :: geo
 !arrays
  integer :: kptrlatt(3,3), new_kptrlatt(3,3)
  !integer,allocatable :: indkk(:,:) !, bz2ibz(:)
@@ -131,9 +132,9 @@ program abitk
  select case (command)
  case ("poscar")
    call get_command_argument(2, path)
-   poscar = poscar_from_filepath(path, comm)
-   call poscar%print_abivars(std_out)
-   call poscar%free()
+   geo = geo_from_poscar_path(path, comm)
+   call geo%print_abivars(std_out)
+   call geo%free()
 
  !case ("wfk_downsample")
  ! e.g. go from a 8x8x8 WFK to a 4x4x4
