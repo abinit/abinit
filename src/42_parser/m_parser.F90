@@ -36,7 +36,7 @@ module m_parser
  use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, next_token, &
                          endswith, char_count, find_digit !, startswith,
  use m_geometry,  only : xcart2xred, det3r
- use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
+ !use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
  !use m_crystal,   only : crystal_t
 
  implicit none
@@ -3530,7 +3530,7 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
 
  case ("poscar")
    ! Get geo info from POSCAR from file.
-   new = geo_from_poscar_path(string(ii+1:), comm)
+   new = geo_from_poscar_path(trim(string(ii+1:)), comm)
 
  !case ("abigeo")
  !  new = geo_from_abigeo_path(string(ii+1:), comm)
@@ -3538,7 +3538,7 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
  case ("abifile")
    if (endswith(string(ii+1:), ".nc")) then
      ! Get geo info from netcdf file.
-     new = geo_from_netcdf_path(string(ii+1:), comm)
+     new = geo_from_netcdf_path(trim(string(ii+1:)), comm)
    else
      ! Assume Fortran file with Abinit header.
      MSG_ERROR("structure variable with Fortran file is not yet implemented.")
