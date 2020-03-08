@@ -1,6 +1,9 @@
 # ANADDB input for phonon bands and DOS
  ng2qpt 9 9 9
 
+ ddb_path = "t52_mp-149_+0_DDB"
+ output_file = "t52.output"
+
  prtdos 2
  ndivsm 2
  nqpath 2
@@ -24,18 +27,17 @@
 #%%<BEGIN TEST_INFO>
 #%% [setup]
 #%% executable = anaddb
-#%% input_ddb = t52_mp-149_+0_DDB
 #%% [shell]
 #%% pre_commands = 
 #%%   iw_cp t52_mp-149_+0_DDB t52_mp-149_+0_DDB;
 #%% [files]
 #%% files_to_test = 
-#%%   t52.out, tolnlines = 10, tolabs = 1.1, tolrel = 1.2e-1;
+#%%   t52.output, tolnlines = 10, tolabs = 1.1, tolrel = 1.2e-1;
 #%% [paral_info]
 #%% max_nprocs = 24
 #%% [extra_info]
 #%% authors = H. Miranda, M. Giantomassi
 #%% keywords = DFPT
 #%% description = 
-#%%   Test tolerance in the new inteergration weights
+#%%   Test tolerance in the new integration weights
 #%%<END TEST_INFO>
