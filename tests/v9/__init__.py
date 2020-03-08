@@ -36,4 +36,6 @@ inp_files = [
 "t83.in", # Langevin NVT 
 "t84.in", # Berendsen NVT
 "t85.in", # Velocity Verlet NVE
+"t86.in", # Spin lattice coupling, Only Oiju term activated.
+"t87.in", # Spin lattice coupling, Oiju and Tijuv. 
 ]
