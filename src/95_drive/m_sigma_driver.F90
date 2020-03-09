@@ -2123,7 +2123,7 @@ endif
      call wrtout(ab_out,msg,'COLL')
      call init_plowannier(dtset%plowan_bandf,dtset%plowan_bandi,dtset%plowan_compute,dtset%plowan_iatom,&
        &dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,dtset%plowan_nbl,dtset%plowan_nt,&
-       &dtset%plowan_projcalc,dtset%acell_orig,dtset%kpt,dtset%nimage,dtset%nkpt,dtset%nspinor,&
+       &dtset%plowan_projcalc,dtset%acell_orig,dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,&
        &dtset%nsppol,dtset%wtk,wanibz_in)
      call get_plowannier(wanibz_in,wanibz,dtset)
      call fullbz_plowannier(dtset,kmesh,cryst,pawang,wanibz,wanbz)

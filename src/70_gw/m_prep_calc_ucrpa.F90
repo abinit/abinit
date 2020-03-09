@@ -215,7 +215,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
  integer :: nhat12_grdim
  integer :: iatom1,iatom2,il1,il2,im1,im2,ispinor2,pos1,pos2,wan_jb,wan_ib_sum,pwx
  real(dp) :: fact_sp,theta_mu_minus_esum,tol_empty,norm,weight
- complex(dpc) :: ctmp,scprod,ph_mkgwt,ph_mkt
+ complex(dpc) :: ctmp,scprod,ph_mkgwt,ph_mkt,eikr
  logical :: iscompatibleFFT,q_is_gamma
  character(len=500) :: msg
 !arrays
@@ -879,6 +879,10 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
              do pwx=1,sigp%npwx
                do iatom1=1,wanbz%natom_wan
                do iatom2=1,wanbz%natom_wan
+                 eikr=exp(- cmplx(0.0,1.0) * two_pi * ( &
+   kmesh%bz(1,ik_bz)* ( cryst%xred(1,wanbz%iatom_wan(iatom1)) - cryst%xred(1,wanbz%iatom_wan(iatom2)) )+&
+   kmesh%bz(2,ik_bz)* ( cryst%xred(2,wanbz%iatom_wan(iatom1)) - cryst%xred(2,wanbz%iatom_wan(iatom2)) )+&
+   kmesh%bz(3,ik_bz)* ( cryst%xred(3,wanbz%iatom_wan(iatom1)) - cryst%xred(3,wanbz%iatom_wan(iatom2)) )))
                  do pos1=1,size(wanbz%nposition(iatom1)%pos,1)
                  do pos2=1,size(wanbz%nposition(iatom2)%pos,1)
                    do il1=1,wanbz%nbl_atom_wan(iatom1)
@@ -892,10 +896,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
       &ptr_rhot(im1,im2,spin,ispinor1,ispinor2)+&
       &rhotwg_ki(pwx,jb)*wanbz%psichi(jk_bz,wan_jb,iatom1)%atom(il1)%matl(im1,spin,ispinor1)*&
       &conjg(wanbz%psichi(ik_bz,wan_ib_sum,iatom2)%atom(il2)%matl(im2,spin,ispinor2))*weight&
-      *exp( cmplx(0.0,1.0) * two_pi * ( &
-      wanbz%kpt(1,ik_bz)* ( cryst%xred(1,wanbz%iatom_wan(iatom1)) - cryst%xred(1,wanbz%iatom_wan(iatom2)) )+&
-      wanbz%kpt(2,ik_bz)* ( cryst%xred(2,wanbz%iatom_wan(iatom1)) - cryst%xred(2,wanbz%iatom_wan(iatom2)) )+&
-      wanbz%kpt(3,ik_bz)* ( cryst%xred(3,wanbz%iatom_wan(iatom1)) - cryst%xred(3,wanbz%iatom_wan(iatom2)) )))
+      *eikr
                                  enddo!im2
                                enddo!im1
                              enddo!il2

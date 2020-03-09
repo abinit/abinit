@@ -171,6 +171,7 @@ contains
  real(dp),allocatable:: normG(:)
  complex(dpc),allocatable:: uomega(:),jomega(:)
  real(dp),allocatable:: omega(:)
+ complex(dpc),allocatable:: eiqr(:)
 
  integer,allocatable:: ikmq_bz_t(:,:)
 
@@ -201,8 +202,8 @@ contains
 
  ABI_ALLOCATE(k_coord,(nkbz,3))
  ABI_ALLOCATE(q_coord,(nqibz,4))
-
-
+ ABI_ALLOCATE(eiqr,(nqibz))
+ eiqr=czero
 !==Read k and q==!
 !open(unit=2012,file='ikbz_COORD',form='formatted',status='unknown')
 !read(2012,*) (ik_bz,k_coord(ik_bz,:),i=1,nkbz)
@@ -629,6 +630,10 @@ endif
           do m3=1,mbband3
           do m4=1,mbband4
             do iqibz=1,nqibz
+              eiqr(iqibz)=exp(cmplx(0.0, 1.0 ) * two_pi * ( &
+                q_coord(iqibz,1)* ( cryst%xred(1,wanbz%iatom_wan(iatom3)) - cryst%xred(1,wanbz%iatom_wan(iatom2)) )+ &
+                q_coord(iqibz,2)* ( cryst%xred(2,wanbz%iatom_wan(iatom3)) - cryst%xred(2,wanbz%iatom_wan(iatom2)) )+ &
+                q_coord(iqibz,3)* ( cryst%xred(3,wanbz%iatom_wan(iatom3)) - cryst%xred(3,wanbz%iatom_wan(iatom2)) ))) 
             do iG=1,npw
               ! cp_paral=cp_paral+1
               ! if(mod(cp_paral-1,nprocs)==Wfd%my_rank) then
@@ -694,8 +699,23 @@ endif
             if(mod(im_paral-1,nprocs)==Wfd%my_rank) then
 !!somme interne sur iG, puis somme externe sur iq_ibz
 !! Sum_(iq_ibz) wi(iq_ibz)*Sum_ig  Rho(m3,m1,iG,iq)cong*Rho(m2,m4,ig,iq)
-              V_m(ms1,ms2,ms3,ms4)=sum(q_coord(:,4)*sum(conjg(rhot_q_m1m3(:,:,m3,m1,ispinor3,ispinor1))* &
-              &rhot_q_m2m4(:,:,m2,m4,ispinor2,ispinor4),dim = 1))*Ha_eV/(ucvol)
+              ! do iq_ibz=1,nqibz
+              !   ! eiqr=exp(cmplx(0.0, 1.0 ) * two_pi * ( &
+              !   !   q_coord(iq_ibz,1)* ( cryst%xred(1,wanbz%iatom_wan(iatom3)) - cryst%xred(1,wanbz%iatom_wan(iatom2)) )+ &
+              !   !   q_coord(iq_ibz,2)* ( cryst%xred(2,wanbz%iatom_wan(iatom3)) - cryst%xred(2,wanbz%iatom_wan(iatom2)) )+ &
+              !   !   q_coord(iq_ibz,3)* ( cryst%xred(3,wanbz%iatom_wan(iatom3)) - cryst%xred(3,wanbz%iatom_wan(iatom2)) )))
+              !   V_m(ms1,ms2,ms3,ms4) = V_m(ms1,ms2,ms3,ms4) + &
+              !     ! exp(cmplx(0.0, 1.0 ) * two_pi * ( &
+              !     ! q_coord(iq_ibz,1)* ( cryst%xred(1,wanbz%iatom_wan(iatom3)) - cryst%xred(1,wanbz%iatom_wan(iatom2)) )+ &
+              !     ! q_coord(iq_ibz,2)* ( cryst%xred(2,wanbz%iatom_wan(iatom3)) - cryst%xred(2,wanbz%iatom_wan(iatom2)) )+ &
+              !     ! q_coord(iq_ibz,3)* ( cryst%xred(3,wanbz%iatom_wan(iatom3)) - cryst%xred(3,wanbz%iatom_wan(iatom2)) ))) &
+              !     &eiqr(iq_ibz)*&
+              !     &q_coord(iq_ibz,4)*sum(conjg(rhot_q_m1m3(:,iq_ibz,m3,m1,ispinor3,ispinor1))* &
+              !     &rhot_q_m2m4(:,iq_ibz,m2,m4,ispinor2,ispinor4),dim = 1)*Ha_eV/(ucvol)
+
+              V_m(ms1,ms2,ms3,ms4)=sum(eiqr(:)*q_coord(:,4)*sum(conjg(rhot_q_m1m3(:,:,m3,m1,ispinor3,ispinor1))* &
+                &rhot_q_m2m4(:,:,m2,m4,ispinor2,ispinor4),dim = 1))*Ha_eV/(ucvol)
+              !end do
             endif!paral
           end do!m4
           end do!m3
@@ -876,7 +896,10 @@ endif
             call cpu_time ( t1 )
             nprocs  = xmpi_comm_size(Wfd%comm)
             do iq_ibz=1,nqibz
-              
+              ! eiqr=exp(cmplx(0.0, 1.0 ) * two_pi * ( &
+              !   q_coord(iq_ibz,1)* ( cryst%xred(1,wanbz%iatom_wan(iatom3)) - cryst%xred(1,wanbz%iatom_wan(iatom2)) )+ &
+              !   q_coord(iq_ibz,2)* ( cryst%xred(2,wanbz%iatom_wan(iatom3)) - cryst%xred(2,wanbz%iatom_wan(iatom2)) )+ &
+              !   q_coord(iq_ibz,3)* ( cryst%xred(3,wanbz%iatom_wan(iatom3)) - cryst%xred(3,wanbz%iatom_wan(iatom2)) )))
               if(nsym>1.and..not.lscr_one)  iqalloc=iq_ibz
               if(nsym==1.or.lscr_one) iqalloc=1
               if(nsym==1.or.lscr_one) then
@@ -939,7 +962,6 @@ endif
                   ms4=m4+(ispinor4-1)*mbband4
                   im_paral=im_paral+1
                   if(mod(im_paral-1,nprocs)==Wfd%my_rank) then
-
 !     sum q sum G1 sum G2 f(G1,q)f(G2,q)G(G1,G2,q)
 !     sum q sum G1 f(g1,q) sum G2 f(G2,q)G(G1,G2,q)
                     do iG1=1,npwe
@@ -947,7 +969,7 @@ endif
                       &sum(rhot_q_m2m4_npwe(:,iq_ibz,m2,m4,ispinor2,ispinor4)*scr(:,iG1,iomega,iqalloc))
                     end do
                     
-                    U_m(ms1,ms2,ms3,ms4)=U_m(ms1,ms2,ms3,ms4)+nc*q_coord(iq_ibz,4)
+                    U_m(ms1,ms2,ms3,ms4)=U_m(ms1,ms2,ms3,ms4)+nc*q_coord(iq_ibz,4)*eiqr(iq_ibz)
 !                   if(m1==1.and.m2==1.and.m3==1.and.m4==1) then
 !                     write(6,*) "TEST2"
 !                     write(6,*) iq_ibz,nc
@@ -1072,6 +1094,7 @@ endif
   enddo!iatom1
  ABI_DEALLOCATE(k_coord)
  ABI_DEALLOCATE(q_coord)
+ ABI_DEALLOCATE(eiqr)
  ABI_DEALLOCATE(bijection)
  ABI_DEALLOCATE(normG)
 ! ABI_DEALLOCATE(coeffW_BZ)

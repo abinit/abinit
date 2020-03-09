@@ -2461,7 +2461,7 @@ end subroutine compute_coeff_plowannier
  call init_plowannier(bandf,bandi,dtset%plowan_compute,&
      &dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
      &dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
-     &dtset%kpt,dtset%nimage,dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk,wan_out)
+     &dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk,wan_out)
 
  call destroy_plowannier(wan_in)
 
