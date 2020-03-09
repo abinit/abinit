@@ -37,15 +37,15 @@ module m_gwrdm
  private
 !!***
 
- public :: calc_rdm,calc_rdmc,natoccs,printdm1,update_wfk_gw_rdm
+ public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_wfk_gw_rdm
 !!***
 
 contains
 !!***
 
-!!****f* ABINIT/calc_rdm
+!!****f* ABINIT/calc_rdmx
 !! NAME
-!! calc_rdm
+!! calc_rdmx
 !!
 !! FUNCTION
 !! Calculate density matrix corrections within k-point 'k' for vxc and Sigma_x
@@ -63,7 +63,7 @@ contains
 !! CHILDREN
 !! SOURCE
 
-subroutine calc_rdm(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
+subroutine calc_rdmx(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
 
 !Arguments ------------------------------------
 !scalars
@@ -76,14 +76,13 @@ subroutine calc_rdm(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
 !scalars
  character(len=500) :: msg,msg2
  integer :: ib1dm,ib2dm
- real(dp) :: sgn_spin,tol
+ real(dp) :: sgn_spin
 !arrays
 
 !************************************************************************
 
  DBG_ENTER("COLL")
 
- tol=1.0d-8
  if(isgn==0) then ! Sigma_x - Vxc
    sgn_spin=2.0d0
    msg2='Sx-Vxc '
@@ -103,7 +102,7 @@ subroutine calc_rdm(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
 
  do ib1dm=ib1,ib2-1  
    do ib2dm=ib1dm+1,ib2
-     if((BSt%occ(ib1dm,kpoint,1)>tol) .and. (BSt%occ(ib2dm,kpoint,1)<tol)) then
+     if((BSt%occ(ib1dm,kpoint,1)>tol8) .and. (BSt%occ(ib2dm,kpoint,1)<tol8)) then
        dm1(ib1dm,ib2dm)=sgn_spin*pot(ib1dm,ib2dm)/(BSt%eig(ib1dm,kpoint,1)-BSt%eig(ib2dm,kpoint,1))
        dm1(ib2dm,ib1dm)=dm1(ib1dm,ib2dm)
      endif
@@ -112,7 +111,7 @@ subroutine calc_rdm(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
 
  DBG_EXIT("COLL")
 
-end subroutine calc_rdm
+end subroutine calc_rdmx
 !!***
 
 
@@ -132,7 +131,6 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
  real(dp), parameter :: pi=3.141592653589793238462643383279502884197
  character(len=500) :: msg,msg2
  integer :: ib1dm,ib2dm,iquad 
- real(dp) :: tol
  complex(dpc) :: denominator,fact,division,dm1_mel
 !arrays
 
@@ -140,7 +138,6 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
 
  DBG_ENTER("COLL")
 
- tol=1.0d-8
  msg2='Sc     '
  fact=cmplx(0.0d0,-1.0d0/pi)
 
@@ -159,20 +156,18 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
      dm1_mel=0.0d0
      do iquad=1,nomega_sigc
        denominator=(Sr%omega_i(iquad)-BSt%eig(ib1dm,kpoint,1))*(Sr%omega_i(iquad)-BSt%eig(ib2dm,kpoint,1)) ! As in FHI-aims for RPA
-       if(abs(denominator)>tol) then 
-         if(abs(sigcme_k(iquad,ib1dm,ib2dm,1))>tol) then
+       if(abs(denominator)>tol8) then 
+         ! Sigma_pq/[(denominator)]
            division=sigcme_k(iquad,ib1dm,ib2dm,1)/denominator 
            dm1_mel=dm1_mel+weights(iquad)*division
-         endif 
-         if(abs(sigcme_k(iquad,ib2dm,ib1dm,1))>tol) then  
+         ! [Sigma_qp/[(denominator)]]^*
            division=sigcme_k(iquad,ib2dm,ib1dm,1)/denominator 
            dm1_mel=dm1_mel+weights(iquad)*conjg(division)
-         endif 
        endif
      enddo
-     dm1_mel=fact*dm1_mel
-     dm1(ib1dm,ib2dm)=dm1_mel
-     dm1(ib2dm,ib1dm)=dm1(ib1dm,ib2dm)
+     dm1(ib1dm,ib2dm)=fact*dm1_mel
+     ! Dji = Dij^*
+     dm1(ib2dm,ib1dm)=conjg(dm1(ib1dm,ib2dm))
    enddo  
  enddo
 

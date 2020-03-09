@@ -113,7 +113,7 @@ module m_sigma_driver
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
 ! MRM density matrix module and Gaussian quadrature one
- use m_gwrdm,         only : calc_rdm, calc_rdmc, natoccs, printdm1, update_wfk_gw_rdm
+ use m_gwrdm,         only : calc_rdmx, calc_rdmc, natoccs, printdm1, update_wfk_gw_rdm
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre
 
  implicit none
@@ -2215,7 +2215,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 !       Compute for Sigma_x - Vxc, DELTA Sigma_x - Vxc for hybrid functionals (DELTA Sigma_x = Sigma_x - hyb_parameter Vx^exact)
         potk(ib1:ib2,ib1:ib2)=Sr%x_mat(ib1:ib2,ib1:ib2,ikcalc,1)-KS_me%vxcval(ib1:ib2,ib1:ib2,ikcalc,1) ! Only restricted calcs 
         dm1k=0.0d0 
-        call calc_rdm(ib1,ib2,ikcalc,0,dtset%useria,potk,dm1k,QP_BSt) ! Only restricted calcs 
+        call calc_rdmx(ib1,ib2,ikcalc,0,dtset%useria,potk,dm1k,QP_BSt) ! Only restricted calcs 
 !       Update the full 1RDM with the exchange (k-point) one
         dm1(ib1:ib2,ib1:ib2,ikcalc)=dm1(ib1:ib2,ib1:ib2,ikcalc)+dm1k(ib1:ib2,ib1:ib2)
 !       Compute NAT ORBS for exchange corrected 1-RDM?
