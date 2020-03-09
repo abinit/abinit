@@ -157,6 +157,10 @@ ext = re.sub("\n"," \\\n\t",ext[:-1])
 ext += "\n\n"
 xsubs = sorted([item for item in cnf.sections() \
   if (cnf.get(item, "mode") == "detached") and (cnf.get(item, "type") == "data")])
+fbk_tgz = sorted([item for item in os.listdir("./fallbacks") \
+        if item.startswith("abinit-fallbacks-") \
+        and item.endswith(".tar.gz")])[-1]
+ext += "EXTRA_DIST += fallbacks/%s\n\n" % fbk_tgz
 
 # Write Makefile.am
 mf = open("Makefile.am", "wt")
