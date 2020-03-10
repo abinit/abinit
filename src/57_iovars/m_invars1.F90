@@ -38,7 +38,7 @@ module m_invars1
 
  use m_fstrings, only : inupper, itoa, endswith, strcat, sjoin, startswith
  use m_geometry, only : mkrdim
- use m_parser,   only : intagm, chkint_ge, ab_dimensions
+ use m_parser,   only : intagm, chkint_ge, ab_dimensions, geo_t, geo_from_abivar_string
  use m_inkpts,   only : inkpts, inqpt
  use m_ingeo,    only : ingeo, invacuum
  use m_symtk,    only : mati3det
@@ -116,20 +116,19 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
 
 !Local variables-------------------------------
 !scalars
- integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos,cnt
+ integer :: i1,i2,idtset,ii,jdtset,marr,multiplicity,tjdtset,tread,treadh,treadm,tread_pseudos,cnt, tread_geo
  integer :: treads, use_gpu_cuda, ierr
  real(dp) :: cpus
  character(len=500) :: msg
  character(len=fnlen) :: pp_dirpath, shell_var
  character(len=20*fnlen) :: pseudos_string ! DO NOT decrease len
+ character(len=len(string)) :: geo_string
+ type(geo_t) :: geo
 !arrays
  integer,allocatable :: intarr(:), sidx(:)
  real(dp),allocatable :: dprarr(:)
 
-
 !******************************************************************
-
- ABI_UNUSED(comm)
 
  !write(std_out,"(3a)")"invars1 with string:", ch10, trim(string)
 
@@ -265,18 +264,18 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
  do idtset=1,ndtset_alloc
    jdtset=dtsets(idtset)%jdtset ; if(ndtset==0)jdtset=0
 
-! proposal: supercell generation in input string before it is read in
-! call expand_supercell_input(jdtset, lenstr, string)
-!  find supercell, else exit
-!  determinant = ncells
-!  copy rprim,    acell,    xred,    xcart,    xangst,    vel,    typat,   to
-!       rprim_uc, acell_uc, xred_uc, xcart_uc, xangst_uc, vel_uc, typat_uc
-!     NB: also rprim and angdeg need to be updated in non diagonal case!!!
-!  generate supercell info for each of these copying out with translation vectors etc...
-!  set chkprim to 0
-!  done!
+   ! proposal: supercell generation in input string before it is read in
+   ! call expand_supercell_input(jdtset, lenstr, string)
+   !  find supercell, else exit
+   !  determinant = ncells
+   !  copy rprim,    acell,    xred,    xcart,    xangst,    vel,    typat,   to
+   !       rprim_uc, acell_uc, xred_uc, xcart_uc, xangst_uc, vel_uc, typat_uc
+   !     NB: also rprim and angdeg need to be updated in non diagonal case!!!
+   !  generate supercell info for each of these copying out with translation vectors etc...
+   !  set chkprim to 0
+   !  done!
 
-!  Generate the supercell if supercell_latt is specified and update string
+   !  Generate the supercell if supercell_latt is specified and update string
    dtsets(idtset)%supercell_latt(:,:) = 0
    do ii=1,3
      dtsets(idtset)%supercell_latt(ii,ii) = 1
@@ -294,17 +293,29 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
       'Action: modify supercell_latt in the input file.'
      MSG_ERROR(msg)
    end if
-!  Compute the multiplicity of the supercell
+   ! Compute the multiplicity of the supercell
    call mati3det(dtsets(idtset)%supercell_latt,multiplicity)
 
-!  Read natom from string
+   ! Read natom from string
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'natom',tread,'INT')
-!  Might initialize natom from XYZ file
-   if(tread==0)then
-     call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'_natom',tread,'INT')
+
+   ! or get it from the structure variable
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'structure', tread_geo, &
+               'KEY', key_value=geo_string)
+
+   if (tread_geo /= 0) then
+     geo = geo_from_abivar_string(geo_string, comm)
+     if (tread /= 0) then
+       ABI_CHECK(intarr(1) == geo%natom, "natom from variable and from structure do not agree with each other")
+     end if
+     intarr(1) = geo%natom
+     tread = 1
    end if
 
-   if(tread==1)then
+   !  Might also initialize natom from XYZ file
+   if (tread==0) call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'_natom',tread,'INT')
+
+   if (tread==1) then
      dtsets(idtset)%natom=intarr(1)
    else
      write(msg, '(a,i0,2a)' )&
@@ -329,7 +340,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nimage',tread,'INT')
    if(tread==1) dtsets(idtset)%nimage=intarr(1)
 
-!  Check that nimage is greater than 0
+   ! Check that nimage is greater than 0
    if (dtsets(idtset)%nimage<=0) then
      write(msg, '(a,i0,4a)' )&
       'nimage must be > 0, but was ',dtsets(idtset)%nimage,ch10,&
@@ -339,8 +350,16 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    end if
 
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ntypat',tread,'INT')
-   if(tread==1)dtsets(idtset)%ntypat=intarr(1)
-!  Check that ntypat is greater than 0
+   if (tread==1) dtsets(idtset)%ntypat=intarr(1)
+
+   if (tread_geo /= 0) then
+     if (tread == 1) then
+       ABI_CHECK(geo%ntypat == dtsets(idtset)%ntypat, "ntypat and geo%ntypat do not agree with each other")
+     end if
+     dtsets(idtset)%ntypat = geo%ntypat
+   end if
+
+   ! Check that ntypat is greater than 0
    if (dtsets(idtset)%ntypat<=0) then
      write(msg, '(a,i0,2a,i0,3a)' )&
       'Input ntypat must be > 0, but was ',dtsets(idtset)%ntypat,ch10,&
@@ -349,7 +368,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      MSG_ERROR(msg)
    end if
 
-   !  Read msym from string
+   ! Read msym from string
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'maxnsym',tread,'INT')
    if(tread==1)dtsets(idtset)%maxnsym=intarr(1)
    !  Check that maxnsym is greater than 1
@@ -392,6 +411,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'usewvl',tread,'INT')
    if(tread==1) dtsets(idtset)%usewvl=intarr(1)
 
+   call geo%free()
  end do
 
 !mxnatom =maxval(dtsets(1:ndtset_alloc)%natom)
@@ -424,7 +444,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    end do
  end if
 
-!Set up npsp
+ ! Set up npsp
  npsp=mxntypat   ! Default value
  call intagm(dprarr,intarr,0,marr,1,string(1:lenstr),'npsp',tread,'INT')
 
@@ -522,6 +542,8 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
       'Action: check the input file.'
      MSG_ERROR(msg)
    end if
+
+
  end do
 
 !GPU information
@@ -1093,7 +1115,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
 !Local variables-------------------------------
 !scalars
  integer,parameter :: master = 0
- integer :: chksymbreak,found,ierr,iatom,ii,ikpt,iimage,index_blank,index_lower
+ integer :: chksymbreak,found,ierr,iatom,ii,ikpt,iimage,index_blank,index_lower, tread_geo
  integer :: index_typsymb,index_upper,ipsp,iscf,intimage,itypat,leave,marr
  integer :: natom,nkpt,nkpthf,npsp,npspalch, ncid
  integer :: nqpt,nspinor,nsppol,ntypat,ntypalch,ntyppure,occopt,response
@@ -1114,6 +1136,8 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  real(dp),allocatable :: vel(:,:),vel_cell(:,:),wtk(:),xred(:,:),znucl(:)
  character(len=32) :: cond_string(4)
  character(len=fnlen) :: key_value
+ character(len=len(string)) :: geo_string
+ type(geo_t) :: geo
 
 !************************************************************************
 
@@ -1183,19 +1207,29 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  npsp=dtset%npsp
  ntypat=dtset%ntypat
 
-!No default value for znucl
- call intagm(dprarr,intarr,jdtset,marr,dtset%npsp,string(1:lenstr),'znucl',tread,'DPR')
- if(tread==1)then
-   dtset%znucl(1:dtset%npsp)=dprarr(1:dtset%npsp)
- end if
- if(tread/=1)then
-   write(msg, '(3a)' )&
-   'The array znucl MUST be initialized in the input file while this is not done.',ch10,&
-   'Action: initialize znucl in your input file.'
-   MSG_ERROR(msg)
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'structure', tread_geo, &
+             'KEY', key_value=geo_string)
+
+ if (tread_geo == 0) then
+   ! No default value for znucl
+   call intagm(dprarr,intarr,jdtset,marr,dtset%npsp,string(1:lenstr),'znucl',tread,'DPR')
+   if(tread==1) dtset%znucl(1:dtset%npsp)=dprarr(1:dtset%npsp)
+
+   if(tread/=1)then
+     write(msg, '(3a)' )&
+     'The array znucl MUST be initialized in the input file while this is not done.',ch10,&
+     'Action: initialize znucl in your input file.'
+     MSG_ERROR(msg)
+   end if
+
+ else
+   call wrtout(std_out, sjoin(" Initializing lattice and positions from:", geo_string))
+   geo = geo_from_abivar_string(geo_string, comm)
+   dtset%znucl(1:dtset%ntypat) = geo%znucl
+   call geo%free()
  end if
 
-!The default for ratsph has already been initialized
+ ! The default for ratsph has already been initialized
  call intagm(dprarr,intarr,jdtset,marr,dtset%ntypat,string(1:lenstr),'ratsph',tread,'LEN')
  if(tread==1)then
    do ii=1,dtset%ntypat
@@ -1358,9 +1392,9 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  ntypalch=dtset%ntypalch
  if(ntypalch>ntypat)then
    write(msg, '(3a,i0,a,i0,a,a)' )&
-&   'The input variable ntypalch must be smaller than ntypat, while it is',ch10,&
-&   'ntypalch=',dtset%ntypalch,', and ntypat=',ntypat,ch10,&
-&   'Action: check ntypalch vs ntypat in your input file.'
+    'The input variable ntypalch must be smaller than ntypat, while it is',ch10,&
+    'ntypalch=',dtset%ntypalch,', and ntypat=',ntypat,ch10,&
+    'Action: check ntypalch vs ntypat in your input file.'
    MSG_ERROR(msg)
  end if
 
@@ -1370,15 +1404,18 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%npspalch=npspalch
  if(npspalch<0)then
    write(msg, '(a,i0,2a,i0,a,a)' )&
-&   'The number of available pseudopotentials, npsp=',npsp,ch10,&
-&   'is smaller than the requested number of types of pure atoms, ntyppure=',ntyppure,ch10,&
-&   'Action: check ntypalch versus ntypat and npsp in your input file.'
+    'The number of available pseudopotentials, npsp=',npsp,ch10,&
+    'is smaller than the requested number of types of pure atoms, ntyppure=',ntyppure,ch10,&
+    'Action: check ntypalch versus ntypat and npsp in your input file.'
    MSG_ERROR(msg)
  end if
 
  if(ntypalch>0)then
    call intagm(dprarr,intarr,jdtset,marr,ntypalch,string(1:lenstr),'algalch',tread,'INT')
    if(tread==1) dtset%algalch(1:ntypalch)=intarr(1:ntypalch)
+   if (tread_geo /= 0) then
+     MSG_ERROR("Alchemical mixing cannot be used with geo variable, use typat, znucl etc.")
+   end if
  end if
 
 !Read the Zeeman field
@@ -1386,13 +1423,13 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) then
    if(dtset%nspden == 2)then
      write(msg,'(7a)')&
-&     'A Zeeman field has been specified without noncollinear spins.',ch10,&
-&     'Only the z-component of the magnetic field will be used.'
+      'A Zeeman field has been specified without noncollinear spins.',ch10,&
+      'Only the z-component of the magnetic field will be used.'
      MSG_WARNING(msg)
    else if (dtset%nspden == 1)then
      write(msg, '(a,a,a)' )&
-&     'A Zeeman field has been specified for a non-spin-polarized calculation.',ch10,&
-&     'Action: check the input file.'
+      'A Zeeman field has been specified for a non-spin-polarized calculation.',ch10,&
+      'Action: check the input file.'
      MSG_ERROR(msg)
    end if
 
@@ -1412,10 +1449,7 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    if(dtset%nimage> 2 .and. ii==intimage)cycle ! Will do the intermediate reference image at the last reading
    if(dtset%nimage>=2 .and. ii==dtset%nimage+1)iimage=intimage
 
-   if (dtset%nimage /= 1) then
-     write(msg,'(a,i0)')' invars1: treat image number: ',iimage
-     call wrtout(std_out,msg,'COLL')
-   end if
+   if (dtset%nimage /= 1) call wrtout(std_out, sjoin(' invars1: treat image number: ',itoa(iimage)))
 
 !  Need to reset nsym to default value for each image
    dtset%nsym=0
@@ -1440,13 +1474,13 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
    znucl(1:dtset%npsp)=dtset%znucl(1:dtset%npsp)
 
    call ingeo(acell,amu,bravais,chrgat,dtset,dtset%genafm(1:3),iatfix,&
-&   dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
-&   msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
-&   dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
-&   dtset%pawspnorb,dtset%ptgroupma,ratsph,&
-&   rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
-&   string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
-&   typat,vel,vel_cell,xred,znucl)
+    dtset%icoulomb,iimage,iout,jdtset,dtset%jellslab,lenstr,mixalch,&
+    msym,natom,dtset%nimage,dtset%npsp,npspalch,dtset%nspden,dtset%nsppol,&
+    dtset%nsym,ntypalch,dtset%ntypat,nucdipmom,dtset%nzchempot,&
+    dtset%pawspnorb,dtset%ptgroupma,ratsph,&
+    rprim,dtset%slabzbeg,dtset%slabzend,dtset%spgroup,spinat,&
+    string,dtset%supercell_latt,symafm,dtset%symmorphi,symrel,tnons,dtset%tolsym,&
+    typat,vel,vel_cell,xred,znucl, comm)
 
    dtset%chrgat(1:natom)=chrgat(1:natom)
    dtset%iatfix(1:3,1:natom)=iatfix(1:3,1:natom)
