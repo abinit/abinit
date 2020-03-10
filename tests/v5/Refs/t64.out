@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h36 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h20 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t64/t64.in
 - output file    -> t64.out
@@ -482,6 +482,15 @@ P           mkmem6          4
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 9, nkpt: 6, mband: 55, nsppol: 1, nspinor: 1, nspden: 1, mpw: 546, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   4.80000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -536,6 +545,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -97.678222768243    -9.768E+01 5.720E-03 5.476E+02
  ETOT  2  -98.998405180444    -1.320E+00 9.050E-05 1.329E+02
@@ -557,23 +572,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  4.6421500,  -8.0404397,   0.0000000, ]
 - [  4.6421500,   8.0404397,   0.0000000, ]
 - [  0.0000000,   0.0000000,  10.2132705, ]
 lattice_lengths: [   9.28430,    9.28430,   10.21327, ]
-lattice_angles: [ 90.000,  90.000, 120.000, ]
+lattice_angles: [ 90.000,  90.000, 120.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6241917E+02
 convergence: {deltae: -6.259E-10, res2:  2.194E-08, residm:  6.439E-11, diffor: null, }
 etotal    :  -9.93970296E+01
 entropy   :   0.00000000E+00
 fermie    :   1.81302846E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  4.84839346E-03,  -1.21323001E-09,  -1.41156156E-09, ]
 - [ -1.21323001E-09,   4.84839486E-03,  -8.14965444E-10, ]
 - [ -1.41156156E-09,  -8.14965444E-10,   4.70198335E-03, ]
 pressure_GPa:  -1.4121E+02
-cartesian_forces:
+xred      :
+- [  4.6500E-01,  -1.1658E-17,   0.0000E+00, Si]
+- [ -1.1658E-17,   4.6500E-01,   6.6667E-01, Si]
+- [ -4.6500E-01,  -4.6500E-01,   3.3333E-01, Si]
+- [  4.1500E-01,   2.7200E-01,   1.2000E-01,  O]
+- [ -1.4300E-01,  -4.1500E-01,   4.5333E-01,  O]
+- [ -2.7200E-01,   1.4300E-01,   7.8667E-01,  O]
+- [  1.4300E-01,  -2.7200E-01,  -1.2000E-01,  O]
+- [  2.7200E-01,   4.1500E-01,   5.4667E-01,  O]
+- [ -4.1500E-01,  -1.4300E-01,   2.1333E-01,  O]
+cartesian_forces: # hartree/bohr
 - [  3.51817659E-04,  -6.09366060E-04,  -1.54197642E-18, ]
 - [  3.53897449E-04,   6.10877708E-04,   1.03327726E-10, ]
 - [ -7.05984339E-04,  -1.04532722E-06,  -1.03327729E-10, ]
@@ -703,6 +728,15 @@ band_energy         : -1.03145196145164E+01
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 9, nkpt: 6, mband: 50, nsppol: 1, nspinor: 1, nspden: 1, mpw: 546, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   4.80000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1013,6 +1047,15 @@ band_energy         : -1.03145196145164E+01
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 9, nkpt: 6, mband: 50, nsppol: 1, nspinor: 1, nspden: 1, mpw: 546, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   4.80000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  mkfilename : getscr/=0, take file _SCR from output of DATASET   2.
@@ -1133,6 +1176,15 @@ data: !SigmaeeData |
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 9, nkpt: 4, mband: 55, nsppol: 1, nspinor: 1, nspden: 1, mpw: 546, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   4.80000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -1186,6 +1238,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -97.678523489170    -9.768E+01 5.720E-03 5.476E+02
  ETOT  2  -98.998519341421    -1.320E+00 9.034E-05 1.328E+02
@@ -1207,23 +1265,33 @@ _setup2: Arith. and geom. avg. npw (full set) are     539.889     539.876
 --- !ResultsGS
 iteration_state: {dtset: 4, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  4.6421500,  -8.0404397,   0.0000000, ]
 - [  4.6421500,   8.0404397,   0.0000000, ]
 - [  0.0000000,   0.0000000,  10.2132705, ]
 lattice_lengths: [   9.28430,    9.28430,   10.21327, ]
-lattice_angles: [ 90.000,  90.000, 120.000, ]
+lattice_angles: [ 90.000,  90.000, 120.000, ] # degrees, (23, 13, 12)
 lattice_volume:   7.6241917E+02
 convergence: {deltae: -1.976E-10, res2:  3.643E-09, residm:  8.688E-11, diffor: null, }
 etotal    :  -9.93970296E+01
 entropy   :   0.00000000E+00
 fermie    :   1.81302475E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  4.84839831E-03,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   4.84839831E-03,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   4.70195977E-03, ]
 pressure_GPa:  -1.4121E+02
-cartesian_forces:
+xred      :
+- [  4.6500E-01,  -1.1658E-17,   0.0000E+00, Si]
+- [ -1.1658E-17,   4.6500E-01,   6.6667E-01, Si]
+- [ -4.6500E-01,  -4.6500E-01,   3.3333E-01, Si]
+- [  4.1500E-01,   2.7200E-01,   1.2000E-01,  O]
+- [ -1.4300E-01,  -4.1500E-01,   4.5333E-01,  O]
+- [ -2.7200E-01,   1.4300E-01,   7.8667E-01,  O]
+- [  1.4300E-01,  -2.7200E-01,  -1.2000E-01,  O]
+- [  2.7200E-01,   4.1500E-01,   5.4667E-01,  O]
+- [ -4.1500E-01,  -1.4300E-01,   2.1333E-01,  O]
+cartesian_forces: # hartree/bohr
 - [  3.50544788E-04,  -6.07161383E-04,   1.54197642E-18, ]
 - [  3.50544788E-04,   6.07161383E-04,   1.54197642E-18, ]
 - [ -7.01089576E-04,  -1.34844479E-18,   1.54197642E-18, ]
@@ -1353,6 +1421,15 @@ band_energy         : -1.03145210099871E+01
 ================================================================================
 == DATASET  5 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 9, nkpt: 4, mband: 50, nsppol: 1, nspinor: 1, nspden: 1, mpw: 546, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   4.80000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   4.
 
@@ -1614,6 +1691,15 @@ band_energy         : -1.03145210099871E+01
 ================================================================================
 == DATASET  6 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 6, }
+dimensions: {natom: 9, nkpt: 4, mband: 50, nsppol: 1, nspinor: 1, nspden: 1, mpw: 546, }
+cutoff_energies: {ecut:   6.0, pawecutdg:  -1.0, }
+electrons: {nelect:   4.80000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   4.
 
@@ -2223,10 +2309,10 @@ P           mkmem6          4
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         37.8  wall=         38.4
+- Proc.   0 individual time (sec): cpu=         38.1  wall=         38.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         37.8  wall=         38.4
++Overall time at end (sec) : cpu=         38.1  wall=         38.4

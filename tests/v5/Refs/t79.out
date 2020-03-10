@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h36 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h20 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t79/t79.in
 - output file    -> t79.out
@@ -113,6 +113,15 @@ P           mkmem           2
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 2, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 40, }
+cutoff_energies: {ecut:   2.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 2, optcell: 1, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -162,6 +171,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      37.750      37.728
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.7062495240545    -8.706E+00 3.215E-04 1.902E-01
  ETOT  2  -8.7071360053395    -8.865E-04 9.359E-10 4.450E-03
@@ -184,23 +199,26 @@ _setup2: Arith. and geom. avg. npw (full set) are      37.750      37.728
 --- !ResultsGS
 iteration_state: {dtset: 1, itime: 1, icycle: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.2000000,   5.2000000, ]
 - [  5.2000000,   0.0000000,   5.2000000, ]
 - [  5.2000000,   5.2000000,   0.0000000, ]
 lattice_lengths: [   7.35391,    7.35391,    7.35391, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.8121600E+02
 convergence: {deltae:  4.086E-14, res2:  7.584E-16, residm:  5.498E-18, diffor: null, }
 etotal    :  -8.70715490E+00
 entropy   :   0.00000000E+00
 fermie    :   1.85892126E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  1.88379905E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   1.88379905E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   1.88379905E-04, ]
 pressure_GPa:  -5.5423E+00
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: # hartree/bohr
 - [ -6.99922057E-24,   6.99922057E-24,   7.84761094E-24, ]
 - [  6.99922057E-24,  -6.99922057E-24,  -7.84761094E-24, ]
 force_length_stats: {min:   1.26318318E-23, max:   1.26318318E-23, mean:   1.26318318E-23, }
@@ -248,6 +266,12 @@ force_length_stats: {min:   1.26318318E-23, max:   1.26318318E-23, mean:   1.263
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.7078761257942    -8.708E+00 7.974E-10 4.501E-03
  ETOT  2  -8.7078968032447    -2.068E-05 3.276E-12 2.493E-04
@@ -268,23 +292,26 @@ force_length_stats: {min:   1.26318318E-23, max:   1.26318318E-23, mean:   1.263
 --- !ResultsGS
 iteration_state: {dtset: 1, itime: 2, icycle: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.1706127,   5.1706127, ]
 - [  5.1706127,   0.0000000,   5.1706127, ]
 - [  5.1706127,   5.1706127,   0.0000000, ]
 lattice_lengths: [   7.31235,    7.31235,    7.31235, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7647510E+02
 convergence: {deltae: -1.297E-13, res2:  2.718E-14, residm:  8.195E-17, diffor: null, }
 etotal    :  -8.70789769E+00
 entropy   :   0.00000000E+00
 fermie    :   1.91523921E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  1.23418269E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   1.23418269E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   1.23418269E-04, ]
 pressure_GPa:  -3.6311E+00
-cartesian_forces:
+xred      :
+- [  2.1006E-24,  -5.9143E-25,  -7.5458E-25, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
@@ -336,6 +363,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 3, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.7082659833829    -8.708E+00 8.096E-10 1.440E-02
  ETOT  2  -8.7083311729825    -6.519E-05 8.237E-12 7.589E-04
@@ -356,23 +389,26 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !ResultsGS
 iteration_state: {dtset: 1, itime: 3, icycle: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.1174257,   5.1174257, ]
 - [  5.1174257,   0.0000000,   5.1174257, ]
 - [  5.1174257,   5.1174257,   0.0000000, ]
 lattice_lengths: [   7.23713,    7.23713,    7.23713, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6803076E+02
 convergence: {deltae: -2.256E-13, res2:  8.281E-14, residm:  2.786E-16, diffor: null, }
 etotal    :  -8.70833382E+00
 entropy   :   0.00000000E+00
 fermie    :   2.02078754E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [ -3.63944647E-05,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,  -3.63944647E-05,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,  -3.63944647E-05, ]
 pressure_GPa:   1.0708E+00
-cartesian_forces:
+xred      :
+- [  2.1006E-24,  -5.9143E-25,  -7.5458E-25, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
@@ -424,6 +460,12 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 4, icycle: 1, }
+solver: {iscf: 7, nstep: 10, nline: 3, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.7083559552929    -8.708E+00 3.681E-11 7.124E-04
  ETOT  2  -8.7083592020147    -3.247E-06 4.218E-13 3.773E-05
@@ -444,23 +486,26 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
 --- !ResultsGS
 iteration_state: {dtset: 1, itime: 4, icycle: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.1292504,   5.1292504, ]
 - [  5.1292504,   0.0000000,   5.1292504, ]
 - [  5.1292504,   5.1292504,   0.0000000, ]
 lattice_lengths: [   7.25386,    7.25386,    7.25386, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6989305E+02
 convergence: {deltae: -3.020E-14, res2:  1.366E-15, residm:  3.737E-18, diffor: null, }
 etotal    :  -8.70835933E+00
 entropy   :   0.00000000E+00
 fermie    :   1.99684414E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  8.70771721E-06,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   8.70771721E-06,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   8.70771721E-06, ]
 pressure_GPa:  -2.5619E-01
-cartesian_forces:
+xred      :
+- [  2.1006E-24,  -5.9143E-25,  -7.5458E-25, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
@@ -727,10 +772,10 @@ P           mkmem           2
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.2
+- Proc.   0 individual time (sec): cpu=          1.2  wall=          1.4
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and   1 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.2  wall=          1.2
++Overall time at end (sec) : cpu=          1.2  wall=          1.4

@@ -85,5 +85,5 @@
     </geometryMinimisation>
   </dataSet>
   <!-- timeInfo markup : cpu and wall attributes are given in seconds. -->
-  <timeInfo day="15" month="2" year="2020" cpu="   1.1817340105772018" wall="   1.2334361249999999" />
+  <timeInfo day="24" month="2" year="2020" cpu="   1.1943289693444967" wall="   1.3915876520000001" />
 </abinitRun>

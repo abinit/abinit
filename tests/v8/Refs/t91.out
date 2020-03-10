@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h54 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h33 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t91/t91.in
 - output file    -> t91.out
@@ -366,6 +366,15 @@ P           mkmem           3
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 3, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 151, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
@@ -412,6 +421,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     284.625     284.289
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-16, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.3582585935285    -8.358E+00 9.907E-02 4.262E+00
  ETOT  2  -8.3627219182551    -4.463E-03 1.286E-05 1.119E-01
@@ -434,23 +449,26 @@ _setup2: Arith. and geom. avg. npw (full set) are     284.625     284.289
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.1085000,   5.1085000, ]
 - [  5.1085000,   0.0000000,   5.1085000, ]
 - [  5.1085000,   5.1085000,   0.0000000, ]
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6663072E+02
 convergence: {deltae:  4.796E-14, res2:  1.892E-15, residm:  9.498E-17, diffor: null, }
 etotal    :  -8.36280582E+00
 entropy   :   0.00000000E+00
 fermie    :   1.75402323E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [ -3.35007526E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,  -3.35007526E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,  -3.35007526E-04, ]
 pressure_GPa:   9.8563E+00
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: # hartree/bohr
 - [ -6.32509400E-28,  -4.48415509E-44,   2.10836467E-28, ]
 - [  6.32509400E-28,   0.00000000E+00,  -2.10836467E-28, ]
 force_length_stats: {min:   6.66723448E-28, max:   6.66723448E-28, mean:   6.66723448E-28, }
@@ -527,6 +545,15 @@ band_energy         : -1.73825273456230E-02
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 3, mband: 28, nsppol: 1, nspinor: 2, nspden: 4, mpw: 302, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  Exchange-correlation functional for the present dataset will be:
@@ -550,6 +577,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     284.625     284.289
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-16, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -8.3628058223925    -8.363E+00 9.352E-17 3.321E-17
 
@@ -564,23 +597,26 @@ _setup2: Arith. and geom. avg. npw (full set) are     284.625     284.289
 --- !ResultsGS
 iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.1085000,   5.1085000, ]
 - [  5.1085000,   0.0000000,   5.1085000, ]
 - [  5.1085000,   5.1085000,   0.0000000, ]
 lattice_lengths: [   7.22451,    7.22451,    7.22451, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.6663072E+02
 convergence: {deltae: -8.363E+00, res2:  3.321E-17, residm:  9.352E-17, diffor: null, }
 etotal    :  -8.36280582E+00
 entropy   :   0.00000000E+00
 fermie    :   1.75402323E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [ -3.35007524E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,  -3.35007524E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,  -3.35007524E-04, ]
 pressure_GPa:   9.8563E+00
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: # hartree/bohr
 - [ -2.10836467E-28,   4.21672933E-28,  -2.10836467E-28, ]
 - [  2.10836467E-28,  -4.21672933E-28,   2.10836467E-28, ]
 force_length_stats: {min:   5.16441762E-28, max:   5.16441762E-28, mean:   5.16441762E-28, }
@@ -662,6 +698,15 @@ band_energy         : -1.73825306019956E-02
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 3, mband: 14, nsppol: 1, nspinor: 1, nspden: 1, mpw: 133, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 3, gwcalctyp: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1282,6 +1327,15 @@ band_energy         : -1.73825306019956E-02
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 3, mband: 28, nsppol: 1, nspinor: 2, nspden: 4, mpw: 266, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  mkfilename : getscr/=0, take file _SCR from output of DATASET   3.
@@ -1406,6 +1460,15 @@ data: !SigmaeeData |
 == DATASET  5 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 3, mband: 28, nsppol: 1, nspinor: 2, nspden: 4, mpw: 266, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 7, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  mkfilename : getscr/=0, take file _SCR from output of DATASET   3.
@@ -1529,6 +1592,15 @@ data: !SigmaeeData |
 ================================================================================
 == DATASET  6 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 6, }
+dimensions: {natom: 2, nkpt: 3, mband: 28, nsppol: 1, nspinor: 2, nspden: 4, mpw: 266, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -2001,10 +2073,10 @@ P           mkmem           3
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          9.3  wall=         10.4
+- Proc.   0 individual time (sec): cpu=          9.5  wall=         10.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered  39 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          9.3  wall=         10.4
++Overall time at end (sec) : cpu=          9.5  wall=         10.9

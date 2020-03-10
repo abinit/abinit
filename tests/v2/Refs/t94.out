@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h35 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 20h56 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v2_t94/t94.in
 - output file    -> t94.out
@@ -328,6 +328,15 @@ P          mk1mem2         64
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 1, nkpt: 4, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 296, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.00000000E+01, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   4.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -369,6 +378,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     291.500     291.463
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 25, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-22, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -40.237459799962    -4.024E+01 1.202E-01 1.679E+03
  ETOT  2  -40.639191426996    -4.017E-01 1.783E-03 9.390E+02
@@ -398,23 +413,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     291.500     291.463
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  4.0900000,   0.0000000,   0.0000000, ]
 - [  0.0000000,   4.0900000,   0.0000000, ]
 - [  0.0000000,   0.0000000,   4.0900000, ]
 lattice_lengths: [   4.09000,    4.09000,    4.09000, ]
-lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   6.8417929E+01
 convergence: {deltae: -9.237E-14, res2:  4.044E-24, residm:  3.965E-07, diffor: null, }
 etotal    :  -4.16440072E+01
 entropy   :   0.00000000E+00
 fermie    :  -2.03190871E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  2.60815719E-02,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   2.60815719E-02,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   2.60815719E-02, ]
 pressure_GPa:  -7.6735E+02
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ni]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
@@ -487,6 +504,15 @@ band_energy         : -3.02108608665243E+00
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 1, nkpt: 64, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 296, }
+cutoff_energies: {ecut:  20.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.00000000E+01, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   4.00000000E-02, }
+meta: {optdriver: 1, rfphon: 1, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
@@ -534,6 +560,12 @@ band_energy         : -3.02108608665243E+00
   fully or partially occupied states are    1.000000E+01 and    1.000000E+01.
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 18, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-11, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   4660.6589589432     -2.039E+03 1.397E+01 9.476E+06
@@ -963,10 +995,10 @@ P          mk1mem2         64
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.9  wall=          4.0
+- Proc.   0 individual time (sec): cpu=          3.9  wall=          5.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.9  wall=          4.0
++Overall time at end (sec) : cpu=          3.9  wall=          5.6
