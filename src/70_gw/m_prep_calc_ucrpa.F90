@@ -167,7 +167,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
 & Psps,Wfd,Wfdf,allQP_sym,gwx_ngfft,ngfftf,&
 & prtvol,pawcross,plowan_compute,rhot1_q_m,wanbz,rhot1)
 
-#ifdef HAVE_CRPA_NO_OPTIM
+#ifndef HAVE_CRPA_OPTIM
 #ifdef FC_INTEL
 #if  __INTEL_COMPILER<=1700
 !DEC$ NOOPTIMIZE

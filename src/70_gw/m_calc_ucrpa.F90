@@ -30,11 +30,11 @@
 
 MODULE m_calc_ucrpa
 
-#ifdef HAVE_CRPA_NO_OPTIM
+#ifndef HAVE_CRPA_OPTIM
 #ifdef FC_INTEL
 #if  __INTEL_COMPILER<=1700
 !DEC$ NOOPTIMIZE
-#warning "cPRA optimization is turned off, to activate it add enable_crpa_no_optim='no' in your .ac9 file and ../configure make again" 
+#warning "cPRA optimization is turned off, to activate it add enable_crpa_optim='yes' in your .ac9 file then ../configure and make again (it will take some time to compile)"
 #endif
 #endif
 #endif

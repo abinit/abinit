@@ -24,7 +24,7 @@
 #include "abi_common.h"
 
 module m_chi0
-#ifdef HAVE_CRPA_NO_OPTIM
+#ifndef HAVE_CRPA_OPTIM
 #ifdef FC_INTEL
 #if  __INTEL_COMPILER<=1700
 !DEC$ NOOPTIMIZE
