@@ -151,7 +151,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 !scalars
  integer,parameter :: master = 0, natifc0 = 0, timrev2 = 2, selectz0 = 0, nsphere0 = 0, prtsrlr0 = 0, brav1 = 1
  integer :: ii,comm,nprocs,my_rank,psp_gencond,mgfftf,nfftf
- integer :: iblock_dielt_zeff, iblock_dielt, ddb_nqshift,ierr
+ integer :: iblock_dielt_zeff, iblock_dielt, iblock_quadrupoles, ddb_nqshift,ierr
  integer :: omp_ncpus, work_size, nks_per_proc
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem
 #ifdef HAVE_NETCDF
@@ -177,6 +177,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  integer,allocatable :: dummy_atifc(:)
  real(dp),parameter :: k0(3)=zero
  real(dp) :: wminmax(2), dielt(3,3), zeff(3,3,dtset%natom), zeff_raw(3,3,dtset%natom)
+ real(dp) :: qdrp_cart(3,3,3,dtset%natom)
  real(dp),pointer :: gs_eigen(:,:,:)
  real(dp),allocatable :: ddb_qshifts(:,:), kpt_efmas(:,:)
  type(efmasdeg_type),allocatable :: efmasdeg(:)
@@ -455,9 +456,37 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
    end if
  end if
 
- call ifc_init(ifc, cryst, ddb, &
+ ! Read the quadrupoles
+ iblock_quadrupoles = ddb%get_quadrupoles(1, 3, qdrp_cart)
+ if (my_rank == master) then
+   if (iblock_quadrupoles == 0) then
+     call wrtout(ab_out, sjoin("- Cannot find quadrupole tensor in DDB file:", ddb_path))
+     call wrtout(ab_out, "Values initialized with zeros")
+   else
+     call wrtout(ab_out, sjoin("- Found quadrupole tensor in DDB file:", ddb_path))
+   end if
+ end if
+
+! if (any(dtset%ddb_qrefine > 1)) then
+!   ! Gaal-Nagy's algorithm in PRB 73 014117 [[cite:GaalNagy2006]]
+!   ! Build the IFCs using the coarse q-mesh.
+!   ngqpt_coarse = dtset%ddb_ngqpt / dtset%ddb_qrefine
+!   call ifc_init(ifc_coarse, cryst, ddb, &
+!     brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, ngqpt_coarse, ddb_nqshift, ddb_qshifts, dielt, zeff, &
+!     qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
+!
+!   ! Now use the coarse q-mesh to fill the entries in dynmat(q)
+!   ! on the dense q-mesh that cannot be obtained from the DDB file.
+!   call ifc_init(ifc, cryst, ddb, &
+!     brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
+!     qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm, ifc_coarse=ifc_coarse)
+!   call ifc_coarse%free()
+
+! else
+   call ifc_init(ifc, cryst, ddb, &
      brav1, dtset%asr, dtset%symdynmat, dtset%dipdip, dtset%rfmeth, dtset%ddb_ngqpt, ddb_nqshift, ddb_qshifts, dielt, zeff, &
-     nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
+     qdrp_cart, nsphere0, rifcsph0, prtsrlr0, dtset%enunit, comm)
+! end if
 
  ABI_FREE(ddb_qshifts)
  call ifc%print(unit=std_out)

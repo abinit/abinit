@@ -125,7 +125,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
 
 !arrays
   real(dp) :: dielt(3,3)
-  real(dp),allocatable :: zeff(:,:,:)
+  real(dp),allocatable :: zeff(:,:,:),qdrp_cart(:,:,:,:)
   real(dp) :: acell_next(3),xred_next(3,natom),rprimd_next(3,3)
   type(ifc_type) :: ifc
   type(crystal_t) :: crystal
@@ -152,7 +152,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
   call wrtout(std_out,message,'COLL')
   call wrtout(ab_out,message,'COLL')
 
-  call ifc_init_fromFile(dielt,trim(filename),ifc,natom_uc,ngqpt,nqshift,qshift,crystal,zeff,comm)
+  call ifc_init_fromFile(dielt,trim(filename),ifc,natom_uc,ngqpt,nqshift,qshift,crystal,zeff,qdrp_cart,comm)
 
   write(message, '(a,I0,a,f10.2,02a)' )' Generation of ',nconfig,' at the temperature ',&
 &                            temperature_K,' K from the phonons',ch10
@@ -201,6 +201,7 @@ subroutine generate_training_set(acell,add_strain,amplitudes,filename,hist,natom
   call thermal_supercell_free(nconfig,thm_scells)
   ABI_DATATYPE_DEALLOCATE(thm_scells)
   ABI_DEALLOCATE(zeff)
+  ABI_DEALLOCATE(qdrp_cart)
 
 end subroutine generate_training_set
 !!***

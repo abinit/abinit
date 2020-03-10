@@ -2249,6 +2249,8 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
        blktyp=4
      else if(blkname==' 2nd eigenvalue derivatives   - ' .or. blkname==' 2rd eigenvalue derivatives   - ')then
        blktyp=5
+     else if(blkname==' 3rd derivatives (long wave)  - ')then
+       blktyp=33
      else
        write(message, '(a,a,a,a,a,a,a,a,a)' )&
 &       'The following string appears in the DDB in place of',' the block type description :',ch10,blkname,ch10,&
@@ -2261,12 +2263,12 @@ subroutine inprep8 (dimekb,filnam,lmnmax,mband,mblktyp,msym,natom,nblok,nkpt,&
      if(blktyp==1.or.blktyp==2)then
 !      Read the phonon wavevector
        read(unddb,*)
-     else if(blktyp==3)then
+     else if(blktyp==3.or.blktyp==33)then
 !      Read the perturbation wavevectors
        read(unddb,*)
        read(unddb,*)
        read(unddb,*)
-       mblktyp=3
+       mblktyp=blktyp
      else if(blktyp==5)then
        read(unddb,*)
        mblktyp=5
