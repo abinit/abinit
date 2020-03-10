@@ -3061,7 +3061,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmftctqmc_grnns dmftctqmc_meas dmftctqmc_mrka'
  list_vars=trim(list_vars)//' dmftctqmc_mov dmftctqmc_order dmftctqmc_triqs_nleg'
  list_vars=trim(list_vars)//' dmftcheck dmftqmc_l dmftqmc_n dmftqmc_seed dmftqmc_therm'
- list_vars=trim(list_vars)//' dosdeltae dtion dynamics dynimage dyn_chksym dyn_tolsym'
+ list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_entropy dmft_iter dmft_kspectralfunc'
  list_vars=trim(list_vars)//' dmft_mxsf dmft_nlambda dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv'
  list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d'
