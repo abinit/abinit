@@ -879,6 +879,7 @@ subroutine prep_calc_ucrpa(sigmak_ibz,ikcalc,itypatcor,minbnd,maxbnd,Cryst,QP_BS
              do pwx=1,sigp%npwx
                do iatom1=1,wanbz%natom_wan
                do iatom2=1,wanbz%natom_wan
+                 !Loig Vaugier PhD eq. 5.11
                  eikr=exp(- cmplx(0.0,1.0) * two_pi * ( &
    kmesh%bz(1,ik_bz)* ( cryst%xred(1,wanbz%iatom_wan(iatom1)) - cryst%xred(1,wanbz%iatom_wan(iatom2)) )+&
    kmesh%bz(2,ik_bz)* ( cryst%xred(2,wanbz%iatom_wan(iatom1)) - cryst%xred(2,wanbz%iatom_wan(iatom2)) )+&

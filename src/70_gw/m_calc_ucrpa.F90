@@ -34,6 +34,7 @@ MODULE m_calc_ucrpa
 #ifdef FC_INTEL
 #if  __INTEL_COMPILER<=1700
 !DEC$ NOOPTIMIZE
+#warning "cPRA optimization is turned off, to activate it add enable_crpa_no_optim='no' in your .ac9 file and ../configure make again" 
 #endif
 #endif
 #endif
@@ -630,6 +631,7 @@ endif
           do m3=1,mbband3
           do m4=1,mbband4
             do iqibz=1,nqibz
+              !Loig Vaugier PhD eq. 5.15
               eiqr(iqibz)=exp(cmplx(0.0, 1.0 ) * two_pi * ( &
                 q_coord(iqibz,1)* ( cryst%xred(1,wanbz%iatom_wan(iatom3)) - cryst%xred(1,wanbz%iatom_wan(iatom2)) )+ &
                 q_coord(iqibz,2)* ( cryst%xred(2,wanbz%iatom_wan(iatom3)) - cryst%xred(2,wanbz%iatom_wan(iatom2)) )+ &
