@@ -49,7 +49,6 @@ AM_DISTCHECK_CONFIGURE_FLAGS = \\
   --without-abinit-common \\
   --without-bigdft \\
   --without-fftw3 \\
-  --without-hdf5 \\
   --without-levmar \\
   --without-libpaw \\
   --without-libpsml \\
