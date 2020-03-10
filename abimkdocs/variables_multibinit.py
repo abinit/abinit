@@ -214,7 +214,7 @@ Variable(
     vartype="integer",
     topics=['FitProcess_basic'],
     dimensions=[3],
-    defaultval=0 1 1,
+    defaultval=[0,1,1],
     mnemonics="FIT on Energy, Forces, and or, Stresses",
     text=r"""
 Specifies on which first-principles quantities the anharmonic coefficients will be fitted. 
@@ -970,7 +970,7 @@ Variable(
     vartype="integer",
     topics=['FitProcess_basic'],
     dimensions=[3],
-    defaultval=0 1 1,
+    defaultval=[0,1,1],
     mnemonics="Select on Energy, Forces, and or, Stresses",
     text=r"""
 Specifies on which goal function quantities the anharmonic coefficients will be selected. 
