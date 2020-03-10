@@ -38,7 +38,7 @@ module m_fock
  use m_pawfgr
  use m_pawfgrtab
  use m_pawcprj
-! use m_vcoul,           only : vcoul_init
+ use m_vcoul,           only : vcoul_init
  use m_cgtools
  use m_dtset
 

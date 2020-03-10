@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+# Copyright (C) 2005-2014 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+set -e
+
+if test "${#}" -lt "2"; then
+  echo "Usage: $0 file_type file"
+  exit 0
+fi
+
+dattype="${1}"
+srcfile="${2}"
+tmpfile="/tmp/add-header-typed.${$}"
+
+cat > "${tmpfile}" <<EOF || exit 1
+# -*- ${dattype} -*-
+#
+# Copyright (C) 2005-2014 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+EOF
+
+cat "${srcfile}" >> "${tmpfile}" || exit 1
+
+mv -f "${tmpfile}" "${srcfile}" && rm -f "${tmpfile}"

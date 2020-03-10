@@ -1,0 +1,30 @@
+Abinit Fallbacks started in 2005 as part of the Abinit Project, with codename
+"Abinit Plugins" until 2010, and became an independent project in 2014.
+
+Copyright © 2005-2014 Abinit Group
+See https://launchpad.net/~abinit-maintainers for more details about the
+authors.
+
+Copyright © 2015 Abinit Fallbacks Developers
+See https://launchpad.net/~abinit-fallbacks-developers for a full list of
+authors.
+
+Main developers:
+
+  * Yann Pouillon <yann.pouillon@materialsevolution.es> (contact person)
+  * Jean-Michel Beuken <jean-michel.beuken@uclouvain.be>
+
+Main contributors:
+
+  * Marc Torrent <marc.torrent@cea.fr> (AtomPAW)
+  * Damien Caliste <damien.caliste@cea.fr> (BigDFT, ETSF_IO)
+  * Micael Oliveira <mjt.oliveira@ulg.ac.be> (LibXC)
+  * Tonatiuh Rangel <trangel@lbl.gov> (Wannier90)
+
+                    ----------------------------------------
+
+The Abinit Fallbacks download, modify, build, and install, third-party packages.
+Please consult the corresponding source code directly for information about
+their upstream authors and licenses. The location of the downloaded source
+tarballs is reported by the configure script at the end of its execution.
+

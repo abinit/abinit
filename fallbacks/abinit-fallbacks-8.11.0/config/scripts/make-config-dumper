@@ -1,0 +1,137 @@
+#!/usr/bin/env python
+#
+# Copyright (C) 2014 ABINIT Group (Yann Pouillon)
+#
+# This file is part of the ABINIT software package. For license information,
+# please see the COPYING file in the top-level directory of the ABINIT source
+# distribution.
+#
+
+from __future__ import print_function
+
+try:
+    from configparser import ConfigParser,NoOptionError
+except ImportError:
+    from ConfigParser import ConfigParser,NoOptionError
+from time import gmtime,strftime
+
+import subprocess
+import os
+import re
+import sys
+
+class MyConfigParser(ConfigParser):
+
+  def optionxform(self,option):
+    return str(option)
+
+# ---------------------------------------------------------------------------- #
+
+#
+# Main program
+#
+
+# Initial setup
+my_name    = "make-config-dumper"
+my_configs = ["config/specs/fallbacks.conf","config/specs/languages.conf"]
+my_output  = "fallbacks.dump.in"
+
+# Check if we are in the top of the ABINIT source tree
+if ( not os.path.exists("configure.ac") or
+     not os.path.exists("config/specs/fallbacks.conf") ):
+  print("%s: You must be in the top of an ABINIT source tree." % my_name)
+  print("%s: Aborting now." % my_name)
+  sys.exit(1)
+
+# Read config open(s)
+for cnf_file in my_configs:
+  if ( os.path.exists(cnf_file) ):
+    if ( re.search("\.cf$",cnf_file) ):
+      exec(compile(open(cnf_file).read(), cnf_file, 'exec'))
+  else:
+    print("%s: Could not find config file (%s)." % (my_name,cnf_file))
+    print("%s: Aborting now." % my_name)
+    sys.exit(2)
+
+# What time is it?
+now = strftime("%Y/%m/%d %H:%M:%S +0000",gmtime())
+
+# Init
+cnf = MyConfigParser()
+cnf.read(my_configs[0])
+abinit_fallbacks = cnf.sections()
+abinit_fallbacks.sort()
+is_preq = dict((pkg,False) for pkg in abinit_fallbacks)
+dumper  = "# Abinit Fallbacks Configuration Dumper\n"
+dumper += "# Generated automatically by %s on %s\n" % (my_name,now)
+dumper += "#\n# Note: this file is both Shell- and Python-readable\n"
+
+# Define environment variables
+global_envvars = {}
+lcf = MyConfigParser()
+lcf.read(my_configs[1])
+fallbacks_langs = lcf.get("languages","fallbacks").split()
+global_langs = lcf.get("languages","global").split()
+for lang in lcf.sections():
+  if ( not lang in ("languages","descriptions") ):
+    global_envvars[lang] = {"envs":lcf.get(lang,"envs").split()}
+    for stage in global_envvars[lang]["envs"]:
+      if ( lcf.has_option(lang,stage) ):
+        global_envvars[lang][stage] = lcf.get(lang,stage).split()
+      else:
+        global_envvars[lang][stage] = None
+
+# Identify dependencies
+for pkg in abinit_fallbacks:
+  if ( cnf.has_option(pkg,"depends") ):
+    pkg_deps = cnf.get(pkg,"depends").split()
+    for dep in pkg_deps:
+      is_preq[dep] = True
+
+# Dump global environment variables
+dumper += "\n# Development environment\n"
+for lang in global_langs:
+  for env_var in global_envvars[lang]["envs"]:
+    dumper += "%s='@%s@'\n" % (env_var,env_var)
+    try:
+      for item in global_envvars[lang][env_var]:
+        dumper += "%s='@%s@'\n" % (item,item)
+    except TypeError:
+      pass
+
+# Process fallbacks individually
+for pkg in abinit_fallbacks:
+
+  # Extract mandatory package information
+  pkg_name = cnf.get(pkg,"name")
+  pkg_desc = cnf.get(pkg,"description")
+  pkg_lngs = ["CONFIG"] + cnf.get(pkg,"languages").split() + ["LINK"]
+  dumper += "\n                    # ------------------------------------ #\n"
+  dumper += "\n# %s - use variables\n" % pkg_desc
+  dumper += "enable_%s='@enable_%s@'\n" % (pkg,pkg)
+  dumper += "afb_%s_ok='@afb_%s_ok@'\n" % (pkg,pkg)
+
+  # Extract optional package information
+  if ( is_preq[pkg] ):
+    if ( cnf.has_option(pkg,"binaries") ):
+      dumper += "with_%s_bins='@with_%s_bins@'\n" % (pkg,pkg)
+      dumper += "afb_%s_bins='@afb_%s_bins@'\n" % (pkg,pkg)
+    if ( cnf.has_option(pkg,"headers") or cnf.has_option(pkg,"modules") ):
+      dumper += "with_%s_incs='@with_%s_incs@'\n" % (pkg,pkg)
+      dumper += "afb_%s_incs='@afb_%s_incs@'\n" % (pkg,pkg)
+    if ( cnf.has_option(pkg,"libraries") ):
+      dumper += "with_%s_libs='@with_%s_libs@'\n" % (pkg,pkg)
+      dumper += "afb_%s_libs='@afb_%s_libs@'\n" % (pkg,pkg)
+
+  # Define package-specific environment variables
+  dumper += "\n# %s - build variables\n" % pkg_desc
+  dumper += "afb_%s_tarball='@afb_%s_tarball@'\n" % (pkg,pkg)
+  for lang in pkg_lngs:
+    for env_var in global_envvars[lang]["envs"]:
+      try:
+        for item in global_envvars[lang][env_var]:
+          dumper += "%s_%s='@%s_%s@'\n" % (item,pkg.upper(),item,pkg.upper())
+      except TypeError:
+        pass
+
+open(my_output,"w").write(dumper)
