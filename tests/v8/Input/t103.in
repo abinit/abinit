@@ -20,8 +20,8 @@ fit_SPCoupling = 1
 fit_SPC_maxS = 2
 fit_anhaStrain = 1 
 fit_iatom = 0 
-fit_EFS = 1 0 0 
-sel_EFS = 1 0 0
+fit_EFS = 1 1 1 
+sel_EFS = 1 1 1
 
 #%%<BEGIN TEST_INFO>
 #%% [setup]

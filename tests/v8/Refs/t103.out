@@ -1,8 +1,8 @@
 
-.Version 8.11.14 of MULTIBINIT 
+.Version 9.1.1 of MULTIBINIT 
 .(MPI version, prepared for a x86_64_linux_gnu7.4 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Thu  5 Mar 2020.
-- ( at 17h20 )
+.Starting date : Tue 10 Mar 2020.
+- ( at 14h40 )
   
--  nproc =    2
+-  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--t103_ddb.in
+-/home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t103_ddb.in
  to initialize the multibinit input
 
 ================================================================================
@@ -176,7 +176,7 @@
 ================================================================================
 
 -Reading the training-set file :
--t103_HIST
+-/home/mschmitt/CODES/DEVELOP-MULTIBINIT/abinit-test-2511/abinit/tests/v8/Input/t103_HIST
 
 
 ================================================================================
@@ -190,27 +190,27 @@
  307 coefficients generated 
 
  Mean Standard Deviation values at the begining of the fit process (meV**2/atm):
-   Energy          :   3.3728497896770321E+01
+   Energy          :   3.3728497896770328E+01
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460727381E-03
-   Forces          :   7.3678367059228271E-03
-   Stresses        :   1.3882954014991051E-04
+   Forces+Stresses :   7.5066662460727624E-03
+   Forces          :   7.3678367059228514E-03
+   Stresses        :   1.3882954014991054E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (meV^2/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 1     12          1.6626197042E-01  2.6305971638E-01  2.6287584702E-01  1.8386935938E-04
- 2     129         5.5115942663E-02  1.2477443153E+00  1.2474790995E+00  2.6521573220E-04
+ 1     210         1.9285052101E+01  7.9992636917E-03  7.8549916653E-03  1.4427202635E-04
+ 2     233         1.5205808063E+01  7.8657305106E-03  7.7189452773E-03  1.4678523326E-04
 
  Fitted coefficients at the end of the fit process:
- 12 =>   2.2674096141E+00 (Sr_x-O1_x)^2(Sr_x-O2_x[-1 0 -1])^1
- 129 =>  -1.8501400831E+00 (Sr_x-O1_x)^1(Sr_z-O2_z)^1(Sr_y-O3_y)^1
+ 210 =>   1.0373665925E-01 (Sr_y-O1_y)^1(Sr_x-O2_x)^1(Sr_z-O2_z[-1 0 -1])^1
+ 233 =>  -4.1192524010E-02 (Sr_y-O1_y)^1(Sr_z-O1_z[0 -1 -1])^1(Sr_z-O2_z[-1 0 -1])^1
 
  Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   5.5115942663167751E-02
+   Energy          :   1.5205808063483701E+01
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   1.2477443152638423E+00
-   Forces          :   1.2474790995316405E+00
-   Stresses        :   2.6521573220206966E-04
+   Forces+Stresses :   7.8657305105838664E-03
+   Forces          :   7.7189452773255849E-03
+   Stresses        :   1.4678523325828137E-04
 
 
 ================================================================================
@@ -226,29 +226,29 @@
  76 coefficients generated 
 
  Mean Standard Deviation values at the begining of the fit process (meV**2/atm):
-   Energy          :   3.3728497896770321E+01
+   Energy          :   3.3728497896770328E+01
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460727381E-03
-   Forces          :   7.3678367059228271E-03
-   Stresses        :   1.3882954014991051E-04
+   Forces+Stresses :   7.5066662460727624E-03
+   Forces          :   7.3678367059228514E-03
+   Stresses        :   1.3882954014991054E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (meV^2/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 3     13          1.6140908722E-02  2.5388258490E+00  2.4039077407E+00  1.3491810831E-01
- 4     23          7.2011361912E-03  1.3530694630E+01  1.3457449002E+01  7.3245628154E-02
+ 3     10          9.4957720409E+00  6.9205642132E-03  6.7715809215E-03  1.4898329172E-04
+ 4     9           8.9240100511E+00  6.6904021327E-03  6.5413356570E-03  1.4906647565E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>   6.7940633384E+00 (Sr_x-O1_x)^2(Sr_x-O2_x[-1 0 -1])^1
- 2 =>   2.2128083953E+00 (Sr_x-O1_x)^1(Sr_z-O2_z)^1(Sr_y-O3_y)^1
- 13 =>  -2.7094617172E+01 (Ru_x-O1_x)^1(Ru_x-O1_x[1 0 0])^1(eta_1)^1
- 23 =>   7.7163134661E+00 (Ru_x-O1_x)^1(Ru_y-O1_y[1 0 0])^2
+ 1 =>   8.6605691193E-02 (Sr_y-O1_y)^1(Sr_x-O2_x)^1(Sr_z-O2_z[-1 0 -1])^1
+ 2 =>  -3.1718224930E-02 (Sr_y-O1_y)^1(Sr_z-O1_z[0 -1 -1])^1(Sr_z-O2_z[-1 0 -1])^1
+ 10 =>  -1.7653748026E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_x-O2_x[0 1 0])^1
+ 9 =>   9.7966650700E-02 (Ru_x-O1_x)^1(Ru_x-O2_x)^1(Ru_y-O2_y)^1
 
  Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   7.2011361912480594E-03
+   Energy          :   8.9240100511042790E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   1.3530694629911340E+01
-   Forces          :   1.3457449001757551E+01
-   Stresses        :   7.3245628153789460E-02
+   Forces+Stresses :   6.6904021326870461E-03
+   Forces          :   6.5413356570403159E-03
+   Stresses        :   1.4906647564672958E-04
 
 
 ================================================================================
@@ -264,31 +264,31 @@
  471 coefficients generated 
 
  Mean Standard Deviation values at the begining of the fit process (meV**2/atm):
-   Energy          :   3.3728497896770321E+01
+   Energy          :   3.3728497896770328E+01
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460727381E-03
-   Forces          :   7.3678367059228271E-03
-   Stresses        :   1.3882954014991051E-04
+   Forces+Stresses :   7.5066662460727624E-03
+   Forces          :   7.3678367059228514E-03
+   Stresses        :   1.3882954014991054E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (meV^2/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 5     94          1.6784791762E-03  1.0152685934E+02  9.9291352113E+01  2.2355072238E+00
- 6     414         2.4062982223E-04  2.2473978894E+02  2.1632199741E+02  8.4177915323E+00
+ 5     348         6.9742521175E+00  6.3848084662E-03  6.2342723730E-03  1.5053609319E-04
+ 6     140         6.7060836532E+00  5.9446570486E-03  5.7940351440E-03  1.5062190463E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>   2.7826878701E+01 (Sr_x-O1_x)^2(Sr_x-O2_x[-1 0 -1])^1
- 2 =>   4.5252065134E-01 (Sr_x-O1_x)^1(Sr_z-O2_z)^1(Sr_y-O3_y)^1
- 3 =>   3.1131578021E+01 (Ru_x-O1_x)^1(Ru_x-O1_x[1 0 0])^1(eta_1)^1
- 4 =>   2.9235791366E+01 (Ru_x-O1_x)^1(Ru_y-O1_y[1 0 0])^2
- 94 =>  -1.3052971455E+03 (Sr_x-O1_x)^1(O2_y-O1_y)^1(eta_5)^1
- 414 =>   1.2516831563E+01 (O1_x-O2_x)^1(O1_x-O2_x[0 1 0])^1(eta_1)^1
+ 1 =>   5.9464156229E-02 (Sr_y-O1_y)^1(Sr_x-O2_x)^1(Sr_z-O2_z[-1 0 -1])^1
+ 2 =>  -2.3717408032E-02 (Sr_y-O1_y)^1(Sr_z-O1_z[0 -1 -1])^1(Sr_z-O2_z[-1 0 -1])^1
+ 3 =>  -1.7263549991E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_x-O2_x[0 1 0])^1
+ 4 =>   1.1522389210E-01 (Ru_x-O1_x)^1(Ru_x-O2_x)^1(Ru_y-O2_y)^1
+ 348 =>   1.6120768290E-01 (Ru_y-O1_y)^1(O1_x-O2_x)^1(O3_z-O1_z)^1
+ 140 =>  -6.7853702803E-02 (Sr_y-O1_y)^1(Ru_x-O1_x)^1(O2_y-O1_y)^1
 
  Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   2.4062982223328159E-04
+   Energy          :   6.7060836532155648E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   2.2473978893927497E+02
-   Forces          :   2.1632199740699593E+02
-   Stresses        :   8.4177915322790398E+00
+   Forces+Stresses :   5.9446570486185093E-03
+   Forces          :   5.7940351439874941E-03
+   Stresses        :   1.5062190463101483E-04
 
 
 ================================================================================
@@ -304,33 +304,33 @@
  96 coefficients generated 
 
  Mean Standard Deviation values at the begining of the fit process (meV**2/atm):
-   Energy          :   3.3728497896770321E+01
+   Energy          :   3.3728497896770328E+01
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460727381E-03
-   Forces          :   7.3678367059228271E-03
-   Stresses        :   1.3882954014991051E-04
+   Forces+Stresses :   7.5066662460727624E-03
+   Forces          :   7.3678367059228514E-03
+   Stresses        :   1.3882954014991054E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (meV^2/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 7     97          2.2645447759E-04  2.3490776234E+02  2.2587525003E+02  9.0325123102E+00
- 8     100         2.0639351395E-04  2.5547761223E+02  2.4538760401E+02  1.0090008220E+01
+ 7     13          6.3444773394E+00  5.8995065062E-03  5.7484760943E-03  1.5103041187E-04
+ 8     16          6.3686714421E+00  5.8334710392E-03  5.6823505935E-03  1.5112044572E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>   2.9653846507E+01 (Sr_x-O1_x)^2(Sr_x-O2_x[-1 0 -1])^1
- 2 =>   2.3250196061E-01 (Sr_x-O1_x)^1(Sr_z-O2_z)^1(Sr_y-O3_y)^1
- 3 =>   4.0802018318E+01 (Ru_x-O1_x)^1(Ru_x-O1_x[1 0 0])^1(eta_1)^1
- 4 =>   3.1059408015E+01 (Ru_x-O1_x)^1(Ru_y-O1_y[1 0 0])^2
- 5 =>  -1.4188655027E+03 (Sr_x-O1_x)^1(O2_y-O1_y)^1(eta_5)^1
- 6 =>   1.7122095950E+01 (O1_x-O2_x)^1(O1_x-O2_x[0 1 0])^1(eta_1)^1
- 97 =>  -4.1024836316E+04 (eta_1)^3
- 100 =>  -5.8375340567E+04 (eta_1)^1(eta_4)^2
+ 1 =>   5.3886454119E-02 (Sr_y-O1_y)^1(Sr_x-O2_x)^1(Sr_z-O2_z[-1 0 -1])^1
+ 2 =>  -2.2776019477E-02 (Sr_y-O1_y)^1(Sr_z-O1_z[0 -1 -1])^1(Sr_z-O2_z[-1 0 -1])^1
+ 3 =>  -1.8567835604E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_x-O2_x[0 1 0])^1
+ 4 =>   1.1256437930E-01 (Ru_x-O1_x)^1(Ru_x-O2_x)^1(Ru_y-O2_y)^1
+ 5 =>   1.6381980381E-01 (Ru_y-O1_y)^1(O1_x-O2_x)^1(O3_z-O1_z)^1
+ 6 =>  -7.8618756703E-02 (Sr_y-O1_y)^1(Ru_x-O1_x)^1(O2_y-O1_y)^1
+ 13 =>  -3.8090707732E-02 (O1_x-O2_x)^2(O2_y-O3_y[0 -1 1])^1
+ 16 =>  -5.3022543626E-02 (O1_x-O2_x)^1(O2_y-O1_y)^1(O2_y-O1_y[1 0 0])^1
 
  Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   2.0639351395229682E-04
+   Energy          :   6.3686714420920687E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   2.5547761222750938E+02
-   Forces          :   2.4538760400780330E+02
-   Stresses        :   1.0090008219706105E+01
+   Forces+Stresses :   5.8334710391790843E-03
+   Forces          :   5.6823505934554992E-03
+   Stresses        :   1.5112044572358557E-04
 
 
 ================================================================================
@@ -346,35 +346,35 @@
  6 coefficients generated 
 
  Mean Standard Deviation values at the begining of the fit process (meV**2/atm):
-   Energy          :   3.3728497896770321E+01
+   Energy          :   3.3728497896770328E+01
  Goal function values at the begining of the fit process (eV^2/A^2):
-   Forces+Stresses :   7.5066662460727381E-03
-   Forces          :   7.3678367059228271E-03
-   Stresses        :   1.3882954014991051E-04
+   Forces+Stresses :   7.5066662460727624E-03
+   Forces          :   7.3678367059228514E-03
+   Stresses        :   1.3882954014991054E-04
 
  N   Selecting          MSDE              MSDFS              MSDF              MSDS
     Coefficient      (meV^2/atm)        (eV^2/A^2)        (eV^2/A^2)        (eV^2/A^2)
- 9     10          5.9026253993E-09  5.6611425225E+02  5.3256362008E+02  3.3550632171E+01
- 10    14          2.6923550682E-12  5.6694142909E+02  5.3334777681E+02  3.3593652280E+01
+ 9     9           6.3697658160E+00  5.7964042867E-03  5.6852968752E-03  1.1110741146E-04
+ 10    13          6.3707702257E+00  5.7958064356E-03  5.6855038389E-03  1.1030259665E-04
 
  Fitted coefficients at the end of the fit process:
- 1 =>   4.3961674586E+01 (Sr_x-O1_x)^2(Sr_x-O2_x[-1 0 -1])^1
- 2 =>  -2.5633894342E+00 (Sr_x-O1_x)^1(Sr_z-O2_z)^1(Sr_y-O3_y)^1
- 3 =>   1.2618281903E+02 (Ru_x-O1_x)^1(Ru_x-O1_x[1 0 0])^1(eta_1)^1
- 4 =>   4.4475734032E+01 (Ru_x-O1_x)^1(Ru_y-O1_y[1 0 0])^2
- 5 =>  -2.3699251323E+03 (Sr_x-O1_x)^1(O2_y-O1_y)^1(eta_5)^1
- 6 =>   4.4609225085E+01 (O1_x-O2_x)^1(O1_x-O2_x[0 1 0])^1(eta_1)^1
- 7 =>  -1.0645776014E+06 (eta_1)^3
- 8 =>  -6.6429477296E+05 (eta_1)^1(eta_4)^2
- 10 =>   7.0109393910E+05 (eta_1)^2(eta_2)^1
- 14 =>   3.9844593145E+03 (eta_4)^1(eta_5)^1(eta_6)^1
+ 1 =>   5.4032299625E-02 (Sr_y-O1_y)^1(Sr_x-O2_x)^1(Sr_z-O2_z[-1 0 -1])^1
+ 2 =>  -2.2845285404E-02 (Sr_y-O1_y)^1(Sr_z-O1_z[0 -1 -1])^1(Sr_z-O2_z[-1 0 -1])^1
+ 3 =>  -1.8583341689E-01 (Ru_x-O1_x)^1(Ru_y-O2_y)^1(Ru_x-O2_x[0 1 0])^1
+ 4 =>   1.1252792809E-01 (Ru_x-O1_x)^1(Ru_x-O2_x)^1(Ru_y-O2_y)^1
+ 5 =>   1.6400402944E-01 (Ru_y-O1_y)^1(O1_x-O2_x)^1(O3_z-O1_z)^1
+ 6 =>  -7.8644590089E-02 (Sr_y-O1_y)^1(Ru_x-O1_x)^1(O2_y-O1_y)^1
+ 7 =>  -3.8168746377E-02 (O1_x-O2_x)^2(O2_y-O3_y[0 -1 1])^1
+ 8 =>  -5.3083252788E-02 (O1_x-O2_x)^1(O2_y-O1_y)^1(O2_y-O1_y[1 0 0])^1
+ 9 =>  -3.0299168369E+03 (eta_1)^3
+ 13 =>  -2.4718109235E+02 (eta_1)^1(eta_5)^2
 
  Mean Standard Deviation values at the end of the fit process (meV^2/atm): 
-   Energy          :   2.6923550682061225E-12
+   Energy          :   6.3707702257479530E+00
  Goal function values at the end of the fit process (eV^2/A^2):
-   Forces+Stresses :   5.6694142908533343E+02
-   Forces          :   5.3334777680566538E+02
-   Stresses        :   3.3593652279668007E+01
+   Forces+Stresses :   5.7958064355612317E-03
+   Forces          :   5.6855038389108676E-03
+   Stresses        :   1.1030259665036422E-04
 
 
 ================================================================================
@@ -386,16 +386,10 @@
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=          4.3  wall=          4.2
+- Proc.   0 individual time (sec): cpu=          5.7  wall=          4.4
 
 ================================================================================
 
-+Total cpu time      8.612  and wall time      8.481 sec
++Total cpu time      5.705  and wall time      4.397 sec
 
  multibinit : the run completed succesfully.
-- MEMORY CONSUMPTION REPORT:
--   There were 617789 allocations and 617789 deallocations
--   Remaining memory at the end of the calculation is 0
-- MEMORY CONSUMPTION REPORT:
--   There were 617789 allocations and 617789 deallocations
--   Remaining memory at the end of the calculation is 0
