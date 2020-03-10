@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h36 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h20 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v5_t50/t50.in
 - output file    -> t50.out
@@ -166,6 +166,15 @@ P           mkmem           1
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 1, nkpt: 1, mband: 2, nsppol: 1, nspinor: 1, nspden: 1, mpw: 752, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   2.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
@@ -201,6 +210,12 @@ P           mkmem           1
 _setup2: Arith. and geom. avg. npw (full set) are    1503.000    1503.000
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-07, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -5.9087045284736    -5.909E+00 2.022E-04 3.532E+02
@@ -239,23 +254,25 @@ _setup2: Arith. and geom. avg. npw (full set) are    1503.000    1503.000
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [ 10.0000000,   0.0000000,   0.0000000, ]
 - [  0.0000000,  10.0000000,   0.0000000, ]
 - [  0.0000000,   0.0000000,  10.0000000, ]
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
-lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
 convergence: {deltae: -5.798E-10, res2:  2.092E-07, residm:  6.708E-12, diffor: null, }
 etotal    :  -6.02853533E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.11175187E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  8.65102535E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   8.65102535E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   8.65102535E-04, ]
 pressure_GPa:  -2.5452E+01
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Li]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
@@ -322,6 +339,15 @@ band_energy         : -3.22199780522557E+00
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 1, nkpt: 1, mband: 2, nsppol: 2, nspinor: 1, nspden: 2, mpw: 752, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   2.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
@@ -341,6 +367,12 @@ band_energy         : -3.22199780522557E+00
 _setup2: Arith. and geom. avg. npw (full set) are    1503.000    1503.000
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-07, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -5.5749830317503    -5.575E+00 3.321E-03 1.178E+03
@@ -385,23 +417,25 @@ _setup2: Arith. and geom. avg. npw (full set) are    1503.000    1503.000
 --- !ResultsGS
 iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [ 10.0000000,   0.0000000,   0.0000000, ]
 - [  0.0000000,  10.0000000,   0.0000000, ]
 - [  0.0000000,   0.0000000,  10.0000000, ]
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
-lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
 convergence: {deltae: -4.574E-10, res2:  2.487E-07, residm:  6.755E-13, diffor: null, }
 etotal    :  -6.03655919E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.23258507E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  8.68473863E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   8.68473863E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   8.68473863E-04, ]
 pressure_GPa:  -2.5551E+01
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Li]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
@@ -476,6 +510,15 @@ band_energy         : -3.23202764728561E+00
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 1, nkpt: 1, mband: 2, nsppol: 2, nspinor: 1, nspden: 2, mpw: 752, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   3.00000000E+00, charge:   0.00000000E+00, occopt:   2.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
@@ -495,6 +538,12 @@ band_energy         : -3.23202764728561E+00
 _setup2: Arith. and geom. avg. npw (full set) are    1503.000    1503.000
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-07, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -5.5749830317503    -5.575E+00 3.321E-03 1.178E+03
@@ -539,23 +588,25 @@ _setup2: Arith. and geom. avg. npw (full set) are    1503.000    1503.000
 --- !ResultsGS
 iteration_state: {dtset: 3, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [ 10.0000000,   0.0000000,   0.0000000, ]
 - [  0.0000000,  10.0000000,   0.0000000, ]
 - [  0.0000000,   0.0000000,  10.0000000, ]
 lattice_lengths: [  10.00000,   10.00000,   10.00000, ]
-lattice_angles: [ 90.000,  90.000,  90.000, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.0000000E+03
 convergence: {deltae: -4.574E-10, res2:  2.487E-07, residm:  6.755E-13, diffor: null, }
 etotal    :  -6.03655919E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.23258507E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  8.68473863E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   8.68473863E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   8.68473863E-04, ]
 pressure_GPa:  -2.5551E+01
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Li]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
@@ -803,10 +854,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          1.7  wall=          1.8
+- Proc.   0 individual time (sec): cpu=          1.8  wall=          1.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   8 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          1.7  wall=          1.8
++Overall time at end (sec) : cpu=          1.8  wall=          1.9

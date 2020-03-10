@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h51 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h22 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t23-t24-t25/t24.in
 - output file    -> t24.out
@@ -173,6 +173,15 @@ P           mkmem           8
 ================================================================================
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 5, nkpt: 8, mband: 27, nsppol: 1, nspinor: 1, nspden: 1, mpw: 96, }
+cutoff_energies: {ecut:   3.0, pawecutdg:   5.0, }
+electrons: {nelect:   4.10000000E+01, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   3.67490000E-03, }
+meta: {optdriver: 3, gwcalctyp: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
@@ -924,10 +933,10 @@ P           mkmem           8
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         36.6  wall=         36.7
+- Proc.   0 individual time (sec): cpu=         36.8  wall=         36.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         36.6  wall=         36.7
++Overall time at end (sec) : cpu=         36.8  wall=         36.9

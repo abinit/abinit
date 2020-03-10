@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h46 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h43 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorespfn_tnlo_7-tnlo_8-tnlo_9-tnlo_10-tnlo_11/tnlo_9.in
 - output file    -> tnlo_9.out
@@ -172,6 +172,15 @@ P          mk1mem         432
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 432, mband: 4, nsppol: 1, nspinor: 1, nspden: 1, mpw: 80, }
+cutoff_energies: {ecut:   2.8, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: old Teter (4/91) fit to Ceperley-Alder data - ixc=3
 
@@ -250,6 +259,12 @@ P          mk1mem         432
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-22, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -10.419562004637     -1.042E+01 1.040E+01 0.000E+00
  ETOT  2  -10.423366793466     -3.805E-03 1.934E-03 0.000E+00
@@ -303,6 +318,12 @@ P          mk1mem         432
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-22, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -10.419562394212     -1.042E+01 1.040E+01 0.000E+00
  ETOT  2  -10.423366793092     -3.804E-03 1.934E-03 0.000E+00
@@ -355,6 +376,12 @@ P          mk1mem         432
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-22, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -10.419561950459     -1.042E+01 1.040E+01 0.000E+00
@@ -618,10 +645,10 @@ P          mk1mem         432
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         16.4  wall=         18.9
+- Proc.   0 individual time (sec): cpu=         16.7  wall=         18.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered   3 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         16.4  wall=         18.9
++Overall time at end (sec) : cpu=         16.7  wall=         18.3

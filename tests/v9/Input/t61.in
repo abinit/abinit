@@ -32,7 +32,7 @@ ddb_ngqpt 2 2 2  # q-mesh used to produce the DDB file (must be consistent with 
 ############
 optdriver1 0
 getkerange_path1 "t57o_DS7_KERANGE.nc"
-getden1   20    # Read DEN wavefunctions from DS20_DEN
+getden1   20    # Read DEN from DS20_DEN
 getwfk1   20    # Init GS wavefunctions from DS20_WFK
 iscf1 -2
 kptopt1 0

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h47 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h46 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpositron_3/tpositron_3.in
 - output file    -> tpositron_3.out
@@ -173,6 +173,15 @@ P           mkmem           3
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 15, nkpt: 3, mband: 36, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1173, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  15.0, }
+electrons: {nelect:   6.00000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
@@ -226,6 +235,12 @@ P           mkmem           3
 _setup2: Arith. and geom. avg. npw (full set) are    2330.375    2330.278
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 17, nstep: 500, nline: 4, wfoptalg: 10, }
+tolerances: {toldfe: 1.00E-08, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
 TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION
@@ -444,12 +459,12 @@ TC-DFT STEP  19 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,  10.2612129,  10.2612129, ]
 - [ 10.2612129,   0.0000000,  10.2612129, ]
 - [ 10.2612129,  10.2612129,   0.0000000, ]
 lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.1608573E+03
 convergence: {deltae:  8.521E-10, res2:  3.934E-09, residm:  7.602E-09, diffor:  0.000E+00, }
 etotal    :  -6.05880820E+01
@@ -457,6 +472,22 @@ entropy   :   0.00000000E+00
 fermie    :   2.04075779E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [ -9.8857E-18,   9.8857E-18,   5.0000E-01, Si]
+- [  9.8857E-18,   5.0000E-01,  -9.8857E-18, Si]
+- [  5.0000E-01,   9.8857E-18,  -9.8857E-18, Si]
+- [  9.8857E-18,   5.0000E-01,   5.0000E-01, Si]
+- [  5.0000E-01,   9.8857E-18,   5.0000E-01, Si]
+- [  5.0000E-01,   5.0000E-01,  -1.9771E-17, Si]
+- [  5.0000E-01,   5.0000E-01,   5.0000E-01, Si]
+- [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
+- [  1.2500E-01,   1.2500E-01,   6.2500E-01, Si]
+- [  1.2500E-01,   6.2500E-01,   1.2500E-01, Si]
+- [  6.2500E-01,   1.2500E-01,   1.2500E-01, Si]
+- [  1.2500E-01,   6.2500E-01,   6.2500E-01, Si]
+- [  6.2500E-01,   1.2500E-01,   6.2500E-01, Si]
+- [  6.2500E-01,   6.2500E-01,   1.2500E-01, Si]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -911,10 +942,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        163.0  wall=        163.7
+- Proc.   0 individual time (sec): cpu=        165.3  wall=        169.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered 228 WARNINGs and  20 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        163.0  wall=        163.7
++Overall time at end (sec) : cpu=        165.3  wall=        169.1

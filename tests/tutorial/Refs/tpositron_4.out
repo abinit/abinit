@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h47 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h46 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tpositron_4/tpositron_4.in
 - output file    -> tpositron_4.out
@@ -175,6 +175,15 @@ P           mkmem           3
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 15, nkpt: 3, mband: 36, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1173, }
+cutoff_energies: {ecut:   8.0, pawecutdg:  15.0, }
+electrons: {nelect:   6.00000000E+01, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 2, optcell: 0, iscf: 17, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
@@ -236,6 +245,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    2330.375    2330.278
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
+solver: {iscf: 17, nstep: 500, nline: 4, wfoptalg: 10, }
+tolerances: {toldfe: 1.00E-08, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
 TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION
@@ -454,12 +469,12 @@ TC-DFT STEP  19 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
 --- !ResultsGS
 iteration_state: {dtset: 1, itime: 1, icycle: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,  10.2612129,  10.2612129, ]
 - [ 10.2612129,   0.0000000,  10.2612129, ]
 - [ 10.2612129,  10.2612129,   0.0000000, ]
 lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.1608573E+03
 convergence: {deltae:  8.534E-10, res2:  3.934E-09, residm:  7.602E-09, diffor:  7.895E-07, }
 etotal    :  -6.05880820E+01
@@ -467,7 +482,23 @@ entropy   :   0.00000000E+00
 fermie    :   2.04075779E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [ -9.8857E-18,   9.8857E-18,   5.0000E-01, Si]
+- [  9.8857E-18,   5.0000E-01,  -9.8857E-18, Si]
+- [  5.0000E-01,   9.8857E-18,  -9.8857E-18, Si]
+- [  9.8857E-18,   5.0000E-01,   5.0000E-01, Si]
+- [  5.0000E-01,   9.8857E-18,   5.0000E-01, Si]
+- [  5.0000E-01,   5.0000E-01,  -1.9771E-17, Si]
+- [  5.0000E-01,   5.0000E-01,   5.0000E-01, Si]
+- [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
+- [  1.2500E-01,   1.2500E-01,   6.2500E-01, Si]
+- [  1.2500E-01,   6.2500E-01,   1.2500E-01, Si]
+- [  6.2500E-01,   1.2500E-01,   1.2500E-01, Si]
+- [  1.2500E-01,   6.2500E-01,   6.2500E-01, Si]
+- [  6.2500E-01,   1.2500E-01,   6.2500E-01, Si]
+- [  6.2500E-01,   6.2500E-01,   1.2500E-01, Si]
+cartesian_forces: # hartree/bohr
 - [  2.39077765E-03,   2.39077765E-03,   2.39077765E-03, ]
 - [ -2.39077765E-03,  -2.39077765E-03,   2.39077765E-03, ]
 - [ -2.39077765E-03,   2.39077765E-03,  -2.39077765E-03, ]
@@ -691,6 +722,12 @@ force_length_stats: {min:   5.11628758E-19, max:   2.31841231E-02, mean:   1.025
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
+solver: {iscf: 17, nstep: 500, nline: 4, wfoptalg: 10, }
+tolerances: {toldfe: 1.00E-08, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
 TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT  1  -60.579411649994    -6.058E+01 9.301E-07 2.685E-03 1.066E-03 1.318E-02
@@ -778,12 +815,12 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
 --- !ResultsGS
 iteration_state: {dtset: 1, itime: 2, icycle: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,  10.2612129,  10.2612129, ]
 - [ 10.2612129,   0.0000000,  10.2612129, ]
 - [ 10.2612129,  10.2612129,   0.0000000, ]
 lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.1608573E+03
 convergence: {deltae:  6.588E-10, res2:  7.006E-09, residm:  1.768E-10, diffor:  8.040E-07, }
 etotal    :  -6.05905613E+01
@@ -791,7 +828,23 @@ entropy   :   0.00000000E+00
 fermie    :   2.04245771E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
-cartesian_forces:
+xred      :
+- [  1.1650E-04,   1.1650E-04,   1.1650E-04, Si]
+- [  1.1650E-04,   1.1650E-04,   4.9965E-01, Si]
+- [  1.1650E-04,   4.9965E-01,   1.1650E-04, Si]
+- [  4.9965E-01,   1.1650E-04,   1.1650E-04, Si]
+- [  1.9567E-03,   4.9935E-01,   4.9935E-01, Si]
+- [  4.9935E-01,   1.9567E-03,   4.9935E-01, Si]
+- [  4.9935E-01,   4.9935E-01,   1.9567E-03, Si]
+- [  4.9935E-01,   4.9935E-01,   4.9935E-01, Si]
+- [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
+- [  1.2464E-01,   1.2464E-01,   6.2536E-01, Si]
+- [  1.2464E-01,   6.2536E-01,   1.2464E-01, Si]
+- [  6.2536E-01,   1.2464E-01,   1.2464E-01, Si]
+- [  1.2464E-01,   6.2536E-01,   6.2536E-01, Si]
+- [  6.2536E-01,   1.2464E-01,   6.2536E-01, Si]
+- [  6.2536E-01,   6.2536E-01,   1.2464E-01, Si]
+cartesian_forces: # hartree/bohr
 - [  2.17188713E-03,   2.17188713E-03,   2.17188713E-03, ]
 - [ -2.17188713E-03,  -2.17188713E-03,   2.17188713E-03, ]
 - [ -2.17188713E-03,   2.17188713E-03,  -2.17188713E-03, ]
@@ -1019,6 +1072,12 @@ force_length_stats: {min:   3.08614169E-19, max:   2.21484537E-02, mean:   9.596
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 3, icycle: 1, }
+solver: {iscf: 17, nstep: 500, nline: 4, wfoptalg: 10, }
+tolerances: {toldfe: 1.00E-08, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
 TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT  1  -60.417412743126    -6.042E+01 2.704E-03 4.555E-01 1.723E-02 1.051E-02
@@ -1136,12 +1195,12 @@ TC-DFT STEP   9 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
 --- !ResultsGS
 iteration_state: {dtset: 1, itime: 3, icycle: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,  10.2612129,  10.2612129, ]
 - [ 10.2612129,   0.0000000,  10.2612129, ]
 - [ 10.2612129,  10.2612129,   0.0000000, ]
 lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.1608573E+03
 convergence: {deltae:  5.413E-10, res2:  8.053E-09, residm:  2.593E-12, diffor:  6.860E-07, }
 etotal    :  -6.06128905E+01
@@ -1149,7 +1208,23 @@ entropy   :   0.00000000E+00
 fermie    :   1.94053804E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
-cartesian_forces:
+xred      :
+- [  2.1429E-03,   2.1429E-03,   2.1429E-03, Si]
+- [  2.1429E-03,   2.1429E-03,   4.9357E-01, Si]
+- [  2.1429E-03,   4.9357E-01,   2.1429E-03, Si]
+- [  4.9357E-01,   2.1429E-03,   2.1429E-03, Si]
+- [  3.7738E-02,   4.8742E-01,   4.8742E-01, Si]
+- [  4.8742E-01,   3.7738E-02,   4.8742E-01, Si]
+- [  4.8742E-01,   4.8742E-01,   3.7738E-02, Si]
+- [  4.8742E-01,   4.8742E-01,   4.8742E-01, Si]
+- [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
+- [  1.1837E-01,   1.1837E-01,   6.3163E-01, Si]
+- [  1.1837E-01,   6.3163E-01,   1.1837E-01, Si]
+- [  6.3163E-01,   1.1837E-01,   1.1837E-01, Si]
+- [  1.1837E-01,   6.3163E-01,   6.3163E-01, Si]
+- [  6.3163E-01,   1.1837E-01,   6.3163E-01, Si]
+- [  6.3163E-01,   6.3163E-01,   1.1837E-01, Si]
+cartesian_forces: # hartree/bohr
 - [ -4.60035078E-03,  -4.60035078E-03,  -4.60035078E-03, ]
 - [  4.60035078E-03,   4.60035078E-03,  -4.60035078E-03, ]
 - [  4.60035078E-03,  -4.60035078E-03,   4.60035078E-03, ]
@@ -1377,6 +1452,12 @@ force_length_stats: {min:   2.02493385E-19, max:   7.96804129E-03, mean:   5.751
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 4, icycle: 1, }
+solver: {iscf: 17, nstep: 500, nline: 4, wfoptalg: 10, }
+tolerances: {toldfe: 1.00E-08, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     nres2    diffor    maxfor
 TC-DFT STEP   1 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
  ETOT  1  -60.608778649394    -6.061E+01 9.303E-08 1.020E-03 7.186E-04 5.635E-03
@@ -1456,12 +1537,12 @@ TC-DFT STEP   7 - ELECTRONIC GROUND-STATE CALCULATION IN PRESENCE OF A POSITRON
 --- !ResultsGS
 iteration_state: {dtset: 1, itime: 4, icycle: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,  10.2612129,  10.2612129, ]
 - [ 10.2612129,   0.0000000,  10.2612129, ]
 - [ 10.2612129,  10.2612129,   0.0000000, ]
 lattice_lengths: [  14.51155,   14.51155,   14.51155, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.1608573E+03
 convergence: {deltae:  6.329E-11, res2:  3.407E-10, residm:  1.149E-12, diffor:  1.109E-07, }
 etotal    :  -6.06134166E+01
@@ -1469,7 +1550,23 @@ entropy   :   0.00000000E+00
 fermie    :   1.93581373E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
-cartesian_forces:
+xred      :
+- [  1.9531E-03,   1.9531E-03,   1.9531E-03, Si]
+- [  1.9531E-03,   1.9531E-03,   4.9414E-01, Si]
+- [  1.9531E-03,   4.9414E-01,   1.9531E-03, Si]
+- [  4.9414E-01,   1.9531E-03,   1.9531E-03, Si]
+- [  3.8710E-02,   4.8710E-01,   4.8710E-01, Si]
+- [  4.8710E-01,   3.8710E-02,   4.8710E-01, Si]
+- [  4.8710E-01,   4.8710E-01,   3.8710E-02, Si]
+- [  4.8710E-01,   4.8710E-01,   4.8710E-01, Si]
+- [  1.2500E-01,   1.2500E-01,   1.2500E-01, Si]
+- [  1.1856E-01,   1.1856E-01,   6.3144E-01, Si]
+- [  1.1856E-01,   6.3144E-01,   1.1856E-01, Si]
+- [  6.3144E-01,   1.1856E-01,   1.1856E-01, Si]
+- [  1.1856E-01,   6.3144E-01,   6.3144E-01, Si]
+- [  6.3144E-01,   1.1856E-01,   6.3144E-01, Si]
+- [  6.3144E-01,   6.3144E-01,   1.1856E-01, Si]
+cartesian_forces: # hartree/bohr
 - [ -3.85655590E-03,  -3.85655590E-03,  -3.85655590E-03, ]
 - [  3.85655590E-03,   3.85655590E-03,  -3.85655590E-03, ]
 - [  3.85655590E-03,  -3.85655590E-03,   3.85655590E-03, ]
@@ -2069,10 +2166,10 @@ P           mkmem           3
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=        386.1  wall=        387.7
+- Proc.   0 individual time (sec): cpu=        378.4  wall=        384.8
 
 ================================================================================
 
  Calculation completed.
 .Delivered 517 WARNINGs and  43 COMMENTs to log file.
-+Overall time at end (sec) : cpu=        386.1  wall=        387.7
++Overall time at end (sec) : cpu=        378.4  wall=        384.8

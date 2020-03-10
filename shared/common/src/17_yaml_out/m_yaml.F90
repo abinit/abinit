@@ -167,11 +167,11 @@ module m_yaml
 
  ! Global variables used to save the iteration state in Abinit.
  ! Set by yaml_iterstart
- integer,save,protected :: DTSET_IDX = -1
- integer,save,protected :: TIMIMAGE_IDX = -1
- integer,save,protected :: IMAGE_IDX = -1
- integer,save,protected :: ITIME_IDX = -1
- integer,save,protected :: ICYCLE_IDX = -1
+ integer,public,save,protected :: DTSET_IDX = -1
+ integer,public,save,protected :: TIMIMAGE_IDX = -1
+ integer,public,save,protected :: IMAGE_IDX = -1
+ integer,public,save,protected :: ITIME_IDX = -1
+ integer,public,save,protected :: ICYCLE_IDX = -1
 
  integer,parameter,private :: MAGIC_IGNORE_INT = huge(0) - 1
  real(dp),parameter,private :: MAGIC_IGNORE_REAL = huge(one) - one
@@ -710,7 +710,7 @@ subroutine yamldoc_add_real1d(self, label, arr, tag, real_fmt, multiline_trig, n
  end if
 
  call yaml_print_real1d(self%stream, length, arr, trim(rfmt), vmax)
- if (present(comment)) call self%stream%push(' #'//trim(comment))
+ if (present(comment)) call self%stream%push(' # '//trim(comment))
  if (nl) call self%stream%push(eol)
 
 end subroutine yamldoc_add_real1d
@@ -920,7 +920,7 @@ subroutine yamldoc_add_real2d(self, label, arr, slist, tag, real_fmt, multiline_
      if (.not. present(slist)) then
        call yaml_print_real1d(self%stream, m, line, rfmt, vmax)
      else
-       call yaml_print_real1d(self%stream, m, line, rfmt, vmax, string=slist(i))
+       call yaml_print_real1d(self%stream, m, line, rfmt, vmax, string=trim(slist(i)))
      end if
    end do
  else
@@ -930,7 +930,7 @@ subroutine yamldoc_add_real2d(self, label, arr, slist, tag, real_fmt, multiline_
      if (.not. present(slist)) then
        call yaml_print_real1d(self%stream, n, line, rfmt, vmax)
      else
-       call yaml_print_real1d(self%stream, n, line, rfmt, vmax, string=slist(i))
+       call yaml_print_real1d(self%stream, n, line, rfmt, vmax, string=trim(slist(i)))
      end if
    end do
  end if

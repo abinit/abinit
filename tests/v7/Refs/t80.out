@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h51 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h23 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t80/t80.in
 - output file    -> t80.out
@@ -499,6 +499,15 @@ P          mk1mem9          1
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 8, mband: 6, nsppol: 1, nspinor: 1, nspden: 1, mpw: 165, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
@@ -534,6 +543,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     162.766     162.716
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-25, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -7.9646620692394    -7.965E+00 3.794E-02 4.016E-01
  ETOT  2  -7.9662146389136    -1.553E-03 3.787E-04 1.408E-02
@@ -559,23 +574,26 @@ _setup2: Arith. and geom. avg. npw (full set) are     162.766     162.716
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.3459523,   5.3459523, ]
 - [  5.3459523,   0.0000000,   5.3459523, ]
 - [  5.3459523,   5.3459523,   0.0000000, ]
 lattice_lengths: [   7.56032,    7.56032,    7.56032, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0556614E+02
 convergence: {deltae: -1.776E-14, res2:  2.610E-26, residm:  1.330E-05, diffor: null, }
 etotal    :  -7.96623170E+00
 entropy   :   0.00000000E+00
 fermie    :   5.00548063E-02
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  1.03283330E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   1.03283330E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   1.03283330E-04, ]
 pressure_GPa:  -3.0387E+00
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ge]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Ge]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
@@ -651,6 +669,15 @@ band_energy         : -1.17259753227097E+00
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 1, mband: 11, nsppol: 1, nspinor: 1, nspden: 1, mpw: 85, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
+
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
  Exchange-correlation functional for the present dataset will be:
@@ -683,12 +710,12 @@ band_energy         : -1.17259753227097E+00
 --- !ResultsGS
 iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.3459523,   5.3459523, ]
 - [  5.3459523,   0.0000000,   5.3459523, ]
 - [  5.3459523,   5.3459523,   0.0000000, ]
 lattice_lengths: [   7.56032,    7.56032,    7.56032, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0556614E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.017E-26, diffor:  0.000E+00, }
 etotal    :  -7.96623170E+00
@@ -696,6 +723,9 @@ entropy   :   0.00000000E+00
 fermie    :   5.00548063E-02
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ge]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Ge]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -728,6 +758,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 1, mband: 11, nsppol: 1, nspinor: 1, nspden: 1, mpw: 169, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -791,6 +830,12 @@ force_length_stats: {min: null, max: null, mean: null, }
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -86.300342236567     -8.630E+01 3.980E-02 0.000E+00
  ETOT  2  -86.300379186591     -3.695E-05 4.123E-07 0.000E+00
@@ -844,6 +889,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -86.300325047287     -8.630E+01 3.980E-02 0.000E+00
@@ -899,6 +950,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -86.300342234860     -8.630E+01 3.980E-02 0.000E+00
@@ -983,6 +1040,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 1, mband: 11, nsppol: 1, nspinor: 1, nspden: 1, mpw: 169, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
@@ -1030,6 +1096,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -86.300342236567     -8.630E+01 3.980E-02 0.000E+00
@@ -1085,6 +1157,12 @@ force_length_stats: {min: null, max: null, mean: null, }
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -86.300325047287     -8.630E+01 3.980E-02 0.000E+00
  ETOT  2  -86.300379187606     -5.414E-05 4.074E-07 0.000E+00
@@ -1139,6 +1217,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 4, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -86.300342234860     -8.630E+01 3.980E-02 0.000E+00
@@ -1221,6 +1305,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 == DATASET  5 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 1, mband: 11, nsppol: 1, nspinor: 1, nspden: 1, mpw: 169, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
@@ -1268,6 +1361,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -86.300342236567     -8.630E+01 3.980E-02 0.000E+00
@@ -1323,6 +1422,12 @@ force_length_stats: {min: null, max: null, mean: null, }
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -86.300325047287     -8.630E+01 3.980E-02 0.000E+00
  ETOT  2  -86.300379187606     -5.414E-05 4.074E-07 0.000E+00
@@ -1377,6 +1482,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 5, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -86.300342234860     -8.630E+01 3.980E-02 0.000E+00
@@ -1503,6 +1614,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 == DATASET  6 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 6, }
+dimensions: {natom: 2, nkpt: 1, mband: 11, nsppol: 1, nspinor: 1, nspden: 1, mpw: 169, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
@@ -1550,6 +1670,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -86.300342236567     -8.630E+01 3.980E-02 0.000E+00
@@ -1605,6 +1731,12 @@ force_length_stats: {min: null, max: null, mean: null, }
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -86.300325047287     -8.630E+01 3.980E-02 0.000E+00
  ETOT  2  -86.300379187606     -5.414E-05 4.074E-07 0.000E+00
@@ -1659,6 +1791,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 6, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -86.300342234860     -8.630E+01 3.980E-02 0.000E+00
@@ -1771,6 +1909,15 @@ Scaling of transport tensor (Eq. (FXX)) =               3.4224242865
 == DATASET  7 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 7, }
+dimensions: {natom: 2, nkpt: 1, mband: 11, nsppol: 1, nspinor: 1, nspden: 1, mpw: 169, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
@@ -1818,6 +1965,12 @@ Scaling of transport tensor (Eq. (FXX)) =               3.4224242865
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 7, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -86.300342236567     -8.630E+01 3.980E-02 0.000E+00
@@ -1873,6 +2026,12 @@ Scaling of transport tensor (Eq. (FXX)) =               3.4224242865
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 7, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -86.300325047287     -8.630E+01 3.980E-02 0.000E+00
  ETOT  2  -86.300379187606     -5.414E-05 4.074E-07 0.000E+00
@@ -1927,6 +2086,12 @@ Scaling of transport tensor (Eq. (FXX)) =               3.4224242865
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 7, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -86.300342234860     -8.630E+01 3.980E-02 0.000E+00
@@ -2022,6 +2187,15 @@ Scaling of transport tensor (Eq. (FXX)) =               3.4224242865
 == DATASET  8 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 8, }
+dimensions: {natom: 2, nkpt: 1, mband: 11, nsppol: 1, nspinor: 1, nspden: 1, mpw: 162, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
+
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
  Exchange-correlation functional for the present dataset will be:
@@ -2067,12 +2241,12 @@ Scaling of transport tensor (Eq. (FXX)) =               3.4224242865
 --- !ResultsGS
 iteration_state: {dtset: 8, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.3459523,   5.3459523, ]
 - [  5.3459523,   0.0000000,   5.3459523, ]
 - [  5.3459523,   5.3459523,   0.0000000, ]
 lattice_lengths: [   7.56032,    7.56032,    7.56032, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   3.0556614E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  8.619E-26, diffor:  0.000E+00, }
 etotal    :  -7.96623170E+00
@@ -2080,6 +2254,9 @@ entropy   :   0.00000000E+00
 fermie    :   5.00548063E-02
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Ge]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Ge]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -2112,6 +2289,15 @@ force_length_stats: {min: null, max: null, mean: null, }
 ================================================================================
 == DATASET  9 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 9, }
+dimensions: {natom: 2, nkpt: 1, mband: 11, nsppol: 1, nspinor: 1, nspden: 1, mpw: 162, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   8.
 
@@ -2175,6 +2361,12 @@ force_length_stats: {min: null, max: null, mean: null, }
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 9, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -10.327781320803     -1.033E+01 7.030E-02 0.000E+00
  ETOT  2  -10.329110185964     -1.329E-03 2.292E-05 0.000E+00
@@ -2231,6 +2423,12 @@ force_length_stats: {min: null, max: null, mean: null, }
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 9, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -47.243859165311     -4.724E+01 2.380E-02 0.000E+00
  ETOT  2  -47.247515470314     -3.656E-03 5.772E-05 0.000E+00
@@ -2286,6 +2484,12 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 9, }
+solver: {iscf: 7, nstep: 100, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-25, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  -47.243857191774     -4.724E+01 2.416E-02 0.000E+00
@@ -2784,10 +2988,10 @@ P          mk1mem9          1
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=          3.5  wall=          5.1
+- Proc.   0 individual time (sec): cpu=          3.7  wall=          4.2
 
 ================================================================================
 
  Calculation completed.
 .Delivered   6 WARNINGs and  71 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          3.5  wall=          5.1
++Overall time at end (sec) : cpu=          3.7  wall=          4.2

@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h35 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h15 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v2_t47/t47.in
 - output file    -> t47.out
@@ -421,6 +421,15 @@ P           mkmem9          1
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 184, }
+cutoff_energies: {ecut:   5.8, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -463,6 +472,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     182.250     182.224
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-10, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -7.9060549179309    -7.906E+00 2.123E-03 3.282E+00
  ETOT  2  -7.9109499201845    -4.895E-03 4.214E-06 1.118E-01
@@ -484,23 +499,26 @@ _setup2: Arith. and geom. avg. npw (full set) are     182.250     182.224
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.1315550,   5.1315550, ]
 - [  5.1315550,   0.0000000,   5.1315550, ]
 - [  5.1315550,   5.1315550,   0.0000000, ]
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
 convergence: {deltae: -3.819E-14, res2:  2.862E-13, residm:  5.327E-13, diffor: null, }
 etotal    :  -7.91105913E+00
 entropy   :   0.00000000E+00
 fermie    :  -1.30338496E-02
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  2.44666905E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   2.44666905E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   2.44666905E-04, ]
 pressure_GPa:  -7.1983E+00
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
@@ -576,6 +594,15 @@ band_energy         : -1.35886232436491E+00
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 184, }
+cutoff_energies: {ecut:   5.8, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   0.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -3, paral_kgb: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
@@ -603,12 +630,12 @@ band_energy         : -1.35886232436491E+00
 --- !ResultsGS
 iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.1315550,   5.1315550, ]
 - [  5.1315550,   0.0000000,   5.1315550, ]
 - [  5.1315550,   5.1315550,   0.0000000, ]
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
 convergence: {deltae: null, res2: null, residm: null, diffor: null, }
 etotal    :  -1.03542001E+01
@@ -616,6 +643,9 @@ entropy   :   0.00000000E+00
 fermie    :  -1.30338496E-02
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -675,6 +705,15 @@ total_energy_dc     : -7.23293981662879E+00
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 184, }
+cutoff_energies: {ecut:   5.8, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   0.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -3, paral_kgb: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
@@ -702,12 +741,12 @@ total_energy_dc     : -7.23293981662879E+00
 --- !ResultsGS
 iteration_state: {dtset: 3, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.1315550,   5.1315550, ]
 - [  5.1315550,   0.0000000,   5.1315550, ]
 - [  5.1315550,   5.1315550,   0.0000000, ]
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
 convergence: {deltae: null, res2: null, residm: null, diffor: null, }
 etotal    :  -1.00680240E+01
@@ -715,6 +754,9 @@ entropy   :   0.00000000E+00
 fermie    :  -1.30338496E-02
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -774,6 +816,15 @@ total_energy_dc     : -6.94356254103039E+00
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 184, }
+cutoff_energies: {ecut:   5.8, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   0.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -3, paral_kgb: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
@@ -801,12 +852,12 @@ total_energy_dc     : -6.94356254103039E+00
 --- !ResultsGS
 iteration_state: {dtset: 4, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.1315550,   5.1315550, ]
 - [  5.1315550,   0.0000000,   5.1315550, ]
 - [  5.1315550,   5.1315550,   0.0000000, ]
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
 convergence: {deltae: null, res2: null, residm: null, diffor: null, }
 etotal    :  -9.91629862E+00
@@ -814,6 +865,9 @@ entropy   :   0.00000000E+00
 fermie    :  -1.30338496E-02
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -873,6 +927,15 @@ total_energy_dc     : -6.73247263273023E+00
 == DATASET  5 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 184, }
+cutoff_energies: {ecut:   5.8, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   0.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -3, paral_kgb: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
@@ -900,12 +963,12 @@ total_energy_dc     : -6.73247263273023E+00
 --- !ResultsGS
 iteration_state: {dtset: 5, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.1315550,   5.1315550, ]
 - [  5.1315550,   0.0000000,   5.1315550, ]
 - [  5.1315550,   5.1315550,   0.0000000, ]
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
 convergence: {deltae: null, res2: null, residm: null, diffor: null, }
 etotal    :  -9.77425600E+00
@@ -913,6 +976,9 @@ entropy   :   0.00000000E+00
 fermie    :  -1.30338496E-02
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -972,6 +1038,15 @@ total_energy_dc     : -6.65867412473277E+00
 == DATASET  6 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 6, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 184, }
+cutoff_energies: {ecut:   5.8, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   0.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -3, paral_kgb: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
@@ -999,12 +1074,12 @@ total_energy_dc     : -6.65867412473277E+00
 --- !ResultsGS
 iteration_state: {dtset: 6, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.1315550,   5.1315550, ]
 - [  5.1315550,   0.0000000,   5.1315550, ]
 - [  5.1315550,   5.1315550,   0.0000000, ]
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
 convergence: {deltae: null, res2: null, residm: null, diffor: null, }
 etotal    :  -9.75711999E+00
@@ -1012,6 +1087,9 @@ entropy   :   0.00000000E+00
 fermie    :  -1.30338496E-02
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -1071,6 +1149,15 @@ total_energy_dc     : -6.40362961530206E+00
 == DATASET  7 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 7, }
+dimensions: {natom: 2, nkpt: 2, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 184, }
+cutoff_energies: {ecut:   5.8, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   2.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -3, paral_kgb: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
@@ -1098,12 +1185,12 @@ total_energy_dc     : -6.40362961530206E+00
 --- !ResultsGS
 iteration_state: {dtset: 7, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.1315550,   5.1315550, ]
 - [  5.1315550,   0.0000000,   5.1315550, ]
 - [  5.1315550,   5.1315550,   0.0000000, ]
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
 convergence: {deltae: null, res2: null, residm: null, diffor: null, }
 etotal    :  -9.59392927E+00
@@ -1111,6 +1198,9 @@ entropy   :   0.00000000E+00
 fermie    :  -1.30338496E-02
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -1170,6 +1260,15 @@ total_energy_dc     : -6.37303636925489E+00
 == DATASET  8 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 8, }
+dimensions: {natom: 2, nkpt: 1, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 85, }
+cutoff_energies: {ecut:   5.8, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -3, paral_kgb: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
@@ -1194,6 +1293,12 @@ total_energy_dc     : -6.37303636925489E+00
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 8, }
+solver: {iscf: -3, nstep: 8, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-14, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  prteigrs : about to open file t47o_DS8_EIG
  Non-SCF case, kpt    1 (  0.00000  0.00000  0.00000), residuals and eigenvalues=
@@ -1205,12 +1310,12 @@ total_energy_dc     : -6.37303636925489E+00
 --- !ResultsGS
 iteration_state: {dtset: 8, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.1315550,   5.1315550, ]
 - [  5.1315550,   0.0000000,   5.1315550, ]
 - [  5.1315550,   5.1315550,   0.0000000, ]
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  7.779E-15, diffor:  0.000E+00, }
 etotal    :  -7.91105913E+00
@@ -1218,6 +1323,9 @@ entropy   :   0.00000000E+00
 fermie    :   1.53422739E-02
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -1275,6 +1383,15 @@ total_energy_dc     : -7.30484157229602E+00
 == DATASET  9 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 9, }
+dimensions: {natom: 2, nkpt: 1, mband: 5, nsppol: 1, nspinor: 1, nspden: 1, mpw: 85, }
+cutoff_energies: {ecut:   5.8, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   0.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -3, paral_kgb: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   8.
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
@@ -1302,12 +1419,12 @@ total_energy_dc     : -7.30484157229602E+00
 --- !ResultsGS
 iteration_state: {dtset: 9, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.1315550,   5.1315550, ]
 - [  5.1315550,   0.0000000,   5.1315550, ]
 - [  5.1315550,   5.1315550,   0.0000000, ]
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
 convergence: {deltae: null, res2: null, residm: null, diffor: null, }
 etotal    :  -9.54310871E+00
@@ -1315,6 +1432,9 @@ entropy   :   0.00000000E+00
 fermie    :  -1.30338496E-02
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...
@@ -1681,10 +1801,10 @@ P           mkmem9          1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          2.3  wall=          4.1
+- Proc.   0 individual time (sec): cpu=          2.3  wall=          2.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  68 WARNINGs and  19 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          2.3  wall=          4.1
++Overall time at end (sec) : cpu=          2.3  wall=          2.6

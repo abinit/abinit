@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 17h27 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 17h12 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/paral_t95_MPI2-t96_MPI2-t97_MPI2-t98_MPI2/t95.in
 - output file    -> t95_MPI2.out
@@ -320,6 +320,15 @@ P          mk1mem3          4
 == DATASET  1 ==================================================================
 -   mpi_nproc: 2, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 4, nkpt: 2, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 432, }
+cutoff_energies: {ecut:   6.0, pawecutdg:   6.0, }
+electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   5.00000000E-03, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 17, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: Perdew-Wang 92 LSD fit to Ceperley-Alder data - ixc=7
  Citation for XC functional:
@@ -397,6 +406,12 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   2 by node    1
 _setup2: Arith. and geom. avg. npw (full set) are     425.000     424.823
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 17, nstep: 200, nline: 5, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-20, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     nres2
 
@@ -734,23 +749,28 @@ _setup2: Arith. and geom. avg. npw (full set) are     425.000     424.823
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  6.5289350,   3.7694824,   0.0000000, ]
 - [ -6.5289350,   3.7694824,   0.0000000, ]
 - [  0.0000000,   0.0000000,  12.2777954, ]
 lattice_lengths: [   7.53896,    7.53896,   12.27780, ]
-lattice_angles: [ 90.000,  90.000, 120.000, ]
+lattice_angles: [ 90.000,  90.000, 120.000, ] # degrees, (23, 13, 12)
 lattice_volume:   6.0433042E+02
 convergence: {deltae: -1.670E-13, res2:  3.650E-20, residm:  8.133E-21, diffor: null, }
 etotal    :  -1.71451766E+01
 entropy   :   0.00000000E+00
 fermie    :   1.26936751E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [ -1.78229667E-04,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,  -1.78229667E-04,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   9.10625560E-05, ]
 pressure_GPa:   2.6027E+00
-cartesian_forces:
+xred      :
+- [  3.3333E-01,   6.6667E-01,   0.0000E+00, Al]
+- [  6.6667E-01,   3.3333E-01,   5.0000E-01, Al]
+- [  3.3333E-01,   6.6667E-01,   3.7609E-01, As]
+- [  6.6667E-01,   3.3333E-01,   8.7609E-01, As]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -1.43490824E-03, ]
 - [ -0.00000000E+00,  -0.00000000E+00,  -1.43490824E-03, ]
 - [ -0.00000000E+00,  -0.00000000E+00,   1.43490824E-03, ]
@@ -953,6 +973,15 @@ total_energy_dc_eV  : -4.66543982399613E+02
 == DATASET  2 ==================================================================
 -   mpi_nproc: 2, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 4, nkpt: 8, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 432, }
+cutoff_energies: {ecut:   6.0, pawecutdg:   6.0, }
+electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   5.00000000E-03, }
+meta: {optdriver: 1, rfelfd: 2, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  Exchange-correlation functional for the present dataset will be:
@@ -1021,6 +1050,12 @@ P newkpt: treating     10 bands with npw=     404 for ikpt=   5 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   6 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   7 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    1
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: -3, nstep: 200, nline: 10, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-20, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
@@ -1141,6 +1176,12 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   6 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   7 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    1
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: -3, nstep: 200, nline: 10, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-20, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
 -ETOT  1  -26.515610477064     -2.652E+01 1.071E-02 0.000E+00
@@ -1260,6 +1301,12 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   6 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   7 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    1
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: -3, nstep: 200, nline: 10, wfoptalg: 10, }
+tolerances: {tolwfr: 1.00E-20, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
 -ETOT  1  -4.2259426919961     -4.226E+00 1.114E-02 0.000E+00
@@ -1360,6 +1407,15 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    1
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 2, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 4, nkpt: 8, mband: 10, nsppol: 1, nspinor: 1, nspden: 1, mpw: 432, }
+cutoff_energies: {ecut:   6.0, pawecutdg:   6.0, }
+electrons: {nelect:   1.60000000E+01, charge:   0.00000000E+00, occopt:   7.00000000E+00, tsmear:   5.00000000E-03, }
+meta: {optdriver: 1, rfelfd: 3, rfphon: 1, rfstrs: 3, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
@@ -1490,6 +1546,12 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   6 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   7 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    1
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 200, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-10, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
 -ETOT  1   8.4598903099672     -1.289E+01 7.334E-03 9.004E+02
@@ -1591,6 +1653,12 @@ P newkpt: treating     10 bands with npw=     404 for ikpt=   1 by node    0
 P newkpt: treating     10 bands with npw=     432 for ikpt=   2 by node    0
 P newkpt: treating     10 bands with npw=     404 for ikpt=   3 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   4 by node    1
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 200, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-10, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
@@ -1695,6 +1763,12 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   6 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   7 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    1
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 200, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-10, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
 -ETOT  1   45.867996830214     -8.334E+01 1.265E-01 1.251E+04
@@ -1798,6 +1872,12 @@ P newkpt: treating     10 bands with npw=     404 for ikpt=   1 by node    0
 P newkpt: treating     10 bands with npw=     432 for ikpt=   2 by node    0
 P newkpt: treating     10 bands with npw=     404 for ikpt=   3 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   4 by node    1
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 200, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-10, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
@@ -1905,6 +1985,12 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   7 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    1
 -dfpt_looppert : read the wavefunctions from file: t95_MPI2o_DS2_1WF13
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 200, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-10, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
 -ETOT  1  -1077.0147980047     -1.077E+03 4.084E-01 9.765E+03
@@ -2008,6 +2094,12 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   7 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    1
 -dfpt_looppert : read the wavefunctions from file: t95_MPI2o_DS2_1WF15
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 200, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-10, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
 -ETOT  1  -87.501833823474     -8.750E+01 4.849E-02 1.540E+03
@@ -2104,6 +2196,12 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   3 by node    0
 P newkpt: treating     10 bands with npw=     404 for ikpt=   4 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   5 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   6 by node    1
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 200, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-10, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
@@ -2209,6 +2307,12 @@ P newkpt: treating     10 bands with npw=     404 for ikpt=   4 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   5 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   6 by node    1
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 200, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-10, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
 -ETOT  1   6.4758811926706     -1.280E+01 8.230E-02 8.916E+02
@@ -2310,6 +2414,12 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   2 by node    0
 P newkpt: treating     10 bands with npw=     404 for ikpt=   3 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   4 by node    1
 
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 200, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-10, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
 -ETOT  1   6.3381460990423     -1.350E+01 6.991E-02 9.795E+02
@@ -2407,6 +2517,12 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   3 by node    0
 P newkpt: treating     10 bands with npw=     404 for ikpt=   4 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   5 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   6 by node    1
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 200, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-10, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
@@ -2507,6 +2623,12 @@ P newkpt: treating     10 bands with npw=     432 for ikpt=   3 by node    0
 P newkpt: treating     10 bands with npw=     404 for ikpt=   4 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   5 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   6 by node    1
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 200, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-10, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
@@ -2609,6 +2731,12 @@ P newkpt: treating     10 bands with npw=     404 for ikpt=   5 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   6 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   7 by node    1
 P newkpt: treating     10 bands with npw=     432 for ikpt=   8 by node    1
+
+--- !BeginCycle
+iteration_state: {dtset: 3, }
+solver: {iscf: 7, nstep: 200, nline: 4, wfoptalg: 10, }
+tolerances: {tolvrs: 1.00E-10, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 
@@ -6834,10 +6962,10 @@ P          mk1mem3          4
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         38.0  wall=         92.2
+- Proc.   0 individual time (sec): cpu=         23.6  wall=         26.1
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   0 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         77.5  wall=        184.4
++Overall time at end (sec) : cpu=         49.5  wall=         52.1

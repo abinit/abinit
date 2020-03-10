@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h48 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h20 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v6_t18-t19/t18.in
 - output file    -> t18.out
@@ -140,6 +140,15 @@ P           mkmem           1
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 16, nkpt: 1, mband: 40, nsppol: 1, nspinor: 1, nspden: 1, mpw: 2527, }
+cutoff_energies: {ecut:  15.0, pawecutdg:  -1.0, }
+electrons: {nelect:   6.40000000E+01, charge:   0.00000000E+00, occopt:   6.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -208,6 +217,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    5053.000    5053.000
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 5, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-06, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -96.252023510644    -9.625E+01 3.381E-02 1.256E+02
  ETOT  2  -96.355424626180    -1.034E-01 7.389E-04 1.881E+01
@@ -229,23 +244,40 @@ _setup2: Arith. and geom. avg. npw (full set) are    5053.000    5053.000
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [ 13.6521852,   0.0000000,   0.0000000, ]
 - [ 13.6563693,  13.6521828,   0.0000000, ]
 - [ -0.0000002,  -0.0000001,   9.8097545, ]
 lattice_lengths: [  13.65219,   19.31006,    9.80975, ]
-lattice_angles: [ 90.000,  90.000,  44.991, ]
+lattice_angles: [ 90.000,  90.000,  44.991, ] # degrees, (23, 13, 12)
 lattice_volume:   1.8283629E+03
 convergence: {deltae: -7.488E-05, res2:  3.720E-03, residm:  3.474E-05, diffor: null, }
 etotal    :  -9.63618410E+01
 entropy   :   0.00000000E+00
 fermie    :   2.13304125E-02
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [ -7.58593323E-04,  -1.13629307E-06,   3.49996208E-08, ]
 - [ -1.13629307E-06,  -7.59029684E-04,   3.36779525E-08, ]
 - [  3.49996208E-08,   3.36779525E-08,  -1.95556061E-04, ]
 pressure_GPa:   1.6801E+01
-cartesian_forces:
+xred      :
+- [  1.8690E-01,   1.3957E-01,   1.1433E+00,  H]
+- [  1.8185E-01,  -1.1242E-01,   1.1433E+00,  H]
+- [ -3.2481E-01,   3.9542E-01,   1.1433E+00,  H]
+- [ -3.1976E-01,   1.3839E-01,   1.1433E+00,  H]
+- [  1.8690E-01,   1.3671E-01,   6.4325E-01,  H]
+- [  1.8186E-01,   3.9375E-01,   6.4325E-01,  H]
+- [ -3.1975E-01,   6.4456E-01,   6.4325E-01,  H]
+- [ -3.2480E-01,   3.9257E-01,   6.4325E-01,  H]
+- [ -6.8965E-02,  -1.1596E-01,   1.1433E+00,  I]
+- [  4.4738E-01,  -1.1651E-01,   1.1433E+00,  I]
+- [ -6.8943E-02,   3.9970E-01,   1.1433E+00,  I]
+- [ -5.8528E-01,   3.9983E-01,   1.1433E+00,  I]
+- [ -6.8961E-02,   1.3244E-01,   6.4325E-01,  I]
+- [  4.4738E-01,   1.3231E-01,   6.4325E-01,  I]
+- [ -6.8939E-02,   6.4810E-01,   6.4325E-01,  I]
+- [ -5.8528E-01,   6.4865E-01,   6.4325E-01,  I]
+cartesian_forces: # hartree/bohr
 - [ -1.36055987E-03,  -3.19235060E-03,  -2.28121842E-05, ]
 - [ -3.49070780E-03,   1.57761342E-03,   8.06557940E-06, ]
 - [ -3.19410089E-03,  -1.36099545E-03,  -2.10226029E-06, ]
@@ -615,10 +647,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          6.8  wall=          6.8
+- Proc.   0 individual time (sec): cpu=          6.8  wall=          6.9
 
 ================================================================================
 
  Calculation completed.
 .Delivered   1 WARNINGs and   3 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          6.8  wall=          6.8
++Overall time at end (sec) : cpu=          6.8  wall=          6.9

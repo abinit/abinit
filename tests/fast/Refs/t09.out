@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 17h00 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h40 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/fast_t03-t05-t06-t07-t08-t09-t11-t12-t14-t16/t09.in
 - output file    -> t09.out
@@ -94,6 +94,15 @@ P           mkmem           2
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 2, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 184, }
+cutoff_energies: {ecut:   5.8, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   0.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
@@ -153,12 +162,12 @@ P           mkmem           2
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  0.0000000,   5.1315550,   5.1315550, ]
 - [  5.1315550,   0.0000000,   5.1315550, ]
 - [  5.1315550,   5.1315550,   0.0000000, ]
 lattice_lengths: [   7.25711,    7.25711,    7.25711, ]
-lattice_angles: [ 60.000,  60.000,  60.000, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
 lattice_volume:   2.7025701E+02
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  2.053E-09, diffor:  0.000E+00, }
 etotal    :  -8.85824794E+00
@@ -166,6 +175,9 @@ entropy   :   0.00000000E+00
 fermie    :   0.00000000E+00
 cartesian_stress_tensor: null
 pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Si]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, Si]
 cartesian_forces: null
 force_length_stats: {min: null, max: null, mean: null, }
 ...

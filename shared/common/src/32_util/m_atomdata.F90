@@ -33,6 +33,8 @@ module m_atomdata
  use m_errors
  use m_abicore
 
+ use m_fstrings, only : sjoin
+
  implicit none
 
  private
@@ -590,7 +592,7 @@ subroutine atomdata_from_symbol(atom,symbol)
  case('Xx')
    amu=     260.0d0     ; rcov=1.42d0/Bohr_Ang ; znucl=104
  case default
-   MSG_ERROR("Unknown symbol name: "//TRIM(symbol))
+   MSG_ERROR(sjoin("Unknown symbol: `",trim(symbol), "`"))
  end select
 
  atom%znucl = znucl

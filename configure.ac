@@ -37,7 +37,7 @@ https://github.com/abinit/abiconfig.
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
-AC_INIT([ABINIT],[9.0.0],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[9.1.1],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 9])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -662,16 +662,20 @@ SD_FFTW3_INIT([optional skip])
 SD_LEVMAR_INIT([optional fail])
 
 # Init LibPSML
-SD_LIBPSML_INIT([optional fail])
+#SD_LIBPSML_INIT([optional fail])
+SD_LIBPSML_INIT([optional warn])
 
 # Init LibXC
-SD_LIBXC_INIT([no-fortran optional fail])
+#SD_LIBXC_INIT([no-fortran optional fail])
+SD_LIBXC_INIT([no-fortran optional warn])
 
 # Init NetCDF
-SD_NETCDF_INIT([optional fail])
+#SD_NETCDF_INIT([optional fail])
+SD_NETCDF_INIT([optional warn])
 
 # Init NetCDF-Fortran
-SD_NETCDF_FORTRAN_INIT([optional fail])
+#SD_NETCDF_FORTRAN_INIT([optional fail])
+SD_NETCDF_FORTRAN_INIT([optional warn])
 
 # Init PAPI
 SD_PAPI_INIT([optional fail])
@@ -683,10 +687,12 @@ SD_PFFT_INIT([optional skip])
 SD_TRIQS_INIT([optional fail])
 
 # Init Wannier90
-SD_WANNIER90_INIT([optional fail], [-lwannier90])
+#SD_WANNIER90_INIT([optional fail], [-lwannier90])
+SD_WANNIER90_INIT([optional warn], [-lwannier90])
 
 # Init XMLF90
-SD_XMLF90_INIT([optional fail])
+#SD_XMLF90_INIT([optional fail])
+SD_XMLF90_INIT([optional warn])
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -697,10 +703,15 @@ SD_XMLF90_INIT([optional fail])
 
 ABI_MSG_SECTION([Linear algebra support])
 
-SD_LINALG_INIT([required fail])
+#SD_LINALG_INIT([required fail])
+SD_LINALG_INIT([required warn])
 SD_LINALG_INIT_FLAVOR
 
 SD_LINALG_DETECT
+
+# the minimum needed to declare linalg working...
+sd_linalg_ok="no"
+test "${sd_linalg_has_blas}" = "yes" -a "${sd_linalg_has_lapack}" = "yes" && sd_linalg_ok="yes"
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -711,9 +722,13 @@ SD_LINALG_DETECT
 
 ABI_MSG_SECTION([Optimized FFT support])
 
-SD_FFT_INIT
+if test "${sd_linalg_enable}" = "yes"; then
+  SD_FFT_INIT
 
-SD_FFT_DETECT
+  SD_FFT_DETECT
+else
+  echo "Skip FFT setting : linalg not enabled..."
+fi
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
@@ -816,6 +831,9 @@ AM_CONDITIONAL([DO_BUILD_67_TRIQS_EXT],
 # Wannier90 library support
 SD_WANNIER90_DETECT
 
+# AtomPAW integration support
+ABI_CHECK_ATOMPAW_BINS
+
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #
 
@@ -838,10 +856,15 @@ SD_LIBPAW_DETECT
                        # ------------------------------ #
 
 # Init BigDFT (requires knowledge about ABINIT Common and LibPAW)
-SD_BIGDFT_INIT([optional fail])
+if test "${sd_libxc_enable}" = "yes" -a "${sd_linalg_enable}" = "yes"; then
+  #SD_BIGDFT_INIT([optional fail])
+  SD_BIGDFT_INIT([optional warn])
 
-# BigDFT library support (requires linear algebra and LibXC)
-SD_BIGDFT_DETECT
+  # BigDFT library support (requires linear algebra and LibXC)
+  SD_BIGDFT_DETECT
+else
+  echo "Skip BIGDFT setting : libxc not enabled..."
+fi
 
                        # ------------------------------ #
 
@@ -895,18 +918,105 @@ ABI_MSG_SECTION([Feature triggers summary])
 # Display summary table
 ABI_TRIGGERS_SUMMARY
 
+#------------------------ START JMB --------------------------------------#
+# Check status of mandatory fallbacks
+
+status=""
+mandatory=""
+
+# Check linalg
+if test "${sd_linalg_flavor_req}" != "auto"; then
+   if test "${sd_linalg_flavor}" != "${sd_linalg_flavor_req}"; then
+      ABI_MSG_NOTICE_L([linalg-flavor],[__INFO__ : the linalg flavor is not the one requested!])
+   fi
+fi
+
+if test "${sd_linalg_enable}" != "yes"; then
+      #ABI_MSG_NOTICE_S([CAUTION : LinAlg is MANDATORY !],
+	  #	       [   suggestion : use 'with_linalg_flavor' in the ac file])
+      ABI_MSG_NOTICE_L([linalg-mandatory],[CAUTION : linalg is __MANDATORY__ !])
+      mandatory="#"
+fi
+
+# Check NetCDF
+if test "${sd_netcdf_enable}" = "no"; then
+      #ABI_MSG_NOTICE_S([CAUTION : NetCDF is __MANDATORY__ !],
+	  #	       [   suggestion : use 'with_netcdf' in the ac file])
+      ABI_MSG_NOTICE_L([netcdf-mandatory],[CAUTION : NetCDF is __MANDATORY__ !])
+      mandatory="#"
+else
+  if test "${sd_netcdf_ok}" != "yes";then
+      ABI_MSG_NOTICE_L([netcdf-nw],[__WARNING__ : NetCDF is not WORKING])
+      status="#"
+  fi
+fi
+
+# Check NetCDF_fortran
+if test "${sd_netcdf_fortran_enable}" = "no"; then
+      #ABI_MSG_NOTICE_S([CAUTION : NetCDF Fortran is __MANDATORY__ !],
+	  #	       [   suggestion : use 'with_netcdf_fortran' in the ac file])
+      ABI_MSG_NOTICE_L([netcdf_fortran-mandatory],[CAUTION : NetCDF Fortran is __MANDATORY__ !])
+      mandatory="#"
+else
+  if test "${sd_netcdf_fortran_ok}" != "yes";then
+      ABI_MSG_NOTICE_L([netcdf_fortran-nw],[WARNING : NetCDF Fortran is not __WORKING__])
+      status="#"
+  fi
+fi
+
+# Check LibXC
+if test "${sd_libxc_enable}" = "no"; then
+      #ABI_MSG_NOTICE_S([CAUTION : LibXC is __MANDATORY__ !],
+	  #	       [   suggestion : use 'with_libxc' in the ac file])
+      ABI_MSG_NOTICE_L([libxc-mandatory],[CAUTION : LibXC is __MANDATORY__ !])
+      mandatory="#"
+else
+  if test "${sd_libxc_ok}" != "yes";then
+      ABI_MSG_NOTICE_L([libxc-nw],[WARNING : LibXC is not __WORKING__])
+      status="#"
+  fi
+fi
+
+# Check Wannier90
+if test "${sd_wannier90_enable}" = "yes"; then
+   if test "${sd_wannier90_ok}" != "yes"; then
+      ABI_MSG_NOTICE_S([CAUTION : Wannier90 is not __WORKING__ !],
+                       [   action : check your Wannier90 installation])
+      status="#"
+   fi
+fi
+
+# Help to produce libraires
+if test ! -z "${mandatory}"; then
+      ABI_MSG_NOTICE_L([help-fb],[We can __help__ you !])
+fi 
+
+if test ! -z "${status}" -o ! -z "${mandatory}"; then
+      ABI_MSG_NOTICE_S([ __Problems must be solved before continuing__ ])
+fi
+
 # Always generate a build script for required fallbacks
 AC_OUTPUT([fallbacks/build-abinit-fallbacks.sh])
+chmod +x fallbacks/build-abinit-fallbacks.sh
 
 # Check that we have all required fallbacks
 ABI_FALLBACKS_VALIDATE([${abi_fbk_required}])
 
+
 # Report situation
-if test "${abi_fbk_required}" = ""; then
-  AC_MSG_NOTICE([no fallback required - you may run production calculations])
-else
-  AC_MSG_NOTICE([fallbacks required - you should not run production calculations])
+#if test "${abi_fbk_required}" = ""; then
+#  AC_MSG_NOTICE([no fallback required - you may run production calculations])
+#else
+#  AC_MSG_NOTICE([fallbacks required - you should not run production calculations])
+#fi
+
+# Check exit
+if test ! -z "${status}" -o ! -z "${mandatory}"; then
+      exit
 fi
+
+
+#-------------------- END JMB --------------------------------------------#
 
 # FIXME: copying linear algebra tarball for now,
 #        ensuring ~/.abinit/tarballs/ exists

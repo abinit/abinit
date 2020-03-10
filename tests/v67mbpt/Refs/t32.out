@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h50 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h22 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v67mbpt_t31-t32-t33-t34-t35/t32.in
 - output file    -> t32.out
@@ -167,6 +167,15 @@ P           mkmem           8
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 153, }
+cutoff_energies: {ecut:   5.1, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 99, bs_calctype: 1, bs_algorithm: 2, }
+...
 
  mkfilename : getwfkfine/=0, take file _WFK from output of DATASET  99.
 
@@ -591,10 +600,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          4.6  wall=          4.7
+- Proc.   0 individual time (sec): cpu=          4.6  wall=          4.6
 
 ================================================================================
 
  Calculation completed.
 .Delivered  12 WARNINGs and   4 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          4.6  wall=          4.7
++Overall time at end (sec) : cpu=          4.6  wall=          4.6

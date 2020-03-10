@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h47 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h45 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/tutorial_tgw1_2-tgw1_3-tgw1_4-tgw1_5/tgw1_3.in
 - output file    -> tgw1_3.out
@@ -352,6 +352,15 @@ P           mkmem           1
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 1, mband: 50, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  mkfilename : getscr/=0, take file _SCR from output of DATASET   3.
@@ -493,6 +502,15 @@ data: !SigmaeeData |
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 1, mband: 100, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  mkfilename : getscr/=0, take file _SCR from output of DATASET   3.
@@ -612,6 +630,15 @@ data: !SigmaeeData |
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 1, mband: 150, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -733,6 +760,15 @@ data: !SigmaeeData |
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 4, }
+dimensions: {natom: 2, nkpt: 1, mband: 200, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
  mkfilename : getscr/=0, take file _SCR from output of DATASET   3.
@@ -852,6 +888,15 @@ data: !SigmaeeData |
 ================================================================================
 == DATASET  5 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 5, }
+dimensions: {natom: 2, nkpt: 1, mband: 250, nsppol: 1, nspinor: 1, nspden: 1, mpw: 259, }
+cutoff_energies: {ecut:   7.6, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 4, gwcalctyp: 0, }
+...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   2.
 
@@ -1301,10 +1346,10 @@ P           mkmem           1
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         20.0  wall=         20.1
+- Proc.   0 individual time (sec): cpu=         20.3  wall=         20.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered  15 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         20.0  wall=         20.1
++Overall time at end (sec) : cpu=         20.3  wall=         20.5
