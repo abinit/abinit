@@ -44,7 +44,7 @@ module m_ddb_diel
 !!***
 
  public :: ddb_diel
- public :: ddb_diel_elec  ! electronic dielectric constant calculation
+! public :: ddb_diel_elec  ! electronic dielectric constant calculation
 !!***
 
 contains
@@ -102,7 +102,7 @@ contains
 !!      anaddb
 !!
 !! CHILDREN
-!!      alignph,wrtout
+!!      alignph,ddb_diel_elec,ddb_oscstr,wrtout
 !!
 !! SOURCE
 
@@ -130,7 +130,7 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
  logical :: t_degenerate
 !arrays
  real(dp) :: qphon(3),refl(3)
- real(dp),allocatable :: frdiel(:,:,:),modez(:,:,:),oscstr(:,:,:,:)
+ real(dp),allocatable :: frdiel(:,:,:),modez(:,:,:),oscstr(:,:,:,:),dielt_modedecompo(:,:,:)
  character(len=1),allocatable :: metacharacter(:)
 
 ! *********************************************************************
@@ -163,19 +163,21 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 !for the different eigenmodes,
 !for different direction of the electric field
  ABI_ALLOCATE(frdiel,(3,3,nfreq))
- ABI_ALLOCATE(modez,(2,3,3*natom))
-!oscstr(2,3,3,3*natom)=oscillator strengths, following
-!the definition Eq.(54) in PRB55, 10355 (1997) [[cite:Gonze1997a]]
  ABI_ALLOCATE(oscstr,(2,3,3,3*natom))
+ ABI_ALLOCATE(modez,(2,3,3*natom))
+ ABI_ALLOCATE(dielt_modedecompo,(3,3,3*natom))
 
 ! write(std_out,'(a)')' Enter ddb_diel : displ ='
 ! do imode=1,3*natom
 !   write(std_out,'(a,i4,a,12es16.6)')'imode=',imode,' displ(:,:,imode)',displ(:,:,imode)
 ! end do
 
-!In case the frequency-dependent dielectric tensor is asked
- if(dieflag==1 .or. dieflag==3 .or. dieflag==4)then
+!In case the ionic contribution to the dielectric tensor is asked
+ if(dieflag==1 .or. dieflag==3 .or. dieflag==4 .or. dieflag==5)then
+! if(dieflag==1 .or. dieflag==3 .or. dieflag==4)then
 
+! Check if the alignement of phonon modes eigenvector is requested from the input flag alphon;
+! useful in case of degenerate modes 
    if (anaddb_dtset%alphon > 0) then
      write(message, '(3a)' )&
       ' The alphon input variable is non-zero, will mix the degenerate phonon modes',ch10,&
@@ -183,7 +185,342 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
      call wrtout(std_out,message,'COLL')
      call wrtout(iout,message,'COLL')
      call alignph(amu,displ,d2cart,mpert,natom,Crystal%ntypat,phfrq,Crystal%typat)
+   end if ! alignment of the phonon eigenvectors
+
+!  Compute the mode effective charge and oscillator strength
+   call ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phfrq,ncid)
+ end if  ! ionic contrib to dielectric tensor
+
+!In case the electronic contribution to the dielectric tensor is needed
+ if(dieflag==1.or.dieflag==2.or.dieflag==3 .or. dieflag==4 .or. dieflag==5)then
+! if(dieflag==1.or.dieflag==2.or.dieflag==3 .or. dieflag==4)then
+   call ddb_diel_elec(d2cart,natom,mpert,iout,epsinf)
+ end if
+
+!Only in case the frequency-dependent dielectric tensor is needed
+! EB: This not only for freq-dep epsilon but for ionic contrib to epsilon!
+ if(dieflag==1 .or. dieflag==3 .or. dieflag==4 .or. dieflag==5) then
+! if(dieflag==1 .or. dieflag==3 .or. dieflag==4) then
+!  Check the acousticity of the three lowest modes, assuming
+!  that they are ordered correctly
+   if (abs(phfrq(1))>abs(phfrq(4)))then
+!    This means that there is at least one mode with truly negative frequency
+     write(message, '(12a,4es16.8)' )&
+      'The lowest mode appears to be a "true" negative mode,',ch10,&
+      'and not an acoustic mode. This precludes the computation',ch10,&
+      'of the frequency-dependent dielectric tensor.',ch10,&
+      'Action : likely there is no action to be taken, although you,',ch10,&
+      'could try to raise your convergence parameters (ecut and k-points).',ch10,&
+      'For your information, here are the four lowest frequencies :',ch10,&
+       (phfrq(ii),ii=1,4)
+     MSG_ERROR(message)
    end if
+
+!  Compute the relaxed ion dielectric tensor
+   do idir1=1,3
+     do idir2=1,3
+!      The electronic contribution to epsilon is added 
+       dielt_rlx(idir1,idir2)=epsinf(idir1,idir2)
+!      calculation of the phonon contribution (ionic) to epsilon
+       do imode=4,3*natom
+!        Note that the acoustic modes are not included : their
+!        oscillator strength should be exactly zero
+!        Also, only the real part of oscstr is taken into account:
+!        the possible imaginary parts of degenerate modes
+!        will cancel.
+         dielt_rlx(idir1,idir2)=dielt_rlx(idir1,idir2)+&
+&         oscstr(1,idir1,idir2,imode) / (phfrq(imode)**2)*four_pi/ucvol
+!        Mode decomposition of epsilon
+         if (dieflag==5)then
+           dielt_modedecompo(idir1,idir2,imode)=oscstr(1,idir1,idir2,imode) / (phfrq(imode)**2)*four_pi/ucvol
+         endif ! mode decompo of epsilon 
+!DEBUG
+!         if(idir1==1 .and. idir2==2)then
+!           write(std_out,'(a,i4,a,3es16.6)')'imode=',imode,' dielt_rlx(idir1,idir2),oscstr(1,idir1,idir2,imode),phfrq(imode)=',&
+!&            dielt_rlx(idir1,idir2),oscstr(1,idir1,idir2,imode),phfrq(imode)
+!         endif
+!ENDDEBUG
+       end do
+     end do
+   end do
+
+   write(message,'(a,a)') ch10,' Relaxed ion dielectric tensor'
+   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,message,'COLL')
+
+   do idir1=1,3
+     write(message,'(3f16.8)')(dielt_rlx(idir1,idir2),idir2=1,3)
+     call wrtout(std_out,message,'COLL')
+     call wrtout(iout,message,'COLL')
+   end do
+   call wrtout(iout, " ",'COLL')
+   call wrtout(std_out, " ",'COLL')
+   
+!  Mode decompo of epsilon
+   if (dieflag==5) then
+     write(message,'(a,a,a,a)') ch10,' Mode by mode decomposition of the ionic dielectric tensor',&
+                                ch10,' (the electronic contribution is not included)'
+     call wrtout(std_out,message,'COLL')
+     call wrtout(iout,message,'COLL')
+     do imode=4,3*natom
+       write(message,'(a,a,i4)') ch10,' Mode number ',imode
+       call wrtout(std_out,message,'COLL')
+       call wrtout(iout,message,'COLL')
+       do idir1=1,3
+        ! write(message,'(a,a,i4)') ch10,' Mode number 2',imode
+         write(message,'(3f16.8)')(dielt_modedecompo(idir1,idir2,imode),idir2=1,3)
+         call wrtout(std_out,message,'COLL')
+         call wrtout(iout,message,'COLL')
+        ! write(message,'(3f16.8)')(dielt_modedecompo(idir1,idir2,imode),idir2=1,3)
+        ! call wrtout(iout, " ",'COLL')
+        ! call wrtout(std_out, " ",'COLL')
+       end do 
+     end do
+   endif ! dieflag=5 mode decompo of epsilon
+
+   ! write the relaxed ion dielectric tensor to the netcdf
+#ifdef HAVE_NETCDF
+   if (ncid /= nctk_noid) then
+     ncerr = nctk_def_arrays(ncid, [nctkarr_t("emacro_cart_rlx", "dp", &
+     "number_of_cartesian_directions, number_of_cartesian_directions")],defmode=.True.)
+     NCF_CHECK(ncerr)
+     NCF_CHECK(nctk_set_datamode(ncid))
+     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "emacro_cart_rlx"), dielt_rlx))
+   end if
+#endif
+
+ end if
+
+!Only in case the frequency-dependent dielectric tensor is needed
+ if(dieflag==1) then
+
+   difffr=zero
+   if(nfreq>1)difffr=(anaddb_dtset%frmax-anaddb_dtset%frmin)/(nfreq-1)
+
+   if (nfreq>10 .and. my_rank == master) then
+     write(iout, '(a,a,a,a,a,a,a,a)' )&
+      ' ddb_diel : the number of frequencies is larger',&
+      ' than 10 => I will consider only',ch10,&
+      ' the three principal directions, assume that the tensor',ch10,&
+      ' is diagonalized, and give dielectric constant and ',ch10,&
+      ' reflectivities.'
+     write(iout, '(a,a)' )&
+      ' Frequency(Hartree)    Dielectric constant   ',&
+      '             Reflectivity    '
+     write(iout, '(a,a)' )&
+      '                     x           y          z',&
+      '          x        y        z'
+   end if
+
+!  Loop on frequencies
+   do ifreq=1,nfreq
+     afreq=anaddb_dtset%frmin+difffr*(ifreq-1)
+     do idir1=1,3
+       do idir2=1,3
+         frdiel(idir1,idir2,ifreq)=epsinf(idir1,idir2)
+         do imode=4,3*natom
+!          Note that the acoustic modes are not included : their
+!          oscillator strength should be exactly zero
+!          Also, only the real part of oscstr is taken into account:
+!          the possible imaginary parts of degenerate modes
+!          will cancel.
+           frdiel(idir1,idir2,ifreq)=frdiel(idir1,idir2,ifreq)+&
+&           oscstr(1,idir1,idir2,imode) / (phfrq(imode)**2-afreq**2)*four_pi/ucvol
+         end do
+       end do
+     end do
+
+     ! Write all this information (actually, there should be a choice of units for the frequencies ...
+     if (nfreq>10) then
+       do idir1=1,3
+         if(frdiel(idir1,idir1,ifreq)<=zero)then
+           refl(idir1)=one
+         else
+!          See Gervais and Piriou PRB11,3944(1975) [[cite:Gervais1975]].
+           refl(idir1)=( (sqrt(frdiel(idir1,idir1,ifreq)) -one) /(sqrt(frdiel(idir1,idir1,ifreq)) +one) )**2
+         end if
+       end do
+       if (my_rank == master) then
+         write(iout, '(7es12.4)' )afreq,(frdiel(idir1,idir1,ifreq),idir1=1,3),(refl(idir1),idir1=1,3)
+       end if
+
+     else
+       if (my_rank == master) then
+         write(iout, '(a,es12.4,a)' )' Full dielectric tensor at frequency',afreq,' Hartree'
+         do idir1=1,3
+           write(iout, '(3es16.8)' ) (frdiel(idir1,idir2,ifreq),idir2=1,3)
+         end do
+         write(iout, '(a)' )' '
+       end if
+     end if
+
+   end do ! End of the loop on frequencies
+ end if ! End the condition on frequency-dependent dielectric tensor
+
+!Calculation of the Lyddane-Sachs-Teller value of the dielectric constant at zero frequency
+ if(anaddb_dtset%nph2l/=0 .and.dieflag==1)then
+
+!  Get the log of product of the square of the frequencies without non-analyticities.
+   lst0=zero
+   do imode=4,3*natom
+     lst0=lst0+2*log(phfrq(imode))
+   end do
+
+!  Prepare the output
+   write(message, '(a,a,a,a)' ) ch10,&
+    ' Generalized Lyddane-Sachs-Teller relation at zero frequency :',ch10,&
+    ' Direction                     Dielectric constant'
+   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,message,'COLL')
+
+!  Examine every wavevector in the phonon list
+   do iphl2=1,anaddb_dtset%nph2l
+     qphon(1:3)=anaddb_dtset%qph2l(1:3,iphl2)
+     if( abs(qphon(1))>DDB_QTOL .or. abs(qphon(2))>DDB_QTOL .or. abs(qphon(3))>DDB_QTOL)then
+       q2=qphon(1)**2+qphon(2)**2+qphon(3)**2
+       eps=qphon(1)**2*epsinf(1,1)+qphon(2)**2*epsinf(2,2)+&
+&       qphon(3)**2*epsinf(3,3)+ 2* ( qphon(1)*qphon(2)*epsinf(1,2)+&
+&       qphon(1)*qphon(3)*epsinf(1,3)+qphon(2)*qphon(3)*epsinf(2,3))
+       eps=eps/q2*exp(lst(iphl2)-lst0)
+       if (my_rank == master) then
+         write(iout, '(3f10.5,es18.8)' )qphon,eps
+         write(std_out,'(3f10.5,es18.8)' )qphon,eps
+       end if
+     end if
+   end do
+ end if ! End of the condition of nph2l does not vanish for Lyddane-Sachs-Teller
+
+ ABI_DEALLOCATE(frdiel)
+ ABI_DEALLOCATE(modez)
+ ABI_DEALLOCATE(oscstr)
+ ABI_DEALLOCATE(dielt_modedecompo)
+
+end subroutine ddb_diel
+!!***
+
+
+
+!!****f* ABINIT/ddb_diel_elec
+!!
+!! NAME
+!! ddb_diel_elec
+!!
+!! FUNCTION
+!! Compute the electronic response of the dielectric constant
+!!
+!! INPUTS
+!! iout=unit number for outputs
+!! mpert =maximum number of ipert
+!! natom=number of atoms in unit cell
+!! d2cart(2,3,mpert,3,mpert)=
+!!  dynamical matrix, effective charges, dielectric tensor,....
+!!  all in cartesian coordinates
+!!
+!! OUTPUT
+!! epsinf(3,3)= epsilon^infty = electronic contribution to the
+!! dielectric tensor
+!! 
+!! PARENTS
+!!      ddb_diel
+!!
+!! CHILDREN
+!!
+
+subroutine ddb_diel_elec(d2cart,natom,mpert,iout,epsinf)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: iout,mpert,natom
+!arrays
+ real(dp),intent(in) :: d2cart(2,3,mpert,3,mpert)
+ real(dp),intent(out) :: epsinf(3,3)
+
+!Local variables -------------------------
+!scalars
+ integer :: idir1,idir2
+ character(len=500) :: message
+!arrays
+
+ write(message, '(a,a)' ) ch10,' Electronic dielectric tensor'
+ call wrtout(std_out,message,'COLL')
+ call wrtout(iout,message,'COLL')
+
+ !Compute the electronic contribution to the dielectric tensor
+ !Needs only the perturbations with E-field from the DDB 
+ do idir1=1,3
+   do idir2=1,3
+     epsinf(idir1,idir2)=d2cart(1,idir1,natom+2,idir2,natom+2)
+   end do
+   write(message, '(3f16.8)' )(epsinf(idir1,idir2),idir2=1,3)
+   call wrtout(std_out,message,'COLL')
+   call wrtout(iout,message,'COLL')
+ end do
+ call wrtout(iout, " ",'COLL')
+ call wrtout(std_out, " ",'COLL')
+
+end subroutine ddb_diel_elec
+!!***
+
+
+
+!!****f* ABINIT/ddb_oscstr
+!!
+!! NAME
+!! ddb_oscstr
+!!
+!! FUNCTION
+!! Compute the oscillator strength
+!!
+!! INPUTS
+!! iout=unit number for outputs
+!! mpert =maximum number of ipert
+!! natom=number of atoms in unit cell
+!! d2cart(2,3,mpert,3,mpert)=
+!!  dynamical matrix, effective charges, dielectric tensor,....
+!!  all in cartesian coordinates
+!!
+!! OUTPUT
+!! oscstr(2,3,3,3*natom)=oscillator strengths, following
+!! the definition Eq.(54) in PRB55, 10355 (1997) [[cite:Gonze1997a]]
+!! fact_oscstr(2,3,3*natom)=oscillator strengths for the different eigenmodes,
+!!  for different direction of the electric field.
+!! 
+!! PARENTS
+!!      ddb_diel
+!!
+!! CHILDREN
+!!
+
+subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phfrq,ncid)
+
+!Arguments -------------------------------
+!scalars
+ integer,intent(in) :: iout,mpert,natom,ncid
+!arrays
+ real(dp),intent(in) :: d2cart(2,3,mpert,3,mpert)
+ real(dp),intent(in) :: phfrq(3*natom)
+ real(dp),intent(inout) :: displ(2,3*natom,3*natom)
+ real(dp),intent(out) :: fact_oscstr(2,3,3*natom),oscstr(2,3,3,3*natom),modez(2,3,3*natom)
+
+!Local variables -------------------------
+!scalars
+ integer,parameter :: master=0
+ integer :: i1,ii,idir1,idir2,imode,ipert1,iphl2,nfreq
+ integer :: my_rank,ncerr
+ real(dp) :: usquare
+ character(len=500) :: message
+ logical :: t_degenerate
+!arrays
+! real(dp),allocatable :: modez(:,:,:),oscstr(:,:,:,:)
+ character(len=1),allocatable :: metacharacter(:)
+
+! *********************************************************************
+
+! ABI_ALLOCATE(modez,(2,3,3*natom))
+!oscstr(2,3,3,3*natom)=oscillator strengths, following
+!the definition Eq.(54) in PRB55, 10355 (1997) [[cite:Gonze1997a]]
+! ABI_ALLOCATE(oscstr,(2,3,3,3*natom))
+
 
 !  Get the factors of the oscillator strength, and the mode effective charge for each mode
    do imode=1,3*natom
@@ -316,261 +653,13 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
    end if
 
    ABI_DEALLOCATE(metacharacter)
+   
+!  ABI_DEALLOCATE(modez)
+!  ABI_DEALLOCATE(oscstr)
 
- end if !  end the condition on frequency-dependent dielectric tensor
-
-!In case the electronic dielectric tensor is needed
- if(dieflag==1.or.dieflag==2.or.dieflag==3 .or. dieflag==4)then
-
-   call ddb_diel_elec(d2cart,natom,mpert,iout,epsinf)
-! EB: old stuff:
-!   write(message, '(a,a)' ) ch10,' Electronic dielectric tensor'
-!   call wrtout(std_out,message,'COLL')
-!   call wrtout(iout,message,'COLL')
-
-!   do idir1=1,3
-!     do idir2=1,3
-!       epsinf(idir1,idir2)=d2cart(1,idir1,natom+2,idir2,natom+2)
-!     end do
-!     write(message, '(3f16.8)' )(epsinf(idir1,idir2),idir2=1,3)
-!     call wrtout(std_out,message,'COLL')
-!     call wrtout(iout,message,'COLL')
-!   end do
-!   call wrtout(iout, " ",'COLL')
-!   call wrtout(std_out, " ",'COLL')
-
- end if
-
-!Only in case the frequency-dependent dielectric tensor is needed
- if(dieflag==1 .or. dieflag==3 .or. dieflag==4) then
-!  Check the acousticity of the three lowest modes, assuming
-!  that they are ordered correctly
-   if (abs(phfrq(1))>abs(phfrq(4)))then
-!    This means that there is at least one mode with truly negative frequency
-     write(message, '(12a,4es16.8)' )&
-      'The lowest mode appears to be a "true" negative mode,',ch10,&
-      'and not an acoustic mode. This precludes the computation',ch10,&
-      'of the frequency-dependent dielectric tensor.',ch10,&
-      'Action : likely there is no action to be taken, although you,',ch10,&
-      'could try to raise your convergence parameters (ecut and k-points).',ch10,&
-      'For your information, here are the four lowest frequencies :',ch10,&
-       (phfrq(ii),ii=1,4)
-     MSG_ERROR(message)
-   end if
-
-!  Extract the relaxed ion dielectric tensor
-   do idir1=1,3
-     do idir2=1,3
-       dielt_rlx(idir1,idir2)=epsinf(idir1,idir2)
-       do imode=4,3*natom
-!        Note that the acoustic modes are not included : their
-!        oscillator strength should be exactly zero
-!        Also, only the real part of oscstr is taken into account:
-!        the possible imaginary parts of degenerate modes
-!        will cancel.
-         dielt_rlx(idir1,idir2)=dielt_rlx(idir1,idir2)+&
-&         oscstr(1,idir1,idir2,imode) / (phfrq(imode)**2)*four_pi/ucvol
-!DEBUG
-!         if(idir1==1 .and. idir2==2)then
-!           write(std_out,'(a,i4,a,3es16.6)')'imode=',imode,' dielt_rlx(idir1,idir2),oscstr(1,idir1,idir2,imode),phfrq(imode)=',&
-!&            dielt_rlx(idir1,idir2),oscstr(1,idir1,idir2,imode),phfrq(imode)
-!         endif
-!ENDDEBUG
-       end do
-     end do
-   end do
-
-   write(message,'(a,a)') ch10,' Relaxed ion dielectric tensor'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(iout,message,'COLL')
-
-   do idir1=1,3
-     write(message,'(3f16.8)')(dielt_rlx(idir1,idir2),idir2=1,3)
-     call wrtout(std_out,message,'COLL')
-     call wrtout(iout,message,'COLL')
-   end do
-   call wrtout(iout, " ",'COLL')
-   call wrtout(std_out, " ",'COLL')
-
-   ! write the relaxed ion dielectric tensor to the netcdf
-#ifdef HAVE_NETCDF
-   if (ncid /= nctk_noid) then
-     ncerr = nctk_def_arrays(ncid, [nctkarr_t("emacro_cart_rlx", "dp", &
-     "number_of_cartesian_directions, number_of_cartesian_directions")],defmode=.True.)
-     NCF_CHECK(ncerr)
-     NCF_CHECK(nctk_set_datamode(ncid))
-     NCF_CHECK(nf90_put_var(ncid, nctk_idname(ncid, "emacro_cart_rlx"), dielt_rlx))
-   end if
-#endif
-
- end if
-
-!Only in case the frequency-dependent dielectric tensor is needed
- if(dieflag==1) then
-
-   difffr=zero
-   if(nfreq>1)difffr=(anaddb_dtset%frmax-anaddb_dtset%frmin)/(nfreq-1)
-
-   if (nfreq>10 .and. my_rank == master) then
-     write(iout, '(a,a,a,a,a,a,a,a)' )&
-      ' ddb_diel : the number of frequencies is larger',&
-      ' than 10 => I will consider only',ch10,&
-      ' the three principal directions, assume that the tensor',ch10,&
-      ' is diagonalized, and give dielectric constant and ',ch10,&
-      ' reflectivities.'
-     write(iout, '(a,a)' )&
-      ' Frequency(Hartree)    Dielectric constant   ',&
-      '             Reflectivity    '
-     write(iout, '(a,a)' )&
-      '                     x           y          z',&
-      '          x        y        z'
-   end if
-
-!  Loop on frequencies
-   do ifreq=1,nfreq
-     afreq=anaddb_dtset%frmin+difffr*(ifreq-1)
-     do idir1=1,3
-       do idir2=1,3
-         frdiel(idir1,idir2,ifreq)=epsinf(idir1,idir2)
-         do imode=4,3*natom
-!          Note that the acoustic modes are not included : their
-!          oscillator strength should be exactly zero
-!          Also, only the real part of oscstr is taken into account:
-!          the possible imaginary parts of degenerate modes
-!          will cancel.
-           frdiel(idir1,idir2,ifreq)=frdiel(idir1,idir2,ifreq)+&
-&           oscstr(1,idir1,idir2,imode) / (phfrq(imode)**2-afreq**2)*four_pi/ucvol
-         end do
-       end do
-     end do
-
-     ! Write all this information (actually, there should be a choice of units for the frequencies ...
-     if (nfreq>10) then
-       do idir1=1,3
-         if(frdiel(idir1,idir1,ifreq)<=zero)then
-           refl(idir1)=one
-         else
-!          See Gervais and Piriou PRB11,3944(1975) [[cite:Gervais1975]].
-           refl(idir1)=( (sqrt(frdiel(idir1,idir1,ifreq)) -one) /(sqrt(frdiel(idir1,idir1,ifreq)) +one) )**2
-         end if
-       end do
-       if (my_rank == master) then
-         write(iout, '(7es12.4)' )afreq,(frdiel(idir1,idir1,ifreq),idir1=1,3),(refl(idir1),idir1=1,3)
-       end if
-
-     else
-       if (my_rank == master) then
-         write(iout, '(a,es12.4,a)' )' Full dielectric tensor at frequency',afreq,' Hartree'
-         do idir1=1,3
-           write(iout, '(3es16.8)' ) (frdiel(idir1,idir2,ifreq),idir2=1,3)
-         end do
-         write(iout, '(a)' )' '
-       end if
-     end if
-
-   end do ! End of the loop on frequencies
- end if ! End the condition on frequency-dependent dielectric tensor
-
-!Calculation of the Lyddane-Sachs-Teller value of the dielectric constant at zero frequency
- if(anaddb_dtset%nph2l/=0 .and.dieflag==1)then
-
-!  Get the log of product of the square of the frequencies without non-analyticities.
-   lst0=zero
-   do imode=4,3*natom
-     lst0=lst0+2*log(phfrq(imode))
-   end do
-
-!  Prepare the output
-   write(message, '(a,a,a,a)' ) ch10,&
-    ' Generalized Lyddane-Sachs-Teller relation at zero frequency :',ch10,&
-    ' Direction                     Dielectric constant'
-   call wrtout(std_out,message,'COLL')
-   call wrtout(iout,message,'COLL')
-
-!  Examine every wavevector in the phonon list
-   do iphl2=1,anaddb_dtset%nph2l
-     qphon(1:3)=anaddb_dtset%qph2l(1:3,iphl2)
-     if( abs(qphon(1))>DDB_QTOL .or. abs(qphon(2))>DDB_QTOL .or. abs(qphon(3))>DDB_QTOL)then
-       q2=qphon(1)**2+qphon(2)**2+qphon(3)**2
-       eps=qphon(1)**2*epsinf(1,1)+qphon(2)**2*epsinf(2,2)+&
-&       qphon(3)**2*epsinf(3,3)+ 2* ( qphon(1)*qphon(2)*epsinf(1,2)+&
-&       qphon(1)*qphon(3)*epsinf(1,3)+qphon(2)*qphon(3)*epsinf(2,3))
-       eps=eps/q2*exp(lst(iphl2)-lst0)
-       if (my_rank == master) then
-         write(iout, '(3f10.5,es18.8)' )qphon,eps
-         write(std_out,'(3f10.5,es18.8)' )qphon,eps
-       end if
-     end if
-   end do
- end if ! End of the condition of nph2l does not vanish
-
- ABI_DEALLOCATE(frdiel)
- ABI_DEALLOCATE(modez)
- ABI_DEALLOCATE(oscstr)
-
-end subroutine ddb_diel
+end subroutine ddb_oscstr
 !!***
 
-
-
-!!****f* ABINIT/ddb_diel_elec
-!!
-!! NAME
-!! ddb_diel_elec
-!!
-!! FUNCTION
-!! Compute the electronic response of the dielectric constant
-!!
-!! INPUTS
-!! iout=unit number for outputs
-!! d2cart(2,3,mpert,3,mpert)=
-!!  dynamical matrix, effective charges, dielectric tensor,....
-!!  all in cartesian coordinates
-!! natom=number of atoms in unit cell
-!!
-!! OUTPUT
-!! epsinf(3,3)= epsilon^infty = electronic contribution to epsilon
-!!
-!! PARENTS
-!!      ddb_diel
-!!
-!! CHILDREN
-!!
-
-subroutine ddb_diel_elec(d2cart,natom,mpert,iout,epsinf)
-
-!Arguments -------------------------------
-!scalars
- integer,intent(in) :: iout,mpert,natom
-!arrays
- real(dp),intent(in) :: d2cart(2,3,mpert,3,mpert)
- real(dp),intent(out) :: epsinf(3,3)
-
-!Local variables -------------------------
-!scalars
- integer :: idir1,idir2
- character(len=500) :: message
-!arrays
-
- write(message, '(a,a)' ) ch10,' Electronic dielectric tensor'
- call wrtout(std_out,message,'COLL')
- call wrtout(iout,message,'COLL')
-
- !Compute the electronic contribution to the dielectric tensor
- !Needs only the perturbations with E-field from the DDB 
- do idir1=1,3
-   do idir2=1,3
-     epsinf(idir1,idir2)=d2cart(1,idir1,natom+2,idir2,natom+2)
-   end do
-   write(message, '(3f16.8)' )(epsinf(idir1,idir2),idir2=1,3)
-   call wrtout(std_out,message,'COLL')
-   call wrtout(iout,message,'COLL')
- end do
- call wrtout(iout, " ",'COLL')
- call wrtout(std_out, " ",'COLL')
-
-end subroutine ddb_diel_elec
-!!***
 
 
 !!****f* ABINIT/alignph
@@ -627,6 +716,7 @@ subroutine alignph(amu,displ,d2cart,mpert,natom,ntypat,phfrq,typat)
 
 !Local variables -------------------------
 !scalars
+ integer,parameter :: master=0
  integer :: i1,idir1,idir2,ii,imode,imodex,imodey,imodez,ipert1
  real(dp) :: theta
 !arrays

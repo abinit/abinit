@@ -597,10 +597,8 @@ program anaddb
  end if
  ABI_MALLOC(fact_oscstr, (2,3,3*natom))
 
- if (inp%nph2l/=0 .or. inp%dieflag==1) then
+ if (inp%nph2l/=0 .or. inp%dieflag==1 .or. inp%dieflag==5) then
 
-   write(msg, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Treat the second list of vectors ',ch10
-   call wrtout([std_out, ab_out], msg)
 
    ! Before examining every direction or the dielectric tensor, generates the dynamical matrix at gamma
    qphon(:,1)=zero; qphnrm(1)=zero
@@ -629,6 +627,8 @@ program anaddb
    end if ! end of the generation of the dynamical matrix at gamma.
 
    if (inp%nph2l/=0) then
+     write(msg, '(a,(80a),a,a,a,a)' ) ch10,('=',ii=1,80),ch10,ch10,' Treat the second list of vectors ',ch10
+     call wrtout([std_out, ab_out], msg)
 
      if (my_rank == master) then
 #ifdef HAVE_NETCDF
@@ -692,14 +692,18 @@ program anaddb
      end do ! iphl2
    end if ! nph2l/=0
 
-   ! The frequency-dependent dielectric tensor (and oscillator strength).
+   ! EB: not sure it is interesting to print the message below...
    if (inp%dieflag==1)then
      write(msg, '(6a)' )&
       ' the frequency-dependent dielectric tensor (and also once more',ch10,&
       ' the phonons at gamma - without non-analytic part )',ch10,ch10,&
       ' The frequency-dependent dielectric tensor'
      call wrtout(std_out, msg)
+   end if
 
+   ! The frequency-dependent dielectric tensor if dieflag==1
+   ! Mode decomposition of ionic epsilon if dieflag==5
+   if (inp%dieflag==1 .or. inp%dieflag==5)then
      ! Initialisation of the phonon wavevector
      qphon(:,1)=zero; qphnrm(1)=zero
 
@@ -712,19 +716,21 @@ program anaddb
      call dfpt_prtph(displ,0,inp%enunit,-1,natom,phfrq,qphnrm(1),qphon)
 
      ! Evaluation of the oscillator strengths and frequency-dependent dielectric tensor.
+     ! or mode by mode decomposition of epsilon if dieflag==5
      call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
        ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
      ! write(std_out,*)'after ddb_diel, dielt_rlx(:,:)=',dielt_rlx(:,:)
-   end if
+   end if ! dieflag==1 or 5
 
-   ! If the electronic dielectric tensor only is needed...
+   ! If the print of the electronic dielectric tensor is needed...
    if (inp%dieflag==2.or.inp%dieflag==3.or. inp%dieflag==4) then
      ! Everything is already in place...
      call ddb_diel(Crystal,ddb%amu,inp,dielt_rlx,displ,d2cart,epsinf,fact_oscstr,&
        ab_out,lst,mpert,natom,inp%nph2l,phfrq,comm,ana_ncid)
    end if
 
- end if ! either nph2l/=0  or  dieflag==1
+ end if ! either nph2l/=0  or  dieflag==1 or dieflag==5
+   
 
 !**********************************************************************
 
