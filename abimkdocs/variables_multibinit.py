@@ -183,6 +183,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="Prt test-set evaluation into file ph_test.nc",
+    added_in_version="before_v9",
     text=r"""
 Flag to activate the printing of the evaluation of the effective potential on to a test set into  a seperate netcdf file called ph_test.nc. 
 
