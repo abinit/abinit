@@ -755,7 +755,7 @@ Variable(
     vartype="real",
     topics=['DynamicsMultibinit_basic'],
     dimensions="scalar",
-    defaultval=1d-10,
+    defaultval=1e-10,
     mnemonics="DYNamics TOLerance on SYMmetries",
     text=r"""
 Tolerance on symmetry finder.
