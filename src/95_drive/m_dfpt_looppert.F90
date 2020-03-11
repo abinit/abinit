@@ -1998,12 +1998,14 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
      call gkk_init(gkk,gkk2d,dtset%mband,dtset%nsppol,nkpt_rbz,1,1)
 
      ! Write the netCDF file.
-     fname = strcat(gkkfilnam,".nc")
-     NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
-     NCF_CHECK(crystal%ncwrite(ncid))
-     NCF_CHECK(ebands_ncwrite(gkk_ebands, ncid))
-     call gkk_ncwrite(gkk2d,dtset%qptn(:),dtset%wtq, ncid)
-     NCF_CHECK(nf90_close(ncid))
+     if (me == master) then
+       fname = strcat(gkkfilnam,".nc")
+       NCF_CHECK_MSG(nctk_open_create(ncid, fname, xmpi_comm_self), "Creating GKK file")
+       NCF_CHECK(crystal%ncwrite(ncid))
+       NCF_CHECK(ebands_ncwrite(gkk_ebands, ncid))
+       call gkk_ncwrite(gkk2d,dtset%qptn(:),dtset%wtq, ncid)
+       NCF_CHECK(nf90_close(ncid))
+     end if
 
      ! Free memory
      ABI_DEALLOCATE(gkk)

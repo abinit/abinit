@@ -46,6 +46,7 @@ module m_driver
 
  use defs_datatypes, only : pseudopotential_type, pspheader_type
  use defs_abitypes,  only : MPI_type
+ use m_fstrings,     only : sjoin, itoa
  use m_time,         only : timab
  use m_xg,           only : xg_finalize
  use m_libpaw_tools, only : libpaw_write_comm_set
@@ -363,10 +364,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
          dict_key="meta")
 
      case default
-       write(msg,'(a,i0,4a)')&
-        'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
-        'This is not allowed.',ch10, 'Action: modify optdriver in the input file.'
-       MSG_ERROR(msg)
+       MSG_ERROR(sjoin('Add a meta section for optdriver: ', itoa(dtset%optdriver)))
      end select
 
      !if (dtset%use_yaml == 1) then
