@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_gstateimg
 !! NAME
 !!  m_gstateimg
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 1998-2019 ABINIT group (XG, AR, GG, MT)
+!!  Copyright (C) 1998-2020 ABINIT group (XG, AR, GG, MT)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -47,7 +46,7 @@ module m_gstateimg
  use m_dtfil
 
  use defs_datatypes, only : pseudopotential_type
- use defs_abitypes, only : MPI_type
+ use defs_abitypes,  only : MPI_type
  use m_time,         only : timab
  use m_geometry,     only : mkradim, mkrdim, fcart2fred, xred2xcart, metric
  use m_specialmsg,   only : specialmsg_mpisum
@@ -201,7 +200,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
  integer,optional,intent(in) :: idtset,ndtset
  integer,intent(inout) :: iexit
  real(dp),intent(in) :: cpui
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  character(len=fnlen),optional,intent(in) :: filstat
  type(MPI_type),intent(inout) :: mpi_enreg
  type(datafiles_type),target,intent(inout) :: dtfil
@@ -406,8 +405,7 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
    ABI_ALLOCATE(amass,(dtset%natom,nimage))
    do iimage=1,nimage
      if (any(amu_img(:,iimage)/=amu_img(:,1))) then
-       msg='HIST file is not compatible with variable masses!'
-       MSG_ERROR(msg)
+       MSG_ERROR('HIST file is not compatible with variable masses!')
      end if
      amass(:,iimage)=amu_emass*amu_img(dtset%typat(:),iimage)
    end do
@@ -505,8 +503,11 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
      end if
      call wrtout(ab_out ,msg,'COLL')
      call wrtout(std_out,msg,'PERS')
+
+     call yaml_iterstart('timimage', itimimage, dev_null, dtset%use_yaml)
    end if
-   call yaml_iterstart('timimage', itimimage, ab_out, dtset%use_yaml)
+
+   if (dtset%use_yaml == 1) call yaml_iterstart('timimage', itimimage, ab_out, dtset%use_yaml)
 
    call timab(704,2,tsec)
 
@@ -529,7 +530,10 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          if (itimimage>1) then
            dtfil%ireadwf=0;dtfil%ireadden=0;dtfil%ireadkden=0
          end if
+         call yaml_iterstart('image', iimage, dev_null, 0)
        end if
+
+       if (dtset%use_yaml == 1) call yaml_iterstart('image', iimage, ab_out, dtset%use_yaml)
 
 !      Redefine output units
        call localwrfile(mpi_enreg%comm_cell,ii,dtset%nimage,mpi_enreg%paral_img,dtset%prtvolimg)
@@ -545,7 +549,6 @@ subroutine gstateimg(acell_img,amu_img,codvsn,cpui,dtfil,dtset,etotal_img,fcart_
          if (dtset%prtvolimg==0) call wrtout(ab_out ,msg,'COLL')
          if (do_write_log) call wrtout(std_out,msg,'PERS')
        end if
-       call yaml_iterstart('image', iimage, ab_out, dtset%use_yaml)
 
        acell(:)     =res_img(iimage)%acell(:)
        rprim(:,:)   =res_img(iimage)%rprim(:,:)

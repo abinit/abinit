@@ -19,7 +19,7 @@
 //   - using Spherical Harmonics Ylm (N-conserving or PAW ; compulsory for PAW)
 //
 // COPYRIGHT
-// Copyright (C) 1998-2019 ABINIT group (MT,FDahm)
+// Copyright (C) 1998-2020 ABINIT group (MT,FDahm)
 // This file is distributed under the terms of the
 // GNU General Public License, see ~abinit/COPYING
 // or http://www.gnu.org/copyleft/gpl.txt .

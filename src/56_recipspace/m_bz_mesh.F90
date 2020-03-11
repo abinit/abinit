@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_bz_mesh
 !! NAME
 !!  m_bz_mesh
@@ -12,7 +11,7 @@
 !!  of the point group that preserve the external q-point.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (MG, GMR, VO, LR, RWG, MT)
+!! Copyright (C) 2008-2020 ABINIT group (MG, GMR, VO, LR, RWG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

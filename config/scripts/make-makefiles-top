@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2005-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2005-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -46,7 +46,18 @@ def makefile_header(name,stamp):
 ACLOCAL_AMFLAGS = -I config/m4
 
 AM_DISTCHECK_CONFIGURE_FLAGS = \\
-  --disable-fallbacks --with-trio-flavor="none" --with-dft-flavor="none" \\
+  --without-abinit-common \\
+  --without-bigdft \\
+  --without-fftw3 \\
+  --without-levmar \\
+  --without-libpaw \\
+  --without-libpsml \\
+  --without-libxml2 \\
+  --without-papi \\
+  --without-pfft \\
+  --without-triqs \\
+  --without-wannier90 \\
+  --without-xmlf90 \\
   @abi_ac_distcheck@ \\
   PYFLAGS="@PYFLAGS@ -B"
 
@@ -132,20 +143,24 @@ for urgency in abinit_priorities:
 
 # FIXME: hard-coded
 clean = "CLEANFILES = config.optim\n\n"
-clean += "DISTCLEANFILES = .abilint abilint.out abilint.log\n\n"
 
 # Generate list of extra files
 ext = "EXTRA_DIST =\n"
 for subdir in abinit_other_dirs:
-  sub_files = "config/dist/%s.lst" % subdir
+  sub_files = "config/dist/auto-%s.lst" % subdir
   ext += open(sub_files, "rt").read()
+for xtrafile in os.listdir("./config/dist"):
+  if ( re.match("xtra-.*\\.lst", xtrafile) ):
+    ext += file(os.path.join("config","dist",xtrafile),"r").read()
 ext = re.sub("\n"," \\\n\t",ext[:-1])
 ext += "\n\n"
+xsubs = sorted([item for item in cnf.sections() \
+  if (cnf.get(item, "mode") == "detached") and (cnf.get(item, "type") == "data")])
 
 # Write Makefile.am
 mf = open("Makefile.am", "wt")
 mf.write(makefile_header(my_name,now))
-mf.write("SUBDIRS = %s\n\n" % (" ".join(abinit_top_dirs)))
+mf.write("SUBDIRS = %s\n\n" % (" ".join(abinit_top_dirs + xsubs)))
 mf.write(clean)
 mf.write(ext)
 add = "config/makefiles/top.am"

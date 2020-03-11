@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_parser
 !! NAME
 !! m_parser
@@ -7,7 +6,7 @@
 !! This module contains (low-level) procedures to parse and validate input files.
 !!
 !! COPYRIGHT
-!! Copyright (C) 2008-2019 ABINIT group (XG, MJV, MT)
+!! Copyright (C) 2008-2020 ABINIT group (XG, MJV, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -27,10 +26,18 @@ module m_parser
  use m_errors
  use m_atomdata
  use m_xmpi
+ !use m_copy
+#ifdef HAVE_NETCDF
+ use netcdf
+#endif
+ use m_nctk
 
  use m_io_tools,  only : open_file
- use m_fstrings,  only : sjoin, itoa, inupper
- use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
+ use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, next_token, &
+                         endswith, char_count, find_digit !, startswith,
+ use m_geometry,  only : xcart2xred, det3r
+ !use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
+ !use m_crystal,   only : crystal_t
 
  implicit none
 
@@ -109,6 +116,67 @@ module m_parser
  public :: prttagm_images      ! Extension to prttagm to include the printing of images information.
  public :: chkvars_in_string   ! Analyze variable names in string. Abort if name is not recognized.
 
+
+!----------------------------------------------------------------------
+
+!!****t* m_parser/geo_t
+!! NAME
+!! geo_t
+!!
+!! FUNCTION
+!!  Small object describing the crystalline structure read from an external file
+!!  or a string given in the input file.
+!!
+!! SOURCE
+
+ type,public :: geo_t
+
+  integer :: natom = 0
+  ! Number of atoms
+
+  integer :: ntypat = 0
+  ! Number of type of atoms
+
+  character(len=500) :: title = ""
+  ! Optional title read for external file e.g. POSCAR
+
+  character(len=500) :: fileformat = ""
+  ! (poscar, netcdf)
+
+  integer,allocatable :: typat(:)
+  ! typat(natom)
+  ! Type of each natom.
+
+  real(dp) :: rprimd(3,3)
+
+  real(dp),allocatable :: xred(:,:)
+  ! xred(3,natom)
+  ! Reduced coordinates.
+
+  real(dp),allocatable :: znucl(:)
+  ! znucl(ntypat)
+  ! Nuclear charge for each type of pseudopotential
+  ! Note that ntypat must be equal to npsp --> no alchemical mixing
+
+ contains
+
+   procedure :: free => geo_free
+   ! Free memory.
+
+   procedure :: malloc => geo_malloc
+   ! Allocate memory
+
+   procedure :: bcast => geo_bcast
+   ! Brodcast object
+
+   procedure :: print_abivars => geo_print_abivars
+   !  Print Abinit variables corresponding to POSCAR
+
+ end type geo_t
+
+ public :: geo_from_abivar_string   ! Build object form abinit variable
+ public :: geo_from_poscar_path     ! Build object from POSCAR filepath.
+
 CONTAINS  !===========================================================
 !!***
 
@@ -139,7 +207,7 @@ CONTAINS  !===========================================================
 !!
 !! SOURCE
 
-subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
+subroutine parsefile(filnamin, lenstr, ndtset, string, comm)
 
 !Arguments ------------------------------------
  character(len=*),intent(in) :: filnamin
@@ -149,8 +217,8 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
 
 !Local variables-------------------------------
 !scalars
- integer,parameter :: master=0
- integer :: option,marr,tread,lenstr_noxyz,ierr,ii
+ integer,parameter :: master=0, option1= 1
+ integer :: marr,tread,lenstr_noxyz,ierr
  character(len=strlen) :: string_raw
  character(len=500) :: msg
 !arrays
@@ -163,14 +231,14 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
  ! Note: this is done only by me=0, and then string and other output vars are BCASTED
 
  if (xmpi_comm_rank(comm) == master) then
-   !strlen from defs_basis module
-   option=1
-   call instrng(filnamin,lenstr,option,strlen,string)
+
+   ! strlen from defs_basis module
+   call instrng(filnamin, lenstr, option1, strlen, string)
 
    ! Copy original file, without change of case
    string_raw=string
 
-   ! To make case-insensitive, map characters of string to upper case:
+   ! To make case-insensitive, map characters of string to upper case.
    call inupper(string(1:lenstr))
 
    ! Might import data from xyz file(s) into string
@@ -179,11 +247,7 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
    call importxyz(lenstr,string_raw,string,strlen)
 
    ! Make sure we don't have unmatched quotation marks
-   ierr = 0
-   do ii=1,len_trim(string)
-     if (string(ii:ii) == '"') ierr = ierr + 1
-   end do
-   if (mod(ierr, 2) /= 0) then
+   if (mod(char_count(string, '"'), 2) /= 0) then
      MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
    end if
 
@@ -202,10 +266,14 @@ subroutine parsefile(filnamin,lenstr,ndtset,string,comm)
 
  if (xmpi_comm_size(comm) > 1) then
    ! Broadcast data.
-   call xmpi_bcast(lenstr,master,comm,ierr)
-   call xmpi_bcast(ndtset,master,comm,ierr)
-   call xmpi_bcast(string,master,comm,ierr)
+   call xmpi_bcast(lenstr, master, comm, ierr)
+   call xmpi_bcast(ndtset, master, comm, ierr)
+   call xmpi_bcast(string, master, comm, ierr)
+   call xmpi_bcast(string_raw, master, comm, ierr)
  end if
+
+ ! Save input string in global variable so that we can access it in ntck_open_create
+ INPUT_STRING = string_raw
 
 end subroutine parsefile
 !!***
@@ -259,32 +327,33 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
  integer :: done,idig,index_slash,sign
  real(dp) :: den,num
  logical :: logi
- character(len=500) :: msg
+ character(len=500) :: msg,iomsg
 
 ! *************************************************************************
 
- !write(std_out,*)'inread: enter '
- !write(std_out,*)'string(1:ndig)=',string(1:ndig)
- !write(std_out,*)'typevarphys=',typevarphys
+ !write(std_out,*)'inread: enter with string(1:ndig): ',string(1:ndig)
+ !write(std_out,*)'typevarphys: ',typevarphys
 
  if (typevarphys=='INT') then
 
    ! integer input section
-   read (unit=string(1:ndig),fmt=*,iostat=errcod) outi
+   read(unit=string(1:ndig), fmt=*, iostat=errcod, iomsg=iomsg) outi
+
    if(errcod/=0)then
      ! integer reading error
-     write(std_out,'(/,a,/,a,i0,a)' ) &
-     ' inread: ERROR -',&
-     '  Attempted to read ndig=',ndig,' integer digits,'
-     write(std_out,'(3a)' ) '   from string(1:ndig)= ',string(1:ndig),', to initialize an integer variable'
+     write(msg,'(a,i0,7a)' ) &
+       "Attempted to read ndig: ",ndig," integer digits", ch10, &
+       "from string(1:ndig)= `",string(1:ndig),"` to initialize an integer variable",ch10,&
+       "iomsg: ", trim(iomsg)
+     MSG_WARNING(msg)
      errcod=1
    end if
 
  else if (typevarphys=='DPR' .or. typevarphys=='LEN' .or. typevarphys=='ENE' &
          .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
 
-   !  real(dp) input section
-   !  Special treatment of SQRT(xxx) or -SQRT(xxx) chains of characters, where xxx can be a fraction
+   ! real(dp) input section
+   ! Special treatment of SQRT(xxx) or -SQRT(xxx) chains of characters, where xxx can be a fraction
    done=0
    if (ndig>5) then
      if(string(1:5)=='SQRT(' .and. string(ndig:ndig)==')')then
@@ -292,14 +361,15 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
      else if(string(1:6)=='-SQRT(' .and. string(ndig:ndig)==')')then
        done=1 ; sign=2
      end if
+
      if(done==1)then
        index_slash=index(string(5+sign:ndig-1),'/')
        if(index_slash==0)then
-         read (unit=string(5+sign:ndig-1),fmt=*,iostat=errcod) outr
+         read (unit=string(5+sign:ndig-1),fmt=*,iostat=errcod, iomsg=iomsg) outr
        else if(index_slash/=0)then
-         read (unit=string(5+sign:5+sign+index_slash-2),fmt=*,iostat=errcod) num
+         read (unit=string(5+sign:5+sign+index_slash-2),fmt=*,iostat=errcod, iomsg=iomsg) num
          if(errcod==0)then
-           read (unit=string(5+sign+index_slash:ndig-1),fmt=*,iostat=errcod) den
+           read (unit=string(5+sign+index_slash:ndig-1),fmt=*,iostat=errcod, iomsg=iomsg) den
            if(errcod==0)then
              if(abs(den)<tol12)then
                errcod=1
@@ -323,9 +393,9 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
      index_slash=index(string(1:ndig),'/')
      if(index_slash/=0)then
        done=1
-       read (unit=string(1:index_slash-1),fmt=*,iostat=errcod) num
+       read (unit=string(1:index_slash-1), fmt=*, iostat=errcod, iomsg=iomsg) num
        if(errcod==0)then
-         read (unit=string(index_slash+1:ndig),fmt=*,iostat=errcod) den
+         read (unit=string(index_slash+1:ndig), fmt=*, iostat=errcod, iomsg=iomsg) den
          if(errcod==0)then
            if(abs(den)<tol12)then
              errcod=1
@@ -338,27 +408,30 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    end if
 
    ! Normal treatment of floats
-   if(done==0) read (unit=string(1:ndig),fmt=*,iostat=errcod) outr
+   if(done==0) read (unit=string(1:ndig), fmt=*, iostat=errcod, iomsg=iomsg) outr
 
    ! Treatment of errors
    if(errcod/=0)then
      ! real(dp) data reading error
-     write(std_out,'(/,a,/,a,i0,a)' ) &
-      'inread : ERROR -',&
-      'Attempted to read ndig=',ndig,' floating point digits,'
-     write(std_out,'(a,a,a)' ) '   from string(1:ndig) ',string(1:ndig),', to initialize a floating variable.'
+     write(msg,'(a,i0,8a)' ) &
+        'Attempted to read ndig: ',ndig,' floating point digits,',ch10, &
+        'from string(1:ndig): `',string(1:ndig),'` to initialize a floating variable.',ch10, &
+        "iomsg: ", trim(iomsg)
+     MSG_WARNING(msg)
      errcod=2
    end if
 
  else if (typevarphys=='LOG') then
 
-   read (unit=string(1:ndig),fmt=*,iostat=errcod) logi
+   read (unit=string(1:ndig), fmt=*, iostat=errcod, iomsg=iomsg) logi
+
    if(errcod/=0)then
      ! integer reading error
-     write(std_out,'(/,a,/,a,i0,a)' ) &
-     'inread: ERROR -',&
-     'Attempted to read ndig=',ndig,' integer digits,'
-     write(std_out,'(a,a,a)' ) '   from string(1:ndig)= ',string(1:ndig),', to initialize a logical variable.'
+     write(msg,'(a,i0,8a)' ) &
+       "Attempted to read ndig: ",ndig," integer digits", ch10, &
+       "from string(1:ndig): `",string(1:ndig),"` to initialize a logical variable.",ch10,&
+       "iomsg: ", trim(iomsg)
+     MSG_WARNING(msg)
      errcod=3
    end if
 
@@ -372,13 +445,13 @@ subroutine inread(string,ndig,typevarphys,outi,outr,errcod)
    MSG_ERROR(msg)
  end if
 
- if(errcod /= 0)then
+ if (errcod /= 0)then
    do idig=1,ndig
      if( string(idig:idig) == 'O' )then
-       write(std_out,'(/,a,/,a,a,a)' ) &
-       'inread: WARNING -',&
+       write(msg,'(3a)' ) &
        'Note that this string contains the letter O. ',ch10,&
        'It is likely that this letter should be replaced by the number 0.'
+       MSG_WARNING(msg)
        exit
      end if
    end do
@@ -432,8 +505,8 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
  character :: blank=' '
 !scalars
  integer,save :: include_level=-1
- integer :: ii,ii1,ii2,ij,iline,ios,iost,lenc,lenstr_inc,mline,nline1,input_unit,ierr
- logical :: include_found,ex
+ integer :: ii,ii1,ii2,ij,iline,ios,iost,lenc,lenstr_inc,mline,nline1,input_unit
+ logical :: include_found, ex
  character(len=1) :: string1
  character(len=3) :: string3
  character(len=500) :: filnam_inc,msg
@@ -501,6 +574,14 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
       'add the keyword ''end'' at the very beginning of the last line of your input file.'
      MSG_ERROR(msg)
    end if
+
+   ! TODO: Ignore sections inside TEST_INFO markers so that we don't need to prepend comment markers.
+   !in_testinfo = 0
+   !if startswith(line, "#%%<BEGIN TEST_INFO") in_testinfo = 1
+   !if (in_testinfo /= 0) cycle
+   !if startswith(line, "#%%<END TEST_INFO> ") then
+   !  in_testinfo = 0; cycle
+   !end if
 
    ! Find length of input line ignoring delimiter characters (# or !)
    ! and any characters beyond it (allows for comments beyond # or !)
@@ -661,20 +742,16 @@ recursive subroutine instrng(filnam,lenstr,option,strln,string)
  nline1=iline-1
  close (unit=input_unit)
 
-
  ! Make sure we don't have unmatched quotation marks
- ierr = 0
- do ii=1,len_trim(string)
-   if (string(ii:ii) == '"') ierr = ierr + 1
- end do
- if (mod(ierr, 2) /= 0) then
+ if (mod(char_count(string, '"'), 2) /= 0) then
    MSG_ERROR('Your input file contains unmatched quotation marks `"`. This confuses the parser. Check your input.')
  end if
 
- write(msg,'(a,i0,3a)')'-instrng: ',nline1,' lines of input have been read from file ',trim(filnam),ch10
- call wrtout(std_out,msg,'COLL')
+ include_level = include_level - 1
 
- include_level=include_level-1
+ write(msg,'(a,i0,3a)')'-instrng: ',nline1,' lines of input have been read from file ',trim(filnam),ch10
+ call wrtout(std_out,msg)
+ !write(std_out, "(3a)")"string after instrng:", ch10, trim(string)
 
  DBG_EXIT("COLL")
 
@@ -974,8 +1051,8 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
  character(len=*),intent(in) :: typevarphys
  character(len=*),optional,intent(out) :: key_value
 !arrays
- integer,intent(inout) :: intarr(marr) !vz_i
- real(dp),intent(inout) :: dprarr(marr) !vz_i
+ integer,intent(inout) :: intarr(marr)
+ real(dp),intent(inout) :: dprarr(marr)
 
 !Local variables-------------------------------
  character(len=1), parameter :: blank=' '
@@ -1551,7 +1628,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  integer,intent(inout) :: b1
  character(len=*),intent(in) :: string
  character(len=*),intent(in) :: typevarphys
- character(len=fnlen),intent(in) :: cs
+ character(len=*),intent(in) :: cs
 !arrays
  integer,intent(inout) :: intarr(marr) !vz_i
  real(dp),intent(out) :: dprarr(marr)
@@ -1562,7 +1639,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
  integer :: asciichar,b2,errcod,ii,integ,istar,nrep,strln
  real(dp) :: factor,real8
  character(len=3) :: typevar
- character(len=500) :: msg
+ character(len=500*4) :: msg
 
 ! *************************************************************************
 
@@ -1624,33 +1701,20 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
    !  Find new absolute location of next element of array:
    b1=b1+b2
 
- end do !  End do while (ii<narr). Note "exit" instructions within loop.
+ end do ! while (ii<narr). Note "exit" instructions within loop.
 
- !if (ii>narr) then
- !write(msg, '(a,a,a,a,a,a,a,a,a,a,i4,a,i4,a,a,a,a,a,a,a,a)' ) ch10,&
- !' inarray : ERROR -',ch10,&
- !&  '  Too many data are provided in the input file for',ch10,&
- !&  '  the keyword "',trim(cs),'" :',ch10,&
- !&  '  attempted to read',ii,' elements for array length',narr,ch10,&
- !&  '  This might be due to an erroneous value for the size ',ch10,&
- !&  '  of this array, in the input file.',ch10,&
- !&  '  Action: check the data provided for this keyword,',ch10,&
- !&  '  as well as its declared dimension. They do not match.'
- !call wrtout(std_out,msg,'COLL')
- !end if
-
- if (errcod/=0) then
-   write(msg, '(5a,i0,10a)' ) &
-   'An error occurred reading data for keyword "',trim(cs),'",',ch10,&
-   'looking for ',narr,' array elements.', ch10, &
-   'There is a problem with the input file: maybe  ',ch10,&
-   'a disagreement between the declared dimension of the array,',ch10,&
-   'and the number of data actually provided. ',ch10,&
-   'Action: correct your input file, and especially the keyword', trim(cs)
+ if (errcod /= 0) then
+   write(msg, '(5a,i0,12a)' ) &
+   'An error occurred reading data for keyword `',trim(cs),'`,',ch10,&
+   'looking for ',narr,' elements.', ch10, &
+   'There is a problem with the input string:',ch10,trim(string(b1:)), ch10, &
+   'Maybe a disagreement between the declared dimension of the array,',ch10,&
+   'and the number of items provided. ',ch10,&
+   'Action: correct your input file and especially the keyword: ', trim(cs)
    MSG_ERROR(msg)
  end if
 
- !In case of 'LEN', 'ENE', 'BFI', or 'TIM', try to identify the unit
+ ! In case of 'LEN', 'ENE', 'BFI', or 'TIM', try to identify the unit
  if (typevarphys=='LEN' .or. typevarphys=='ENE' .or. typevarphys=='BFI' .or. typevarphys=='TIM') then
    do
      ! Relative location of next blank after data
@@ -1660,8 +1724,7 @@ subroutine inarray(b1,cs,dprarr,intarr,marr,narr,string,typevarphys)
      if(b2==0) b2=strln-b1+1
 
      ! write(std_out,*)' inarray : strln=',strln
-     ! write(std_out,*)' inarray : b1=',b1
-     ! write(std_out,*)' inarray : b2=',b2
+     ! write(std_out,*)' inarray : b1=',b1, b2=',b2
      ! write(std_out,*)' inarray : string(b1+1:)=',string(b1+1:)
      ! write(std_out,*)' typevarphys==',typevarphys
 
@@ -1768,7 +1831,7 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
    ixyz=ixyz+1
    if(ixyz==1)then
      write(msg,'(80a)')('=',ii=1,80)
-     call wrtout(ab_out,msg,'COLL')
+     call wrtout(ab_out,msg)
    end if
 
    ! The xyzFILE token has been identified
@@ -1801,7 +1864,7 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
    xyz_fname=string_raw(index_xyz_fname:index_xyz_fname_end-1)
 
    write(msg, '(3a)') ch10, ' importxyz : Identified token XYZFILE, referring to file ',trim(xyz_fname)
-   call wrtout([std_out, ab_out],msg,'COLL')
+   call wrtout([std_out, ab_out],msg)
 
    ! Append the data from the xyz file to the string, and update the length of the string
    call append_xyz(dtset_char,lenstr,string_upper,xyz_fname,strln)
@@ -1825,7 +1888,7 @@ subroutine importxyz(lenstr,string_raw,string_upper,strln)
    string_upper(1:1)=blank
    lenstr=lenstr+1
    write(msg,'(a,80a,a)')ch10,('=',ii=1,80),ch10
-   call wrtout(ab_out,msg,'COLL')
+   call wrtout(ab_out,msg)
  end if
 
 end subroutine importxyz
@@ -1912,7 +1975,7 @@ subroutine append_xyz(dtset_char,lenstr,string,xyz_fname,strln)
    MSG_ERROR(msg)
  end if
  write(msg, '(3a)')' importxyz : Opened file ',trim(xyz_fname),'; content stored in string_xyz'
- call wrtout(std_out,msg,'COLL')
+ call wrtout(std_out,msg)
 
  ! check number of atoms is correct
  read(unitxyz,*) natom
@@ -2105,7 +2168,7 @@ subroutine chkdpr(advice_change_cond,cond_number,cond_string,cond_values,&
      '   ',trim(cond_string(1)),', ',trim(cond_string(2)),' or ',trim(cond_string(3)),'.'
    end if
 
-   call wrtout(unit,msg,'COLL')
+   call wrtout(unit,msg)
    MSG_WARNING(msg)
  end if
 
@@ -2706,8 +2769,7 @@ subroutine chkint_prt(advice_change_cond,cond_number,cond_string,cond_values,&
     '  Action: you should change one of the input variables ',trim(input_name),',',ch10,&
     '   ',trim(cond_string(1)),', ',trim(cond_string(2)),' or ',trim(cond_string(3)),'.'
  end if
- call wrtout(unit   ,msg,'COLL')
- call wrtout(std_out,msg,'COLL')
+ call wrtout([unit, std_out], msg)
 
 end subroutine chkint_prt
 !!***
@@ -3431,6 +3493,587 @@ subroutine chkvars_in_string(protocol, list_vars, list_logicals, list_strings, s
  end do
 
 end subroutine chkvars_in_string
+!!***
+
+!!****f* m_parser/geo_from_abivar_string
+!! NAME
+!!  geo_from_abivars_string
+!!
+!! FUNCTION
+!!  Build object form abinit `structure` variable
+!!
+!! INPUTS
+!!  comm=MPI communicator. Used for performing IO.
+!!
+!! SOURCE
+
+type(geo_t) function geo_from_abivar_string(string, comm) result(new)
+!type(geo_t) function geo_from_structure_string(string, comm) result(new)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: string
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+ integer :: ii
+ character(len=len(string)) :: prefix
+
+!************************************************************************
+
+ !print *, "in geo_from_abivar_string: `", trim(string), "`"
+
+ ii = index(string, ":")
+ ABI_CHECK(ii > 0, sjoin("Expecting string of the form `type:content`, got:", string))
+ prefix = adjustl(string(1:ii-1))
+
+ select case (prefix)
+
+ case ("poscar")
+   ! Get geo info from POSCAR from file.
+   new = geo_from_poscar_path(trim(string(ii+1:)), comm)
+
+ !case ("abigeo")
+ !  new = geo_from_abigeo_path(string(ii+1:), comm)
+
+ case ("abifile")
+   if (endswith(string(ii+1:), ".nc")) then
+     ! Get geo info from netcdf file.
+     new = geo_from_netcdf_path(trim(string(ii+1:)), comm)
+   else
+     ! Assume Fortran file with Abinit header.
+     MSG_ERROR("structure variable with Fortran file is not yet implemented.")
+     !new = geo_from_fortran_file_with_hdr(string(ii+1:), comm)
+     !cryst = crystal_from_file(string(ii+1:), comm)
+     !if (cryst%isalchemical()) then
+     !  MSG_ERROR("Alchemical mixing is not compatibile with `structure` input variable!")
+     !end if
+     !new%natom = cryst%natom
+     !new%ntypat = cryst%ntypat
+     !new%rprimd = cryst%rprimd
+     !call alloc_copy(cryst%typat, new%typat)
+     !call alloc_copy(cryst%xred, new%xred)
+     !call alloc_copy(cryst%znucl, new%znucl)
+     !call cryst%free()
+   end if
+
+ case default
+   MSG_ERROR(sjoin("Invalid prefix: `", prefix, "`"))
+ end select
+
+end function geo_from_abivar_string
+!!***
+
+!!!! !!****f* m_parser/geo_from_abigeo_path
+!!!! !! NAME
+!!!! !!  geo_from_abigeo_path
+!!!! !!
+!!!! !! FUNCTION
+!!!! !!
+!!!! !! SOURCE
+!!!!
+!!!! type(geo_t) function geo_from_abigeo_path(path, jdtset, iimage, comm) result(new)
+!!!!
+!!!! !Arguments ------------------------------------
+!!!!  character(len=*),intent(in) :: path
+!!!!  integer,intent(in) :: jdtset, iimage, comm
+!!!!
+!!!! !Local variables-------------------------------
+!!!!  integer,parameter :: master = 0, option1=1
+!!!!  integer :: my_rank, lenstr, ierr, ii, iatom, start, tread, marr !itypat,
+!!!!  !character(len=500) :: msg
+!!!!  character(len=strlen) :: string
+!!!! !arrays
+!!!!  integer,allocatable :: intarr(:)
+!!!!  real(dp),allocatable ::dprarr(:)
+!!!!  character(len=5),allocatable :: symbols(:)
+!!!!
+!!!!
+!!!! !************************************************************************
+!!!!
+!!!!  ! Master node reads string and broadcasts
+!!!!  my_rank = xmpi_comm_rank(comm)
+!!!!
+!!!!  if (my_rank == master) then
+!!!!     ! Below part copied from `parsefile`. strlen from defs_basis module
+!!!!     call instrng(path, lenstr, option1, strlen, string)
+!!!!
+!!!!    ! To make case-insensitive, map characters of string to upper case.
+!!!!    call inupper(string(1:lenstr))
+!!!!  end if
+!!!!
+!!!!  if (xmpi_comm_size(comm) > 1) then
+!!!!    call xmpi_bcast(string, master, comm, ierr)
+!!!!    call xmpi_bcast(lenstr, master, comm, ierr)
+!!!!  end if
+!!!!
+!!!!  ! ==============================
+!!!!  ! Now all procs parse the string
+!!!!  ! ==============================
+!!!!
+!!!!  ! Set up unit cell from acell, rprim, angdeg
+!!!!  !call parse_acell_rprim_angdeg(string, jdtset, iimage, marr, string(1:lenstr), acell, rprim, angdeg)
+!!!!
+!!!!  ! Get the number of atom in the unit cell. Read natom from string
+!!!!  marr = 1
+!!!!  ABI_MALLOC(intarr, (marr))
+!!!!  ABI_MALLOC(dprarr, (marr))
+!!!!  !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'natom', tread, 'INT')
+!!!!  ABI_CHECK(tread /= 0, sjoin("natom is required in file:", path))
+!!!!  new%natom = intarr(1)
+!!!!  ABI_FREE(intarr)
+!!!!  ABI_FREE(dprarr)
+!!!!
+!!!!  ! Parse atomic positions. Only xcart is supported here because it makes life easier
+!!!!  ! and we don't need to handle symbols + Units
+!!!!  ii = index(string(1:lenstr), "xred_symbols")
+!!!!  ABI_CHECK(ii /= 0, "In structure mode only `xred_symbols` with coords followed by atom symbol are supported")
+!!!!
+!!!!  new%fileformat = "abivars"
+!!!!  ABI_MALLOC(new%typat, (new%natom))
+!!!!  ABI_MALLOC(new%xred, (3, new%natom))
+!!!!
+!!!!  ABI_MALLOC(symbols, (new%natom))
+!!!!  start = ii + 4
+!!!!  do iatom=1,new%natom
+!!!!    !call inarray(start, cs, dprarr, intarr, marr, narr, string, "DPR")
+!!!!    !read(string(cs:), *) symbols(iatom)
+!!!!  end do
+!!!!
+!!!!  !call find_unique(symbols, new%ntypat, new%typat)
+!!!!
+!!!!  ! Note that the first letter should be capitalized, rest must be lower case
+!!!!  ABI_MALLOC(new%znucl, (new%ntypat))
+!!!!  !do itypat=1,new%ntypat
+!!!!  !  !iatom = new%typat(iat
+!!!!  !  new%znucl(itypat) = symbol2znucl(symbols(iatom))
+!!!!  !end do
+!!!!
+!!!!  ABI_FREE(symbols)
+!!!!  ABI_FREE(intarr)
+!!!!  ABI_FREE(dprarr)
+!!!!
+!!!! end function geo_from_abigeo_path
+!!!! !!***
+
+!!****f* m_parser/geo_from_poscar_path
+!! NAME
+!!  geo_from_poscar_path
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+type(geo_t) function geo_from_poscar_path(path, comm) result(new)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+ integer,parameter :: master = 0
+ integer :: unt, my_rank
+ character(len=500) :: msg
+
+!************************************************************************
+
+ my_rank = xmpi_comm_rank(comm)
+
+ if (my_rank == master) then
+   if (open_file(path, msg, newunit=unt, form='formatted', status='old', action="read") /= 0) then
+     MSG_ERROR(msg)
+   end if
+   new = geo_from_poscar_unit(unt)
+   close(unt)
+ end if
+
+ if (xmpi_comm_size(comm) > 1) call new%bcast(master, comm)
+
+end function geo_from_poscar_path
+!!***
+
+!!****f* m_parser/geo_from_poscar_unit
+!! NAME
+!!  geo_from_poscar_unit
+!!
+!! FUNCTION
+!!  Build object from string with seperator `sep`. Usually sep = newline = ch10
+!!
+!! SOURCE
+
+type(geo_t) function geo_from_poscar_unit(unit) result(new)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: unit
+
+!Local variables-------------------------------
+ !integer,parameter :: marr = 3
+ integer :: beg, iatom, itypat, ierr, ii, cnt
+ real(dp) :: scaling_constant
+ character(len=500) :: line, system, iomsg
+ character(len=5) :: symbol
+!arrays
+ integer,allocatable :: nattyp(:)
+ logical,allocatable :: duplicated(:)
+ character(len=5),allocatable :: symbols(:), dupe_symbols(:)
+ real(dp),allocatable :: xcart(:,:)
+
+!************************************************************************
+
+ ! Example of POSCAR (with 6 figures --> space group won't be recognized by Abinit
+ ! See also https://github.com/ExpHP/vasp-poscar/blob/master/doc/format.md
+
+ ! Mg1 B2
+ ! 1.0
+ ! 2.672554 1.543000 0.000000
+ ! -2.672554 1.543000 0.000000
+ ! 0.000000 0.000000 3.523000
+ ! Mg B
+ ! 1 2
+ ! direct
+ ! 0.000000 0.000000 0.000000 Mg
+ ! 0.333333 0.666667 0.500000 B
+ ! 0.666667 0.333333 0.500000 B
+
+ new%fileformat = "poscar"
+ read(unit, "(a)", err=10, iomsg=iomsg) new%title
+ read(unit, *, err=10, iomsg=iomsg) scaling_constant
+ do ii=1,3
+   read(unit, *, err=10, iomsg=iomsg) new%rprimd(:, ii)
+ end do
+
+ ! Read line with the names of the atoms.
+ read(unit, "(a)", err=10, iomsg=iomsg) line
+ !print *, "line:", trim(line)
+
+ new%ntypat = 0
+ do ii=1,2
+   if (ii == 2) then
+     ABI_MALLOC(symbols, (new%ntypat))
+   end if
+   itypat = 0; beg = 1
+   do
+     ierr = next_token(line, beg, symbol)
+     !print *, "ierr:", ierr, "beg:", beg, "symbol:", trim(symbol)
+     if (ierr /= 0) exit
+     if (ii == 1) new%ntypat = new%ntypat + 1
+     if (ii == 2) then
+       itypat = itypat + 1
+       symbols(itypat) = trim(symbol)
+     end if
+   end do
+ end do
+ !write(std_out, *)"ntypat: ", new%ntypat, "symbols: ", symbols
+
+ ! TODO: Handle case in which not all atoms are not grouped by type
+ ABI_MALLOC(duplicated, (new%ntypat))
+ duplicated = .False.
+ do itypat=1,new%ntypat-1
+   do ii=itypat+1, new%ntypat
+     if (symbols(itypat) == symbols(ii)) duplicated(ii) = .True.
+   end do
+ end do
+
+ ! number of atoms of each type.
+ ! NOTE: Assuming ntypat == npsp thus alchemical mixing is not supported.
+ ! There's a check in the main parser though.
+ ABI_MALLOC(nattyp, (new%ntypat))
+ read(unit, *, err=10, iomsg=iomsg) nattyp
+ new%natom = sum(nattyp)
+ ABI_FREE(nattyp)
+
+ if (any(duplicated)) then
+   ! Need to recompute ntypat and symbols taking into account duplication.
+   MSG_WARNING("Found POSCAR with duplicated symbols")
+   ABI_MOVE_ALLOC(symbols, dupe_symbols)
+   new%ntypat = count(.not. duplicated)
+   ABI_MALLOC(symbols, (new%ntypat))
+   cnt = 0
+   do ii=1,size(duplicated)
+     if (.not. duplicated(ii)) then
+       cnt = cnt + 1; symbols(cnt) = dupe_symbols(ii)
+     end if
+   end do
+   ABI_FREE(dupe_symbols)
+ end if
+
+ ! At this point, we can allocate Abinit arrays.
+ call new%malloc()
+
+ ! Note that first letter should be capitalized, rest must be lower case
+ do itypat=1,new%ntypat
+   new%znucl(itypat) = symbol2znucl(symbols(itypat))
+ end do
+
+ read(unit, *, err=10, iomsg=iomsg) system
+ system = tolower(system)
+ if (system /= "cartesian" .and. system /= "direct") then
+   MSG_ERROR(sjoin("Expecting `cartesian` or `direct` for the coordinate system but got:", system))
+ end if
+
+ ! Parse atomic positions.
+ do iatom=1,new%natom
+
+   ! This should implement the POSCAR format.
+   read(unit, *, err=10, iomsg=iomsg) new%xred(:, iatom), symbol
+   if (len_trim(symbol) == 0) then
+     if (new%ntypat == 1) then
+       MSG_COMMENT("POTCAR without element symbol after coords but this is not critical because ntypat == 1")
+       symbol = symbols(1)
+     else
+       MSG_ERROR("POTCAR positions should be followed by element symbol.")
+     end if
+   end if
+
+   ! This to handle symbol + oxidation state e.g. Li1+
+   !print *, symbol
+   ii = find_digit(symbol)
+   if (ii /= 0) symbol = symbol(:ii-1)
+
+   do itypat=1, new%ntypat
+     if (symbols(itypat) == symbol) then
+       new%typat(iatom) = itypat; exit
+     end if
+   end do
+   if (itypat == new%ntypat + 1) then
+     MSG_ERROR(sjoin("Cannot find symbol:`", symbol, " `in initial symbol list. Typo or POSCAR without symbols?."))
+   end if
+ end do
+
+ ! Convert ang -> bohr
+ if (scaling_constant > zero) then
+   new%rprimd = scaling_constant * new%rprimd * Ang_Bohr
+ else if (scaling_constant < zero) then
+   ! A negative scale factor is treated as a volume. translate scaling_constant to a lattice vector scaling.
+   new%rprimd = Ang_Bohr * new%rprimd * (-scaling_constant / abs(det3r(new%rprimd))) ** (one / three)
+ else
+   ABI_CHECK(scaling_constant > zero, sjoin("scaling constant must be /= 0 but found:", ftoa(scaling_constant)))
+ end if
+
+ if (system == "cartesian") then
+   ! Go from cartesian to reduced.
+   ABI_MALLOC(xcart, (3, new%natom))
+   xcart = new%xred
+   call xcart2xred(new%natom, new%rprimd, xcart, new%xred)
+   ABI_FREE(xcart)
+ end if
+
+ ABI_FREE(symbols)
+ ABI_FREE(duplicated)
+ return
+
+ 10 MSG_ERROR(sjoin("Error while parsing POSCAR file,", ch10, "iomsg:", trim(iomsg)))
+
+end function geo_from_poscar_unit
+!!***
+
+!!****f* m_parser/geo_print_abivars
+!! NAME
+!!  geo_print_abivars
+!!
+!! FUNCTION
+!!  Print Abinit variables corresponding to POSCAR
+!!
+!! SOURCE
+
+subroutine geo_print_abivars(self, unit)
+
+!Arguments ------------------------------------
+ class(geo_t),intent(in) :: self
+ integer,intent(in) :: unit
+
+!Local variables-------------------------------
+ integer :: ii, iatom, itypat
+
+!************************************************************************
+
+ if (unit == dev_null) return
+
+ write(unit, "(2a)")"# fileformat: ", trim(self%fileformat)
+ if (len_trim(self%title) > 0) write(unit, "(2a)")"# ",trim(self%title)
+ write(unit, "(a, i0)")" natom ", self%natom
+ write(unit, "(a, i0)")" ntypat ", self%ntypat
+ write(unit, sjoin("(a, ", itoa(self%natom), "(i0,1x))")) " typat ", self%typat
+ write(unit, sjoin("(a, ", itoa(self%ntypat), "(f5.1,1x))")) " znucl ", self%znucl
+ write(unit, "(a)")" acell 1 1 1 Bohr"
+ write(unit, "(a)")" rprim "
+ do ii=1,3
+   write(unit, "(2x, 3(f11.7,1x))") self%rprimd(:, ii)
+ end do
+ write(unit, "(a)")" xred"
+ do iatom=1,self%natom
+   itypat = self%typat(iatom)
+   write(unit, "(2x, 3(f11.7,1x),3x,2a)") self%xred(:, iatom) , " # ", trim(znucl2symbol(self%znucl(itypat)))
+ end do
+
+end subroutine geo_print_abivars
+!!***
+
+!!****f* m_parser/geo_from_netdf_path
+!! NAME
+!!  geo_from_netdf_path
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+type(geo_t) function geo_from_netcdf_path(path, comm) result(new)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+ integer, parameter :: master = 0
+ integer :: ncid, npsp, dimid, itime
+ logical :: has_nimage
+
+!************************************************************************
+
+ new%fileformat = "netcdf"
+
+#ifdef HAVE_NETCDF
+ if (xmpi_comm_rank(comm) == master) then
+   NCF_CHECK(nctk_open_read(ncid, path, xmpi_comm_self))
+
+   if (endswith(path, "_HIST.nc")) then
+     ! See def_file_hist.
+     !MSG_ERROR("Cannot yet read structure from HIST.nc file")
+     NCF_CHECK(nctk_get_dim(ncid, "natom", new%natom))
+     NCF_CHECK(nctk_get_dim(ncid, "ntypat", new%ntypat))
+
+     NCF_CHECK(nctk_get_dim(ncid, "npsp", npsp))
+     ABI_CHECK(npsp == new%ntypat, 'Geo from HIST file with alchemical mixing!')
+     has_nimage = nf90_inq_dimid(ncid, "nimage", dimid) == nf90_noerr
+     ABI_CHECK(.not. has_nimage, "Cannot initialize structure from HIST.nc when file contains images.")
+
+     call new%malloc()
+
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "typat"), new%typat))
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "znucl"), new%znucl))
+
+     ! time is NF90_UNLIMITED
+     NCF_CHECK(nctk_get_dim(ncid, "time", itime))
+
+     ! dim3 = [xyz_id, xyz_id, time_id]
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "rprimd"), new%rprimd, start=[1,1,itime]))
+
+     ! dim3 = [xyz_id, natom_id, time_id]
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "xred"), new%xred, start=[1,1,itime]))
+
+   else
+     ! Assume netcdf file produced by calling crystal%ncwrite
+     NCF_CHECK(nctk_get_dim(ncid, "number_of_atoms", new%natom))
+     NCF_CHECK(nctk_get_dim(ncid, "number_of_atom_species", new%ntypat))
+
+     ! Test if alchemical. NB: nsps added in crystal_ncwrite in v9.
+     if (nf90_inq_dimid(ncid, "number_of_pseudopotentials", dimid) == nf90_noerr) then
+       NCF_CHECK(nf90_inquire_dimension(ncid, dimid, len=npsp))
+       ABI_CHECK(npsp == new%ntypat, 'Geo from HIST file with alchemical mixing!')
+     end if
+
+     call new%malloc()
+
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "primitive_vectors"), new%rprimd))
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "atom_species"), new%typat))
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "atomic_numbers"), new%znucl))
+     NCF_CHECK(nf90_get_var(ncid, nctk_idname(ncid, "reduced_atom_positions"), new%xred))
+   end if
+
+   NCF_CHECK(nf90_close(ncid))
+ end if
+#endif
+
+ call new%bcast(master, comm)
+ !call new%print_abivars(std_out)
+
+end function geo_from_netcdf_path
+!!***
+
+!!****f* m_parser/geo_bcast
+!! NAME
+!!  geo_bcast
+!!
+!! FUNCTION
+!!  Brodcast object
+!!
+!! SOURCE
+
+subroutine geo_bcast(self, master, comm)
+
+!Arguments ------------------------------------
+ class(geo_t),intent(inout) :: self
+ integer,intent(in) :: master, comm
+
+!Local variables-------------------------------
+ integer :: ierr, my_rank, list_int(2)
+
+!************************************************************************
+
+ if (xmpi_comm_size(comm) == 1) return
+ my_rank = xmpi_comm_rank(comm)
+
+ if (my_rank == master) list_int = [self%natom, self%ntypat]
+ call xmpi_bcast(list_int, master, comm, ierr)
+
+ if (my_rank /= master) then
+   self%natom = list_int(1); self%ntypat = list_int(2)
+   call self%malloc()
+ end if
+
+ call xmpi_bcast(self%rprimd, master, comm, ierr)
+ call xmpi_bcast(self%xred, master, comm, ierr)
+ call xmpi_bcast(self%typat, master, comm, ierr)
+ call xmpi_bcast(self%znucl, master, comm, ierr)
+ call xmpi_bcast(self%title, master, comm, ierr)
+ call xmpi_bcast(self%fileformat, master, comm, ierr)
+
+end subroutine geo_bcast
+!!***
+
+!!****f* m_parser/geo_malloc
+!! NAME
+!!  geo_malloc
+!!
+!! FUNCTION
+!!  Allocate memory once %natom and %ntypat are know
+!!
+!! SOURCE
+
+subroutine geo_malloc(self)
+
+!Arguments ------------------------------------
+ class(geo_t),intent(inout) :: self
+
+!************************************************************************
+
+ ABI_MALLOC(self%typat, (self%natom))
+ ABI_MALLOC(self%xred, (3, self%natom))
+ ABI_MALLOC(self%znucl, (self%ntypat))
+
+end subroutine geo_malloc
+!!***
+
+!!****f* m_parser/geo_free
+!! NAME
+!!  geo_free
+!!
+!! FUNCTION
+!!  Free memory.
+!!
+!! SOURCE
+
+subroutine geo_free(self)
+
+!Arguments ------------------------------------
+ class(geo_t),intent(inout) :: self
+
+!************************************************************************
+
+ ABI_SFREE(self%typat)
+ ABI_SFREE(self%xred)
+ ABI_SFREE(self%znucl)
+
+end subroutine geo_free
 !!***
 
 end module m_parser

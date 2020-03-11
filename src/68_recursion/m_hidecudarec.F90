@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_hidecudarec
 !! NAME
 !! m_hidecudarec
@@ -7,7 +6,7 @@
 !!  Call the C-cu program to make recursion on GPU
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2009-2019 ABINIT group (MMancini)
+!!  Copyright (C) 2009-2020 ABINIT group (MMancini)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

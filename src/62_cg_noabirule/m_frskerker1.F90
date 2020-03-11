@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_frskerker1
 !! NAME
 !! m_frskerker1
@@ -9,7 +8,7 @@
 !! with some residuals and a real space dielectric function
 !!
 !! COPYRIGHT
-!! Copyright (C) 1998-2019 ABINIT group (DCA, XG, MT)
+!! Copyright (C) 1998-2020 ABINIT group (DCA, XG, MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_abi_etsf
 !! NAME
 !! m_abi_etsf
@@ -6,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (DCA,YP,MJV,MG)
+!! Copyright (C) 2006-2020 ABINIT group (DCA,YP,MJV,MG)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -461,7 +460,7 @@ subroutine ini_wf_etsf(ncid,usewvl,lmn_size,npsp,ntypat)
 
 #ifdef HAVE_ETSF_IO
 !Define dimensions.
- ncerr = nctk_def_dims(ncid, [nctkdim_t("npsp", npsp), nctkdim_t("codvsnlen", 6),nctkdim_t("psptitlen", 132)])
+ ncerr = nctk_def_dims(ncid, [nctkdim_t("npsp", npsp), nctkdim_t("codvsnlen", 8),nctkdim_t("psptitlen", 132)])
  NCF_CHECK(ncerr)
 
  if (usewvl==1) then ! Add the BigDFT private dimensions.

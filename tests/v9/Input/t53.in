@@ -29,6 +29,7 @@ symsigma2  1
 optdriver  7
 nband      8
 eph_task   -4
+eph_intmeth 1
 tmesh 5 295 2
 
 gw_qprange 2

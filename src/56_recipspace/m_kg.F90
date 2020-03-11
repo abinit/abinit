@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_kg
 !! NAME
 !! m_kg
@@ -7,7 +6,7 @@
 !!  Low-level functions to operate of G-vectors.
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (DCA, XG, GMR, MT, DRH, AR)
+!!  Copyright (C) 2008-2020 ABINIT group (DCA, XG, GMR, MT, DRH, AR)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -1015,7 +1014,7 @@ end subroutine mkkpg
 !! as appear in Berry phase derived quantities
 !!
 !! COPYRIGHT
-!! Copyright (C) 2003-2019 ABINIT  group
+!! Copyright (C) 2003-2020 ABINIT  group
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

@@ -1,11 +1,10 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_ab7_kpoints
 !! NAME
 !!
 !! FUNCTION
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (DC)
+!!  Copyright (C) 2008-2020 ABINIT group (DC)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

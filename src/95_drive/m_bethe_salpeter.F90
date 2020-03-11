@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_bethe_salpeter
 !! NAME
 !!  m_bethe_salpeter
@@ -9,7 +8,7 @@
 !!
 !! COPYRIGHT
 !! Copyright (C) 1992-2009 EXC group (L.Reining, V.Olevano, F.Sottile, S.Albrecht, G.Onida)
-!! Copyright (C) 2009-2019 ABINIT group (MG, YG)
+!! Copyright (C) 2009-2020 ABINIT group (MG, YG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -193,7 +192,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 
 !Arguments ------------------------------------
 !scalars
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  type(datafiles_type),intent(inout) :: Dtfil
  type(dataset_type),intent(inout) :: Dtset
  type(pawang_type),intent(inout) :: Pawang
@@ -369,7 +368,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  if (Dtset%usepaw==1) then
    call chkpawovlp(Cryst%natom,Cryst%ntypat,Dtset%pawovlp,Pawtab,Cryst%rmet,Cryst%typat,xred)
 
-   ABI_DT_MALLOC(KS_Pawrhoij,(Cryst%natom))
+   ABI_MALLOC(KS_Pawrhoij,(Cryst%natom))
    call pawrhoij_inquire_dim(cplex_rhoij=cplex_rhoij,nspden_rhoij=nspden_rhoij,&
 &              nspden=Dtset%nspden,spnorb=Dtset%pawspnorb,cpxocc=Dtset%pawcpxocc)
    call pawrhoij_alloc(KS_Pawrhoij,cplex_rhoij,nspden_rhoij,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
@@ -441,7 +440,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ABI_MALLOC(qmax,(Psps%ntypat))
    nq_spl = Psps%mqgrid_ff
    qmax = SQRT(gsq_osc)*1.2d0 ! qmax=Psps%qgrid_ff(Psps%mqgrid_ff)
-   ABI_DT_MALLOC(Paw_pwff,(Psps%ntypat))
+   ABI_MALLOC(Paw_pwff,(Psps%ntypat))
 
    call pawpwff_init(Paw_pwff,rhoxsp_method,nq_spl,qmax,gmet,Pawrad,Pawtab,Psps)
 
@@ -451,7 +450,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! Variables/arrays related to the fine FFT grid ===
    ABI_MALLOC(ks_nhat,(nfftf,Dtset%nspden))
    ks_nhat=zero
-   ABI_DT_MALLOC(Pawfgrtab,(Cryst%natom))
+   ABI_MALLOC(Pawfgrtab,(Cryst%natom))
    call pawtab_get_lsize(Pawtab,l_size_atm,Cryst%natom,Cryst%typat)
    call pawfgrtab_init(Pawfgrtab,cplex1,l_size_atm,Dtset%nspden,Dtset%typat)
    ABI_FREE(l_size_atm)
@@ -469,7 +468,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    call nhatgrid(Cryst%atindx1,gmet,Cryst%natom,Cryst%natom,Cryst%nattyp,ngfftf,Cryst%ntypat,&
    optcut,optgr0,optgr1,optgr2,optrad,Pawfgrtab,Pawtab,Cryst%rprimd,Cryst%typat,Cryst%ucvol,Cryst%xred)
  else
-   ABI_DT_MALLOC(Paw_pwff,(0))
+   ABI_MALLOC(Paw_pwff,(0))
  end if !End of PAW Initialization
 
  ! Consistency check and additional stuff done only for GW with PAW.
@@ -605,7 +604,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! Evaluate onsite energies, potentials, densities ===
    !   * Initialize variables/arrays related to the PAW spheres.
    !   * Initialize also lmselect (index of non-zero LM-moments of densities).
-   ABI_DT_MALLOC(KS_paw_ij,(Cryst%natom))
+   ABI_MALLOC(KS_paw_ij,(Cryst%natom))
    call paw_ij_nullify(KS_paw_ij)
 
    has_dijso=Dtset%pawspnorb
@@ -616,7 +615,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
 &   has_dij=1,has_dijhartree=1,has_dijhat=1,has_dijxc=0,has_dijxc_hat=0,has_dijxc_val=0,&
 &   has_dijso=has_dijso,has_dijU=has_dijU,has_exexch_pot=1,has_pawu_occ=1)
 
-   ABI_DT_MALLOC(KS_paw_an,(Cryst%natom))
+   ABI_MALLOC(KS_paw_an,(Cryst%natom))
    call paw_an_nullify(KS_paw_an)
 
    nkxc1=0
@@ -802,7 +801,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    ! Now read m_lda_to_qp and update the energies in QP_BSt.
    ! TODO switch on the renormalization of n in sigma.
    ABI_MALLOC(prev_rhor,(nfftf,Wfd%nspden))
-   ABI_DT_MALLOC(prev_Pawrhoij,(Cryst%natom*Wfd%usepaw))
+   ABI_MALLOC(prev_Pawrhoij,(Cryst%natom*Wfd%usepaw))
 
    call rdqps(QP_BSt,Dtfil%fnameabi_qps,Wfd%usepaw,Wfd%nspden,1,nscf,&
     nfftf,ngfftf,Cryst%ucvol,Cryst,Pawtab,MPI_enreg_seq,nbsc,m_lda_to_qp,prev_rhor,prev_Pawrhoij)
@@ -811,7 +810,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
    if (Psps%usepaw==1.and.nscf>0) then
      call pawrhoij_free(prev_pawrhoij)
    end if
-   ABI_DT_FREE(prev_pawrhoij)
+   ABI_FREE(prev_pawrhoij)
    !
    !  if (nscf>0.and.wfd_iam_master(Wfd)) then ! Print the unitary transformation on std_out.
    !  call show_QP(QP_BSt,m_lda_to_qp,fromb=Sigp%minbdgw,tob=Sigp%maxbdgw,unit=std_out,tolmat=0.001_dp)
@@ -924,7 +923,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call timab(658,2,tsec) ! bse(wfd_wave_free)
 
  ! Compute the commutator [r,Vu] (PAW only).
- ABI_DT_MALLOC(HUr,(Cryst%natom*Wfd%usepaw))
+ ABI_MALLOC(HUr,(Cryst%natom*Wfd%usepaw))
 
  call timab(659,1,tsec) ! bse(make_pawhur_t)
  if (Bsp%inclvkb/=0 .and. Wfd%usepaw==1 .and. Dtset%usepawu/=0) then !TODO here I need KS_Paw_ij
@@ -1003,7 +1002,7 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  call ebands_free(QP_BSt)
  call vcoul_free(Vcp)
  call pawhur_free(Hur)
- ABI_DT_FREE(Hur)
+ ABI_FREE(Hur)
  call bs_parameters_free(BSp)
  call wfd%free()
  call pawfgr_destroy(Pawfgr)
@@ -1026,16 +1025,16 @@ subroutine bethe_salpeter(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rpr
  ! Optional deallocation for PAW.
  if (Dtset%usepaw==1) then
    call pawrhoij_free(KS_Pawrhoij)
-   ABI_DT_FREE(KS_Pawrhoij)
+   ABI_FREE(KS_Pawrhoij)
    call pawfgrtab_free(Pawfgrtab)
-   ABI_DT_FREE(Pawfgrtab)
+   ABI_FREE(Pawfgrtab)
    call paw_ij_free(KS_paw_ij)
-   ABI_DT_FREE(KS_paw_ij)
+   ABI_FREE(KS_paw_ij)
    call paw_an_free(KS_paw_an)
-   ABI_DT_FREE(KS_paw_an)
+   ABI_FREE(KS_paw_an)
    call pawpwff_free(Paw_pwff)
  end if
- ABI_DT_FREE(Paw_pwff)
+ ABI_FREE(Paw_pwff)
 
  call timab(650,2,tsec) ! bse(Total)
 
@@ -1102,7 +1101,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: comm
- character(len=6),intent(in) :: codvsn
+ character(len=8),intent(in) :: codvsn
  character(len=fnlen),intent(out) :: w_fname
  type(dataset_type),intent(inout) :: Dtset
  type(datafiles_type),intent(in) :: Dtfil
@@ -1617,7 +1616,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  call hdr_init(KS_BSt,codvsn,Dtset,Hdr_bse,Pawtab,pertcase0,Psps,wvl)
 
  ! === Get Pawrhoij from the header of the WFK file ===
- ABI_DT_MALLOC(Pawrhoij,(Cryst%natom*Dtset%usepaw))
+ ABI_MALLOC(Pawrhoij,(Cryst%natom*Dtset%usepaw))
  if (Dtset%usepaw==1) then
    call pawrhoij_alloc(Pawrhoij,1,Dtset%nspden,Dtset%nspinor,Dtset%nsppol,Cryst%typat,pawtab=Pawtab)
    call pawrhoij_copy(Hdr_wfk%Pawrhoij,Pawrhoij)
@@ -1628,7 +1627,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
  ABI_FREE(occfact)
 
  if (Dtset%usepaw==1) call pawrhoij_free(Pawrhoij)
- ABI_DT_FREE(Pawrhoij)
+ ABI_FREE(Pawrhoij)
 
  ! Find optimal value for G-sphere enlargment due to oscillator matrix elements
  ! We will split k-points over processors

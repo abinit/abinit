@@ -7,7 +7,7 @@
 !!  Module to read PAW atomic data
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2012-2019 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
+!!  Copyright (C) 2012-2020 ABINIT group (MT, FJ,TR, GJ, FB, FrD, AF, GMR, DRH)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .

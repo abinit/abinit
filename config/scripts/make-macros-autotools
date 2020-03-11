@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2009-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2009-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
 # distribution.
 #
-from __future__ import print_function, division, absolute_import #, unicode_literals
+
+from __future__ import print_function, division, absolute_import
 
 from time import gmtime,strftime
 
@@ -14,6 +15,7 @@ try:
     from commands import getoutput
 except:
     from subprocess import getoutput
+
 import os
 import re
 import sys
@@ -63,7 +65,12 @@ AC_DEFUN([ABI_INFO_AUTOTOOLS],[
   abi_lt_version="%6.6d"
 
   dnl Display version information
-  AC_MSG_NOTICE([M4 ${abi_m4_version} - Autoconf ${abi_ac_version} - Automake ${abi_am_version} - Libtool ${abi_lt_version}])
+  AC_MSG_NOTICE([reporting Autotools information:])
+  AC_MSG_NOTICE([])
+  AC_MSG_NOTICE([  * M4       : ${abi_m4_version}])
+  AC_MSG_NOTICE([  * Autoconf : ${abi_ac_version}])
+  AC_MSG_NOTICE([  * Automake : ${abi_am_version}])
+  AC_MSG_NOTICE([  * Libtool  : ${abi_lt_version}])
 
   dnl Substitute variables
   AC_SUBST(abi_m4_version)
@@ -78,11 +85,6 @@ AC_DEFUN([ABI_INFO_AUTOTOOLS],[
 # Init macro for source and build dirs
 def macro_init_dirs(ac_version):
 
-  if ( ac_version > 25900 ):
-    ac_macro = "_AC_SRCDIRS"
-  else:
-    ac_macro = "_AC_SRCPATHS"
-
   ret = """
 
 
@@ -93,18 +95,16 @@ def macro_init_dirs(ac_version):
 #
 AC_DEFUN([ABI_INIT_DIRS],[
   dnl Set paths (needed by other ABINIT macros)
-  %s(["."])
+  _AC_SRCDIRS(["."])
   abinit_srcdir="${ac_abs_top_srcdir}"
   abinit_builddir="${ac_abs_top_builddir}"
-  abinit_moddir="${abinit_builddir}/src/mods"
-
+  
   export abinit_srcdir abinit_builddir
 
   AC_SUBST(abinit_srcdir)
   AC_SUBST(abinit_builddir)
-  AC_SUBST(abinit_moddir)
 ]) # ABI_INIT_DIRS
-""" % (ac_macro)
+"""
 
   return ret
 

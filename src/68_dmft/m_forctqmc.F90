@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_forctqmc
 !! NAME
 !!  m_forctqmc
@@ -7,7 +6,7 @@
 !! Prepare CTQMC and call CTQMC
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2019 ABINIT group (BAmadon, VPlanes)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon, VPlanes)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -1388,7 +1387,7 @@ subroutine qmc_prep_ctqmc(cryst_struc,green,self,hu,paw_dmft,pawang,pawprtvol,we
 
      ! Print green function is files directly from CTQMC
      ! --------------------------------------------------
-     call ctqmcoutput_printgreen(cryst_struc,eigvectmatlu,pawang,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
+     call ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
 
 
      ! If the CTQMC code in ABINIT was used, then destroy it and deallocate arrays
@@ -2229,8 +2228,6 @@ end subroutine ctqmcoutput_to_green
 !!  gw_tmp_nd(nb_of_frequency,nflavor,nflavor) = Green's fct in imag freq (with off diag terms)
 !!  gtmp(dmftqmc_l,nflavor) = Green's fct in imag time (diag)
 !!  gw_tmp(nb_of_frequency,nflavor+1) =Green's fct in imag freq (diag)
-!!  cryst_struc <type(crystal_t)>=crystal structure data
-!!  pawang <type(pawang)>=paw angular mesh and related data
 !!  iatom = atoms on which the calculation has been done
 !!
 !! OUTPUT
@@ -2247,7 +2244,7 @@ end subroutine ctqmcoutput_to_green
 !!
 !! SOURCE
 
-subroutine ctqmcoutput_printgreen(cryst_struc,eigvectmatlu,pawang,paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
+subroutine ctqmcoutput_printgreen(paw_dmft,gtmp_nd,gw_tmp_nd,gtmp,gw_tmp,iatom)
 
 !Arguments ------------------------------------
 !scalars
@@ -2256,16 +2253,12 @@ subroutine ctqmcoutput_printgreen(cryst_struc,eigvectmatlu,pawang,paw_dmft,gtmp_
  complex(dpc), allocatable, intent(in) :: gw_tmp(:,:)
  complex(dpc), allocatable, intent(in) :: gw_tmp_nd(:,:,:)
  real(dp), allocatable, intent(in) :: gtmp(:,:)
- type(crystal_t),intent(in) :: cryst_struc
  integer, intent(in) :: iatom
- type(coeff2c_type), intent(inout) :: eigvectmatlu(:,:)
- type(pawang_type), intent(in) :: pawang
 
 !Local variables ------------------------------
  character(len=500) :: message
- type(matlu_type), allocatable :: matlu1(:)
- integer :: ifreq, itau,im1,im2,isppol,ispinor1,ispinor2,iflavor1
- integer :: iflavor2,tndim,iflavor,nflavor
+ integer :: ifreq, itau,iflavor1
+ integer :: tndim,iflavor,nflavor
  character(len=2) :: gtau_iter,iatomnb
  integer :: unt
 ! ************************************************************************
@@ -2322,47 +2315,47 @@ subroutine ctqmcoutput_printgreen(cryst_struc,eigvectmatlu,pawang,paw_dmft,gtmp_
         ((gtmp_nd(itau,iflavor,iflavor1), iflavor=1, nflavor),iflavor1=1, nflavor)
       end do
       close(unt)
-      if(paw_dmft%natom==1) then ! If natom>1, it should be moved outside the loop over atoms
-        ABI_DATATYPE_ALLOCATE(matlu1,(paw_dmft%natom))
-        call init_matlu(paw_dmft%natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,matlu1)
-        do itau=1,paw_dmft%dmftqmc_l
-          do isppol=1,paw_dmft%nsppol
-            do ispinor1=1,paw_dmft%nspinor
-              do im1=1,tndim
-                iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
-                do ispinor2=1,paw_dmft%nspinor
-                  do im2=1,tndim
-                    iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
-                    matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
-&                     gtmp_nd(itau,iflavor1,iflavor2)
-                  end do  ! im2
-                end do  ! ispinor2
-              end do  ! im1
-            end do  ! ispinor
-          end do ! isppol
-          call rotate_matlu(matlu1,eigvectmatlu,paw_dmft%natom,3,0)
-          call slm2ylm_matlu(matlu1,paw_dmft%natom,2,0)
-          call sym_matlu(cryst_struc,matlu1,pawang,paw_dmft)
-          call slm2ylm_matlu(matlu1,paw_dmft%natom,1,0)
-          call rotate_matlu(matlu1,eigvectmatlu,paw_dmft%natom,3,1)
-          do isppol=1,paw_dmft%nsppol
-            do ispinor1=1,paw_dmft%nspinor
-              do im1=1,tndim
-                iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
-                do ispinor2=1,paw_dmft%nspinor
-                  do im2=1,tndim
-                    iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
-                    gtmp_nd(itau,iflavor1,iflavor2)=&
-                     matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)
-                  end do  ! im2
-                end do  ! ispinor2
-              end do  ! im1
-            end do  ! ispinor
-          end do ! isppol
-        end do  !itau
-        call destroy_matlu(matlu1,paw_dmft%natom)
-        ABI_DATATYPE_DEALLOCATE(matlu1)
-      endif ! if natom=1
+!      if(paw_dmft%natom==1) then ! If natom>1, it should be moved outside the loop over atoms
+!        ABI_DATATYPE_ALLOCATE(matlu1,(paw_dmft%natom))
+!        call init_matlu(paw_dmft%natom,paw_dmft%nspinor,paw_dmft%nsppol,paw_dmft%lpawu,matlu1)
+!        do itau=1,paw_dmft%dmftqmc_l
+!          do isppol=1,paw_dmft%nsppol
+!            do ispinor1=1,paw_dmft%nspinor
+!              do im1=1,tndim
+!                iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
+!                do ispinor2=1,paw_dmft%nspinor
+!                  do im2=1,tndim
+!                    iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
+!                    matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)=&
+!&                     gtmp_nd(itau,iflavor1,iflavor2)
+!                  end do  ! im2
+!                end do  ! ispinor2
+!              end do  ! im1
+!            end do  ! ispinor
+!          end do ! isppol
+!          call rotate_matlu(matlu1,eigvectmatlu,paw_dmft%natom,3,0)
+!          call slm2ylm_matlu(matlu1,paw_dmft%natom,2,0)
+!          call sym_matlu(cryst_struc,matlu1,pawang,paw_dmft)
+!          call slm2ylm_matlu(matlu1,paw_dmft%natom,1,0)
+!          call rotate_matlu(matlu1,eigvectmatlu,paw_dmft%natom,3,1)
+!          do isppol=1,paw_dmft%nsppol
+!            do ispinor1=1,paw_dmft%nspinor
+!              do im1=1,tndim
+!                iflavor1=im1+tndim*(ispinor1-1)+tndim*(isppol-1)
+!                do ispinor2=1,paw_dmft%nspinor
+!                  do im2=1,tndim
+!                    iflavor2=im2+tndim*(ispinor2-1)+tndim*(isppol-1)
+!                    gtmp_nd(itau,iflavor1,iflavor2)=&
+!                     matlu1(iatom)%mat(im1,im2,isppol,ispinor1,ispinor2)
+!                  end do  ! im2
+!                end do  ! ispinor2
+!              end do  ! im1
+!            end do  ! ispinor
+!          end do ! isppol
+!        end do  !itau
+!        call destroy_matlu(matlu1,paw_dmft%natom)
+!        ABI_DATATYPE_DEALLOCATE(matlu1)
+!      endif ! if natom=1
       if (open_file(trim(paw_dmft%filapp)//"_atom_"//iatomnb//"_Gtau_offdiag_"//gtau_iter//".dat",&
 &      message, newunit=unt) /= 0) then
         MSG_ERROR(message)

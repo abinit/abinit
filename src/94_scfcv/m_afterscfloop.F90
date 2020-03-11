@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_afterscfloop
 !! NAME
 !!  m_afterscfloop
@@ -7,7 +6,7 @@
 !!
 !!
 !! COPYRIGHT
-!!  Copyright (C) 2008-2019 ABINIT group (XG)
+!!  Copyright (C) 2008-2020 ABINIT group (XG)
 !!  This file is distributed under the terms of the
 !!  GNU General Public License, see ~abinit/COPYING
 !!  or http://www.gnu.org/copyleft/gpl.txt .
@@ -937,7 +936,7 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 
    call forstr(atindx1,cg,cprj,diffor,dtefield,dtset,&
 &   eigen,electronpositron,energies,favg,fcart,fock,&
-&   forold,fred,grchempottn,gresid,grewtn,&
+&   forold,fred,grchempottn,grcondft,gresid,grewtn,&
 &   grhf,grvdw,grxc,gsqcut,indsym,&
 &   kg,kxc,maxfor,mcg,mcprj,mgfftf,mpi_enreg,my_natom,&
 &   n3xccc,nattyp,nfftf,ngfftf,ngrvdw,nhat,nkxc,&
@@ -947,10 +946,11 @@ subroutine afterscfloop(atindx,atindx1,cg,computed_forces,cprj,cpus,&
 &   ucvol,usecprj,vhartr,vpsp,vxc,vxctau,wvl,xccc3d,xcctau3d,xred,ylm,ylmgr,qvpotzero)
  end if
 
+ ! Init values with MAGIC_UNDEF if not computed.
  if (optfor==1) computed_forces=1
- if (optfor==1) diffor=9.9999999999D99
- if (stress_needed==0) strten(:)=9.9999999999D99
- if (computed_forces==0) fcart(:,:)=9.9999999999D99
+ if (optfor==1) diffor = MAGIC_UNDEF
+ if (stress_needed==0) strten = MAGIC_UNDEF
+ if (computed_forces==0) fcart = MAGIC_UNDEF
  if (dtset%prtstm/=0) strten(:)=zero
 
  call timab(256,2,tsec)

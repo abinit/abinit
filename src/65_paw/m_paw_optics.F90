@@ -1,4 +1,3 @@
-!{\src2tex{textfont=tt}}
 !!****m* ABINIT/m_paw_optics
 !! NAME
 !!  m_paw_optics
@@ -8,7 +7,7 @@
 !!    optical conductivity, X spectroscopy, linear susceptibility, ...
 !!
 !! COPYRIGHT
-!! Copyright (C) 2018-2019 ABINIT group (SM,VR,FJ,MT,PGhosh)
+!! Copyright (C) 2018-2020 ABINIT group (SM,VR,FJ,MT,PGhosh)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -483,7 +482,7 @@ CONTAINS  !=====================================================================
 !!  Matrix elements = <Phi_core|Nabla|Phi_j>
 !!
 !! COPYRIGHT
-!! Copyright (C) 2005-2019 ABINIT group (SM,MT)
+!! Copyright (C) 2005-2020 ABINIT group (SM,MT)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~ABINIT/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .

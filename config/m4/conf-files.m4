@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2006-2019 ABINIT Group (Yann Pouillon)
+# Copyright (C) 2006-2020 ABINIT Group (Yann Pouillon)
 #
 # This file is part of the ABINIT software package. For license information,
 # please see the COPYING file in the top-level directory of the ABINIT source
@@ -18,9 +18,9 @@
 #
 # Looks for options to the configure script in predefined locations:
 #
-#   * system-wide : /etc/abinit/build/hostname.ac
-#   * per-user    : ~/.abinit/build/hostname.ac
-#   * local       : <current_directory>/hostname.ac
+#   * system-wide : /etc/abinit/build/hostname.ac9
+#   * per-user    : ~/.abinit/build/hostname.ac9
+#   * local       : <current_directory>/hostname.ac9
 #
 # and eventually in a command-line-specified file. "hostname" is the
 # name of the machine without the domain name. The last valid file is
@@ -35,17 +35,26 @@
 #   directory (e.g. with NFS).
 #
 AC_DEFUN([ABI_LOAD_OPTIONS],[
-  dnl Setup file names
+  # Setup file names
   abi_hostname=`hostname | sed -e 's/\..*//'`
-  abi_sys_options="/etc/abinit/build/${abi_hostname}.ac"
-  abi_per_options="${HOME}/.abinit/build/${abi_hostname}.ac"
-  abi_src_options="${abinit_srcdir}/${abi_hostname}.ac"
-  abi_loc_options="./${abi_hostname}.ac"
+  abi_sys_options="/etc/abinit/build/${abi_hostname}.ac9"
+  abi_per_options="${HOME}/.abinit/build/${abi_hostname}.ac9"
+  abi_src_options="${abinit_srcdir}/${abi_hostname}.ac9"
+  abi_loc_options="./${abi_hostname}.ac9"
   abi_cmd_options=`eval echo "${with_config_file}"`
+  abi_cfg_enable=""
   abi_cfg_options=""
   abi_ac_distcheck=""
 
-  dnl Some architectures require "./" for files in current directory
+  # Check if the option is yes or no
+  if test "${with_config_file}" = "no" -o "${with_config_file}" = "yes"; then
+    abi_cfg_enable="${with_config_file}"
+    abi_cmd_options=""
+  else
+    abi_cfg_enable="yes"
+  fi
+
+  # Some architectures require "./" for files in current directory
   if test "${abi_cmd_options}" != ""; then
     abi_cmd_has_path=`echo "${abi_cmd_options}" | grep '/'`
     if test "${abi_cmd_has_path}" = ""; then
@@ -54,8 +63,8 @@ AC_DEFUN([ABI_LOAD_OPTIONS],[
     unset abi_cmd_has_path
   fi
 
-  dnl Select and read config file
-  if test "${enable_config_file}" = "yes"; then
+  # Select and read config file
+  if test "${abi_cfg_enable}" = "yes"; then
     if test "${with_config_file}" != "" -a \
             ! -e "${with_config_file}"; then
       AC_MSG_ERROR([config file ${with_config_file} not found])
@@ -69,13 +78,13 @@ AC_DEFUN([ABI_LOAD_OPTIONS],[
       fi
     done
 
-    dnl Prevent infinite loops
+    # Prevent infinite loops
     if grep "From configure.ac Autotools support for ABINIT" \
       "${abi_cfg_options}" >/dev/null 2>&1; then
       AC_MSG_ERROR([infinite loop detected - aborting!])
     fi
 
-    dnl Source the file
+    # Source the file
     if test "${abi_cfg_options}" != ""; then
       AC_MSG_NOTICE([reading options from ${abi_cfg_options}])
       . "${abi_cfg_options}"
@@ -86,8 +95,8 @@ AC_DEFUN([ABI_LOAD_OPTIONS],[
     AC_MSG_NOTICE([not loading options (disabled from command line)])
   fi
 
-  dnl Propagate information to "make distcheck"
-  abi_ac_distcheck=`${REALPATH} -f "${abi_cfg_options}"`
+  # Propagate information to "make distcheck"
+  abi_ac_distcheck=`${REALPATH} "${abi_cfg_options}"`
   if test "${abi_ac_distcheck}" != ""; then
     abi_ac_distcheck="--with-config-file=\"${abi_ac_distcheck}\""
   fi
@@ -105,17 +114,17 @@ AC_DEFUN([ABI_LOAD_OPTIONS],[
 # them if found.
 #
 AC_DEFUN([ABI_LOAD_DBGFLAGS],[
-  dnl Do some sanity checking of the arguments
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
   m4_if([$2], , [AC_FATAL([$0: missing argument 2])])dnl
   m4_if([$3], , [AC_FATAL([$0: missing argument 3])])dnl
   m4_if([$4], , [AC_FATAL([$0: missing argument 3])])dnl
 
-  dnl Init
+  # Init
   abi_result=""
   abi_dbgflags_file=""
 
-  dnl Explore all the possibilities
+  # Explore all the possibilities
   for tmp_dbgflags_file in \
     "${ac_top_srcdir}/config/compilers/$2_$1/all/all.dbg" \
     "${ac_top_srcdir}/config/compilers/$2_$1/all/$4.dbg" \
@@ -129,7 +138,7 @@ AC_DEFUN([ABI_LOAD_DBGFLAGS],[
     fi
   done
 
-  dnl Source the file
+  # Source the file
   #AC_MSG_NOTICE([checking ${abi_dbgflags_file}])
   if test "${abi_dbgflags_file}" != ""; then
     AC_MSG_NOTICE([loading debug flags for ${abi_result}])
@@ -147,17 +156,17 @@ AC_DEFUN([ABI_LOAD_DBGFLAGS],[
 # them if found.
 #
 AC_DEFUN([ABI_LOAD_DIRFLAGS],[
-  dnl Do some sanity checking of the arguments
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
   m4_if([$2], , [AC_FATAL([$0: missing argument 2])])dnl
   m4_if([$3], , [AC_FATAL([$0: missing argument 3])])dnl
   m4_if([$4], , [AC_FATAL([$0: missing argument 3])])dnl
 
-  dnl Init
+  # Init
   abi_result=""
   abi_dirflags_file=""
 
-  dnl Explore all the possibilities
+  # Explore all the possibilities
   for tmp_dirflags_file in \
     "${ac_top_srcdir}/config/compilers/$2_$1/all/all.dir" \
     "${ac_top_srcdir}/config/compilers/$2_$1/all/$4.dir" \
@@ -171,7 +180,7 @@ AC_DEFUN([ABI_LOAD_DIRFLAGS],[
     fi
   done
 
-  dnl Source the file
+  # Source the file
   #AC_MSG_NOTICE([checking ${abi_dirflags_file}])
   if test "${abi_dirflags_file}" != ""; then
     AC_MSG_NOTICE([loading customizations for ${abi_result}])
@@ -189,17 +198,17 @@ AC_DEFUN([ABI_LOAD_DIRFLAGS],[
 # if found.
 #
 AC_DEFUN([ABI_LOAD_OPTFLAGS],[
-  dnl Do some sanity checking of the arguments
+  # Do some sanity checking of the arguments
   m4_if([$1], , [AC_FATAL([$0: missing argument 1])])dnl
   m4_if([$2], , [AC_FATAL([$0: missing argument 2])])dnl
   m4_if([$3], , [AC_FATAL([$0: missing argument 3])])dnl
   m4_if([$4], , [AC_FATAL([$0: missing argument 3])])dnl
 
-  dnl Init
+  # Init
   abi_result=""
   abi_optflags_file=""
 
-  dnl Explore all the possibilities
+  # Explore all the possibilities
   for tmp_optflags_file in \
     "${ac_top_srcdir}/config/compilers/generic_$1/all/all.opt" \
     "${ac_top_srcdir}/config/compilers/$2_$1/all/all.opt" \
@@ -214,7 +223,7 @@ AC_DEFUN([ABI_LOAD_OPTFLAGS],[
     fi
   done
 
-  dnl Source the file
+  # Source the file
   #AC_MSG_NOTICE([checking ${abi_optflags_file}])
   if test "${abi_optflags_file}" != ""; then
     AC_MSG_NOTICE([loading optimizations for ${abi_result}])

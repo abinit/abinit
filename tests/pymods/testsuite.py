@@ -371,9 +371,11 @@ class FileToTest(object):
         elif self.use_yaml == 'only':
             opts['use_yaml'] = True
             opts['use_fl'] = False
-        else:  # self.use_yaml == 'no':
+        elif self.use_yaml == 'no':
             opts['use_yaml'] = False
             opts['use_fl'] = True
+        else:
+            raise ValueError("Invalid value for use_yaml: %s", self.use_yaml)
 
         differ = FlDiffer(yaml_test=yaml_test, **opts)
 
@@ -381,9 +383,7 @@ class FileToTest(object):
             result = differ.diff(ref_fname, out_fname)
             result.dump_details(outf)
 
-            return (result.passed_within_tols(
-                self.tolnlines, self.tolabs, self.tolrel
-            ), result.has_line_count_error())
+            return (result.passed_within_tols(self.tolnlines, self.tolabs, self.tolrel), result.has_line_count_error())
 
         if fldebug:
             # fail on first error and output the traceback
@@ -393,12 +393,13 @@ class FileToTest(object):
                 (isok, status, msg), has_line_count_error = make_diff()
             except Exception as e:
                 warnings.warn(('[{}] Something went wrong with this test:\n'
-                               '{}: {}\n').format(self.name, type(e).__name__,
-                                                  str(e)))
+                               '{}: {}\n').format(self.name, type(e).__name__, str(e)))
+                #raise e
+
                 isok, status = False, 'failed'
-                msg = 'internal error:\n{}: {}'.format(type(e).__name__,
-                                                       str(e))
+                msg = 'Internal error:\n{}: {}'.format(type(e).__name__, str(e))
                 has_line_count_error = False
+
         msg += ' [file={}]'.format(os.path.basename(ref_fname))
 
         # Save comparison results.
@@ -636,8 +637,7 @@ class AbinitTestInfoParser(object):
         try:
             start, stop = lines.index(HEADER), lines.index(FOOTER)
         except ValueError:
-            raise self.Error("{} does not contain any valid testcnf section!"
-                             .format(inp_fname))
+            raise self.Error("{} does not contain any valid testcnf section!".format(inp_fname))
 
         # Keep only test section lines and remove one space at the begining
         lines = [line[1:] if line.startswith(' ') else line
@@ -753,8 +753,7 @@ class AbinitTestInfoParser(object):
 
             ncpu_section = "NCPU_" + str(nprocs)
             if not self.parser.has_section(ncpu_section):
-                err_msg = "Cannot find section %s in %s" % (ncpu_section, self.inp_fname)
-                raise self.Error(err_msg)
+                raise self.Error("Cannot find section %s in %s" % (ncpu_section, self.inp_fname))
 
             for key in self.parser.options(ncpu_section):
                 if key in self.parser.defaults():
@@ -769,8 +768,7 @@ class AbinitTestInfoParser(object):
                 except Exception as exc:
                     err_msg = ("In file: %s\nWrong line:\n"
                                " key = %s, d[key] = %s\n %s: %s") % (
-                                   self.inp_fname, key, d[key],
-                                   type(exc).__name__, str(exc)
+                                   self.inp_fname, key, d[key], type(exc).__name__, str(exc)
                     )
                     raise self.Error(err_msg)
 
@@ -1812,8 +1810,7 @@ class BaseTest(object):
                     return True
         return False
 
-    def run(self, build_env, runner, workdir, print_lock=None, nprocs=1,
-            runmode="static", **kwargs):
+    def run(self, build_env, runner, workdir, print_lock=None, nprocs=1, runmode="static", **kwargs):
         """
         Run the test with nprocs MPI nodes in the build environment build_env using the `JobRunner` runner.
         Results are produced in directory workdir. kwargs is used to pass additional options
@@ -1939,7 +1936,7 @@ class BaseTest(object):
                 with open(self.stdin_fname, "wt") as fh:
                     fh.writelines(self.make_stdin())
                 stdin_fname = self.stdin_fname
-                bin_argstr = self.exec_args
+                bin_argstr = " " + self.exec_args
 
             else:
                 # New CLI mode: invoke exec with syntax `abinit run.abi`
@@ -1949,7 +1946,7 @@ class BaseTest(object):
                 self.prepare_new_cli_invokation()
 
                 path = os.path.join(self.workdir, os.path.basename(self.inp_fname))
-                bin_argstr = path + self.exec_args
+                bin_argstr = path + " " + self.exec_args
                 #print("Using .abi mode with bin_argstr", bin_argstr)
 
             self.run_etime = runner.run(self.nprocs, self.bin_path,
@@ -1980,7 +1977,7 @@ class BaseTest(object):
                 fldiff_fname = os.path.join(self.workdir, f.name + ".fldiff")
                 self.keep_files(fldiff_fname)
 
-                with open(fldiff_fname, "w") as fh:
+                with open(fldiff_fname, "wt") as fh:
                     f.fldiff_fname = fldiff_fname
 
                     isok, status, msg = f.compare(self.abenv.fldiff_path, self.ref_dir, self.workdir,
@@ -1988,28 +1985,35 @@ class BaseTest(object):
                 self.keep_files(os.path.join(self.workdir, f.name))
                 self.fld_isok = self.fld_isok and isok
 
-                if not self.exec_error and f.has_line_count_error:
-                    f.do_html_diff = True
+                if not self.exec_error and f.has_line_count_error: f.do_html_diff = True
 
-                msg = ": ".join([self.full_id, msg])
-                self.cprint(msg, status2txtcolor[status])
+                self.cprint(self.full_id + "[run_etime: %s s]: " % sec2str(self.run_etime) + msg,
+                            status2txtcolor[status])
+
+                # Print message for users running the test suite on their machine
+                # if the test failed and we have exclusion rules on the ABINIT testfarm.
+                if status == "failed" and (self.exclude_hosts or self.exclude_builders):
+                    print("\tTest %s failed but note that the feature being tested is not portable" % self.full_id)
+                    print("\tas this test is partly disabled on the Abinit testfarm.")
+                    if self.exclude_hosts: print("\texclude_hosts:", self.exclude_hosts)
+                    if self.exclude_builders: print("\texclude_builder:", self.exclude_builders)
 
             # Check if the test is expected to fail.
             if runner.retcode == 124:
                 self._status = "failed"
                 self.had_timeout = True
-                msg = self.full_id + "test has reached timeout and has been killed (SIGTERM)."
+                msg = self.full_id + "Test has reached timeout and has been killed by SIGTERM"
                 self.cprint(msg, status2txtcolor["failed"])
 
             elif runner.retcode == 137:
                 self._status = "failed"
                 self.had_timeout = True
-                msg = self.full_id + "test has reached timeout and has been killed (SIGKILL)."
+                msg = self.full_id + "Test has reached timeout and has been killed by SIGKILL"
                 self.cprint(msg, status2txtcolor["failed"])
 
             elif runner.retcode != 0 and not self.expected_failure:
                 self._status = "failed"
-                msg = (self.full_id + "Test was not expected to fail but subprocesses returned %s" % runner.retcode)
+                msg = (self.full_id + "Test was not expected to fail but subprocesses returned retcode: %s" % runner.retcode)
                 self.cprint(msg, status2txtcolor["failed"])
 
             # If pedantic, stderr must be empty unless the test is expected to fail!
@@ -2521,13 +2525,17 @@ class AbinitTest(BaseTest):
 
     def prepare_new_cli_invokation(self):
         """Perform operations required to execute test with new CLI."""
-        # Need to add pseudopotential info to input.
+        # Read full input in line.
         with open(self.inp_fname, "rt") as fh:
             line = fh.read()
 
+        # Add extra variables for pseudos and output file if not already present.
+        # Note that the code checks for the presence of `varname = "`
         extra = ["# Added by runtests.py"]
         app = extra.append
-        app('output_file = "%s"' % (self.id + ".out"))
+
+        if 'output_file = "' not in line:
+            app('output_file = "%s"' % (self.id + ".out"))
 
         # This is needed for ATOMPAW as the pseudo will be generated at runtime.
         #dirname, pp_names = self.get_pseudo_paths(dir_and_names=True)
@@ -2540,7 +2548,9 @@ class AbinitTest(BaseTest):
         # This is to check whether the parser supports "long strings"
         #app('pseudos = "%s"' % (", ".join(self.get_pseudo_paths())))
 
-        app('pseudos = "%s"' % (",\n ".join(self.get_pseudo_paths())))
+        # Need to add pseudopotential info to input.
+        if 'pseudos = ' not in line:
+            app('pseudos = "%s"' % (",\n ".join(self.get_pseudo_paths())))
 
         #pp_paths = self.get_pseudo_paths()
         #app('pseudos = "%s"' % (", ".join(os.path.relpath(p, self.abenv.psps_dir) for p in pp_paths)))
@@ -2553,9 +2563,13 @@ class AbinitTest(BaseTest):
         # FIXME: Use temp prefix and change iofn
         t_prefix = self.id  + "t"
 
-        app('indata_prefix "%s"' % i_prefix)
-        app('outdata_prefix "%s"' % o_prefix)
-        app('tmpdata_prefix "%s"' % t_prefix)
+        if 'indata_prefix = ' not in line:
+            app('indata_prefix = "%s"' % i_prefix)
+        if 'outdata_prefix = ' not in line:
+            app('outdata_prefix = "%s"' % o_prefix)
+        if 'tmpdata_prefix = ' not in line:
+            app('tmpdata_prefix = "%s"' % t_prefix)
+
         app("# end runtests.py section\n\n")
 
         path = os.path.join(self.workdir, os.path.basename(self.inp_fname))
@@ -2621,16 +2635,25 @@ class AnaddbTest(BaseTest):
 
         extra = ["# Added by runtests.py"]
         app = extra.append
-        app('ddb_path = "%s"' % (self.get_ddb_path()))
-        app('output_file = "%s"' % (self.id + ".out"))
+
+        # Add extra variables for ddb_path, output_file if not already present.
+        # Note that the code checks for the presence of `varname = "`
+        if 'ddb_path = "' not in line:
+            app('ddb_path = "%s"' % (self.get_ddb_path()))
+
+        if 'output_file = "' not in line:
+            app('output_file = "%s"' % (self.id + ".out"))
 
         # EPH stuff
         gkk_path = self.get_gkk_path()
-        if gkk_path: app('gkk_path = "%s"' % gkk_path)
-        ddk_path = self.get_ddk_path()
-        if ddk_path: app('ddk_path = "%s"' % ddk_path)
+        if gkk_path and 'gkk_path = "' not in line:
+            app('gkk_path = "%s"' % gkk_path)
 
-        if gkk_path or ddk_path:
+        ddk_path = self.get_ddk_path()
+        if ddk_path and 'ddk_path = "' not in line:
+            app('ddk_path = "%s"' % ddk_path)
+
+        if (gkk_path or ddk_path) and 'eph_prefix = "' not in line:
             # EPH calculation
             app('eph_prefix = "%s"' % self.id)
 
@@ -3554,8 +3577,7 @@ class AbinitTestSuite(object):
                     timeout_1test = 240.
 
                 # Wait for all tests to be done gathering results
-                results = self.wait_loop(py_nprocs, len(self.tests),
-                                         timeout_1test, res_q)
+                results = self.wait_loop(py_nprocs, len(self.tests), timeout_1test, res_q)
 
                 # remove this to let python garbage collect processes and avoid
                 # Pickle to complain (it does not accept processes for security reasons)
@@ -3563,16 +3585,20 @@ class AbinitTestSuite(object):
                 task_q.close()
                 res_q.close()
 
-                # update local tests instances with the results of their running in
-                # a remote process
-                for test in self.tests:
-                    if test._rid not in results:
-                        # This error will only happen if there is a bug
-                        raise RuntimeError((
-                            "I did not get the results of the test {}. It"
-                            " means that something fishy happen in the worker."
-                        ).format(test.full_id))
-                    test.results_load(results[test._rid])
+                if results is None:
+                    # In principle this should not happen!
+                    print("WARNING: wait_loop returned None instead of results. Will try to continue execution!")
+
+                else:
+                    # update local tests instances with the results of their running in a remote process
+                    for test in self.tests:
+                        if test._rid not in results:
+                            # This error will only happen if there is a bug
+                            raise RuntimeError((
+                                "I did not get results for test {}. "
+                                "It means that some error occurred in the worker."
+                            ).format(test.full_id))
+                        test.results_load(results[test._rid])
 
             # Run completed.
             self._executed = True
@@ -3667,7 +3693,17 @@ class AbinitTestSuite(object):
 
             header = """
             <html>
-            <head><title>Suite Summary</title></head>
+            <head>
+                <title>Suite Summary</title>
+
+                <!-- Include Jquery -->
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+                <!-- datatables: https://datatables.net/manual/installation -->
+                <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+                <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
+
+            </head>
             <body bgcolor="#FFFFFF" text="#000000">
             <hr>
             <h1>Suite Summary</h1>
@@ -3695,18 +3731,21 @@ class AbinitTestSuite(object):
             table = """
             <p>
             <h1>Test Results</h1>
-            <table width="100%" border="0" cellspacing="0" cellpadding="2">
+            <table id="table_id" class="display" width="100%" border="0" cellspacing="0" cellpadding="2">
+                <thead>
                 <tr valign="top" align="left">
-                <py-open code = "for h in test_headings:"> </py-open>
-                <th>$h</th>
+                    <py-open code = "for h in test_headings:"> </py-open>
+                    <th>$h</th>
                 <py-close/>
                 </tr>
+                </thead>
+            <tbody>
             """
 
             for status in BaseTest._possible_status:
                 table += self._pyhtml_table_section(status)
 
-            table += "</table>"
+            table += "</tbody> </table>"
 
             footer = """
             <hr>
@@ -3718,6 +3757,22 @@ class AbinitTestSuite(object):
             <hr>
                 Automatically generated by %s on %s. Logged on as %s@%s
             <hr>
+
+            <script type="text/javascript">
+            $(document).ready( function () {
+                $('#table_id').DataTable({
+                    "lengthMenu": [[100, 200, -1], [100, 200, "All"]],
+                    "paging":   true,
+                    "ordering": true,
+                    // No ordering applied by DataTables during initialisation.
+                    // The rows are shown in the order they are read by DataTables
+                    // (i.e. the original order from the DOM
+                    "order": [],
+                    "info":     true
+                });
+            } );
+            </script>
+
             </body>
             </html> """ % (_MY_NAME, time.asctime(), username, gethostname())
 

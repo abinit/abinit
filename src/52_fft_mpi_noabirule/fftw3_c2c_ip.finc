@@ -1,4 +1,4 @@
-#ifdef HAVE_FFT_FFTW3
+#ifdef HAVE_FFTW3
 !Local variables-------------------------------
 !scalars
  integer,parameter :: rank=3,nt_all=-1

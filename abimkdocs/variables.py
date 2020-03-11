@@ -154,7 +154,7 @@ ABI_CHARACTERISTICS = [
 ABI_EXTERNAL_PARAMS = OrderedDict([
     ("AUTO_FROM_PSP", "Means that the value is read from the PSP file"),
     ("CUDA", "True if CUDA is enabled (compilation)"),
-    ("ETSF_IO", "True if ETSF_IO is enabled (compilation)"),
+    ("ETSF_IO", "True if NetCDF is enabled (compilation)"),
     ("FFTW3", "True if FFTW3 is enabled (compilation)"),
     ("MPI_IO", "True if MPI_IO is enabled (compilation)"),
     ("NPROC", "Number of processors used for Abinit"),
@@ -316,7 +316,6 @@ class Variable(object):
             commentdefault=None,
             commentdims=None,
             added_in_version (str): String with the Abinit version in which this variable was added.
-                None if variable is present in Abinit <= 8.6.3
             alternative_name: alias name (used if a new variable with a different name was introduced, in place
                 of of an old variable that is still supported.
             text: markdown string with documentation. Required.
@@ -338,7 +337,7 @@ class Variable(object):
         self.text = my_unicode(text)
 
         errors = []
-        for a in ("abivarname", "varset", "vartype", "topics", "dimensions", "text"):
+        for a in ("abivarname", "varset", "vartype", "topics", "dimensions", "added_in_version", "text"):
             if getattr(self, a) is None:
                 errors.append("attribute %s is mandatory" % a)
         if errors:
@@ -543,7 +542,7 @@ class Variable(object):
 
     def to_abimarkdown(self, with_hr=True):
         """
-        Return markdown string Can use Abinit markdown extensions.
+        Return markdown string. Can use Abinit markdown extensions.
         """
         lines = []; app = lines.append
 
@@ -565,6 +564,7 @@ class Variable(object):
             app("*Only relevant if:* %s  " % str(self.requires))
         if self.excludes:
             app("*The use of this variable forbids the use of:* %s  " % self.excludes)
+        app("*Added in version:* %s  " % self.added_in_version)
 
         # Add links to tests.
         if hasattr(self, "tests") and not self.is_internal:
@@ -603,7 +603,9 @@ class Variable(object):
 
         # Add text with description.
         app(2 * "\n")
-        app(self.text)
+        # Replace all occurrences of [[name]] with **name** to reduce number of html links in docs
+        new_text = self.text.replace("[[%s]]" % self.name, " **%s** " % self.name)
+        app(new_text)
         if with_hr: app("* * *" + 2*"\n")
 
         return "\n".join(lines)
@@ -665,6 +667,7 @@ class Variable(object):
         if errors:
             raise ValueError("\n".join(errors))
 
+
 class ValueWithUnit(object):
     """
     This type allows to specify values with units:
@@ -678,6 +681,7 @@ class ValueWithUnit(object):
 
     def __repr__(self):
         return str(self)
+
 
 class Range(object):
     """
@@ -749,6 +753,7 @@ class MultipleValue(object):
             return "*" + str(self.value)
         else:
             return str(self.number) + " * " + str(self.value)
+
 
 def my_unicode(s):
     """Convert string to unicode (needed for py2.7 DOH!)"""
