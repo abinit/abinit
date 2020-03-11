@@ -217,6 +217,7 @@ Variable(
     dimensions=[3],
     defaultval=[0,1,1],
     mnemonics="FIT on Energy, Forces, and or, Stresses",
+    added_in_version="v9",
     text=r"""
 Specifies on which first-principles quantities the anharmonic coefficients will be fitted. 
 The first number flags the fitting on the energies, the second the fitting on the forces, and the third on the stressses. 
@@ -264,6 +265,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="FIT anharmonic terms around ATOM I",
+    added_in_version="before_v9",
     text=r"""Gives the index of the atom in the reference structure around which the anharmonic terms will be generated. 
 If 0 (default) a loop over all atoms in the reference structure will be perforemed and fit_ncoeff coefficienst will be fitted and selected per atom. 
 If -1 all possible cross terms will be generated (e.G. (A_x-B_x)^2*(C_y-D_y)^1. This options generates much more terms. 
@@ -348,6 +350,7 @@ Variable(
     dimensions="scalar",
     defaultval=1,
     mnemonics="FIT Strain Phonon Coupling maximum Strain",
+    added_in_version="v9",
     text=r"""
 Set maximum power of strain body in strain-phonon coupling terms. 
 """,
@@ -741,6 +744,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="DYNamics CHeK SYMmetry",
+    added_in_version="v9",
     text=r"""
 Flag to activate symmetry finder and imposition of symmetry of the restart structure before dynamics run, when restartxf is negativ.  
 Useful to do symmetry constrained relaxation with structural realxations algorithms. 
@@ -758,6 +762,7 @@ Variable(
     dimensions="scalar",
     defaultval=1e-10,
     mnemonics="DYNamics TOLerance on SYMmetries",
+    added_in_version="v9",
     text=r"""
 Tolerance on symmetry finder.
 **Related variables:** Activation flag for symmetry finder ([[multibinit:dyn_chksym]])
@@ -972,6 +977,7 @@ Variable(
     topics=['FitProcess_basic'],
     dimensions=[3],
     defaultval=[0,1,1],
+    added_in_version="v9",
     mnemonics="Select on Energy, Forces, and or, Stresses",
     text=r"""
 Specifies on which goal function quantities the anharmonic coefficients will be selected. 
