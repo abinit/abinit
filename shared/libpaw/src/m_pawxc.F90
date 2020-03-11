@@ -330,7 +330,7 @@ subroutine pawxc_size_dvxc_local()
 
 !Do we use the gradient?
  need_gradient=((ixc>=11.and.ixc<=17).or.(ixc==23.or.ixc==24).or. &
-&               (ixc==26.or.ixc==27).or.(ixc>=31.and.ixc<=34).or. &
+&               (ixc==26.or.ixc==27).or.(ixc>=31.and.ixc<=35).or. &
 &               (ixc==41.or.ixc==42).or.ixc==1402000)
  if (ixc<0) then
    if (libxc_functionals_isgga().or.libxc_functionals_ismgga().or. &
@@ -339,12 +339,12 @@ subroutine pawxc_size_dvxc_local()
  usegradient_=0 ; if (need_gradient) usegradient_=2*min(nspden,2)-1
 
 !Do we use the laplacian?
- need_laplacian=(ixc==32)
+ need_laplacian=(ixc==32.or.ixc==35)
  if (ixc<0) need_laplacian=libxc_functionals_needs_laplacian()
  uselaplacian_=0 ; if (need_laplacian) uselaplacian_=min(nspden,2)
 
 !Do we use the kinetic energy density?
- need_kden=(ixc==31.or.ixc==34)
+ need_kden=(ixc==31.or.ixc==34.or.ixc==35)
  if (ixc<0) need_kden=libxc_functionals_ismgga()
  usekden_=0 ; if (need_kden) usekden_=min(nspden,2)
 
@@ -732,7 +732,7 @@ function pawxc_get_xclevel(ixc)
  if ((1<=ixc.and.ixc<=10).or.(30<=ixc.and.ixc<=39).or.(ixc==50)) pawxc_get_xclevel=1 ! ABINIT LDA
  if ((11<=ixc.and.ixc<=19).or.(23<=ixc.and.ixc<=29).or.ixc==1402000) pawxc_get_xclevel=2 ! ABINIT GGA
  if (20<=ixc.and.ixc<=22) pawxc_get_xclevel=3 ! ABINIT TDDFT kernel tests
- if (ixc>=31.and.ixc<=34) pawxc_get_xclevel=2 ! ABINIT internal fake mGGA
+ if (ixc>=31.and.ixc<=35) pawxc_get_xclevel=2 ! ABINIT internal fake mGGA
  if (ixc>=41.and.ixc<=42) pawxc_get_xclevel=2 ! ABINIT internal hybrids using GGA
 
 !LibXC functionals
@@ -770,7 +770,7 @@ function pawxc_get_usekden(ixc)
  pawxc_get_usekden=0
  if (ixc<0) then
    if (libxc_functionals_ismgga()) pawxc_get_usekden=1
- else if (ixc==31.or.ixc==34) then
+ else if (ixc==31.or.ixc==34.or.ixc==35) then
    pawxc_get_usekden=1
  end if
 
@@ -801,7 +801,7 @@ function pawxc_get_uselaplacian(ixc)
  pawxc_get_uselaplacian=0
  if (ixc<0) then
    if (libxc_functionals_needs_laplacian()) pawxc_get_uselaplacian=1
- else if (ixc==32) then
+ else if (ixc==32.or.ixc==35) then
    pawxc_get_uselaplacian=1
  end if
 
@@ -950,7 +950,7 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 !Local variables-------------------------------
 !scalars
  integer,parameter :: mu(3,3)=reshape([4,9,8,9,5,7,8,7,6],[3,3]) ! Voigt indices
- integer :: ii,ilm,ipts,ir,ispden,iwarn,jj,kk,lm_size_eff,ndvxc,nd2vxc,ngrad
+ integer :: ii,ilm,ipts,ir,ispden,iwarn,jj,lm_size_eff,ndvxc,nd2vxc,ngrad
  integer :: nkxc_updn,npts,nspden_eff,nspden_updn,nspgrad,nu
  integer :: nvxcgrho,nvxclrho,nvxctau,order
  integer :: usecoretau,usegradient,usekden,uselaplacian
@@ -1331,10 +1331,11 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 
 !    If fake meta-GGA, has to remove the core contribution
 !      when electronic effective mass has been modified
-     if (usecoretau==1.and.(ixc==31.or.ixc==34)) then
-       if (ixc==31) then
+     if (usecoretau==1.and.(ixc==31.or.ixc==35)) then
+       if (ixc==31.or.ixc==35) then
          factor=one-(one/1.01_dp)
          if (nspden_updn==1) then
+           factor=factor*half
            do ii=1,nrad
              exci(ii)=exci(ii)-factor*coretau(ii)/rho_updn(ii,1)
            end do
@@ -1698,6 +1699,27 @@ subroutine pawxc(corexc,enxc,enxcdc,ixc,kxc,k3xc,lm_size,lmselect,nhat,nkxc,nk3x
 !  Add the four*pi factor of the Exc and Excdc angular integration
    if (option/=1.and.option/=5) enxc=enxc*four_pi
    if (option==0.or.option==2) enxcdc=enxcdc*four_pi
+
+!TESTDEBUG
+! Compute difference between fake mGGA=32 Exc=Int[Grad[rho]**2.dr]
+! and mGGA=33 Exc=-Int[Laplacian[rho]*rho.dr]
+! i.e. contour integral Int_contour[rho.Grad[rho].DS]=rc^2.Sum_L[rho_L(rc)*drho_L(rc)]
+! if (option<4) then
+!   enxcr=zero
+!   ir=pawrad%int_meshsz
+!   LIBPAW_ALLOCATE(drho,(nrad))
+!   LIBPAW_ALLOCATE(ff,(nrad))
+!   enxcr=zero
+!   do ilm=1,lm_size_eff
+!     ff(1:nrad)=rho_(1:nrad,ilm,1)
+!     call nderiv_gen(drho,ff,pawrad)
+!     enxcr=enxcr+ff(ir)*drho(ir)
+!   end do
+!   LIBPAW_DEALLOCATE(drho)
+!   LIBPAW_DEALLOCATE(ff)
+!   enxcr=enxcr*0.01_dp*pawrad%rad(ir)**2
+!   write(100,*) "Contour integral=",enxcr
+! end if
 
 !  Final memory deallocation
    LIBPAW_DEALLOCATE(rhoarr)
