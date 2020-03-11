@@ -887,20 +887,7 @@ The bibtex file is available [here](../abiref.bib).
     so that you can invoke the code by simply typing *abinit* in the terminal instead of providing the absolute path.
 
 """
-
-        new_lines = []
-        for line in lines:
-            if "[TUTORIAL_README]" in line:
-                new_lines.extend(tutorial_readme.splitlines())
-            else:
-                new_lines.append(line)
-
-        return new_lines
-
-    def _preprocess_macros(self, lines):
-        """Preprocess markdown lines and replace [TUTORIAL_README] string."""
-
-        tutorial_readme1 = """
+        tutorial_readmev9 = """
 
 !!! note
 
@@ -930,16 +917,18 @@ The bibtex file is available [here](../abiref.bib).
     so that you can invoke the code by simply typing *abinit* in the terminal instead of providing the absolute path.
 
 """
-
         new_lines = []
         for line in lines:
-            if "[TUTORIAL_README1]" in line:
-                new_lines.extend(tutorial_readme1.splitlines())
+            if "[TUTORIAL_README]" in line:
+                new_lines.extend(tutorial_readme.splitlines())
+            elif "[TUTORIAL_READMEV9]" in line:
+                new_lines.extend(tutorial_readmev9.splitlines())
             else:
                 new_lines.append(line)
 
         return new_lines
- 
+
+
     def _preprocess_aliases(self, lines):
         """
         Handle aliases.
