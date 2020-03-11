@@ -1925,7 +1925,7 @@ subroutine setshells(ecut,npw,nsh,nsym,gmet,gprimd,symrel,tag,ucvol)
      ABI_FREE(insort)
      ABI_FREE(npw_sh)
    else
-     ecut=ecut_found
+     !ecut=ecut_found ! MRM_ECUT
      npw=npw_found
      nsh=nsh_found
    end if

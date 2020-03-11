@@ -37,7 +37,7 @@ module m_gwrdm
  private
 !!***
 
- public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_wfd_bst
+ public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_hdr_bst! ,update_wfd_bst
 !!***
 
 contains
@@ -61,6 +61,7 @@ contains
 !! Updated dm1 matrix with: Go.vxc.Go, Go.Sigma_x.Go, or Go.Sigma_x-Vxc.Go
 !! PARENTS
 !! CHILDREN
+!! EX_WIFE?
 !! SOURCE
 
 subroutine calc_rdmx(ib1,ib2,kpoint,isgn,iinfo,pot,dm1,BSt)
@@ -183,7 +184,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
  type(ebands_t),target,intent(in) :: BSt
 !arrays
  real(dp),intent(inout) :: occs_ks(:,:)
- complex(dpc),intent(inout) :: dm1(:,:),nateigv(:,:,:)
+ complex(dpc),intent(inout) :: dm1(:,:),nateigv(:,:,:,:)
 !Local variables ------------------------------
 !scalars
  integer::ndim,ib1dm,ib2dm,lwork,info
@@ -254,7 +255,7 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
  toccs_k=0.0d0
  do ib1dm=1,ndim
    do ib2dm=1,ndim
-     nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),kpoint)=eigenvect(ib2dm,ib1dm)
+     nateigv(ib1+(ib1dm-1),ib1+(ib2dm-1),kpoint,1)=eigenvect(ib2dm,ib1dm)
    enddo
    occs_ks(ib1+(ib1dm-1),kpoint)=occs_tmp(ib1dm)
    toccs_k=toccs_k+occs_tmp(ib1dm)
@@ -279,18 +280,17 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
 end subroutine natoccs
 !!***
 
-subroutine update_wfd_bst(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
+subroutine update_hdr_bst(Wfd,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: b1gw,b2gw
  integer,intent(in),dimension(3) :: ngfft_in
- type(wfd_t),intent(inout) :: wfd_f
- type(wfd_t),intent(in) :: wfd_i
  type(ebands_t),target,intent(inout) :: BSt
  type(Hdr_type),intent(inout) :: Hdr
+ type(wfd_t),intent(in) :: Wfd
+ !!type(),
 !arrays
  real(dp),intent(in) :: occs(:,:)
- complex(dpc),intent(in) :: nateigv(:,:,:)
 !Local variables ------------------------------
 !scalars
  character(len=500) :: msg
@@ -298,22 +298,6 @@ subroutine update_wfd_bst(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
 !arrays
 !************************************************************************
  DBG_ENTER("COLL")
-
- ! Only master
- !Wfd%Wave(6,2,1)%ug(3) ! BAND 6 , k-POINT 2, SPIN 1, UG="MO Coef"= 3
- do ikpoint=1,BSt%nkpt
-   write(msg,'(a31,i5,a9,i5,a1,i5,a7,i5)') ' Calc. nat. orbs coefs k-point: ',ikpoint,', bands: ',b1gw,'-',b2gw,', npw: ',wfd_i%Kdata(ikpoint)%npw ! Print for debug
-   call wrtout(std_out,msg,'COLL')
-   do ib1dm=b1gw,b2gw
-     wfd_f%Wave(ib1dm,ikpoint,1)%ug(:)=0.0d0 
-     do ib2dm=b1gw,b2gw
-       Wfd_f%Wave(ib1dm,ikpoint,1)%ug(:)=Wfd_f%Wave(ib1dm,ikpoint,1)%ug(:) &
-               +nateigv(ib2dm,ib1dm,ikpoint)*Wfd_i%Wave(ib2dm,ikpoint,1)%ug(:)
-     enddo
-     !write(*,'(*(f10.5))') real(nateigv(ib1dm,:,ikpoint)) !Print for debug
-   enddo
-   !write(*,*) ' ' !Space for debug
- enddo
 
  ! MRM BSt occ are changed and never recoverd
  MSG_COMMENT("QP_BSt occupations correctly updated with nat. orb. ones")
@@ -337,10 +321,10 @@ subroutine update_wfd_bst(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
  enddo
 
  MSG_COMMENT("Hdr_sigma npw and ngfft correctly updated")
- Hdr%npwarr(:)=Wfd_f%npwarr(:)                                   ! Use the npw = ones used in GW calc
+ Hdr%npwarr(:)=Wfd%npwarr(:)                                   ! Use the npw = ones used in GW calc
  Hdr%ngfft(1:3)=ngfft_in(1:3)
 
-end subroutine update_wfd_bst
+end subroutine update_hdr_bst
 !!***
 
 subroutine printdm1(ib1,ib2,dm1) ! Only used for debug of this file, do not use it with large arrays
@@ -364,4 +348,67 @@ end subroutine printdm1
 !!***
 
 end module m_gwrdm
+!!***
+
+!subroutine update_wfd_bst(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
+!!Arguments ------------------------------------
+!!scalars
+! integer,intent(in) :: b1gw,b2gw
+! integer,intent(in),dimension(3) :: ngfft_in
+! type(wfd_t),intent(inout) :: wfd_f
+! type(wfd_t),intent(in) :: wfd_i
+! type(ebands_t),target,intent(inout) :: BSt
+! type(Hdr_type),intent(inout) :: Hdr
+!!arrays
+! real(dp),intent(in) :: occs(:,:)
+! complex(dpc),intent(in) :: nateigv(:,:,:,:)
+!Local variables ------------------------------
+!scalars
+! character(len=500) :: msg
+! integer :: ib1dm,ib2dm,dim_bands,ikpoint
+!!arrays
+!!************************************************************************
+! DBG_ENTER("COLL")
+!
+! !Wfd%Wave(6,2,1)%ug(3) ! BAND 6 , k-POINT 2, SPIN 1, UG="MO Coef"= 3
+! do ikpoint=1,BSt%nkpt
+!   write(msg,'(a31,i5,a9,i5,a1,i5,a7,i5)') ' Calc. nat. orbs coefs k-point: ',ikpoint,', bands: ',b1gw,'-',b2gw,', npw: ',wfd_i%Kdata(ikpoint)%npw ! Print for debug
+!   call wrtout(std_out,msg,'COLL')
+!   do ib1dm=b1gw,b2gw
+!     wfd_f%Wave(ib1dm,ikpoint,1)%ug(:)=0.0d0 
+!     do ib2dm=b1gw,b2gw
+!       Wfd_f%Wave(ib1dm,ikpoint,1)%ug(:)=Wfd_f%Wave(ib1dm,ikpoint,1)%ug(:) &
+!               +nateigv(ib2dm,ib1dm,ikpoint,1)*Wfd_i%Wave(ib2dm,ikpoint,1)%ug(:)
+!     enddo
+!     !write(*,'(*(f10.5))') real(nateigv(ib1dm,:,ikpoint,1)) !Print for debug
+!   enddo
+!   !write(*,*) ' ' !Space for debug
+! enddo
+!
+! ! MRM BSt occ are changed and never recoverd
+! MSG_COMMENT("QP_BSt occupations correctly updated with nat. orb. ones")
+! do ikpoint=1,BSt%nkpt
+!   BSt%occ(b1gw:b2gw,ikpoint,1) = occs(b1gw:b2gw,ikpoint) ! No spin used
+! enddo
+! if((size(Hdr%occ(:))/BSt%nkpt) < (b2gw-b1gw+1)) then
+!   !Actually, we should never reach this point because the code should stop during Wfd initialization in m_sigma_driver.F90
+!   MSG_ERROR("Impossible to use the existing read WFK to build a new one!")
+! endif
+! ! MRM change occs in Header Hdr
+! ! Update occ in Hdr before printing
+! MSG_COMMENT("Hdr_sigma occupations correctly updated with nat. orb. ones")
+! ib1dm=1
+! do ikpoint=1,BSt%nkpt
+!   dim_bands=size(BSt%occ(:,ikpoint,1))
+!   do ib2dm=1,dim_bands   
+!     Hdr%occ(ib1dm)=BSt%occ(ib2dm,ikpoint,1)
+!     ib1dm=ib1dm+1
+!   enddo
+! enddo
+!
+! MSG_COMMENT("Hdr_sigma npw and ngfft correctly updated")
+! Hdr%npwarr(:)=Wfd_f%npwarr(:)                                   ! Use the npw = ones used in GW calc
+! Hdr%ngfft(1:3)=ngfft_in(1:3)
+!
+!!end subroutine update_wfd_bst
 !!***

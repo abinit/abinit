@@ -113,7 +113,7 @@ module m_sigma_driver
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
 ! MRM density matrix module and Gaussian quadrature one
- use m_gwrdm,         only : calc_rdmx, calc_rdmc, natoccs, printdm1, update_wfd_bst
+ use m_gwrdm,         only : calc_rdmx, calc_rdmc, natoccs, printdm1, update_hdr_bst!,update_wfd_bst
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre
 
  implicit none
@@ -252,7 +252,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  type(Energies_type) :: KS_energies,QP_energies
  type(Epsilonm1_results) :: Er
  type(gsphere_t) :: Gsph_Max,Gsph_x,Gsph_c
- type(hdr_type) :: Hdr_wfk,Hdr_sigma,hdr_rhor
+ type(hdr_type) :: Hdr_wfk,Hdr_sigma,Hdr_rhor
  type(melflags_t) :: KS_mflags,QP_mflags
  type(melements_t) :: KS_me,QP_me
  type(MPI_type) :: MPI_enreg_seq
@@ -288,7 +288,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc),allocatable :: ctmp(:,:),hbare(:,:,:,:)
  complex(dpc),target,allocatable :: sigcme(:,:,:,:,:)
  complex(dpc),allocatable :: hlda(:,:,:,:),htmp(:,:,:,:),uks2qp(:,:)
- complex(dpc),allocatable :: dm1(:,:,:),dm1k(:,:),potk(:,:),nateigv(:,:,:) ! MRM
+ complex(dpc),allocatable :: dm1(:,:,:),dm1k(:,:),potk(:,:),nateigv(:,:,:,:) ! MRM
  complex(gwpc),allocatable :: kxcg(:,:),fxc_ADA(:,:,:)
  complex(gwpc),ABI_CONTIGUOUS pointer :: ug1(:)
 !complex(dpc),pointer :: sigcme_p(:,:,:,:)
@@ -1771,9 +1771,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
 
        ABI_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
        call read_rhor(Dtfil%filpawdensin, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
-       ks_aepaw_rhor, hdr_rhor, tmp_pawrhoij, wfd%comm)
+       ks_aepaw_rhor, Hdr_rhor, tmp_pawrhoij, wfd%comm)
 
-       call hdr_rhor%free()
+       call Hdr_rhor%free()
        call pawrhoij_free(tmp_pawrhoij)
        ABI_FREE(tmp_pawrhoij)
      end if ! Dtset%usepaw==1
@@ -1813,9 +1813,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ABI_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
 
        call read_rhor(Dtfil%filpawdensin, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
-       ks_aepaw_rhor, hdr_rhor, tmp_pawrhoij, wfd%comm)
+       ks_aepaw_rhor, Hdr_rhor, tmp_pawrhoij, wfd%comm)
 
-       call hdr_rhor%free()
+       call Hdr_rhor%free()
        call pawrhoij_free(tmp_pawrhoij)
        ABI_FREE(tmp_pawrhoij)
      end if ! Dtset%usepaw==1
@@ -1868,9 +1868,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ABI_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
 
        call read_rhor(Dtfil%filpawdensin, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
-       ks_aepaw_rhor, hdr_rhor, tmp_pawrhoij, wfd%comm)
+       ks_aepaw_rhor, Hdr_rhor, tmp_pawrhoij, wfd%comm)
 
-       call hdr_rhor%free()
+       call Hdr_rhor%free()
        call pawrhoij_free(tmp_pawrhoij)
        ABI_FREE(tmp_pawrhoij)
      end if ! Dtset%usepaw==1
@@ -1950,9 +1950,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
        ABI_MALLOC(tmp_pawrhoij,(cryst%natom*wfd%usepaw))
 
        call read_rhor(pawden_fname, cplex1, nfftf_tot, Wfd%nspden, ngfftf, 1, MPI_enreg_seq, &
-       ks_aepaw_rhor, hdr_rhor, tmp_pawrhoij, wfd%comm)
+       ks_aepaw_rhor, Hdr_rhor, tmp_pawrhoij, wfd%comm)
 
-       call hdr_rhor%free()
+       call Hdr_rhor%free()
        call pawrhoij_free(tmp_pawrhoij)
        ABI_FREE(tmp_pawrhoij)
      else
@@ -2169,7 +2169,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    if(gwcalctyp==21) then  !! MRM allocate the 1-RDM correction info if gwcalctyp=21
      if(Sigp%nsppol/=1) MSG_ERROR("1-RDM GW correction only implemented for restricted closed-shell calculations!")
      ABI_MALLOC(dm1,(b1gw:b2gw,b1gw:b2gw,Sigp%nkptgw))
-     ABI_MALLOC(nateigv,(b1gw:b2gw,b1gw:b2gw,Sigp%nkptgw))
+     ABI_MALLOC(nateigv,(Wfd%mband,Wfd%mband,Wfd%nkibz,Sigp%nsppol))
      ABI_MALLOC(dm1k,(b1gw:b2gw,b1gw:b2gw)) 
      ABI_MALLOC(potk,(b1gw:b2gw,b1gw:b2gw))
      ABI_MALLOC(occs,(b1gw:b2gw,Sigp%nkptgw))
@@ -2178,7 +2178,12 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      do ikcalc=1,Sigp%nkptgw
        do ib=b1gw,b2gw
          dm1(ib,ib,ikcalc)=QP_BSt%occ(ib,ikcalc,1)
-       enddo 
+       enddo
+     enddo
+     do ikcalc=1,Wfd%nkibz
+       do ib=1,Wfd%mband 
+         nateigv(ib,ib,ikcalc,1)=1.0d0
+       enddo  
      enddo
      order_int=Sigp%nomegasi 
      write(msg,'(a45,i9)')' number of imaginary frequencies for Sigma_c ',order_int
@@ -2279,28 +2284,16 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    end if
    ! MRM print WFK and DEN files. Finally, deallocate all arrays used for 1-RDM update
    if(gwcalctyp==21) then
-     write(msg,'(a1)')' '
-     call wrtout(std_out,msg,'COLL')
-     write(msg,'(a46)')' Computing Nat. Orbs. to store them in Wfd_dm'
-     call wrtout(std_out,msg,'COLL')
      ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
-     call update_wfd_bst(Wfd,Wfd_dm,nateigv,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
-     write(msg,'(a29)')' Printing DEN (and WFK) files'
-     call wrtout(std_out,msg,'COLL')
-     gw1rdm_fname=dtfil%fnameabo_wfk
+     !call update_wfd_bst(Wfd,Wfd_dm,nateigv,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3)) ! MRM remove it
+     call update_hdr_bst(Wfd_dm,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3)) 
+     call Wfd_dm%rotate(Cryst,nateigv)                                      ! Let it generate the bmask and build NOs 
+     gw1rdm_fname=dtfil%fnameabo_wfk                                         
      call Wfd_dm%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname)                   ! Print WFK file, QP_BSt contains nat. orbs.
      gw1rdm_fname=dtfil%fnameabo_den
-     write(msg,'(a38)')' Computing the density on the FFT grid'
-     call wrtout(std_out,msg,'COLL')
      call Wfd_dm%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)        ! Construct the density
      call fftdatar_write("density",gw1rdm_fname,dtset%iomode,Hdr_sigma,&    ! Print DEN file  
      Cryst,ngfftf,cplex1,nfftf,dtset%nspden,gw_rhor,mpi_enreg_seq,ebands=QP_BSt)
-     call wrtout(std_out,msg,'COLL')
-     write(msg,'(a1)')' '
-     write(msg,'(a17)')' DEN file printed'
-     call wrtout(std_out,msg,'COLL')
-     write(msg,'(a1)')' '
-     call wrtout(std_out,msg,'COLL')
      ABI_FREE(gw_rhor)
      ! MRM prepare deallocation of Wfd_dm
      Wfd_dm%bks_comm = xmpi_comm_null
