@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 17h01 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 20h16 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/psml_t10/t10.in
 - output file    -> t10.out
@@ -263,6 +263,15 @@ P           mkmem          14
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 1, nkpt: 14, mband: 12, nsppol: 1, nspinor: 1, nspden: 1, mpw: 140, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)= -2.7117570  2.7117570  2.7117570  G(1)=  0.0000000  0.1843823  0.1843823
  R(2)=  2.7117570 -2.7117570  2.7117570  G(2)=  0.1843823  0.0000000  0.1843823
@@ -297,6 +306,12 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 20, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-08, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -23.270462779498    -2.327E+01 2.443E-02 9.521E+02
  ETOT  2  -24.137744910159    -8.673E-01 4.087E-02 9.653E+01
@@ -319,23 +334,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [ -2.7117570,   2.7117570,   2.7117570, ]
 - [  2.7117570,  -2.7117570,   2.7117570, ]
 - [  2.7117570,   2.7117570,  -2.7117570, ]
 lattice_lengths: [   4.69690,    4.69690,    4.69690, ]
-lattice_angles: [109.471, 109.471, 109.471, ]
+lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   7.9764987E+01
 convergence: {deltae: -5.614E-11, res2:  1.407E-10, residm:  2.639E-05, diffor: null, }
 etotal    :  -2.43012289E+01
 entropy   :   0.00000000E+00
 fermie    :   4.04768289E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  3.30759556E-02,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   3.30759556E-02,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   3.30759556E-02, ]
 pressure_GPa:  -9.7313E+02
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Fe]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
@@ -410,6 +427,15 @@ band_energy         :  1.54398336703187E+00
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 1, nkpt: 14, mband: 12, nsppol: 2, nspinor: 1, nspden: 2, mpw: 140, }
+cutoff_energies: {ecut:  10.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   4.00000000E+00, tsmear:   1.00000000E-03, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)= -2.7117570  2.7117570  2.7117570  G(1)=  0.0000000  0.1843823  0.1843823
  R(2)=  2.7117570 -2.7117570  2.7117570  G(2)=  0.1843823  0.0000000  0.1843823
@@ -424,6 +450,12 @@ band_energy         :  1.54398336703187E+00
 _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
 
 ================================================================================
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 40, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-05, }
+...
 
      iter   Etot(hartree)     deltaE(h) residm    vres2    magn
  ETOT  1  -23.309047667267    -2.33E+01 2.44E-02 1.86E+03 1.056
@@ -447,23 +479,25 @@ _setup2: Arith. and geom. avg. npw (full set) are     120.037     119.993
 --- !ResultsGS
 iteration_state: {dtset: 2, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [ -2.7117570,   2.7117570,   2.7117570, ]
 - [  2.7117570,  -2.7117570,   2.7117570, ]
 - [  2.7117570,   2.7117570,  -2.7117570, ]
 lattice_lengths: [   4.69690,    4.69690,    4.69690, ]
-lattice_angles: [109.471, 109.471, 109.471, ]
+lattice_angles: [109.471, 109.471, 109.471, ] # degrees, (23, 13, 12)
 lattice_volume:   7.9764987E+01
 convergence: {deltae: -4.722E-07, res2:  1.523E-05, residm:  6.876E-05, diffor: null, }
 etotal    :  -2.43012289E+01
 entropy   :   0.00000000E+00
 fermie    :   4.04774413E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [  3.30760689E-02,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,   3.30760689E-02,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   3.30760689E-02, ]
 pressure_GPa:  -9.7313E+02
-cartesian_forces:
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Fe]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
 force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
 ...
@@ -817,10 +851,10 @@ P           mkmem          14
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          5.8  wall=          6.2
+- Proc.   0 individual time (sec): cpu=          5.3  wall=          5.5
 
 ================================================================================
 
  Calculation completed.
 .Delivered   0 WARNINGs and   2 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          5.8  wall=          6.2
++Overall time at end (sec) : cpu=          5.3  wall=          5.5

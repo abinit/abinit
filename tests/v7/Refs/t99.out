@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Sat 15 Feb 2020.
-- ( at 16h52 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h23 )
   
 - input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t99/t99.in
 - output file    -> t99.out
@@ -156,6 +156,15 @@ P          mk1mem2          4
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 2, mband: 6, nsppol: 1, nspinor: 1, nspden: 1, mpw: 39, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
@@ -232,6 +241,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.500      73.455
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-24, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -10.790759179575    -1.079E+01 1.239E-03 2.146E+02
  ETOT  2  -10.427872741918     3.629E-01 2.644E-04 2.802E+02
@@ -262,23 +277,26 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.500      73.455
 --- !ResultsGS
 iteration_state: {dtset: 1, }
 comment   : Summary of ground state results
-rprimd    :
+lattice_vectors:
 - [  4.7407935,   0.0000000,   0.0000000, ]
 - [ -2.3703968,   4.1056476,   0.0000000, ]
 - [  0.0000000,   0.0000000,   6.4088989, ]
 lattice_lengths: [   4.74079,    4.74079,    6.40890, ]
-lattice_angles: [ 90.000,  90.000, 120.000, ]
+lattice_angles: [ 90.000,  90.000, 120.000, ] # degrees, (23, 13, 12)
 lattice_volume:   1.2474298E+02
 convergence: {deltae:  5.329E-15, res2:  6.296E-23, residm:  5.799E-25, diffor: null, }
 etotal    :  -1.14558046E+01
 entropy   :   0.00000000E+00
 fermie    :   4.81722139E-01
-cartesian_stress_tensor:
+cartesian_stress_tensor: # hartree/bohr^3
 - [ -9.01580660E-03,   0.00000000E+00,   0.00000000E+00, ]
 - [  0.00000000E+00,  -9.01580660E-03,   0.00000000E+00, ]
 - [  0.00000000E+00,   0.00000000E+00,   3.90892824E-03, ]
 pressure_GPa:   1.3850E+02
-cartesian_forces:
+xred      :
+- [ -3.3267E-33,   2.8363E-33,   2.4000E-01,  B]
+- [  3.3333E-01,   6.6667E-01,   7.5000E-01,  N]
+cartesian_forces: # hartree/bohr
 - [ -0.00000000E+00,  -0.00000000E+00,   1.40481240E-02, ]
 - [ -0.00000000E+00,  -0.00000000E+00,  -1.40481240E-02, ]
 force_length_stats: {min:   1.40481240E-02, max:   1.40481240E-02, mean:   1.40481240E-02, }
@@ -355,6 +373,15 @@ band_energy         :  4.55282665649483E-01
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
 
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 4, mband: 6, nsppol: 1, nspinor: 1, nspden: 1, mpw: 78, }
+cutoff_energies: {ecut:   5.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 1, rfphon: 1, rfstrs: 3, }
+...
+
  mkfilename : getwfk/=0, take file _WFK from output of DATASET   1.
 
  Exchange-correlation functional for the present dataset will be:
@@ -417,6 +444,12 @@ band_energy         :  4.55282665649483E-01
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-16, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1 -0.33849634355679     -2.130E+01 2.668E-02 6.447E+01
  ETOT  2 -0.87049918387095     -5.320E-01 1.869E-04 5.465E+00
@@ -471,6 +504,12 @@ band_energy         :  4.55282665649483E-01
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-16, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   22.914444457167     -3.703E+01 4.564E-02 3.721E+03
@@ -527,6 +566,12 @@ band_energy         :  4.55282665649483E-01
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-16, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   18.819063714485     -9.165E+01 4.866E-01 1.586E+03
  ETOT  2   3.4513428469042     -1.537E+01 1.221E-02 3.399E+02
@@ -582,6 +627,12 @@ band_energy         :  4.55282665649483E-01
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-16, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   114.30320746681     -1.195E+02 6.714E-01 2.734E+04
  ETOT  2   10.160109440543     -1.041E+02 7.766E-02 1.947E+02
@@ -636,6 +687,12 @@ band_energy         :  4.55282665649483E-01
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-16, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   1.6256207964264     -1.879E+02 7.769E-01 1.404E+02
@@ -693,6 +750,12 @@ band_energy         :  4.55282665649483E-01
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-16, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   1.6401601393171     -1.879E+02 8.616E-01 1.424E+02
@@ -752,6 +815,12 @@ band_energy         :  4.55282665649483E-01
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-16, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   8.9467369074045     -1.259E+01 5.760E-02 8.944E+01
  ETOT  2   8.5785916285108     -3.681E-01 3.981E-04 2.274E+00
@@ -809,6 +878,12 @@ band_energy         :  4.55282665649483E-01
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-16, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   8.6894253204993     -2.215E+01 6.013E-02 1.210E+01
  ETOT  2   8.5427521901890     -1.467E-01 4.753E-05 2.185E-01
@@ -865,6 +940,12 @@ band_energy         :  4.55282665649483E-01
  Initialisation of the first-order wave-functions :
   ireadwf=   0
 
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-16, }
+...
+
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1   8.6900697190233     -2.215E+01 6.013E-02 1.183E+01
  ETOT  2   8.5427557536451     -1.473E-01 4.750E-05 2.154E-01
@@ -919,6 +1000,12 @@ band_energy         :  4.55282665649483E-01
 
  Initialisation of the first-order wave-functions :
   ireadwf=   0
+
+--- !BeginCycle
+iteration_state: {dtset: 2, }
+solver: {iscf: 7, nstep: 30, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-16, }
+...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
 -ETOT  1  7.36475584189802E-02 -6.597E+01 2.160E-01 3.687E+01

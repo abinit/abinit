@@ -1,6 +1,6 @@
 # -*- Autoconf -*-
 #
-# Copyright (C) 2005-2019 Yann Pouillon, Marc Torrent
+# Copyright (C) 2005-2020 Yann Pouillon, Marc Torrent
 #
 # This file is part of the Steredeg software package. For license information,
 # please see the COPYING file in the top-level directory of the source
@@ -210,9 +210,11 @@ AC_DEFUN([SD_LINALG_INIT_FLAVOR], [
   sd_linalg_flavor_mpi=""
   sd_linalg_flavor_mpiacc=""
   sd_linalg_flavor_serial=""
+  sd_linalg_flavor_req=""
 
   # Set adjustable parameters
   sd_linalg_flavor_def="$1"
+
 
   # Set reasonable defaults if not provided
   test -z "${sd_linalg_flavor_def}" && sd_linalg_flavor_def="auto"
@@ -240,6 +242,7 @@ AC_DEFUN([SD_LINALG_INIT_FLAVOR], [
   # Check that the specified flavor is consistent
   _SD_LINALG_CHECK_FLAVOR
 
+  sd_linalg_flavor_req=${sd_linalg_flavor}
   # Export configuration
   AC_SUBST(sd_linalg_flavor)
   AC_SUBST(with_linalg_flavor)

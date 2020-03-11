@@ -46,6 +46,7 @@ module m_driver
 
  use defs_datatypes, only : pseudopotential_type, pspheader_type
  use defs_abitypes,  only : MPI_type
+ use m_fstrings,     only : sjoin, itoa
  use m_time,         only : timab
  use m_xg,           only : xg_finalize
  use m_libpaw_tools, only : libpaw_write_comm_set
@@ -329,7 +330,7 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      case(RUNL_RESPFN)
        call ydoc%add_ints("optdriver, rfddk, rfelfd, rfmagn, rfphon, rfstrs", &
          [dtset%optdriver, dtset%rfddk, dtset%rfelfd, dtset%rfmagn, dtset%rfphon, dtset%rfstrs], &
-         dict_key="meta")
+         ignore=0, dict_key="meta")
          ! dtset%rfdir ??
 
      case(RUNL_NONLINEAR)
@@ -357,17 +358,14 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
          [dtset%optdriver, dtset%eph_task] , dict_key="meta")
 
      case default
-       write(msg,'(a,i0,4a)')&
-        'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
-        'This is not allowed.',ch10, 'Action: modify optdriver in the input file.'
-       MSG_ERROR(msg)
+       MSG_ERROR(sjoin('Add a meta section for optdriver: ', itoa(dtset%optdriver)))
      end select
 
-     if (dtset%use_yaml == 1) then
-       call ydoc%write_and_free(ab_out)
-     else
-       call ydoc%write_and_free(std_out)
-     end if
+     !if (dtset%use_yaml == 1) then
+     call ydoc%write_and_free(ab_out)
+     !else
+     !  call ydoc%write_and_free(std_out)
+     !end if
    end if
 
    if ( dtset%np_slk == 0 ) then
