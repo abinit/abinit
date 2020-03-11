@@ -1,4 +1,4 @@
-!!****m* ABINIT/m_sigc
+!!****m* ABINIT/m_gwrdm
 !! NAME
 !!  m_gwrdm
 !!
@@ -37,7 +37,7 @@ module m_gwrdm
  private
 !!***
 
- public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_wfk_gw_rdm
+ public :: calc_rdmx,calc_rdmc,natoccs,printdm1,update_wfd_bst
 !!***
 
 contains
@@ -279,74 +279,68 @@ subroutine natoccs(ib1,ib2,dm1,nateigv,occs_ks,BSt,kpoint,iinfo)
 end subroutine natoccs
 !!***
 
-subroutine update_wfk_gw_rdm(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr,Hdr2)
+subroutine update_wfd_bst(wfd_i,wfd_f,nateigv,occs,b1gw,b2gw,BSt,Hdr,ngfft_in)
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: b1gw,b2gw
+ integer,intent(in),dimension(3) :: ngfft_in
  type(wfd_t),intent(inout) :: wfd_f
  type(wfd_t),intent(in) :: wfd_i
  type(ebands_t),target,intent(inout) :: BSt
- type(Hdr_type),intent(inout) :: Hdr,Hdr2
+ type(Hdr_type),intent(inout) :: Hdr
 !arrays
  real(dp),intent(in) :: occs(:,:)
  complex(dpc),intent(in) :: nateigv(:,:,:)
 !Local variables ------------------------------
 !scalars
  character(len=500) :: msg
- integer :: ib1dm,ib2dm,dim_bands,ikpoint,irecip_v
+ integer :: ib1dm,ib2dm,dim_bands,ikpoint
 !arrays
 !************************************************************************
  DBG_ENTER("COLL")
 
- !call xmpi_barrier(Wfd_i%comm)
-
  ! Only master
- !if(xmpi_comm_rank(Wfd_i%comm)==0) then 
  !Wfd%Wave(6,2,1)%ug(3) ! BAND 6 , k-POINT 2, SPIN 1, UG="MO Coef"= 3
-   do ikpoint=1,BSt%nkpt
-     write(msg,'(a31,i5,a9,i5,a1,i5,a7,i5)') ' Calc. nat. orbs coefs k-point: ',ikpoint,', bands: ',b1gw,'-',b2gw,', npw: ',wfd_i%Kdata(ikpoint)%npw ! Print for debug
-     call wrtout(std_out,msg,'COLL')
-     do ib1dm=b1gw,b2gw
-       do irecip_v=1,wfd_i%Kdata(ikpoint)%npw ! No spin used, setting nspinor=1 
-        wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v)=0.0d0 
-        do ib2dm=b1gw,b2gw
-          wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v)=wfd_f%Wave(ib1dm,ikpoint,1)%ug(irecip_v) &
-                  +nateigv(ib2dm,ib1dm,ikpoint)*wfd_i%Wave(ib2dm,ikpoint,1)%ug(irecip_v)
-        enddo
-       enddo
-       !write(*,'(*(f10.5))') real(nateigv(ib1dm,:,ikpoint)) !Print for debug
+ do ikpoint=1,BSt%nkpt
+   write(msg,'(a31,i5,a9,i5,a1,i5,a7,i5)') ' Calc. nat. orbs coefs k-point: ',ikpoint,', bands: ',b1gw,'-',b2gw,', npw: ',wfd_i%Kdata(ikpoint)%npw ! Print for debug
+   call wrtout(std_out,msg,'COLL')
+   do ib1dm=b1gw,b2gw
+     wfd_f%Wave(ib1dm,ikpoint,1)%ug(:)=0.0d0 
+     do ib2dm=b1gw,b2gw
+       Wfd_f%Wave(ib1dm,ikpoint,1)%ug(:)=Wfd_f%Wave(ib1dm,ikpoint,1)%ug(:) &
+               +nateigv(ib2dm,ib1dm,ikpoint)*Wfd_i%Wave(ib2dm,ikpoint,1)%ug(:)
      enddo
-     !write(*,*) ' ' !Space for debug
+     !write(*,'(*(f10.5))') real(nateigv(ib1dm,:,ikpoint)) !Print for debug
    enddo
- !endif
- 
- !call xmpi_barrier(Wfd_i%comm)
+   !write(*,*) ' ' !Space for debug
+ enddo
 
  ! MRM BSt occ are changed and never recoverd
- MSG_COMMENT("QP_BSt occupations were updated with nat. orb. ones")
+ MSG_COMMENT("QP_BSt occupations correctly updated with nat. orb. ones")
  do ikpoint=1,BSt%nkpt
    BSt%occ(b1gw:b2gw,ikpoint,1) = occs(b1gw:b2gw,ikpoint) ! No spin used
  enddo
  if((size(Hdr%occ(:))/BSt%nkpt) < (b2gw-b1gw+1)) then
-   !Actually, we should never reach this point as the code should crash during Wfd initialization in m_sigma_driver.F90
+   !Actually, we should never reach this point because the code should stop during Wfd initialization in m_sigma_driver.F90
    MSG_ERROR("Impossible to use the existing read WFK to build a new one!")
  endif
  ! MRM change occs in Header Hdr
  ! Update occ in Hdr before printing
- MSG_COMMENT("Hdr and Hdr_sigma occupations were updated with nat. orb. ones")
+ MSG_COMMENT("Hdr_sigma occupations correctly updated with nat. orb. ones")
  ib1dm=1
  do ikpoint=1,BSt%nkpt
    dim_bands=size(BSt%occ(:,ikpoint,1))
    do ib2dm=1,dim_bands   
-     Hdr2%occ(ib1dm)=BSt%occ(ib2dm,ikpoint,1)
      Hdr%occ(ib1dm)=BSt%occ(ib2dm,ikpoint,1)
      ib1dm=ib1dm+1
    enddo
  enddo
 
- !call xmpi_barrier(Wfd_i%comm)
+ MSG_COMMENT("Hdr_sigma npw and ngfft correctly updated")
+ Hdr%npwarr(:)=Wfd_f%npwarr(:)                                   ! Use the npw = ones used in GW calc
+ Hdr%ngfft(1:3)=ngfft_in(1:3)
 
-end subroutine update_wfk_gw_rdm        
+end subroutine update_wfd_bst
 !!***
 
 subroutine printdm1(ib1,ib2,dm1) ! Only used for debug of this file, do not use it with large arrays

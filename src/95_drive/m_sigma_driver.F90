@@ -113,7 +113,7 @@ module m_sigma_driver
  use m_prep_calc_ucrpa,only : prep_calc_ucrpa
  use m_paw_correlations,only : pawpuxinit
 ! MRM density matrix module and Gaussian quadrature one
- use m_gwrdm,         only : calc_rdmx, calc_rdmc, natoccs, printdm1, update_wfk_gw_rdm
+ use m_gwrdm,         only : calc_rdmx, calc_rdmc, natoccs, printdm1, update_wfd_bst
  use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre
 
  implicit none
@@ -264,13 +264,13 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  type(wfd_t),target :: Wfd,Wfdf,Wfd_dm ! MRM use Wfd_dm 
  type(wvl_data) :: Wvl
 !arrays
- integer :: gwc_ngfft(18),ngfftc(18),ngfftf(18),gwx_ngfft(18),old_ngfft(3) ! MRM old_ngfft info 
+ integer :: gwc_ngfft(18),ngfftc(18),ngfftf(18),gwx_ngfft(18)  
  integer,allocatable :: nq_spl(:),nlmn_atm(:),my_spins(:)
  integer,allocatable :: tmp_gfft(:,:),ks_vbik(:,:),nband(:,:),l_size_atm(:),qp_vbik(:,:)
  integer,allocatable :: tmp_kstab(:,:,:),ks_irreptab(:,:,:),qp_irreptab(:,:,:),my_band_list(:)
  real(dp),parameter ::  k0(3)=zero
  real(dp) :: gmet(3,3),gprimd(3,3),rmet(3,3),rprimd(3,3),strsxc(6),tsec(2)
- real(dp),allocatable :: weights(:),aux_ecuts(:),freqs(:),occs(:,:),gw_rhor(:,:) ! MRM
+ real(dp),allocatable :: weights(:),freqs(:),occs(:,:),gw_rhor(:,:) ! MRM
  real(dp),allocatable :: grchempottn(:,:),grewtn(:,:),grvdw(:,:),qmax(:)
  real(dp),allocatable :: ks_nhat(:,:),ks_nhatgr(:,:,:),ks_rhog(:,:)
  real(dp),allocatable :: ks_rhor(:,:),ks_vhartr(:),ks_vtrial(:,:),ks_vxc(:,:)
@@ -2279,58 +2279,32 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    end if
    ! MRM print WFK and DEN files. Finally, deallocate all arrays used for 1-RDM update
    if(gwcalctyp==21) then
-     if(dtset%useric==0 .and. (Dtset%gwpara==1 .or. Dtset%gwpara==0)) then      
-       write(msg,'(a1)')' '
-       call wrtout(std_out,msg,'COLL')
-       write(msg,'(a46)')' Computing Nat. Orbs. to store them in Wfd_dm'
-       call wrtout(std_out,msg,'COLL')
-       ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
-       call update_wfk_gw_rdm(Wfd,Wfd_dm,nateigv,occs,b1gw,b2gw,QP_BSt,Hdr_wfk,Hdr_sigma)
-       write(msg,'(a29)')' Printing DEN (and WFK) files'
-       call wrtout(std_out,msg,'COLL')
-       gw1rdm_fname=dtfil%fnameabo_wfk
-       ! MRM update ngfft in the Header
-       old_ngfft(1:3)=Hdr_wfk%ngfft(1:3)
-       Hdr_wfk%ngfft(1:3)=dtset%ngfft(1:3)
-       ! MRM update ecuts (except ecutdg because it is used only with PAW)
-       ABI_MALLOC(aux_ecuts,(3))
-       aux_ecuts(1)=Hdr_wfk%ecut;     Hdr_wfk%ecut=Dtset%ecut
-       aux_ecuts(2)=Hdr_wfk%ecut_eff; Hdr_wfk%ecut_eff=Dtset%ecutwfn
-       aux_ecuts(3)=Hdr_wfk%ecutsm;   Hdr_wfk%ecutsm=Dtset%ecutsm
-       if(xmpi_comm_size(Wfd%comm)==1) then
-         call Wfd_dm%write_wfk(Hdr_wfk,QP_BSt,gw1rdm_fname)                 ! Print WFK file, QP_BSt contains nat. orbs.
-         write(msg,'(a17)')' WFK file printed'
-         call wrtout(std_out,msg,'COLL')
-       else
-         MSG_WARNING("Unable to print WFK files in parallel mode")          ! FIXME
-       endif
-       gw1rdm_fname=dtfil%fnameabo_den
-       write(msg,'(a38)')' Computing the density on the FFT grid'
-       call wrtout(std_out,msg,'COLL')
-       call Wfd%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)         ! Construct the density
-       hdr_sigma%npwarr=wfd%npwarr ! Use the npw = ones used in GW calc
-       call fftdatar_write("density",gw1rdm_fname,dtset%iomode,hdr_sigma,&  ! Print DEN file  
-       Cryst,ngfftf,cplex1,nfftf,dtset%nspden,gw_rhor,mpi_enreg_seq,ebands=QP_BSt)
-       call wrtout(std_out,msg,'COLL')
-       write(msg,'(a1)')' '
-       write(msg,'(a17)')' DEN file printed'
-       call wrtout(std_out,msg,'COLL')
-       write(msg,'(a1)')' '
-       call wrtout(std_out,msg,'COLL')
-       ! MRM Recover old values for ecuts and ngfft after writing the WFK file
-       Hdr_wfk%ecut=aux_ecuts(1)
-       Hdr_wfk%ecut_eff=aux_ecuts(2)
-       Hdr_wfk%ecutsm=aux_ecuts(3)
-       Hdr_wfk%ngfft(1:3)=old_ngfft(1:3)
-       ABI_FREE(aux_ecuts)
-       ABI_FREE(gw_rhor)
-       ! MRM prepare deallocation of Wfd_dm
-       Wfd_dm%bks_comm = xmpi_comm_null
-       call Wfd_dm%free()
-     endif
-     if(dtset%useric==0 .and. Dtset%gwpara==2) then     
-       MSG_WARNING("Unable to print DEN files with gwpara=2 (band parallelization)")          ! FIXME
-     endif 
+     write(msg,'(a1)')' '
+     call wrtout(std_out,msg,'COLL')
+     write(msg,'(a46)')' Computing Nat. Orbs. to store them in Wfd_dm'
+     call wrtout(std_out,msg,'COLL')
+     ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
+     call update_wfd_bst(Wfd,Wfd_dm,nateigv,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
+     write(msg,'(a29)')' Printing DEN (and WFK) files'
+     call wrtout(std_out,msg,'COLL')
+     gw1rdm_fname=dtfil%fnameabo_wfk
+     call Wfd_dm%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname)                   ! Print WFK file, QP_BSt contains nat. orbs.
+     gw1rdm_fname=dtfil%fnameabo_den
+     write(msg,'(a38)')' Computing the density on the FFT grid'
+     call wrtout(std_out,msg,'COLL')
+     call Wfd_dm%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)        ! Construct the density
+     call fftdatar_write("density",gw1rdm_fname,dtset%iomode,Hdr_sigma,&    ! Print DEN file  
+     Cryst,ngfftf,cplex1,nfftf,dtset%nspden,gw_rhor,mpi_enreg_seq,ebands=QP_BSt)
+     call wrtout(std_out,msg,'COLL')
+     write(msg,'(a1)')' '
+     write(msg,'(a17)')' DEN file printed'
+     call wrtout(std_out,msg,'COLL')
+     write(msg,'(a1)')' '
+     call wrtout(std_out,msg,'COLL')
+     ABI_FREE(gw_rhor)
+     ! MRM prepare deallocation of Wfd_dm
+     Wfd_dm%bks_comm = xmpi_comm_null
+     call Wfd_dm%free()
      ABI_FREE(dm1) 
      ABI_FREE(nateigv) 
      ABI_FREE(freqs)
