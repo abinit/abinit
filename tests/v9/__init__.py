@@ -14,8 +14,8 @@ inp_files = [
 "t01.in",
 "t02.in",
 "t03.in",
-# Structure variable (temporarily disabled)
-"-t04.in",
+# Structure variable
+"t04.in",
 # Electron-phonon
 "t50.in",
 "t51.in",
