@@ -3230,7 +3230,7 @@ subroutine chkvars(string)
 !T
  list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc temperature test_effpot test_prt_ph tfw_toldfe tim1rev timopt'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix'
- list_vars=trim(list_vars)//' tl_nprccg tl_radiustmesh tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
+ list_vars=trim(list_vars)//' tl_nprccg tl_radius tmesh tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
  list_vars=trim(list_vars)//' tolvrs tolwfr tphysel transport_ngkpt ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
