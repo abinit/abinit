@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of AIM 
+.Version 9.0.0 of AIM 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h27 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h16 )
   
  ECHO of the INPUT
  ************************
@@ -34,7 +34,7 @@
  ECHO of the ABINIT file header 
  
  First record :
-.codvsn,headform,fform = 8.11.1   80   52
+.codvsn,headform,fform = 9.0.0      80   52
  
  Second record :
  bantot,intxc,ixc,natom  =     1     0     1     1
@@ -665,8 +665,8 @@ BCP-RCP-CCP       6      12       8
 
  Time needed (seconds) - total, CP analyse, SURF determination:
 
--               1.31087804      0.18239500      1.10393503
+-               1.29162998      0.15997200      1.10742904
 
-+Total cpu time      1.311  and wall time      1.327 sec
++Total cpu time      1.292  and wall time      1.300 sec
 
  aim : the run completed succesfully.

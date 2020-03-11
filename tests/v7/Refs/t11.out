@@ -1,5 +1,5 @@
 
-.Version 8.11.12 of ABINIT 
+.Version 9.0.0 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 25 Nov 2019.
-- ( at 08h33 )
+.Starting date : Mon 24 Feb 2020.
+- ( at 16h22 )
   
-- input  file    -> t11.in
+- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v7_t11/t11.in
 - output file    -> t11.out
 - root for input  files -> t11i
 - root for output files -> t11o
@@ -186,7 +186,16 @@ P           mkmem           1
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 32, nkpt: 1, mband: 1, nsppol: 1, nspinor: 1, nspden: 1, mpw: 1213, }
+cutoff_energies: {ecut:  75.0, pawecutdg:  -1.0, }
+electrons: {nelect:   1.60000000E+02, charge:   0.00000000E+00, occopt:   0.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 12, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA at finite T Ichimaru-Iyetomy-Tanaka - ixc=50
@@ -211,8 +220,8 @@ P           mkmem           1
 
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/05b.soft_tm
-- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk__gonze3/tests/Psps_for_tests/05b.soft_tm
+- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/05b.soft_tm
+- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/05b.soft_tm
 -  Troullier-Martins-Fermi psp for element  B         dim jui 18 17:59:39 CEST 2004
 -  5.00000   5.00000     40425                znucl, zion, pspdat
     1    1    0    0      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -238,6 +247,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1213.000    1213.000
 --------------------------------------------------------------------------------
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
+
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
+solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-09, }
+...
 
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -299.00246631334    -2.990E+02 0.000E+00 2.385E+02
@@ -274,6 +289,95 @@ _setup2: Arith. and geom. avg. npw (full set) are    1213.000    1213.000
   sigma(1 1)= -1.03143579E+01  sigma(3 2)= -6.90214491E-10
   sigma(2 2)= -1.03143579E+01  sigma(3 1)= -2.46489928E-10
   sigma(3 3)= -1.03143579E+01  sigma(2 1)=  3.97717224E-10
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 1, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  3.3844700,   0.0000000,   0.0000000, ]
+- [  0.0000000,   3.3844700,   0.0000000, ]
+- [  0.0000000,   0.0000000,   3.3844700, ]
+lattice_lengths: [   3.38447,    3.38447,    3.38447, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   3.8767876E+01
+convergence: {deltae: -1.689E-10, res2:  3.418E-08, residm:  0.000E+00, diffor: null, }
+etotal    :  -2.81589787E+02
+entropy   :   0.00000000E+00
+fermie    :   1.03836932E+01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -1.03143579E+01,   3.97717224E-10,  -2.46489928E-10, ]
+- [  3.97717224E-10,  -1.03143579E+01,  -6.90214491E-10, ]
+- [ -2.46489928E-10,  -6.90214491E-10,  -1.03143579E+01, ]
+pressure_GPa:   3.0346E+05
+xred      :
+- [  2.6487E-06,   1.9908E-06,  -3.7886E-06,  B]
+- [  2.5000E-01,   2.5000E-01,   2.7427E-06,  B]
+- [  2.5000E-01,   4.1627E-06,   2.5000E-01,  B]
+- [ -2.9645E-06,   2.5000E-01,   2.5000E-01,  B]
+- [ -2.0271E-06,   4.0493E-06,   5.0000E-01,  B]
+- [  2.5000E-01,   2.5000E-01,   5.0000E-01,  B]
+- [  2.5000E-01,  -2.2609E-06,   7.5000E-01,  B]
+- [ -7.6000E-08,   2.5000E-01,   7.5000E-01,  B]
+- [ -4.0200E-08,   5.0000E-01,  -3.1958E-06,  B]
+- [  2.5000E-01,   7.5000E-01,  -3.6094E-06,  B]
+- [  2.5000E-01,   5.0000E-01,   2.5000E-01,  B]
+- [  2.2425E-06,   7.5000E-01,   2.5000E-01,  B]
+- [ -1.4700E-08,   5.0000E-01,   5.0000E-01,  B]
+- [  2.5000E-01,   7.5000E-01,   5.0000E-01,  B]
+- [  2.5000E-01,   5.0000E-01,   7.5000E-01,  B]
+- [  3.1813E-06,   7.5000E-01,   7.5000E-01,  B]
+- [  5.0000E-01,   1.5883E-06,   1.0888E-06,  B]
+- [  7.5000E-01,   2.5000E-01,  -4.2745E-06,  B]
+- [  7.5000E-01,   1.4721E-06,   2.5000E-01,  B]
+- [  5.0000E-01,   2.5000E-01,   2.5000E-01,  B]
+- [  5.0000E-01,   4.3449E-06,   5.0000E-01,  B]
+- [  7.5000E-01,   2.5000E-01,   5.0000E-01,  B]
+- [  7.5000E-01,  -3.4273E-06,   7.5000E-01,  B]
+- [  5.0000E-01,   2.5000E-01,   7.5000E-01,  B]
+- [  5.0000E-01,   5.0000E-01,   3.2994E-06,  B]
+- [  7.5000E-01,   7.5000E-01,  -1.7399E-06,  B]
+- [  7.5000E-01,   5.0000E-01,   2.5000E-01,  B]
+- [  5.0000E-01,   7.5000E-01,   2.5000E-01,  B]
+- [  5.0000E-01,   5.0000E-01,   5.0000E-01,  B]
+- [  7.5000E-01,   7.5000E-01,   5.0000E-01,  B]
+- [  7.5000E-01,   5.0000E-01,   7.5000E-01,  B]
+- [  5.0000E-01,   7.5000E-01,   7.5000E-01,  B]
+cartesian_forces: # hartree/bohr
+- [ -2.79589263E-04,  -3.09760015E-04,   1.01374536E-03, ]
+- [ -2.22829044E-04,   3.02945149E-04,  -2.38225713E-04, ]
+- [ -1.05222743E-03,  -6.16432660E-04,   8.74019711E-05, ]
+- [  3.65814453E-05,  -5.94022033E-04,  -1.83301457E-04, ]
+- [  4.66948248E-06,  -2.31543873E-04,  -7.57951340E-04, ]
+- [ -6.18731273E-04,  -3.28251517E-05,   2.32762950E-04, ]
+- [  3.68786550E-04,   4.94203696E-04,  -4.92012903E-04, ]
+- [  2.20843048E-04,   2.78863960E-04,  -3.81320161E-04, ]
+- [ -1.03010639E-05,   1.32977245E-04,   2.65371526E-04, ]
+- [ -3.06812077E-04,  -3.25447059E-04,   7.15488688E-04, ]
+- [  4.16359781E-05,   2.95726336E-04,  -3.21864352E-04, ]
+- [  1.40099992E-04,   8.58630298E-04,  -3.13693060E-05, ]
+- [  4.06076761E-04,   9.94132236E-05,   5.21536671E-04, ]
+- [  2.31969541E-04,   2.21075642E-04,  -5.59743931E-04, ]
+- [ -2.54239618E-04,  -3.00524216E-04,  -1.16930012E-04, ]
+- [ -4.08499627E-04,  -2.60306869E-04,  -6.87571744E-06, ]
+- [  7.65845467E-05,  -8.16632590E-05,  -2.77378184E-04, ]
+- [  1.68197771E-04,   5.74501358E-04,   3.58570588E-04, ]
+- [  8.33490800E-04,  -2.27155941E-04,   1.72206011E-04, ]
+- [  5.43593906E-04,   5.25914703E-04,   2.51677062E-04, ]
+- [  2.34097507E-04,  -7.48706343E-04,   1.58724370E-04, ]
+- [  2.37664554E-04,  -4.29772080E-04,  -2.26128716E-04, ]
+- [ -2.05207282E-05,  -8.79073084E-05,  -4.76810655E-04, ]
+- [ -1.66233142E-04,  -2.75549226E-05,   5.20093938E-04, ]
+- [  2.83236381E-04,   4.56965161E-05,  -1.92634610E-04, ]
+- [  3.36408420E-04,  -2.57888260E-05,   2.70063210E-04, ]
+- [ -4.90082326E-04,  -1.50128470E-04,  -6.26684389E-04, ]
+- [ -1.30903061E-05,  -4.83772491E-04,   6.71855468E-04, ]
+- [  6.35229445E-05,   9.10323315E-04,  -3.51140858E-04, ]
+- [ -4.11905371E-04,   4.75771382E-04,   1.19959572E-04, ]
+- [ -3.38130716E-04,   1.36248081E-04,   4.23800002E-04, ]
+- [  3.65732356E-04,  -4.18979386E-04,  -5.42885081E-04, ]
+force_length_stats: {min:   2.97003546E-04, max:   1.22262459E-03, mean:   6.63386201E-04, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -486,6 +590,12 @@ _setup2: Arith. and geom. avg. npw (full set) are    1213.000    1213.000
 
 ---SELF-CONSISTENT-FIELD CONVERGENCE--------------------------------------------
 
+--- !BeginCycle
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
+solver: {iscf: 7, nstep: 50, nline: 4, wfoptalg: 0, }
+tolerances: {toldfe: 1.00E-09, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -281.57464248186    -2.816E+02 0.000E+00 7.644E+01
  ETOT  2  -281.58560513742    -1.096E-02 0.000E+00 1.664E+00
@@ -506,6 +616,95 @@ _setup2: Arith. and geom. avg. npw (full set) are    1213.000    1213.000
   sigma(1 1)= -1.03144160E+01  sigma(3 2)= -2.91955518E-06
   sigma(2 2)= -1.03144226E+01  sigma(3 1)=  5.10270512E-07
   sigma(3 3)= -1.03144227E+01  sigma(2 1)=  1.47693862E-05
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, itime: 2, icycle: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  3.3844700,   0.0000000,   0.0000000, ]
+- [  0.0000000,   3.3844700,   0.0000000, ]
+- [  0.0000000,   0.0000000,   3.3844700, ]
+lattice_lengths: [   3.38447,    3.38447,    3.38447, ]
+lattice_angles: [ 90.000,  90.000,  90.000, ] # degrees, (23, 13, 12)
+lattice_volume:   3.8767876E+01
+convergence: {deltae: -3.183E-12, res2:  7.618E-07, residm:  0.000E+00, diffor: null, }
+etotal    :  -2.81585955E+02
+entropy   :   0.00000000E+00
+fermie    :   1.03836857E+01
+cartesian_stress_tensor: # hartree/bohr^3
+- [ -1.03144160E+01,   1.47693862E-05,   5.10270512E-07, ]
+- [  1.47693862E-05,  -1.03144226E+01,  -2.91955518E-06, ]
+- [  5.10270512E-07,  -2.91955518E-06,  -1.03144227E+01, ]
+pressure_GPa:   3.0346E+05
+xred      :
+- [  2.1067E-04,  -3.1727E-04,   2.3092E-04,  B]
+- [  2.5047E-01,   2.4985E-01,   4.9937E-04,  B]
+- [  2.5076E-01,  -1.6336E-05,   2.5020E-01,  B]
+- [  1.0238E-04,   2.5029E-01,   2.5015E-01,  B]
+- [  3.8524E-04,  -1.2123E-03,   5.0014E-01,  B]
+- [  2.5010E-01,   2.4885E-01,   4.9977E-01,  B]
+- [  2.5020E-01,   1.0320E-03,   7.5044E-01,  B]
+- [  1.9447E-04,   2.4978E-01,   7.5049E-01,  B]
+- [ -7.1920E-05,   5.0024E-01,   3.8884E-04,  B]
+- [  2.4994E-01,   7.5013E-01,  -2.2542E-04,  B]
+- [  2.4989E-01,   4.9968E-01,   2.5003E-01,  B]
+- [  6.6424E-04,   7.4890E-01,   2.4945E-01,  B]
+- [ -1.7782E-04,   5.0045E-01,   4.9945E-01,  B]
+- [  2.5031E-01,   7.5016E-01,   5.0038E-01,  B]
+- [  2.5001E-01,   5.0088E-01,   7.5011E-01,  B]
+- [  1.7641E-04,   7.5023E-01,   7.4950E-01,  B]
+- [  4.9989E-01,   5.2759E-04,   6.0236E-04,  B]
+- [  7.4988E-01,   2.4979E-01,   1.0480E-04,  B]
+- [  7.4943E-01,   2.4369E-04,   2.4967E-01,  B]
+- [  4.9980E-01,   2.4984E-01,   2.5022E-01,  B]
+- [  4.9954E-01,   3.2934E-04,   4.9932E-01,  B]
+- [  7.4924E-01,   2.4928E-01,   5.0035E-01,  B]
+- [  7.4934E-01,   1.7188E-05,   7.4952E-01,  B]
+- [  4.9999E-01,   2.5048E-01,   7.5064E-01,  B]
+- [  4.9996E-01,   5.0015E-01,  -1.4689E-04,  B]
+- [  7.4951E-01,   7.4973E-01,   3.4034E-04,  B]
+- [  7.4997E-01,   4.9981E-01,   2.5003E-01,  B]
+- [  5.0001E-01,   7.5066E-01,   2.4900E-01,  B]
+- [  5.0002E-01,   4.9963E-01,   4.9962E-01,  B]
+- [  7.5052E-01,   7.5040E-01,   4.9951E-01,  B]
+- [  7.4987E-01,   5.0013E-01,   7.4950E-01,  B]
+- [  4.9986E-01,   7.5008E-01,   7.5070E-01,  B]
+cartesian_forces: # hartree/bohr
+- [ -5.61102335E-02,   6.43632461E-03,   1.18460618E-02, ]
+- [ -8.24688965E-02,   5.76261423E-02,  -3.73905562E-02, ]
+- [ -1.56357807E-01,  -3.74289937E-02,  -2.67924585E-02, ]
+- [ -4.01459951E-02,  -8.54373244E-02,   3.45272376E-02, ]
+- [ -5.00434313E-02,   1.15045102E-01,  -6.37836680E-02, ]
+- [ -8.16523914E-02,   1.43844251E-01,   7.88649260E-02, ]
+- [  7.99812542E-03,  -5.98531588E-02,  -9.83787806E-03, ]
+- [ -2.24368107E-02,   5.97044676E-02,  -6.09932932E-02, ]
+- [ -1.64351794E-02,  -4.72896685E-02,  -1.06437318E-01, ]
+- [ -1.63767492E-02,   4.02132995E-03,   7.14952812E-04, ]
+- [  6.70061722E-02,   2.82912631E-02,   3.33083746E-02, ]
+- [ -3.73941307E-02,   1.36041061E-01,   1.58842655E-02, ]
+- [  2.24756789E-02,  -1.18599511E-01,   9.55349541E-02, ]
+- [  6.00565981E-02,  -3.74659551E-02,  -2.76734109E-02, ]
+- [ -4.45660960E-02,  -1.16476517E-01,  -5.34549976E-02, ]
+- [ -5.41570252E-02,  -1.50061190E-02,   8.42009601E-02, ]
+- [  2.96706195E-02,  -2.83518528E-02,  -1.04866716E-01, ]
+- [  5.94808762E-02,   2.81388135E-02,  -2.72760034E-02, ]
+- [  1.57176619E-01,  -2.06003425E-02,   3.21943375E-02, ]
+- [  4.14663597E-02,   9.94690384E-02,  -2.05411282E-02, ]
+- [  4.93967189E-02,  -9.96681863E-02,   1.17428077E-01, ]
+- [  1.36394669E-01,   3.65248231E-02,  -3.85582553E-03, ]
+- [  3.85941891E-02,  -2.48574297E-02,   5.32365157E-02, ]
+- [ -1.71394311E-02,   6.68563616E-03,  -4.74590860E-02, ]
+- [  8.08143764E-03,  -2.59416661E-02,   3.37733322E-02, ]
+- [  8.52837779E-02,   3.50010409E-02,  -6.70379182E-02, ]
+- [ -4.55520469E-02,  -1.38013199E-02,   2.23599531E-02, ]
+- [ -1.03203010E-02,  -1.20885026E-01,   1.19473154E-01, ]
+- [ -1.63354501E-02,   8.34210143E-02,   1.40239110E-02, ]
+- [ -1.13329893E-01,  -2.38585748E-02,   8.66843846E-03, ]
+- [  5.46007697E-02,   3.72165194E-03,   7.48436590E-03, ]
+- [  4.31392567E-02,   3.15496846E-02,  -1.06123559E-01, ]
+force_length_stats: {min:   1.68783935E-02, max:   1.83242894E-01, mean:   1.05042158E-01, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -894,22 +1093,20 @@ _setup2: Arith. and geom. avg. npw (full set) are    1213.000    1213.000
  length scales=  3.384470000000  3.384470000000  3.384470000000 bohr
               =  1.790984387157  1.790984387157  1.790984387157 angstroms
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  1.30888340478549E+03
-    Hartree energy  =  1.84181708464438E+01
-    XC energy       = -1.94685952077039E+02
-    Ewald energy    = -1.08372926657027E+03
-    PspCore energy  = -3.66144270079341E+01
-    Loc. psp. energy= -2.93857885416311E+02
-    NL   psp  energy=  0.00000000000000E+00
-    >>>>>>>>> Etotal= -2.81585955439622E+02
-
- Other information on the energy :
-    Total energy(eV)= -7.66234352305242E+03 ; Band energy (Ha)=   0.0000000000E+00
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, itime: 2, icycle: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  1.30888340478549E+03
+hartree             :  1.84181708464438E+01
+xc                  : -1.94685952077039E+02
+Ewald energy        : -1.08372926657027E+03
+psp_core            : -3.66144270079341E+01
+local_psp           : -2.93857885416311E+02
+non_local_psp       :  0.00000000000000E+00
+total_energy        : -2.81585955439622E+02
+total_energy_eV     : -7.66234352305242E+03
+band_energy         :  0.00000000000000E+00
+...
 
  rms coord change=  4.4010E-04   atom, delta coord (reduced):
      1        0.000208018958     -0.000319258611      0.000234703737
@@ -1178,7 +1375,24 @@ P           mkmem           1
  of the ABINIT implementation.
  For information on why they are suggested, see also https://docs.abinit.org/theory/acknowledgments.
 -
-- [1] Recent developments in the ABINIT software package.
+- [1] The Abinit project: Impact, environment and recent developments.
+- Computer Phys. Comm. 248, 107042 (2020).
+- X.Gonze, B. Amadon, G. Antonius, F.Arnardi, L.Baguet, J.-M.Beuken,
+- J.Bieder, F.Bottin, J.Bouchet, E.Bousquet, N.Brouwer, F.Bruneval,
+- G.Brunin, T.Cavignac, J.-B. Charraud, Wei Chen, M.Cote, S.Cottenier,
+- J.Denier, G.Geneste, Ph.Ghosez, M.Giantomassi, Y.Gillet, O.Gingras,
+- D.R.Hamann, G.Hautier, Xu He, N.Helbig, N.Holzwarth, Y.Jia, F.Jollet,
+- W.Lafargue-Dit-Hauret, K.Lejaeghere, M.A.L.Marques, A.Martin, C.Martins,
+- H.P.C. Miranda, F.Naccarato, K. Persson, G.Petretto, V.Planes, Y.Pouillon,
+- S.Prokhorenko, F.Ricci, G.-M.Rignanese, A.H.Romero, M.M.Schmitt, M.Torrent,
+- M.J.van Setten, B.Van Troeye, M.J.Verstraete, G.Zerah and J.W.Zwanzig
+- Comment: the fifth generic paper describing the ABINIT project.
+- Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
+- is available at https://www.abinit.org/sites/default/files/ABINIT20.pdf .
+- The licence allows the authors to put it on the Web.
+- DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2020
+-
+- [2] Recent developments in the ABINIT software package.
 - Computer Phys. Comm. 205, 106 (2016).
 - X.Gonze, F.Jollet, F.Abreu Araujo, D.Adams, B.Amadon, T.Applencourt,
 - C.Audouze, J.-M.Beuken, J.Bieder, A.Bokhanchuk, E.Bousquet, F.Bruneval
@@ -1192,11 +1406,11 @@ P           mkmem           1
 - B.Xu, A.Zhou, J.W.Zwanziger.
 - Comment: the fourth generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT16.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT16.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2016
 -
-- [2] ABINIT: First-principles approach of materials and nanosystem properties.
+- [3] ABINIT: First-principles approach of materials and nanosystem properties.
 - Computer Phys. Comm. 180, 2582-2615 (2009).
 - X. Gonze, B. Amadon, P.-M. Anglade, J.-M. Beuken, F. Bottin, P. Boulanger, F. Bruneval,
 - D. Caliste, R. Caracas, M. Cote, T. Deutsch, L. Genovese, Ph. Ghosez, M. Giantomassi
@@ -1205,11 +1419,13 @@ P           mkmem           1
 - M. Torrent, M.J. Verstraete, G. Zerah, J.W. Zwanziger
 - Comment: the third generic paper describing the ABINIT project.
 - Note that a version of this paper, that is not formatted for Computer Phys. Comm. 
-- is available at https://www.abinit.org/about/ABINIT_CPC_v10.pdf .
+- is available at https://www.abinit.org/sites/default/files/ABINIT_CPC_v10.pdf .
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- [3] A brief introduction to the ABINIT software package.
+- And optionally:
+-
+- [4] A brief introduction to the ABINIT software package.
 - Z. Kristallogr. 220, 558-562 (2005).
 - X. Gonze, G.-M. Rignanese, M. Verstraete, J.-M. Beuken, Y. Pouillon, R. Caracas, F. Jollet,
 - M. Torrent, G. Zerah, M. Mikami, Ph. Ghosez, M. Veithen, J.-Y. Raty, V. Olevano, F. Bruneval,
@@ -1217,19 +1433,10 @@ P           mkmem           1
 - Comment: the second generic paper describing the ABINIT project. Note that this paper
 - should be cited especially if you are using the GW part of ABINIT, as several authors
 - of this part are not in the list of authors of the first or third paper.
-- The .pdf of the latter paper is available at https://www.abinit.org/about/zfk_0505-06_558-562.pdf.
-- Note that it should not redistributed (Copyright by Oldenburg Wissenshaftverlag,
+- The .pdf of the latter paper is available at https://www.abinit.org/sites/default/files/zfk_0505-06_558-562.pdf.
+- Note that it should not redistributed (Copyright by Oldenburg Wissenschaftverlag,
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
--
-- And optionally:
--
-- [4] First-principles computation of material properties: the ABINIT software project. 
-- X. Gonze, J.-M. Beuken, R. Caracas, F. Detraux, M. Fuchs, G.-M. Rignanese, L. Sindic,
-- M. Verstraete, G. Zerah, F. Jollet, M. Torrent, A. Roy, M. Mikami, Ph. Ghosez, J.-Y. Raty, D.C. Allan.
-- Computational Materials Science 25, 478-492 (2002). http://dx.doi.org/10.1016/S0927-0256(02)00325-7
-- Comment: the original paper describing the ABINIT project.
-- DOI and bibtex : see https://docs.abinit.org/theory/bibliography/#gonze2002
 -
 - Proc.   0 individual time (sec): cpu=          9.2  wall=          9.2
 

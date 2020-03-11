@@ -38,10 +38,10 @@ MODULE m_crystal
 
  use m_io_tools,       only : file_exists
  use m_numeric_tools,  only : set2unit
- use m_fstrings,       only : int2char10, sjoin, yesno
+ use m_fstrings,       only : int2char10, sjoin, yesno, itoa
  use m_symtk,          only : mati3inv, sg_multable, symatm, print_symmetries
  use m_spgdata,        only : spgdata
- use m_geometry,       only : metric, xred2xcart, remove_inversion, getspinrot, symredcart
+ use m_geometry,       only : metric, xred2xcart, xcart2xred, remove_inversion, getspinrot, symredcart
  use m_io_tools,       only : open_file
 
  implicit none
@@ -288,8 +288,8 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine crystal_init(amu,Cryst,space_group,natom,npsp,ntypat,nsym,rprimd,typat,xred,&
-& zion,znucl,timrev,use_antiferro,remove_inv,title,&
-& symrel,tnons,symafm) ! Optional
+   zion,znucl,timrev,use_antiferro,remove_inv,title,&
+   symrel,tnons,symafm) ! Optional
 
 !Arguments ------------------------------------
 !scalars
@@ -672,7 +672,7 @@ subroutine symbols_crystal(natom,ntypat,npsp,symbols,typat,znucl)
  integer :: ia,ii,itypat,jj
 ! *************************************************************************
 
- !  Fill the symbols array
+ ! Fill the symbols array
  do ia=1,natom
    symbols(ia) = adjustl(znucl2symbol(znucl(typat(ia))))
  end do
@@ -781,11 +781,9 @@ end function isymmorphic
 !!
 !! SOURCE
 
-pure function isalchemical(Cryst) result(ans)
+pure logical function isalchemical(Cryst) result(ans)
 
 !Arguments ------------------------------------
-!scalars
- logical :: ans
  class(crystal_t),intent(in) :: Cryst
 
 ! *************************************************************************
@@ -808,13 +806,12 @@ end function isalchemical
 !!
 !! SOURCE
 
-function adata_type(crystal, itypat) result(atom)
+type(atomdata_t) function adata_type(crystal, itypat) result(atom)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: itypat
  class(crystal_t),intent(in) :: crystal
- type(atomdata_t) :: atom
 
 ! *************************************************************************
 
@@ -1036,7 +1033,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
 ! *************************************************************************
 
- ! TODO alchemy not treated correctly
+ ! TODO alchemy not treated correctly by ETSF_IO specs.
  if (cryst%isalchemical()) then
    write(msg,"(3a)")&
     "Alchemical crystals are not fully supported by the netcdf format",ch10,&
@@ -1047,11 +1044,13 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
  symmorphic = yesno(cryst%isymmorphic())
 
  ! Define dimensions.
+ ! npsp added in v9.
  ncerr = nctk_def_dims(ncid, [ &
    nctkdim_t("complex", 2), nctkdim_t("symbol_length", 2),&
    nctkdim_t("character_string_length", 80), nctkdim_t("number_of_cartesian_directions", 3),&
    nctkdim_t("number_of_reduced_dimensions", 3), nctkdim_t("number_of_vectors", 3),&
    nctkdim_t("number_of_atoms", cryst%natom), nctkdim_t("number_of_atom_species", cryst%ntypat),&
+   nctkdim_t("number_of_atom_pseudopotentials", cryst%npsp),&
    nctkdim_t("number_of_symmetry_operations", cryst%nsym)], defmode=.True.)
  NCF_CHECK(ncerr)
 
@@ -1090,7 +1089,7 @@ integer function crystal_ncwrite(cryst, ncid) result(ncerr)
 
  ! Set-up atomic symbols.
  do itypat=1,cryst%ntypat
-   call atomdata_from_znucl(atom,cryst%znucl(itypat))
+   call atomdata_from_znucl(atom, cryst%znucl(itypat))
    symbols(itypat) = atom%symbol
    write(symbols_long(itypat),'(a2,a78)') symbols(itypat),REPEAT(CHAR(0),78)
    write(psp_desc(itypat),'(2a)') &
@@ -1394,8 +1393,9 @@ end subroutine symrel2string
 !! FUNCTION
 !!  output VASP style POSCAR and FORCES files for use with frozen phonon codes, like
 !!  PHON from Dario Alfe' or frophon
-!!  IMPORTANT: the order of atoms is fixed such that typat is re-grouped. First typat=1
-!!  then typat=2, etc...
+!!  IMPORTANT: the order of atoms is fixed such that typat is re-grouped.
+!!  First typat=1 then typat=2, etc...
+!!  Only master should call this routine in MPI-mode.
 !!
 !! INPUTS
 !!  fcart = forces on atoms in cartesian coordinates
@@ -1442,26 +1442,24 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
  character(len=7) :: natoms_this_type_str
  character(len=100) :: chem_formula, natoms_all_types
  character(len=500) :: msg
- character(len=fnlen) :: fname
 
 !************************************************************************
 
-!output POSCAR file for positions, atom types etc
- fname = trim(fnameradix)//"_POSCAR"
- if (open_file(fname,msg,newunit=iout) /= 0) then
+ ! Output POSCAR file for positions, atom types etc
+ if (open_file(trim(fnameradix)//"_POSCAR", msg, newunit=iout) /= 0) then
    MSG_ERROR(msg)
  end if
 
  natoms_this_type = 0
- do itypat=1, ntypat
+ do itypat=1,ntypat
    do iatom=1,natom
-     if (typat(iatom) == itypat) natoms_this_type(itypat) = natoms_this_type(itypat)+1
+     if (typat(iatom) == itypat) natoms_this_type(itypat) = natoms_this_type(itypat) + 1
    end do
  end do
 
  chem_formula = ""
  do itypat=1, ntypat
-   call atomdata_from_znucl(atom,znucl(itypat))
+   call atomdata_from_znucl(atom, znucl(itypat))
    symbol = atom%symbol
    if (natoms_this_type(itypat) < 10) then
      write (natoms_this_type_str, '(I1)') natoms_this_type(itypat)
@@ -1472,19 +1470,23 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
    end if
    chem_formula = trim(chem_formula) // symbol // trim(natoms_this_type_str)
  end do
+
  write (iout,'(2a)') "ABINIT generated POSCAR file. Title string - should be chemical formula... ",trim(chem_formula)
 
  write (iout,'(E24.14)') -ucvol*Bohr_Ang*Bohr_Ang*Bohr_Ang
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,1) ! (angstr? bohr?)
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,2)
  write (iout,'(3E24.14,1x)') Bohr_Ang*rprimd(:,3)
+
  natoms_all_types = "   "
  do itypat=1, ntypat
    write (natoms_this_type_str, '(I7)') natoms_this_type(itypat)
    natoms_all_types = trim(natoms_all_types) // "   " // trim(natoms_this_type_str)
  end do
+
  write (iout,'(a)') trim(natoms_all_types)
  write (iout,'(a)') "Direct"
+
  do itypat=1, ntypat
    do iatom=1,natom
      if (typat(iatom) /= itypat) cycle
@@ -1493,17 +1495,16 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
  end do
  close (iout)
 
-!output FORCES file for forces in same order as positions above
- fname = trim(fnameradix)//"_FORCES"
- if (open_file(fname,msg,newunit=iout) /= 0 ) then
+ ! output FORCES file for forces in same order as positions above
+ if (open_file(trim(fnameradix)//"_FORCES", msg, newunit=iout) /= 0 ) then
    MSG_ERROR(msg)
  end if
 
-!ndisplacements
-!iatom_displaced displacement_red_coord(3)
-!forces_cart_ev_Angstr(3)
-!...
-!<repeat for other displaced atoms>
+ !ndisplacements
+ !iatom_displaced displacement_red_coord(3)
+ !forces_cart_ev_Angstr(3)
+ !...
+ !<repeat for other displaced atoms>
  write (iout,'(I7)') 1
  write (iout,'(a)') '1 0 0 0        ! TO BE FILLED IN '
  do itypat=1, ntypat
@@ -1512,34 +1513,11 @@ subroutine prtposcar(fcart, fnameradix, natom, ntypat, rprimd, typat, ucvol, xre
      write (iout,'(3(E24.14,1x))') Ha_eV/Bohr_Ang*fcart(:,iatom)
    end do
  end do
+
  close (iout)
 
 end subroutine prtposcar
 !!***
-
-!!! !!****f* m_crystal/crystal_yaml_write
-!!! !!
-!!! !! NAME
-!!! !! crystal_yaml_write
-!!! !!
-!!! !! FUNCTION
-!!! !! Write rystal info in YAML format
-!!! !!
-!!! !! PARENTS
-!!! !!
-!!! !! CHILDREN
-!!! !!
-!!! !! SOURCE
-!!!
-!!! subroutine neat_crystal(crystal, iout, comment)
-!!!  class(crystal_t),intent(in) :: crystal
-!!!  integer,intent(in) :: iout
-!!!  character(len=*),intent(in),optional :: comment
-!!!
-!!!  write(std_out, *)"Unused neat_crystal", crystal%natom, iout, trim(comment)
-!!!
-!!! end subroutine neat_crystal
-!!! !!***
 
 END MODULE m_crystal
 !!***

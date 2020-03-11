@@ -79,7 +79,7 @@ directory,
 
 ```sh
 cd $ABI_TESTS/tutoparal/Input
-mkdir Work_dfmt
+mkdir Work_dmft
 cd Work_dmft
 cp ../tdmft_x.files .
 cp ../tdmft_1.in .
@@ -601,12 +601,144 @@ acell  | Internal energy LDA  |  Internal energy DMFT
 and then plot DMFT and LDA energies as a function of acell. You will notice
 that the equilibrium volume is very weakly modified by the strong correlations is this case.
 
-## 7 Electronic Structure of SrVO3: Conclusion
+## 7 Electronic Structure of SrVO3: k-resolved Spectral function
 
+We are going to use OmegaMaxEnt to do the direct analytical continuation of the self-energy in Matsubara frequencies to real frequencies.
+(A more precise way to do the analytical continuation uses an auxiliary Green's function as mentionned in e.g. endnote 55
+of Ref. [[cite:Sakuma2013a]]).
+First of all, we are going to relaunch a more converged calculation using tdmft_5.in
+
+{% dialog tests/tutoparal/Input/tdmft_5.in%}
+
+Modify tdmft_x.files and launch the calculation, it might take some time. The calculation takes in few minutes with 4 processors.
+
+    abinit < tdmft_x.files > log_5
+
+We are going to create a new directory for the analytical continuation.
+
+    mkdir Spectral
+  
+We first extract the first Matsubara frequencies (which are not too noisy)
+    
+    head -n 26 tdmft_5o_DS2Selfrotformaxent0001_isppol1_iflavor0001 > Spectral/self.dat
+
+In this directory, we launch OmegaMaxEnt just to generate the input template:
+
+    cd Spectral
+    OmegaMaxEnt
+
+Then, you have to edit the input file *OmegaMaxEnt_input_params.dat* of OmegaMaxent and specify that the data is contained in self.dat and
+that it contains a finite value a infinite frequency. So the first lines should look like this:
+
+    data file: self.dat
+    
+    OPTIONAL PREPROCESSING TIME PARAMETERS
+    
+    DATA PARAMETERS
+    bosonic data (yes/[no]):
+    imaginary time data (yes/[no]):
+    temperature (in energy units, k_B=1):
+    finite value at infinite frequency (yes/[no]): yes
+
+
+Then relaunch OmegaMaxent
+
+    OmegaMaxEnt
+
+You can now plot the imaginary part of the self energy in real frequencies with (be careful, this file contains in fact -2 Im$\Sigma$. If another analytical continuation tool is used, one needs to give to ABINIT -2 Im$\Sigma$ and not $\Sigma$ ):
+
+    xmgrace OmegaMaxEnt_final_result/optimal_spectral_function.dat
+
+Then, we need to give to ABINIT this file in order for abinit to use
+it, to compute the Green's function in real frequencies and to deduce the k-resolved spectral function.
+First copy this self energy in the real axis in a Self energy file and a grid file for ABINIT.
+
+    cp OmegaMaxEnt_final_result/optimal_spectral_function.dat ../self_ra.dat
+    cd ..
+
+Create file containing the frequency grid with:
+
+    wc -l self_ra.dat >  tdmft_5o_DS3_spectralfunction_realfrequencygrid
+    cat self_ra.dat >> tdmft_5o_DS3_spectralfunction_realfrequencygrid
+
+As in this particular case, the three self energies for the three t2g orbitals are equal,
+we can do only one analytical continuation, and duplicate the results as in:
+
+    cp self_ra.dat  tdmft_5i_DS3Self_ra-omega_iatom0001_isppol1
+    cat self_ra.dat >>  tdmft_5i_DS3Self_ra-omega_iatom0001_isppol1
+    cat self_ra.dat >>  tdmft_5i_DS3Self_ra-omega_iatom0001_isppol1
+
+Now, tdmft_5i_DS3Self_ra-omega_iatom0001_isppol1 file, contains three times the self
+real axis self-energy. If the three orbitals were not degenerated, one would have of course to use
+a different real axis self-energy for each orbitals (and thus do an analytical continuation for each).
+
+Copy the file containing the rotation of the self energy in the local basis (useful for non cubic cases, here
+this matrix is just useless):
+
+    cp tdmft_5o_DS2.UnitaryMatrix_for_DiagLevel_iatom0001 tdmft_5i_DS3.UnitaryMatrix_for_DiagLevel_iatom0001 
+
+Copy the Self energy in imaginary frequency for restart also (dmft_nwlo should be the same in the input
+file  tdmft_5.in and tdmft_2.in)
+
+    cp tdmft_5o_DS2Self-omega_iatom0001_isppol1 tdmft_5o_DS3Self-omega_iatom0001_isppol1
+    
+
+Then modify tdmft_5.in with
+
+    ndtset 1
+    jdtset 3
+    
+and relaunch the calculation.
+
+    abinit < tdmft_x.files > log_5_dataset3
+
+
+Then the spectral function is obtained in file tdmft_5o_DS3_DFTDMFT_SpectralFunction_kresolved_from_realaxisself. You can copy
+it in file bands.dat:
+
+    cp tdmft_5o_DS3_DFTDMFT_SpectralFunction_kresolved_from_realaxisself bands_dmft.dat
+
+Extract DFT band structure from fatbands file in readable file for gnuplot (261 is the number
+of k-point used to plot the band structure (it can be obtained by "grep nkpt log_5_dataset3"):
+
+    grep " BAND" -A 261 tdmft_5o_DS3_FATBANDS_at0001_V_is1_l0001 | grep -v BAND > bands_dft.dat
+
+And you can use a gnuplot script to plot it:
+
+{% dialog tests/tutoparal/Input/tdmft_gnuplot%}
+
+    gnuplot
+    
+    	G N U P L O T
+    	Version 5.2 patchlevel 7    last modified 2019-05-29 
+    
+    	Copyright (C) 1986-1993, 1998, 2004, 2007-2018
+    	Thomas Williams, Colin Kelley and many others
+    
+    	gnuplot home:     http://www.gnuplot.info
+    	faq, bugs, etc:   type "help FAQ"
+    	immediate help:   type "help"  (plot window: hit 'h')
+    
+    Terminal type is now 'qt'
+    gnuplot> load "../tdmft_gnuplot"
+
+
+The spectral function should thus look like this.
+
+![internal](dmft_assets/bands.png)
+
+The white curve is the LDA band structure, the colored plot is the DMFT spectral function.
+One notes the renormalization of the bandwith as well as Hubbard bands, mainly visible a high energy  (arount 2 eV).
+A  more precise description of the Hubbard band would require a more converged calculation.
+
+
+
+## 8 Electronic Structure of SrVO3: Conclusion
+  
 To sum up, the important physical parameters for DFT+DMFT are the definition
 of correlated orbitals, the choice of U and J (and double counting). The
 important technical parameters are the frequency and time grids as well as the
 number of steps for Monte Carlo, the DMFT loop and the DFT loop.
 
-We showed in this tutorial how to compute spectral functions, quasiparticle
-renormalization weights and total internal energy.
+We showed in this tutorial how to compute the correlated orbital spectral functions, quasiparticle
+renormalization weights, total internal energy and the k-resolved spectral function.
