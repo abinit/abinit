@@ -24,13 +24,6 @@
 #include "abi_common.h"
 
 module m_chi0
-#ifndef HAVE_CRPA_OPTIM
-#ifdef FC_INTEL
-#if  __INTEL_COMPILER<=1700
-!DEC$ NOOPTIMIZE
-#endif
-#endif
-#endif
 
  use defs_basis
  use m_abicore

@@ -701,20 +701,6 @@ endif
             if(mod(im_paral-1,nprocs)==Wfd%my_rank) then
 !!somme interne sur iG, puis somme externe sur iq_ibz
 !! Sum_(iq_ibz) wi(iq_ibz)*Sum_ig  Rho(m3,m1,iG,iq)cong*Rho(m2,m4,ig,iq)
-              ! do iq_ibz=1,nqibz
-              !   ! eiqr=exp(cmplx(0.0, 1.0 ) * two_pi * ( &
-              !   !   q_coord(iq_ibz,1)* ( cryst%xred(1,wanbz%iatom_wan(iatom3)) - cryst%xred(1,wanbz%iatom_wan(iatom2)) )+ &
-              !   !   q_coord(iq_ibz,2)* ( cryst%xred(2,wanbz%iatom_wan(iatom3)) - cryst%xred(2,wanbz%iatom_wan(iatom2)) )+ &
-              !   !   q_coord(iq_ibz,3)* ( cryst%xred(3,wanbz%iatom_wan(iatom3)) - cryst%xred(3,wanbz%iatom_wan(iatom2)) )))
-              !   V_m(ms1,ms2,ms3,ms4) = V_m(ms1,ms2,ms3,ms4) + &
-              !     ! exp(cmplx(0.0, 1.0 ) * two_pi * ( &
-              !     ! q_coord(iq_ibz,1)* ( cryst%xred(1,wanbz%iatom_wan(iatom3)) - cryst%xred(1,wanbz%iatom_wan(iatom2)) )+ &
-              !     ! q_coord(iq_ibz,2)* ( cryst%xred(2,wanbz%iatom_wan(iatom3)) - cryst%xred(2,wanbz%iatom_wan(iatom2)) )+ &
-              !     ! q_coord(iq_ibz,3)* ( cryst%xred(3,wanbz%iatom_wan(iatom3)) - cryst%xred(3,wanbz%iatom_wan(iatom2)) ))) &
-              !     &eiqr(iq_ibz)*&
-              !     &q_coord(iq_ibz,4)*sum(conjg(rhot_q_m1m3(:,iq_ibz,m3,m1,ispinor3,ispinor1))* &
-              !     &rhot_q_m2m4(:,iq_ibz,m2,m4,ispinor2,ispinor4),dim = 1)*Ha_eV/(ucvol)
-
               V_m(ms1,ms2,ms3,ms4)=sum(eiqr(:)*q_coord(:,4)*sum(conjg(rhot_q_m1m3(:,:,m3,m1,ispinor3,ispinor1))* &
                 &rhot_q_m2m4(:,:,m2,m4,ispinor2,ispinor4),dim = 1))*Ha_eV/(ucvol)
               !end do
