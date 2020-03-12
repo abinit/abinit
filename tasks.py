@@ -287,10 +287,26 @@ def vimt(ctx, tagname):
 
 @task
 def pull_trunk(ctx):
-    """"git statsh && git pull trunk develop && git stash apply"""
+    """"git stash && git pull trunk develop && git stash apply"""
     ctx.run("git stash")
     ctx.run("git pull trunk develop")
     ctx.run("git stash apply")
+
+
+@task
+def branchoff(ctx, start_point):
+    """"
+    Checkout new branch from start_point e.g. `trunk/release-9.0` and set default upstream to origin.
+    """
+    remote, branch = start_point.split("/")
+    ctx.run(f"git fetch {remote}")
+    # Create new branch `test_v9.0` using trunk/release-9.0 as start_point:
+    # git checkout [-q] [-f] [-m] [[-b|-B|--orphan] <new_branch>] [<start_point>]
+    my_branch = "my_" + branch
+    ctx.run(f"git checkout -b {my_branch} {start_point}")
+    # Change default upstream. If you forget this step, you will be pushing to trunk
+    ctx.run("git branch --set-upstream-to origin")
+    ctx.run.("git push origin HEAD")
 
 
 def which(cmd):
