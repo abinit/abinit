@@ -210,29 +210,34 @@ Atom #  2
 by direct calculation and double counting calculation:
 
 ```
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  6.90446929441886E+00
+hartree             :  9.63708091533161E-01
+xc                  : -4.29580646918379E+00
+Ewald energy        : -1.27864121210521E+01
+psp_core            :  9.19865486989434E-01
+local_psp           : -4.67413594752577E+00
+spherical_terms     :  1.44220243759604E+00
+total_energy        : -1.15261092272241E+01
+total_energy_eV     : -3.13641382594284E+02
+...
 
-    Kinetic energy  =  6.90446929441886E+00
-    Hartree energy  =  9.63708091533161E-01
-    XC energy       = -4.29580646918379E+00
-    Ewald energy    = -1.27864121210521E+01
-    PspCore energy  =  9.19865486989434E-01
-    Loc. psp. energy= -4.67413594752577E+00
-    Spherical terms =  1.44220243759604E+00
-    >>>>>>>>> Etotal= -1.15261092272241E+01
 
- "Double-counting" decomposition of free energy:
-    Band energy     =  3.07962181105384E-01
-    Ewald energy    =-1.27864121210521E+01
-    PspCore energy  =  9.19865486989434E-01
-    Dble-C XC-energy= -7.39239833326780E-01
-    Spherical terms =  7.71714533951319E-01
-    >>>> Etotal (DC)= -1.15261097523327E+01
-
-  >Total energy in eV           = -3.13641382594284E+02
-  >Total DC energy in eV        = -3.13641396883215E+02
+--- !EnergyTermsDC
+iteration_state     : {dtset: 1, }
+comment             : '"Double-counting" decomposition of free energy'
+band_energy         :  3.07962181105384E-01
+Ewald energy        : -1.27864121210521E+01
+psp_core            :  9.19865486989434E-01
+xc_dc               : -7.39239833326780E-01
+spherical_terms     :  7.71714533951319E-01
+total_energy_dc     : -1.15261097523327E+01
+total_energy_dc_eV  : -3.13641396883215E+02
+...
 ```
+
 
 !!! Note
     The PAW total energy is not the equal to the one obtained in the Norm-Conserving PseudoPotential case:
@@ -368,15 +373,16 @@ We want now to check the convergence with respect to [[ecut]] with a fixed value
 Let's modify *tpaw1_2.in* file, setting pawecutdg to 24 Ha, and let's launch ABINIT again.
 You should obtain the values:
 
-    etotal1    -1.1404413200E+01
-    etotal2    -1.1496546303E+01
-    etotal3    -1.1518699851E+01
-    etotal4    -1.1524923431E+01
-    etotal5    -1.1526676260E+01
-    etotal6    -1.1526950267E+01
-    etotal7    -1.1526965855E+01
-    etotal8    -1.1527043191E+01
-    etotal9    -1.1527176114E+01
+    etotal1    -1.1404443407E+01
+    etotal2    -1.1496575772E+01
+    etotal3    -1.1518729256E+01
+    etotal4    -1.1524953006E+01
+    etotal5    -1.1526706024E+01
+    etotal6    -1.1526980122E+01
+    etotal7    -1.1526995701E+01
+    etotal8    -1.1527072969E+01
+    etotal9    -1.1527205784E+01
+    
 
 
 You can check again that:
