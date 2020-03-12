@@ -48,6 +48,7 @@ MODULE m_geometry
  public :: spinrot_cmat       ! Construct 2x2 complex matrix representing rotation operator in spin-space.
  public :: rotmat             ! Finds the rotation matrix.
  public :: fixsym             ! Check that iatfix does not break symmetry.
+ public :: det3r              ! Compute determinant of a 3x3 real matrix
  public :: metric             ! Compute metric matrices.
  public :: mkradim            ! Make rprim and acell from rprimd
  public :: mkrdim             ! Make rprimd from acell from rprim
@@ -1010,7 +1011,6 @@ end subroutine getspinrot
 
 pure function spinrot_cmat(spinrot)
 
-
 !Arguments ------------------------------------
  real(dp),intent(in) :: spinrot(4)
  complex(dpc) :: spinrot_cmat(2,2)
@@ -1207,6 +1207,30 @@ subroutine fixsym(iatfix,indsym,natom,nsym)
 end subroutine fixsym
 !!***
 
+!!****f* m_geometry/det3r
+!! NAME
+!!  det3r
+!!
+!! FUNCTION
+!!  Compute determinant of a 3x3 real matrix
+!!
+!! SOURCE
+
+pure real(dp) function det3r(rprimd)
+
+!Arguments ------------------------------------
+ real(dp),intent(in) :: rprimd(3,3)
+
+! *************************************************************************
+
+ ! Compute unit cell volume
+ det3r = rprimd(1,1)*(rprimd(2,2)*rprimd(3,3)-rprimd(3,2)*rprimd(2,3))+&
+         rprimd(2,1)*(rprimd(3,2)*rprimd(1,3)-rprimd(1,2)*rprimd(3,3))+&
+         rprimd(3,1)*(rprimd(1,2)*rprimd(2,3)-rprimd(2,2)*rprimd(1,3))
+
+end function det3r
+!!***
+
 !!****f* m_geometry/metric
 !! NAME
 !! metric
@@ -1278,6 +1302,7 @@ subroutine metric(gmet,gprimd,iout,rmet,rprimd,ucvol)
  ucvol=rprimd(1,1)*(rprimd(2,2)*rprimd(3,3)-rprimd(3,2)*rprimd(2,3))+&
        rprimd(2,1)*(rprimd(3,2)*rprimd(1,3)-rprimd(1,2)*rprimd(3,3))+&
        rprimd(3,1)*(rprimd(1,2)*rprimd(2,3)-rprimd(2,2)*rprimd(1,3))
+ !ucvol = det3r(rprimd)
 
  ! Check that the input primitive translations are not linearly dependent (and none is zero); i.e. ucvol~=0
  ! Also ask that the mixed product is positive.

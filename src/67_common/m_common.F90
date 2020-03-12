@@ -76,8 +76,7 @@ module m_common
  public :: get_dtsets_pspheads     ! Parse input file, get list of pseudos for files file and build list of datasets
                                    ! pseudopotential headers, maxval of dimensions needed in outvars
  public :: ebands_from_file        ! Build an ebands_t object from file. Supports Fortran and netcdf files
- public :: crystal_from_file       ! Build a crystal_t object from netcdf file or Abinit input file
-                                   ! with file extension in [".abi", ".in"]
+ public :: crystal_from_file       ! Build a crystal_t object from netcdf or Fortran file with Header
 
 !!***
 
@@ -1893,7 +1892,6 @@ subroutine get_dtsets_pspheads(input_path, path, ndtset, lenstr, string, timopt,
 end subroutine get_dtsets_pspheads
 !!***
 
-
 !!****f* ABINIT/ebands_from_file
 !! NAME
 !! ebands_from_file
@@ -1957,13 +1955,12 @@ type(ebands_t) function ebands_from_file(path, comm) result(new)
 end function ebands_from_file
 !!***
 
-
 !!****f* ABINIT/crystal_from_file
 !! NAME
 !! crystal_from_file
 !!
 !! FUNCTION
-!!  Build crystal_t object from netcdf file or Abinit input file with file extension in [".abi", ".in"]
+!!  Build crystal_t object from netcdf file
 !!
 !! INPUTS
 !!
@@ -1975,7 +1972,6 @@ end function ebands_from_file
 !!
 !! SOURCE
 
-
 type(crystal_t) function crystal_from_file(path, comm) result(new)
 
 !Arguments ------------------------------------
@@ -1985,38 +1981,17 @@ type(crystal_t) function crystal_from_file(path, comm) result(new)
 
 !Local variables-------------------------------
 !scalars
- integer :: fform, timrev !, lenstr, ndtset, timopt, dmatpuflag
- !character(len=strlen) :: string
+ integer :: fform, timrev
  type(hdr_type) :: hdr
- !type(ab_dimensions) :: mx
-!arrays
- !type(dataset_type),allocatable :: dtsets(:)
- !type(pspheader_type),allocatable :: pspheads(:)
 
 ! *************************************************************************
 
- if (endswith(path, ".abi") .or. endswith(path, ".in")) then
-   NOT_IMPLEMENTED_ERROR()
-
-   ! TODO
-   ! This routine prompts for the list of pseudos! One should get rid of the files file
-   ! before activating this part.
-   !call get_dtsets_pspheads(path, ndtset, lenstr, string, timopt, dtsets, pspheads, mx, dmatpuflag, comm)
-   !call crystal_init(dtset%amu_orig(:,1), new, dtset%spgroup, dtset%natom, dtset%npsp, &
-   !  psps%ntypat,dtset%nsym, rprimd, dtset%typat, xred, dtset%ziontypat, dtset%znucl,1, &
-   !  dtset%nspden==2.and.dtset%nsppol==1, remove_inv, psps%title, &
-   !  symrel=dtset%symrel, tnons=dtset%tnons, symafm=dtset%symafm)
-   !ABI_FREE(dtsets)
-   !ABI_FREE(pspheads)
-
- else
-    ! Assume file header
-    call hdr_read_from_fname(hdr, path, fform, comm)
-    ABI_CHECK(fform /= 0, "fform == 0")
-    timrev = 2 !; (if kpts_timrev_from_kptopt(hdr%kptopt) == 0) timrev = 1
-    new = hdr%get_crystal(timrev)
-    call hdr%free()
- end if
+ ! Assume file with Abinit header
+ call hdr_read_from_fname(hdr, path, fform, comm)
+ ABI_CHECK(fform /= 0, "fform == 0")
+ timrev = 2 !; (if kpts_timrev_from_kptopt(hdr%kptopt) == 0) timrev = 1
+ new = hdr%get_crystal(timrev)
+ call hdr%free()
 
 end function crystal_from_file
 !!***

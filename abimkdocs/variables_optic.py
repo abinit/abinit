@@ -17,6 +17,7 @@ Variable(
     dimensions="scalar",
     defaultval="1.d-3 Ha",
     mnemonics="BROADENING",
+    added_in_version="before_v9",
     text=r"""
 This parameter applies a broadening to the spectrum and is used to avoid
 divergences in the sum-over-states approach.
@@ -43,6 +44,7 @@ Variable(
     dimensions="scalar",
     mnemonics="DDK FILE",
     commentdefault="no default",
+    added_in_version="before_v9",
     text=r"""
 This parameter specifies the name of the file containing the matrix elements of the
 $d/dk$ operator in direction X, as the string ddkfile_X. This file should have been
@@ -61,6 +63,7 @@ Variable(
     dimensions="scalar",
     defaultval="1.d-3 Ha",
     mnemonics="Delta OMEGA",
+    added_in_version="before_v9",
     text=r"""
 This parameter specifies the step size $\Delta\omega$ for the grid over which the
 optic utility computes the susceptibilities. The maximum energy is set by the
@@ -79,6 +82,7 @@ Variable(
     dimensions=[['num_lin_comp']],
     defaultval=0,
     mnemonics="LINear COMPonents",
+    added_in_version="before_v9",
     text=r"""
 This parameter specifies the directions of the [[optic:num_lin_comp]] requested components
 of the dielectric tensor. The components are specified in
@@ -97,6 +101,7 @@ Variable(
     dimensions="scalar",
     defaultval="1 Ha",
     mnemonics="MAXimum value of OMEGA",
+    added_in_version="before_v9",
     text=r"""
 This parameter specifies the maximum energy for the grid over which the
 optic utility computes the susceptibilities. The grid step size is set by the
@@ -115,6 +120,7 @@ Variable(
     dimensions=[['num_nonlin_comp']],
     defaultval=0,
     mnemonics="NON-LINear COMPonents",
+    added_in_version="before_v9",
     text=r"""
 This parameter specifies the directions of the [[optic:num_nonlin_comp]] requested components
 of the second-order nonlinear dielectric tensor. The components are specified in
@@ -133,6 +139,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="NUMber of LINear COMPonents",
+    added_in_version="before_v9",
     text=r"""
 This parameter specifies how many components (out of 9 possible)
 of the linear optical dielectric tensor to calculate.
@@ -151,6 +158,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="NUMber of NON-LINear COMPonents",
+    added_in_version="before_v9",
     text=r"""
 This parameter specifies how many components (out of 27 possible)
 of the second-order nonlinear optical tensor to calculate.
@@ -167,6 +175,7 @@ Variable(
     dimensions="scalar",
     defaultval=0,
     mnemonics="NUMber of LINear ELetro-optic  COMPonents",
+    added_in_version="before_v9",
     text=r"""
 This parameter specifies how many components (out of 27 possible)
 of the linear electro-optical susceptibility to calculate.
@@ -183,6 +192,7 @@ Variable(
     dimensions=[['num_linel_comp']],
     defaultval=0,
     mnemonics="LINear ELectro-optic COMPonents",
+    added_in_version="before_v9",
     text=r"""
 This parameter specifies the directions of the [[optic:num_linel_comp]] requested components
 of the linear electro-optical susceptibility. The components are specified in
@@ -201,6 +211,7 @@ Variable(
     defaultval=0.0,
     mnemonics="SCISSOR operator",
     commentdefault="in Ha",
+    added_in_version="before_v9",
     text=r"""
 This parameter provides a fixed shift to all the conduction bands. As
 LDA/GGA are known to underestimate the band-gap by a significant amount in
@@ -221,6 +232,7 @@ Variable(
     dimensions="scalar",
     defaultval="1.d-3 Ha",
     mnemonics="TOLERANCE",
+    added_in_version="before_v9",
     text=r"""
 This parameter sets a scale for discarding small energy denominators.
 When energy denominators are smaller than **tolerance**, the term is discarded from the sum.
@@ -236,6 +248,7 @@ Variable(
     dimensions="scalar",
     mnemonics="WaveFunction K FILE",
     commentdefault="no default",
+    added_in_version="before_v9",
     text=r"""
 This parameter specifies the name of the ground state wavefunction file, which
 should have been produced in a preparatory Abinit run. It should include both
