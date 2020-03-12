@@ -156,9 +156,6 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
  end if
 
 !frdiel(3,3,nfreq)= frequency-dependent dielectric tensor
-!modez(2,3,3*natom)=mode effective charges for the different eigenmodes,
-!for different directions of the electric field, following
-!the definition Eq.(53) in PRB55, 10355 (1997) [[cite:Gonze1997a]]
 !fact_oscstr(2,3,3*natom)=factors of the oscillator strengths
 !for the different eigenmodes,
 !for different direction of the electric field
@@ -271,9 +268,6 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
          write(message,'(3f16.8)')(dielt_modedecompo(idir1,idir2,imode),idir2=1,3)
          call wrtout(std_out,message,'COLL')
          call wrtout(iout,message,'COLL')
-        ! write(message,'(3f16.8)')(dielt_modedecompo(idir1,idir2,imode),idir2=1,3)
-        ! call wrtout(iout, " ",'COLL')
-        ! call wrtout(std_out, " ",'COLL')
        end do 
      end do
    endif ! dieflag=5 mode decompo of epsilon
@@ -409,16 +403,16 @@ end subroutine ddb_diel
 !! Compute the electronic response of the dielectric constant
 !!
 !! INPUTS
-!! iout=unit number for outputs
-!! mpert =maximum number of ipert
-!! natom=number of atoms in unit cell
 !! d2cart(2,3,mpert,3,mpert)=
 !!  dynamical matrix, effective charges, dielectric tensor,....
 !!  all in cartesian coordinates
+!! iout=unit number for outputs
+!! mpert =maximum number of ipert
+!! natom=number of atoms in unit cell
 !!
 !! OUTPUT
 !! epsinf(3,3)= epsilon^infty = electronic contribution to the
-!! dielectric tensor
+!!  dielectric tensor
 !! 
 !! PARENTS
 !!      ddb_diel
@@ -469,21 +463,33 @@ end subroutine ddb_diel_elec
 !! ddb_oscstr
 !!
 !! FUNCTION
-!! Compute the oscillator strength
+!! Compute the oscillator strength and the mode effective charge
 !!
 !! INPUTS
-!! iout=unit number for outputs
-!! mpert =maximum number of ipert
-!! natom=number of atoms in unit cell
+!! displ(2,3*natom,3*natom)=
+!!  the displacements of atoms in cartesian coordinates.
+!!  The first index means either the real or the imaginary part,
+!!  The second index runs on the direction and the atoms displaced
+!!  The third index runs on the modes.
 !! d2cart(2,3,mpert,3,mpert)=
 !!  dynamical matrix, effective charges, dielectric tensor,....
 !!  all in cartesian coordinates
+!! iout=unit number for outputs
+!! mpert =maximum number of ipert
+!! natom=number of atoms in unit cell
+!! phfrq(3*natom)=phonon frequencies (square root of the dynamical
+!!  matrix eigenvalues, except if these are negative, and in this
+!!  case, give minus the square root of the absolute value
+!!  of the matrix eigenvalues). Hartree units.
 !!
 !! OUTPUT
-!! oscstr(2,3,3,3*natom)=oscillator strengths, following
-!! the definition Eq.(54) in PRB55, 10355 (1997) [[cite:Gonze1997a]]
 !! fact_oscstr(2,3,3*natom)=oscillator strengths for the different eigenmodes,
 !!  for different direction of the electric field.
+!! modez(2,3,3*natom)=mode effective charges for the different eigenmodes,
+!!  for different directions of the electric field, following
+!!  the definition Eq.(53) in PRB55, 10355 (1997) [[cite:Gonze1997a]]
+!! oscstr(2,3,3,3*natom)=oscillator strengths, following
+!!  the definition Eq.(54) in PRB55, 10355 (1997) [[cite:Gonze1997a]]
 !! 
 !! PARENTS
 !!      ddb_diel
@@ -654,9 +660,6 @@ subroutine ddb_oscstr(displ,d2cart,fact_oscstr,oscstr,modez,iout,mpert,natom,phf
 
    ABI_DEALLOCATE(metacharacter)
    
-!  ABI_DEALLOCATE(modez)
-!  ABI_DEALLOCATE(oscstr)
-
 end subroutine ddb_oscstr
 !!***
 
@@ -693,9 +696,9 @@ end subroutine ddb_oscstr
 !!
 !! OUTPUT
 !! displ(2,3*natom,3*natom)=
-!! the displacements of atoms in cartesian coordinates.
-!! The eigendisplacements of degenerate modes have been aligned along
-!! the cartesian axes.
+!!  the displacements of atoms in cartesian coordinates.
+!!  The eigendisplacements of degenerate modes have been aligned along
+!!  the cartesian axes.
 !!
 !! PARENTS
 !!      ddb_diel
