@@ -125,10 +125,6 @@ for bin in main_bins:
     if ( lib_opt == "yes" ):
       bin_make = "\nif DO_BUILD_%s" % (lib.upper()) + bin_make
 
-  # Delegate the build of external dependencies
-  if ( bin_deps == "yes" ):
-    bin_make = "\n\tcd fallbacks && $(MAKE) @SET_MAKE@"  + bin_make
-
   # Check for optional binaries
   if ( bin_opt == "yes" ):
     bin_make = "\nif DO_BUILD_%s%s\n" % (bin.upper(),bin_make) \

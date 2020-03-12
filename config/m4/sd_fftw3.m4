@@ -25,6 +25,7 @@ AC_DEFUN([SD_FFTW3_INIT], [
   sd_fftw3_init="unknown"
   sd_fftw3_mpi_ok="unknown"
   sd_fftw3_ok="unknown"
+  sd_fftw3_threads_ok="unknown"
 
   # Set adjustable parameters
   sd_fftw3_options="$1"
@@ -260,10 +261,25 @@ AC_DEFUN([_SD_FFTW3_CHECK_USE], [
     [[
       fftw_plan *plan;
       fftw_complex *a1, *a2;
-      fftw_execute_dft(plan, a1, a2);
+      fftw_execute_dft(*plan, a1, a2);
     ]])], [sd_fftw3_ok="yes"], [sd_fftw3_ok="no"])
   AC_LANG_POP([C])
   AC_MSG_RESULT([${sd_fftw3_ok}])
+
+  # Check for threads support
+  if test "${sd_fftw3_ok}" = "yes"; then
+    AC_MSG_CHECKING([whether the FFTW3 library supports threads])
+    AC_LANG_PUSH([C])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM(
+        [[
+#include <fftw3.h>
+        ]],
+      [[
+        fftw_init_threads;
+      ]])], [sd_fftw3_threads_ok="yes"], [sd_fftw3_threads_ok="no"])
+    AC_LANG_POP([C])
+    AC_MSG_RESULT([${sd_fftw3_threads_ok}])
+  fi
 
   # Check FFTW3 MPI C API
   if test "${sd_fftw3_ok}" = "yes" -a "${sd_mpi_enable}" = "yes"; then
