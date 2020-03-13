@@ -1,6 +1,6 @@
 
 .Version 9.0.2 of MULTIBINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.(sequential version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  MULTIBINIT comes with ABSOLUTELY NO WARRANTY.
@@ -15,14 +15,14 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Fri 13 Mar 2020.
-- ( at 12h56 )
+- ( at 18h02 )
   
 -  nproc =    1
 
 ================================================================================
 
  Read the information in the reference structure in 
--/home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/xuhe_release-9.0_slc/tests/v9/Input/t83.nc
+-/home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/xuhe_release-9.0_slc/tests/v9/Input/t83.nc
  to initialize the multibinit input
 
 ================================================================================
@@ -89,7 +89,7 @@ reading spin terms.
 
 ================================================================================
 
-Reading spin-lattice coupling terms from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/xuhe_release-9.0_slc/tests/v9/Input/t83.nc
+Reading spin-lattice coupling terms from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/xuhe_release-9.0_slc/tests/v9/Input/t83.nc
  Initial spins set to random values.
 ================================================================================
 Coupled spin-lattice
@@ -1111,10 +1111,10 @@ Total energy                               2.71794E-01
 ================================================================================
 
 -
-- Proc.   0 individual time (sec): cpu=        294.3  wall=        295.1
+- Proc.   0 individual time (sec): cpu=        304.3  wall=        306.7
 
 ================================================================================
 
-+Total cpu time    294.288  and wall time    295.143 sec
++Total cpu time    304.252  and wall time    306.733 sec
 
  multibinit : the run completed succesfully.
