@@ -46,6 +46,7 @@ module m_driver
 
  use defs_datatypes, only : pseudopotential_type, pspheader_type
  use defs_abitypes,  only : MPI_type
+ use m_fstrings,     only : sjoin, itoa
  use m_time,         only : timab
  use m_xg,           only : xg_finalize
  use m_libpaw_tools, only : libpaw_write_comm_set
@@ -71,6 +72,8 @@ module m_driver
  use BigDFT_API,   only: xc_init, xc_end, XC_MIXED, XC_ABINIT,&
 &                        mpi_environment_set,bigdft_mpi, f_malloc_set_status
 #endif
+
+ use m_longwave
 
  implicit none
 
@@ -356,11 +359,12 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
        call ydoc%add_ints("optdriver, eph_task", &
          [dtset%optdriver, dtset%eph_task] , dict_key="meta")
 
+     case(RUNL_LONGWAVE)
+       call ydoc%add_ints("optdriver", [dtset%optdriver], &
+         dict_key="meta")
+
      case default
-       write(msg,'(a,i0,4a)')&
-        'Unknown value for the variable optdriver: ',dtset%optdriver,ch10,&
-        'This is not allowed.',ch10, 'Action: modify optdriver in the input file.'
-       MSG_ERROR(msg)
+       MSG_ERROR(sjoin('Add a meta section for optdriver: ', itoa(dtset%optdriver)))
      end select
 
      !if (dtset%use_yaml == 1) then
@@ -821,6 +825,11 @@ subroutine driver(codvsn,cpui,dtsets,filnam,filstat,&
      call dtsets(0)%free_nkpt_arrays()
      call dtsets(idtset)%free_nkpt_arrays()
      call eph(acell,codvsn,dtfil,dtset,pawang,pawrad,pawtab,psps,rprim,xred)
+
+   case(RUNL_LONGWAVE)
+
+     call longwave(codvsn,dtfil,dtset,etotal,mpi_enregs(idtset),npwtot,occ,&
+&     pawrad,pawtab,psps,xred)
 
    case default
      ! Bad value for optdriver

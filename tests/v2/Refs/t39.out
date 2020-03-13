@@ -31,6 +31,8 @@
    symdynmat         0
  Interatomic Force Constants Inputs :
       dipdip         1
+      dipqua         0
+      quadqu         0
       ifcana         0
       ifcout        20
       natifc         3

@@ -552,8 +552,8 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    MSG_ERROR(msg)
  end if
 
- ! Treatment of the other get wavefunction variable, if response function case or nonlinear case
- if (ANY(dtset%optdriver == [RUNL_RESPFN, RUNL_NONLINEAR, RUNL_EPH])) then
+!Treatment of the other get wavefunction variable, if response function case or nonlinear case
+ if (ANY(dtset%optdriver == [RUNL_RESPFN, RUNL_NONLINEAR, RUNL_EPH, RUNL_LONGWAVE])) then
 
    ! According to getwfq and irdwfq, build _WFQ file name, referred as fnamewffq
    stringfile='_WFQ' ; stringvar='wfq'
