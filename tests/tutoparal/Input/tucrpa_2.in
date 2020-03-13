@@ -149,5 +149,5 @@ dmftbandf2 25       # Precise the definition of Wannier functions (also used for
 #%% keywords = LDA, CRPA
 #%% authors = B. Amadon
 #%% description = For SrVO3, compute U
-#%% The results of this test with 24 procs are non-reproducible at present ! See the huge tolerance. There must be a bug ...
+#%%   The results of this test with 24 procs are non-reproducible at present ! See the huge tolerance. There must be a bug ...
 #%%<END TEST_INFO>
