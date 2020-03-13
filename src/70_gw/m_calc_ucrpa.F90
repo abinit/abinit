@@ -34,7 +34,8 @@ MODULE m_calc_ucrpa
 #ifdef FC_INTEL
 #if  __INTEL_COMPILER<=1700
 !DEC$ NOOPTIMIZE
-#warning "cPRA optimization is turned off, to activate it add enable_crpa_optim='yes' in your .ac9 file then ../configure and make again (it will take some time to compile)"
+#warning "cPRA optimization is turned off, to activate it add enable_crpa_optim='yes' in your \
+.ac9 file then ../configure and make again (it will take some time to compile)"
 #endif
 #endif
 #endif

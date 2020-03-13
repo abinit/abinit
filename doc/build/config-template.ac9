@@ -1319,9 +1319,9 @@
 #
 #enable_bse_unpacked="yes"
 
-# Enable non optimized cRPA build (routerovitch)
+# Enable optimized cRPA build for ifort <=17 (routerovitch)
 #
-#enable_crpa_no_optim="yes"
+#enable_crpa_optim="yes"
 
 # Enable exports (pouillon)
 #
