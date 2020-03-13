@@ -6,7 +6,7 @@
 !! Calculate the effective interaction in the correlated orbitals
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon,ROuterovitch)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
