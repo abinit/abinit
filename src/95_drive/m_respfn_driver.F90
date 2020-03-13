@@ -1147,6 +1147,17 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
 !Determine the symmetrical perturbations
  ABI_ALLOCATE(pertsy,(3,natom+6))
  call irreducible_set_pert(indsym,natom+6,natom,dtset%nsym,pertsy,rfdir,rfpert,symq,symrec,dtset%symrel)
+
+!MR: Deactivate perturbation symmetries temporarily for a longwave calculation
+!The same has been done in 51_manage_mpi/get_npert_rbz.F90
+ if (dtset%prepalw==1) then
+   do ipert=1,natom+6
+     do idir=1,3
+       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
+     end do
+   end do
+ endif
+
  write(message,'(a)') ' The list of irreducible perturbations for this q vector is:'
  call wrtout(ab_out,message,'COLL')
  call wrtout(std_out,message,'COLL')
@@ -1594,8 +1605,8 @@ subroutine respfn(codvsn,cpui,dtfil,dtset,etotal,iexit,&
    ABI_DEALLOCATE(eigen0_pert)
    ABI_DEALLOCATE(eigen1_pert)
  end if
- ABI_DEALLOCATE(doccde)
 
+ ABI_DEALLOCATE(doccde)
 
  if(me==0)then
    if (.not.(rfphon==0 .and. (rf2_dkdk/=0 .or. rf2_dkde/=0 .or. rfddk/=0 .or. rfelfd==2) .and. rfstrs==0 .and.rfuser==0 &
@@ -3415,7 +3426,7 @@ subroutine dfpt_gatherdy(becfrnl,berryopt,blkflg,carflg,dyew,dyfrwf,dyfrx1,&
 & dyfr_cplex,dyfr_nondiag,dyvdw,d2bbb,d2cart,d2cart_bbb,d2matr,d2nfr,&
 & eltcore,elteew,eltfrhar,eltfrkin,eltfrloc,eltfrnl,eltfrxc,eltvdw,&
 & gprimd,mband,mpert,natom,ntypat,outd2,pawbec,pawpiezo,piezofrnl,prtbbb,&
-& rfasr,rfpert,rprimd,typat,ucvol,usevdw,zion)
+& rfasr,rfpert,rprimd,typat,ucvol,usevdw,zion) 
 
 !Arguments -------------------------------
 !scalars
