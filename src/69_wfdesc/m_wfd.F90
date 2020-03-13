@@ -4875,7 +4875,7 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 
  nprocs = xmpi_comm_size(Wfd%comm); my_rank = xmpi_comm_rank(Wfd%comm)
  iam_master = (my_rank == master)
-
+  
  ! Select the IO library from the file extension.
  iomode = iomode_from_fname(wfk_fname)
  call wrtout(std_out, sjoin('Writing GS WFK file: ',wfk_fname,", with iomode ",iomode2str(iomode)))
@@ -4890,9 +4890,9 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
  ABI_CHECK(Wfd%nsppol == Hdr%nsppol,"Different number of spins")
  ABI_CHECK(Wfd%nspinor == Hdr%nspinor,"Different number of spinors")
 
- if (any(Wfd%nband /= reshape(Hdr%nband, [Wfd%nkibz, Wfd%nsppol]))) then
+ !if (any(Wfd%nband /= reshape(Hdr%nband, [Wfd%nkibz, Wfd%nsppol]))) then
 
- endif
+ !endif
  ! Use bks_tab to decide who will write the data. Remember
  ! integer,allocatable :: bks_tab(:,:,:,:)
  ! Wfd%bks_tab(mband,nkibz,nsppol,0:nproc-1)
@@ -4975,8 +4975,8 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
      !call wfd_extract_cgblock(Wfd,[(ii, ii=1,nband_k)],ik_ibz,spin,cg_k)
      do blk=1,nblocks
        band_block = blocks(:,blk)
-       call wfd_extract_cgblock(Wfd,[(ii, ii=band_block(1),band_block(2))],ik_ibz,spin,cg_k) ! cg_k extracted from Wfd! (OK! we
-                                                                                             ! changed them in 70_gw/m_gwrdm.F90) 
+       call wfd_extract_cgblock(Wfd,[(ii, ii=band_block(1),band_block(2))],ik_ibz,spin,cg_k) ! cg_k extracted from Wfd!
+       
        if (band_block(1)==1) then
          ! Write also kg_k, eig_k and occ_k
          call wfkfile%write_band_block(band_block,ik_ibz,spin,xmpio_single,&
@@ -4992,8 +4992,8 @@ subroutine wfd_write_wfk(Wfd,Hdr,Bands,wfk_fname)
 
      ABI_FREE(cg_k)
      ABI_FREE(blocks)
-   end do
- end do
+   end do  ! k-points
+ end do  ! spin
 
  call xmpi_barrier(Wfd%comm)
 

@@ -296,6 +296,7 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  complex(dpc), allocatable :: rhot1_q_m(:,:,:,:,:,:,:)
  complex(dpc), allocatable :: M1_q_m(:,:,:,:,:,:,:)
  logical,allocatable :: bks_mask(:,:,:),keep_ur(:,:,:),bmask(:)
+ logical,allocatable :: bdm_mask(:,:,:),keep_ur_dm(:,:,:)                    ! MRM
  type(esymm_t),target,allocatable :: KS_sym(:,:)
  type(esymm_t),pointer :: QP_sym(:,:)
  type(pawcprj_type),allocatable :: Cp1(:,:) !,Cp2(:,:)
@@ -630,6 +631,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ABI_MALLOC(keep_ur ,(mband,Kmesh%nibz,Sigp%nsppol))
  keep_ur=.FALSE.; bks_mask=.FALSE.
 
+ if(gwcalctyp==21) then
+   ABI_MALLOC(bdm_mask  ,(mband,Kmesh%nibz,Sigp%nsppol))
+   ABI_MALLOC(keep_ur_dm,(mband,Kmesh%nibz,Sigp%nsppol))
+   keep_ur_dm=.FALSE.; bdm_mask=.FALSE.
+   if(my_rank==0) then
+     keep_ur_dm=.TRUE.; bdm_mask=.TRUE.
+   endif
+ endif
  ABI_MALLOC(nband,(Kmesh%nibz,Sigp%nsppol))
  nband=mband
 
@@ -727,9 +736,9 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  ! MRM also initialize the Wfd_dm for GW 1-RDM if required.
  ! Warning, this should be replaced by copy but copy fails. Do it in the future! FIXME 
  if (gwcalctyp==21) then
-   call wfd_init(Wfd_dm,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bks_mask,&
+   call wfd_init(Wfd_dm,Cryst,Pawtab,Psps,keep_ur,mband,nband,Kmesh%nibz,Sigp%nsppol,bdm_mask,&
      Dtset%nspden,Dtset%nspinor,Dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
-     Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
+     Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,xmpi_comm_self)!comm)  ! MPI_COMM_SELF 
    call wfd_dm%read_wfk(wfk_fname,iomode_from_fname(wfk_fname))
  endif
 
@@ -738,7 +747,10 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      Dtset%nspden,Dtset%nspinor,dtset%ecutwfn,Dtset%ecutsm,Dtset%dilatmx,Hdr_wfk%istwfk,Kmesh%ibz,gwc_ngfft,&
      Dtset%nloalg,Dtset%prtvol,Dtset%pawprtvol,comm)
  end if
-
+ if (gwcalctyp==21) then
+   ABI_FREE(keep_ur_dm)
+   ABI_FREE(bdm_mask)
+ endif
  ABI_FREE(bks_mask)
  ABI_FREE(nband)
  ABI_FREE(keep_ur)
@@ -2285,15 +2297,18 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
    ! MRM print WFK and DEN files. Finally, deallocate all arrays used for 1-RDM update
    if(gwcalctyp==21) then
      ABI_MALLOC(gw_rhor,(nfftf,Dtset%nspden))
-     !call update_wfd_bst(Wfd,Wfd_dm,nateigv,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3)) ! MRM remove it
-     call update_hdr_bst(Wfd_dm,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3)) 
-     call Wfd_dm%rotate(Cryst,nateigv)                                      ! Let it generate the bmask and build NOs 
-     gw1rdm_fname=dtfil%fnameabo_wfk                                         
-     call Wfd_dm%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname)                   ! Print WFK file, QP_BSt contains nat. orbs.
-     gw1rdm_fname=dtfil%fnameabo_den
-     call Wfd_dm%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)        ! Construct the density
-     call fftdatar_write("density",gw1rdm_fname,dtset%iomode,Hdr_sigma,&    ! Print DEN file  
-     Cryst,ngfftf,cplex1,nfftf,dtset%nspden,gw_rhor,mpi_enreg_seq,ebands=QP_BSt)
+     ! MRM only the master has bands on Wfd_dm so let it print everything
+     if(my_rank==0) then
+       call update_hdr_bst(Wfd_dm,occs,b1gw,b2gw,QP_BSt,Hdr_sigma,Dtset%ngfft(1:3))
+       call Wfd_dm%rotate(Cryst,nateigv)                                      ! Let it generate the bmask and build NOs 
+       gw1rdm_fname=dtfil%fnameabo_wfk                                         
+       call Wfd_dm%write_wfk(Hdr_sigma,QP_BSt,gw1rdm_fname)                   ! Print WFK file, QP_BSt contains nat. orbs.
+       gw1rdm_fname=dtfil%fnameabo_den
+       call Wfd_dm%mkrho(Cryst,Psps,Kmesh,QP_BSt,ngfftf,nfftf,gw_rhor)        ! Construct the density
+       call fftdatar_write("density",gw1rdm_fname,dtset%iomode,Hdr_sigma,&    ! Print DEN file  
+       Cryst,ngfftf,cplex1,nfftf,dtset%nspden,gw_rhor,mpi_enreg_seq,ebands=QP_BSt)
+     endif
+     call xmpi_barrier(Wfd%comm)
      ABI_FREE(gw_rhor)
      ! MRM prepare deallocation of Wfd_dm
      Wfd_dm%bks_comm = xmpi_comm_null
