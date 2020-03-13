@@ -2036,7 +2036,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
  if (dtset%iscf > 0) then
    call ab7_mixing_deallocate(mix)
-   if (dtset%usekden/=0.and.denpot==AB7_MIXING_DENSITY) call ab7_mixing_deallocate(mix_mgga)
+   if (dtset%usekden/=0) call ab7_mixing_deallocate(mix_mgga)
  end if
 
  if (usefock==1)then
