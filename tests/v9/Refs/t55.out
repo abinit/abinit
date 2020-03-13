@@ -280,6 +280,8 @@ meta: {optdriver: 7, eph_task: -4, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t55o_DS20_DDB
 Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t155o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -536,6 +538,8 @@ meta: {optdriver: 7, eph_task: -4, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t55o_DS20_DDB
 Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t155o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -773,6 +777,8 @@ meta: {optdriver: 7, eph_task: -4, }
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t55o_DS20_DDB
 Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t155o_DS20_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -1008,6 +1014,8 @@ meta: {optdriver: 7, eph_task: -4, }
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
 - Cannot find dielectric tensor and Born effective charges in DDB file: t55o_DS20_DDB
+Values initialized with zeros
+- Cannot find quadrupole tensor in DDB file: t155o_DS20_DDB
 Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        8

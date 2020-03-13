@@ -30,6 +30,8 @@
          asr         2
  Interatomic Force Constants Inputs :
       dipdip         0
+      dipqua         0
+      quadqu         0
       ifcana         1
       ifcout         0
  Description of grid 1 :

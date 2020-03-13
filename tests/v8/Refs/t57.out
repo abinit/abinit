@@ -2008,6 +2008,8 @@ meta: {optdriver: 7, eph_task: 6, }
          2         3    2.590481E-16    2.590481E-16   -2.014909E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t57o_DS3_DDB
+- Cannot find quadrupole tensor in DDB file: t57o_DS3_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :        1
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00

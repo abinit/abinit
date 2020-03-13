@@ -29,6 +29,8 @@
       chneut         1
  Interatomic Force Constants Inputs :
       dipdip         1
+      dipqua         0
+      quadqu         0
      nsphere        -1
       ifcana         0
       ifcout         0
