@@ -142,18 +142,6 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 
  ucvol = Crystal%ucvol
 
-!Check the possibility of asking the frequency-dependent
-!dielectric tensor (there should be more than one atom in the unit cell)
- if(natom==1)then
-   write(message, '(6a)' )&
-     ' ddb_diel : WARNING -',ch10,&
-     '  When there is only one atom in the unit cell',ch10,&
-     '  cell, the dielectric tensor is frequency-independent.',&
-     '  Consequently, dieflag has been reset to 2 . '
-   call wrtout(std_out,message,'COLL')
-   call wrtout(iout,message,'COLL')
-   dieflag=2
- end if
 
 !frdiel(3,3,nfreq)= frequency-dependent dielectric tensor
 !fact_oscstr(2,3,3*natom)=factors of the oscillator strengths
@@ -163,11 +151,6 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
  ABI_ALLOCATE(oscstr,(2,3,3,3*natom))
  ABI_ALLOCATE(modez,(2,3,3*natom))
  ABI_ALLOCATE(dielt_modedecompo,(3,3,3*natom))
-
-! write(std_out,'(a)')' Enter ddb_diel : displ ='
-! do imode=1,3*natom
-!   write(std_out,'(a,i4,a,12es16.6)')'imode=',imode,' displ(:,:,imode)',displ(:,:,imode)
-! end do
 
 !In case the ionic contribution to the dielectric tensor is asked
  if(dieflag==1 .or. dieflag==3 .or. dieflag==4 .or. dieflag==5)then
@@ -194,10 +177,8 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
    call ddb_diel_elec(d2cart,natom,mpert,iout,epsinf)
  end if
 
-!Only in case the frequency-dependent dielectric tensor is needed
-! EB: This not only for freq-dep epsilon but for ionic contrib to epsilon!
+! Calculation of epsilon_r (Eq.55 PRB 55, 10355)
  if(dieflag==1 .or. dieflag==3 .or. dieflag==4 .or. dieflag==5) then
-! if(dieflag==1 .or. dieflag==3 .or. dieflag==4) then
 !  Check the acousticity of the three lowest modes, assuming
 !  that they are ordered correctly
    if (abs(phfrq(1))>abs(phfrq(4)))then
@@ -260,7 +241,8 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
      call wrtout(std_out,message,'COLL')
      call wrtout(iout,message,'COLL')
      do imode=4,3*natom
-       write(message,'(a,a,i4)') ch10,' Mode number ',imode
+       write(message,'(a,a,i4,a,E14.7,a,a,3f8.3)') ch10,' Mode number ',imode, '    freq = ',phfrq(imode),' Ha', &
+                                                        '   |Mode Z*| (x, y, z)', (abs(modez(1,idir1,imode)),idir1=1,3)
        call wrtout(std_out,message,'COLL')
        call wrtout(iout,message,'COLL')
        do idir1=1,3
@@ -285,8 +267,22 @@ subroutine ddb_diel(Crystal,amu,anaddb_dtset,dielt_rlx,displ,d2cart,epsinf,fact_
 
  end if
 
-!Only in case the frequency-dependent dielectric tensor is needed
+! Frequency-dependent dielectric tensor case
  if(dieflag==1) then
+
+!Check the possibility of asking the frequency-dependent
+!dielectric tensor (there should be more than one atom in the unit cell)
+! EB: this check is not in any automatic test
+   if(natom==1)then
+     write(message, '(6a)' )&
+       ' ddb_diel : WARNING -',ch10,&
+       '  When there is only one atom in the unit cell',ch10,&
+       '  cell, the dielectric tensor is frequency-independent.',&
+       '  Consequently, dieflag has been reset to 2 . '
+     call wrtout(std_out,message,'COLL')
+     call wrtout(iout,message,'COLL')
+     dieflag=2
+   end if
 
    difffr=zero
    if(nfreq>1)difffr=(anaddb_dtset%frmax-anaddb_dtset%frmin)/(nfreq-1)
