@@ -812,7 +812,6 @@ subroutine pawdij(cplex,enunit,gprimd,ipert,my_natom,natom,nfft,nfftot,nspden,nt
 
    end if
 
-
 !  ------------------------------------------------------------------------
 !  ----------- Add Dij spin-orbit to Dij
 !  ------------------------------------------------------------------------
@@ -1601,8 +1600,10 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
                j0ln=jln*(jln-1)/2
                do iln=1,jln
                  kln=j0ln+iln
-                 ff(1:mesh_size)=vxctau1(1:mesh_size,ipts,ispden)*pawtab%phiphj(1:mesh_size,kln) &
-&                               -vxcttau1(1:mesh_size,ipts,ispden)*pawtab%tphitphj(1:mesh_size,kln)
+                 ff(2:mesh_size)=(vxctau1(2:mesh_size,ipts,ispden)*pawtab%phiphj(2:mesh_size,kln) &
+&                                -vxcttau1(2:mesh_size,ipts,ispden)*pawtab%tphitphj(2:mesh_size,kln)) &
+&                                /pawrad%rad(2:mesh_size)**2
+                 call pawrad_deducer0(ff,mesh_size,pawrad)
                  call simp_gen(vxctauij1(kln),ff,pawrad)
                  ff(1:mesh_size)=vxctau1(1:mesh_size,ipts,ispden) &
 &                               *pawtab%nablaphi(1:mesh_size,iln)*pawtab%nablaphi(1:mesh_size,jln) &
@@ -1635,13 +1636,15 @@ subroutine pawdijxc(dijxc,cplex_dij,qphase,ndij,nspden,nsppol,&
                j0ln=jln*(jln-1)/2
                do iln=1,jln
                  kln=j0ln+iln
-                 do ir=1,mesh_size
+                 do ir=2,mesh_size
                    ir1=2*ir
                    ff(ir)=vxctau1(ir1-1,ipts,ispden)*pawtab%phiphj(ir,kln) &
 &                        -vxcttau1(ir1-1,ipts,ispden)*pawtab%tphitphj(ir,kln)
                    gg(ir)=vxctau1(ir1,ipts,ispden)*pawtab%phiphj(ir,kln) &
 &                        -vxcttau1(ir1,ipts,ispden)*pawtab%tphitphj(ir,kln)
                  end do
+                 call pawrad_deducer0(ff,mesh_size,pawrad)
+                 call pawrad_deducer0(gg,mesh_size,pawrad)
                  call simp_gen(vxctauij1(2*kln-1),ff,pawrad)
                  call simp_gen(vxctauij1(2*kln  ),gg,pawrad)
                  do ir=1,mesh_size
