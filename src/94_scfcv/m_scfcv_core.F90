@@ -534,8 +534,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  end if
 
  ! Initialize fermi level.
- !if (dtset%nstep==0 .or. dtset%iscf < 0) then
- if ((dtset%nstep==0 .or. dtset%iscf < 0) .and. dtset%plowan_compute==0) then
+ if (dtset%nstep==0 .or. dtset%iscf < 0) then
+ !if ((dtset%nstep==0 .or. dtset%iscf < 0) .and. dtset%plowan_compute==0) then
    energies%e_fermie = results_gs%energies%e_fermie
    results_gs%fermie = results_gs%energies%e_fermie
    !write(std_out,*)"in scfcv_core: results_gs%fermie: ",results_gs%fermie

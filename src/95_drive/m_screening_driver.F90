@@ -96,6 +96,8 @@ module m_screening_driver
  use m_mkrho,         only : prtrhomxmn
  use m_pspini,        only : pspini
  use m_paw_correlations, only : pawpuxinit
+ use m_plowannier,    only : plowannier_type,init_plowannier,get_plowannier,&
+                             &fullbz_plowannier,destroy_plowannier 
 
  implicit none
 
@@ -261,6 +263,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  type(Pawrhoij_type),allocatable :: Pawrhoij(:),prev_Pawrhoij(:)
  type(pawpwff_t),allocatable :: Paw_pwff(:)
  type(paw_pwaves_lmn_t),allocatable :: Paw_onsite(:)
+ type(plowannier_type) :: wanbz,wanibz,wanibz_in
 
 !************************************************************************
 
@@ -1072,6 +1075,14 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
  call timab(321,2,tsec) ! screening(2)
 
  iqcalc = 0
+ if(Dtset%plowan_compute >= 10) then
+   call init_plowannier(Dtset%plowan_bandf,Dtset%plowan_bandi,Dtset%plowan_compute,&
+&Dtset%plowan_iatom,Dtset%plowan_it,Dtset%plowan_lcalc,Dtset%plowan_natom,&
+&Dtset%plowan_nbl,Dtset%plowan_nt,Dtset%plowan_projcalc,Dtset%acell_orig,&
+&Dtset%kptns,Dtset%nimage,Dtset%nkpt,Dtset%nspinor,Dtset%nsppol,Dtset%wtk,wanibz_in)
+   call get_plowannier(wanibz_in,wanibz,Dtset)
+   call fullbz_plowannier(Dtset,Kmesh,Cryst,Pawang,wanibz,wanbz)
+ endif
  do iqibz=1,Qmesh%nibz
    call timab(306,1,tsec)
    is_first_qcalc=(iqibz==1)
@@ -1111,7 +1122,7 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      call cchi0q0(use_tr,Dtset,Cryst,Ep,Psps,Kmesh,QP_BSt,KS_BSt,Gsph_epsG0,&
 &     Pawang,Pawrad,Pawtab,Paw_ij,Paw_pwff,Pawfgrtab,Paw_onsite,ktabr,ktabrf,nbvw,ngfft_gw,nfftgw,&
-&     ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf)
+&     ngfftf,nfftf_tot,chi0,chi0_head,chi0_lwing,chi0_uwing,Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf,wanbz)
 
      chihw = chi_new(ep%npwe, ep%nomega)
      chihw%head = chi0_head
@@ -1161,7 +1172,8 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
      call cchi0(use_tr,Dtset,Cryst,Qmesh%ibz(:,iqibz),Ep,Psps,Kmesh,QP_BSt,Gsph_epsG0,&
 &     Pawtab,Pawang,Paw_pwff,Pawfgrtab,Paw_onsite,nbvw,ngfft_gw,nfftgw,ngfftf,nfftf_tot,chi0,ktabr,ktabrf,&
-&     Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf)
+&     Ltg_q(iqibz),chi0_sumrule,Wfd,Wfdf,wanbz)
+
 
      call timab(308,2,tsec)
    end if
@@ -1453,8 +1465,10 @@ subroutine screening(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim)
 
    call timab(310,2,tsec)
  end do ! Loop over q-points
-
- !----------------------------- END OF THE CALCULATION ------------------------
+ if (Dtset%plowan_compute >=10)then
+   call destroy_plowannier(wanbz)
+ endif
+!----------------------------- END OF THE CALCULATION ------------------------
 
  ! Close Files.
  if (my_rank==master) then
