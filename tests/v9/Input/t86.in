@@ -38,7 +38,7 @@ slc_coupling = 0010 # activate only Oiju terms
 #%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
-#%%   t86.out, tolnlines = 3, tolabs = 0.01, tolrel = 0.05, fld_options = -medium;
+#%%   t86.out, tolnlines = 6, tolabs = 0.01, tolrel = 0.05, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
