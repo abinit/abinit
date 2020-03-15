@@ -146,7 +146,7 @@ contains
     if (xmpi_comm_rank(xmpi_world)==0) then
        ncdf_fname=fnames(3)
        write(message,'(a,(81a, 80a),3a)') ch10,('=',ii=1,80),ch10,ch10,&
-            &     'Reading spin-lattice coupling terms from ', trim(ncdf_fname)
+            &     '- Reading spin-lattice coupling terms from ', trim(ncdf_fname)
        call wrtout(ab_out,message,'COLL')
        call wrtout(std_out,message,'COLL')
     endif
