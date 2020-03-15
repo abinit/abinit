@@ -21,11 +21,11 @@
 
 #include "abi_common.h"
 
-#if (defined HAVE_LINALG_ELPA) && (defined HAVE_LINALG_ELPA_2017)
-#define HAVE_ELPA_FORTRAN2008
-#else
-#undef HAVE_ELPA_FORTRAN2008
-#endif
+!!#if (defined HAVE_LINALG_ELPA) && (defined HAVE_LINALG_ELPA_2017)
+!!#define HAVE_LINALG_ELPA_FORTRAN2008
+!!#else
+!!#undef HAVE_LINALG_ELPA_FORTRAN2008
+!!#endif
 
 module m_elpa
 
@@ -33,7 +33,7 @@ module m_elpa
  use m_errors
 
 #ifdef HAVE_LINALG_ELPA
-#ifdef HAVE_ELPA_FORTRAN2008
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  use elpa
 #else
  use elpa1
@@ -84,7 +84,7 @@ module m_elpa
  type,public :: elpa_hdl_t
    logical :: is_allocated=.false.
    logical :: matrix_is_set=.false.
-#ifdef HAVE_ELPA_FORTRAN2008
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
    class(elpa_t),pointer :: elpa
 #else
    integer :: mpi_comm_parent
@@ -130,7 +130,7 @@ subroutine elpa_func_init()
 !Arguments ------------------------------------
 
 !Local variables-------------------------------
-#if (defined HAVE_LINALG_ELPA_2017)
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  integer,parameter :: elpa_min_version=20170403
 #endif
  logical :: success
@@ -139,14 +139,20 @@ subroutine elpa_func_init()
 
  success=.true.
 
-#if   (defined HAVE_LINALG_ELPA_2017)
- success=(elpa_init(elpa_min_version)==ELPA_OK)
-#elif (defined HAVE_LINALG_ELPA_2016) || (defined HAVE_LINALG_ELPA_2015)
-!No init function
-#elif (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
-!No init function
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
+
+#if (defined HAVE_LINALG_ELPA_2016) || \
+    (defined HAVE_LINALG_ELPA_2015_11) || (defined HAVE_LINALG_ELPA_2015_02) || \
+    (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
+!This case is not supposed to happen
+ success=.false.
+ MSG_BUG('Wrong ELPA cpp directives!')
 #else
- success=.true.
+ success=(elpa_init(elpa_min_version)==ELPA_OK)
+#endif
+
+#else
+!No init function
 #endif
 
  if (.not.success) then
@@ -185,12 +191,8 @@ subroutine elpa_func_uninit()
 
 ! *********************************************************************
 
-#if   (defined HAVE_LINALG_ELPA_2017)
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  call elpa_uninit()
-#elif (defined HAVE_LINALG_ELPA_2016) || (defined HAVE_LINALG_ELPA_2015)
-!No uninit function
-#elif (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
-!No uninit function
 #else
 !No uninit function
 #endif
@@ -239,7 +241,7 @@ subroutine elpa_func_allocate(elpa_hdl,mpi_comm_parent,process_row,process_col,g
 
  err=0
 
-#ifdef HAVE_ELPA_FORTRAN2008
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  elpa_hdl%elpa => elpa_allocate()
  if (err==ELPA_OK.and.present(gpu)) call elpa_hdl%elpa%set("gpu",gpu,err)
 #else
@@ -287,7 +289,7 @@ subroutine elpa_func_deallocate(elpa_hdl)
 
  err=0
 
-#ifdef HAVE_ELPA_FORTRAN2008
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  call elpa_deallocate(elpa_hdl%elpa)
 #endif
 
@@ -340,7 +342,7 @@ subroutine elpa_func_error_handler(err_code,err_msg,err_varname)
  if (err_code_==0) return
 
  err_strg=''
-#ifdef HAVE_ELPA_FORTRAN2008
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  if (err_code_==ELPA_ERROR) err_strg='ELPA_ERROR'
  if (err_code_==ELPA_ERROR_ENTRY_READONLY) err_strg='ELPA_ERROR_ENTRY_READONLY'
  if (err_code_==ELPA_ERROR_ENTRY_NOT_FOUND) err_strg='ELPA_ERROR_ENTRY_NOT_FOUND'
@@ -406,7 +408,7 @@ subroutine elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,proc
    MSG_BUG('ELPA handle not allocated!')
  end if
 
-#if (defined HAVE_LINALG_ELPA_2017)
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  if (err==ELPA_OK) then
    varname='mpi_comm_parent'
    call elpa_hdl%elpa%set(trim(varname),mpi_comm_parent,err)
@@ -429,13 +431,13 @@ subroutine elpa_func_get_communicators(elpa_hdl,mpi_comm_parent,process_row,proc
  elpa_hdl%process_col=process_col
 #if (defined HAVE_LINALG_ELPA_2016)
  err=elpa_get_communicators(mpi_comm_parent,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
-#elif (defined HAVE_LINALG_ELPA_2015)
+#elif (defined HAVE_LINALG_ELPA_2015_11) || (defined HAVE_LINALG_ELPA_2015_02)
  err=get_elpa_row_col_comms(mpi_comm_parent,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
 #elif (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
  call get_elpa_row_col_comms(mpi_comm_parent,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
 #else
 !ELPA-LEGACY-2017
- err=get_elpa_communicators(mpi_comm_parent,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+ err=elpa_get_communicators(mpi_comm_parent,process_row,process_col,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
 #endif
 #endif
 
@@ -492,7 +494,7 @@ subroutine elpa_func_set_matrix(elpa_hdl,na,nblk,local_nrows,local_ncols)
    MSG_BUG('ELPA handle not allocated!')
  end if
 
-#ifdef HAVE_ELPA_FORTRAN2008
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  if (err==ELPA_OK) then
    varname="na"
    call elpa_hdl%elpa%set(trim(varname),na,err)
@@ -581,7 +583,7 @@ subroutine elpa_func_solve_evp_1stage_real(elpa_hdl,aa,qq,ev,nev)
  if (.not.elpa_hdl%matrix_is_set) then
    MSG_BUG('Matrix not set in ELPA handle!')
  end if
-#ifdef HAVE_ELPA_FORTRAN2008
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
  ABI_CHECK(size(qq)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix Q has wrong sizes!')
  ABI_CHECK(size(ev)==elpa_hdl%elpa%na,'BUG: matrix EV has wrong sizes!')
@@ -591,7 +593,7 @@ subroutine elpa_func_solve_evp_1stage_real(elpa_hdl,aa,qq,ev,nev)
  ABI_CHECK(size(ev)==elpa_hdl%na,'BUG: matrix EV has wrong sizes!')
 #endif
 
-#if  (defined HAVE_LINALG_ELPA_2017)
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  if (err==ELPA_OK) call elpa_hdl%elpa%set('nev',nev,err)
  if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
  if (err==ELPA_OK) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
@@ -599,7 +601,10 @@ subroutine elpa_func_solve_evp_1stage_real(elpa_hdl,aa,qq,ev,nev)
 #elif  (defined HAVE_LINALG_ELPA_2016)
  success=elpa_solve_evp_real_1stage(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
 &                       elpa_hdl%nblk,elpa_hdl%local_ncols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
-#elif (defined HAVE_LINALG_ELPA_2015) || (defined HAVE_LINALG_ELPA_2014)
+#elif (defined HAVE_LINALG_ELPA_2015_11)
+ success=solve_evp_real(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
+&                       elpa_hdl%nblk,elpa_hdl%local_ncols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#elif (defined HAVE_LINALG_ELPA_2015_02) || (defined HAVE_LINALG_ELPA_2014)
  success=solve_evp_real(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
 &                       elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
 #elif (defined HAVE_LINALG_ELPA_2013)
@@ -675,7 +680,7 @@ subroutine elpa_func_solve_evp_1stage_complex(elpa_hdl,aa,qq,ev,nev)
  if (.not.elpa_hdl%matrix_is_set) then
    MSG_BUG('Matrix not set in ELPA handle!')
  end if
-#ifdef HAVE_ELPA_FORTRAN2008
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
  ABI_CHECK(size(qq)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix Q has wrong sizes!')
  ABI_CHECK(size(ev)==elpa_hdl%elpa%na,'BUG: matrix EV has wrong sizes!')
@@ -685,7 +690,7 @@ subroutine elpa_func_solve_evp_1stage_complex(elpa_hdl,aa,qq,ev,nev)
  ABI_CHECK(size(ev)==elpa_hdl%na,'BUG: matrix EV has wrong sizes!')
 #endif
 
-#if  (defined HAVE_LINALG_ELPA_2017)
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  if (err==ELPA_OK) call elpa_hdl%elpa%set('nev',nev,err)
  if (err==ELPA_OK) call elpa_hdl%elpa%set("solver",ELPA_SOLVER_1STAGE,err)
  if (err==ELPA_OK) call elpa_hdl%elpa%eigenvectors(aa,ev,qq,err)
@@ -693,7 +698,10 @@ subroutine elpa_func_solve_evp_1stage_complex(elpa_hdl,aa,qq,ev,nev)
 #elif  (defined HAVE_LINALG_ELPA_2016)
  success=elpa_solve_evp_complex_1stage(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
 &                       elpa_hdl%nblk,elpa_hdl%local_ncols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
-#elif (defined HAVE_LINALG_ELPA_2015) || (defined HAVE_LINALG_ELPA_2014)
+#elif (defined HAVE_LINALG_ELPA_2015_11)
+ success=solve_evp_complex(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
+&                       elpa_hdl%nblk,elpa_hdl%local_ncols,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
+#elif (defined HAVE_LINALG_ELPA_2015_02) || (defined HAVE_LINALG_ELPA_2014)
  success=solve_evp_complex(elpa_hdl%na,nev,aa,elpa_hdl%local_nrows,ev,qq,elpa_hdl%local_nrows,&
 &                       elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols)
 #elif (defined HAVE_LINALG_ELPA_2013)
@@ -759,19 +767,22 @@ subroutine elpa_func_cholesky_real(elpa_hdl,aa)
  if (.not.elpa_hdl%matrix_is_set) then
    MSG_BUG('Matrix not set in ELPA handle!')
  end if
-#ifdef HAVE_ELPA_FORTRAN2008
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
 #else
  ABI_CHECK(size(aa)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix A has wrong sizes!')
 #endif
 
-#if  (defined HAVE_LINALG_ELPA_2017)
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  call elpa_hdl%elpa%cholesky(aa,err)
  success=(err==ELPA_OK)
 #elif (defined HAVE_LINALG_ELPA_2016)
  success = elpa_cholesky_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
 &                             elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
-#elif (defined HAVE_LINALG_ELPA_2015)
+#elif (defined HAVE_LINALG_ELPA_2015_11)
+ call cholesky_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
+                    elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
+#elif (defined HAVE_LINALG_ELPA_2015_02)
  call cholesky_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
                     elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
 #elif (defined HAVE_LINALG_ELPA_2014)
@@ -806,7 +817,7 @@ end subroutine elpa_func_cholesky_real
 !!                     Distribution is like in Scalapack.
 !!                     Only upper triangle is needs to be set.
 !!                     On return, the upper triangle contains the Cholesky factor
-!!                     and the lower triangle is set to 0.#elif (defined HAVE_LINALG_ELPA_2016)
+!!                     and the lower triangle is set to 0.
 !!  elpa_hdl(type<elpa_hdl_t>)=handler for ELPA object
 !!
 !! PARENTS
@@ -839,19 +850,22 @@ subroutine elpa_func_cholesky_complex(elpa_hdl,aa)
  if (.not.elpa_hdl%matrix_is_set) then
    MSG_BUG('Matrix not set in ELPA handle!')
  end if
-#ifdef HAVE_ELPA_FORTRAN2008
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
 #else
  ABI_CHECK(size(aa)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix A has wrong sizes!')
 #endif
 
-#if  (defined HAVE_LINALG_ELPA_2017)
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  call elpa_hdl%elpa%cholesky(aa,err)
  success=(err==ELPA_OK)
 #elif (defined HAVE_LINALG_ELPA_2016)
  success = elpa_cholesky_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
 &                                elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
-#elif (defined HAVE_LINALG_ELPA_2015)
+#elif (defined HAVE_LINALG_ELPA_2015_11)
+ call cholesky_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
+&                      elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
+#elif (defined HAVE_LINALG_ELPA_2015_02)
  call cholesky_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
 &                      elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
 #elif (defined HAVE_LINALG_ELPA_2014)
@@ -919,19 +933,22 @@ subroutine elpa_func_invert_triangular_real(elpa_hdl,aa)
  if (.not.elpa_hdl%matrix_is_set) then
    MSG_BUG('Matrix not set in ELPA handle!')
  end if
-#ifdef HAVE_ELPA_FORTRAN2008
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
 #else
  ABI_CHECK(size(aa)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix A has wrong sizes!')
 #endif
 
-#if  (defined HAVE_LINALG_ELPA_2017)
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  call elpa_hdl%elpa%invert_triangular(aa,err)
  success=(err==ELPA_OK)
 #elif (defined HAVE_LINALG_ELPA_2016)
  success = elpa_invert_trm_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
 &                               elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
-#elif (defined HAVE_LINALG_ELPA_2015)
+#elif (defined HAVE_LINALG_ELPA_2015_11)
+ call invert_trm_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
+                         elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
+#elif (defined HAVE_LINALG_ELPA_2015_02)
  call invert_trm_real(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
                          elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
 #elif (defined HAVE_LINALG_ELPA_2014)
@@ -1000,19 +1017,22 @@ subroutine elpa_func_invert_triangular_complex(elpa_hdl,aa)
  if (.not.elpa_hdl%matrix_is_set) then
    MSG_BUG('Matrix not set in ELPA handle!')
  end if
-#ifdef HAVE_ELPA_FORTRAN2008
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
 #else
  ABI_CHECK(size(aa)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix A has wrong sizes!')
 #endif
 
-#if  (defined HAVE_LINALG_ELPA_2017)
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  call elpa_hdl%elpa%invert_triangular(aa,err)
  success=(err==ELPA_OK)
 #elif (defined HAVE_LINALG_ELPA_2016)
  success = elpa_invert_trm_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
 &                                  elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.)
-#elif (defined HAVE_LINALG_ELPA_2015)
+#elif (defined HAVE_LINALG_ELPA_2015_11)
+ call invert_trm_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,elpa_hdl%local_ncols,&
+                         elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
+#elif (defined HAVE_LINALG_ELPA_2015_02)
  call invert_trm_complex(elpa_hdl%na,aa,elpa_hdl%local_nrows,elpa_hdl%nblk,&
                          elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,.false.,success)
 #elif (defined HAVE_LINALG_ELPA_2014)
@@ -1104,7 +1124,7 @@ subroutine elpa_func_hermitian_multiply_real(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb,lo
  if (.not.elpa_hdl%matrix_is_set) then
    MSG_BUG('Matrix not set in ELPA handle!')
  end if
-#ifdef HAVE_ELPA_FORTRAN2008
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
 #else
  ABI_CHECK(size(aa)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix A has wrong sizes!')
@@ -1112,7 +1132,7 @@ subroutine elpa_func_hermitian_multiply_real(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb,lo
  ABI_CHECK(size(bb)==local_nrows_b*local_ncols_b,'BUG: matrix B has wrong sizes!')
  ABI_CHECK(size(cc)==local_nrows_c*local_ncols_c,'BUG: matrix C has wrong sizes!')
 
-#if  (defined HAVE_LINALG_ELPA_2017)
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  call elpa_hdl%elpa%hermitian_multiply(uplo_a,uplo_c,ncb,aa,bb,local_nrows_b,local_ncols_b,&
 &                                      cc,local_nrows_c,local_ncols_c,err)
  success=(err==ELPA_OK)
@@ -1120,7 +1140,8 @@ subroutine elpa_func_hermitian_multiply_real(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb,lo
  success = elpa_mult_at_b_real(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,elpa_hdl%local_ncols,&
 &          bb,local_nrows_b,local_ncols_b,elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,&
 &          cc,local_nrows_c,local_ncols_c)
-#elif (defined HAVE_LINALG_ELPA_2015) || (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
+#elif (defined HAVE_LINALG_ELPA_2015_11) || (defined HAVE_LINALG_ELPA_2015_02) || \
+      (defined HAVE_LINALG_ELPA_2014)    || (defined HAVE_LINALG_ELPA_2013)
  call mult_at_b_real(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,bb,local_nrows_b,&
 &               elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,cc,local_nrows_c)
 #else
@@ -1206,7 +1227,7 @@ subroutine elpa_func_hermitian_multiply_complex(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb
  if (.not.elpa_hdl%matrix_is_set) then
    MSG_BUG('Matrix not set in ELPA handle!')
  end if
-#ifdef HAVE_ELPA_FORTRAN2008
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  ABI_CHECK(size(aa)==elpa_hdl%elpa%local_nrows*elpa_hdl%elpa%local_ncols,'BUG: matrix A has wrong sizes!')
 #else
  ABI_CHECK(size(aa)==elpa_hdl%local_nrows*elpa_hdl%local_ncols,'BUG: matrix A has wrong sizes!')
@@ -1214,7 +1235,7 @@ subroutine elpa_func_hermitian_multiply_complex(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb
  ABI_CHECK(size(bb)==local_nrows_b*local_ncols_b,'BUG: matrix B has wrong sizes!')
  ABI_CHECK(size(cc)==local_nrows_c*local_ncols_c,'BUG: matrix C has wrong sizes!')
 
-#if  (defined HAVE_LINALG_ELPA_2017)
+#ifdef HAVE_LINALG_ELPA_FORTRAN2008
  call elpa_hdl%elpa%hermitian_multiply(uplo_a,uplo_c,ncb,aa,bb,local_nrows_b,local_ncols_b,&
 &                                      cc,local_nrows_c,local_ncols_c,err)
  success=(err==ELPA_OK)
@@ -1222,7 +1243,8 @@ subroutine elpa_func_hermitian_multiply_complex(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb
  success = elpa_mult_ah_b_complex(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,elpa_hdl%local_ncols,&
 &          bb,local_nrows_b,local_ncols_b,elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,&
 &          cc,local_nrows_c,local_ncols_c)
-#elif (defined HAVE_LINALG_ELPA_2015) || (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
+#elif (defined HAVE_LINALG_ELPA_2015_11) || (defined HAVE_LINALG_ELPA_2015_02) || \
+      (defined HAVE_LINALG_ELPA_2014)    || (defined HAVE_LINALG_ELPA_2013)
  call mult_ah_b_complex(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,bb,local_nrows_b,&
 &               elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,cc,local_nrows_c)
 #else
