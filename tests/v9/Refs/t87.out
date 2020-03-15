@@ -89,7 +89,7 @@ reading spin terms.
 
 ================================================================================
 
-Reading spin-lattice coupling terms from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/xuhe_release-9.0_slc/tests/v9/Input/t83.nc
+- Reading spin-lattice coupling terms from /home/buildbot/bb/ABINIT/abiref_gnu_9.2_serial/xuhe_release-9.0_slc/tests/v9/Input/t83.nc
  Initial spins set to random values.
 ================================================================================
 Coupled spin-lattice
