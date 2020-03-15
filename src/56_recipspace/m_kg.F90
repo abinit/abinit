@@ -521,6 +521,9 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 !Define me
  me=mpi_enreg%me_kpt
 
+print *, 'me mkmem, nkpt ', me, mkmem, nkpt
+print *, 'me mpi_enreg%proc_distrb ', me, mpi_enreg%proc_distrb
+
  if((mpi_enreg%paralbd==1) .and. (mode_paral=='PERS')) then
    if(nsppol==2)then
      do ikpt=1,nkpt
@@ -552,6 +555,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 
    nband_k = nband(ikpt)
 
+print *, 'me, ikpt, nband_k ', me, ikpt, nband_k, xmpi_paral
    if(mode_paral=='PERS')then
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
    end if
@@ -572,7 +576,7 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 !  if (npw1<nband(ikpt)) then
 !  write(message, '(a,a,a,a,i5,a,3f8.4,a,a,i10,a,i10,a,a,a,a)' )ch10,&
 !  &   ' kpgio : ERROR -',ch10,&
-!  &   '  At k point number',ikpt,' k=',(kptns(mu,ikpt),mu=1,3),ch10,&
+!  &   '  At k point number',ikpt,' k=',(kptns(ierr,ikpt),ierr=1,3),ch10,&
 !  &   '  npw=',npw1,' < nband=',nband(ikpt),ch10,&
 !  &   '  Indicates not enough planewaves for desired number of bands.',ch10,&
 !  &   '  Action: change either ecut or nband in input file.'
@@ -584,7 +588,9 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
    ikg=ikg+npw1
  end do !  End of the loop over k points
 
+! TODO: this fails on some platforms if nproc > nkpt
  if(mode_paral == 'PERS') then
+print *, 'me = ', mpi_enreg%me_kpt, ' comm ',  mpi_enreg%comm_kpt
    call xmpi_sum(npwarr,mpi_enreg%comm_kpt,ierr)
  end if
 

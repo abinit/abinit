@@ -1034,11 +1034,18 @@ print *, ' dtset%mkmem, mkmem_rbz ', dtset%mkmem, mkmem_rbz
 
    _IBM6("IBM6 before kpgio")
 
+#ifdef DEV_MJV
+print *, ' calling kpgio '
+#endif
 !  Set up the basis sphere of planewaves at k
    call timab(143,1,tsec)
    call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
-&   kpt_rbz,mkmem_rbz,nband_rbz,nkpt_rbz,'PERS',mpi_enreg,mpw,npwarr,npwtot,dtset%nsppol)
+&    kpt_rbz,mkmem_rbz,nband_rbz,nkpt_rbz,'PERS',mpi_enreg,&
+&    mpw,npwarr,npwtot,dtset%nsppol)
    call timab(143,2,tsec)
+#ifdef DEV_MJV
+print *, ' out of kpgio'
+#endif
 
 !  Set up the spherical harmonics (Ylm) at k
    useylmgr=0; option=0 ; nylmgr=0
@@ -1052,6 +1059,9 @@ print *, ' dtset%mkmem, mkmem_rbz ', dtset%mkmem, mkmem_rbz
    ABI_ALLOCATE(ylm,(mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
    ABI_ALLOCATE(ylmgr,(mpw*mkmem_rbz,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr))
    if (psps%useylm==1) then
+#ifdef DEV_MJV
+print *, ' call initylmg'
+#endif
      call initylmg(gprimd,kg,kpt_rbz,mkmem_rbz,mpi_enreg,psps%mpsang,mpw,nband_rbz,nkpt_rbz,&
 &     npwarr,dtset%nsppol,option,rprimd,ylm,ylmgr)
    end if
@@ -1144,6 +1154,9 @@ print *, 'shape cg 1 ', shape(cg)
 !TODO : distribute cprj by band as well?
        !mcprj=dtset%nspinor*dtset%mband_mem*mkmem_rbz*dtset%nsppol
        mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
+       !mcprj=dtset%nspinor*dtset%mband*nkpt_rbz*dtset%nsppol
+print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
+& mcprj, dtset%nspinor, dtset%mband, mkmem_rbz, dtset%nsppol, nband_rbz
        ABI_DATATYPE_DEALLOCATE(cprj)
        ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
        call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)

@@ -2606,10 +2606,16 @@ print *, 'yes band paral now'
 !      Does not allow a processor to treat different spins
        ind0=0
        inb=nproc/(nkpt*nsppol)
+#ifdef DEV_MJV
+print *, ' inb = ', inb
+#endif
        do iikpt=1,nkpt
          nband_k=nband(iikpt)
          nband_k_sp2=nband(iikpt+nkpt*(nsppol-1))
          inb1=nband_k/inb
+#ifdef DEV_MJV
+print *, ' inb1 = ', inb1
+#endif
          if (mod(nband_k,inb)/=0) inb1=inb1+1
          do iiband=1,nband_k
            ind=(iiband-1)/inb1+ind0
@@ -2712,6 +2718,9 @@ print *, iisppol, iiband, iikpt, mpi_enreg%proc_distrb(iikpt,iiband,iisppol)
 end do
 end do
 end do
+write (401, '(a)') ' mpi_enreg%proc_distrb '
+write (401, *) mpi_enreg%proc_distrb
+flush (401)
 #endif
 
 end subroutine distrb2

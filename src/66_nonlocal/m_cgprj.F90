@@ -543,7 +543,7 @@ contains
    spaceComm_band=xmpi_comm_self
    if (mpi_enreg%paralbd==1) then
      cg_band_distributed=.true.
-     !cprj_band_distributed=.true.
+     cprj_band_distributed=.true.
      spaceComm_band=mpi_enreg%comm_band
    end if
  end if
