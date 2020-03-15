@@ -534,8 +534,8 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
  end if
 
  ! Initialize fermi level.
- !if (dtset%nstep==0 .or. dtset%iscf < 0) then
- if ((dtset%nstep==0 .or. dtset%iscf < 0) .and. dtset%plowan_compute==0) then
+ if (dtset%nstep==0 .or. dtset%iscf < 0) then
+ !if ((dtset%nstep==0 .or. dtset%iscf < 0) .and. dtset%plowan_compute==0) then
    energies%e_fermie = results_gs%energies%e_fermie
    results_gs%fermie = results_gs%energies%e_fermie
    !write(std_out,*)"in scfcv_core: results_gs%fermie: ",results_gs%fermie
@@ -1945,7 +1945,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 &     ngfftf,ngfftmix,nkxc,npawmix,npwdiel,&
 &     nstep,psps%ntypat,n1xccc,&
 &     pawrhoij,ph1df,psps,rhor,rprimd,susmat,psps%usepaw,&
-&     vhartr,vnew_mean,vpsp,nvresid,vtrial,vxc,xred,&
+&     vhartr,vnew_mean,vpsp,nvresid,vres_mean,vtrial,vxc,xred,&
 &     nfftf,pawtab,rhog,wvl,&
 &     mix_mgga=mix_mgga,vtau=vxctau,vtauresid=nvtauresid)
 
@@ -2036,7 +2036,7 @@ subroutine scfcv_core(atindx,atindx1,cg,cprj,cpus,dmatpawu,dtefield,dtfil,dtorbm
 
  if (dtset%iscf > 0) then
    call ab7_mixing_deallocate(mix)
-   if (dtset%usekden/=0.and.denpot==AB7_MIXING_DENSITY) call ab7_mixing_deallocate(mix_mgga)
+   if (dtset%usekden/=0) call ab7_mixing_deallocate(mix_mgga)
  end if
 
  if (usefock==1)then

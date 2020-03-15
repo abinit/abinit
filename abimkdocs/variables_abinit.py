@@ -2624,11 +2624,12 @@ Variable(
     vartype="real",
     topics=['DMFT_expert'],
     dimensions="scalar",
-    defaultval=1,
+    defaultval=1e-06,
     mnemonics="Dynamical Mean Field Theory: charge density precision",
     added_in_version="before_v9",
     text=r"""
 Precision to achieve in determining the charge density in the computation of the fermi level.
+Should be decreased to increase precision. However, for a large system, it can increase importantly computer time.
 """,
 ),
 
@@ -2644,8 +2645,8 @@ Variable(
     added_in_version="before_v9",
     text=r"""
 
-Value of double counting used for DMFT. Only value 1 is activated for the
-moment and is the FLL double counting.
+Value of double counting used for DMFT. Only value 1 is currently activated.
+It corresponds to the "Full Localized Limit" double counting.
 """,
 ),
 
@@ -2666,6 +2667,28 @@ implementation, this is only possible with [[dmft_solv]] = 5 (Continuous Time
 Quantum Monte Carlo). See also the input variable [[dmft_nlambda]].
 """,
 ),
+
+Variable(
+    abivarname="dmft_kspectral_func",
+    varset="dmft",
+    vartype="integer",
+    topics=['DMFT_useful'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="Dynamical Mean Field Theory: compute K-resolved SPECTRAL FUNCtion",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="9.0.0",
+    text=r"""
+
+When activated, in conjunction with [[iscf]] = -2 or -3, a calculation
+of k-resolved spectral function (or density of state) is possible.
+However, the calculation requires as input the self-energy computed in the real
+axis using an external analytical continuation code.
+The section 7 of the DFT+DMFT tutorial  details how to obtain this data
+and related informations.
+""",
+),
+
 
 Variable(
     abivarname="dmft_iter",
@@ -2693,7 +2716,7 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-Mixing parameter for the simple mixing of the self-energy (should be between 0.3 and 0.8).
+Mixing parameter for the simple mixing of the self-energy (0.3 is safe, but it can be increased most of the time to 0.6).
 """,
 ),
 
@@ -2784,6 +2807,7 @@ where it stopped (assuming a restart with the wave functions, see [[getwfk]]).
 
 An alternative and more simple way to restart a DFT+DMFT calculation is to use
 the density file (obtained with [[prtden]] = 1 or [[prtden]] = -1) and the self-energy (see [[dmft_rslf]]).
+In this case, use [[dmft_read_occnd]]=0.
 """,
 ),
 
@@ -2800,6 +2824,7 @@ Variable(
     text=r"""
 Flag to read/write Self-Energy. If put to one, self-energy is written and read at each DFT iteration.
 If self-energy file is missing, the self-energy is initialized to the double counting at the first iteration.
+Importantly, in order to the calculation to restart easily, the self-energy is read and write in the same file.
 """,
 ),
 
@@ -2818,10 +2843,11 @@ Choice of solver for the Impurity model.
 
   * 0 --> No solver and U=0, J=0 (see [[upawu]] and [[jpawu]]).
   * 1 --> LDA+U self-energy is used (for testing purpose)
-  * 2 --> Hubbard one solver. The Hubbard one solver is an approximation which gives a rough description of correlated Mott insulators. It should not be used for metals.
-  * 5 --> Use the Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of ABINIT in the density density representation, CTQMC calculations are much more time consuming that Hubbard I calculations. Nevertheless, the calculation is fully parallelised.
+  * 2 --> Hubbard one solver in the density density approximation of the Coulomb interaction. The Hubbard one solver is an approximation which gives a rough description of correlated Mott insulators. It should not be used for metals.
+  * 5 --> Use the Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of ABINIT in the density density approximation of the Coulomb interaction. The calculation is fully parallelised over MPI processes.
   * 6 --> Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of TRIQS in the density density representation.
   * 7 --> Continuous Time Quantum Monte Carlo (CTQMC) solver CT-Hyb of TRIQS with the rotationally invariant formulation.
+  * 8 --> Same as 5, but off-diagonal elements of the hybridization function are taken into account (useful for low symetry systems or with spin orbit coupling).
   * 9 --> Python invocation. Give a symbolic link to your python interpreter as an input like 'input-tag'_TRIQS_python_lib and the python script as an input like 'input-tag'_TRIQS_script.py. The inputs for the script will be written in dft_for_triqs.nc and the output as triqs_for_dft.nc.
 
 The CT Hyb algorithm is described in [[cite:Werner2006]]. For a
@@ -2890,9 +2916,9 @@ Variable(
     characteristics=['[[DEVELOP]]'],
     added_in_version="before_v9",
     text=r"""
-Tolerance for the variation of Local Charge during iterations of the DMFT Loop.
-The default value is good for fast calculations. However, to obtain good
-convergence of the DFT Loop, the DMFT Loop needs a better convergence criterion.
+Tolerance for the variation of Local Charge for convergence of the DMFT Loop.
+Most of the time however, DFT+DMFT calculations can converge fastly using [[dmft_iter]]=1, so
+that this variable is not required. 
 """,
 ),
 
