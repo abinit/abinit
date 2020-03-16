@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.1.1 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h32 )
+.Starting date : Mon 16 Mar 2020.
+- ( at 09h04 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t57/t57.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Test_suite/v8_t57/t57.in
 - output file    -> t57.out
 - root for input  files -> t57i
 - root for output files -> t57o
@@ -477,8 +477,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -492,8 +492,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -671,7 +671,6 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -690,7 +689,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -750,7 +748,6 @@ tolerances: {tolwfr: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -810,7 +807,6 @@ tolerances: {tolwfr: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -916,7 +912,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -966,7 +961,6 @@ meta: {optdriver: 1, rfelfd: 3, rfphon: 1, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1028,7 +1022,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1089,7 +1082,6 @@ tolerances: {tolvrs: 1.00E-08, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t57o_DS1_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
@@ -1530,8 +1522,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1545,8 +1537,8 @@ meta: {optdriver: 1, rfelfd: 2, }
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1562,7 +1554,6 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t57o_DS4_WFK
 
  ==>  initialize data related to q vector <== 
 
@@ -1584,41 +1575,40 @@ meta: {optdriver: 1, rfelfd: 2, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t57o_DS4_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   1
--inwffil : will read wavefunctions from disk file t57o_DS2_1WF7
 
 --- !BeginCycle
 iteration_state: {dtset: 5, }
-solver: {iscf: -2, nstep: 100, nline: 4, wfoptalg: 0, }
-tolerances: {tolwfr: 1.00E-12, }
+solver: {iscf: -2, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -27.757624794034     -2.776E+01 2.424E-01 0.000E+00
- ETOT  2  -27.964661678244     -2.070E-01 4.825E-03 0.000E+00
- ETOT  3  -27.969478428039     -4.817E-03 2.311E-04 0.000E+00
- ETOT  4  -27.969624110433     -1.457E-04 4.527E-06 0.000E+00
- ETOT  5  -27.969629266851     -5.156E-06 2.461E-07 0.000E+00
- ETOT  6  -27.969629461514     -1.947E-07 1.037E-08 0.000E+00
- ETOT  7  -27.969629469153     -7.639E-09 8.439E-10 0.000E+00
- ETOT  8  -27.969629469457     -3.036E-10 3.141E-11 0.000E+00
- ETOT  9  -27.969629469469     -1.178E-11 3.635E-12 0.000E+00
- ETOT 10  -27.969629469469      7.105E-15 9.464E-13 0.000E+00
+-ETOT  1  -27.655924646532     -2.766E+01 4.029E+00 0.000E+00
+ ETOT  2  -27.964649371753     -3.087E-01 4.825E-03 0.000E+00
+ ETOT  3  -27.969483909894     -4.835E-03 2.349E-04 0.000E+00
+ ETOT  4  -27.969624256508     -1.403E-04 4.527E-06 0.000E+00
+ ETOT  5  -27.969629270303     -5.014E-06 2.090E-06 0.000E+00
+ ETOT  6  -27.969629461600     -1.913E-07 3.458E-08 0.000E+00
+ ETOT  7  -27.969629469159     -7.558E-09 2.408E-08 0.000E+00
+ ETOT  8  -27.969629469462     -3.031E-10 4.075E-10 0.000E+00
+ ETOT  9  -27.969629469474     -1.228E-11 2.857E-10 0.000E+00
+ ETOT 10  -27.969629469474     -4.690E-13 4.903E-12 0.000E+00
 
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
-  maximum residual=  9.464E-13 exceeds tolwfr=  1.000E-20
+  maximum residual=  4.903E-12 exceeds tolwfr=  1.000E-20
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   48.791E-14; max=  94.639E-14
+ Mean square residual over all n,k,spin=   26.158E-14; max=  49.035E-13
  dfpt_looppert : ek2=    4.5406579546E+01
-          f-sum rule ratio=    1.3569144226E+00
+          f-sum rule ratio=    1.3569145037E+00
  prteigrs : about to open file t57t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   2  k points:
   (in case of degenerate eigenvalues, averaged derivative)
@@ -1630,16 +1620,16 @@ tolerances: {tolwfr: 1.00E-12, }
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   4.00230682E+01 eigvalue=  -1.16687030E+00  local=  -2.06750431E+01
+     kin0=   4.00230896E+01 eigvalue=  -1.16687124E+00  local=  -2.06750585E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -6.16128427E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+     kin1=  -6.16128463E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   1.19038645E+01     enl0=  -2.11539225E+00   enl1=   5.67358616E+00
+    edocc=   1.19038645E+01     enl0=  -2.11539515E+00   enl1=   5.67358771E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -2.79696295E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
  2DEtotal=   -0.2796962947E+02 Ha. Also 2DEtotal=   -0.761092323916E+03 eV
-    (  non-var. 2DEtotal :   -2.7969628250E+01 Ha)
+    (  non-var. 2DEtotal :   -2.7969629317E+01 Ha)
 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
@@ -1649,41 +1639,40 @@ tolerances: {tolwfr: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t57o_DS4_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   1
--inwffil : will read wavefunctions from disk file t57o_DS2_1WF8
 
 --- !BeginCycle
 iteration_state: {dtset: 5, }
-solver: {iscf: -2, nstep: 100, nline: 4, wfoptalg: 0, }
-tolerances: {tolwfr: 1.00E-12, }
+solver: {iscf: -2, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -27.720468849737     -2.772E+01 2.424E-01 0.000E+00
- ETOT  2  -27.964138204329     -2.437E-01 5.897E-03 0.000E+00
- ETOT  3  -27.969566296252     -5.428E-03 2.312E-04 0.000E+00
- ETOT  4  -27.969718471713     -1.522E-04 4.527E-06 0.000E+00
- ETOT  5  -27.969723472555     -5.001E-06 2.461E-07 0.000E+00
- ETOT  6  -27.969723646098     -1.735E-07 1.183E-08 0.000E+00
- ETOT  7  -27.969723652423     -6.325E-09 1.087E-09 0.000E+00
- ETOT  8  -27.969723652659     -2.358E-10 2.990E-11 0.000E+00
- ETOT  9  -27.969723652667     -7.972E-12 5.263E-12 0.000E+00
- ETOT 10  -27.969723652667      7.105E-15 5.826E-13 0.000E+00
+-ETOT  1  -27.689538451783     -2.769E+01 4.148E-01 0.000E+00
+ ETOT  2  -27.964217025315     -2.747E-01 5.897E-03 0.000E+00
+ ETOT  3  -27.969569927710     -5.353E-03 2.312E-04 0.000E+00
+ ETOT  4  -27.969718585149     -1.487E-04 4.527E-06 0.000E+00
+ ETOT  5  -27.969723476202     -4.891E-06 2.461E-07 0.000E+00
+ ETOT  6  -27.969723646223     -1.700E-07 1.183E-08 0.000E+00
+ ETOT  7  -27.969723652429     -6.207E-09 1.370E-09 0.000E+00
+ ETOT  8  -27.969723652661     -2.322E-10 1.004E-10 0.000E+00
+ ETOT  9  -27.969723652670     -8.825E-12 1.742E-11 0.000E+00
+ ETOT 10  -27.969723652671     -3.872E-13 1.296E-12 0.000E+00
 
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
-  maximum residual=  5.826E-13 exceeds tolwfr=  1.000E-20
+  maximum residual=  1.296E-12 exceeds tolwfr=  1.000E-20
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   36.964E-14; max=  58.255E-14
+ Mean square residual over all n,k,spin=   74.016E-15; max=  12.959E-13
  dfpt_looppert : ek2=    4.5406579546E+01
-          f-sum rule ratio=    1.3569191728E+00
+          f-sum rule ratio=    1.3569192668E+00
  prteigrs : about to open file t57t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   2  k points:
   (in case of degenerate eigenvalues, averaged derivative)
@@ -1695,16 +1684,16 @@ tolerances: {tolwfr: 1.00E-12, }
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   4.10485626E+01 eigvalue=  -1.08596744E+00  local=  -2.13605801E+01
+     kin0=   4.10485853E+01 eigvalue=  -1.08596836E+00  local=  -2.13605956E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -6.16130584E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+     kin1=  -6.16130626E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   1.15939381E+01     enl0=  -2.22623233E+00   enl1=   5.67361389E+00
+    edocc=   1.15939381E+01     enl0=  -2.22623597E+00   enl1=   5.67361557E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -2.79697237E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
  2DEtotal=   -0.2796972365E+02 Ha. Also 2DEtotal=   -0.761094886771E+03 eV
-    (  non-var. 2DEtotal :   -2.7969722233E+01 Ha)
+    (  non-var. 2DEtotal :   -2.7969723530E+01 Ha)
 
 --------------------------------------------------------------------------------
  Perturbation wavevector (in red.coord.)   0.000000  0.000000  0.000000
@@ -1714,41 +1703,40 @@ tolerances: {tolwfr: 1.00E-12, }
 
 --------------------------------------------------------------------------------
 
--inwffil : will read wavefunctions from disk file t57o_DS4_WFK
 --------------------------------------------------------------------------------
 
  Initialisation of the first-order wave-functions :
   ireadwf=   1
--inwffil : will read wavefunctions from disk file t57o_DS2_1WF9
 
 --- !BeginCycle
 iteration_state: {dtset: 5, }
-solver: {iscf: -2, nstep: 100, nline: 4, wfoptalg: 0, }
-tolerances: {tolwfr: 1.00E-12, }
+solver: {iscf: -2, nstep: 10, nline: 4, wfoptalg: 0, }
+tolerances: {tolwfr: 1.00E-20, }
 ...
 
      iter   2DEtotal(Ha)        deltaE(Ha) residm    vres2
--ETOT  1  -27.767309020787     -2.777E+01 2.424E-01 0.000E+00
- ETOT  2  -27.965144003869     -1.978E-01 3.417E-03 0.000E+00
- ETOT  3  -27.969573839161     -4.430E-03 2.498E-04 0.000E+00
- ETOT  4  -27.969713172536     -1.393E-04 3.441E-06 0.000E+00
- ETOT  5  -27.969718385975     -5.213E-06 3.369E-07 0.000E+00
- ETOT  6  -27.969718595697     -2.097E-07 1.167E-08 0.000E+00
- ETOT  7  -27.969718604436     -8.739E-09 1.051E-09 0.000E+00
- ETOT  8  -27.969718604806     -3.699E-10 2.843E-11 0.000E+00
- ETOT  9  -27.969718604821     -1.516E-11 5.030E-12 0.000E+00
- ETOT 10  -27.969718604821     -1.066E-14 9.943E-13 0.000E+00
+-ETOT  1  -27.731226079954     -2.773E+01 1.873E+00 0.000E+00
+ ETOT  2  -27.965234424625     -2.340E-01 3.417E-03 0.000E+00
+ ETOT  3  -27.969577156602     -4.343E-03 6.579E-04 0.000E+00
+ ETOT  4  -27.969713249440     -1.361E-04 7.851E-06 0.000E+00
+ ETOT  5  -27.969718387529     -5.138E-06 6.900E-06 0.000E+00
+ ETOT  6  -27.969718595728     -2.082E-07 8.967E-08 0.000E+00
+ ETOT  7  -27.969718604439     -8.711E-09 8.577E-08 0.000E+00
+ ETOT  8  -27.969718604810     -3.705E-10 1.086E-09 0.000E+00
+ ETOT  9  -27.969718604826     -1.592E-11 1.090E-09 0.000E+00
+ ETOT 10  -27.969718604827     -7.248E-13 1.355E-11 0.000E+00
 
  scprqt:  WARNING -
   nstep=   10 was not enough SCF cycles to converge;
-  maximum residual=  9.943E-13 exceeds tolwfr=  1.000E-20
+  maximum residual=  1.355E-11 exceeds tolwfr=  1.000E-20
+
 ================================================================================
 
  ----iterations are completed or convergence reached----
 
- Mean square residual over all n,k,spin=   47.691E-14; max=  99.432E-14
+ Mean square residual over all n,k,spin=   71.002E-14; max=  13.545E-12
  dfpt_looppert : ek2=    4.5406579546E+01
-          f-sum rule ratio=    1.3569188783E+00
+          f-sum rule ratio=    1.3569189566E+00
  prteigrs : about to open file t57t_1WF1_EIG
  Expectation of eigenvalue derivatives (hartree) for nkpt=   2  k points:
   (in case of degenerate eigenvalues, averaged derivative)
@@ -1760,16 +1748,16 @@ tolerances: {tolwfr: 1.00E-12, }
 
  Eight components of 2nd-order total energy (hartree) are
  1,2,3: 0th-order hamiltonian combined with 1st-order wavefunctions
-     kin0=   4.10491099E+01 eigvalue=  -1.08594823E+00  local=  -2.13609310E+01
+     kin0=   4.10491327E+01 eigvalue=  -1.08594909E+00  local=  -2.13609480E+01
  4,5,6: 1st-order hamiltonian combined with 1st and 0th-order wfs
-     kin1=  -6.16130450E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
+     kin1=  -6.16130485E+01  Hartree=   0.00000000E+00     xc=   0.00000000E+00
  7,8,9: eventually, occupation + non-local contributions
-    edocc=   1.15937744E+01     enl0=  -2.22628884E+00   enl1=   5.67361014E+00
+    edocc=   1.15937744E+01     enl0=  -2.22629186E+00   enl1=   5.67361173E+00
  1-9 gives the relaxation energy (to be shifted if some occ is /=2.0)
    erelax=  -2.79697186E+01
   No Ewald or frozen-wf contrib.: the relaxation energy is the total one
  2DEtotal=   -0.2796971860E+02 Ha. Also 2DEtotal=   -0.761094749412E+03 eV
-    (  non-var. 2DEtotal :   -2.7969717420E+01 Ha)
+    (  non-var. 2DEtotal :   -2.7969718405E+01 Ha)
 
  CALCULATION OF EFFECTIVE MASSES
  NOTE : Additional infos (eff. mass eigenvalues, eigenvectors and, if degenerate, average mass) are available in stdout.
@@ -1825,7 +1813,7 @@ tolerances: {tolwfr: 1.00E-12, }
  Transport equivalent effective mass tensor eigenvalues:
              -4.1296384728             -4.1295451245             -4.1285190946
  Angular average effective mass 1/(<1/m>)=  -2.3349475403
- Angular average effective mass for Frohlich model (<m**0.5>)**2=  -2.4045926600
+ Angular average effective mass for Frohlich model (<m**0.5>)**2=  -2.4045926599
  Effective masses along directions: (cart. coord. / red. coord. -> eff. mass)
     1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 ->  -2.9256015741
     2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->  -2.9256015702
@@ -1881,9 +1869,9 @@ message: |
  Transport equivalent effective mass tensor:
      *** SADDLE POINT: TRANSPORT EQV. EFF. MASS NOT DEFINED (see WARNING above) ***
  Angular average effective mass 1/(<1/m>)=  -0.9423854088
- Angular average effective mass for Frohlich model (<m**0.5>)**2=  -1.6079625372
+ Angular average effective mass for Frohlich model (<m**0.5>)**2=  -1.6079625373
  Effective masses along directions: (cart. coord. / red. coord. -> eff. mass)
-    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 -> 297.9058670715
+    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 -> 297.9058670752
     2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->  -0.6830086827
     3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->  -0.6830072649
     4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->  -0.8806101457
@@ -1895,9 +1883,9 @@ message: |
  Transport equivalent effective mass tensor:
      *** SADDLE POINT: TRANSPORT EQV. EFF. MASS NOT DEFINED (see WARNING above) ***
  Angular average effective mass 1/(<1/m>)=  -2.0188589135
- Angular average effective mass for Frohlich model (<m**0.5>)**2=  -3.6276013613
+ Angular average effective mass for Frohlich model (<m**0.5>)**2=  -3.6276013574
  Effective masses along directions: (cart. coord. / red. coord. -> eff. mass)
-    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 -> 297.8602110820
+    1:   1.000000  0.000000  0.000000 /   0.000000  0.707107  0.707107 -> 297.8602111592
     2:   0.000000  1.000000  0.000000 /   0.707107  0.000000  0.707107 ->  -1.1442371592
     3:   0.000000  0.000000  1.000000 /   0.707107  0.707107  0.000000 ->  -1.1442371527
     4:   0.577350  0.577350  0.577350 /   0.577350  0.577350  0.577350 ->  -2.3760619752
@@ -1939,15 +1927,15 @@ message: |
   WARNING : still subject to testing - especially symmetries.
       direction              matrix element
    alpha     beta       real part   imaginary part
-     1        1       1.8870598598    0.0000000000
-     1        2       0.9435297197    0.0000000000
-     1        3       0.9435301401    0.0000000000
-     2        1       0.9435297197    0.0000000000
-     2        2       1.8870492594    0.0000000000
-     2        3       0.9435195397    0.0000000000
-     3        1       0.9435301401    0.0000000000
-     3        2       0.9435195397    0.0000000000
-     3        3       1.8870496798    0.0000000000
+     1        1       1.8870601589    0.0000000000
+     1        2       0.9435298673    0.0000000000
+     1        3       0.9435302916    0.0000000000
+     2        1       0.9435298673    0.0000000000
+     2        2       1.8870495499    0.0000000000
+     2        3       0.9435196826    0.0000000000
+     3        1       0.9435302916    0.0000000000
+     3        2       0.9435196826    0.0000000000
+     3        3       1.8870499743    0.0000000000
 
  respfn : d/dk was computed, but no 2DTE, so no DDB output.
 
@@ -2017,8 +2005,8 @@ Values initialized with zeros
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2032,8 +2020,8 @@ Values initialized with zeros
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/mverstra_dfpt_band_paral/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2432,10 +2420,10 @@ P          mk1mem6          2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         44.0  wall=         45.2
+- Proc.   0 individual time (sec): cpu=         41.8  wall=         43.9
 
 ================================================================================
 
  Calculation completed.
-.Delivered  24 WARNINGs and  62 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         44.0  wall=         45.2
+.Delivered  19 WARNINGs and  14 COMMENTs to log file.
++Overall time at end (sec) : cpu=         41.8  wall=         43.9
