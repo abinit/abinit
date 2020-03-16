@@ -521,8 +521,10 @@ subroutine kpgio(ecut,exchn2n3d,gmet,istwfk,kg,kptns,mkmem,nband,nkpt,&
 !Define me
  me=mpi_enreg%me_kpt
 
+#ifdef DEV_MJV
 print *, 'me mkmem, nkpt ', me, mkmem, nkpt
 print *, 'me mpi_enreg%proc_distrb ', me, mpi_enreg%proc_distrb
+#endif
 
  if((mpi_enreg%paralbd==1) .and. (mode_paral=='PERS')) then
    if(nsppol==2)then
@@ -555,7 +557,9 @@ print *, 'me mpi_enreg%proc_distrb ', me, mpi_enreg%proc_distrb
 
    nband_k = nband(ikpt)
 
+#ifdef DEV_MJV
 print *, 'me, ikpt, nband_k ', me, ikpt, nband_k, xmpi_paral
+#endif
    if(mode_paral=='PERS')then
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
    end if
@@ -590,7 +594,9 @@ print *, 'me, ikpt, nband_k ', me, ikpt, nband_k, xmpi_paral
 
 ! TODO: this fails on some platforms if nproc > nkpt
  if(mode_paral == 'PERS') then
+#ifdef DEV_MJV
 print *, 'me = ', mpi_enreg%me_kpt, ' comm ',  mpi_enreg%comm_kpt
+#endif
    call xmpi_sum(npwarr,mpi_enreg%comm_kpt,ierr)
  end if
 
