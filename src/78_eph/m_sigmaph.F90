@@ -609,7 +609,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer,parameter :: tim_getgh1c = 1, berryopt0 = 0, istw1 = 1
  integer,parameter :: useylmgr = 0, useylmgr1 =0, master = 0, ndat1 = 1
  integer,parameter :: igscq0 = 0, icgq0 = 0, usedcwavef0 = 0, nbdbuf0 = 0, quit0 = 0, cplex1 = 1, pawread0 = 0
- integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_frohl,iq_bz_frohl, my_npert
+ integer,parameter :: ngvecs = 1
+ integer :: my_rank,nsppol,nkpt,iq_ibz,iq_ibz_frohl,iq_bz_frohl,my_npert
  integer :: cplex,db_iqpt,natom,natom3,ipc,nspinor,nprocs
  integer :: ibsum_kq,ib_k,band_ks,ibsum,ii,jj, iw
  integer :: mcgq, mgscq, nband_kq, ig, ispinor, ifft
@@ -623,7 +624,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  integer :: nfft,nfftf,mgfft,mgfftf,nkpg,nkpg1,nq,cnt,imyp, q_start, q_stop, restart
  integer :: nlines_done, nline_in, grad_berry_size_mpw1, enough_stern
  integer :: nbcalc_ks,nbsum,bsum_start, bsum_stop, bstart_ks,my_ikcalc,ikcalc,bstart,bstop,iatom
- integer :: comm_rpt, method, need_oscillators, osc_npw
+ integer :: comm_rpt, method, osc_npw
  real(dp) :: cpu,wall,gflops,cpu_all,wall_all,gflops_all,cpu_ks,wall_ks,gflops_ks,cpu_dw,wall_dw,gflops_dw
  real(dp) :: cpu_setk, wall_setk, gflops_setk, cpu_qloop, wall_qloop, gflops_qloop, gf_val, cpu_stern, wall_stern, gflops_stern
  real(dp) :: ecut,eshift,weight_q,rfact,gmod2,hmod2,ediff,weight, inv_qepsq, simag, q0rad, out_resid
@@ -648,7 +649,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp) :: kk(3),kq(3),kk_ibz(3),kq_ibz(3),qpt(3),qpt_cart(3),phfrq(3*cryst%natom), dotri(2),qq_ibz(3)
  real(dp) :: vk(3), vkq(3), tsec(2), eminmax(2)
  real(dp) :: frohl_sphcorr(3*cryst%natom), vec_natom3(2, 3*cryst%natom)
- real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,gkq2_dfrohl,eig0nk,eig0mk,eig0mkq,f_mkq
+ real(dp) :: wqnu,nqnu,gkq2,gkq2_pf,eig0nk,eig0mk,eig0mkq,f_mkq
  real(dp) :: gdw2, gdw2_stern
  real(dp),allocatable :: displ_cart(:,:,:,:),displ_red(:,:,:,:)
  real(dp),allocatable :: grad_berry(:,:),kinpw1(:),kpg1_k(:,:),kpg_k(:,:),dkinpw(:)
@@ -662,9 +663,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  real(dp),allocatable :: ylm_kq(:,:),ylm_k(:,:),ylmgr_kq(:,:,:)
  real(dp),allocatable :: vtrial(:,:),gvnlx1(:,:),gvnlxc(:,:),work(:,:,:,:)
  real(dp),allocatable :: gs1c(:,:),nqnu_tlist(:),dtw_weights(:,:),dt_tetra_weights(:,:,:),dwargs(:),alpha_mrta(:)
- real(dp),allocatable :: delta_e_minus_emkq(:), osc_ks(:,:,:)
+ real(dp),allocatable :: delta_e_minus_emkq(:)
  logical,allocatable :: osc_mask(:)
+ real(dp),allocatable :: gkq2_lr(:,:,:)
  complex(dpc) :: cp3(3)
+ complex(dpc),allocatable :: osc_ks(:,:)
  complex(dpc),allocatable :: cfact_wr(:), tpp_red(:,:)
  complex(gwpc),allocatable :: ur_k(:,:), ur_kq(:), work_ur(:), workq_ug(:)
  type(pawcprj_type),allocatable :: cwaveprj0(:,:), cwaveprj(:,:)
@@ -841,13 +844,18 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ABI_MALLOC(gbound_kq, (2*wfd%mgfft+8, 2))
  ABI_MALLOC(osc_gbound_q, (2*wfd%mgfft+8, 2))
 
- need_oscillators = 0
  osc_ecut = dtset%eph_ecutosc
- if (osc_ecut /= zero) then
-   need_oscillators = 1
-   call wrtout(std_out, sjoin("Computing oscillator matrix elements with ecut:", ftoa(osc_ecut)))
+ !osc_ecut = dtset%ecut
+ !osc_ecut = one
+ if (osc_ecut > zero) then
+   call wrtout(std_out, sjoin("Computing oscillator matrix elements with ecut.", ftoa(osc_ecut)))
    ABI_CHECK(osc_ecut <= wfd%ecut, "osc_ecut cannot be greater than dtset%ecut")
  end if
+ if (osc_ecut < zero) then
+   call wrtout(std_out, sjoin("Including G vectors inside a sphere with ecut.", ftoa(osc_ecut)))
+ end if
+ !nsheps = 0
+ !call setshells(ecut, npw, nsh, cryst%nsym, cryst%gmet, cryst%gprimd, cryst%symrel, "eps", cryst%ucvol)
 
  !if (sigma%calc_velocity == 1) then
  call cwtime(cpu_ks, wall_ks, gflops_ks, "start", &
@@ -1155,18 +1163,18 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ! Note: One should rotate the wavefunctions if kk is not irred (not implemented)
      ABI_MALLOC(kets_k, (2, npw_k*nspinor, nbcalc_ks))
      ABI_MALLOC(sigma%e0vals, (nbcalc_ks))
-
-     if (need_oscillators /= 0) then
+     if (osc_ecut /= zero) then
        ABI_MALLOC(ur_k, (wfd%nfft*wfd%nspinor, nbcalc_ks))
        ABI_MALLOC(ur_kq, (wfd%nfft*wfd%nspinor))
        ABI_MALLOC(work_ur, (wfd%nfft*wfd%nspinor))
+       ABI_MALLOC(gkq2_lr, (sigma%eph_doublegrid%ndiv,nbcalc_ks,sigma%my_npert))
      end if
 
      do ib_k=1,nbcalc_ks
        band_ks = ib_k + bstart_ks - 1
        call wfd%copy_cg(band_ks, ik_ibz, spin, kets_k(1, 1, ib_k))
        sigma%e0vals(ib_k) = ebands%eig(band_ks, ik_ibz, spin)
-       if (need_oscillators /= 0) call wfd%get_ur(band_ks, ik_ibz, spin, ur_k(1, ib_k))
+       if (osc_ecut > zero) call wfd%get_ur(band_ks, ik_ibz, spin, ur_k(1, ib_k))
      end do
 
      ! Distribute q-points, compute tetra weigths.
@@ -1264,13 +1272,15 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_MALLOC(bra_kq, (2, npw_kq*nspinor))
        ABI_MALLOC(cgwork, (2, npw_kqirr*nspinor))
 
-       if (need_oscillators /= 0) then
+       ! Finds the boundary of the basis sphere of G vectors (for this kq point)
+       ! for use in improved zero padding of ffts in 3 dimensions.
+       if (osc_ecut /= zero) then
          ! Finds the boundary of the basis sphere of G vectors (for this kq point)
          ! for use in improved zero padding of ffts in 3 dimensions.
          call sphereboundary(gbound_kq, istwf_kq, kg_kq, wfd%mgfft, npw_kq)
 
          ! Compute "small" G-sphere centered on qpt and gbound for zero-padded FFT for oscillators.
-         call get_kg(qpt, istw1, osc_ecut, cryst%gmet, osc_npw, osc_gvecq)
+         call get_kg(qpt, istw1, abs(osc_ecut), cryst%gmet, osc_npw, osc_gvecq)
          call sphereboundary(osc_gbound_q, istw1, osc_gvecq, wfd%mgfft, osc_npw)
 
          ! Compute correspondence G-sphere --> FFT mesh.
@@ -1280,7 +1290,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ABI_FREE(osc_mask)
 
          ABI_MALLOC(workq_ug, (npw_kq*wfd%nspinor))
-         ABI_MALLOC(osc_ks, (2, osc_npw*wfd%nspinor, nbcalc_ks))
+         ABI_MALLOC(osc_ks, (osc_npw*wfd%nspinor, nbcalc_ks))
        end if
 
        ! Allocate array to store H1 |psi_nk> for all 3*natom perturbations
@@ -1575,7 +1585,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
          ! gkq_nu(2, nbcalc_ks, bsum_start:bsum_stop, natom3)
          if (isqzero .and. .not. sigma%imag_only) gkq0_atm(:, :, ibsum_kq, :) = gkq_atm
 
-         if (need_oscillators /= 0) then
+
+         if (osc_ecut > zero) then
            workq_ug = cmplx(bra_kq(1, :), bra_kq(2, :), kind=gwpc)
            call fft_ug(npw_kq, wfd%nfft, wfd%nspinor, ndat1, wfd%mgfft, wfd%ngfft, &
                        istwf_kq, kg_kq, gbound_kq, workq_ug, ur_kq)
@@ -1590,23 +1601,17 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
              do ispinor=1,nspinor
                do ig=1,osc_npw
                  ifft = osc_indpw(ig) + (ispinor-1) * wfd%nfft
-                 osc_ks(1, ig + (ispinor -1) * osc_npw, ib_k) = real(work_ur(ifft))
-                 osc_ks(2, ig + (ispinor -1) * osc_npw, ib_k) = -aimag(work_ur(ifft))
+                 osc_ks(ig + (ispinor -1) * osc_npw, ib_k) = conjg(work_ur(ifft))
                end do
              end do
 
-             band_ks = ib_k + bstart_ks - 1
-             eig0nk = ebands%eig(band_ks, ik_ibz, spin)
-             eig0mkq = ebands%eig(ibsum_kq, ikq_ibz, spin)
-             ! Here it seems there's a bug when istwfk 1 and kerange is used (see v8[161])
+             !band_ks = ib_k + bstart_ks - 1
              !if (ibsum_kq == band_ks) then
-             !if (ibsum_kq == band_ks .and. all(abs(qpt) < tol12) .and. abs(eig0mkq - eig0nk) < tol6) then
-             if (all(abs(qpt) < tol12) .and. abs(eig0mkq - eig0nk) < tol6) then
-               write(std_out,"(a,i0,2a)")" Ene and Oscillator for band: ", band_ks, ", and q-point: ", trim(ktoa(qpt))
-               write(std_out,*)eig0nk * Ha_eV, osc_ks(:,1:2,ib_k)
-             end if
+             !if (ibsum_kq == band_ks .and. all(abs(qpt) < tol12)) then
+             !  write(std_out,"(a,i0,2a)")" Ene and Oscillator for band: ", band_ks, ", and q-point: ", trim(ktoa(qpt))
+             !  write(std_out,*)ebands%eig(band_ks, ik_ibz, spin) * Ha_eV, osc_ks(:2,ib_k)
+             !end if
            end do
-
          end if
 
          ! Accumulate contribution to self-energy
@@ -1760,9 +1765,8 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
                      ! Add Frohlich contribution
                      gkq2_pf = gkq2
-                     if (ediff <= TOL_EDIFF .and. sigma%frohl_model == 3) then
-                       gkq2_dfrohl = sigma%ephwg%frohl_ibz(iq_ibz_fine,nu) - sigma%ephwg%frohl_ibz(iq_ibz_frohl,nu)
-                       gkq2_pf = gkq2_pf + weight_q * gkq2_dfrohl
+                     if (osc_ecut /= 0) then
+                       gkq2_pf = gkq2_pf + weight_q * gkq2_lr(jj,ib_k,imyp)
                      end if
 
                      if (sigma%imag_only) then
@@ -1869,7 +1873,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
        ABI_FREE(cgwork)
        ABI_FREE(h1kets_kq)
 
-       if (need_oscillators /= 0) then
+       if (osc_ecut /= zero) then
          ABI_FREE(osc_gvecq)
          ABI_FREE(osc_indpw)
          ABI_FREE(osc_ks)
@@ -1896,10 +1900,11 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
      ABI_FREE(gkq_atm)
      ABI_FREE(gkq_nu)
 
-     if (need_oscillators /= 0) then
+     if (osc_ecut /= zero) then
        ABI_FREE(ur_k)
        ABI_FREE(ur_kq)
        ABI_FREE(work_ur)
+       ABI_FREE(gkq2_lr)
      end if
 
      ! =========================
@@ -2968,6 +2973,7 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
    new%nqr = 10  !int(dtset%frohl_params(3))
    new%qrad = new%qrad !/ 2.0_dp  dtset%frohl_params(2)
    new%qdamp = new%qrad !/ four
+   new%qdamp = dtset%frohl_params(4)
    write(std_out,"(a)")" Activating computation of Frohlich self-energy:"
    write(std_out,"(2(a,i0,1x))")" ntheta: ", new%ntheta, "nphi: ", new%nphi
    write(std_out,"((a,i0,1x,a,f6.3,1x,a))")" nqr points: ", new%nqr, "qrad: ", new%qrad, " [Bohr^-1]"
@@ -5099,6 +5105,72 @@ subroutine qpoints_oracle(sigma, cryst, ebands, qpts, nqpt, nqbz, qbz, qselect, 
    " q-points in the IBZ. (nqibz_eff / nqibz): ", (100.0_dp * cnt) / sigma%nqibz, " [%]"
 
 end subroutine qpoints_oracle
+!!***
+
+!----------------------------------------------------------------------
+!!****f* m_sigma/get_frohlich
+!! NAME
+!! ephwg_from_ebands
+!!
+!! FUNCTION
+!!  Compute the frohlich matrix elements Convenience constructor to initialize the object from an ebands_t object
+!!
+!! INPUTS
+!!  iqpt=index of the qpoint in the IBZ
+!!  oscillator=oscillator matrix elements for the wavefunction to be used
+!!
+
+function get_frohlich(cryst,ifc,qpt,nu,phfrq,displ_cart,ngvecs,gvecs) result(gkqg_lr)
+
+!Arguments ------------------------------------
+!scalars
+ type(crystal_t),target,intent(in) :: cryst
+ type(ifc_type),intent(in) :: ifc
+ integer,intent(in)  :: nu,ngvecs
+ real(dp),intent(in) :: qpt(3)
+ real(dp),intent(in) :: phfrq(3*cryst%natom)
+ real(dp),intent(in) :: displ_cart(2,3,cryst%natom,3*cryst%natom)
+!arrays
+ integer,intent(in) :: gvecs(3,ngvecs)
+ complex(dpc) :: gkqg_lr(ngvecs)
+
+!Local variables ------------------------------
+ integer :: iatom, ig, ii
+ real(dp) :: qG_mod, fqdamp, inv_qepsq, wqnu
+ complex(dpc) :: cnum
+ !arrays
+ real(dp) :: qG_red(3), qG_cart(3)
+ complex(dpc) :: cdd(3)
+
+ gkqg_lr = zero
+ wqnu = phfrq(nu)
+ if (wqnu < tol8) return
+ do ig=1,ngvecs
+   qG_red = qpt + gvecs(:,ig)
+   qG_cart = two_pi*matmul(cryst%gprimd, qG_red)
+   qG_mod = sqrt(sum(qG_cart ** 2))
+   if (qG_mod < tol6) cycle
+   inv_qepsq = one / dot_product(qG_cart, matmul(ifc%dielt, qG_cart))
+   fqdamp = (four_pi / cryst%ucvol) * inv_qepsq !* exp(-qG_mod ** 2 / (four * qdamp))
+
+   ! Compute gkq_{LR}. Note that in our approx the matrix element does not depend on ib_k.
+   cnum = zero
+   do iatom=1,cryst%natom
+     ! This is complex
+     cdd = cmplx(displ_cart(1,:, iatom, nu), displ_cart(2,:, iatom, nu), kind=dpc) * &
+           exp(-j_dpc * two_pi * dot_product(qG_red, cryst%xred(:, iatom)))
+     ! Dipoles term
+     cnum = cnum + dot_product(qG_cart, matmul(ifc%zeff(:, :, iatom), cdd))
+     ! Quadrupoles term
+     do ii=1,3
+       cnum = cnum - j_dpc * cdd(ii) * dot_product(qG_cart, matmul(ifc%qdrp_cart(:, :, ii, iatom), qG_cart))
+     end do
+   end do
+   gkqg_lr(ig) = cnum * j_dpc * fqdamp
+ end do
+ gkqg_lr = gkqg_lr / sqrt(two * wqnu)
+
+end function get_frohlich
 !!***
 
 end module m_sigmaph
