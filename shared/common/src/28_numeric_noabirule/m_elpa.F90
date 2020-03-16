@@ -141,9 +141,11 @@ subroutine elpa_func_init()
 
 #ifdef HAVE_LINALG_ELPA_FORTRAN2008
 
-#if (defined HAVE_LINALG_ELPA_2016) || \
-    (defined HAVE_LINALG_ELPA_2015_11) || (defined HAVE_LINALG_ELPA_2015_02) || \
-    (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
+#if (defined HAVE_LINALG_ELPA_2016) || (defined HAVE_LINALG_ELPA_2015_11) || (defined HAVE_LINALG_ELPA_2015_02)
+!This case is not supposed to happen
+ success=.false.
+ MSG_BUG('Wrong ELPA cpp directives!')
+#elif (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
 !This case is not supposed to happen
  success=.false.
  MSG_BUG('Wrong ELPA cpp directives!')
@@ -1140,8 +1142,10 @@ subroutine elpa_func_hermitian_multiply_real(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb,lo
  success = elpa_mult_at_b_real(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,elpa_hdl%local_ncols,&
 &          bb,local_nrows_b,local_ncols_b,elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,&
 &          cc,local_nrows_c,local_ncols_c)
-#elif (defined HAVE_LINALG_ELPA_2015_11) || (defined HAVE_LINALG_ELPA_2015_02) || \
-      (defined HAVE_LINALG_ELPA_2014)    || (defined HAVE_LINALG_ELPA_2013)
+#elif (defined HAVE_LINALG_ELPA_2015_11) || (defined HAVE_LINALG_ELPA_2015_02)
+ call mult_at_b_real(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,bb,local_nrows_b,&
+&               elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,cc,local_nrows_c)
+#elif (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
  call mult_at_b_real(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,bb,local_nrows_b,&
 &               elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,cc,local_nrows_c)
 #else
@@ -1243,8 +1247,10 @@ subroutine elpa_func_hermitian_multiply_complex(elpa_hdl,uplo_a,uplo_c,ncb,aa,bb
  success = elpa_mult_ah_b_complex(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,elpa_hdl%local_ncols,&
 &          bb,local_nrows_b,local_ncols_b,elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,&
 &          cc,local_nrows_c,local_ncols_c)
-#elif (defined HAVE_LINALG_ELPA_2015_11) || (defined HAVE_LINALG_ELPA_2015_02) || \
-      (defined HAVE_LINALG_ELPA_2014)    || (defined HAVE_LINALG_ELPA_2013)
+#elif (defined HAVE_LINALG_ELPA_2015_11) || (defined HAVE_LINALG_ELPA_2015_02)
+ call mult_ah_b_complex(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,bb,local_nrows_b,&
+&               elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,cc,local_nrows_c)
+#elif (defined HAVE_LINALG_ELPA_2014) || (defined HAVE_LINALG_ELPA_2013)
  call mult_ah_b_complex(uplo_a,uplo_c,elpa_hdl%na,ncb,aa,elpa_hdl%local_nrows,bb,local_nrows_b,&
 &               elpa_hdl%nblk,elpa_hdl%elpa_comm_rows,elpa_hdl%elpa_comm_cols,cc,local_nrows_c)
 #else
