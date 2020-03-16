@@ -38,7 +38,7 @@ slc_coupling = 1010 # Tijuv and Oiju
 #%% exec_args = --F03
 #%% [files]
 #%% files_to_test = 
-#%%   t87.out, tolnlines = 6, tolabs = 0.1, tolrel = 0.1, fld_options = -medium;
+#%%   t87.out, tolnlines = 6, tolabs = 0.1, tolrel = 0.4, fld_options = -medium;
 #%% [paral_info]
 #%% max_nprocs = 1
 #%% [extra_info]
