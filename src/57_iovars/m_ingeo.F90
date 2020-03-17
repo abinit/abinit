@@ -26,7 +26,6 @@
 module m_ingeo
 
  use defs_basis
- use m_intagm_img
  use m_abicore
  use m_errors
  use m_atomdata
@@ -37,7 +36,7 @@ module m_ingeo
  use m_spgbuilder, only : gensymspgr, gensymshub, gensymshub4
  use m_symfind,    only : symfind, symanal, symlatt
  use m_geometry,   only : mkradim, mkrdim, xcart2xred, xred2xcart, randomcellpos, metric
- use m_parser,     only : intagm, geo_t, geo_from_abivar_string
+ use m_parser,     only : intagm, intagm_img, geo_t, geo_from_abivar_string
 
  implicit none
 

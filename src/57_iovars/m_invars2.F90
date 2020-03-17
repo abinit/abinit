@@ -41,10 +41,9 @@ module m_invars2
  use m_time,      only : timab
  use m_fstrings,  only : sjoin, itoa, ltoa, tolower
  use m_symtk,     only : matr3inv
- use m_parser,    only : intagm
+ use m_parser,    only : intagm, intagm_img
  use m_geometry,   only : mkrdim, metric
  use m_gsphere,    only : setshells
- use m_intagm_img, only : intagm_img
  use m_xcdata,    only : get_auxc_ixc, get_xclevel
  use m_inkpts,    only : inkpts
  use m_ingeo,     only : invacuum
@@ -3407,7 +3406,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
        dtset%plowan_compute=10
      end if
    end if
-   
+
  ! band range for self-energy sum
  call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'sigma_bsum_range', tread, 'INT')
  if (tread == 1) then
