@@ -167,9 +167,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 &   .or.dt%d3e_pert2_phon/=0.or.dt%d3e_pert3_phon/=0) response=1
    call metric(gmet,gprimd,-1,rmet,rprimd,ucvol)
    nproc=mpi_enregs(idtset)%nproc
-   mgga=0;if(dt%ixc>=31.and.dt%ixc<=34)mgga=1
+   mgga=0;if(dt%ixc>=31.and.dt%ixc<=35)mgga=1
    if (dt%ixc<0.and.libxc_functionals_ismgga()) mgga=1
-   need_kden=mgga;if (dt%ixc==31.or.dt%ixc==34) need_kden=0
+   need_kden=mgga;if (dt%ixc==32.or.dt%ixc==33) need_kden=0
 
 !  =====================================================================================================
 !  Check the values of variables, using alphabetical order
@@ -791,6 +791,15 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      MSG_ERROR_NOSTOP("sigma_erange and gw_qprange are mutually exclusive", ierr)
    end if
 
+!  effmass_free
+   if(abs(dt%effmass_free-one)>tol8.and.(dt%ixc/=31.and.dt%ixc/=35).and.mgga==1)then
+     write(msg, '(5a)' )&
+&     'A modified electronic effective mass is not useable with a meta-GGA XC functional!',ch10,&
+&     'Except with some fake metaGGAs (ixc=31 or ixc=35).',ch10,&
+&     'effmass should be included in kinetic energy density (tau).'
+     MSG_ERROR_NOSTOP(msg, ierr)
+   end if
+
 !  efmas
    if(optdriver==RUNL_RESPFN) then !.and.usepaw==1)then
      cond_string(1)='optdriver' ; cond_values(1)=1
@@ -1283,7 +1292,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  ixc
    call chkint(0,0,cond_string,cond_values,ierr,&
-&   'ixc',dt%ixc,33,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,20,21,22,23,24,26,27,31,32,33,34,40,41,42,50/),-1,0,iout) ! One of the values, or negative
+&   'ixc',dt%ixc,34,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,20,21,22,23,24,26,27,31,32,33,34,35,40,41,42,50/),-1,0,iout) ! One of the values, or negative
    if(dt%iscf==-1)then
      cond_string(1)='iscf' ; cond_values(1)=-1
 !    Make sure that ixc is 1, 7, 8, 20, 21 or 22 or negative
@@ -1299,7 +1308,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
      cond_string(1)='nspden' ; cond_values(1)=nspden
 !    Make sure that ixc is 0, 1 , the gga, or Fermi-Amaldi, or negative
      call chkint(1,1,cond_string,cond_values,ierr,&
-&     'ixc',dt%ixc,24,(/0,1,7,8,9,11,12,13,14,15,16,17,20,23,24,26,27,31,32,33,34,40,41,42/),-1,0,iout)
+&     'ixc',dt%ixc,25,(/0,1,7,8,9,11,12,13,14,15,16,17,20,23,24,26,27,31,32,33,34,35,40,41,42/),-1,0,iout)
    end if
    if(dt%usepaw>0.and.dt%ixc<0) then
      if (libxc_functionals_is_hybrid()) then
@@ -2122,9 +2131,9 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 !  end if
 
 !  optdriver
-   call chkint_eq(0,0,cond_string,cond_values,ierr,'optdriver',optdriver,9,&
-&   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_BSE, RUNL_GWLS, RUNL_WFK,RUNL_EPH],iout)
-   if (response==1.and.all(dt%optdriver/=[RUNL_RESPFN,RUNL_NONLINEAR])) then
+   call chkint_eq(0,0,cond_string,cond_values,ierr,'optdriver',optdriver,10,&
+&   [RUNL_GSTATE,RUNL_RESPFN,RUNL_SCREENING,RUNL_SIGMA,RUNL_NONLINEAR,RUNL_BSE, RUNL_GWLS, RUNL_WFK,RUNL_EPH,RUNL_LONGWAVE],iout)
+   if (response==1.and.all(dt%optdriver/=[RUNL_RESPFN,RUNL_NONLINEAR,RUNL_LONGWAVE])) then
      write(msg,'(a,i3,3a,14(a,i2),4a)' )&
 &     'The input variable optdriver=',dt%optdriver,ch10,&
 &     'This is in conflict with the values of the other input variables,',ch10,&
@@ -2166,16 +2175,23 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(nspinor/=1)then
      cond_string(1)='nspinor' ; cond_values(1)=nspinor
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_NONLINEAR,RUNL_LONGWAVE/),iout)
    end if
    !Non-linear response only for insulators
    if(dt%occopt/=1 .and. dt%occopt/=2)then
      cond_string(1)='occopt' ; cond_values(1)=dt%occopt
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,2,(/RUNL_NONLINEAR,RUNL_LONGWAVE/),iout)
    end if
    !Non-linear response not compatible with mkmem=0
    if(dt%mkmem==0)then
      cond_string(1)='mkmem' ; cond_values(1)=dt%mkmem
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
+   end if
+   !Long wave needs all k-points
+   if(dt%kptopt==1 .or. dt%kptopt==4) then
+     cond_string(1)='kptopt' ; cond_values(1)=dt%kptopt
+     call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_LONGWAVE/),iout)
    end if
    !dkdk and dkde non-linear response only for occopt=1 (insulators)
    if (dt%rf2_dkdk==1) then
@@ -2255,6 +2271,13 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(allow)then
      cond_string(1)='ixc' ; cond_values(1)=dt%ixc
      call chkint_ne(1,1,cond_string,cond_values,ierr,'optdriver',dt%optdriver,1,(/RUNL_NONLINEAR/),iout)
+   end if
+
+   !Long-wave DFPT calculation function only for LDA 
+   allow=(dt%optdriver==RUNL_LONGWAVE.and.dt%xclevel/=1)
+   if(allow)then
+     cond_string(1)='optdriver' ; cond_values(1)=dt%optdriver
+     call chkint_eq(1,1,cond_string,cond_values,ierr,'xclevel',dt%xclevel,1,(/1/),iout)
    end if
 
 !  optforces
@@ -2566,14 +2589,14 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
 !  plowan_compute
    cond_string(1)='usepaw' ; cond_values(1)=1
-   call chkint_eq(1,1,cond_string,cond_values,ierr,'plowan_compute',dt%plowan_compute,3,(/0,1,2/),iout)
+   call chkint_eq(1,1,cond_string,cond_values,ierr,'plowan_compute',dt%plowan_compute,4,(/0,1,2,10/),iout)
    if(dt%plowan_compute>0) then
 !    plowan_bandi/plowan_bandf
-     call chkint_ge(0,0,cond_string,cond_values,ierr,'plowan_bandi',dt%plowan_bandi,              1,iout)
-     call chkint_ge(0,0,cond_string,cond_values,ierr,'plowan_bandf',dt%plowan_bandf,dt%plowan_bandi,iout)
+     !call chkint_ge(0,0,cond_string,cond_values,ierr,'plowan_bandi',dt%plowan_bandi,              1,iout)
+     !call chkint_ge(0,0,cond_string,cond_values,ierr,'plowan_bandf',dt%plowan_bandf,dt%plowan_bandi,iout)
 
-     call chkint_le(0,0,cond_string,cond_values,ierr,'plowan_bandi',dt%plowan_bandi,dt%plowan_bandf,iout)
-     call chkint_le(0,0,cond_string,cond_values,ierr,'plowan_bandi',dt%plowan_bandf,dt%mband       ,iout)
+     !call chkint_le(0,0,cond_string,cond_values,ierr,'plowan_bandi',dt%plowan_bandi,dt%plowan_bandf,iout)
+     !call chkint_le(0,0,cond_string,cond_values,ierr,'plowan_bandi',dt%plowan_bandf,dt%mband       ,iout)
 
      call chkint_ge(0,0,cond_string,cond_values,ierr,'plowan_natom',dt%plowan_natom,              0,iout)
 
@@ -3222,7 +3245,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
    if(dt%usekden==0)then
      cond_string(1)='usekden' ; cond_values(1)=dt%usekden
      call chkint_eq(1,1,cond_string,cond_values,ierr,'prtkden',dt%prtkden,1,(/0/),iout)
-     if(mgga/=need_kden)then
+     if(dt%usekden<need_kden)then
        write(msg, '(3a)' )&
 &       'The functional is a MGGA, but the kinetic energy density',ch10, &
 &       'is not present. Please set "usekden 1" in the input file.'

@@ -2646,7 +2646,7 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
 
  !if (psps%usepaw==1) then
  !  ! Allocate/initialize only zarot in pawang1 datastructure
- !  call pawang_init(pawang1,0,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
+ !  call pawang_init(pawang1,0,0,pawang%l_max-1,0,0,nsym1,0,0,0,0)
  !  call setsym_ylm(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
  !end if
 
@@ -6566,7 +6566,7 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_path, ddb)
 
 !Local variables ------------------------------
  integer,parameter :: brav1 = 1, master = 0, natifc0 = 0, rfmeth1 = 1, selectz0 = 0
- integer :: my_rank, iblock_dielt, iblock_dielt_zeff
+ integer :: my_rank, iblock_dielt, iblock_dielt_zeff, iblock_quadrupoles
  logical :: free_ddb
  type(crystal_t) :: cryst_ddb
  type(ddb_type),pointer :: ddb_ptr
@@ -6627,6 +6627,10 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_path, ddb)
        " WARNING: dvdb_add_lr set to 0. Long-range term won't be substracted in Fourier interpolation.")
    end if
  end if
+
+ ! Read the quadrupoles
+ iblock_quadrupoles = ddb_ptr%get_quadrupoles(1, 3, dvdb%qstar)
+ if (iblock_quadrupoles /=0) dvdb%has_quadrupoles = .True.
 
  ABI_FREE(zeff)
  ABI_FREE(zeff_raw)

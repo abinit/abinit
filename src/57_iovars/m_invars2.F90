@@ -785,6 +785,86 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'mdtemp',tread,'DPR')
  if(tread==1) dtset%mdtemp(1:2)=dprarr(1:2)
 
+!LONG WAVE integer input variables
+!FIXME
+! if(dtset%optdriver==RUNL_LONGWAVE) then
+   tread_key=0
+
+   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert1_atpol',tread,'INT')
+   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf1atpol',tread_alt,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_atpol(1:2)=intarr(1:2)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert1_dir',tread,'INT')
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf1dir',tread_alt,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_dir(1:3)=intarr(1:3)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert1_elfd',tread,'INT')
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf1elfd',tread_alt,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_elfd=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert1_phon',tread,'INT')
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf1phon',tread_alt,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert1_phon=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert2_atpol',tread,'INT')
+   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf2atpol',tread_alt,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_atpol(1:2)=intarr(1:2)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert2_dir',tread,'INT')
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf2dir',tread_alt,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_dir(1:3)=intarr(1:3)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert2_elfd',tread,'INT')
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2elfd',tread_alt,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_elfd=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert2_phon',tread,'INT')
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2phon',tread_alt,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_phon=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert2_strs',tread,'INT')
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf2strs',tread_alt,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert2_strs=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'d3e_pert3_atpol',tread,'INT')
+   call intagm(dprarr,intarr,jdtset,marr,2,string(1:lenstr),'rf3atpol',tread_alt,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert3_atpol(1:2)=intarr(1:2)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'d3e_pert3_dir',tread,'INT')
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'rf3dir',tread_alt,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert3_dir(1:3)=intarr(1:3)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert3_elfd',tread,'INT')
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf3elfd',tread_alt,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert3_elfd=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'d3e_pert3_phon',tread,'INT')
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'rf3phon',tread_alt,'INT')
+   if(tread==1.or.tread_alt==1) dtset%d3e_pert3_phon=intarr(1)
+   if (tread_alt==1) tread_key=1
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_flexo',tread,'INT')
+   if(tread==1) dtset%lw_flexo=intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'lw_qdrpl',tread,'INT')
+   if(tread==1) dtset%lw_qdrpl=intarr(1)
+
+   call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'prepalw',tread,'INT')
+   if(tread==1) dtset%prepalw=intarr(1)
+! end if
+
  ! Recursion input variables
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'tfkinfunc',tread,'INT')
  if(tread==1) dtset%tfkinfunc=intarr(1)
@@ -2398,7 +2478,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  if(tread==1) then
    dtset%usekden=intarr(1)
  else
-   dtset%usekden=merge(1,0,libxc_functionals_ismgga().or.dtset%ixc==31.or.dtset%ixc==34)
+   dtset%usekden=merge(1,0,libxc_functionals_ismgga().or.dtset%ixc==31.or.dtset%ixc==34.or.dtset%ixc==35)
  end if
  if (dtset%usekden == 1 .and. dtset%nimage == 1) dtset%prtkden = 1
 
@@ -2976,6 +3056,12 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
    response = 1
  end if
 
+!In case of longwave calculation put response = 1
+!in order to set istwfk = 1 at all k-points
+ if ( dtset%optdriver==RUNL_LONGWAVE ) then
+   response = 1
+ end if
+
  nsym=dtset%nsym
  ii=0;if (mod(dtset%wfoptalg,10)==4) ii=2
  if(dtset%ngfft(7)==314)ii=1
@@ -3277,7 +3363,7 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_nt',tread,'INT')
  if(tread==1) dtset%plowan_nt=intarr(1)
 
- if (dtset%plowan_compute>0) then
+! if (dtset%plowan_compute>0) then
    call intagm(dprarr,intarr,jdtset,marr,3*dtset%plowan_nt,string(1:lenstr),'plowan_it',tread,'INT')
    if(tread==1) dtset%plowan_it(1:3*dtset%plowan_nt)=intarr(1:3*dtset%plowan_nt)
 
@@ -3293,8 +3379,35 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
    call intagm(dprarr,intarr,jdtset,marr,sumnbl,string(1:lenstr),'plowan_projcalc',tread,'INT')
    if(tread==1) dtset%plowan_projcalc(1:sumnbl)=intarr(1:sumnbl)
- end if
+! end if
 
+
+   if ((dtset%ucrpa > 0 .and. dtset%plowan_natom == 0).or.(dtset%nbandkss /= 0 .and. dtset%usedmft/=0)) then
+     dtset%plowan_natom=1
+     dtset%plowan_nbl(:)=1
+     dtset%plowan_nt=1
+     dtset%plowan_it(:)=0
+     dtset%plowan_realspace=1
+     do iatom=1,dtset%natom
+       lpawu=dtset%lpawu(dtset%typat(iatom))
+       if (lpawu/=-1) then
+         dtset%plowan_lcalc(:)=lpawu
+         dtset%plowan_iatom(:)=iatom
+         dtset%plowan_projcalc(:)=-2
+       end if
+     end do
+     dtset%plowan_bandi=dtset%dmftbandi
+     dtset%plowan_bandf=dtset%dmftbandf
+     if (dtset%nbandkss /= 0 .and. dtset%usedmft/=0) then
+       dtset%plowan_compute=1
+       dtset%usedmft=0
+     else if (dtset%optdriver==3) then
+       dtset%plowan_compute=10
+     else if(dtset%optdriver==4) then
+       dtset%plowan_compute=10
+     end if
+   end if
+   
  ! band range for self-energy sum
  call intagm(dprarr, intarr, jdtset, marr, 2, string(1:lenstr), 'sigma_bsum_range', tread, 'INT')
  if (tread == 1) then

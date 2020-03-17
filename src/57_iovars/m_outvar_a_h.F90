@@ -696,6 +696,9 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  intarr(1,:)=dtsets(:)%d3e_pert2_phon
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert2_phon','INT',0)
 
+ intarr(1,:)=dtsets(:)%d3e_pert2_strs
+ call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'d3e_pert2_strs','INT',0)
+
  intarr(1,:)=dtsets(:)%d3e_pert3_atpol(1)
  intarr(2,:)=dtsets(:)%d3e_pert3_atpol(2)
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,2,narrm,ncid,ndtset_alloc,'d3e_pert3_atpol','INT',0)

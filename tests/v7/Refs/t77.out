@@ -1233,6 +1233,8 @@ force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.000
  13      -2.319      -1.555      -0.720      -0.639      -0.358
  14      -2.319      -1.555      -0.720      -0.639      -0.358
 
+ Print the psichi coefficients in data.plowann
+
 ======================================================================
  Calculating and writing out Kohn-Sham electronic Structure file
  Using conjugate gradient wavefunctions and energies (kssform=3)
@@ -1847,7 +1849,7 @@ lattice_volume:   7.9373431E+01
 convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.952E-11, diffor:  0.000E+00, }
 etotal    :  -1.97426056E+02
 entropy   :   0.00000000E+00
-fermie    :   0.00000000E+00
+fermie    :   1.36195627E-01
 cartesian_stress_tensor: null
 pressure_GPa: null
 xred      :
@@ -1919,7 +1921,7 @@ force_length_stats: {min: null, max: null, mean: null, }
 
  == For each k-point of the path, gives the eigenvalues (in eV) of the Hamiltonian in the Wannier basis
 
-   (The band structure is shifted by fermie =       0.0000 eV )
+   (The band structure is shifted by fermie =       3.7060 eV )
 
  Wannier band structure for atom  1
  1      -1.254      -1.254      -1.254      -0.306      -0.306
@@ -1963,6 +1965,8 @@ force_length_stats: {min: null, max: null, mean: null, }
  39      -2.003      -1.467      -0.902      -0.808      -0.384
  40      -2.126      -1.234      -1.161      -0.752      -0.361
  41      -2.223      -1.539      -0.978      -0.574      -0.361
+
+ Print the psichi coefficients in data.plowann
 
 ======================================================================
  Calculating and writing out Kohn-Sham electronic Structure file

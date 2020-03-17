@@ -206,7 +206,7 @@ contains
 !!      mlwfovlp,mlwfovlp_qp,multipoles_out,optics_paw,optics_paw_core
 !!      optics_vloc,out1dm,outkss,outwant,partial_dos_fractions
 !!      partial_dos_fractions_paw,pawmkaewf,pawprt,pawrhoij_copy
-!!      pawrhoij_nullify,posdoppler,poslifetime,print_dmft,prt_cif,prtfatbands
+!!      pawrhoij_nullify,posdoppler,poslifetime,print_dmft,print_plowannier,prt_cif,prtfatbands
 !!      read_atomden,simpson_int,sort_dp,spline,splint,timab,wrtout,xmpi_sum
 !!      xmpi_sum_master
 !!
@@ -1071,7 +1071,7 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
  end if
 
  call timab(963,2,tsec)
- if(dtset%plowan_compute>0) then
+ if(dtset%plowan_compute>0 .and. dtset%plowan_compute<10) then
    write(message,'(2a,i3)') ch10,&
 &   ' ====================================================================================== '
    call wrtout([std_out, ab_out], message)
@@ -1081,9 +1081,15 @@ subroutine outscfcv(atindx1,cg,compch_fft,compch_sph,cprj,dimcprj,dmatpawu,dtfil
 
 !  ==  compute psichi
 
-   call init_plowannier(dtset,wan)
+   call init_plowannier(dtset%plowan_bandf,dtset%plowan_bandi,dtset%plowan_compute,&
+&dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
+&dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
+&dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk,wan)
    call compute_coeff_plowannier(crystal,cprj,dimcprj,dtset,eigen,e_fermie,&
 &   mpi_enreg,occ,wan,pawtab,psps,usecprj,dtfil%unpaw,pawrad,dtfil)
+   if (me==master) then 
+     call print_plowannier(wan)
+   endif
    call destroy_plowannier(wan)
  end if
 

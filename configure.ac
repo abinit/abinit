@@ -19,6 +19,7 @@
 
 # ---------------------------------------------------------------------------- #
 
+
 #
 # Autoconf & Automake startup
 #
@@ -37,7 +38,7 @@ https://github.com/abinit/abiconfig.
 
 # Initialize Autoconf
 AC_PREREQ(2.59)
-AC_INIT([ABINIT],[9.1.0],[https://bugs.launchpad.net/abinit/],[abinit])
+AC_INIT([ABINIT],[9.1.1],[https://bugs.launchpad.net/abinit/],[abinit])
 AC_REVISION([Autotools support for ABINIT 9])
 AC_CONFIG_AUX_DIR([config/gnu])
 AC_CONFIG_MACRO_DIR([config/m4])
@@ -1145,6 +1146,12 @@ ABI_MSG_SECTION([Output])
 # Output files
 # Note: later, add tests/atconfig and tests/atlocal for test suite
 ABI_OUTPUT
+
+# FIXME: Generate fake makefile for the fallbacks until the test farm is
+#        updated
+test -e "fallbacks" || ${INSTALL} -d -m 755 "fallbacks"
+${INSTALL} -m 644 "${abinit_srcdir}/config/makefiles/fallbacks.mf" \
+  "fallbacks/Makefile"
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #

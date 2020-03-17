@@ -759,11 +759,8 @@
 #   * auto          : select library depending on build environment (default)
 #   * custom        : bypass build-system checks
 #   * dfti          : native MKL FFT library
-#   * dfti-threads  : threaded MKL FFT library
 #   * fftw3         : serial FFTW3 library
-#   * fftw3-mkl     : FFTW3 over MKL library
 #   * fftw3-threads : threaded FFTW3 library
-#   * fftw3-mpi     : MPI-parallel FFTW3 library
 #   * pfft          : MPI-parallel PFFT library (for maintainers only)
 #   * goedecker     : Abinit internal FFT
 #
@@ -1318,6 +1315,10 @@
 # Enable BSE unpacking (gmatteo)
 #
 #enable_bse_unpacked="yes"
+
+# Enable optimized cRPA build for ifort <=17 (routerovitch)
+#
+#enable_crpa_optim="yes"
 
 # Enable exports (pouillon)
 #
