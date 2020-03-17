@@ -46,7 +46,7 @@ MODULE m_prep_calc_ucrpa
  use m_bz_mesh,       only : kmesh_t, get_BZ_item, findqg0, has_IBZ_item
  use m_gsphere,       only : gsphere_t, gsph_fft_tabs
  use m_io_tools,      only : flush_unit, open_file
- use m_vcoul,         only : vcoul_t
+ use m_vcoul_dt
  use m_pawpwij,       only : pawpwff_t, pawpwij_t, pawpwij_init, pawpwij_free, paw_rho_tw_g, paw_cross_rho_tw_g
  use m_paw_pwaves_lmn,only : paw_pwaves_lmn_t
  use m_pawang,        only : pawang_type

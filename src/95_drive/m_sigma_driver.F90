@@ -69,7 +69,8 @@ module m_sigma_driver
  use m_gsphere,       only : gsphere_t, gsph_init, gsph_free, merge_and_sort_kg, gsph_extend, setshells
  use m_kg,            only : getph
  use m_xcdata,        only : get_xclevel
- use m_vcoul,         only : vcoul_t, vcoul_init, vcoul_free
+ use m_vcoul_dt
+ use m_vcoul,         only : vcoul_init, vcoul_free
  use m_qparticles,    only : wrqps, rdqps, rdgw, show_QP, updt_m_lda_to_qp
  use m_screening,     only : mkdump_er, em1results_free, epsilonm1_results, init_er_from_file
  use m_ppmodel,       only : ppm_init, ppm_free, setup_ppmodel, getem1_from_PPm, ppmodel_t
