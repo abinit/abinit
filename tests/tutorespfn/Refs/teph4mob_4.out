@@ -1,6 +1,6 @@
 
-.Version 8.11.14 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu7.4 computer) 
+.Version 9.1.1 of ABINIT 
+.(MPI version, prepared for a x86_64_darwin18.7.0_gnu8.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 21 Jan 2020.
-- ( at 17h06 )
+.Starting date : Mon 16 Mar 2020.
+- ( at 12h05 )
   
 - input  file    -> /home/gbrunin/Software/abinit/eph_tuto/build/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_4.in
 - output file    -> teph4mob_4.out
@@ -305,7 +305,16 @@ P           mkmem3       2769
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 8, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 76, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
+...
 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
@@ -358,6 +367,12 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
 
 ================================================================================
 
+--- !BeginCycle
+iteration_state: {dtset: 1, }
+solver: {iscf: 7, nstep: 25, nline: 4, wfoptalg: 0, }
+tolerances: {tolvrs: 1.00E-18, }
+...
+
      iter   Etot(hartree)      deltaE(h)  residm     vres2
  ETOT  1  -9.7524358209150    -9.752E+00 1.922E-03 1.010E+00
  ETOT  2  -9.7569449951238    -4.509E-03 2.745E-06 5.186E-02
@@ -377,6 +392,35 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   sigma(1 1)=  2.80097263E-04  sigma(3 2)=  0.00000000E+00
   sigma(2 2)=  2.80097263E-04  sigma(3 1)=  0.00000000E+00
   sigma(3 3)=  2.80097263E-04  sigma(2 1)=  0.00000000E+00
+
+
+--- !ResultsGS
+iteration_state: {dtset: 1, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.3050000,   5.3050000, ]
+- [  5.3050000,   0.0000000,   5.3050000, ]
+- [  5.3050000,   5.3050000,   0.0000000, ]
+lattice_lengths: [   7.50240,    7.50240,    7.50240, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.9859750E+02
+convergence: {deltae:  3.553E-14, res2:  5.835E-21, residm:  4.134E-17, diffor: null, }
+etotal    :  -9.75719335E+00
+entropy   :   0.00000000E+00
+fermie    :   8.65978298E-02
+cartesian_stress_tensor: # hartree/bohr^3
+- [  2.80097263E-04,   0.00000000E+00,   0.00000000E+00, ]
+- [  0.00000000E+00,   2.80097263E-04,   0.00000000E+00, ]
+- [  0.00000000E+00,   0.00000000E+00,   2.80097263E-04, ]
+pressure_GPa:  -8.2407E+00
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
+cartesian_forces: # hartree/bohr
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+- [ -0.00000000E+00,  -0.00000000E+00,  -0.00000000E+00, ]
+force_length_stats: {min:   0.00000000E+00, max:   0.00000000E+00, mean:   0.00000000E+00, }
+...
 
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
@@ -418,22 +462,20 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
  prteigrs : prtvol=0 or 1, do not print more k-points.
 
 
---------------------------------------------------------------------------------
- Components of total free energy (in Hartree) :
-
-    Kinetic energy  =  2.93664316618341E+00
-    Hartree energy  =  7.98938376773701E-01
-    XC energy       = -3.93723883317501E+00
-    Ewald energy    = -8.47989583509473E+00
-    PspCore energy  =  7.65414498117480E-01
-    Loc. psp. energy= -2.43103083154897E+00
-    NL   psp  energy=  5.89976109402722E-01
-    >>>>>>>>> Etotal= -9.75719334934140E+00
-
- Other information on the energy :
-    Total energy(eV)= -2.65506733625168E+02 ; Band energy (Ha)=  -6.9871995632E-01
---------------------------------------------------------------------------------
-
+--- !EnergyTerms
+iteration_state     : {dtset: 1, }
+comment             : Components of total free energy in Hartree
+kinetic             :  2.93664316618340E+00
+hartree             :  7.98938376773698E-01
+xc                  : -3.93723883317501E+00
+Ewald energy        : -8.47989583509473E+00
+psp_core            :  7.65414498117480E-01
+local_psp           : -2.43103083154896E+00
+non_local_psp       :  5.89976109402721E-01
+total_energy        : -9.75719334934140E+00
+total_energy_eV     : -2.65506733625168E+02
+band_energy         : -6.98719956322869E-01
+...
 
 
  Cartesian components of stress tensor (hartree/bohr^3)
@@ -448,7 +490,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
 
 ================================================================================
 == DATASET  2 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 2, }
+dimensions: {natom: 2, nkpt: 413, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 79, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -878,6 +929,30 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25  412 max resid (incl. the buffer)=  2.72262E-18
   prteigrs : nnsclo,ikpt=   25  413 max resid (incl. the buffer)=  4.27425E-20
 
+
+--- !ResultsGS
+iteration_state: {dtset: 2, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.3050000,   5.3050000, ]
+- [  5.3050000,   0.0000000,   5.3050000, ]
+- [  5.3050000,   5.3050000,   0.0000000, ]
+lattice_lengths: [   7.50240,    7.50240,    7.50240, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.9859750E+02
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  9.967E-21, diffor:  0.000E+00, }
+etotal    :  -9.75719335E+00
+entropy   :   0.00000000E+00
+fermie    :   8.65978298E-02
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -906,7 +981,16 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
 
 ================================================================================
 == DATASET  3 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 3, }
+dimensions: {natom: 2, nkpt: 2769, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 79, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   1.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: -2, paral_kgb: 0, }
+...
 
  mkfilename : getden/=0, take file _DEN from output of DATASET   1.
 
@@ -3631,6 +3715,30 @@ _setup2: Arith. and geom. avg. npw (full set) are      73.328      73.250
   prteigrs : nnsclo,ikpt=   25 2768 max resid (incl. the buffer)=  2.18446E-19
   prteigrs : nnsclo,ikpt=   25 2769 max resid (incl. the buffer)=  4.27425E-20
 
+
+--- !ResultsGS
+iteration_state: {dtset: 3, }
+comment   : Summary of ground state results
+lattice_vectors:
+- [  0.0000000,   5.3050000,   5.3050000, ]
+- [  5.3050000,   0.0000000,   5.3050000, ]
+- [  5.3050000,   5.3050000,   0.0000000, ]
+lattice_lengths: [   7.50240,    7.50240,    7.50240, ]
+lattice_angles: [ 60.000,  60.000,  60.000, ] # degrees, (23, 13, 12)
+lattice_volume:   2.9859750E+02
+convergence: {deltae:  0.000E+00, res2:  0.000E+00, residm:  1.000E-20, diffor:  0.000E+00, }
+etotal    :  -9.75719335E+00
+entropy   :   0.00000000E+00
+fermie    :   8.65978298E-02
+cartesian_stress_tensor: null
+pressure_GPa: null
+xred      :
+- [  0.0000E+00,   0.0000E+00,   0.0000E+00, Al]
+- [  2.5000E-01,   2.5000E-01,   2.5000E-01, As]
+cartesian_forces: null
+force_length_stats: {min: null, max: null, mean: null, }
+...
+
  Integrated electronic density in atomic spheres:
  ------------------------------------------------
  Atom  Sphere_radius  Integrated_density
@@ -3879,51 +3987,10 @@ P           mkmem3       2769
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         43.0        0.72      0.012
-- Total wall clock time (s,m,h):         43.0        0.72      0.012
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           43.0, wall_time =           43.0
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                  15.435  35.9     15.398  35.8         756157      -1.00        1.00       1.00
-- nonlop(apply)                  5.111  11.9      5.217  12.1         756157      -1.00        0.98       0.98
-- projbd                         4.571  10.6      4.500  10.5        1142586      -1.00        1.02       1.02
-- getghc-other                   4.423  10.3      4.366  10.2             -1      -1.00        1.01       1.01
-- vtowfk(ssdiag)                 3.992   9.3      4.029   9.4             -1      -1.00        0.99       0.99
-- invars2                        0.821   1.9      0.821   1.9              3      -1.00        1.00       1.00
-- abinit(2)                      0.788   1.8      0.788   1.8              1      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )          0.432   1.0      0.432   1.0             -1      -1.00        1.00       1.00
-- pspini                         0.250   0.6      0.249   0.6              3      -1.00        1.00       1.00
-- others (125)                   0.449   1.0      0.457   1.1             -1      -1.00        0.98       0.98
--<END_TIMER>
--
-- subtotal                      36.272  84.4     36.257  84.4                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          43.0, wall_time =          43.0
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- fourwf%(pot)                  15.435  35.9     15.398  35.8         756157      -1.00        1.00       1.00
-- nonlop(apply)                  5.111  11.9      5.217  12.1         756157      -1.00        0.98       0.98
-- projbd                         4.571  10.6      4.500  10.5        1142586      -1.00        1.02       1.02
-- getghc-other                   4.423  10.3      4.366  10.2             -1      -1.00        1.01       1.01
-- vtowfk(ssdiag)                 3.992   9.3      4.029   9.4             -1      -1.00        0.99       0.99
-- invars2                        0.821   1.9      0.821   1.9              3      -1.00        1.00       1.00
-- abinit(2)                      0.788   1.8      0.788   1.8              1      -1.00        1.00       1.00
-- newkpt(excl. rwwf   )          0.432   1.0      0.432   1.0             -1      -1.00        1.00       1.00
-- pspini                         0.250   0.6      0.249   0.6              3      -1.00        1.00       1.00
-- others (125)                   0.449   1.0      0.457   1.1             -1      -1.00        0.98       0.98
--<END_TIMER>
 
-- subtotal                      36.272  84.4     36.257  84.4                                  1.00       1.00
 
 ================================================================================
 

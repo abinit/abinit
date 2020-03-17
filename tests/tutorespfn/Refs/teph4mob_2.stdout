@@ -1,8 +1,8 @@
 
-.Version 8.11.11 of MRGDDB 
-.(sequential version, prepared for a x86_64_linux_gnu7.4 computer) 
+.Version 9.1.1 of MRGDDB 
+.(MPI version, prepared for a x86_64_darwin18.7.0_gnu8.2 computer) 
 
-.Copyright (C) 1998-2019 ABINIT group . 
+.Copyright (C) 1998-2020 ABINIT group . 
  MRGDDB comes with ABSOLUTELY NO WARRANTY.
  It is free software, and you are welcome to redistribute it
  under certain conditions (GNU General Public License,
@@ -14,109 +14,109 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 13 Jan 2020.
-- ( at 16h12 )
+.Starting date : Mon 16 Mar 2020.
+- ( at 12h21 )
   
   Give name for output derivative database : 
- teph2_2.ddb.out
+ teph4mob_2_DDB
   Give short description of the derivative database :
  AlAs phonons on 4 4 4 mesh
   Give number of input ddbs, or 1 if input GS file
            8
   Give name for derivative database number           1  : 
- teph2_1o_DS3_DDB
+ teph4mob_1o_DS3_DDB
   Give name for derivative database number           2  : 
- teph2_1o_DS4_DDB
+ teph4mob_1o_DS4_DDB
   Give name for derivative database number           3  : 
- teph2_1o_DS5_DDB
+ teph4mob_1o_DS5_DDB
   Give name for derivative database number           4  : 
- teph2_1o_DS6_DDB
+ teph4mob_1o_DS6_DDB
   Give name for derivative database number           5  : 
- teph2_1o_DS7_DDB
+ teph4mob_1o_DS7_DDB
   Give name for derivative database number           6  : 
- teph2_1o_DS8_DDB
+ teph4mob_1o_DS8_DDB
   Give name for derivative database number           7  : 
- teph2_1o_DS9_DDB
+ teph4mob_1o_DS9_DDB
   Give name for derivative database number           8  : 
- teph2_1o_DS10_DDB
- Opening DDB file: teph2_1o_DS3_DDB
+ teph4mob_1o_DS10_DDB
+ Opening DDB file: teph4mob_1o_DS3_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- Opening DDB file: teph2_1o_DS4_DDB
+ Opening DDB file: teph4mob_1o_DS4_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- Opening DDB file: teph2_1o_DS5_DDB
+ Opening DDB file: teph4mob_1o_DS5_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- Opening DDB file: teph2_1o_DS6_DDB
+ Opening DDB file: teph4mob_1o_DS6_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- Opening DDB file: teph2_1o_DS7_DDB
+ Opening DDB file: teph4mob_1o_DS7_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- Opening DDB file: teph2_1o_DS8_DDB
+ Opening DDB file: teph4mob_1o_DS8_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- Opening DDB file: teph2_1o_DS9_DDB
+ Opening DDB file: teph4mob_1o_DS9_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- Opening DDB file: teph2_1o_DS10_DDB
+ Opening DDB file: teph4mob_1o_DS10_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- Opening DDB file: teph2_1o_DS3_DDB
+ Opening DDB file: teph4mob_1o_DS3_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- Opening DDB file: teph2_1o_DS4_DDB
+ Opening DDB file: teph4mob_1o_DS4_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- Opening DDB file: teph2_1o_DS5_DDB
+ Opening DDB file: teph4mob_1o_DS5_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- Opening DDB file: teph2_1o_DS6_DDB
+ Opening DDB file: teph4mob_1o_DS6_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- Opening DDB file: teph2_1o_DS7_DDB
+ Opening DDB file: teph4mob_1o_DS7_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- Opening DDB file: teph2_1o_DS8_DDB
+ Opening DDB file: teph4mob_1o_DS8_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- Opening DDB file: teph2_1o_DS9_DDB
+ Opening DDB file: teph4mob_1o_DS9_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- Opening DDB file: teph2_1o_DS10_DDB
+ Opening DDB file: teph4mob_1o_DS10_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
   read the input derivative database information
- Opening DDB file: teph2_1o_DS3_DDB
+ Opening DDB file: teph4mob_1o_DS3_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- About to open file teph2_1o_DS3_DDB
+ About to open file teph4mob_1o_DS3_DDB
  read     1 blocks from the input DDB
 
  read the input derivative database number     2
- Opening DDB file: teph2_1o_DS4_DDB
+ Opening DDB file: teph4mob_1o_DS4_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- About to open file teph2_1o_DS4_DDB
+ About to open file teph4mob_1o_DS4_DDB
  compare the current and input DDB information
   compar8 : assume that one of the DDB to be merged use Time-Reversal to
   decrease the number of k-points
@@ -126,11 +126,11 @@
  Now, current number of bloks =    2
 
  read the input derivative database number     3
- Opening DDB file: teph2_1o_DS5_DDB
+ Opening DDB file: teph4mob_1o_DS5_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- About to open file teph2_1o_DS5_DDB
+ About to open file teph4mob_1o_DS5_DDB
  compare the current and input DDB information
  Will try to merge this input DDB with the current one.
  Current number of bloks =    2
@@ -138,11 +138,11 @@
  Now, current number of bloks =    3
 
  read the input derivative database number     4
- Opening DDB file: teph2_1o_DS6_DDB
+ Opening DDB file: teph4mob_1o_DS6_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- About to open file teph2_1o_DS6_DDB
+ About to open file teph4mob_1o_DS6_DDB
  compare the current and input DDB information
  Will try to merge this input DDB with the current one.
  Current number of bloks =    3
@@ -150,11 +150,11 @@
  Now, current number of bloks =    4
 
  read the input derivative database number     5
- Opening DDB file: teph2_1o_DS7_DDB
+ Opening DDB file: teph4mob_1o_DS7_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- About to open file teph2_1o_DS7_DDB
+ About to open file teph4mob_1o_DS7_DDB
  compare the current and input DDB information
  Will try to merge this input DDB with the current one.
  Current number of bloks =    4
@@ -162,11 +162,11 @@
  Now, current number of bloks =    5
 
  read the input derivative database number     6
- Opening DDB file: teph2_1o_DS8_DDB
+ Opening DDB file: teph4mob_1o_DS8_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- About to open file teph2_1o_DS8_DDB
+ About to open file teph4mob_1o_DS8_DDB
  compare the current and input DDB information
  Will try to merge this input DDB with the current one.
  Current number of bloks =    5
@@ -174,11 +174,11 @@
  Now, current number of bloks =    6
 
  read the input derivative database number     7
- Opening DDB file: teph2_1o_DS9_DDB
+ Opening DDB file: teph4mob_1o_DS9_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- About to open file teph2_1o_DS9_DDB
+ About to open file teph4mob_1o_DS9_DDB
  compare the current and input DDB information
  Will try to merge this input DDB with the current one.
  Current number of bloks =    6
@@ -186,11 +186,11 @@
  Now, current number of bloks =    7
 
  read the input derivative database number     8
- Opening DDB file: teph2_1o_DS10_DDB
+ Opening DDB file: teph4mob_1o_DS10_DDB
   inprep8 : nband(1)=           4
         occ  0.20000000000000D+01  0.20000000000000D+01  0.20000000000000D+01
              0.20000000000000D+01
- About to open file teph2_1o_DS10_DDB
+ About to open file teph4mob_1o_DS10_DDB
  compare the current and input DDB information
  Will try to merge this input DDB with the current one.
  Current number of bloks =    7

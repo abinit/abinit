@@ -1,6 +1,6 @@
 
-.Version 8.11.14 of MRGDV 
-.(sequential version, prepared for a x86_64_linux_gnu7.4 computer) 
+.Version 9.1.1 of MRGDV 
+.(MPI version, prepared for a x86_64_darwin18.7.0_gnu8.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  MRGDV comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Tue 21 Jan 2020.
-- ( at 17h06 )
+.Starting date : Mon 16 Mar 2020.
+- ( at 12h21 )
   
 >>> Enter name of output file: 
 >>> Enter total number of DFPT POT files: 

@@ -1,6 +1,6 @@
 
-.Version 8.11.14 of ABINIT 
-.(sequential version, prepared for a x86_64_linux_gnu7.4 computer) 
+.Version 9.1.1 of ABINIT 
+.(MPI version, prepared for a x86_64_darwin18.7.0_gnu8.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,8 +14,8 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Wed 22 Jan 2020.
-- ( at 08h31 )
+.Starting date : Mon 16 Mar 2020.
+- ( at 12h08 )
   
 - input  file    -> /home/gbrunin/Software/abinit/eph_tuto/build/Test_suite/tutorespfn_teph4mob_1-teph4mob_2-teph4mob_3-teph4mob_4-teph4mob_5-teph4mob_6-teph4mob_7/teph4mob_7.in
 - output file    -> teph4mob_7.out
@@ -275,7 +275,16 @@ P           mkmem         413
 
 ================================================================================
 == DATASET  1 ==================================================================
--   nproc =    1
+-   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
+
+
+--- !DatasetInfo
+iteration_state: {dtset: 1, }
+dimensions: {natom: 2, nkpt: 413, mband: 8, nsppol: 1, nspinor: 1, nspden: 1, mpw: 79, }
+cutoff_energies: {ecut:   3.0, pawecutdg:  -1.0, }
+electrons: {nelect:   8.00000000E+00, charge:   0.00000000E+00, occopt:   3.00000000E+00, tsmear:   1.00000000E-02, }
+meta: {optdriver: 7, eph_task: -4, }
+...
 
  mkfilename: getwfk from: teph4mob_4o_DS2_WFK
 
@@ -344,6 +353,8 @@ P           mkmem         413
          2         3   -6.755301E-17   -6.755301E-17   -2.115792E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: teph4mob_2_DDB
+- Cannot find quadrupole tensor in DDB file: teph4mob_2_DDB
+Values initialized with zeros
        Homogeneous q point set in the B.Z.
  Grid q points  :       64
   1)   0.00000000E+00  0.00000000E+00  0.00000000E+00
@@ -736,49 +747,10 @@ P           mkmem         413
 
 ================================================================================
 
-- Total cpu        time (s,m,h):         57.8        0.96      0.016
-- Total wall clock time (s,m,h):         57.8        0.96      0.016
--
-- For major independent code sections, cpu and wall times (sec),
--  as well as % of the time and number of calls for node 0-
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = 0>
-- cpu_time =           57.8, wall_time =           57.8
--
-- routine                        cpu     %       wall     %      number of calls  Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- ewald9                        27.333  47.3     27.312  47.2           3295      -1.00        1.00       1.00
-- ifc_fourq                     26.697  46.2     26.702  46.2           3230      -1.00        1.00       1.00
-- sigph_pre_qloop                1.864   3.2      1.864   3.2              3      -1.00        1.00       1.00
-- sigph_qloop_preamble           1.631   2.8      1.639   2.8            197      -1.00        1.00       1.00
-- invars2                        0.497   0.9      0.497   0.9              1      -1.00        1.00       1.00
-- abinit(2)                      0.483   0.8      0.482   0.8              1      -1.00        1.00       1.00
-- listkk                         0.325   0.6      0.326   0.6             11      -1.00        1.00       1.00
-- pspini                         0.301   0.5      0.301   0.5              1      -1.00        1.00       1.00
-- others (126)                   0.588   1.0      0.570   1.0             -1      -1.00        1.03       1.03
--<END_TIMER>
--
-- subtotal                      59.720 103.3     59.693 103.2                                  1.00       1.00
 
-- For major independent code sections, cpu and wall times (sec),
-- as well as % of the total time and number of calls 
+- Timing analysis has been suppressed with timopt=0
 
--<BEGIN_TIMER mpi_nprocs = 1, omp_nthreads = 1, mpi_rank = world>
-- cpu_time =          57.8, wall_time =          57.8
--
-- routine                         cpu     %       wall     %      number of calls Gflops    Speedup Efficacity
--                                                                  (-1=no count)
-- ewald9                        27.333  47.3     27.312  47.2           3295      -1.00        1.00       1.00
-- ifc_fourq                     26.697  46.2     26.702  46.2           3230      -1.00        1.00       1.00
-- sigph_pre_qloop                1.864   3.2      1.864   3.2              3      -1.00        1.00       1.00
-- sigph_qloop_preamble           1.631   2.8      1.639   2.8            197      -1.00        1.00       1.00
-- invars2                        0.497   0.9      0.497   0.9              1      -1.00        1.00       1.00
-- abinit(2)                      0.483   0.8      0.482   0.8              1      -1.00        1.00       1.00
-- listkk                         0.325   0.6      0.326   0.6             11      -1.00        1.00       1.00
-- pspini                         0.301   0.5      0.301   0.5              1      -1.00        1.00       1.00
-- others (126)                   0.588   1.0      0.570   1.0             -1      -1.00        1.03       1.03
--<END_TIMER>
 
-- subtotal                      59.720 103.3     59.693 103.2                                  1.00       1.00
 
 ================================================================================
 

@@ -3533,11 +3533,11 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
    new = geo_from_poscar_path(trim(string(ii+1:)), comm)
 
  !case ("abigeo")
- !  new = geo_from_abigeo_path(string(ii+1:), comm)
+ !  new = geo_from_abigeo_path(trim(string(ii+1:)), comm)
 
  case ("abifile")
    if (endswith(string(ii+1:), ".nc")) then
-     ! Get geo info from netcdf file.
+     ! Get geo from netcdf file.
      new = geo_from_netcdf_path(trim(string(ii+1:)), comm)
    else
      ! Assume Fortran file with Abinit header.

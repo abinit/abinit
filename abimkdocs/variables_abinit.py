@@ -2918,7 +2918,7 @@ Variable(
     text=r"""
 Tolerance for the variation of Local Charge for convergence of the DMFT Loop.
 Most of the time however, DFT+DMFT calculations can converge fastly using [[dmft_iter]]=1, so
-that this variable is not required. 
+that this variable is not required.
 """,
 ),
 
@@ -20572,23 +20572,6 @@ This variable is not compatible with [[nkptgw]] and [[sigma_ngkpt]].
 ),
 
 Variable(
-    abivarname="transport_ngkpt",
-    varset="eph",
-    topics=['SelfEnergy_useful'],
-    vartype="integer",
-    defaultval=[0,0,0],
-    dimensions=[3],
-    requires="[[optdriver]] == 7 and [[eph_task]] in [-4,7]",
-    mnemonics="TRANSPORT: Number of Grid points for K PoinTs integration in transport computations",
-    text=r"""
-This variable allows the user to specify the k-grid that should be used by the transport
-driver ([[eph_task]] = -4 or [[eph_task]] = 7). It should be equal to [[sigma_ngkpt]] or a
-mesh that is smaller and commensurate to it, since all the electron lifetimes and velocities
-should be obtained from the SIGEPH.nc file created previously.
-""",
-),
-
-Variable(
     abivarname="eph_tols_idelta",
     varset="eph",
     topics=['SelfEnergy_expert'],
@@ -20628,11 +20611,13 @@ Variable(
     vartype="integer",
     defaultval=[0, 0, 0],
     dimensions=[3],
-    mnemonics="TRANSPORT, Number of Grid points for K PoinTs generation",
+    requires="[[optdriver]] == 7 and [[eph_task]] in [-4,7]",
+    mnemonics="TRANSPORT: Number of Grid points for K PoinTs integration in transport computations",
     added_in_version="9.0.0",
     text=r"""
-This in an advanced option that is mainly used to donwsample the k-points used
-to compute the carrier mobility obtained in [[eph_task]] = -4.
+This in an advanced option that is mainly used to downsample the k-points used
+to compute the carrier mobility obtained with ([[eph_task]] = -4 or [[eph_task]] = 7).
+
 If this variable is not specified, the code uses the k-mesh specified by [[ngkpt]]
 (i.e. the k-mesh corresponding to the WFK file) for computing the mobility integral in the BZ.
 In some cases, however, one may want to employ a submesh of k-points to analyze the convergence behaviour.
