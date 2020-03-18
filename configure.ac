@@ -19,6 +19,7 @@
 
 # ---------------------------------------------------------------------------- #
 
+
 #
 # Autoconf & Automake startup
 #
@@ -1145,6 +1146,12 @@ ABI_MSG_SECTION([Output])
 # Output files
 # Note: later, add tests/atconfig and tests/atlocal for test suite
 ABI_OUTPUT
+
+# FIXME: Generate fake makefile for the fallbacks until the test farm is
+#        updated
+test -e "fallbacks" || ${INSTALL} -d -m 755 "fallbacks"
+${INSTALL} -m 644 "${abinit_srcdir}/config/makefiles/fallbacks.mf" \
+  "fallbacks/Makefile"
 
 # ---------------------------------------------------------------------------- #
 # ---------------------------------------------------------------------------- #

@@ -954,7 +954,7 @@ subroutine gstate(args_gs,acell,codvsn,cpui,dtfil,dtset,iexit,initialized,&
      hyb_range_fock=zero;if (dtset%ixc<0) call libxc_functionals_get_hybridparams(hyb_range=hyb_range_fock)
      call pawinit(dtset%effmass_free,gnt_option,gsqcut_shp,hyb_range_fock,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
-&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,dtset%usekden,dtset%usepotzero)
+&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%ixc,dtset%usepotzero)
 
      ! Update internal values
      call paw_gencond(Dtset,gnt_option,"save",call_pawinit)

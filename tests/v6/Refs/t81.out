@@ -29,6 +29,8 @@
          asr         1
  Interatomic Force Constants Inputs :
       dipdip         0
+      dipqua         0
+      quadqu         0
       ifcana         1
       ifcout        20
       natifc         1
