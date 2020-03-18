@@ -21197,6 +21197,7 @@ the external file and need not to be specified in the ABINIT input.
 At present ( |today| ), the allowed values for **filetype** are:
 
 * abifile --> An output file produced by Abinit (only netcdf files are supported for the time being)
+* abivars --> An txt input file with Abinit variables
 * poscar  --> POSCAR files in VASP-5 format (element symbol after the atomic position is required).
 
 Some examples will help clarify.
@@ -21214,6 +21215,31 @@ are supported as well e.g.
 In the case of structural relaxations, these files contain the final geometry (not necessarily relaxed
 within the given tolerance) hence [[structure]] can be used to perform an in-place restart by reading
 the output of a previous run.
+
+To read the structure from an external file with the structure in Abinit format, use:
+
+    structure "abivars:my_text_file"
+
+
+where *my_text_file* contains e.g.
+
+```
+# MgB2 lattice structure
+natom   3
+
+acell   2*3.086  3.523 Angstrom
+
+rprim   0.866025403784439  0.5  0.0
+       -0.866025403784439  0.5  0.0
+        0.0                0.0  1.0
+
+# Atomic positions
+xred_symbols
+ 0.0000000000E+00  0.0000000000E+00  0.0     Mg
+ 1/3               2/3               0.5     B
+ 2/3               1/3               0.5     B
+```
+
 
 To read the structure from an external POSCAR file, use:
 

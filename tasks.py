@@ -306,7 +306,7 @@ def branchoff(ctx, start_point):
     ctx.run(f"git checkout -b {my_branch} {start_point}")
     # Change default upstream. If you forget this step, you will be pushing to trunk
     ctx.run("git branch --set-upstream-to origin")
-    ctx.run.("git push origin HEAD")
+    ctx.run("git push origin HEAD")
 
 
 def which(cmd):

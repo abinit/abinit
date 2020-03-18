@@ -33,11 +33,10 @@ module m_parser
  use m_nctk
 
  use m_io_tools,  only : open_file
- use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, next_token, &
+ use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, toupper, next_token, &
                          endswith, char_count, find_digit !, startswith,
- use m_geometry,  only : xcart2xred, det3r
+ use m_geometry,  only : xcart2xred, det3r, mkrdim
  !use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
- !use m_crystal,   only : crystal_t
 
  implicit none
 
@@ -115,6 +114,7 @@ module m_parser
  public :: prttagm             ! Print the content of intarr or dprarr.
  public :: prttagm_images      ! Extension to prttagm to include the printing of images information.
  public :: chkvars_in_string   ! Analyze variable names in string. Abort if name is not recognized.
+ public :: get_acell_rprim     ! Get acell and rprim from string
 
 
 !----------------------------------------------------------------------
@@ -500,7 +500,7 @@ end subroutine inread
 !!
 !! SOURCE
 
-recursive subroutine instrng(filnam,lenstr,option,strln,string)
+recursive subroutine instrng(filnam, lenstr, option, strln, string)
 
 !Arguments ------------------------------------
 !scalars
@@ -3826,15 +3826,16 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
  select case (prefix)
 
  case ("poscar")
-   ! Get geo info from POSCAR from file.
+   ! Build geo ifrom POSCAR from file.
    new = geo_from_poscar_path(trim(string(ii+1:)), comm)
 
- !case ("abigeo")
- !  new = geo_from_abigeo_path(trim(string(ii+1:)), comm)
+ case ("abivars")
+   ! Build geo from from file with Abinit variables.
+   new = geo_from_abivars_path(trim(string(ii+1:)), comm)
 
  case ("abifile")
    if (endswith(string(ii+1:), ".nc")) then
-     ! Get geo from netcdf file.
+     ! Build geo from netcdf file.
      new = geo_from_netcdf_path(trim(string(ii+1:)), comm)
    else
      ! Assume Fortran file with Abinit header.
@@ -3860,97 +3861,147 @@ type(geo_t) function geo_from_abivar_string(string, comm) result(new)
 end function geo_from_abivar_string
 !!***
 
-!!!! !!****f* m_parser/geo_from_abigeo_path
-!!!! !! NAME
-!!!! !!  geo_from_abigeo_path
-!!!! !!
-!!!! !! FUNCTION
-!!!! !!
-!!!! !! SOURCE
-!!!!
-!!!! type(geo_t) function geo_from_abigeo_path(path, jdtset, iimage, comm) result(new)
-!!!!
-!!!! !Arguments ------------------------------------
-!!!!  character(len=*),intent(in) :: path
-!!!!  integer,intent(in) :: jdtset, iimage, comm
-!!!!
-!!!! !Local variables-------------------------------
-!!!!  integer,parameter :: master = 0, option1=1
-!!!!  integer :: my_rank, lenstr, ierr, ii, iatom, start, tread, marr !itypat,
-!!!!  !character(len=500) :: msg
-!!!!  character(len=strlen) :: string
-!!!! !arrays
-!!!!  integer,allocatable :: intarr(:)
-!!!!  real(dp),allocatable ::dprarr(:)
-!!!!  character(len=5),allocatable :: symbols(:)
-!!!!
-!!!!
-!!!! !************************************************************************
-!!!!
-!!!!  ! Master node reads string and broadcasts
-!!!!  my_rank = xmpi_comm_rank(comm)
-!!!!
-!!!!  if (my_rank == master) then
-!!!!     ! Below part copied from `parsefile`. strlen from defs_basis module
-!!!!     call instrng(path, lenstr, option1, strlen, string)
-!!!!
-!!!!    ! To make case-insensitive, map characters of string to upper case.
-!!!!    call inupper(string(1:lenstr))
-!!!!  end if
-!!!!
-!!!!  if (xmpi_comm_size(comm) > 1) then
-!!!!    call xmpi_bcast(string, master, comm, ierr)
-!!!!    call xmpi_bcast(lenstr, master, comm, ierr)
-!!!!  end if
-!!!!
-!!!!  ! ==============================
-!!!!  ! Now all procs parse the string
-!!!!  ! ==============================
-!!!!
-!!!!  ! Set up unit cell from acell, rprim, angdeg
-!!!!  !call parse_acell_rprim_angdeg(string, jdtset, iimage, marr, string(1:lenstr), acell, rprim, angdeg)
-!!!!
-!!!!  ! Get the number of atom in the unit cell. Read natom from string
-!!!!  marr = 1
-!!!!  ABI_MALLOC(intarr, (marr))
-!!!!  ABI_MALLOC(dprarr, (marr))
-!!!!  !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'natom', tread, 'INT')
-!!!!  ABI_CHECK(tread /= 0, sjoin("natom is required in file:", path))
-!!!!  new%natom = intarr(1)
-!!!!  ABI_FREE(intarr)
-!!!!  ABI_FREE(dprarr)
-!!!!
-!!!!  ! Parse atomic positions. Only xcart is supported here because it makes life easier
-!!!!  ! and we don't need to handle symbols + Units
-!!!!  ii = index(string(1:lenstr), "xred_symbols")
-!!!!  ABI_CHECK(ii /= 0, "In structure mode only `xred_symbols` with coords followed by atom symbol are supported")
-!!!!
-!!!!  new%fileformat = "abivars"
-!!!!  ABI_MALLOC(new%typat, (new%natom))
-!!!!  ABI_MALLOC(new%xred, (3, new%natom))
-!!!!
-!!!!  ABI_MALLOC(symbols, (new%natom))
-!!!!  start = ii + 4
-!!!!  do iatom=1,new%natom
-!!!!    !call inarray(start, cs, dprarr, intarr, marr, narr, string, "DPR")
-!!!!    !read(string(cs:), *) symbols(iatom)
-!!!!  end do
-!!!!
-!!!!  !call find_unique(symbols, new%ntypat, new%typat)
-!!!!
-!!!!  ! Note that the first letter should be capitalized, rest must be lower case
-!!!!  ABI_MALLOC(new%znucl, (new%ntypat))
-!!!!  !do itypat=1,new%ntypat
-!!!!  !  !iatom = new%typat(iat
-!!!!  !  new%znucl(itypat) = symbol2znucl(symbols(iatom))
-!!!!  !end do
-!!!!
-!!!!  ABI_FREE(symbols)
-!!!!  ABI_FREE(intarr)
-!!!!  ABI_FREE(dprarr)
-!!!!
-!!!! end function geo_from_abigeo_path
-!!!! !!***
+!!****f* m_parser/geo_from_abivars_path
+!! NAME
+!!  geo_from_abivars_path
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+type(geo_t) function geo_from_abivars_path(path, comm) result(new)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: path
+ integer,intent(in) :: comm
+
+!Local variables-------------------------------
+ integer,parameter :: master = 0, option1 = 1
+ integer :: jdtset, iimage, nimage, iatom, itypat
+ integer :: my_rank, lenstr, ierr, ii, start, tread, marr
+ !character(len=500) :: msg
+ character(len=strlen) :: string
+!arrays
+ integer,allocatable :: intarr(:)
+ real(dp) :: acell(3), rprim(3,3)
+ real(dp),allocatable :: dprarr(:)
+ character(len=5),allocatable :: symbols(:)
+
+!************************************************************************
+
+ ! Master node reads string and broadcasts
+ my_rank = xmpi_comm_rank(comm)
+
+ if (my_rank == master) then
+   ! Below part copied from `parsefile`. strlen from defs_basis module
+   call instrng(path, lenstr, option1, strlen, string)
+   ! To make case-insensitive, map characters of string to upper case.
+   call inupper(string(1:lenstr))
+   !call chkvars_in_string(protocol1, list_vars, list_logicals, list_strings, string)
+ end if
+
+ if (xmpi_comm_size(comm) > 1) then
+   call xmpi_bcast(string, master, comm, ierr)
+   call xmpi_bcast(lenstr, master, comm, ierr)
+ end if
+
+ ! ==============================
+ ! Now all procs parse the string
+ ! ==============================
+
+ jdtset = 0; iimage = 0; nimage = 0
+
+ ! Get the number of atom in the unit cell. Read natom from string
+ marr = 1
+ ABI_MALLOC(intarr, (marr))
+ ABI_MALLOC(dprarr, (marr))
+
+ call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), 'natom', tread, 'INT')
+ ABI_CHECK(tread /= 0, sjoin("natom is required in file:", path))
+ new%natom = intarr(1)
+
+ marr = max(12, 3*new%natom)
+ ABI_REMALLOC(intarr, (marr))
+ ABI_REMALLOC(dprarr, (marr))
+
+ ! Set up unit cell from acell, rprim, angdeg
+ call get_acell_rprim(lenstr, string, jdtset, iimage, nimage, marr, acell, rprim)
+
+ ! Compute different matrices in real and reciprocal space, also checks whether ucvol is positive.
+ call mkrdim(acell, rprim, new%rprimd)
+
+ ! Parse atomic positions.
+ ! Only xcart is supported here because it makes life easier and we don't need to handle symbols + Units
+ ii = index(string(1:lenstr), "XRED_SYMBOLS")
+ ABI_CHECK(ii /= 0, "In structure mode only `xred_symbols` with coords followed by element symbol are supported")
+
+ new%fileformat = "abivars"
+ ABI_MALLOC(new%xred, (3, new%natom))
+
+ ABI_MALLOC(symbols, (new%natom))
+ start = ii + len("XRED_SYMBOLS")
+ do iatom=1,new%natom
+   call inarray(start, "xred_symbols", dprarr, intarr, marr, 3, string, "DPR")
+   new%xred(:, iatom) = dprarr(1:3)
+   ABI_CHECK(next_token(string, start, symbols(iatom)) == 0, "Error while reading element symbol.")
+   symbols(iatom) = tolower(symbols(iatom))
+   symbols(iatom)(1:1) = toupper(symbols(iatom)(1:1))
+   !write(std_out, *)"xred", new%xred(:, iatom), "symbol:", trim(symbols(iatom))
+ end do
+
+ call typat_from_symbols(symbols, new%ntypat, new%typat)
+
+ ! Note that the first letter should be capitalized, rest must be lower case
+ ABI_MALLOC(new%znucl, (new%ntypat))
+ do iatom=1,new%natom
+   itypat = new%typat(iatom)
+   new%znucl(itypat) = symbol2znucl(symbols(iatom))
+ end do
+
+ ABI_FREE(symbols)
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
+
+ !call new%print_abivars(std_out)
+
+contains
+
+subroutine typat_from_symbols(symbols, ntypat, typat)
+
+!Arguments ------------------------------------
+ character(len=*),intent(in) :: symbols(:)
+ integer,intent(out) :: ntypat
+ integer,allocatable,intent(out) :: typat(:)
+
+!Local variables-------------------------------
+ integer :: ii, jj, nstr, found
+
+!************************************************************************
+
+ nstr = size(symbols)
+ ABI_ICALLOC(typat, (nstr))
+
+ typat(1) = 1
+ ntypat = 1
+ do ii=2, nstr
+   found = 0
+   do jj=1, ntypat
+     if (symbols(ii) == symbols(typat(jj))) then
+       found = jj; exit
+     end if
+   end do
+   if (found == 0) then
+     ntypat = ntypat + 1
+     typat(ii) = ntypat
+   else
+     typat(ii) = found
+   end if
+ end do
+
+end subroutine typat_from_symbols
+
+end function geo_from_abivars_path
+!!***
 
 !!****f* m_parser/geo_from_poscar_path
 !! NAME
@@ -4371,6 +4422,134 @@ subroutine geo_free(self)
  ABI_SFREE(self%znucl)
 
 end subroutine geo_free
+!!***
+
+!!****f* m_parser/get_acell_rprim
+!! NAME
+!!  get_acell_rprim
+!!
+!! FUNCTION
+!!  Get acell and rprim from string
+!!
+!! INPUTS
+!! string*(*)=character string containing all the input data. Initialized previously in instrng.
+!! jdtset=number of the dataset looked for
+!! iimage= index of the current image
+!! nimage=Number of images.
+!! marr=dimension of the intarr and dprarr arrays, as declared in the calling subroutine.
+!!
+!! OUTPUT
+!! acell(3)=length of primitive vectors
+!! rprim(3,3)=dimensionless real space primitive translations
+!!
+!! FUNCTION
+!!
+!! SOURCE
+
+subroutine get_acell_rprim(lenstr, string, jdtset, iimage, nimage, marr, acell, rprim)
+
+!Arguments ------------------------------------
+ integer,intent(in) :: lenstr, jdtset, iimage, nimage, marr
+ character(len=*),intent(in) :: string
+ real(dp),intent(out) :: acell(3)
+ real(dp),intent(out) :: rprim(3,3)
+
+!Local variables-------------------------------
+ integer :: tacell, tangdeg, tread, trprim, mu
+ real(dp) :: a2, aa, cc, cosang
+ character(len=500) :: msg
+!arrays
+ integer,allocatable :: intarr(:)
+ real(dp) :: angdeg(3)
+ real(dp),allocatable :: dprarr(:)
+
+!************************************************************************
+
+ ABI_MALLOC(intarr, (marr))
+ ABI_MALLOC(dprarr, (marr))
+
+ acell(1:3) = one
+ call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'acell',tacell,'LEN')
+ if(tacell==1) acell(1:3)=dprarr(1:3)
+ call intagm_img(acell,iimage,jdtset,lenstr,nimage,3,string,"acell",tacell,'LEN')
+
+ ! Check that input length scales acell(3) are > 0
+ do mu=1,3
+   if(acell(mu) <= zero) then
+     write(msg, '(a,i0,a, 1p,e14.6,4a)' )&
+      'Length scale ',mu,' is input as acell: ',acell(mu),ch10,&
+      'However, length scales must be > 0 ==> stop',ch10,&
+      'Action: correct acell in input file.'
+     MSG_ERROR(msg)
+   end if
+ end do
+
+ ! Initialize rprim, or read the angles
+ tread=0
+ call intagm(dprarr,intarr,jdtset,marr,9,string(1:lenstr),'rprim',trprim,'DPR')
+ if (trprim==1) rprim(:,:) = reshape( dprarr(1:9), [3, 3])
+ call intagm_img(rprim,iimage,jdtset,lenstr,nimage,3,3,string,"rprim",trprim,'DPR')
+
+ if(trprim==0)then
+   ! If none of the rprim were read ...
+   call intagm(dprarr,intarr,jdtset,marr,3,string(1:lenstr),'angdeg',tangdeg,'DPR')
+   angdeg(:)=dprarr(1:3)
+   call intagm_img(angdeg,iimage,jdtset,lenstr,nimage,3,string,"angdeg",tangdeg,'DPR')
+
+   if(tangdeg==1)then
+     !call wrtout(std_out,' ingeo: use angdeg to generate rprim.')
+
+     ! Check that input angles are positive
+     do mu=1,3
+       if(angdeg(mu)<=0.0_dp) then
+         write(msg, '(a,i0,a,1p,e14.6,a,a,a,a)' )&
+          'Angle number ',mu,' is input as angdeg: ',angdeg(mu),ch10,&
+          'However, angles must be > 0 ==> stop',ch10,&
+          'Action: correct angdeg in the input file.'
+         MSG_ERROR(msg)
+       end if
+     end do
+
+     ! Check that the sum of angles is smaller than 360 degrees
+     if(angdeg(1)+angdeg(2)+angdeg(3)>=360.0_dp) then
+       write(msg, '(a,a,a,es14.4,a,a,a)' )&
+        'The sum of input angles (angdeg(1:3)) must be lower than 360 degrees',ch10,&
+        'while it is: ',angdeg(1)+angdeg(2)+angdeg(3),'.',ch10,&
+        'Action: correct angdeg in the input file.'
+       MSG_ERROR(msg)
+     end if
+
+     if( abs(angdeg(1)-angdeg(2))<tol12 .and. &
+         abs(angdeg(2)-angdeg(3))<tol12 .and. &
+         abs(angdeg(1)-90._dp)+abs(angdeg(2)-90._dp)+abs(angdeg(3)-90._dp)>tol12 )then
+       ! Treat the case of equal angles (except all right angles):
+       ! generates trigonal symmetry wrt third axis
+       cosang=cos(pi*angdeg(1)/180.0_dp)
+       a2=2.0_dp/3.0_dp*(1.0_dp-cosang)
+       aa=sqrt(a2)
+       cc=sqrt(1.0_dp-a2)
+       rprim(1,1)=aa        ; rprim(2,1)=0.0_dp                 ; rprim(3,1)=cc
+       rprim(1,2)=-0.5_dp*aa ; rprim(2,2)= sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,2)=cc
+       rprim(1,3)=-0.5_dp*aa ; rprim(2,3)=-sqrt(3.0_dp)*0.5_dp*aa ; rprim(3,3)=cc
+       ! write(std_out,*)' ingeo: angdeg=',angdeg(1:3), aa,cc=',aa,cc
+     else
+       ! Treat all the other cases
+       rprim(:,:)=0.0_dp
+       rprim(1,1)=1.0_dp
+       rprim(1,2)=cos(pi*angdeg(3)/180.0_dp)
+       rprim(2,2)=sin(pi*angdeg(3)/180.0_dp)
+       rprim(1,3)=cos(pi*angdeg(2)/180.0_dp)
+       rprim(2,3)=(cos(pi*angdeg(1)/180.0_dp)-rprim(1,2)*rprim(1,3))/rprim(2,2)
+       rprim(3,3)=sqrt(1.0_dp-rprim(1,3)**2-rprim(2,3)**2)
+     end if
+
+   end if
+ end if ! No problem if neither rprim nor angdeg are defined: use default rprim
+
+ ABI_FREE(intarr)
+ ABI_FREE(dprarr)
+
+end subroutine get_acell_rprim
 !!***
 
 end module m_parser
