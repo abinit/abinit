@@ -30,10 +30,14 @@ module m_qplusg
  implicit none
  
  private 
+!!***
   
  public :: cmod_qpg
+!!***
 
 CONTAINS 
+!!***
+
 !!****f* m_qplusg/cmod_qpg
 !! NAME
 !! cmod_qpg
