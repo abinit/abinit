@@ -140,7 +140,7 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
  DBG_ENTER("COLL")
 
  msg2='Sc     '
- fact=cmplx(0.0d0,-1.0d0/pi)
+ fact=cmplx(1.0d0/pi,0.0d0)
 
  if(iinfo==0) then
    write(msg,'(a37,a7,a14,3f10.5)')'Computing the 1-RDM correction for  ',msg2,' and k-point: ',BSt%kptns(1:,kpoint)
@@ -160,10 +160,10 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
        if(abs(denominator)>tol8) then 
          ! Sigma_pq/[(denominator)]
            division=sigcme_k(iquad,ib1dm,ib2dm,1)/denominator 
-           dm1_mel=dm1_mel+weights(iquad)*division
+           dm1_mel=dm1_mel-weights(iquad)*division        ! -
          ! [Sigma_qp/[(denominator)]]^*
            division=sigcme_k(iquad,ib2dm,ib1dm,1)/denominator 
-           dm1_mel=dm1_mel+weights(iquad)*conjg(division)
+           dm1_mel=dm1_mel+weights(iquad)*conjg(division) ! +
        endif
      enddo
      dm1(ib1dm,ib2dm)=fact*dm1_mel
