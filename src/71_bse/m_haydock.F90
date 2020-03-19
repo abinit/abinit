@@ -54,7 +54,7 @@ MODULE m_haydock
  use m_wfd,               only : wfd_t
  use m_bse_io,            only : exc_write_optme
  use m_pawtab,            only : pawtab_type
- use m_vcoul,             only : vcoul_t
+ use m_vcoul_dt
  use m_hexc,              only : hexc_init, hexc_interp_init, hexc_free, hexc_interp_free, &
 &                                hexc_build_hinterp, hexc_matmul_tda, hexc_matmul_full, hexc_t, hexc_matmul_elphon, hexc_interp_t
  use m_exc_spectra,       only : exc_write_data, exc_eps_rpa, exc_write_tensor, mdfs_ncwrite
