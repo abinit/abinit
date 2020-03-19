@@ -383,9 +383,11 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  ncycle=specs%ncycle
 
  if(ab_mover%ionmov==25.and.scfcv_args%dtset%hmctt>=0)then
-   ncycle=scfcv_args%dtset%hmctt
+   ncycle=scfcv_args%dtset%hmctt   
+   write(std_out,*) "ncycle AKA args%dtset%hmctt", ncycle
    if(scfcv_args%dtset%hmcsst>0.and.ab_mover%optcell/=0)then
-     ncycle=ncycle+scfcv_args%dtset%hmcsst
+      ncycle=ncycle+scfcv_args%dtset%hmcsst 
+      write(std_out,*) "ncycle AKA args%dtset%hmctt + hmcsst", ncycle
    endif
  endif
 
