@@ -307,7 +307,7 @@ Even without a graphical tool we will have a quick look at the values at L, $\Ga
      kpt#  23, nband=  8, wtk=  1.00000, kpt=  0.0000  0.5000  0.5000 (reduced coord)
       -1.96393  -1.96393   3.00569   3.00569   6.51173   6.51173  15.95524  15.95524
 
-     kpt#  40, nband=  8, wtk=  1.00000, kpt=  1.0000  1.0000  1.0000 (reduced coord)
+     kpt#  39, nband=  8, wtk=  1.00000, kpt=  1.0000  1.0000  1.0000 (reduced coord)
       -6.17005   5.91814   5.91814   5.91814   8.44836   8.44836   8.44836   9.17755
 
 The last $\Gamma$ is exactly equivalent to the first $\Gamma$.
