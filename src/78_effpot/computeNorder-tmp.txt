@@ -1,0 +1,147 @@
+!Set the inputs
+ need_compute = .TRUE.
+ need_anharmstr = .TRUE.
+ need_spcoupling = .TRUE.
+ need_distributed = .FALSE.
+ nbody_in = 0 !all kind of terms
+ if(present(compute)) need_compute = compute
+ if(present(nbody)) nbody_in = nbody
+ if(present(anharmstr)) need_anharmstr = anharmstr
+ if(present(spcoupling)) need_spcoupling = spcoupling
+ if(present(distributed)) need_distributed  = distributed
+ if(power_disp <= power_disp_max)then
+
+!  Initialisation of variables
+   nterm_max  = nsym
+   ncoeff_max = (ncoeff+nstr)
+   ndisp_max = power_disp
+   icoeff_tmp = 0
+   ABI_ALLOCATE(coeffs_tmp,(ncoeff_max))
+   ABI_ALLOCATE(terms,(nterm_max))
+   ABI_ALLOCATE(index_coeff,(power_disp))
+
+   index_coeff(1:power_disp-1) = index_coeff_in(:)
+
+   do icoeff1=icoeff,ncoeff+nstr
+!    If the distance between the 2 coefficients is superior than the cut-off,
+!    we cycle
+!    If the power_disp is one, we need to set icoeff to icoeff1
+     if(power_disp==1) icoeff = icoeff1
+
+     if(compatibleCoeffs(icoeff,icoeff1)==0) cycle
+
+!    Reset the flag compatible and possible
+     compatible = .TRUE.
+     possible   = .TRUE.
+
+     index_coeff(power_disp) = icoeff1
+     iterm = 0
+     coefficient = one
+
+     if(power_disp >= power_disp_min) then
+       call generateTermsFromList(cell,index_coeff,list_coeff,list_str,ncoeff,&
+&                                 ndisp_max,nrpt,nstr,nsym,iterm,terms)
+
+       if(iterm > 0)then
+!        Do some checks
+!        -------------
+!        1-Check if the coefficient is full anharmonic strain and if we need to compute it
+         if(terms(1)%ndisp == 0)then
+           compatible = (need_anharmstr .or. need_spcoupling)
+           possible = need_anharmstr
+         end if
+!        1-Check if the coefficient is strain-coupling and if we need to compute it
+         if(terms(1)%nstrain > 0.and.terms(1)%ndisp > 0)then
+           possible   = need_spcoupling
+           compatible = need_spcoupling
+         end if
+
+!        ------------
+!        2-Check if this terms is compatible with nbody
+         if(nbody_in > 0)then
+           pa = 1 ; pb = 1
+           ia = 0 ; ib = 0
+!          Count the number of terms and the power_disp
+           do ii=1,terms(1)%ndisp
+             if(terms(1)%nstrain > 0) then
+               pb = pb*terms(1)%power_disp(ii)
+               ib = ib + 1
+             else
+               pa = pa*terms(1)%power_disp(ii)
+               ia = ia + 1
+             end if
+           end do
+           if(ia <= nbody_in)then
+             if(ia==nbody_in.and.abs(mod(pa,2)) < tol16)then
+               if(ib==0)then
+                 compatible = .FALSE.
+                 possible   = .TRUE.
+               else if (ib==nbody_in.and.abs(mod(pb,2)) < tol16) then
+                 compatible = .FALSE.
+                 possible   = .TRUE.
+               else
+                possible = .FALSE.
+                compatible = .FALSE.
+               end if
+             else
+                possible = .FALSE.
+                compatible = .FALSE.
+             end if
+           else
+             compatible = .FALSE.
+             possible = .FALSE.
+           end if
+         end if
+
+         if(possible)then
+!          increase coefficients and set it
+           icoeff_tmp = icoeff_tmp + 1
+           icoeff_tot = icoeff_tot + 1
+           call polynomial_coeff_init(coefficient,iterm,coeffs_tmp(icoeff_tmp),&
+&                                     terms(1:iterm),check=.true.)
+
+         end if
+       end if
+
+!      Deallocate the terms
+       do iterm=1,nterm_max
+         call polynomial_term_free(terms(iterm))
+       end do
+
+     end if!end if power_disp < power_disp_min
+
+     if(compatible)then
+       call computeNorder(cell,coeffs_out,compatibleCoeffs,list_coeff,list_str,index_coeff,&
+&                         icoeff1,icoeff_tot,natom,ncoeff,nstr,ncoeff_out,nrpt,nsym,power_disp+1,&
+&                         power_disp_min,power_disp_max,symbols,nbody=nbody_in,compute=need_compute,&
+&                         anharmstr=need_anharmstr,spcoupling=need_spcoupling)
+     end if
+   end do
+
+   ABI_DEALLOCATE(terms)
+   ABI_DEALLOCATE(index_coeff)
+
+!  Transfer in the final array
+   icoeff1 = 0
+   do icoeff_tmp=1,ncoeff_max
+     if (abs(coeffs_tmp(icoeff_tmp)%coefficient) > tol16)then
+!      Increase icoeff and fill the coeffs_out array
+       icoeff_tot = icoeff_tot + 1
+       if(need_compute)then
+         name = ''
+!        Get the name of this coefficient
+         call polynomial_coeff_getName(name,coeffs_tmp(icoeff_tmp),symbols,recompute=.TRUE.)
+         call polynomial_coeff_init(one,coeffs_tmp(icoeff_tmp)%nterm,&
+&                                   coeffs_out(icoeff_tot),coeffs_tmp(icoeff_tmp)%terms,&
+&                                   name=name)
+       end if
+     end if
+   end do
+!  Deallocation
+   do icoeff1=1,ncoeff_max
+     call polynomial_coeff_free(coeffs_tmp(icoeff1))
+   end do
+   ABI_DEALLOCATE(coeffs_tmp)
+ end if
+
+end subroutine computeNorder

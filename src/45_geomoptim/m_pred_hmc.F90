@@ -100,10 +100,10 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 !Local variables-------------------------------
 
  integer,save  :: seed                                   ! seed for rnd generator
- integer       :: iacc !ii,jj                             ! dummy integers for loop indexes and acceptance decision flag
+ integer       :: iacc,ii,jj                             ! dummy integers for loop indexes and acceptance decision flag
  real(dp)      :: etotal,epot,ekin,de                    ! total, potential (electronic), kinetic (ionic) energies and energy difference
  !real(dp)      :: mv2tot,factor                          ! dummies used for rescaling of velocities
- !real(dp)      :: rnd
+ real(dp)      :: rnd
  real(dp)      :: xred(3,ab_mover%natom)                 ! reduced coordinates of all ions
  real(dp)      :: vel(3,ab_mover%natom)                  ! ionic velocities in Cartesian coordinates
  !real(dp)      :: mvtot(3)                               ! total momentum of the cell used to rescale velocities
@@ -112,9 +112,9 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
  real(dp)      :: rprimd(3,3)                            ! lattice vectors
 
  real(dp),save :: etotal_hmc_prev,epot_hmc_prev          ! total energy of the initial state
- !real(dp),save :: acell_hmc_prev(3)                      !
- !real(dp),save :: rprimd_hmc_prev(3,3)                   !
- !real(dp),save :: strain_hmc_prev(3,3)                   !
+ real(dp),save :: acell_hmc_prev(3)                      !
+ real(dp),save :: rprimd_hmc_prev(3,3)                   !
+ real(dp),save :: strain_hmc_prev(3,3)                   !
  real(dp),save :: strain(3,3),dstrain                    ! strain tensor
  real(dp),save :: rprimd_original(3,3)                   ! initial lattice vectors <= itime=1,icycle=1
  real(dp),allocatable,save :: xred_hmc_prev(:,:)         ! reduced coordinates of the ions corresponding to the initial state
@@ -235,144 +235,142 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
 
    call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! 1 is indicating that velverlet is called from hmc routine
 
- else !icycle/=1
+ elseif(icycle > 1 .and. icycle <= ncycle)then !icycle/=1
 
    call pred_velverlet(ab_mover,hist,itime,ntime,zDEBUG,iexit,1,icycle,ncycle) ! 1 is indicating that velverlet is called from hmc routine
-
- end if
 
  !end if
  !END OF ATOMIC COORDINATES SWEEP************************************************
 
-! else if(icycle>ncycle) then ! strain update
-!   strain_updated = .TRUE.
-!   strain_steps   = strain_steps + 1
- ! Metropolis update of lattice vectors and parameters in case optcell/=0
-!   if(icycle==ncycle+1.and.xred_updated) then
-!     !save rprimd_hmc_prev and total electronic energy etotal_hmc_prev
-!     call hist2var(acell_hmc_prev,hist,ab_mover%natom,rprimd_hmc_prev,xred,zDEBUG)
-!     etotal_hmc_prev = hist%etot(hist%ihist)
-!     strain_hmc_prev(:,:) = strain(:,:)
+ else if(icycle>ncycle) then ! strain update
+   strain_updated = .TRUE.
+   strain_steps   = strain_steps + 1
+! Metropolis update of lattice vectors and parameters in case optcell/=0
+   if(icycle==ncycle+1.and.xred_updated) then
+     !save rprimd_hmc_prev and total electronic energy etotal_hmc_prev
+     call hist2var(acell_hmc_prev,hist,ab_mover%natom,rprimd_hmc_prev,xred,zDEBUG)
+     etotal_hmc_prev = hist%etot(hist%ihist)
+     strain_hmc_prev(:,:) = strain(:,:)
 
-!     select case (ab_mover%optcell)
-!     case (1) !volume optimization only
-!       acell(:)=acell(:)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
-!     case (2,3,7,8,9) !full geometry optimization
-!       !suggest new strain tensor values
-!       do ii=1,3
-!         do jj=ii,3
-!           strain(ii,jj) = strain(ii,jj)+ 2.0_dp*dstrain*(uniformrandom(seed)-0.5_dp)
-!           strain(jj,ii) = strain(ii,jj)
-!         enddo
-!       enddo
-!       if(ab_mover%optcell==3) then !eliminate volume change if optcell==3
-!         do ii=1,3
-!           strain(ii,ii) = strain(ii,ii) -(strain(1,1)+strain(2,2)+strain(3,3))
-!         enddo
-!       endif
-!       do jj=1,3    ! sum over three lattice vectors
-!         do ii=1,3  ! sum over Cart components
-!           rprimd(ii,jj)=rprimd_original(ii,jj)+&
-!&                        rprimd_original(1,jj)*strain(ii,1)+&
-!&                        rprimd_original(2,jj)*strain(ii,2)+&
-!&                        rprimd_original(3,jj)*strain(ii,3)
-!         enddo
-!       enddo
-!       if(ab_mover%optcell==7) then
-!         rprimd(:,1)=rprimd_original(:,1)
-!       else if (ab_mover%optcell==8) then
-!         rprimd(:,2)=rprimd_original(:,2)
-!       else if (ab_mover%optcell==9) then
-!         rprimd(:,3)=rprimd_original(:,3)
-!       endif
-!     case(4)
-!       acell(1)=acell(1)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
-!     case(5)
-!       acell(2)=acell(2)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
-!     case(6)
-!       acell(3)=acell(3)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
-!     case default
-!     !  write(message,"(a,i0)") "Wrong value of optcell: ",ab_mover%optcell
-!     !  MSG_ERROR(message)
-!     end select
-!
-!     !update the new suggested rprimd and or acell in the history record
-!     hist%ihist=abihist_findIndex(hist,+1)
-!     call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
-!   else
-!
-!     etotal = hist%etot(hist%ihist)
-!     de = etotal - etotal_hmc_prev
-!
-!     iacc=0
-!     rnd=uniformrandom(seed)
-!     if(de<0)then
-!       iacc=1
-!     else
-!       if(exp(-de/kbtemp)>rnd)then
-!         iacc=1
-!       end if
-!     end if
+     select case (ab_mover%optcell)
+     case (1) !volume optimization only
+       acell(:)=acell(:)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+     case (2,3,7,8,9) !full geometry optimization
+       !suggest new strain tensor values
+       do ii=1,3
+         do jj=ii,3
+           strain(ii,jj) = strain(ii,jj)+ 2.0_dp*dstrain*(uniformrandom(seed)-0.5_dp)
+           strain(jj,ii) = strain(ii,jj)
+         enddo
+       enddo
+       if(ab_mover%optcell==3) then !eliminate volume change if optcell==3
+         do ii=1,3
+           strain(ii,ii) = strain(ii,ii) -(strain(1,1)+strain(2,2)+strain(3,3))
+         enddo
+       endif
+       do jj=1,3    ! sum over three lattice vectors
+         do ii=1,3  ! sum over Cart components
+           rprimd(ii,jj)=rprimd_original(ii,jj)+&
+&                        rprimd_original(1,jj)*strain(ii,1)+&
+&                        rprimd_original(2,jj)*strain(ii,2)+&
+&                        rprimd_original(3,jj)*strain(ii,3)
+         enddo
+       enddo
+       if(ab_mover%optcell==7) then
+         rprimd(:,1)=rprimd_original(:,1)
+       else if (ab_mover%optcell==8) then
+         rprimd(:,2)=rprimd_original(:,2)
+       else if (ab_mover%optcell==9) then
+         rprimd(:,3)=rprimd_original(:,3)
+       endif
+     case(4)
+       acell(1)=acell(1)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+     case(5)
+       acell(2)=acell(2)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+     case(6)
+       acell(3)=acell(3)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+     !case default
+     !  write(message,"(a,i0)") "Wrong value of optcell: ",ab_mover%optcell
+     !  MSG_ERROR(message)
+     end select
 
-!     if(iacc==0) then
-!      strain(:,:)=strain_hmc_prev(:,:)
-!      acell(:)=acell_hmc_prev(:)
-!     else
-!      call hist2var(acell_hmc_prev,hist,ab_mover%natom,rprimd_hmc_prev,xred,zDEBUG)
-!      strain_hmc_prev(:,:) = strain(:,:)
-!      etotal_hmc_prev=etotal
-!     endif
+     !update the new suggested rprimd and or acell in the history record
+     hist%ihist=abihist_findIndex(hist,+1)
+     call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+   else
 
-     !suggest new acell/rprimd values depending on the optcell value
-!     select case (ab_mover%optcell)
-!     case (1) !volume optimization only
-!       acell(:)=acell(:)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
-!     case (2,3,7,8,9) !full geometry optimization
-!       !suggest new strain tensor values
-!       do ii=1,3
-!         do jj=ii,3
-!           strain(ii,jj) = strain(ii,jj)+ 2.0_dp*dstrain*(uniformrandom(seed)-0.5_dp)
-!           strain(jj,ii) = strain(ii,jj)
-!         enddo
-!       enddo
-!       if(ab_mover%optcell==3) then !eliminate volume change if optcell==3
-!         do ii=1,3
-!           strain(ii,ii) = strain(ii,ii) -(strain(1,1)+strain(2,2)+strain(3,3))
-!         enddo
-!       endif
-!       do jj=1,3    ! sum over three lattice vectors
-!         do ii=1,3  ! sum over Cart components
-!           rprimd(ii,jj)=rprimd_original(ii,jj)+&
-!&                        rprimd_original(1,jj)*strain(ii,1)+&
-!&                        rprimd_original(2,jj)*strain(ii,2)+&
-!&                        rprimd_original(3,jj)*strain(ii,3)
-!         enddo
-!       enddo
-!       if(ab_mover%optcell==7) then
-!         rprimd(:,1)=rprimd_original(:,1)
-!       else if (ab_mover%optcell==8) then
-!         rprimd(:,2)=rprimd_original(:,2)
-!       else if (ab_mover%optcell==9) then
-!         rprimd(:,3)=rprimd_original(:,3)
-!       endif
-!     case(4)
-!       acell(1)=acell(1)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
-!     case(5)
-!       acell(2)=acell(2)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
-!     case(6)
-!       acell(3)=acell(3)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
-!     case default
-!     !  write(message,"(a,i0)") "Wrong value of optcell: ",ab_mover%optcell
-!     !  MSG_ERROR(message)
-!     end select
-!
-!     !update the new suggested rprimd/acell in the history record
-!     hist%ihist=abihist_findIndex(hist,+1)
-!     call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
-!
-!   endif
-!
-! end if
+     etotal = hist%etot(hist%ihist)
+     de = etotal - etotal_hmc_prev
+
+     iacc=0
+     rnd=uniformrandom(seed)
+     if(de<0)then
+       iacc=1
+     else
+       if(exp(-de/kbtemp)>rnd)then
+         iacc=1
+       end if
+     end if
+
+     if(iacc==0) then
+      strain(:,:)=strain_hmc_prev(:,:)
+      acell(:)=acell_hmc_prev(:)
+     else
+      call hist2var(acell_hmc_prev,hist,ab_mover%natom,rprimd_hmc_prev,xred,zDEBUG)
+      strain_hmc_prev(:,:) = strain(:,:)
+      etotal_hmc_prev=etotal
+     endif
+
+    !suggest new acell/rprimd values depending on the optcell value
+     select case (ab_mover%optcell)
+     case (1) !volume optimization only
+       acell(:)=acell(:)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+     case (2,3,7,8,9) !full geometry optimization
+       !suggest new strain tensor values
+       do ii=1,3
+         do jj=ii,3
+           strain(ii,jj) = strain(ii,jj)+ 2.0_dp*dstrain*(uniformrandom(seed)-0.5_dp)
+           strain(jj,ii) = strain(ii,jj)
+         enddo
+       enddo
+       if(ab_mover%optcell==3) then !eliminate volume change if optcell==3
+         do ii=1,3
+           strain(ii,ii) = strain(ii,ii) -(strain(1,1)+strain(2,2)+strain(3,3))
+         enddo
+       endif
+       do jj=1,3    ! sum over three lattice vectors
+         do ii=1,3  ! sum over Cart components
+           rprimd(ii,jj)=rprimd_original(ii,jj)+&
+&                        rprimd_original(1,jj)*strain(ii,1)+&
+&                        rprimd_original(2,jj)*strain(ii,2)+&
+&                        rprimd_original(3,jj)*strain(ii,3)
+         enddo
+       enddo
+       if(ab_mover%optcell==7) then
+         rprimd(:,1)=rprimd_original(:,1)
+       else if (ab_mover%optcell==8) then
+         rprimd(:,2)=rprimd_original(:,2)
+       else if (ab_mover%optcell==9) then
+         rprimd(:,3)=rprimd_original(:,3)
+       endif
+     case(4)
+       acell(1)=acell(1)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+     case(5)
+       acell(2)=acell(2)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+     case(6)
+       acell(3)=acell(3)*(1.0_dp+dstrain*2.0_dp*(uniformrandom(seed)-0.5_dp))
+     case default
+     !  write(message,"(a,i0)") "Wrong value of optcell: ",ab_mover%optcell
+     !  MSG_ERROR(message)
+     end select
+
+     !update the new suggested rprimd/acell in the history record
+     hist%ihist=abihist_findIndex(hist,+1)
+     call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
+
+   endif
+
+ end if
 
 end subroutine pred_hmc
 !!***

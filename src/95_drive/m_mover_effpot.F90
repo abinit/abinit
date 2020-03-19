@@ -395,6 +395,8 @@ ABI_DEALLOCATE(xcart)
    dtset%mixalch_orig(:,:,:)=zero
    ABI_ALLOCATE(dtset%ph_qshift,(3,dtset%ph_nqshift))
    dtset%ph_qshift = inp%q1shft
+   dtset%hmctt = inp%hmctt
+   dtset%hmcsst = inp%hmcsst
    if(option  > 0)then
      verbose = .TRUE.
      writeHIST = .TRUE.

@@ -92,6 +92,8 @@ module m_multibinit_dataset
   integer :: opt_effpot 
   integer :: opt_ncoeff 
   integer :: ts_option
+  integer :: hmctt 
+  integer :: hmcsst
   integer :: ifcana
   integer :: ifcflag
   integer :: ifcout
@@ -359,6 +361,8 @@ subroutine multibinit_dtset_init(multibinit_dtset,natom)
  multibinit_dtset%ifcana=0
  multibinit_dtset%ifcflag=1
  multibinit_dtset%ifcout=-1
+ multibinit_dtset%hmctt=0
+ multibinit_dtset%hmcsst=0
  multibinit_dtset%prtsrlr=0
  ! Langevin friction
  multibinit_dtset%latt_friction=1d-4
@@ -924,6 +928,27 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
    MSG_ERROR(message)
  end if
 
+ multibinit_dtset%hmctt=0 ! or -1 -> max number of ifc
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hmctt',tread,'INT')
+ if(tread==1) multibinit_dtset%hmctt=intarr(1)
+ if(multibinit_dtset%hmctt< 0)then
+   write(message, '(a,i0,a,a,a)' )&
+&   'hmctt is',multibinit_dtset%hmctt,', but only positive values are allowed .',ch10,&
+&   'Action: correct hmctt in your input file.'
+   MSG_ERROR(message)
+ end if
+
+ multibinit_dtset%hmcsst=0 ! or -1 -> max number of ifc
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'hmcsst',tread,'INT')
+ if(tread==1) multibinit_dtset%hmcsst=intarr(1)
+ if(multibinit_dtset%hmcsst<0)then
+   write(message, '(a,i0,a,a,a)' )&
+&   'hmcsst is',multibinit_dtset%hmcsst,', but only positive values are allowed .',ch10,&
+&   'Action: correct hmcsst in your input file.'
+   MSG_ERROR(message)
+ end if
+
+
  multibinit_dtset%nctime=1
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'nctime',tread,'INT')
  if(tread==1) multibinit_dtset%nctime=intarr(1)
@@ -1136,7 +1161,7 @@ subroutine invars10(multibinit_dtset,lenstr,natom,string)
  if(tread==1) multibinit_dtset%optcell=intarr(1)
  if(multibinit_dtset%optcell<0.or.multibinit_dtset%optcell>2)then
    write(message, '(a,i8,a,a,a,a,a)' )&
-&   'optcell is',multibinit_dtset%prtsrlr,', but the only allowed values',ch10,&
+&   'optcell is',multibinit_dtset%optcell,', but the only allowed values',ch10,&
 &   'are 0, 1 or 2.',ch10,&
 &   'Action: correct optcell in your input file.'
    MSG_ERROR(message)

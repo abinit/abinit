@@ -1,0 +1,115 @@
+!Set the inputs
+ need_compute = .TRUE.
+ need_anharmstr = .TRUE.
+ need_spcoupling = .TRUE.
+ need_only_odd_power = .FALSE.
+ need_only_even_power = .FALSE.
+ nbody_in = 0 !all kind of terms
+ if(present(compute)) need_compute = compute
+ if(present(nbody)) nbody_in = nbody
+ if(present(anharmstr)) need_anharmstr = anharmstr
+ if(present(spcoupling)) need_spcoupling = spcoupling
+ if(present(only_odd_power)) need_only_odd_power = only_odd_power
+ if(present(only_even_power)) need_only_even_power = only_even_power
+
+ if(power_disp <= power_disp_max)then
+
+!  Initialisation of variables
+   ABI_ALLOCATE(index_coeff,(power_disp))
+   index_coeff(1:power_disp-1) = index_coeff_in(:)
+!  Loop over ncoeff+nstr
+   do icoeff1=icoeff,ncoeff+nstr
+
+!    Reset the flag compatible and possible
+     compatible = .TRUE.
+     possible   = .TRUE.
+
+!    If the power_disp is one, we need to set icoeff to icoeff1
+     if(power_disp==1) then
+       icoeff = icoeff1
+       if(compatibleCoeffs(icoeff,icoeff1)==0)then
+         compatible = .FALSE.
+       end if
+     end if
+!    If the distance between the 2 coefficients is superior than the cut-off, we cycle.
+    do icoeff2=1,power_disp-1
+      if(compatibleCoeffs(index_coeff(icoeff2),icoeff1)==0)then
+        compatible = .FALSE.
+      end if
+    end do
+
+     if (.not.compatible) cycle !The distance is not compatible
+
+!    Set the index of the new coeff in the list
+     index_coeff(power_disp) = icoeff1
+!    Do some checks
+!    -------------
+!    1-Check if the coefficient is full anharmonic strain and if we need to compute it
+     if(all(index_coeff > ncoeff))then
+       compatible = (need_anharmstr .or. need_spcoupling)
+       possible = need_anharmstr
+     end if
+!    2-Check if the coefficient is strain-coupling and if we need to compute it
+     if(any(index_coeff < ncoeff) .and. any(index_coeff > ncoeff))then
+       possible   = need_spcoupling
+       compatible = need_spcoupling
+       if(count(index_coeff > ncoeff) > max_power_strain)then
+         possible = .false.
+         compatible = .false.
+       end if
+     end if
+
+
+     if(power_disp >= power_disp_min) then
+
+!      count the number of body
+       powers(:) = 1
+       do ii=1,power_disp
+         do jj=ii+1,power_disp
+           if (powers(jj) == 0) cycle
+           if(index_coeff(ii)==index_coeff(jj))then
+             powers(ii) = powers(ii) + 1
+             powers(jj) = 0
+           end if
+         end do
+       end do
+
+!      check the only_odd and only_even flags
+       if(any(mod(powers(1:power_disp),2) /=0) .and. need_only_even_power) then
+         possible = .false.
+       end if
+       if(any(mod(powers(1:power_disp),2) ==0) .and. need_only_odd_power)then
+         possible = .false.
+       end if
+!      Check the nbody flag
+       if(nbody_in /= 0)then
+         if(power_disp-count(powers==0) > nbody_in) then
+           possible = .false.
+           compatible = .false.
+         end if
+       end if
+
+       if(possible) then
+!        increase coefficients and set it
+         nmodel_tot = nmodel_tot + 1
+         if(need_compute)then
+           list_combination(1:power_disp,nmodel_tot) = index_coeff
+         end if
+       end if
+     end if!end if power_disp < power_disp_min
+
+!    If the model is still compatbile with the input flags, we continue.
+     if(compatible)then
+       call computeCombinationFromList(cell,compatibleCoeffs,list_coeff,list_str,&
+&                                     index_coeff,list_combination,icoeff1,max_power_strain,&
+&                                     nmodel_tot,natom,ncoeff,nstr,nmodel,nrpt,nsym,power_disp+1,&
+&                                     power_disp_min,power_disp_max,symbols,nbody=nbody_in,&
+&                                     compute=need_compute,anharmstr=need_anharmstr,&
+&                                     spcoupling=need_spcoupling,only_odd_power=need_only_odd_power,&
+&                                     only_even_power=need_only_even_power)
+     end if
+   end do
+   ABI_DEALLOCATE(index_coeff)
+ end if
+
+end subroutine computeCombinationFromList
