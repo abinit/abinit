@@ -521,6 +521,16 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
  dprarr(1,:)=dtsets(:)%ddamp
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'ddamp','DPR',0)
 
+ do idtset=0,ndtset_alloc
+   intarr(1:3,idtset)=dtsets(idtset)%ddb_ngqpt
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ddb_ngqpt','INT',0)
+
+ dprarr(1,:)=dtsets(:)%ddb_shiftq(1)
+ dprarr(2,:)=dtsets(:)%ddb_shiftq(2)
+ dprarr(3,:)=dtsets(:)%ddb_shiftq(3)
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ddb_shiftq','DPR',0)
+
  intarr(1,:)=dtsets(:)%delayperm
  call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'delayperm','INT',0)
 
@@ -655,6 +665,17 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  dprarr(1,:)=dtsets(:)%dtion
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dtion','DPR',0,forceprint=2)
+
+ intarr(1,:)=dtsets(:)%dvdb_add_lr
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dvdb_add_lr','INT',0)
+
+ do idtset=0,ndtset_alloc
+   intarr(1:3,idtset)=dtsets(idtset)%dvdb_ngqpt
+ end do
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'dvdb_ngqpt','INT',0)
+
+ dprarr(1,:)=dtsets(:)%dvdb_qcache_mb
+ call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dvdb_qcache_mb','DPR',0)
 
 !dynimage
  intarr(1:marr,0)=1                 ! default value
@@ -844,17 +865,6 @@ subroutine outvar_a_h (choice,dmatpuflag,dtsets,iout,&
 
  intarr(1,:)=dtsets(:)%dvdb_add_lr
  call prttagm(dprarr,intarr,iout,jdtset_,1,marr,1,narrm,ncid,ndtset_alloc,'dvdb_add_lr','INT',0)
-
- intarr(1,:)=dtsets(:)%ph_ndivsm
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ph_ndivsm','INT',0)
-
- intarr(1,:)=dtsets(:)%ph_nqpath
- call prttagm(dprarr,intarr,iout,jdtset_,2,marr,1,narrm,ncid,ndtset_alloc,'ph_nqpath','INT',0)
-
- do idtset=0,ndtset_alloc
-   intarr(1:3,idtset)=dtsets(idtset)%ph_ngqpt
- end do
- call prttagm(dprarr,intarr,iout,jdtset_,1,marr,3,narrm,ncid,ndtset_alloc,'ph_ngqpt','INT',0)
 !end e-ph variables
 
  dprarr(1,:)=dtsets(:)%eshift
