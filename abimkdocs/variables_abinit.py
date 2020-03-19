@@ -8654,7 +8654,7 @@ abs([[kptopt]])+1. They form a circuit starting at
 [[kptbounds]](1:3,1)/[[kptnrm]] and ending at
 [[kptbounds]](1:3,abs([[kptopt]])+1)/[[kptnrm]]. The number of divisions of
 each segment can be defined either using the array [[ndivk]] or the variable
-[[ndivsm]] that just defines the number of divisions for the smallest segment
+[[ndivsm]] (preferred) that just defines the number of divisions for the smallest segment.
 
 As for [[kpt]], [[kptbounds]] is specified using the primitive vectors in
 reciprocal space. If your Bravais lattice is simple, then it should be quite
@@ -8975,7 +8975,7 @@ The use of symmetries (spatial and/or time-reversal) is crucial to determine the
    in the Irreducible Brillouin Zone, with the appropriate weights.
    This has to be used when performing calculations with non-collinear magnetism allowed ([[nspden]] = 4)
 
-  * A negative value  --> rely on [[kptbounds]], and [[ndivk]] ([[ndivsm]]) to set up a band structure calculation
+  * A negative value  --> rely on [[kptbounds]], and [[ndivsm]] (or [[ndivk]]) to set up a band structure calculation
     along different lines (allowed only for [[iscf]] == -2). The absolute value of [[kptopt]] gives
     the number of segments of the band structure. Weights are usually irrelevant with this option,
     and will be left to their default value.
@@ -10186,7 +10186,7 @@ Variable(
     dimensions=['abs([[kptopt]])'],
     mnemonics="Number of DIVisions of K lines",
     characteristics=['[[INPUT_ONLY]]'],
-    commentdefault="Will be generated automatically from [[ndivsm]] if the latter is defined.",
+    commentdefault="Will be generated automatically from [[ndivsm]] if the latter is defined, which is much more convenient.",
     excludes="[[ndivsm]]",
     requires="[[kptopt]] < 0",
     added_in_version="before_v9",
@@ -10213,7 +10213,7 @@ segment connecting the end of one circuit with the beginning of the next one
 
 Alternatively it is possible to generate automatically the array [[ndivk]] by
 just specifying the number of divisions for the smallest segment. See the
-related input variable [[ndivsm]].
+related input variable [[ndivsm]]. This is much more convenient than using [[ndivk]].
 """,
 ),
 
