@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.0.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_intel15.0 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 21h35 )
+.Starting date : Fri 20 Mar 2020.
+- ( at 09h01 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.in
+- input  file    -> /cephfs/home/xgonze/ABINIT_git/gonze-9.0/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.in
 - output file    -> t60.out
 - root for input  files -> t60i
 - root for output files -> t60o
-
-
+ 
+ 
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -38,8 +38,8 @@ P This job should need less than                       4.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,8 +55,8 @@ P This job should need less than                       4.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
@@ -72,8 +72,8 @@ P This job should need less than                       4.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    4 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -89,8 +89,8 @@ P This job should need less than                       4.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    5 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5.
@@ -106,8 +106,8 @@ P This job should need less than                       4.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    6 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6.
@@ -123,8 +123,8 @@ P This job should need less than                       4.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    7 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  7.
@@ -140,8 +140,8 @@ P This job should need less than                       4.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    8 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  8.
@@ -157,8 +157,8 @@ P This job should need less than                       4.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    9 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  9.
@@ -174,8 +174,8 @@ P This job should need less than                       4.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET   10 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET 10.
@@ -191,13 +191,13 @@ P This job should need less than                       4.937 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
 ================================================================================
-
+ 
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -206,17 +206,9 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
         boxcutmin      1.10000000E+00
+        ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
              ecut      3.50000000E+01 Hartree
-  eph_tols_idelta1     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta2     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta3     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta4     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta5     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta6     1.00000000E-06  1.00000000E-06
-  eph_tols_idelta7     1.00000000E-06  1.00000000E-06
-  eph_tols_idelta8     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta9     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta10    1.00000000E-12  1.00000000E-12
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -227,6 +219,16 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
       eph_intmeth8          1
       eph_intmeth9          2
       eph_intmeth10         2
+   eph_ngqpt_fine1       0    0    0
+   eph_ngqpt_fine2       4    4    4
+   eph_ngqpt_fine3       4    4    4
+   eph_ngqpt_fine4       4    4    4
+   eph_ngqpt_fine5       0    0    0
+   eph_ngqpt_fine6       4    4    4
+   eph_ngqpt_fine7       4    4    4
+   eph_ngqpt_fine8       4    4    4
+   eph_ngqpt_fine9       0    0    0
+   eph_ngqpt_fine10      0    0    0
       eph_restart           1
          eph_task1          4
          eph_task2          5
@@ -238,29 +240,17 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
          eph_task8          4
          eph_task9         15
          eph_task10       -15
-   eph_ngqpt_fine1       0    0    0
-   eph_ngqpt_fine2       4    4    4
-   eph_ngqpt_fine3       4    4    4
-   eph_ngqpt_fine4       4    4    4
-   eph_ngqpt_fine5       0    0    0
-   eph_ngqpt_fine6       4    4    4
-   eph_ngqpt_fine7       4    4    4
-   eph_ngqpt_fine8       4    4    4
-   eph_ngqpt_fine9       0    0    0
-   eph_ngqpt_fine10      0    0    0
-        ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
-        ph_nqpath1          3
-        ph_nqpath2          3
-        ph_nqpath3          3
-        ph_nqpath4          3
-        ph_nqpath5          5
-        ph_nqpath6          3
-        ph_nqpath7          3
-        ph_nqpath8          3
-        ph_nqpath9          5
-        ph_nqpath10         3
--          fftalg         312
+  eph_tols_idelta1     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta2     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta3     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta4     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta5     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta6     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta7     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta8     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta9     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta10    1.00000000E-12  1.00000000E-12
+-          fftalg         512
         freqspmax      7.34986508E-02 Hartree
         freqspmin     -7.34986508E-02 Hartree
           getdvdb1          0
@@ -310,6 +300,16 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           7
+        ph_nqpath1          3
+        ph_nqpath2          3
+        ph_nqpath3          3
+        ph_nqpath4          3
+        ph_nqpath5          5
+        ph_nqpath6          3
+        ph_nqpath7          3
+        ph_nqpath8          3
+        ph_nqpath9          5
+        ph_nqpath10         3
         prteliash           1
          prtphdos           0
             rprim      0.0000000000E+00  3.8515039575E+00  3.8515039575E+00
@@ -383,33 +383,33 @@ P           mkmem           8
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl        3.00000    9.00000
-
+ 
 ================================================================================
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   1.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   2.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   3.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   4.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   5.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   6.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   7.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   8.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   9.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=  10.
-
+ 
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -420,20 +420,20 @@ meta: {optdriver: 7, eph_task: 4, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -441,15 +441,15 @@ meta: {optdriver: 7, eph_task: 4, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
@@ -459,21 +459,21 @@ meta: {optdriver: 7, eph_task: 4, }
        1               3        0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
-       2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
-         1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
-         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00   -1.811598E-19
+         1         2    0.000000E+00    1.040868E+00   -1.811598E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00    1.811598E-19
+         2         2    0.000000E+00   -1.040868E+00    1.811598E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -486,7 +486,7 @@ meta: {optdriver: 7, eph_task: 4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -496,7 +496,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -505,7 +505,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -514,12 +514,12 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
-
+ 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /cephfs/home/xgonze/ABINIT_git/gonze-9.0/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /cephfs/home/xgonze/ABINIT_git/gonze-9.0/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -532,9 +532,9 @@ All the independent perturbations are available
          --- l  ekb(1:nproj) -->
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
-
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/09-F.psp
+ 
+- pspini: atom type   2  psp file is /cephfs/home/xgonze/ABINIT_git/gonze-9.0/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /cephfs/home/xgonze/ABINIT_git/gonze-9.0/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -547,10 +547,10 @@ All the independent perturbations are available
          --- l  ekb(1:nproj) -->
              0    6.310228
  pspatm: atomic psp has been read  and splines computed
-
+ 
    2.47252491E-01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
-
+ 
  Number of bands in e-ph self-energy sum: 20
  From bsum_start: 1 to bsum_stop: 20
  Symsigma: 1 Timrev: 1
@@ -616,7 +616,7 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -19.234  -19.361   -0.127   -0.220   -0.137    0.578   -0.526    0.306    0.000    0.000
+   1 -19.234  -19.361   -0.128   -0.221   -0.137    0.578   -0.526    0.306    0.000    0.000
    2  -2.697   -2.574    0.124    0.137   -0.012    0.902   -0.311    0.448   16.537   16.788
    3  -0.415   -0.508   -0.093   -0.114   -0.094    0.817   -0.529    0.416    2.282    2.066
    4  -0.415   -0.508   -0.093   -0.114   -0.094    0.817   -0.529    0.416    0.000    0.000
@@ -626,7 +626,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    8  17.971   18.212    0.241    0.284   -0.018    0.849    0.040    0.245    0.000    0.000
  
  KS gap:   10.441 (assuming bval:4 ==> bcond:5)
- QP gap:   10.516 (OTMS:   10.537)
+ QP gap:   10.516 (OTMS:   10.536)
  QP_gap - KS_gap:    0.075 (OTMS:    0.095)
  
 ============================================================================================
@@ -636,22 +636,22 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    2  -3.149   -3.188   -0.039   -0.048   -0.023    0.829   -0.406    0.358   15.833   15.676
    3  -1.171   -1.340   -0.169   -0.181   -0.023    0.934   -0.520    0.339    1.978    1.848
    4  -1.171   -1.340   -0.169   -0.181   -0.023    0.934   -0.520    0.339    0.000    0.000
-   5  13.987   14.047    0.060    0.067   -0.012    0.892   -0.611    0.678   15.158   15.387
+   5  13.987   14.047    0.060    0.068   -0.012    0.892   -0.611    0.678   15.158   15.387
    6  15.747   15.438   -0.309   -0.534   -0.407    0.578   -0.406   -0.128    1.760    1.391
    7  16.382   16.312   -0.070   -0.114   -0.065    0.619   -0.002   -0.112    0.635    0.874
-   8  19.258   19.480    0.222    0.249   -0.015    0.893   -0.228    0.477    2.876    3.169
-   9  19.258   19.480    0.222    0.249   -0.015    0.893   -0.228    0.477    0.000    0.000
+   8  19.258   19.481    0.222    0.249   -0.015    0.893   -0.228    0.477    2.876    3.169
+   9  19.258   19.481    0.222    0.249   -0.015    0.893   -0.228    0.477    0.000    0.000
  
  KS gap:   15.158 (assuming bval:4 ==> bcond:5)
- QP gap:   15.387 (OTMS:   15.406)
+ QP gap:   15.387 (OTMS:   15.407)
  QP_gap - KS_gap:    0.229 (OTMS:    0.249)
  
 ============================================================================================
-
+ 
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -662,21 +662,21 @@ meta: {optdriver: 7, eph_task: 5, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename: getdvdb from: t60o_DS20_DVDB
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -684,15 +684,15 @@ meta: {optdriver: 7, eph_task: 5, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
@@ -702,21 +702,21 @@ meta: {optdriver: 7, eph_task: 5, }
        1               3        0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
-       2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
-         1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
-         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00   -1.811598E-19
+         1         2    0.000000E+00    1.040868E+00   -1.811598E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00    1.811598E-19
+         2         2    0.000000E+00   -1.040868E+00    1.811598E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -729,7 +729,7 @@ meta: {optdriver: 7, eph_task: 5, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -739,7 +739,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -748,7 +748,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -757,22 +757,22 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
 --------------------------------------------------------------------------------
-
+ 
  Interpolation of the electron-phonon coupling potential
-
+ 
  From coarse q-mesh: [2,2,2] to: [4,4,4]
  Number of q-points found in input DVDB: 3
  Number of q-points requiring Fourier interpolation 5
 Interpolation of the electron-phonon coupling potential completed
-
-
+ 
+ 
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
@@ -783,22 +783,22 @@ meta: {optdriver: 7, eph_task: 4, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS2_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -806,15 +806,15 @@ meta: {optdriver: 7, eph_task: 4, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
@@ -824,21 +824,21 @@ meta: {optdriver: 7, eph_task: 4, }
        1               3        0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
-       2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
-         1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
-         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00   -1.811598E-19
+         1         2    0.000000E+00    1.040868E+00   -1.811598E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00    1.811598E-19
+         2         2    0.000000E+00   -1.040868E+00    1.811598E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -851,7 +851,7 @@ meta: {optdriver: 7, eph_task: 4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -861,7 +861,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -870,7 +870,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -879,7 +879,7 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -888,7 +888,7 @@ qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
  More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -898,10 +898,10 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
 --------------------------------------------------------------------------------
-
+ 
  Number of bands in e-ph self-energy sum: 3
  From bsum_start: 2 to bsum_stop: 4
  Symsigma: 1 Timrev: 1
@@ -952,7 +952,7 @@ K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    2  -0.193   -0.024    0.169    0.278   -0.099    0.608    0.278    0.000   19.542   19.718
    3  -0.193   -0.024    0.169    0.278   -0.099    0.608    0.278    0.000    0.000    0.000
    4  -0.193   -0.024    0.169    0.278   -0.099    0.608    0.278    0.000    0.000    0.000
-   5   8.342    8.293   -0.049   -0.050   -0.001    0.993    0.068   -0.118    8.536    8.317
+   5   8.342    8.293   -0.050   -0.050   -0.001    0.993    0.068   -0.118    8.536    8.317
    6  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000   14.521   14.572
    7  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000    0.000    0.000
    8  22.864   22.865    0.001    0.001   -0.000    1.000    0.001   -0.000    0.000    0.000
@@ -969,8 +969,8 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
    1 -19.234  -19.239   -0.006   -0.006   -0.002    0.981   -0.354    0.348    0.000    0.000
    2  -2.697   -2.978   -0.281   -0.250   -0.200    1.124   -0.250    0.000   16.537   16.261
-   3  -0.415   -1.980   -1.566    0.143   -0.262  -10.980    0.143   -0.000    2.282    0.997
-   4  -0.415   -1.980   -1.566    0.143   -0.262  -10.980    0.143   -0.000    0.000    0.000
+   3  -0.415   -1.980   -1.565    0.143   -0.262  -10.977    0.143   -0.000    2.282    0.998
+   4  -0.415   -1.980   -1.565    0.143   -0.262  -10.977    0.143   -0.000    0.000    0.000
    5  10.027   10.025   -0.002   -0.002   -0.001    0.992    0.094   -0.096   10.441   12.005
    6  15.827   15.830    0.003    0.003   -0.000    1.000    0.003   -0.000    5.800    5.805
    7  17.971   17.978    0.008    0.008   -0.001    0.994    0.109   -0.101    2.144    2.149
@@ -978,7 +978,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
  
  KS gap:   10.441 (assuming bval:4 ==> bcond:5)
  QP gap:   12.005 (OTMS:   10.297)
- QP_gap - KS_gap:    1.564 (OTMS:   -0.144)
+ QP_gap - KS_gap:    1.563 (OTMS:   -0.144)
  
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
@@ -998,11 +998,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
  QP_gap - KS_gap:    0.022 (OTMS:    0.037)
  
 ============================================================================================
-
+ 
 ================================================================================
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
@@ -1013,22 +1013,22 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS2_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1036,15 +1036,15 @@ meta: {optdriver: 7, eph_task: -4, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
@@ -1054,21 +1054,21 @@ meta: {optdriver: 7, eph_task: -4, }
        1               3        0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
-       2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
-         1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
-         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00   -1.811598E-19
+         1         2    0.000000E+00    1.040868E+00   -1.811598E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00    1.811598E-19
+         2         2    0.000000E+00   -1.040868E+00    1.811598E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1081,7 +1081,7 @@ meta: {optdriver: 7, eph_task: -4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -1091,7 +1091,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1100,7 +1100,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1109,7 +1109,7 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1118,7 +1118,7 @@ qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
  More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -1128,10 +1128,10 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
 --------------------------------------------------------------------------------
-
+ 
  Number of bands in e-ph self-energy sum: 9
  From bsum_start: 1 to bsum_stop: 9
  Symsigma: 1 Timrev: 1
@@ -1214,7 +1214,7 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    2  -3.149    0.000   4166.1   15.833
    3  -1.171    0.120      2.7    1.978
    4  -1.171    0.120      2.7    0.000
-   5  13.987    0.005     60.6   15.158
+   5  13.987    0.005     60.5   15.158
    6  15.747    0.202      1.6    1.760
    7  16.382    0.104      3.2    0.635
    8  19.258    0.194      1.7    2.876
@@ -1227,11 +1227,11 @@ Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
+ 
 ================================================================================
 == DATASET  5 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 5, }
@@ -1242,21 +1242,21 @@ meta: {optdriver: 7, eph_task: -5, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS2_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1264,15 +1264,15 @@ meta: {optdriver: 7, eph_task: -5, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
@@ -1282,21 +1282,21 @@ meta: {optdriver: 7, eph_task: -5, }
        1               3        0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
-       2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
-         1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
-         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00   -1.811598E-19
+         1         2    0.000000E+00    1.040868E+00   -1.811598E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00    1.811598E-19
+         2         2    0.000000E+00   -1.040868E+00    1.811598E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1309,7 +1309,7 @@ meta: {optdriver: 7, eph_task: -5, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -1319,7 +1319,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1328,7 +1328,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1337,7 +1337,7 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1346,7 +1346,7 @@ qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
  More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -1356,22 +1356,22 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
 --------------------------------------------------------------------------------
-
+ 
  Interpolation of the electron-phonon coupling potential
-
+ 
  Using list of q-points specified by ph_qpath with 5 qpoints
  Number of q-points found in input DVDB: 3
  Number of q-points requiring Fourier interpolation 2
 Interpolation of the electron-phonon coupling potential completed
-
-
+ 
+ 
 ================================================================================
 == DATASET  6 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 6, }
@@ -1382,22 +1382,22 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   2.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS2_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1405,15 +1405,15 @@ meta: {optdriver: 7, eph_task: -4, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
@@ -1423,21 +1423,21 @@ meta: {optdriver: 7, eph_task: -4, }
        1               3        0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
-       2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
-         1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
-         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00   -1.811598E-19
+         1         2    0.000000E+00    1.040868E+00   -1.811598E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00    1.811598E-19
+         2         2    0.000000E+00   -1.040868E+00    1.811598E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1450,7 +1450,7 @@ meta: {optdriver: 7, eph_task: -4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -1460,7 +1460,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1469,7 +1469,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1478,7 +1478,7 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1487,7 +1487,7 @@ qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
  More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -1497,10 +1497,10 @@ qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
 --------------------------------------------------------------------------------
-
+ 
  Number of bands in e-ph self-energy sum: 4
  From bsum_start: 2 to bsum_stop: 5
  Symsigma: 1 Timrev: 1
@@ -1568,11 +1568,11 @@ Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
+ 
 ================================================================================
 == DATASET  7 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 7, }
@@ -1583,22 +1583,22 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET  20.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1606,15 +1606,15 @@ meta: {optdriver: 7, eph_task: -4, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
@@ -1624,21 +1624,21 @@ meta: {optdriver: 7, eph_task: -4, }
        1               3        0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
-       2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
-         1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
-         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00   -1.811598E-19
+         1         2    0.000000E+00    1.040868E+00   -1.811598E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00    1.811598E-19
+         2         2    0.000000E+00   -1.040868E+00    1.811598E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1651,7 +1651,7 @@ meta: {optdriver: 7, eph_task: -4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -1661,7 +1661,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1670,7 +1670,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1679,10 +1679,10 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
 --------------------------------------------------------------------------------
-
+ 
  Number of bands in e-ph self-energy sum: 4
  From bsum_start: 2 to bsum_stop: 5
  Symsigma: 1 Timrev: 1
@@ -1750,11 +1750,11 @@ Transport calculation results
  Temperature [K]             e/h density [cm^-3]          e/h mobility [cm^2/Vs]
             0.00        0.00E+00        0.00E+00            0.00            0.00
           300.00        0.21E-64        0.00E+00            0.00            0.00
-
+ 
 ================================================================================
 == DATASET  8 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 8, }
@@ -1765,22 +1765,22 @@ meta: {optdriver: 7, eph_task: 4, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET  20.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t60o_DS20_WFK
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1788,15 +1788,15 @@ meta: {optdriver: 7, eph_task: 4, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
@@ -1806,21 +1806,21 @@ meta: {optdriver: 7, eph_task: 4, }
        1               3        0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
-       2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
-         1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
-         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00   -1.811598E-19
+         1         2    0.000000E+00    1.040868E+00   -1.811598E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00    1.811598E-19
+         2         2    0.000000E+00   -1.040868E+00    1.811598E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -1833,7 +1833,7 @@ meta: {optdriver: 7, eph_task: 4, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -1843,7 +1843,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1852,7 +1852,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1861,10 +1861,10 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
 --------------------------------------------------------------------------------
-
+ 
  Number of bands in e-ph self-energy sum: 3
  From bsum_start: 2 to bsum_stop: 4
  Symsigma: 1 Timrev: 1
@@ -1930,10 +1930,10 @@ Please use SIGEPH.nc file and AbiPy to analyze the results.
 
 K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -19.234  -19.239   -0.005   -0.005   -0.002    0.981   -0.354    0.348    0.000    0.000
+   1 -19.234  -19.239   -0.005   -0.006   -0.002    0.981   -0.354    0.348    0.000    0.000
    2  -2.697   -2.978   -0.281   -0.250   -0.200    1.124   -0.250    0.000   16.537   16.261
-   3  -0.415   -2.026   -1.611    0.144   -0.262  -11.196    0.144   -0.000    2.282    0.952
-   4  -0.415   -2.026   -1.611    0.144   -0.262  -11.196    0.144   -0.000    0.000    0.000
+   3  -0.415   -2.026   -1.611    0.144   -0.262  -11.195    0.144   -0.000    2.282    0.952
+   4  -0.415   -2.026   -1.611    0.144   -0.262  -11.195    0.144   -0.000    0.000    0.000
    5  10.027   10.025   -0.002   -0.002   -0.001    0.992    0.094   -0.096   10.441   12.051
    6  15.827   15.830    0.003    0.003   -0.000    1.000    0.003   -0.000    5.800    5.805
    7  17.971   17.978    0.008    0.008   -0.001    0.994    0.109   -0.101    2.144    2.149
@@ -1946,7 +1946,7 @@ K-point: [ 5.0000E-01,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
 ============================================================================================
 K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
    B    eKS     eQP    eQP-eKS   SE1(eKS)  SE2(eKS)  Z(eKS)  FAN(eKS)   DW      DeKS     DeQP
-   1 -18.981  -18.997   -0.015   -0.015   -0.002    0.980   -0.357    0.342    0.000    0.000
+   1 -18.981  -18.997   -0.015   -0.015   -0.002    0.980   -0.357    0.341    0.000    0.000
    2  -3.149   -3.270   -0.122   -0.145   -0.021    0.838   -0.145    0.000   15.833   15.726
    3  -1.171   -1.191   -0.020   -0.036   -0.123    0.570   -0.036   -0.000    1.978    2.079
    4  -1.171   -1.191   -0.020   -0.036   -0.123    0.570   -0.036   -0.000    0.000    0.000
@@ -1961,11 +1961,11 @@ K-point: [ 5.0000E-01,  5.0000E-01,  0.0000E+00], T=    0.0 [K]
  QP_gap - KS_gap:    0.021 (OTMS:    0.037)
  
 ============================================================================================
-
+ 
 ================================================================================
 == DATASET  9 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 9, }
@@ -1976,21 +1976,21 @@ meta: {optdriver: 7, eph_task: 15, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename: getdvdb from: t60o_DS20_DVDB
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -1998,15 +1998,15 @@ meta: {optdriver: 7, eph_task: 15, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
@@ -2016,21 +2016,21 @@ meta: {optdriver: 7, eph_task: 15, }
        1               3        0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
-       2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
-         1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
-         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00   -1.811598E-19
+         1         2    0.000000E+00    1.040868E+00   -1.811598E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00    1.811598E-19
+         2         2    0.000000E+00   -1.040868E+00    1.811598E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -2043,7 +2043,7 @@ meta: {optdriver: 7, eph_task: 15, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -2053,7 +2053,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -2062,7 +2062,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -2071,21 +2071,21 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
 --------------------------------------------------------------------------------
-
+ 
  Computing average over the unit cell of the periodic part of the DFPT potentials
 
  Using list of q-points specified by ph_qpath with 5 qpoints
-
+ 
  - Results stored in: t60o_DS9_V1QAVG.nc
  Use `abiopen.py out_V1QAVG.nc -e` to visualize results
-
+ 
 ================================================================================
 == DATASET 10 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 10, }
@@ -2096,21 +2096,21 @@ meta: {optdriver: 7, eph_task: -15, }
 ...
 
  mkfilename: getwfk from: t60o_DS20_WFK
-
+ 
  mkfilename: getddb from: t60o_DS20_DDB
-
+ 
  mkfilename: getdvdb from: t60o_DS20_DVDB
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading DDB from file: t60o_DS20_DDB
 - Reading DVDB from file: t60o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.8515040  3.8515040  G(1)= -0.1298194  0.1298194  0.1298194
  R(2)=  3.8515040  0.0000000  3.8515040  G(2)=  0.1298194 -0.1298194  0.1298194
@@ -2118,15 +2118,15 @@ meta: {optdriver: 7, eph_task: -15, }
  Unit cell volume ucvol=  1.1426706E+02 bohr^3
  Angles (23,13,12)=  6.00000000E+01  6.00000000E+01  6.00000000E+01 degrees
  Now the whole DDB is in central memory
-
+ 
 ================================================================================
-
+ 
  Dielectric Tensor and Effective Charges 
-
-
+ 
+ 
  anaddb : Zero the imaginary part of the Dynamical Matrix at Gamma,
    and impose the ASR on the effective charges 
-
+ 
  The violation of the charge neutrality conditions
  by the effective charges is as follows :
     atom        electric field
@@ -2136,21 +2136,21 @@ meta: {optdriver: 7, eph_task: -15, }
        1               3        0.000000        0.000000
        2               1        0.000000        0.000000
        2               2        0.004143        0.000000
-       2               3       -0.000000        0.000000
-       3               1       -0.000000        0.000000
-       3               2       -0.000000        0.000000
+       2               3        0.000000        0.000000
+       3               1        0.000000        0.000000
+       3               2        0.000000        0.000000
        3               3        0.004143        0.000000
-
+ 
  Effective charge tensors after 
  imposition of the charge neutrality,
  and eventual restriction to some part :
    atom    displacement
-         1         1    1.040868E+00   -2.245748E-17   -2.230191E-17
-         1         2   -2.245748E-17    1.040868E+00    2.261304E-17
-         1         3    2.245748E-17    2.245748E-17    1.040868E+00
-         2         1   -1.040868E+00    2.245748E-17    2.230191E-17
-         2         2    2.245748E-17   -1.040868E+00   -2.261304E-17
-         2         3   -2.245748E-17   -2.245748E-17   -1.040868E+00
+         1         1    1.040868E+00    0.000000E+00   -1.811598E-19
+         1         2    0.000000E+00    1.040868E+00   -1.811598E-19
+         1         3    0.000000E+00    0.000000E+00    1.040868E+00
+         2         1   -1.040868E+00    0.000000E+00    1.811598E-19
+         2         2    0.000000E+00   -1.040868E+00    1.811598E-19
+         2         3    0.000000E+00    0.000000E+00   -1.040868E+00
  Now, the imaginary part of the dynamical matrix is zeroed
 - Found dielectric tensor and Born effective charges in DDB file: t60o_DS20_DDB
        Homogeneous q point set in the B.Z.
@@ -2163,7 +2163,7 @@ meta: {optdriver: 7, eph_task: -15, }
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -2173,7 +2173,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -2182,7 +2182,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=independent, found=Yes
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -2191,17 +2191,17 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=independent, found=Yes
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
 --------------------------------------------------------------------------------
-
+ 
  Computing average over the unit cell of the periodic part of the DFPT potentials
 
  Using list of q-points found in the DVDB file
-
+ 
  - Results stored in: t60o_DS10_V1QAVG.nc
  Use `abiopen.py out_V1QAVG.nc -e` to visualize results
-
+ 
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -2209,17 +2209,9 @@ All the independent perturbations are available
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
         boxcutmin      1.10000000E+00
+        ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
              ecut      3.50000000E+01 Hartree
-  eph_tols_idelta1     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta2     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta3     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta4     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta5     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta6     1.00000000E-06  1.00000000E-06
-  eph_tols_idelta7     1.00000000E-06  1.00000000E-06
-  eph_tols_idelta8     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta9     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta10    1.00000000E-12  1.00000000E-12
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -2230,6 +2222,16 @@ All the independent perturbations are available
       eph_intmeth8          1
       eph_intmeth9          2
       eph_intmeth10         2
+   eph_ngqpt_fine1       0    0    0
+   eph_ngqpt_fine2       4    4    4
+   eph_ngqpt_fine3       4    4    4
+   eph_ngqpt_fine4       4    4    4
+   eph_ngqpt_fine5       0    0    0
+   eph_ngqpt_fine6       4    4    4
+   eph_ngqpt_fine7       4    4    4
+   eph_ngqpt_fine8       4    4    4
+   eph_ngqpt_fine9       0    0    0
+   eph_ngqpt_fine10      0    0    0
       eph_restart           1
          eph_task1          4
          eph_task2          5
@@ -2241,28 +2243,16 @@ All the independent perturbations are available
          eph_task8          4
          eph_task9         15
          eph_task10       -15
-   eph_ngqpt_fine1       0    0    0
-   eph_ngqpt_fine2       4    4    4
-   eph_ngqpt_fine3       4    4    4
-   eph_ngqpt_fine4       4    4    4
-   eph_ngqpt_fine5       0    0    0
-   eph_ngqpt_fine6       4    4    4
-   eph_ngqpt_fine7       4    4    4
-   eph_ngqpt_fine8       4    4    4
-   eph_ngqpt_fine9       0    0    0
-   eph_ngqpt_fine10      0    0    0
-        ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
-        ph_nqpath1          3
-        ph_nqpath2          3
-        ph_nqpath3          3
-        ph_nqpath4          3
-        ph_nqpath5          5
-        ph_nqpath6          3
-        ph_nqpath7          3
-        ph_nqpath8          3
-        ph_nqpath9          5
-        ph_nqpath10         3
+  eph_tols_idelta1     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta2     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta3     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta4     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta5     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta6     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta7     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta8     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta9     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta10    1.00000000E-12  1.00000000E-12
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
@@ -2293,7 +2283,7 @@ All the independent perturbations are available
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart10    0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
         freqspmax      7.34986508E-02 Hartree
         freqspmin     -7.34986508E-02 Hartree
           getdvdb1          0
@@ -2334,6 +2324,16 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           7
+        ph_nqpath1          3
+        ph_nqpath2          3
+        ph_nqpath3          3
+        ph_nqpath4          3
+        ph_nqpath5          5
+        ph_nqpath6          3
+        ph_nqpath7          3
+        ph_nqpath8          3
+        ph_nqpath9          5
+        ph_nqpath10         3
         prteliash           1
          prtphdos           0
             rprim      0.0000000000E+00  3.8515039575E+00  3.8515039575E+00
@@ -2425,7 +2425,7 @@ P           mkmem           8
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        5.0000000000E-01  5.0000000000E-01  5.0000000000E-01
             znucl        3.00000    9.00000
-
+ 
 ================================================================================
 
 
@@ -2511,10 +2511,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         27.8  wall=         30.2
-
+- Proc.   0 individual time (sec): cpu=         18.8  wall=         19.0
+ 
 ================================================================================
-
+ 
  Calculation completed.
 .Delivered  16 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         27.8  wall=         30.2
++Overall time at end (sec) : cpu=         18.8  wall=         19.0

@@ -1,6 +1,6 @@
 
-.Version 9.0.0 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
+.Version 9.0.2 of ABINIT 
+.(MPI version, prepared for a x86_64_linux_intel15.0 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -14,15 +14,15 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h34 )
+.Starting date : Fri 20 Mar 2020.
+- ( at 09h12 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t56.in
+- input  file    -> /cephfs/home/xgonze/ABINIT_git/gonze-9.0/tests/Test_suite/v9_t50-t51-t52-t53-t54-t55-t56/t56.in
 - output file    -> t56.out
 - root for input  files -> t56i
 - root for output files -> t56o
-
-
+ 
+ 
  DATASET    1 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -38,8 +38,8 @@ P This job should need less than                       3.141 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    2 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,8 +55,8 @@ P This job should need less than                       3.141 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    3 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
@@ -72,8 +72,8 @@ P This job should need less than                       3.873 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    4 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -89,8 +89,8 @@ P This job should need less than                       3.873 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    5 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  5.
@@ -106,8 +106,8 @@ P This job should need less than                       3.873 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
-
+ 
+ 
  DATASET    6 : space group Fd -3 m (#227); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  6.
@@ -123,13 +123,13 @@ P This job should need less than                       3.141 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
 ================================================================================
-
+ 
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -138,9 +138,10 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
             acell      6.7034680500E+00  6.7034680500E+00  6.7034680500E+00 Bohr
               amu      1.20110000E+01
              bdgw           1       8
+        ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
-      eph_intmeth           1
       eph_extrael1     0.00000000E+00
       eph_extrael2     0.00000000E+00
       eph_extrael3     2.00000000E-01
@@ -153,10 +154,9 @@ _ WF disk file :      0.326 Mbytes ; DEN or POT disk file :      0.063 Mbytes.
        eph_fermie4     0.00000000E+00 Hartree
        eph_fermie5     6.43113194E-01 Hartree
        eph_fermie6     0.00000000E+00 Hartree
+      eph_intmeth           1
          eph_task          -4
-        ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
--          fftalg         312
+-          fftalg         512
            getddb          20
            getwfk          20
            istwfk        1    0    1    0    0    0    1    0
@@ -311,25 +311,25 @@ P           mkmem           8
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl        6.00000
-
+ 
 ================================================================================
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   1.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   2.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   3.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   4.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   5.
-
+ 
  chkinp: Checking input parameters for consistency, jdtset=   6.
-
+ 
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -340,20 +340,20 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
-
+ 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t56o_DS20_WFK
 - Reading DDB from file: t56o_DS20_DDB
 - Reading DVDB from file: t56o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
@@ -373,7 +373,7 @@ Values initialized with zeros
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -383,7 +383,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -392,7 +392,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -401,12 +401,12 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
-
+ 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/6c.pspnc
+- pspini: atom type   1  psp file is /cephfs/home/xgonze/ABINIT_git/gonze-9.0/tests/Psps_for_tests/6c.pspnc
+- pspatm: opening atomic psp file    /cephfs/home/xgonze/ABINIT_git/gonze-9.0/tests/Psps_for_tests/6c.pspnc
 -  Troullier-Martins psp for element  C         Thu Oct 27 17:29:33 EDT 1994
 -  6.00000   4.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -419,10 +419,10 @@ All the independent perturbations are available
          --- l  ekb(1:nproj) -->
              0    4.921466
  pspatm: atomic psp has been read  and splines computed
-
+ 
    1.48144565E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
-
+ 
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
  Symsigma: 1 Timrev: 1
@@ -495,11 +495,11 @@ Transport calculation results
           240.00        0.33E-22        0.00E+00            0.00            0.00
           270.00        0.20E-17        0.00E+00            0.00            0.00
           300.00        0.14E-13        0.00E+00            0.00            0.00
-
+ 
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -510,22 +510,22 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
-
+ 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
-
+ 
  mkfilename: getwfkfine from: t50o_DS6_WFK
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t56o_DS20_WFK
 - Reading DDB from file: t56o_DS20_DDB
 - Reading DVDB from file: t56o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
@@ -545,7 +545,7 @@ Values initialized with zeros
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -555,7 +555,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -564,7 +564,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -573,10 +573,10 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
 --------------------------------------------------------------------------------
-
+ 
  EPH double grid interpolation: will read energies from: t50o_DS6_WFK
 
  Number of bands in e-ph self-energy sum: 8
@@ -652,11 +652,11 @@ Transport calculation results
           240.00        0.28E-12        0.00E+00            0.00            0.00
           270.00        0.13E-08        0.00E+00            0.00            0.00
           300.00        0.12E-05        0.00E+00            0.00            0.00
-
+ 
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
@@ -667,24 +667,24 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
-
+ 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t56o_DS20_WFK
 - Reading DDB from file: t56o_DS20_DDB
 - Reading DVDB from file: t56o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
-
+ 
  Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
  New fermi level:     6.422151E-01, with nelect:     8.200000E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -706,7 +706,7 @@ Values initialized with zeros
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -716,7 +716,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -725,7 +725,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -734,10 +734,10 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
 --------------------------------------------------------------------------------
-
+ 
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
  Symsigma: 1 Timrev: 1
@@ -810,11 +810,11 @@ Transport calculation results
           240.00        0.18E+23        0.00E+00            0.00            0.00
           270.00        0.18E+23        0.00E+00            0.00            0.00
           300.00        0.18E+23        0.00E+00            0.00            0.00
-
+ 
 ================================================================================
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
@@ -825,26 +825,26 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
-
+ 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
-
+ 
  mkfilename: getwfkfine from: t50o_DS6_WFK
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t56o_DS20_WFK
 - Reading DDB from file: t56o_DS20_DDB
 - Reading DVDB from file: t56o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
-
+ 
  Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
  New fermi level:     6.422151E-01, with nelect:     8.200000E+00
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -866,7 +866,7 @@ Values initialized with zeros
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -876,7 +876,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -885,7 +885,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -894,10 +894,10 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
 --------------------------------------------------------------------------------
-
+ 
  EPH double grid interpolation: will read energies from: t50o_DS6_WFK
 
  Number of bands in e-ph self-energy sum: 8
@@ -945,7 +945,7 @@ Notations:
  
 K-point: [ 0.0000E+00,  0.0000E+00,  0.0000E+00], T=    0.0 [K]
    B    eKS    SE2(eKS)  TAU(eKS)  DeKS
-   1  -8.789   -0.001    509.0    0.000
+   1  -8.789   -0.001    509.1    0.000
    2  12.800   -0.052      6.3   21.589
    3  12.800   -0.052      6.3    0.000
    4  12.800   -0.052      6.3    0.000
@@ -973,11 +973,11 @@ Transport calculation results
           240.00        0.34E+23        0.00E+00            0.00            0.00
           270.00        0.34E+23        0.00E+00            0.00            0.00
           300.00        0.34E+23        0.00E+00            0.00            0.00
-
+ 
 ================================================================================
 == DATASET  5 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 5, }
@@ -988,24 +988,24 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
-
+ 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t56o_DS20_WFK
 - Reading DDB from file: t56o_DS20_DDB
 - Reading DVDB from file: t56o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Changing occupation scheme as input occopt and tsmear differ from those read from WFK file.
    From WFK file: occopt = 1, tsmear =       0.010000
    From input:    occopt = 3, tsmear =       0.010000
-
+ 
  Fermi level set by the user at: 6.431132E-01
  Old fermi level:     5.483715E-01, with nelect:     8.000000E+00
  New fermi level:     6.431132E-01, with nelect:     8.208457E+00
@@ -1028,7 +1028,7 @@ Values initialized with zeros
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -1038,7 +1038,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1047,7 +1047,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1056,10 +1056,10 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
 --------------------------------------------------------------------------------
-
+ 
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
  Symsigma: 1 Timrev: 1
@@ -1132,11 +1132,11 @@ Transport calculation results
           240.00        0.17E+23        0.00E+00            0.00            0.00
           270.00        0.17E+23        0.00E+00            0.00            0.00
           300.00        0.17E+23        0.00E+00            0.00            0.00
-
+ 
 ================================================================================
 == DATASET  6 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
-
+ 
 
 --- !DatasetInfo
 iteration_state: {dtset: 6, }
@@ -1147,20 +1147,20 @@ meta: {optdriver: 7, eph_task: -4, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
-
+ 
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
-
+ 
  Exchange-correlation functional for the present dataset will be:
   LDA: new Teter (4/93) with spin-polarized option - ixc=1
  Citation for XC functional:
   S. Goedecker, M. Teter, J. Huetter, PRB 54, 1703 (1996)
-
+ 
 - Reading GS states from WFK file: t56o_DS20_WFK
 - Reading DDB from file: t56o_DS20_DDB
 - Reading DVDB from file: t56o_DS20_DVDB
-
-
-
+ 
+ 
+ 
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.3517340  3.3517340  G(1)= -0.1491765  0.1491765  0.1491765
  R(2)=  3.3517340  0.0000000  3.3517340  G(2)=  0.1491765 -0.1491765  0.1491765
@@ -1180,7 +1180,7 @@ Values initialized with zeros
   6)   5.00000000E-01  0.00000000E+00  5.00000000E-01
   7)   0.00000000E+00  5.00000000E-01  5.00000000E-01
   8)   5.00000000E-01  5.00000000E-01  5.00000000E-01
-
+ 
  The interatomic forces have been obtained
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
@@ -1190,7 +1190,7 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1199,7 +1199,7 @@ qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
@@ -1208,10 +1208,10 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
     4)  idir= 1, ipert=   2, type=symmetric, found=No
     5)  idir= 2, ipert=   2, type=symmetric, found=No
     6)  idir= 3, ipert=   2, type=symmetric, found=No
-
+ 
 All the independent perturbations are available
 --------------------------------------------------------------------------------
-
+ 
  Number of bands in e-ph self-energy sum: 8
  From bsum_start: 1 to bsum_stop: 8
  Symsigma: 1 Timrev: 1
@@ -1284,7 +1284,7 @@ Transport calculation results
           240.00        0.33E-22        0.00E+00            0.00            0.00
           270.00        0.20E-17        0.00E+00            0.00            0.00
           300.00        0.14E-13        0.00E+00            0.00            0.00
-
+ 
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -1292,9 +1292,10 @@ Transport calculation results
             acell      6.7034680500E+00  6.7034680500E+00  6.7034680500E+00 Bohr
               amu      1.20110000E+01
              bdgw           1       8
+        ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
              ecut      2.00000000E+01 Hartree
            ecutsm      5.00000000E-01 Hartree
-      eph_intmeth           1
       eph_extrael1     0.00000000E+00
       eph_extrael2     0.00000000E+00
       eph_extrael3     2.00000000E-01
@@ -1307,9 +1308,8 @@ Transport calculation results
        eph_fermie4     0.00000000E+00 Hartree
        eph_fermie5     6.43113194E-01 Hartree
        eph_fermie6     0.00000000E+00 Hartree
+      eph_intmeth           1
          eph_task          -4
-        ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
@@ -1328,7 +1328,7 @@ Transport calculation results
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart6     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         312
+-          fftalg         512
            getddb          20
            getwfk          20
            jdtset        1    2    3    4    5    6
@@ -1484,7 +1484,7 @@ P           mkmem           8
              xred      0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
                        2.5000000000E-01  2.5000000000E-01  2.5000000000E-01
             znucl        6.00000
-
+ 
 ================================================================================
 
 
@@ -1570,10 +1570,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         78.9  wall=         86.9
-
+- Proc.   0 individual time (sec): cpu=        132.9  wall=        133.2
+ 
 ================================================================================
-
+ 
  Calculation completed.
 .Delivered  15 WARNINGs and  12 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         78.9  wall=         86.9
++Overall time at end (sec) : cpu=        132.9  wall=        133.2
