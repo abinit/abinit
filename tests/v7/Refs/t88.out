@@ -1,6 +1,6 @@
 
 .Version 9.0.2 of ABINIT 
-.(MPI version, prepared for a x86_64_linux_intel15.0 computer) 
+.(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
  ABINIT comes with ABSOLUTELY NO WARRANTY.
@@ -15,14 +15,14 @@
  For more information, see https://www.abinit.org .
 
 .Starting date : Fri 20 Mar 2020.
-- ( at 09h00 )
+- ( at 07h52 )
   
-- input  file    -> /cephfs/home/xgonze/ABINIT_git/gonze-9.0/tests/Test_suite/v7_t85-t86-t87-t88-t89/t88.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/TestBot_MPI1/v7_t85-t86-t87-t88-t89/t88.in
 - output file    -> t88.out
 - root for input  files -> t88i
 - root for output files -> t88o
- 
- 
+
+
  DATASET    1 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  1.
@@ -38,8 +38,8 @@ P This job should need less than                       2.212 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
- 
- 
+
+
  DATASET    2 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  2.
@@ -55,8 +55,8 @@ P This job should need less than                       2.212 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
- 
- 
+
+
  DATASET    3 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  3.
@@ -72,8 +72,8 @@ P This job should need less than                       2.212 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
- 
- 
+
+
  DATASET    4 : space group Fm -3 m (#225); Bravais cF (face-center cubic)
 ================================================================================
  Values of the parameters that define the memory need for DATASET  4.
@@ -89,13 +89,13 @@ P This job should need less than                       2.212 Mbytes of memory.
   Rough estimation (10% accuracy) of disk space for files :
 _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
 ================================================================================
- 
+
 --------------------------------------------------------------------------------
 ------------- Echo of variables that govern the present computation ------------
 --------------------------------------------------------------------------------
 -
 - outvars: echo of selected default values                                      
--   iomode0 =  0 , fftalg0 =512 , wfoptalg0 =  0
+-   iomode0 =  0 , fftalg0 =312 , wfoptalg0 =  0
 -
 - outvars: echo of global parameters not present in the input file              
 -  max_nthreads =    0
@@ -127,7 +127,7 @@ _ WF disk file :      0.175 Mbytes ; DEN or POT disk file :      0.015 Mbytes.
          eph_task3          5
          eph_task4          1
     eph_transport           1
--          fftalg         512
+-          fftalg         312
            getddb          20
           getdvdb1          0
           getdvdb2          0
@@ -275,21 +275,21 @@ P           mkmem          29
                          0.04688    0.02344    0.00586    0.04688    0.09375    0.04688
                          0.04688    0.09375    0.04688    0.02344    0.01172
             znucl       13.00000
- 
+
 ================================================================================
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   1.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   2.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   3.
- 
+
  chkinp: Checking input parameters for consistency, jdtset=   4.
- 
+
 ================================================================================
 == DATASET  1 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 1, }
@@ -300,20 +300,20 @@ meta: {optdriver: 7, eph_task: 1, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
- 
+
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
- 
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
 - Reading GS states from WFK file: t88o_DS20_WFK
 - Reading DDB from file: t88o_DS20_DDB
 - Reading DVDB from file: t88o_DS20_DVDB
- 
- 
- 
+
+
+
 - Writing Fermi surface to file: t88o_DS1_BXSF
 - Writing nesting factor to file: t88o_DS1_NEST
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
@@ -391,25 +391,25 @@ Values initialized with zeros
  62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
  63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
- 
+
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1020483061E-02 (at units)
+ Average speed of sound partial sums:     0.1020483004E-02 (at units)
 -                                   =           2.2325 [km/s]
- 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
- 
- Average speed of sound partial sums:     0.1020483061E-02 (at units)
+
+ Debye frequency from partial sums:     0.8418760840E-03 (Ha)
+-                                 =     0.5539278533E+01 (THz)
+-Debye temperature from partial sums:     0.2658431258E+03 (K)
+
+ Average speed of sound partial sums:     0.1020483004E-02 (at units)
 -                                   =           2.2325 [km/s]
- 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
- 
+
+ Debye frequency from partial sums:     0.8418760840E-03 (Ha)
+-                                 =     0.5539278533E+01 (THz)
+-Debye temperature from partial sums:     0.2658431258E+03 (K)
+
 - Writing phonon DOS to file: t88o_DS1_PHDOS
 - Writing phonon DOS to netcdf file: t88o_DS1_PHDOS.nc
- 
+
  Will write phonon FREQS in BoltzTrap format to file t88o_DS1_BTRAP
 - Writing phonon frequencies in Xcrysden format to file: t88o_DS1_PH.bxsf
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -417,37 +417,37 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
 qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=independent, found=Yes
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=independent, found=Yes
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
  More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=independent, found=Yes
     3)  idir= 3, ipert=   1, type=independent, found=Yes
- 
+
 All the independent perturbations are available
- 
+
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /cephfs/home/xgonze/ABINIT_git/gonze-9.0/tests/Psps_for_tests/Al-psval.psp8
-- pspatm: opening atomic psp file    /cephfs/home/xgonze/ABINIT_git/gonze-9.0/tests/Psps_for_tests/Al-psval.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Al-psval.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Al-psval.psp8
 - Al    ONCVPSP  r_core=  1.77  1.77  1.71
 - 13.00000   3.00000    150709                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -460,17 +460,17 @@ All the independent perturbations are available
              1    7.659439    0.819933
              2  -21.179474   -1.097800
  pspatm: atomic psp has been read  and splines computed
- 
+
    1.58563817E+01                                ecore*ucvol(ha*bohr**3)
 --------------------------------------------------------------------------------
- 
+
  Fermi level:   7.16066825E+00 (eV)
  Total electron DOS at Fermi level in states/eV:   3.22193685E-01
  Total number of electrons at eF:    3.0
  Linear tetrahedron method with mesh step:  9.99999978E-03 (eV)
 
 - Writing electron DOS to file: t88o_DS1_EDOS 
- 
+
  ==== Fermi surface info ====
  FS integration done with tetrahedron method
  Total number of k-points in the full mesh: 512
@@ -479,61 +479,61 @@ All the independent perturbations are available
     Maximum number of bands crossing the Fermi level: 2
     min band: 2
     Max band: 3
- 
+
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        0.000000E+00    0.000000E+00    0.000000E+00
     2        0.000000E+00    0.000000E+00    0.000000E+00
     3        0.000000E+00    0.000000E+00    0.000000E+00
- 
+
  q-point =    2.500000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        2.602749E-04    1.448787E-07    7.764656E-02
-    2        2.602749E-04    1.448787E-07    7.764656E-02
+    1        2.602749E-04    1.448787E-07    7.764657E-02
+    2        2.602749E-04    1.448787E-07    7.764657E-02
     3        9.809668E-04    2.208191E-06    8.331255E-02
- 
+
  q-point =    5.000000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        4.272260E-04   -1.739922E-09   -3.460963E-04
     2        4.272260E-04   -1.739922E-09   -3.460963E-04
     3        1.431326E-03   -3.113814E-08   -5.518204E-04
- 
+
  q-point =    2.500000E-01    2.500000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        3.759487E-04    1.113856E-10    2.861241E-05
     2        3.759487E-04    1.113856E-10    2.861241E-05
-    3        9.031819E-04    5.227309E-06    2.326538E-01
- 
+    3        9.031819E-04    5.227309E-06    2.326539E-01
+
  q-point =    5.000000E-01    2.500000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        4.474897E-04    1.369095E-07    2.482276E-02
     2        9.250340E-04    4.978770E-07    2.112463E-02
     3        1.227511E-03    2.047836E-06    4.934317E-02
- 
+
  q-point =   -2.500000E-01    2.500000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        5.408550E-04    2.155191E-07    2.674893E-02
     2        9.955170E-04    1.536667E-06    5.629437E-02
     3        1.411204E-03    1.375155E-05    2.507003E-01
- 
+
  q-point =    5.000000E-01    5.000000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        6.183407E-04    4.179885E-07    3.969092E-02
     2        6.183407E-04    4.179885E-07    3.969092E-02
     3        1.278977E-03    2.104868E-06    4.671773E-02
- 
+
  q-point =   -2.500000E-01    5.000000E-01    2.500000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        9.643037E-04    2.758338E-07    1.076967E-02
     2        1.101344E-03    9.032923E-07    2.703738E-02
     3        1.101344E-03    9.032923E-07    2.703738E-02
- 
+
  lambda=   0.1619
- 
+
 ================================================================================
 == DATASET  2 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 2, }
@@ -544,20 +544,20 @@ meta: {optdriver: 7, eph_task: 1, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
- 
+
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
- 
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
 - Reading GS states from WFK file: t88o_DS20_WFK
 - Reading DDB from file: t88o_DS20_DDB
 - Reading DVDB from file: t88o_DS20_DVDB
- 
- 
- 
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
@@ -633,22 +633,22 @@ Values initialized with zeros
  62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
  63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
- 
+
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1020483061E-02 (at units)
+ Average speed of sound partial sums:     0.1020483004E-02 (at units)
 -                                   =           2.2325 [km/s]
- 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
- 
- Average speed of sound partial sums:     0.1020483061E-02 (at units)
+
+ Debye frequency from partial sums:     0.8418760840E-03 (Ha)
+-                                 =     0.5539278533E+01 (THz)
+-Debye temperature from partial sums:     0.2658431258E+03 (K)
+
+ Average speed of sound partial sums:     0.1020483004E-02 (at units)
 -                                   =           2.2325 [km/s]
- 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
- 
+
+ Debye frequency from partial sums:     0.8418760840E-03 (Ha)
+-                                 =     0.5539278533E+01 (THz)
+-Debye temperature from partial sums:     0.2658431258E+03 (K)
+
 - Writing phonon DOS to file: t88o_DS2_PHDOS
 - Writing phonon DOS to netcdf file: t88o_DS2_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -656,42 +656,42 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
 qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=independent, found=Yes
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=independent, found=Yes
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
  More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=independent, found=Yes
     3)  idir= 3, ipert=   1, type=independent, found=Yes
- 
+
 All the independent perturbations are available
 --------------------------------------------------------------------------------
- 
+
  Fermi level:   7.16066825E+00 (eV)
  Total electron DOS at Fermi level in states/eV:   3.22193685E-01
  Total number of electrons at eF:    3.0
  Linear tetrahedron method with mesh step:  9.99999978E-03 (eV)
 
 - Writing electron DOS to file: t88o_DS2_EDOS 
- 
+
  ==== Fermi surface info ====
  FS integration done with gaussian method
  Total number of k-points in the full mesh: 512
@@ -700,61 +700,61 @@ All the independent perturbations are available
     Maximum number of bands crossing the Fermi level: 2
     min band: 2
     Max band: 3
- 
+
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        0.000000E+00    0.000000E+00    0.000000E+00
     2        0.000000E+00    0.000000E+00    0.000000E+00
     3        0.000000E+00    0.000000E+00    0.000000E+00
- 
+
  q-point =    2.500000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        2.602749E-04    4.616238E-07    2.474036E-01
     2        2.602749E-04    4.616238E-07    2.474036E-01
     3        9.809668E-04    8.462158E-06    3.192677E-01
- 
+
  q-point =    5.000000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        4.272260E-04    2.147038E-07    4.270778E-02
     2        4.272260E-04    2.147038E-07    4.270778E-02
     3        1.431326E-03    4.079272E-06    7.229158E-02
- 
+
  q-point =    2.500000E-01    2.500000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        3.759487E-04    1.335968E-10    3.431795E-05
-    2        3.759487E-04    1.335968E-10    3.431795E-05
+    1        3.759487E-04    1.335968E-10    3.431796E-05
+    2        3.759487E-04    1.335968E-10    3.431796E-05
     3        9.031819E-04    5.222996E-06    2.324619E-01
- 
+
  q-point =    5.000000E-01    2.500000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        4.474897E-04    1.891301E-06    3.429076E-01
     2        9.250340E-04    6.216409E-06    2.637586E-01
     3        1.227511E-03    1.246655E-05    3.003848E-01
- 
+
  q-point =   -2.500000E-01    2.500000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        5.408550E-04    1.418664E-06    1.760761E-01
     2        9.955170E-04    3.399361E-06    1.245324E-01
     3        1.411204E-03    3.767262E-05    6.867979E-01
- 
+
  q-point =    5.000000E-01    5.000000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        6.183407E-04    7.282220E-06    6.914974E-01
     2        6.183407E-04    7.282220E-06    6.914974E-01
     3        1.278977E-03    8.425234E-06    1.869989E-01
- 
+
  q-point =   -2.500000E-01    5.000000E-01    2.500000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        9.643037E-04    6.973742E-07    2.722831E-02
     2        1.101344E-03    1.417774E-06    4.243687E-02
     3        1.101344E-03    1.417774E-06    4.243687E-02
- 
+
  lambda=   0.7428
- 
+
 ================================================================================
 == DATASET  3 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 3, }
@@ -765,19 +765,19 @@ meta: {optdriver: 7, eph_task: 5, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
- 
+
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
- 
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
 - Reading DDB from file: t88o_DS20_DDB
 - Reading DVDB from file: t88o_DS20_DVDB
- 
- 
- 
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
@@ -853,22 +853,22 @@ Values initialized with zeros
  62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
  63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
- 
+
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1020483061E-02 (at units)
+ Average speed of sound partial sums:     0.1020483004E-02 (at units)
 -                                   =           2.2325 [km/s]
- 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
- 
- Average speed of sound partial sums:     0.1020483061E-02 (at units)
+
+ Debye frequency from partial sums:     0.8418760840E-03 (Ha)
+-                                 =     0.5539278533E+01 (THz)
+-Debye temperature from partial sums:     0.2658431258E+03 (K)
+
+ Average speed of sound partial sums:     0.1020483004E-02 (at units)
 -                                   =           2.2325 [km/s]
- 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
- 
+
+ Debye frequency from partial sums:     0.8418760840E-03 (Ha)
+-                                 =     0.5539278533E+01 (THz)
+-Debye temperature from partial sums:     0.2658431258E+03 (K)
+
 - Writing phonon DOS to file: t88o_DS3_PHDOS
 - Writing phonon DOS to netcdf file: t88o_DS3_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -876,47 +876,47 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
 qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=independent, found=Yes
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=independent, found=Yes
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
  More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=independent, found=Yes
     3)  idir= 3, ipert=   1, type=independent, found=Yes
- 
+
 All the independent perturbations are available
 --------------------------------------------------------------------------------
- 
+
  Interpolation of the electron-phonon coupling potential
- 
+
  From coarse q-mesh: [4,4,4] to: [8,8,8]
  Number of q-points found in input DVDB: 8
  Number of q-points requiring Fourier interpolation 21
 Interpolation of the electron-phonon coupling potential completed
- 
- 
+
+
 ================================================================================
 == DATASET  4 ==================================================================
 -   mpi_nproc: 1, omp_nthreads: -1 (-1 if OMP is not activated)
- 
+
 
 --- !DatasetInfo
 iteration_state: {dtset: 4, }
@@ -927,22 +927,22 @@ meta: {optdriver: 7, eph_task: 1, }
 ...
 
  mkfilename : getwfk/=0, take file _WFK from output of DATASET  20.
- 
+
  mkfilename : getddb/=0, take file _DDB from output of DATASET  20.
- 
+
  mkfilename : getdvdb/=0, take file _DVDB from output of DATASET   3.
- 
+
  Exchange-correlation functional for the present dataset will be:
   GGA: Perdew-Burke-Ernzerhof functional - ixc=11
  Citation for XC functional:
   J.P.Perdew, K.Burke, M.Ernzerhof, PRL 77, 3865 (1996)
- 
+
 - Reading GS states from WFK file: t88o_DS20_WFK
 - Reading DDB from file: t88o_DS20_DDB
 - Reading DVDB from file: t88o_DS3_DVDB
- 
- 
- 
+
+
+
  Real(R)+Recip(G) space primitive vectors, cartesian coordinates (Bohr,Bohr^-1):
  R(1)=  0.0000000  3.7500000  3.7500000  G(1)= -0.1333333  0.1333333  0.1333333
  R(2)=  3.7500000  0.0000000  3.7500000  G(2)=  0.1333333 -0.1333333  0.1333333
@@ -1018,22 +1018,22 @@ Values initialized with zeros
  62)   2.50000000E-01 -2.50000000E-01 -2.50000000E-01
  63)   5.00000000E-01 -2.50000000E-01 -2.50000000E-01
  64)  -2.50000000E-01 -2.50000000E-01 -2.50000000E-01
- 
+
  The interatomic forces have been obtained
- Average speed of sound partial sums:     0.1020483061E-02 (at units)
+ Average speed of sound partial sums:     0.1020483004E-02 (at units)
 -                                   =           2.2325 [km/s]
- 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
- 
- Average speed of sound partial sums:     0.1020483061E-02 (at units)
+
+ Debye frequency from partial sums:     0.8418760840E-03 (Ha)
+-                                 =     0.5539278533E+01 (THz)
+-Debye temperature from partial sums:     0.2658431258E+03 (K)
+
+ Average speed of sound partial sums:     0.1020483004E-02 (at units)
 -                                   =           2.2325 [km/s]
- 
- Debye frequency from partial sums:     0.8418761318E-03 (Ha)
--                                 =     0.5539278847E+01 (THz)
--Debye temperature from partial sums:     0.2658431408E+03 (K)
- 
+
+ Debye frequency from partial sums:     0.8418760840E-03 (Ha)
+-                                 =     0.5539278533E+01 (THz)
+-Debye temperature from partial sums:     0.2658431258E+03 (K)
+
 - Writing phonon DOS to file: t88o_DS4_PHDOS
 - Writing phonon DOS to netcdf file: t88o_DS4_PHDOS.nc
 qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
@@ -1041,42 +1041,42 @@ qpoint: [ 0.0000E+00,  0.0000E+00,  0.0000E+00] is present in the DVDB file
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
 qpoint: [ 2.5000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=independent, found=Yes
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
 qpoint: [ 5.0000E-01,  0.0000E+00,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=independent, found=Yes
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
 qpoint: [ 2.5000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=symmetric, found=No
     3)  idir= 3, ipert=   1, type=symmetric, found=No
- 
+
  More than 20 q-points with prtvol == 0. Only important messages will be printed...
 qpoint: [ 5.0000E-01,  2.5000E-01,  0.0000E+00] is present in the DVDB file
  The list of irreducible perturbations for this q vector is:
     1)  idir= 1, ipert=   1, type=independent, found=Yes
     2)  idir= 2, ipert=   1, type=independent, found=Yes
     3)  idir= 3, ipert=   1, type=independent, found=Yes
- 
+
 All the independent perturbations are available
 --------------------------------------------------------------------------------
- 
+
  Fermi level:   7.16066825E+00 (eV)
  Total electron DOS at Fermi level in states/eV:   3.22193685E-01
  Total number of electrons at eF:    3.0
  Linear tetrahedron method with mesh step:  9.99999978E-03 (eV)
 
 - Writing electron DOS to file: t88o_DS4_EDOS 
- 
+
  ==== Fermi surface info ====
  FS integration done with tetrahedron method
  Total number of k-points in the full mesh: 512
@@ -1085,183 +1085,183 @@ All the independent perturbations are available
     Maximum number of bands crossing the Fermi level: 2
     min band: 2
     Max band: 3
- 
+
  q-point =    0.000000E+00    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        0.000000E+00    0.000000E+00    0.000000E+00
     2        0.000000E+00    0.000000E+00    0.000000E+00
     3        0.000000E+00    0.000000E+00    0.000000E+00
- 
+
  q-point =    1.250000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1       -1.493563E-04    1.404201E-07    2.285411E-01
-    2       -1.493563E-04    1.404201E-07    2.285411E-01
-    3        4.813736E-04    1.777196E-07    2.784539E-02
- 
+    1       -1.493564E-04    1.404203E-07    2.285414E-01
+    2       -1.493564E-04    1.404203E-07    2.285414E-01
+    3        4.813736E-04    1.777195E-07    2.784537E-02
+
  q-point =    2.500000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        2.602749E-04    1.448787E-07    7.764656E-02
-    2        2.602749E-04    1.448787E-07    7.764656E-02
+    1        2.602749E-04    1.448787E-07    7.764657E-02
+    2        2.602749E-04    1.448787E-07    7.764657E-02
     3        9.809668E-04    2.208191E-06    8.331255E-02
- 
+
  q-point =    3.750000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        4.258067E-04    5.800967E-08    1.161603E-02
-    2        4.258067E-04    5.800967E-08    1.161603E-02
-    3        1.324735E-03    3.754196E-07    7.766785E-03
- 
+    1        4.258067E-04    5.800918E-08    1.161594E-02
+    2        4.258067E-04    5.800918E-08    1.161594E-02
+    3        1.324735E-03    3.754173E-07    7.766738E-03
+
  q-point =    5.000000E-01    0.000000E+00    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        4.272260E-04   -1.739922E-09   -3.460963E-04
     2        4.272260E-04   -1.739922E-09   -3.460963E-04
     3        1.431326E-03   -3.113814E-08   -5.518204E-04
- 
+
  q-point =    1.250000E-01    1.250000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        8.794812E-05    4.666138E-07    2.190216E+00
-    2        8.794812E-05    4.666138E-07    2.190216E+00
+    1        8.794810E-05    4.666138E-07    2.190217E+00
+    2        8.794810E-05    4.666138E-07    2.190217E+00
     3        4.972476E-04    6.806817E-06    9.994962E-01
- 
+
  q-point =    2.500000E-01    1.250000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        3.239895E-04    4.649883E-07    1.608284E-01
+    1        3.239894E-04    4.649883E-07    1.608284E-01
     2        3.349529E-04    3.965268E-07    1.283180E-01
     3        8.647618E-04    2.300081E-06    1.116690E-01
- 
+
  q-point =    3.750000E-01    1.250000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        4.931601E-04    6.367083E-08    9.504892E-03
-    2        5.609364E-04    4.248421E-07    4.902107E-02
-    3        1.216190E-03    3.913729E-06    9.606620E-02
- 
+    1        4.931601E-04    6.367117E-08    9.504942E-03
+    2        5.609364E-04    4.248490E-07    4.902186E-02
+    3        1.216190E-03    3.913734E-06    9.606633E-02
+
  q-point =    5.000000E-01    1.250000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        4.560376E-04    5.218148E-07    9.109565E-02
+    1        4.560375E-04    5.218148E-07    9.109566E-02
     2        6.748185E-04    3.555545E-07    2.834750E-02
     3        1.392152E-03    2.647304E-06    4.959217E-02
- 
+
  q-point =   -3.750000E-01    1.250000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        4.402161E-04    3.180377E-08    5.958393E-03
-    2        7.491555E-04    2.938725E-07    1.901067E-02
-    3        1.399351E-03    3.150417E-06    5.841133E-02
- 
+    1        4.402161E-04    3.180481E-08    5.958589E-03
+    2        7.491555E-04    2.938746E-07    1.901081E-02
+    3        1.399351E-03    3.150415E-06    5.841129E-02
+
  q-point =   -2.500000E-01    1.250000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        3.808384E-04    8.900010E-08    2.227878E-02
     2        6.730722E-04    4.739203E-07    3.798083E-02
     3        1.190835E-03    1.997607E-06    5.114339E-02
- 
+
  q-point =   -1.250000E-01    1.250000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1       -4.286839E-05    1.657884E-07    3.275383E+00
-    2        3.660096E-04    1.659794E-07    4.498332E-02
-    3        7.903401E-04    1.449711E-05    8.426280E-01
- 
+    1       -4.286847E-05    1.657708E-07    3.275025E+00
+    2        3.660096E-04    1.659683E-07    4.498032E-02
+    3        7.903401E-04    1.449711E-05    8.426281E-01
+
  q-point =    2.500000E-01    2.500000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        3.759487E-04    1.113856E-10    2.861241E-05
     2        3.759487E-04    1.113856E-10    2.861241E-05
-    3        9.031819E-04    5.227309E-06    2.326538E-01
- 
+    3        9.031819E-04    5.227309E-06    2.326539E-01
+
  q-point =    3.750000E-01    2.500000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        4.542944E-04    7.237890E-07    1.273267E-01
-    2        6.188843E-04    5.004547E-07    4.743821E-02
+    1        4.542944E-04    7.237890E-07    1.273268E-01
+    2        6.188843E-04    5.004547E-07    4.743822E-02
     3        1.071052E-03    3.292495E-06    1.042045E-01
- 
+
  q-point =    5.000000E-01    2.500000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        4.474897E-04    1.369095E-07    2.482276E-02
     2        9.250340E-04    4.978770E-07    2.112463E-02
     3        1.227511E-03    2.047836E-06    4.934317E-02
- 
+
  q-point =   -3.750000E-01    2.500000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        4.880952E-04    1.571923E-07    2.395546E-02
     2        1.050126E-03    3.402869E-07    1.120327E-02
     3        1.405455E-03    4.800017E-07    8.822495E-03
- 
+
  q-point =   -2.500000E-01    2.500000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        5.408550E-04    2.155191E-07    2.674893E-02
     2        9.955170E-04    1.536667E-06    5.629437E-02
     3        1.411204E-03    1.375155E-05    2.507003E-01
- 
+
  q-point =    3.750000E-01    3.750000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        4.871442E-04    1.198404E-06    1.833457E-01
     2        4.871442E-04    1.198404E-06    1.833457E-01
     3        1.139696E-03    3.599760E-06    1.006185E-01
- 
+
  q-point =    5.000000E-01    3.750000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        5.241283E-04    4.291282E-07    5.671453E-02
     2        7.997507E-04    6.718511E-07    3.813698E-02
     3        1.205851E-03    2.117172E-06    5.286298E-02
- 
+
  q-point =   -3.750000E-01    3.750000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        4.757474E-04    4.311473E-07    6.916006E-02
-    2        1.168345E-03    7.637810E-07    2.031464E-02
-    3        1.193196E-03    2.064179E-06    5.263879E-02
- 
+    1        4.757474E-04    4.311432E-07    6.915940E-02
+    2        1.168345E-03    7.637921E-07    2.031493E-02
+    3        1.193196E-03    2.064163E-06    5.263839E-02
+
  q-point =    5.000000E-01    5.000000E-01    0.000000E+00
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        6.183407E-04    4.179885E-07    3.969092E-02
     2        6.183407E-04    4.179885E-07    3.969092E-02
     3        1.278977E-03    2.104868E-06    4.671773E-02
- 
+
  q-point =    3.750000E-01    2.500000E-01    1.250000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        4.594460E-04    1.674258E-07    2.879625E-02
     2        6.616252E-04    8.477193E-07    7.030892E-02
     3        1.104352E-03    1.136120E-06    3.382140E-02
- 
+
  q-point =    5.000000E-01    2.500000E-01    1.250000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        5.579848E-04    2.077636E-07    2.422743E-02
     2        8.751654E-04    6.640291E-07    3.147671E-02
     3        1.312037E-03    2.324324E-06    4.902155E-02
- 
+
  q-point =   -3.750000E-01    2.500000E-01    1.250000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        5.330435E-04    2.808967E-07    3.589250E-02
-    2        9.349135E-04    1.283349E-06    5.330702E-02
+    2        9.349134E-04    1.283349E-06    5.330702E-02
     3        1.369500E-03    5.702860E-06    1.103954E-01
- 
+
  q-point =    5.000000E-01    3.750000E-01    1.250000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        6.661162E-04    6.815885E-08    5.577053E-03
     2        7.404772E-04    4.291082E-07    2.841358E-02
     3        1.167084E-03    1.162542E-06    3.098751E-02
- 
+
  q-point =   -3.750000E-01    3.750000E-01    1.250000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
-    1        6.885159E-04    1.666808E-06    1.276557E-01
-    2        1.059117E-03    1.266148E-06    4.098071E-02
-    3        1.218060E-03    1.828993E-06    4.475659E-02
- 
+    1        6.885159E-04    1.666822E-06    1.276567E-01
+    2        1.059117E-03    1.266148E-06    4.098070E-02
+    3        1.218060E-03    1.829003E-06    4.475684E-02
+
  q-point =   -2.500000E-01    3.750000E-01    1.250000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        6.649972E-04    3.361471E-07    2.759766E-02
     2        1.069107E-03    1.628944E-06    5.174242E-02
     3        1.336466E-03    7.193671E-07    1.462235E-02
- 
+
  q-point =   -3.750000E-01    5.000000E-01    1.250000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        7.825475E-04    2.378433E-07    1.410107E-02
     2        8.100862E-04    4.496622E-07    2.487748E-02
     3        1.215861E-03    1.655701E-06    4.066276E-02
- 
+
  q-point =   -2.500000E-01    5.000000E-01    2.500000E-01
  Mode number    Frequency (Ha)  Linewidth (Ha)  Lambda(q,n)
     1        9.643037E-04    2.758338E-07    1.076967E-02
     2        1.101344E-03    9.032923E-07    2.703738E-02
     3        1.101344E-03    9.032923E-07    2.703738E-02
- 
+
  lambda=   0.3176
- 
+
 == END DATASET(S) ==============================================================
 ================================================================================
   
@@ -1300,7 +1300,7 @@ All the independent perturbations are available
             fcart2     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart3     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
             fcart4     0.0000000000E+00  0.0000000000E+00  0.0000000000E+00
--          fftalg         512
+-          fftalg         312
            getddb          20
           getdvdb1          0
           getdvdb2          0
@@ -1419,7 +1419,7 @@ P           mkmem          29
            tsmear      4.00000000E-02 Hartree
             typat      1
             znucl       13.00000
- 
+
 ================================================================================
 
 
@@ -1510,10 +1510,10 @@ P           mkmem          29
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=          8.3  wall=          8.5
- 
+- Proc.   0 individual time (sec): cpu=         10.3  wall=         13.8
+
 ================================================================================
- 
+
  Calculation completed.
 .Delivered   6 WARNINGs and   6 COMMENTs to log file.
-+Overall time at end (sec) : cpu=          8.3  wall=          8.5
++Overall time at end (sec) : cpu=         10.3  wall=         13.8
