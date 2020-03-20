@@ -31,6 +31,7 @@ sources = [
  "m_nonlop_test.F90",
  "m_nonlop_ylm.F90",
  "m_opernl.F90",
+ "m_qplusg.F90",
  "m_vkbr.F90",
  "m_opernla_ylm.F90",
  "m_opernlb_ylm.F90",
