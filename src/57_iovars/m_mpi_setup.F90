@@ -584,12 +584,16 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
            call distrb2_hf(dtsets(idtset)%nbandhf,dtsets(idtset)%nkpthf,nproc,nsppol,mpi_enregs(idtset))
          end if
        else ! response==1
+!  TODO: check or remove the following comment which seems outdated
 !        Wrongly assumes that the number of elements of the
 !        k-point sets of the two spin polarizations is the maximal
 !        value of one of these k-point sets ...
 !        This is to be corrected when RF is implemented
 !        for spin-polarized case.
-         mpi_enregs(idtset)%paralbd=1
+         mpi_enregs(idtset)%paralbd=0
+         if (nproc > 2*nkpt) then 
+           mpi_enregs(idtset)%paralbd=1
+         end if
 !        nproc=mpi_enregs(idtset)%nproc_cell*mpi_enregs(idtset)%nproc_pert
 print *, 'respfn call to distrb2 mband_upper,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset)%paralbd'
 print *,                         mband_upper,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset)%paralbd
