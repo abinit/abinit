@@ -423,7 +423,7 @@ ABI_DEALLOCATE(xcart)
    end if
 
 !  Set the barostat and thermonstat if ionmov == 13
-   if(dtset%ionmov == 13)then
+   if(dtset%ionmov == 13 .or. dtset%ionmov == 25)then
 
 !    Select frequency of the barostat as a function of temperature
 !    For small temperature, we need huge barostat and inversely

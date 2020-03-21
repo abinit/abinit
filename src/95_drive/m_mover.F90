@@ -303,7 +303,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    call delocint_ini(deloc)
  end if
 
- if (ab_mover%ionmov==13)then
+ if (ab_mover%ionmov==13 .or. ab_mover%ionmov==25)then
    call mttk_ini(mttk_vars,ab_mover%nnos)
  end if
 
@@ -972,7 +972,7 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
    call prec_simple(ab_mover,preconforstr,hist,1,1,1)
  end if
 
- if (ab_mover%ionmov==13)then
+ if (ab_mover%ionmov==13 .or. ab_mover%ionmov==25)then
    call mttk_fin(mttk_vars)
  end if
 

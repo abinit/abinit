@@ -305,6 +305,7 @@ subroutine pred_isothermal(ab_mover,hist,itime,mttk_vars,ntime,zDEBUG,iexit)
    write(std_out,*) 'Initial temp (mdtemp(1)):',ab_mover%mdtemp(1)
    write(std_out,*) 'Final temp (mdtemp(2)):',ab_mover%mdtemp(2)
    write(std_out,*) 'Delay for atom permutation (delayperm)',ab_mover%delayperm
+   write(std_out,*) 'dtion',ab_mover%dtion
    write(std_out,*) 'nnos:', ab_mover%nnos
    write(std_out,*) 'qmass', ab_mover%qmass(:)
    write(std_out,*) 'bmass',ab_mover%bmass
