@@ -160,7 +160,7 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
        if(abs(denominator)>tol8) then 
          ! Sigma_pq/[(denominator)]
            division=sigcme_k(iquad,ib1dm,ib2dm,1)/denominator 
-           dm1_mel=dm1_mel-weights(iquad)*division        ! -
+           dm1_mel=dm1_mel+weights(iquad)*division        ! +
          ! [Sigma_qp/[(denominator)]]^*
            division=sigcme_k(iquad,ib2dm,ib1dm,1)/denominator 
            dm1_mel=dm1_mel+weights(iquad)*conjg(division) ! +
