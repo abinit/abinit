@@ -114,7 +114,7 @@ type, public :: dataset_type
  integer :: dmft_read_occnd
  integer :: dmft_solv
  integer :: dmft_t2g
- integer :: dmft_x2my2d
+!integer :: dmft_x2my2d
  integer :: dmftbandi
  integer :: dmftbandf
  integer :: dmftcheck
@@ -1334,7 +1334,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_rslf          = dtin%dmft_rslf
  dtout%dmft_solv          = dtin%dmft_solv
  dtout%dmft_t2g           = dtin%dmft_t2g
- dtout%dmft_x2my2d        = dtin%dmft_x2my2d
+!dtout%dmft_x2my2d        = dtin%dmft_x2my2d
  dtout%dmft_tolfreq       = dtin%dmft_tolfreq
  dtout%dmft_tollc         = dtin%dmft_tollc
  dtout%dmftbandi          = dtin%dmftbandi
@@ -3064,7 +3064,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_entropy dmft_iter dmft_kspectralfunc'
  list_vars=trim(list_vars)//' dmft_mxsf dmft_nlambda dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv'
- list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d'
+!list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d'
+ list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g'
  list_vars=trim(list_vars)//' dosdeltae dtion dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dynamics dynimage'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
  list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_phon'
