@@ -783,6 +783,7 @@ case (15)
    specs%crit4xml='none'
 !  Name of specs%method
    specs%method = 'Hybrid Monte Carlo'
+   specs%nhist = 3
 !  This is the initialization for ionmov==27
 !  -------------------------------------------
  case (27)                ! Generation of the training set for effective potential

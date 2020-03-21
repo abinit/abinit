@@ -209,7 +209,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
      de = etotal - etotal_hmc_prev
      call metropolis_check(seed,de,kbtemp,iacc)
 !DEBUG
-     write(std_out,*)' m_pred_hmc, after metropolis_check : seed,de,kbtemp,iacc=',seed,de,kbtemp,iacc
+!     write(std_out,*)' m_pred_hmc, after metropolis_check : seed,de,kbtemp,iacc=',seed,de,kbtemp,iacc
 !ENDDEBUG
    end if
 
@@ -223,10 +223,10 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,zDEBUG,iexit)
      epot_hmc_prev   = epot         !update reference potential energy
    end if
 
-   write(message,'(2a,i7,a,i2,a,E24.16,a,E24.16,a,E24.16)') ch10,' HMC Sweep => ',itime,' iacc= ', iacc,' epot= ',&
-&   epot,' ekin=',ekin,' de=',de
-   call wrtout(ab_out,message,'COLL')
-   call wrtout(std_out,message,'COLL')
+!   write(message,'(2a,i7,a,i2,a,E24.16,a,E24.16,a,E24.16)') ch10,' HMC Sweep => ',itime,' iacc= ', iacc,' epot= ',&
+!&   epot,' ekin=',ekin,' de=',de
+!   call wrtout(ab_out,message,'COLL')
+!   call wrtout(std_out,message,'COLL')
 
    call generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)  ! this routine also computes the new kinetic energy
    hist%vel(:,:,hist%ihist)=vel(:,:)

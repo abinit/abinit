@@ -210,6 +210,7 @@ subroutine abihist_init_0D(hist,natom,mxhist,isVused,isARused)
  hist%isVused=isVUsed
  hist%isARused=isARUsed
 
+
 !Allocate all the histories
  ABI_ALLOCATE(hist%acell,(3,mxhist))
  ABI_ALLOCATE(hist%rprimd,(3,3,mxhist))
