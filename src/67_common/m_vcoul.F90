@@ -29,6 +29,8 @@
 
 MODULE m_vcoul
 
+ use m_vcoul_dt
+
  use defs_basis
  use m_abicore
  use m_errors
@@ -44,6 +46,7 @@ MODULE m_vcoul
  use m_bessel,          only : CALJY0, CALJY1, CALCK0, CALCK1
  use m_hide_lapack,     only : matrginv
  use m_geometry,        only : normv, metric
+ use m_qplusg,          only : cmod_qpg
  use m_crystal,         only : crystal_t
  use m_bz_mesh,         only : kmesh_t, get_BZ_item
  use m_gsphere,         only : gsphere_t
@@ -53,108 +56,12 @@ MODULE m_vcoul
  implicit none
 
  private
-!!***
-
-!!****t* m_vcoul/vcoul_t
-!! NAME
-!!  vcoul_t
-!!
-!! FUNCTION
-!!  This data type contains the square root of the Fourier components of the Coulomb interaction
-!!  calculated taking into account a possible cutoff. Info on the particular geometry used for the cutoff
-!!  as well as quantities required to deal with the Coulomb divergence.
-!!
-!! SOURCE
-
- type,public :: vcoul_t
-
-  ! TODO: Remove it
-  integer  :: nfft
-  ! Number of points in FFT grid
-
-  integer  :: ng
-   ! Number of G-vectors
-
-  integer  :: nqibz
-   ! Number of irreducible q-points
-
-  integer  :: nqlwl
-   ! Number of small q-points around Gamma
-
-  real(dp) :: alpha(3)
-   ! Lenght of the finite surface
-
-  real(dp) :: rcut
-   ! Cutoff radius
-
-  real(dp) :: i_sz
-   ! Value of the integration of the Coulomb singularity 4\pi/V_BZ \int_BZ d^3q 1/q^2
-
-  real(dp) :: i_sz_resid
-   ! Residual difference between the i_sz in the sigma self-energy for exchange,
-   ! and the i_sz already present in the generalized Kohn-Sham eigenenergies
-   ! Initialized to the same value as i_sz
-
-  real(dp) :: hcyl
-   ! Length of the finite cylinder along the periodic dimension
-
-  real(dp) :: ucvol
-    ! Volume of the unit cell
-
-  character(len=50) :: mode
-   ! String defining the cutoff mode, possible values are: sphere,cylinder,surface,crystal
-
-  integer :: pdir(3)
-   ! 1 if the system is periodic along this direction
-
-  ! TODO: Remove it
-  integer :: ngfft(18)
-    ! Information on the FFT grid
-
-  real(dp) :: boxcenter(3)
-   ! 1 if the point in inside the cutoff region 0 otherwise
-   ! Reduced coordinates of the center of the box (input variable)
-
-  real(dp) :: vcutgeo(3)
-    ! For each reduced direction gives the length of the finite system
-    ! 0 if the system is infinite along that particular direction
-    ! negative value to indicate that a finite size has to be used
-
-  real(dp) :: rprimd(3,3)
-    ! Lattice vectors in real space.
-
-  real(dp),allocatable :: qibz(:,:)
-   ! qibz(3,nqibz)
-   ! q-points in the IBZ.
-
-  real(dp),allocatable :: qlwl(:,:)
-   ! qibz(3,nqlwl)
-   ! q-points for the treatment of the Coulomb singularity.
-
-  complex(gwpc),allocatable :: vc_sqrt(:,:)
-    ! vc_sqrt(ng,nqibz)
-    ! Square root of the Coulomb interaction in reciprocal space.
-    ! A cut might be applied.
-
-  complex(gwpc),allocatable :: vcqlwl_sqrt(:,:)
-    ! vcqs_sqrt(ng,nqlwl)
-    ! Square root of the Coulomb term calculated for small q-points
-
-  complex(gwpc),allocatable :: vc_sqrt_resid(:,:)
-    ! vc_sqrt_resid(ng,nqibz)
-    ! Square root of the residual difference between the Coulomb interaction in the sigma self-energy for exchange,
-    ! and the Coulomb interaction already present in the generalized Kohn-Sham eigenenergies (when they come from an hybrid)
-    ! Given in reciprocal space. At the call to vcoul_init, it is simply initialized at the value of vc_sqrt(:,:),
-    ! and only later modified.
-    ! A cut might be applied.
-
- end type vcoul_t
-
+	
  public ::  vcoul_init           ! Main creation method.
  public ::  vcoul_plot           ! Plot vc in real and reciprocal space.
  public ::  vcoul_print          ! Report info on the object.
  public ::  vcoul_free           ! Destruction method.
- public ::  cmod_qpg             ! FT of the long ranged Coulomb interaction.
+! public ::  cmod_qpg             ! FT of the long ranged Coulomb interaction.
 !!***
 
 ! private variables used for the integration needed by the cylindrical case.
@@ -2015,46 +1922,46 @@ end subroutine cutoff_surface
 !!
 !! SOURCE
 
-subroutine cmod_qpg(nq,iq,q,npwvec,gvec,gprimd,qplusg)
+!subroutine cmod_qpg(nq,iq,q,npwvec,gvec,gprimd,qplusg)
 
 !Arguments ------------------------------------
 !scalars
- integer,intent(in) :: iq,npwvec,nq
+! integer,intent(in) :: iq,npwvec,nq
 !arrays
- integer,intent(in) :: gvec(3,npwvec)
- real(dp),intent(in) :: gprimd(3,3),q(3,nq)
- real(dp),intent(out) :: qplusg(npwvec)
+! integer,intent(in) :: gvec(3,npwvec)
+! real(dp),intent(in) :: gprimd(3,3),q(3,nq)
+! real(dp),intent(out) :: qplusg(npwvec)
 
 !Local variables ------------------------------
 !scalars
- integer :: ig,ii
+! integer :: ig,ii
 !arrays
- real(dp) :: gmet(3,3),gpq(3)
+! real(dp) :: gmet(3,3),gpq(3)
 
 !************************************************************************
 
  ! Compute reciprocal space metrics
- do ii=1,3
-   gmet(ii,:)=gprimd(1,ii)*gprimd(1,:)+&
-&             gprimd(2,ii)*gprimd(2,:)+&
-&             gprimd(3,ii)*gprimd(3,:)
- end do
+! do ii=1,3
+!   gmet(ii,:)=gprimd(1,ii)*gprimd(1,:)+&
+!&             gprimd(2,ii)*gprimd(2,:)+&
+!&             gprimd(3,ii)*gprimd(3,:)
+! end do
 
- if (ALL(ABS(q(:,iq))<1.e-3)) then !FIXME avoid this, everything should be under the control of the programmer.
+! if (ALL(ABS(q(:,iq))<1.e-3)) then !FIXME avoid this, everything should be under the control of the programmer.
    ! * Treat q as it were zero except when G=0
-   qplusg(1)=two_pi*SQRT(DOT_PRODUCT(q(:,iq),MATMUL(gmet,q(:,iq))))
-   do ig=2,npwvec
-     gpq(:)=gvec(:,ig)
-     qplusg(ig)=two_pi*SQRT(DOT_PRODUCT(gpq,MATMUL(gmet,gpq)))
-   end do
- else
-   do ig=1,npwvec
-     gpq(:)=gvec(:,ig)+q(:,iq)
-     qplusg(ig)=two_pi*SQRT(DOT_PRODUCT(gpq,MATMUL(gmet,gpq)))
-   end do
- end if
+!   qplusg(1)=two_pi*SQRT(DOT_PRODUCT(q(:,iq),MATMUL(gmet,q(:,iq))))
+!   do ig=2,npwvec
+!     gpq(:)=gvec(:,ig)
+!     qplusg(ig)=two_pi*SQRT(DOT_PRODUCT(gpq,MATMUL(gmet,gpq)))
+!   end do
+! else
+!   do ig=1,npwvec
+!     gpq(:)=gvec(:,ig)+q(:,iq)
+!     qplusg(ig)=two_pi*SQRT(DOT_PRODUCT(gpq,MATMUL(gmet,gpq)))
+!   end do
+! end if
 
-end subroutine cmod_qpg
+!end subroutine cmod_qpg
 
 !----------------------------------------------------------------------
 

@@ -62,7 +62,8 @@ module m_bethe_salpeter
                                ebands_update_occ, get_valence_idx, apply_scissor, ebands_report_gap
  use m_kg,              only : getph
  use m_gsphere,         only : gsphere_t, gsph_free, gsph_init, print_gsphere, gsph_extend
- use m_vcoul,           only : vcoul_t, vcoul_init, vcoul_free
+ use m_vcoul_dt
+ use m_vcoul,           only : vcoul_init, vcoul_free
  use m_qparticles,      only : rdqps, rdgw  !, show_QP , rdgw
  use m_wfd,             only : wfd_init, wfd_t, test_charge
  use m_wfk,             only : wfk_read_eigenvalues
