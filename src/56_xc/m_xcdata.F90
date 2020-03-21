@@ -256,7 +256,7 @@ subroutine get_xclevel(ixc,xclevel,usefock)
    usefock=0
    if( ixc>=40 .and. ixc<=42 )usefock=1 ! Hartree-Fock or internal hybrid functionals
  endif
- if( ixc>=31 .and. ixc<=34)xclevel=2 ! ixc for internal fake mGGA
+ if( ixc>=31 .and. ixc<=35)xclevel=2 ! ixc for internal fake mGGA
  if( ixc>=41 .and. ixc<=42)xclevel=2 ! ixc for internal hybrids using GGA
  if (ixc<0) then                     ! libXC: metaGGA and hybrid functionals
    xclevel=1

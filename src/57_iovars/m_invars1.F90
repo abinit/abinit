@@ -383,6 +383,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    ! Read plowan_compute
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_compute',tread,'INT')
    if(tread==1) dtsets(idtset)%plowan_compute=intarr(1)
+   
 
    ! Read user* variables
    call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'useria',tread,'INT')
@@ -1891,11 +1892,12 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  if(tread==1) dtset%ucrpa=intarr(1)
 
  if (dtset%ucrpa > 0 .and. dtset%usedmft > 0) then
-   write(msg, '(7a)' )&
+   write(msg, '(9a)' )&
    'usedmft and ucrpa are both activated in the input file ',ch10,&
    'In the following, abinit assume you are doing a ucrpa calculation and ',ch10,&
    'you define Wannier functions as in DFT+DMFT calculation',ch10,&
-   'If instead, you want to do a full dft+dmft calculation and not only the Wannier construction, use ucrpa=0'
+   'If instead, you want to do a full dft+dmft calculation and not only the Wannier construction, use ucrpa=0',ch10,&
+   'This keywords are depreciated, please use the new keywords to perform cRPA calculation'
    MSG_WARNING(msg)
  end if
 
@@ -1939,6 +1941,11 @@ subroutine invars1(bravais,dtset,iout,jdtset,lenstr,mband_upper,msym,npsp1,&
  dtset%plowan_nt=0
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'plowan_nt',tread,'INT')
  if(tread==1) dtset%plowan_natom=intarr(1)
+
+ !if (dtset%ucrpa > 0 .and. dtset%plowan_compute==0) then
+   !dtset%plowan_natom=1
+   !dtset%plowan_nt=1
+ !endif
 
 !PAW potential zero keyword
  dtset%usepotzero=0
@@ -2533,15 +2540,16 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%pimd_constraint=0
    dtsets(idtset)%pitransform=0
    dtsets(idtset)%ptcharge(:) = zero
+   !dtsets(idtset)%plowan_compute=0
    dtsets(idtset)%plowan_bandi=0
    dtsets(idtset)%plowan_bandf=0
-   if(dtsets(idtset)%plowan_compute>0) then
-     dtsets(idtset)%plowan_it(:)=0
-     dtsets(idtset)%plowan_iatom(:)=0
-     dtsets(idtset)%plowan_lcalc(:)=-1
-     dtsets(idtset)%plowan_projcalc(:)=0
-     dtsets(idtset)%plowan_nbl(:)=0
-   end if
+   !if(dtsets(idtset)%plowan_compute>0) then
+   dtsets(idtset)%plowan_it(:)=0
+   dtsets(idtset)%plowan_iatom(:)=0
+   dtsets(idtset)%plowan_lcalc(:)=-1
+   dtsets(idtset)%plowan_projcalc(:)=0
+   dtsets(idtset)%plowan_nbl(:)=0
+   !end if
    dtsets(idtset)%plowan_natom=0
    dtsets(idtset)%plowan_nt=0
    dtsets(idtset)%plowan_realspace=0

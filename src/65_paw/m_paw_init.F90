@@ -33,6 +33,7 @@ MODULE m_paw_init
  use m_pawang,  only : pawang_type, pawang_init, pawang_free
  use m_pawrad,  only : pawrad_type, simp_gen, nderiv_gen, poisson, pawrad_deducer0
  use m_pawtab,  only : pawtab_type
+ use m_pawxc,   only : pawxc_get_usekden,pawxc_get_uselaplacian,pawxc_get_xclevel
  use m_paw_numeric, only : paw_derfc
 
  implicit none
@@ -87,6 +88,7 @@ CONTAINS  !=====================================================================
 !!             also determine the size of these pointers
 !!  gsqcut_shp=effective cut-off to determine shape functions in reciprocal space
 !!  hyb_range_fock=range coefficient for screened hybrid XC functionals
+!!  ixc=choice of exchange-correlation functional
 !!  lcutdens=max. l for densities/potentials moments computations
 !!  lmix=max. l for which spherical terms will be mixed durinf SCF cycle
 !!  mpsang=1+maximum angular momentum
@@ -118,7 +120,6 @@ CONTAINS  !=====================================================================
 !!     %tphi(mesh_size,basis_size)=PAW atomic pseudowavefunctions
 !!  pawxcdev=Choice of XC development (0=no dev. (use of angular mesh) ; 1=dev. on moments)
 !!  usekden= 1 is kinetic energy density has to be computed, 0 otherwise
-!!  xclevel=XC functional level (1=LDA, 2=GGA)
 !!
 !! OUTPUT
 !!  pawang
@@ -167,13 +168,12 @@ CONTAINS  !=====================================================================
 !! SOURCE
 
 subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lmix,mpsang,&
-&                  nphi,nsym,ntheta,pawang,pawrad,pawspnorb,pawtab,pawxcdev,xclevel,&
-&                  usekden,usepotzero)
+&                  nphi,nsym,ntheta,pawang,pawrad,pawspnorb,pawtab,pawxcdev,ixc,usepotzero)
 
 !Arguments ---------------------------------------------
 !scalars
- integer,intent(in) :: gnt_option,lcutdens,lmix,mpsang,nphi,nsym,ntheta,usekden
- integer,intent(in) :: pawspnorb,pawxcdev,xclevel,usepotzero
+ integer,intent(in) :: gnt_option,ixc,lcutdens,lmix,mpsang,nphi,nsym,ntheta
+ integer,intent(in) :: pawspnorb,pawxcdev,usepotzero
  real(dp),intent(in) :: effmass_free,gsqcut_eff,hyb_range_fock
  type(pawang_type),intent(inout) :: pawang
 !arrays
@@ -186,7 +186,8 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
  integer :: basis_size,i0lm,i0ln,ij_size,il,ilm,ilmn,iln,iloop,iq,isel,isel1
  integer :: itypat,j0lm,j0lmn,j0ln,jl,jlm,jlmn,jln,klm,klm1
  integer :: klmn,klmn1,kln,kln1,l_size,ll,lm0,lmax,lmax1,lmin,lmin1,lmn2_size
- integer :: lmn_size,lmnmix,mesh_size,meshsz,mm,nabgnt_option,ntypat,pw_mesh_size,usexcnhat,use_ls_ylm,use_ylm
+ integer :: lmn_size,lmnmix,mesh_size,meshsz,mm,nabgnt_option,ngrad2_ylm,ntypat,pw_mesh_size
+ integer :: usexcnhat,use_angular_grid,use_ls_ylm,use_ylm,usekden
  real(dp) :: dq,gnrm,intg,ql,ql1,rg,rg1,vh1,yp1,ypn
  character(len=500) :: message
 !arrays
@@ -202,16 +203,17 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
  DBG_ENTER("COLL")
 
  call timab(553,1,tsec)
-! if kinetic energy density is used, set nabgnt_option to 1 for nablagaunt computation
- nabgnt_option=0 ; if (usekden>=1) nabgnt_option=1
+
  ntypat=size(pawtab)
  if (size(pawrad)/=ntypat) then
    MSG_BUG('pawrad and pawtab should have the same size!')
  end if
 
- ! Immediately set the value of usepotzero
- ! it will be used later on in this subroutine
+!Immediately set the value of usepotzero
+!it will be used later on in this subroutine
  pawtab%usepotzero=usepotzero
+
+ usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
 
 !==================================================
 !1- INITIALIZE DATA RELATED TO ANGULAR MESH
@@ -219,11 +221,17 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
 !* REAL SPHERICAL HARMONICS
 !* REAL GAUNT COEFFICIENTS
 
+!if kinetic energy density is used, set nabgnt_option to 1 for nablagaunt computation
+ usekden=pawxc_get_usekden(ixc)
+ nabgnt_option=0;if (usekden>0) nabgnt_option=1
+ use_angular_grid=0;if (pawxcdev==0) use_angular_grid=1
  use_ylm=0;if (pawxcdev==0) use_ylm=1
  use_ls_ylm=0;if (pawspnorb>0) use_ls_ylm=1
+ ngrad2_ylm=0;if (pawxc_get_xclevel(ixc)>=2) ngrad2_ylm=1
+ if (pawxc_get_uselaplacian(ixc)>0) ngrad2_ylm=2
  call pawang_free(pawang)
- call pawang_init(pawang,gnt_option,nabgnt_option,usekden,mpsang-1,nphi,nsym,ntheta,pawxcdev,use_ls_ylm,use_ylm,xclevel)
- usexcnhat=maxval(pawtab(1:ntypat)%usexcnhat)
+ call pawang_init(pawang,gnt_option,nabgnt_option,mpsang-1,nphi,ntheta,nsym,ngrad2_ylm,&
+&                 use_angular_grid,use_ylm,use_ls_ylm)
 
 !*******************
 !Loop on atom types
@@ -459,8 +467,8 @@ subroutine pawinit(effmass_free,gnt_option,gsqcut_eff,hyb_range_fock,lcutdens,lm
        call nderiv_gen(der,pawtab(itypat)%tphi(1:pw_mesh_size,iln),pawrad(itypat))
        pawtab(itypat)%tnablaphi(2:pw_mesh_size,iln)=der(2:pw_mesh_size) &
 &          -pawtab(itypat)%tphi(2:pw_mesh_size,iln)/pawrad(itypat)%rad(2:pw_mesh_size)
-       call pawrad_deducer0(pawtab(itypat)%nablaphi(:,iln),pw_mesh_size,pawrad(itypat))
-       call pawrad_deducer0(pawtab(itypat)%tnablaphi(:,iln),pw_mesh_size,pawrad(itypat))
+       call pawrad_deducer0(pawtab(itypat)%nablaphi(1:pw_mesh_size,iln),pw_mesh_size,pawrad(itypat))
+       call pawrad_deducer0(pawtab(itypat)%tnablaphi(1:pw_mesh_size,iln),pw_mesh_size,pawrad(itypat))
      end do
      ABI_DEALLOCATE(der)
      pawtab(itypat)%has_nablaphi=2

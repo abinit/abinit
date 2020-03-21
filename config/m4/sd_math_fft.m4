@@ -76,7 +76,7 @@ AC_DEFUN([SD_FFT_INIT], [
 
 
 dnl WARNING: Each flavor must be treated as a separate case in order to avoid
-dnl          false positives (e.g. fftw3-mpi accepted without -lfftw3_mpi).
+dnl          false positives (e.g. MPI FFTW3 enabled without -lfftw3_mpi).
 AC_DEFUN([SD_FFT_DETECT], [
   for sd_fft_flavor in ${sd_fft_selected_flavors}; do
 
@@ -98,38 +98,7 @@ AC_DEFUN([SD_FFT_DETECT], [
           sd_fft_ldflags="${sd_fftw3_ldflags}"
           sd_fft_libs="${sd_fftw3_libs}"
           sd_fft_ok="yes"
-        fi
-        ;;
-      fftw3-mkl)
-        sd_fftw3_enable="yes"
-        sd_fftw3_init="mkl"
-        sd_fftw3_cppflags="${sd_linalg_cppflags} -I${MKLROOT}/include/fftw"
-        sd_fftw3_cflags="${sd_linalg_cflags}"
-        sd_fftw3_cxxflags="${sd_linalg_cxxflags}"
-        sd_fftw3_fcflags="${sd_linalg_fcflags} -I${MKLROOT}/include/fftw"
-        sd_fftw3_ldflags="${sd_linalg_ldflags}"
-        sd_fftw3_libs="${sd_linalg_libs}"
-        SD_FFTW3_DETECT
-        if test "${sd_fftw3_ok}" = "yes"; then
-          sd_fft_ok="yes"
-        fi
-        sd_fftw3_cppflags="-I${MKLROOT}/include/fftw"
-        sd_fftw3_cflags=""
-        sd_fftw3_cxxflags=""
-        sd_fftw3_fcflags="-I${MKLROOT}/include/fftw"
-        sd_fftw3_ldflags=""
-        sd_fftw3_libs=""
-        ;;
-      fftw3-mpi)
-        if test "${sd_mpi_ok}" = "yes"; then
-          SD_FFTW3_DETECT
-          if test "${sd_fftw3_ok}" = "yes" -a "${sd_fftw3_mpi_ok}" = "yes"; then
-            sd_fft_cppflags="${sd_fftw3_cppflags}"
-            sd_fft_cflags="${sd_fftw3_cflags}"
-            sd_fft_fcflags="${sd_fftw3_fcflags}"
-            sd_fft_ldflags="${sd_fftw3_ldflags}"
-            sd_fft_libs="${sd_fftw3_libs}"
-            sd_fft_ok="yes"
+          if test "${sd_mpi_ok}" = "yes" -a "${sd_fftw3_mpi_ok}" = "yes"; then
             AC_DEFINE([HAVE_FFTW3_MPI], 1,
               [Define to 1 if you have a MPI-enabled FFTW3 library.])
           fi
@@ -146,6 +115,10 @@ AC_DEFUN([SD_FFT_DETECT], [
           sd_fft_ok="yes"
           AC_DEFINE([HAVE_FFTW3_THREADS], 1,
             [Define to 1 if you have a threads-enabled FFTW3 library.])
+          if test "${sd_mpi_ok}" = "yes" -a "${sd_fftw3_mpi_ok}" = "yes"; then
+            AC_DEFINE([HAVE_FFTW3_MPI], 1,
+              [Define to 1 if you have a MPI-enabled FFTW3 library.])
+          fi
         fi
         ;;
       goedecker)
@@ -335,15 +308,7 @@ AC_DEFUN([_SD_FFT_INIT_FLAVORS], [
 
   # Prepend FFTW3 if available
   if test "${sd_fftw3_init}" != "" -a "${sd_fftw3_enable}" != "no"; then
-    sd_fft_selected_flavors="fftw3 fftw3-threads ${sd_fft_selected_flavors}"
-    if test "${sd_mpi_ok}" = "yes"; then
-      sd_fft_selected_flavors="fftw3-mpi ${sd_fft_selected_flavors}"
-    fi
-  fi
-
-  # Prepend FFTW3-in-MKL if MKL is present and FFTW3 is not set
-  if test "${tmp_linalg_has_mkl}" != "" -a "${sd_fftw3_enable}" = "no"; then
-    sd_fft_selected_flavors="fftw3-mkl ${sd_fft_selected_flavors}"
+    sd_fft_selected_flavors="fftw3-threads fftw3 ${sd_fft_selected_flavors}"
   fi
 
   # Prepend DFTI if linear algebra is MKL
