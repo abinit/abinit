@@ -1,6 +1,6 @@
 ## v9.0
   
-Version 9.0, released on March 15, 2020.
+Version 9.0, released on March 28, 2020.
 List of changes with respect to version 8.10.
 
 Many thanks to the contributors to the ABINIT project between
