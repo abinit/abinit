@@ -102,13 +102,13 @@ with many tests provided.
 List of tests: [[test:v9_50]], [[test:v9_61]] and [[test:v8_44]].
 
 New input variables: [[dvdb_qcache_mb]], 
-[[eph_phrange]], [[eph_tols_idelta]], [[eph_ecutosc]], [[eph_np_pqbks]], [[eph_restart]], 
+[[eph_phrange]], [[eph_tols_idelta]], [[eph_ecutosc]], [[eph_restart]], 
 [[eph_stern]], [[eph_use_ftinterp]],
 [[getdvdb]], [[getdvdb_path]], [[getkerange_path]],
 [[irddvdb]], [[prteliash]], [[sigma_bsum_range]], [[sigma_erange]],
 [[sigma_ngkpt]], [[sigma_nshiftk]], [[sigma_shiftk]], [[symv1scf]].
 
-Note that thew new EPH code is interfaced with ABINIT and the implementation differs from the one implemented in anaddb.
+Note that the new EPH processing unit of ABINIT [[optdriver]]=7 has a different implementation than the one implemented in anaddb.
 A new set of tutorials are in preparation and they will be made available in the forthcoming versions. 
 For further details about the implementation, please consult this [preprint](https://arxiv.org/abs/2002.00630).
 
@@ -148,7 +148,8 @@ fully in the Sec. 3.7 of [[cite:Gonze2020]], as follows.
 Also, the DMFT k-resolved spectral function is available (MR 529, 490).
 
 List of tests: paral#84,85,86,99, v8#01.
-New input variables: [[dmft_charge_prec]]. Also [[dmft_occnd_imag]], but only for keeping backward compatibility for tests.
+New input variables: [[dmft_charge_prec]] and [[dmft_kspectral_func]] (test to be provided for the latter). 
+Also [[dmft_occnd_imag]], but only for keeping backward compatibility for tests.
 
 By T. Cavignac, B. Amadon and O. Gingras.
 
