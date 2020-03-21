@@ -14982,7 +14982,7 @@ Variable(
     text=r"""
 Print out VASP-style PROCAR files, to generate "fat band" structures, where the
 thickness is proportional to the atomic and angular momentum character. Used in
-particular with the [https://github.com/romerogroup/pyprocar](pyprocar)
+particular with the [pyprocar](https://github.com/romerogroup/pyprocar]
 package. The same fractions are used as with [[prtdos]] 3, but output in the
 VASP format. Attempts have been made to support spin polarized and spinor
 calculations, but there may be subtle inconsistencies
