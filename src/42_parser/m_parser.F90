@@ -26,17 +26,16 @@ module m_parser
  use m_errors
  use m_atomdata
  use m_xmpi
- !use m_copy
 #ifdef HAVE_NETCDF
  use netcdf
 #endif
  use m_nctk
+ !use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
 
  use m_io_tools,  only : open_file
  use m_fstrings,  only : sjoin, strcat, itoa, inupper, ftoa, tolower, toupper, next_token, &
                          endswith, char_count, find_digit !, startswith,
  use m_geometry,  only : xcart2xred, det3r, mkrdim
- !use m_nctk,      only : write_var_netcdf    ! FIXME Deprecated
 
  implicit none
 

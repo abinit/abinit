@@ -1,7 +1,7 @@
 ################################################
 # TEST STRUCTURE VARIABLE. SEE DESCRIPTION BELOW
 ################################################
-ndtset  3
+ndtset  4
 
 # This is just to test the prefix variables replacing the old files file.
 # Note the `varname = ""` format that will be searched by runtests,py to decide whether
@@ -37,6 +37,8 @@ structure2 "abifile:t04.outdata_DS1_GSR.nc"
 
 structure3 "abifile:t04.outdata_DS1_HIST.nc"
 
+structure4 "abivars:mgb2.ucell"
+
 # Global variables
 ngkpt   4 4 4
 nshiftk 1
@@ -62,6 +64,7 @@ nband   8
 #%%   pw_cp 12mg.pspnc 12mg.pspnc;
 #%%   pw_cp 05b.soft_tm 05b.soft_tm;
 #%%   iw_cp t04_POSCAR t04_POSCAR;
+#%%   iw_cp mgb2.ucell mgb2.ucell;
 #%%   iw_cp t04.outdata_DS1_GSR.nc t04.outdata_DS1_GSR.nc;
 #%%   iw_cp t04.outdata_DS1_HIST.nc t04.outdata_DS1_HIST.nc;
 #%% [extra_info]
@@ -74,6 +77,7 @@ nband   8
 #%%
 #%%    1) An external POSCAR file with symbols (VASP5 format)
 #%%    2) An external netcdf file produced by Abinit.
+#%%    3) An external txt file with Abinit variables.
 #%%
 #%%  Test also the prefix variables that replace the old files file.
 #%% 

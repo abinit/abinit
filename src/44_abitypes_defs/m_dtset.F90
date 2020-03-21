@@ -2983,7 +2983,7 @@ subroutine macroin2(dtsets,ndtset_alloc)
 !scalars
  integer,intent(in) :: ndtset_alloc
 !arrays
- type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc) !vz_i
+ type(dataset_type),intent(inout) :: dtsets(0:ndtset_alloc)
 
 !Local variables -------------------------------
 !scalars
@@ -3046,7 +3046,6 @@ subroutine chkvars(string)
 
 
 !Here, list all admitted variable names (max 10 per line, to fix the ideas)
-!Note: Do not use "double quotation mark" for the string since it triggers a bug in docchk.py (abirules script)
 !<ABINIT_VARS>
 !A
  list_vars=                 ' accuracy acell adpimd adpimd_gamma'
@@ -3294,7 +3293,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' sqrt end'
 !</ABINIT_OPERATORS>
 
-!Transform to upper case
+ ! Transform to upper case
  call inupper(list_vars)
  call inupper(list_logicals)
  call inupper(list_strings)

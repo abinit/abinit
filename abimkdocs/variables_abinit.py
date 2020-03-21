@@ -712,11 +712,14 @@ The box cutoff ratio is the ratio between the wavefunction plane wave sphere
 radius, and the radius of the sphere that can be inserted in the FFT box, in reciprocal space.
 
 In order for the density to be exact (in the case of the plane wave part, not the PAW on-site terms),
-this ratio should be at least two. If one uses a smaller ratio, one will gain speed, at the expense of accuracy.
+this ratio should be at least two. If one uses a smaller ratio (e.g 1.5), one will gain speed, at the expense of accuracy.
 In the case of pure ground state calculation (e.g. for the determination of geometries), this is sensible.
+It should also be noticed that using a value of [[boxcutmin]] too close to one can lead to runtime errors in the FFT routines.
+A value larger than to 1.1 is therefore recommended.
 
 Prior to v8.9, the use of boxcutmin for DFPT calculations was forbidden. However, after testing, it was seen that
-the deterioration in phonon band structures could be alleviated to a large extent by the imposition of the Acoustic Sum Rule [[asr]].
+the deterioration in phonon band structures could be alleviated to a large extent by the imposition
+of the Acoustic Sum Rule [[asr]].
 """,
 ),
 
@@ -21197,7 +21200,7 @@ the external file and need not to be specified in the ABINIT input.
 At present ( |today| ), the allowed values for **filetype** are:
 
 * abifile --> An output file produced by Abinit (only netcdf files are supported for the time being)
-* abivars --> An txt input file with Abinit variables
+* abivars --> A txt input file with Abinit variables
 * poscar  --> POSCAR files in VASP-5 format (element symbol after the atomic position is required).
 
 Some examples will help clarify.
@@ -21220,12 +21223,11 @@ To read the structure from an external file with the structure in Abinit format,
 
     structure "abivars:my_text_file"
 
-
-where *my_text_file* contains e.g.
+where *my_text_file* specifies the lattice in terms [[acell], ([[rprimd]] or [[angdeg]])
+while the atomic positions are specified with [[natom]] and [[xred_symbols]].
 
 ```
 # MgB2 lattice structure
-natom   3
 
 acell   2*3.086  3.523 Angstrom
 
@@ -21233,11 +21235,14 @@ rprim   0.866025403784439  0.5  0.0
        -0.866025403784439  0.5  0.0
         0.0                0.0  1.0
 
-# Atomic positions
+natom   3
+
+# Reduced positions followed by element symbol.
+
 xred_symbols
- 0.0000000000E+00  0.0000000000E+00  0.0     Mg
- 1/3               2/3               0.5     B
- 2/3               1/3               0.5     B
+ 0.0  0.0  0.0  Mg
+ 1/3  2/3  0.5  B
+ 2/3  1/3  0.5  B
 ```
 
 
