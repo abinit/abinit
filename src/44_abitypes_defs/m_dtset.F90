@@ -114,7 +114,7 @@ type, public :: dataset_type
  integer :: dmft_read_occnd
  integer :: dmft_solv
  integer :: dmft_t2g
- integer :: dmft_x2my2d
+!integer :: dmft_x2my2d
  integer :: dmftbandi
  integer :: dmftbandf
  integer :: dmftcheck
@@ -1329,7 +1329,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%dmft_rslf          = dtin%dmft_rslf
  dtout%dmft_solv          = dtin%dmft_solv
  dtout%dmft_t2g           = dtin%dmft_t2g
- dtout%dmft_x2my2d        = dtin%dmft_x2my2d
+!dtout%dmft_x2my2d        = dtin%dmft_x2my2d
  dtout%dmft_tolfreq       = dtin%dmft_tolfreq
  dtout%dmft_tollc         = dtin%dmft_tollc
  dtout%dmftbandi          = dtin%dmftbandi
@@ -3054,7 +3054,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dmft_charge_prec dmft_dc dmft_entropy dmft_iter dmft_kspectralfunc'
  list_vars=trim(list_vars)//' dmft_mxsf dmft_nlambda dmft_nwli dmft_nwlo'
  list_vars=trim(list_vars)//' dmft_occnd_imag dmft_read_occnd dmft_rslf dmft_solv'
- list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d'
+!list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g dmft_x2my2d'
+ list_vars=trim(list_vars)//' dmft_tolfreq dmft_tollc dmft_t2g'
  list_vars=trim(list_vars)//' dosdeltae dtion dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dynamics dynimage'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
  list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_phon'
@@ -3065,7 +3066,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' efmas_dim efmas_dirs efmas_n_dirs efmas_ntheta'
  list_vars=trim(list_vars)//' efield einterp elph2_imagden energy_reference enunit'
  list_vars=trim(list_vars)//' eph_ecutosc eph_extrael eph_fermie eph_frohlich eph_frohlichm eph_fsewin eph_fsmear '
- list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_np_pqbks'
+!list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine eph_np_pqbks'  ! XG20200321, please provide testing for eph_np_pqbks 
+ list_vars=trim(list_vars)//' eph_intmeth eph_mustar eph_ngqpt_fine'
  list_vars=trim(list_vars)//' eph_phrange eph_tols_idelta '
  list_vars=trim(list_vars)//' eph_restart eph_stern eph_task eph_transport eph_use_ftinterp'
  list_vars=trim(list_vars)//' eshift esmear exchmix exchn2n3d extrapwf'
@@ -3077,7 +3079,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' fit_rangePower fit_SPCoupling fit_SPC_maxS fit_tolMSDE fit_tolMSDF fit_tolMSDFS fit_tolMSDS'
  list_vars=trim(list_vars)//' fockoptmix focktoldfe fockdownsampling'
  list_vars=trim(list_vars)//' freqim_alpha freqremax freqremin freqspmax'
- list_vars=trim(list_vars)//' freqspmin friction frohl_params frzfermi fxcartfactor'
+ list_vars=trim(list_vars)//' freqspmin friction frohl_params frzfermi fxcartfactor'  ! XG20200321, please do not reintroduce frohl_params without documenting it, and testing it
+ list_vars=trim(list_vars)//' freqspmin friction frzfermi fxcartfactor'
  list_vars=trim(list_vars)//' f4of2_sla f6of2_sla'
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
@@ -3213,7 +3216,8 @@ subroutine chkvars(string)
 !T
  list_vars=trim(list_vars)//' td_maxene td_mexcit tfkinfunc temperature test_effpot tfw_toldfe tim1rev timopt tl_nprccg tl_radius'
  list_vars=trim(list_vars)//' tmesh tmpdata_prefix tnons toldfe tolmxde toldff tolimg tolmxf tolrde tolrff tolsym'
- list_vars=trim(list_vars)//' tolvrs tolwfr tphysel transport_ngkpt ts_option tsmear typat'
+ list_vars=trim(list_vars)//' tolvrs tolwfr tphysel transport_ngkpt ts_option tsmear typat' ! XG20200321, please do not reintroduce transport_ngkpt without documenting it, and testing it 
+ list_vars=trim(list_vars)//' tolvrs tolwfr tphysel ts_option tsmear typat'
 !U
  list_vars=trim(list_vars)//' ucrpa ucrpa_bands ucrpa_window udtset upawu usepead usedmatpu '
  list_vars=trim(list_vars)//' usedmft useexexch usekden use_nonscf_gkk usepawu usepotzero'

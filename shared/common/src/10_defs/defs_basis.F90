@@ -505,7 +505,7 @@ CONTAINS  !=====================================================================
 
   write(my_unt,'(a)')' DATA TYPE INFORMATION: '
 
-  write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8,/),a,e15.8)')&
+  write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8e3,/),a,e15.8e3)')&
     ' REAL:      Data type name: REAL(DP) ',&
     '            Kind value: ',KIND(0.0_dp),&
     '            Precision:  ',PRECISION(0.0_dp),&
