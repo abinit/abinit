@@ -3,6 +3,13 @@
 
   ndtset  2
 
+## Although this is not activated in the present input file, one should simply
+## uncomment the next lines to use the new way of launching ABINIT, without the "files" file.
+# pseudos = '20ca_sic.drh, 8o_sic.drh'
+# output_file = 't20.out'
+## Possibly, the path to the pseudopotential directory might be defined
+# pp_dirpath = '../../Psps_for_tests'
+
 # Dataset 1 : self-consistent ground state calculation
 
  kptopt1  1
