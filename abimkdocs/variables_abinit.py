@@ -14970,6 +14970,26 @@ No output is provided by a negative value of this variable.
 ),
 
 Variable(
+    abivarname="prtprocar",
+    varset="dev",
+    vartype="integer",
+    topics=['printing_prgs'],
+    dimensions="scalar",
+    defaultval=0,
+    mnemonics="PRinT PROCAR file",
+    characteristics=['[[DEVELOP]]'],
+    added_in_version="before_v9",
+    text=r"""
+Print out VASP-style PROCAR files, to generate "fat band" structures, where the
+thickness is proportional to the atomic and angular momentum character. Used in
+particular with the [pyprocar](https://github.com/romerogroup/pyprocar]
+package. The same fractions are used as with [[prtdos]] 3, but output in the
+VASP format. Attempts have been made to support spin polarized and spinor
+calculations, but there may be subtle inconsistencies
+""",
+),
+
+Variable(
     abivarname="prtpsps",
     varset="files",
     vartype="integer",
