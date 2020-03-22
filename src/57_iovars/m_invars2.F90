@@ -1323,25 +1323,6 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'dvdb_add_lr',tread,'INT')
  if(tread==1) dtset%dvdb_add_lr = intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_freez_disp_addStrain',tread,'INT')
- if(tread==1) dtset%ph_freez_disp_addStrain=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_freez_disp_option',tread,'INT')
- if(tread==1) dtset%ph_freez_disp_option=intarr(1)
-
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_freez_disp_nampl',tread,'INT')
- if(tread==1) dtset%ph_freez_disp_nampl=intarr(1)
-
- if(dtset%ph_freez_disp_nampl > 0)then
-   ABI_MALLOC(dtset%ph_freez_disp_ampl, (5, dtset%ph_freez_disp_nampl))
-   ABI_CHECK(5 * dtset%ph_freez_disp_nampl <= marr, "5 * dtset%ph_nampl > marr!")
-   call intagm(dprarr,intarr,jdtset,marr,5*dtset%ph_freez_disp_nampl,string(1:lenstr),'ph_freez_disp_ampl',tread,'DPR')
-   if (tread==0) then
-     MSG_ERROR("When ph_freez_disp_nampl > 0, ph_freez_disp_ampl should be specified")
-   end if
-   dtset%ph_freez_disp_ampl=reshape(dprarr(1:5*dtset%ph_freez_disp_nampl),[5,dtset%ph_freez_disp_nampl])
- end if
-
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'ph_ndivsm',tread,'INT')
  if(tread==1) dtset%ph_ndivsm=intarr(1)
 

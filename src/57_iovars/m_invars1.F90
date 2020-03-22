@@ -2782,10 +2782,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%chneut = 1
    dtsets(idtset)%symdynmat = 1
 
-   dtsets(idtset)%ph_freez_disp_addStrain = 0
-   dtsets(idtset)%ph_freez_disp_option = 0
-   dtsets(idtset)%ph_freez_disp_nampl = 0
-   if(dtsets(idtset)%ph_freez_disp_nampl>0)dtsets(idtset)%ph_freez_disp_ampl = zero
    dtsets(idtset)%ph_ndivsm = 20
    dtsets(idtset)%ph_nqpath = 0
    dtsets(idtset)%ph_ngqpt = [20, 20, 20]

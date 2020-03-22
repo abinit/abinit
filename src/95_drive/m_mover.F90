@@ -72,7 +72,7 @@ module m_mover
  use m_pred_steepdesc,     only : pred_steepdesc
  use m_pred_simple,        only : pred_simple, prec_simple
  use m_pred_hmc,           only : pred_hmc
- use m_generate_training_set, only : generate_training_set
+!use m_generate_training_set, only : generate_training_set
  use m_wvl_wfsinp, only : wvl_wfsinp_reformat
  use m_wvl_rho,      only : wvl_mkrho
  use m_effective_potential_file, only : effective_potential_file_mapHistToRef
@@ -430,26 +430,28 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !### 07. Fill the history of the first SCFCV
 
  if (ab_mover%ionmov==26)then
+
 !Tdep call need to merge with adewandre branch
- else if (ab_mover%ionmov==27)then
-   if(present(filename_ddb))then
-     fname_ddb = trim(filename_ddb)
-   else
-     fname_ddb = trim(ab_mover%filnam_ds(3))//'_DDB'
-   end if
-   INQUIRE(FILE=filename, EXIST=file_exists)
+! XG 20200322 : This part was not documented, not tested for more than one year.
+! else if (ab_mover%ionmov==27)then
+!   if(present(filename_ddb))then
+!     fname_ddb = trim(filename_ddb)
+!   else
+!     fname_ddb = trim(ab_mover%filnam_ds(3))//'_DDB'
+!   end if
+!   INQUIRE(FILE=filename, EXIST=file_exists)
 
-   call generate_training_set(acell,ab_mover%ph_freez_disp_addStrain==1,ab_mover%ph_freez_disp_ampl,&
-&                             fname_ddb,hist,ab_mover%natom,ab_mover%ph_freez_disp_nampl,ntime,&
-&                             ab_mover%ph_ngqpt,ab_mover%ph_nqshift,ab_mover%ph_freez_disp_option,&
-&                             ab_mover%ph_qshift,scfcv_args%dtset%supercell_latt,&
-&                             rprimd,ab_mover%mdtemp(2),xred,comm,DEBUG)
+!   call generate_training_set(acell,ab_mover%ph_freez_disp_addStrain==1,ab_mover%ph_freez_disp_ampl,&
+!&                             fname_ddb,hist,ab_mover%natom,ab_mover%ph_freez_disp_nampl,ntime,&
+!&                             ab_mover%ph_ngqpt,ab_mover%ph_nqshift,ab_mover%ph_freez_disp_option,&
+!&                             ab_mover%ph_qshift,scfcv_args%dtset%supercell_latt,&
+!&                             rprimd,ab_mover%mdtemp(2),xred,comm,DEBUG)
 
 
-   !Fill history with the values of xred, acell and rprimd of the first configuration
-   acell(:)   =hist%acell(:,1)
-   rprimd(:,:)=hist%rprimd(:,:,1)
-   xred(:,:)  =hist%xred(:,:,1)
+!   !Fill history with the values of xred, acell and rprimd of the first configuration
+!   acell(:)   =hist%acell(:,1)
+!   rprimd(:,:)=hist%rprimd(:,:,1)
+!   xred(:,:)  =hist%xred(:,:,1)
 
  else
 

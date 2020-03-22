@@ -834,16 +834,11 @@ type, public :: dataset_type
  integer :: symdynmat
 
 ! Phonon variables.
- integer :: ph_freez_disp_addStrain
- integer :: ph_freez_disp_option
- integer :: ph_freez_disp_nampl
  integer :: ph_ndivsm    ! = 20
  integer :: ph_nqpath    ! = 0
  integer :: ph_ngqpt(3)  ! = 0
  integer :: ph_nqshift
 
- real(dp),allocatable :: ph_freez_disp_ampl(:,:)
-  ! ph_freez_disp_ampl(5,ph_freez_disp_nampl)
  real(dp),allocatable :: ph_qshift(:,:)
   ! ph_qshift(3, ph_nqshift)
  real(dp),allocatable :: ph_qpath(:,:)
@@ -1413,14 +1408,10 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
 
  dtout%transport_ngkpt = dtin%transport_ngkpt
 
- dtout%ph_freez_disp_addStrain = dtin%ph_freez_disp_addStrain
- dtout%ph_freez_disp_option = dtin%ph_freez_disp_option
- dtout%ph_freez_disp_nampl  = dtin%ph_freez_disp_nampl
  dtout%ph_ndivsm          = dtin%ph_ndivsm
  dtout%ph_nqpath          = dtin%ph_nqpath
  dtout%ph_ngqpt           = dtin%ph_ngqpt
  if (allocated(dtin%ph_qpath)) call alloc_copy(dtin%ph_qpath, dtout%ph_qpath)
- if (allocated(dtin%ph_freez_disp_ampl)) call alloc_copy(dtin%ph_freez_disp_ampl,dtout%ph_freez_disp_ampl)
 ! end eph variables
 
  dtout%exchn2n3d          = dtin%exchn2n3d
@@ -2134,7 +2125,6 @@ subroutine dtset_free(dtset)
  ABI_SFREE(dtset%ldaminushalf)
  ABI_SFREE(dtset%lpawu)
  ABI_SFREE(dtset%nband)
- ABI_SFREE(dtset%ph_freez_disp_ampl)
  ABI_SFREE(dtset%ph_qpath)
  ABI_SFREE(dtset%ph_qshift)
  ABI_SFREE(dtset%plowan_iatom)
@@ -3164,10 +3154,6 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' pawprtdos pawprtvol pawprtwf pawprt_b pawprt_k pawspnorb pawstgylm'
  list_vars=trim(list_vars)//' pawsushat pawujat pawujrad pawujv'
  list_vars=trim(list_vars)//' pawusecp pawxcdev pimass pimd_constraint'
-!XG 20180927 : The developments for which these input variables have been introduced have barely started. They are
-!temporarily disabled, as being not documented and not tested for the v8.10 release.
-!list_vars=trim(list_vars)//' ph_freez_disp_addStrain'
-!list_vars=trim(list_vars)//' ph_freez_disp_option ph_freez_disp_nampl ph_freez_disp_ampl'
  list_vars=trim(list_vars)//' ph_intmeth ph_ndivsm ph_ngqpt ph_nqpath ph_nqshift ph_qpath'
  list_vars=trim(list_vars)//' ph_qshift ph_smear ph_wstep pitransform'
  list_vars=trim(list_vars)//' plowan_bandi plowan_bandf plowan_compute plowan_iatom plowan_it plowan_lcalc'
