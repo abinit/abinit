@@ -205,7 +205,7 @@ contains
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,verbose,writeHIST,scup_dtset)
+& effective_potential,filename_ddb,verbose,writeHIST,scup_dtset)
 
 !Arguments ------------------------------------
 !scalars
@@ -216,7 +216,7 @@ type(ab_xfh_type),intent(inout) :: ab_xfh
 type(effective_potential_type),optional,intent(inout) :: effective_potential
 logical,optional,intent(in) :: verbose
 logical,optional,intent(in) :: writeHIST
-!character(len=fnlen),optional,intent(in) :: filename_ddb
+character(len=fnlen),optional,intent(in) :: filename_ddb
 !arrays
 real(dp),intent(inout) :: acell(3)
 real(dp), intent(in),target :: amu_curr(:) !(scfcv%dtset%ntypat)
@@ -242,7 +242,7 @@ character(len=500) :: message
 !character(len=500) :: dilatmx_errmsg
 character(len=8) :: stat4xml
 character(len=35) :: fmt
-character(len=fnlen) :: filename,name_file
+character(len=fnlen) :: filename,fname_ddb,name_file
 character(len=500) :: MY_NAME = "mover"
 real(dp) :: favg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
@@ -251,6 +251,7 @@ logical :: change,useprtxfase
 logical :: skipcycle
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
+logical :: file_exists
 real(dp) :: minE,wtime_step,now,prev
 !arrays
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
@@ -431,15 +432,18 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
  if (ab_mover%ionmov==26)then
 
 !Tdep call need to merge with adewandre branch
-! XG 20200322 : This part was not documented, not tested for more than one year.
-! else if (ab_mover%ionmov==27)then
-!   if(present(filename_ddb))then
-!     fname_ddb = trim(filename_ddb)
-!   else
-!     fname_ddb = trim(ab_mover%filnam_ds(3))//'_DDB'
-!   end if
-!   INQUIRE(FILE=filename, EXIST=file_exists)
+  else if (ab_mover%ionmov==27)then
+    if(present(filename_ddb))then
+      fname_ddb = trim(filename_ddb)
+    else
+      fname_ddb = trim(ab_mover%filnam_ds(3))//'_DDB'
+    end if
+    INQUIRE(FILE=filename, EXIST=file_exists)
 
+    MSG_ERROR("This section has been disabled, ph_freez_disp is not defined in main ABINIT")
+
+! XG 20200322 : The input variables ph_freez_disp are not documented neither tested, so they
+! have been removed from the allowed list in the parser. Also, you should not be here !
 !   call generate_training_set(acell,ab_mover%ph_freez_disp_addStrain==1,ab_mover%ph_freez_disp_ampl,&
 !&                             fname_ddb,hist,ab_mover%natom,ab_mover%ph_freez_disp_nampl,ntime,&
 !&                             ab_mover%ph_ngqpt,ab_mover%ph_nqshift,ab_mover%ph_freez_disp_option,&
@@ -447,10 +451,10 @@ real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
 !&                             rprimd,ab_mover%mdtemp(2),xred,comm,DEBUG)
 
 
-!   !Fill history with the values of xred, acell and rprimd of the first configuration
-!   acell(:)   =hist%acell(:,1)
-!   rprimd(:,:)=hist%rprimd(:,:,1)
-!   xred(:,:)  =hist%xred(:,:,1)
+    !Fill history with the values of xred, acell and rprimd of the first configuration
+    acell(:)   =hist%acell(:,1)
+    rprimd(:,:)=hist%rprimd(:,:,1)
+    xred(:,:)  =hist%xred(:,:,1)
 
  else
 
