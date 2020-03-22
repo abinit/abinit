@@ -205,7 +205,7 @@ contains
 
 subroutine mover(scfcv_args,ab_xfh,acell,amu_curr,dtfil,&
 & electronpositron,rhog,rhor,rprimd,vel,vel_cell,xred,xred_old,&
-& effective_potential,filename_ddb,verbose,writeHIST,scup_dtset)
+& effective_potential,verbose,writeHIST,scup_dtset)
 
 !Arguments ------------------------------------
 !scalars
@@ -216,7 +216,7 @@ type(ab_xfh_type),intent(inout) :: ab_xfh
 type(effective_potential_type),optional,intent(inout) :: effective_potential
 logical,optional,intent(in) :: verbose
 logical,optional,intent(in) :: writeHIST
-character(len=fnlen),optional,intent(in) :: filename_ddb
+!character(len=fnlen),optional,intent(in) :: filename_ddb
 !arrays
 real(dp),intent(inout) :: acell(3)
 real(dp), intent(in),target :: amu_curr(:) !(scfcv%dtset%ntypat)
@@ -242,7 +242,7 @@ character(len=500) :: message
 !character(len=500) :: dilatmx_errmsg
 character(len=8) :: stat4xml
 character(len=35) :: fmt
-character(len=fnlen) :: filename,fname_ddb, name_file
+character(len=fnlen) :: filename,name_file
 character(len=500) :: MY_NAME = "mover"
 real(dp) :: favg
 logical :: DEBUG=.FALSE., need_verbose=.TRUE.,need_writeHIST=.TRUE.
@@ -252,7 +252,6 @@ logical :: skipcycle
 integer :: minIndex,ii,similar,conv_retcode
 integer :: iapp
 real(dp) :: minE,wtime_step,now,prev
-logical :: file_exists
 !arrays
 real(dp) :: gprimd(3,3),rprim(3,3),rprimd_prev(3,3)
 real(dp),allocatable :: fred_corrected(:,:),xred_prev(:,:)
