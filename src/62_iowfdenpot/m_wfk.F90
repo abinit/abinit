@@ -368,11 +368,24 @@ subroutine wfk_open_read(Wfk,fname,formeig,iomode,funt,comm,Hdr_out)
  Wfk%chunk_bsize = WFK_CHUNK_BSIZE
 
  Wfk%fname     = fname
+!Checking the existence of data file
+ if (.not.file_exists(fname)) then
+   ! Trick needed to run Abinit test suite in netcdf mode.
+   if (file_exists(nctk_ncify(fname))) then
+     write(std_out,"(3a)")"- File: ",trim(fname)," does not exist but found netcdf file with similar name."
+     Wfk%fname = nctk_ncify(fname)
+   end if
+   if (.not. file_exists(Wfk%fname)) then
+     MSG_ERROR('Missing data file: '//TRIM(Wfk%fname))
+   end if
+ end if
+
  Wfk%formeig   = formeig
 #ifdef DEV_MJV
-print *, ' in open read Wfk%formeig ', Wfk%formeig
+print *, ' in open read Wfk%fname formeig ',trim(Wfk%fname), Wfk%formeig, iomode
 #endif
- Wfk%iomode    = iomode; if (endswith(fname, ".nc")) wfk%iomode = IO_MODE_ETSF
+ Wfk%iomode    = iomode;
+ if (endswith(fname, ".nc")) wfk%iomode = IO_MODE_ETSF
  ! This is to test the different versions.
  !wfk%iomode    = IO_MODE_MPI
  !if (.not. endswith(fname, ".nc") .and. xmpi_comm_size == 1) wfk%iomode == IO_MODE_FORTRAN
@@ -1029,6 +1042,12 @@ subroutine wfk_ncdef_dims_vars(ncid, hdr, fform, write_hdr, iskss)
  ])
  NCF_CHECK(ncerr)
  NCF_CHECK(nctk_set_atomic_units(ncid, "eigenvalues"))
+
+ ncerr = nctk_def_arrays(ncid, [&
+   nctkarr_t("h1_matrix_elements", "dp", "two, max_number_of_states, max_number_of_states, number_of_kpoints, number_of_spins") &
+ ])
+ NCF_CHECK(ncerr)
+ NCF_CHECK(nctk_set_atomic_units(ncid, "h1_matrix_elements"))
 
  ncerr = nctk_def_arrays(ncid, nctkarr_t("coefficients_of_wavefunctions", "dp", &
    "real_or_complex_coefficients, max_number_of_coefficients, number_of_spinor_components, &
@@ -1879,7 +1898,7 @@ subroutine wfk_write_band_block(Wfk,band_block,ik_ibz,spin,sc_mode,kg_k,cg_k,eig
  integer(XMPI_OFFSET_KIND),allocatable :: bsize_frecords(:)
 #endif
 #ifdef HAVE_NETCDF
- integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr
+ integer :: kg_varid,eig_varid,occ_varid,cg_varid,ncerr,h1_varid
 #endif
 
 !************************************************************************
@@ -2237,8 +2256,19 @@ print *, ' bufsz sc_mode, xmpio_collective, xmpio_single ', bufsz, sc_mode, xmpi
      end if
 
    else if (Wfk%formeig==1) then
-     if (present(eig_k) .or. present(occ_k)) then
-       MSG_ERROR("Don't pass eig_k or occ_k when formeig==1 and ETSF-IO")
+     if (present(occ_k)) then
+       MSG_ERROR("Don't pass occ_k when formeig==1 and ETSF-IO")
+     end if
+     if (present(eig_k)) then
+!       MSG_WARNING("Don't pass eig_k when formeig==1 and ETSF-IO")
+
+       NCF_CHECK(nf90_inq_varid(wfk%fh, "h1_matrix_elements", h1_varid))
+       if (sc_mode == xmpio_collective .and. wfk%nproc > 1) then
+         NCF_CHECK(nctk_set_collective(wfk%fh, h1_varid))
+       end if
+       ncerr = nf90_put_var(wfk%fh, h1_varid, eig_k, start=[1,1,1,ik_ibz,spin], count=[2, nband_disk, nband_disk, 1, 1])
+       NCF_CHECK_MSG(ncerr, "puting h1mat_k")
+
      end if
 
    else
@@ -3034,7 +3064,7 @@ end subroutine wfk_read_eigenvalues
 !! based on a distribution of k, b, s attributed to present processor
 !!
 !! INPUTS
-!!  inpath = file name
+!!  inpath_ = file name
 !!  distrb_flags = logical mask for band, k, spins on this processor
 !!  comm = mpi communicator
 !!  formeig = flag for GS or response function format of eigenvalues
@@ -3067,7 +3097,7 @@ end subroutine wfk_read_eigenvalues
 !!
 !! SOURCE
 
-subroutine wfk_read_my_kptbands(inpath, distrb_flags, comm, ecut_eff_in,&
+subroutine wfk_read_my_kptbands(inpath_, distrb_flags, comm, ecut_eff_in,&
 &          formeig, istwfk_in, kptns_in, kptopt_in, mcg, mband_in, mband_mem_in, mpw_in,&
 &          natom_in, nkpt_in, npwarr, nspinor_in, nsppol_in, usepaw_in,&
 &          cg, kg, eigen, occ, pawrhoij, ask_accurate_)
@@ -3082,7 +3112,7 @@ subroutine wfk_read_my_kptbands(inpath, distrb_flags, comm, ecut_eff_in,&
 !arrays
  integer, intent(in) :: istwfk_in(nkpt_in)
  integer, intent(in) :: npwarr(nkpt_in)
- character(len=fnlen), intent(in) :: inpath
+ character(len=fnlen), intent(in) :: inpath_
  logical, intent(in) :: distrb_flags(nkpt_in,mband_in,nsppol_in)
  real(dp), intent(in),target :: kptns_in(3,nkpt_in)
 
@@ -3109,6 +3139,7 @@ subroutine wfk_read_my_kptbands(inpath, distrb_flags, comm, ecut_eff_in,&
  real(dp) :: ecut_eff_disk
  real(dp) :: dksqmax
  character(len=500) :: msg
+ character(len=fnlen) :: inpath
  logical :: isirred_kf, foundk
  logical :: needthisk
  logical :: convnsppol1to2
@@ -3127,6 +3158,19 @@ subroutine wfk_read_my_kptbands(inpath, distrb_flags, comm, ecut_eff_in,&
 ! *************************************************************************
 
  call cwtime(cpu, wall, gflops, "start")
+
+ inpath = inpath_
+!Checking the existence of data file
+ if (.not.file_exists(inpath)) then
+   ! Trick needed to run Abinit test suite in netcdf mode.
+   if (file_exists(nctk_ncify(inpath))) then
+     write(std_out,"(3a)")"- File: ",trim(inpath)," does not exist but found netcdf file with similar name."
+     inpath = nctk_ncify(inpath)
+   end if
+   if (.not. file_exists(inpath)) then
+     MSG_ERROR('Missing data file: '//TRIM(inpath))
+   end if
+ end if
 
 ! now attack the cg reading
  iomode = iomode_from_fname(inpath)
@@ -3556,7 +3600,7 @@ end subroutine wfk_read_my_kptbands
 !! distributed bands on all procs, not just k-points
 !!
 !! INPUTS
-!!  outpath = file name
+!!  outpath_ = file name
 !!  distrb_flags = logical mask for band, k, spins on this processor
 !!  comm = mpi communicator
 !!  formeig = flag for GS or response function format of eigenvalues
@@ -3579,17 +3623,17 @@ end subroutine wfk_read_my_kptbands
 !!
 !! SOURCE
 
-subroutine wfk_write_my_kptbands(outpath, distrb_flags, comm, &
-&          formeig, hdr, mband_in, mband_mem_in, mpw_in, nkpt_in, nspinor_in, nsppol_in, &
+subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
+&          iomode, mband_in, mband_mem_in, mpw_in, nkpt_in, nspinor_in, nsppol_in, &
 &          cg, kg, eigen, occ)
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: comm, nkpt_in, formeig
+ integer, intent(in) :: comm, nkpt_in, formeig, iomode
  integer, intent(in) :: mband_in,mband_mem_in,mpw_in, nspinor_in, nsppol_in
  type(hdr_type),intent(in) :: hdr
 !arrays
- character(len=fnlen), intent(in) :: outpath
+ character(len=fnlen), intent(in) :: outpath_
  logical, intent(in) :: distrb_flags(nkpt_in,mband_in,nsppol_in)
 
  real(dp), intent(in) :: cg(2,mpw_in*nspinor_in*mband_mem_in*nkpt_in*nsppol_in)
@@ -3600,9 +3644,9 @@ subroutine wfk_write_my_kptbands(outpath, distrb_flags, comm, &
 !Local variables-------------------------------
 !scalars
  integer :: spin,ik_rbz,nband_k
- integer :: iomode
  integer :: npw_k
  integer :: wfk_unt, ibdocc, ibdeig, icg, ikg, iband, nband_me
+ character(len=fnlen) :: outpath
  real(dp) :: cpu,wall,gflops
  type(wfk_t),target :: wfk_disk
 
@@ -3610,10 +3654,16 @@ subroutine wfk_write_my_kptbands(outpath, distrb_flags, comm, &
 
  call cwtime(cpu, wall, gflops, "start")
 
+! if iomode ncdf check that outpath has the correct termination
+ outpath = outpath_
+ if (iomode==IO_MODE_ETSF .and. .not. endswith(outpath, ".nc")) then
+   outpath = nctk_ncify(outpath)
+ end if
+
+
 #ifdef DEV_MJV
-print *, 'formeig ', formeig
+print *, 'formeig,outpath ', formeig, outpath
 #endif
- iomode = iomode_from_fname(outpath)
  wfk_unt = get_unit()
  wfk_disk%debug = .true.
  call wfk_disk%open_write(hdr,outpath,formeig,iomode,wfk_unt,comm) !xmpi_comm_self)

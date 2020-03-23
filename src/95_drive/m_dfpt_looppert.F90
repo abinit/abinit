@@ -2089,8 +2089,8 @@ print *, 'out of read_my_kptbands'
 &                nband_rbz,nkpt_rbz,&
 &                dtset%nsppol,resid)
      ! Output 1st-order wavefunctions in file
-     call wfk_write_my_kptbands(fiwf1o, distrb_flags, spacecomm, &
-&          formeig, hdr, dtset%mband, dtset%mband_mem, dtset%mpw, nkpt_rbz, dtset%nspinor, dtset%nsppol, &
+     call wfk_write_my_kptbands(fiwf1o, distrb_flags, spacecomm, formeig, hdr, dtset%iomode, &
+&          dtset%mband, dtset%mband_mem, dtset%mpw, nkpt_rbz, dtset%nspinor, dtset%nsppol, &
 &          cg1, kg1, eigen1)
 
 !     call outwf(cg1,dtset,psps,eigen1,fiwf1o,hdr,kg1,kpt_rbz,&
