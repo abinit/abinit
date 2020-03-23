@@ -233,7 +233,7 @@ subroutine pred_hmc(ab_mover,hist,itime,icycle,ntime,ncycle,mttk_vars,zDEBUG,iex
 
    !call generate_random_velocities(ab_mover,kbtemp,seed,vel,ekin)  ! this routine also computes the new kinetic energy
    !hist%vel(:,:,hist%ihist)=vel(:,:)
-   !hist%vel(:,:,hist%ihist)=0
+   hist%vel(:,:,hist%ihist)=0
    !call var2hist(acell,hist,ab_mover%natom,rprimd,xred,zDEBUG)
    !etotal_hmc_prev=epot+ekin ! either old or current potential energy + new kinetic energy
 
