@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.0.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 21h35 )
+.Starting date : Fri 20 Mar 2020.
+- ( at 07h58 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v9_t57-t58-t59-t60-t61/t60.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/TestBot_MPI1/v9_t57-t58-t59-t60-t61/t60.in
 - output file    -> t60.out
 - root for input  files -> t60i
 - root for output files -> t60o
@@ -206,17 +206,9 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
         boxcutmin      1.10000000E+00
+        ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
              ecut      3.50000000E+01 Hartree
-  eph_tols_idelta1     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta2     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta3     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta4     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta5     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta6     1.00000000E-06  1.00000000E-06
-  eph_tols_idelta7     1.00000000E-06  1.00000000E-06
-  eph_tols_idelta8     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta9     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta10    1.00000000E-12  1.00000000E-12
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -227,6 +219,16 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
       eph_intmeth8          1
       eph_intmeth9          2
       eph_intmeth10         2
+   eph_ngqpt_fine1       0    0    0
+   eph_ngqpt_fine2       4    4    4
+   eph_ngqpt_fine3       4    4    4
+   eph_ngqpt_fine4       4    4    4
+   eph_ngqpt_fine5       0    0    0
+   eph_ngqpt_fine6       4    4    4
+   eph_ngqpt_fine7       4    4    4
+   eph_ngqpt_fine8       4    4    4
+   eph_ngqpt_fine9       0    0    0
+   eph_ngqpt_fine10      0    0    0
       eph_restart           1
          eph_task1          4
          eph_task2          5
@@ -238,28 +240,16 @@ _ WF disk file :      2.763 Mbytes ; DEN or POT disk file :      0.033 Mbytes.
          eph_task8          4
          eph_task9         15
          eph_task10       -15
-   eph_ngqpt_fine1       0    0    0
-   eph_ngqpt_fine2       4    4    4
-   eph_ngqpt_fine3       4    4    4
-   eph_ngqpt_fine4       4    4    4
-   eph_ngqpt_fine5       0    0    0
-   eph_ngqpt_fine6       4    4    4
-   eph_ngqpt_fine7       4    4    4
-   eph_ngqpt_fine8       4    4    4
-   eph_ngqpt_fine9       0    0    0
-   eph_ngqpt_fine10      0    0    0
-        ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
-        ph_nqpath1          3
-        ph_nqpath2          3
-        ph_nqpath3          3
-        ph_nqpath4          3
-        ph_nqpath5          5
-        ph_nqpath6          3
-        ph_nqpath7          3
-        ph_nqpath8          3
-        ph_nqpath9          5
-        ph_nqpath10         3
+  eph_tols_idelta1     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta2     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta3     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta4     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta5     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta6     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta7     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta8     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta9     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta10    1.00000000E-12  1.00000000E-12
 -          fftalg         312
         freqspmax      7.34986508E-02 Hartree
         freqspmin     -7.34986508E-02 Hartree
@@ -310,6 +300,16 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           7
+        ph_nqpath1          3
+        ph_nqpath2          3
+        ph_nqpath3          3
+        ph_nqpath4          3
+        ph_nqpath5          5
+        ph_nqpath6          3
+        ph_nqpath7          3
+        ph_nqpath8          3
+        ph_nqpath9          5
+        ph_nqpath10         3
         prteliash           1
          prtphdos           0
             rprim      0.0000000000E+00  3.8515039575E+00  3.8515039575E+00
@@ -518,8 +518,8 @@ qpoint: [ 5.0000E-01,  5.0000E-01,  0.0000E+00] is present in the DVDB file
 All the independent perturbations are available
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/03-Li.psp
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/03-Li.psp
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/03-Li.psp
 -  Troullier-Martins psp for element  Li        Thu Oct 27 17:29:06 EDT 1994
 -  3.00000   1.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -533,8 +533,8 @@ All the independent perturbations are available
              0    1.242797
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/09-F.psp
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/09-F.psp
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/09-F.psp
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/09-F.psp
 -  Troullier-Martins psp for element  F         Thu Oct 27 17:30:08 EDT 1994
 -  9.00000   7.00000    940714                znucl, zion, pspdat
     1    1    1    1      2001   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2209,17 +2209,9 @@ All the independent perturbations are available
             acell      1.0000000000E+00  1.0000000000E+00  1.0000000000E+00 Bohr
               amu      6.94100000E+00  1.89984032E+01
         boxcutmin      1.10000000E+00
+        ddb_ngqpt        2    2    2
+       dvdb_ngqpt        2    2    2
              ecut      3.50000000E+01 Hartree
-  eph_tols_idelta1     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta2     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta3     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta4     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta5     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta6     1.00000000E-06  1.00000000E-06
-  eph_tols_idelta7     1.00000000E-06  1.00000000E-06
-  eph_tols_idelta8     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta9     1.00000000E-12  1.00000000E-12
-  eph_tols_idelta10    1.00000000E-12  1.00000000E-12
       eph_intmeth1          1
       eph_intmeth2          2
       eph_intmeth3          1
@@ -2230,6 +2222,16 @@ All the independent perturbations are available
       eph_intmeth8          1
       eph_intmeth9          2
       eph_intmeth10         2
+   eph_ngqpt_fine1       0    0    0
+   eph_ngqpt_fine2       4    4    4
+   eph_ngqpt_fine3       4    4    4
+   eph_ngqpt_fine4       4    4    4
+   eph_ngqpt_fine5       0    0    0
+   eph_ngqpt_fine6       4    4    4
+   eph_ngqpt_fine7       4    4    4
+   eph_ngqpt_fine8       4    4    4
+   eph_ngqpt_fine9       0    0    0
+   eph_ngqpt_fine10      0    0    0
       eph_restart           1
          eph_task1          4
          eph_task2          5
@@ -2241,28 +2243,16 @@ All the independent perturbations are available
          eph_task8          4
          eph_task9         15
          eph_task10       -15
-   eph_ngqpt_fine1       0    0    0
-   eph_ngqpt_fine2       4    4    4
-   eph_ngqpt_fine3       4    4    4
-   eph_ngqpt_fine4       4    4    4
-   eph_ngqpt_fine5       0    0    0
-   eph_ngqpt_fine6       4    4    4
-   eph_ngqpt_fine7       4    4    4
-   eph_ngqpt_fine8       4    4    4
-   eph_ngqpt_fine9       0    0    0
-   eph_ngqpt_fine10      0    0    0
-        ddb_ngqpt        2    2    2
-       dvdb_ngqpt        2    2    2
-        ph_nqpath1          3
-        ph_nqpath2          3
-        ph_nqpath3          3
-        ph_nqpath4          3
-        ph_nqpath5          5
-        ph_nqpath6          3
-        ph_nqpath7          3
-        ph_nqpath8          3
-        ph_nqpath9          5
-        ph_nqpath10         3
+  eph_tols_idelta1     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta2     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta3     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta4     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta5     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta6     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta7     1.00000000E-06  1.00000000E-06
+  eph_tols_idelta8     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta9     1.00000000E-12  1.00000000E-12
+  eph_tols_idelta10    1.00000000E-12  1.00000000E-12
            etotal1     0.0000000000E+00
            etotal2     0.0000000000E+00
            etotal3     0.0000000000E+00
@@ -2334,6 +2324,16 @@ P           mkmem           8
                        0.000000  0.000000  0.000000  0.000000  0.000000  0.000000
                        0.000000  0.000000
         optdriver           7
+        ph_nqpath1          3
+        ph_nqpath2          3
+        ph_nqpath3          3
+        ph_nqpath4          3
+        ph_nqpath5          5
+        ph_nqpath6          3
+        ph_nqpath7          3
+        ph_nqpath8          3
+        ph_nqpath9          5
+        ph_nqpath10         3
         prteliash           1
          prtphdos           0
             rprim      0.0000000000E+00  3.8515039575E+00  3.8515039575E+00
@@ -2511,10 +2511,10 @@ P           mkmem           8
 - the licence allows the authors to put it on the Web).
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2005
 -
-- Proc.   0 individual time (sec): cpu=         27.8  wall=         30.2
+- Proc.   0 individual time (sec): cpu=         23.6  wall=         25.3
 
 ================================================================================
 
  Calculation completed.
 .Delivered  16 WARNINGs and  15 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         27.8  wall=         30.2
++Overall time at end (sec) : cpu=         23.6  wall=         25.3

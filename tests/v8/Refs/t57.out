@@ -1,5 +1,5 @@
 
-.Version 9.0.0 of ABINIT 
+.Version 9.0.2 of ABINIT 
 .(MPI version, prepared for a x86_64_linux_gnu9.2 computer) 
 
 .Copyright (C) 1998-2020 ABINIT group . 
@@ -14,10 +14,10 @@
  acknowledgments of the ABINIT effort.
  For more information, see https://www.abinit.org .
 
-.Starting date : Mon 24 Feb 2020.
-- ( at 16h32 )
+.Starting date : Fri 20 Mar 2020.
+- ( at 07h53 )
   
-- input  file    -> /home/gmatteo/git_repos/abinit/_abiref_gnu9.2_openmpi/tests/Test_suite/v8_t57/t57.in
+- input  file    -> /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/TestBot_MPI1/v8_t57/t57.in
 - output file    -> t57.out
 - root for input  files -> t57i
 - root for output files -> t57o
@@ -146,7 +146,19 @@ _ WF disk file :      0.281 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
            chneut4          1
            chneut5          1
            chneut6          0
+        ddb_ngqpt1       0    0    0
+        ddb_ngqpt2       0    0    0
+        ddb_ngqpt3       0    0    0
+        ddb_ngqpt4       0    0    0
+        ddb_ngqpt5       0    0    0
+        ddb_ngqpt6       1    1    1
            diemac      6.00000000E+00
+       dvdb_ngqpt1       0    0    0
+       dvdb_ngqpt2       0    0    0
+       dvdb_ngqpt3       0    0    0
+       dvdb_ngqpt4       0    0    0
+       dvdb_ngqpt5       0    0    0
+       dvdb_ngqpt6       1    1    1
              ecut      3.00000000E+01 Hartree
     eph_frohlichm1          0
     eph_frohlichm2          0
@@ -160,18 +172,6 @@ _ WF disk file :      0.281 Mbytes ; DEN or POT disk file :      0.252 Mbytes.
          eph_task4          1
          eph_task5          1
          eph_task6          6
-        ddb_ngqpt1       0    0    0
-        ddb_ngqpt2       0    0    0
-        ddb_ngqpt3       0    0    0
-        ddb_ngqpt4       0    0    0
-        ddb_ngqpt5       0    0    0
-        ddb_ngqpt6       1    1    1
-       dvdb_ngqpt1       0    0    0
-       dvdb_ngqpt2       0    0    0
-       dvdb_ngqpt3       0    0    0
-       dvdb_ngqpt4       0    0    0
-       dvdb_ngqpt5       0    0    0
-       dvdb_ngqpt6       1    1    1
 -          fftalg         312
            getddb1          0
            getddb2          0
@@ -472,8 +472,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -487,8 +487,8 @@ meta: {optdriver: 0, ionmov: 0, optcell: 0, iscf: 7, paral_kgb: 0, }
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1525,8 +1525,8 @@ meta: {optdriver: 1, rfelfd: 2, }
          ecut(hartree)=     30.000   => boxcut(ratio)=   2.00901
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -1540,8 +1540,8 @@ meta: {optdriver: 1, rfelfd: 2, }
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2004,8 +2004,8 @@ meta: {optdriver: 7, eph_task: 6, }
  The interatomic forces have been obtained
 
 --- Pseudopotential description ------------------------------------------------
-- pspini: atom type   1  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Ca.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/Ca.psp8
+- pspini: atom type   1  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Ca.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/Ca.psp8
 - Ca    ONCVPSP-3.2.3.1  r_core=   1.45885   1.45885   1.85192
 - 20.00000  10.00000    170504                znucl, zion, pspdat
     8   11    2    4       400   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2019,8 +2019,8 @@ meta: {optdriver: 7, eph_task: 6, }
              2   -3.406671   -1.078890
  pspatm: atomic psp has been read  and splines computed
 
-- pspini: atom type   2  psp file is /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
-- pspatm: opening atomic psp file    /home/gmatteo/git_repos/abinit/tests/Psps_for_tests/O.psp8
+- pspini: atom type   2  psp file is /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/O.psp8
+- pspatm: opening atomic psp file    /home/buildbot/bb/ABINIT/abiref_gnu_9.2_openmpi/trunk_gonze-9.0/tests/Psps_for_tests/O.psp8
 - O     ONCVPSP  r_core=  1.36  1.46  1.26
 -  8.00000   6.00000    151103                znucl, zion, pspdat
     8   11    2    4       600   0.00000      pspcod,pspxc,lmax,lloc,mmax,r2well
@@ -2081,7 +2081,19 @@ meta: {optdriver: 7, eph_task: 6, }
            chneut4          1
            chneut5          1
            chneut6          0
+        ddb_ngqpt1       0    0    0
+        ddb_ngqpt2       0    0    0
+        ddb_ngqpt3       0    0    0
+        ddb_ngqpt4       0    0    0
+        ddb_ngqpt5       0    0    0
+        ddb_ngqpt6       1    1    1
            diemac      6.00000000E+00
+       dvdb_ngqpt1       0    0    0
+       dvdb_ngqpt2       0    0    0
+       dvdb_ngqpt3       0    0    0
+       dvdb_ngqpt4       0    0    0
+       dvdb_ngqpt5       0    0    0
+       dvdb_ngqpt6       1    1    1
              ecut      3.00000000E+01 Hartree
     eph_frohlichm1          0
     eph_frohlichm2          0
@@ -2095,18 +2107,6 @@ meta: {optdriver: 7, eph_task: 6, }
          eph_task4          1
          eph_task5          1
          eph_task6          6
-        ddb_ngqpt1       0    0    0
-        ddb_ngqpt2       0    0    0
-        ddb_ngqpt3       0    0    0
-        ddb_ngqpt4       0    0    0
-        ddb_ngqpt5       0    0    0
-        ddb_ngqpt6       1    1    1
-       dvdb_ngqpt1       0    0    0
-       dvdb_ngqpt2       0    0    0
-       dvdb_ngqpt3       0    0    0
-       dvdb_ngqpt4       0    0    0
-       dvdb_ngqpt5       0    0    0
-       dvdb_ngqpt6       1    1    1
            etotal1    -5.5386471108E+01
            etotal2    -2.0593241427E+01
            etotal3    -5.0518883538E+01
@@ -2414,10 +2414,10 @@ P          mk1mem6          2
 - The licence allows the authors to put it on the Web.
 - DOI and bibtex: see https://docs.abinit.org/theory/bibliography/#gonze2009
 -
-- Proc.   0 individual time (sec): cpu=         44.0  wall=         45.2
+- Proc.   0 individual time (sec): cpu=         44.4  wall=         47.0
 
 ================================================================================
 
  Calculation completed.
 .Delivered  24 WARNINGs and  62 COMMENTs to log file.
-+Overall time at end (sec) : cpu=         44.0  wall=         45.2
++Overall time at end (sec) : cpu=         44.4  wall=         47.0

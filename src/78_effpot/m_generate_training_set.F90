@@ -3,6 +3,8 @@
 !!  m_generate_training_set
 !!
 !! FUNCTION
+!! XG20200322 : Was initiated by Alexandre Martin, but not tested, not documented, perhaps not completed ?!? So, should
+!! be removed at some point ...
 !!
 !!
 !! COPYRIGHT

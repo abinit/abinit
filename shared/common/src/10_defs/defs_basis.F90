@@ -214,6 +214,7 @@ module defs_basis
 !Revised fundamental constants from http://physics.nist.gov/cuu/Constants/index.html
 !(from 2006 least squares adjustment)
  real(dp), parameter :: Bohr_Ang=0.52917720859_dp    ! 1 Bohr, in Angstrom
+ real(dp), parameter :: Ang_Bohr = one / Bohr_Ang  ! 1 Angstrom in Bohr
  real(dp), parameter :: Bohr_meter=Bohr_Ang * 1.d-10 ! 1 Bohr in meter
  real(dp), parameter :: Ha_cmm1=219474.6313705_dp  ! 1 Hartree, in cm^-1
  real(dp), parameter :: Ha_eV=27.21138386_dp ! 1 Hartree, in eV
@@ -504,7 +505,7 @@ CONTAINS  !=====================================================================
 
   write(my_unt,'(a)')' DATA TYPE INFORMATION: '
 
-  write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8,/),a,e15.8)')&
+  write(my_unt,'(a,/,2(a,i6,/),2(a,e15.8e3,/),a,e15.8e3)')&
     ' REAL:      Data type name: REAL(DP) ',&
     '            Kind value: ',KIND(0.0_dp),&
     '            Precision:  ',PRECISION(0.0_dp),&

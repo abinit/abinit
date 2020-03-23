@@ -561,8 +561,8 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
        end if
        cond_string(1)='usedmft' ; cond_values(1)=1
        call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_t2g',dt%dmft_t2g,2,(/0,1/),iout)
-       cond_string(1)='usedmft' ; cond_values(1)=1
-       call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_x2my2d',dt%dmft_x2my2d,2,(/0,1/),iout)
+!      cond_string(1)='usedmft' ; cond_values(1)=1
+!      call chkint_eq(0,1,cond_string,cond_values,ierr,'dmft_x2my2d',dt%dmft_x2my2d,2,(/0,1/),iout)
        if (dt%dmft_solv>=4.and.dt%ucrpa==0.and.dt%dmft_solv/=9) then
          cond_string(1)='usedmft' ; cond_values(1)=1
          call chkint_ge(0,1,cond_string,cond_values,ierr,'dmftqmc_l',dt%dmftqmc_l,1,iout)
@@ -1136,7 +1136,7 @@ subroutine chkinp(dtsets,iout,mpi_enregs,ndtset,ndtset_alloc,npsp,pspheads,comm)
 
    ! ionmov
    call chkint_eq(0,0,cond_string,cond_values,ierr,'ionmov',&
-     dt%ionmov,24,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,21,22,23,24,25,26,27/),iout)
+     dt%ionmov,23,(/0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,20,21,22,23,24,25,26/),iout)
 
    ! When optcell/=0, ionmov must be 2, 3, 13, 22 or 25 (except if imgmov>0)
    if(dt%optcell/=0)then
