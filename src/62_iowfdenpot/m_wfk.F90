@@ -3624,12 +3624,12 @@ end subroutine wfk_read_my_kptbands
 !! SOURCE
 
 subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
-&          iomode, mband_in, mband_mem_in, mpw_in, nkpt_in, nspinor_in, nsppol_in, &
+&          iomode_, mband_in, mband_mem_in, mpw_in, nkpt_in, nspinor_in, nsppol_in, &
 &          cg, kg, eigen, occ)
 
 !Arguments ------------------------------------
 !scalars
- integer, intent(in) :: comm, nkpt_in, formeig, iomode
+ integer, intent(in) :: comm, nkpt_in, formeig, iomode_
  integer, intent(in) :: mband_in,mband_mem_in,mpw_in, nspinor_in, nsppol_in
  type(hdr_type),intent(in) :: hdr
 !arrays
@@ -3645,6 +3645,7 @@ subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
 !scalars
  integer :: spin,ik_rbz,nband_k
  integer :: npw_k
+ integer :: iomode
  integer :: wfk_unt, ibdocc, ibdeig, icg, ikg, iband, nband_me
  character(len=fnlen) :: outpath
  real(dp) :: cpu,wall,gflops
@@ -3656,8 +3657,12 @@ subroutine wfk_write_my_kptbands(outpath_, distrb_flags, comm, formeig, hdr,&
 
 ! if iomode ncdf check that outpath has the correct termination
  outpath = outpath_
+ iomode = iomode_
  if (iomode==IO_MODE_ETSF .and. .not. endswith(outpath, ".nc")) then
    outpath = nctk_ncify(outpath)
+ else
+! adjust for mpiio if needed
+   iomode = iomode_from_fname(outpath)
  end if
 
 
