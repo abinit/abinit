@@ -449,6 +449,7 @@ print *, 'zeroing ipw ', ipw
 
 #ifdef DEV_MJV
 print *, ' vtowfk isppol.ikpt, nband_me ', isppol, ikpt, nband_me, iband, iband_me 
+print *, 'usedcwavef ', usedcwavef
 print *, ' occ_k, eig0nk,eig0_kq ', occ_k(iband), eig0nk,eig0_kq
 print *, 'cgwf cwavef 444 ', cwavef(:,1:5)
 print *, 'cgwf cwave0 444 ', cwave0(:,1:5)
