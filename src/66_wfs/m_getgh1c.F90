@@ -29,6 +29,7 @@ module m_getgh1c
  use m_abicore
  use m_errors
  use m_dtset
+ use m_xmpi
 
  use defs_abitypes, only : MPI_type
  use defs_datatypes, only : pseudopotential_type
@@ -1189,7 +1190,7 @@ end subroutine getgh1c_setup
 !!         see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42)
 !!
 !! INPUTS
-!!  cgq(2,mcgq)=wavefunction coefficients for ALL bands at k+Q
+!!  cgq(2,mcgq)=wavefunction coefficients for all bands on present processor, at k+Q
 !!  cprjq(natom,mcprjq)= wave functions at k+q projected with non-local projectors: cprjq=<P_i|Cnk+q>
 !!  ibgq=shift to be applied on the location of data in the array cprjq
 !!  icgq=shift to be applied on the location of data in the array cgq
@@ -1218,14 +1219,17 @@ end subroutine getgh1c_setup
 !!
 !! SOURCE
 
-subroutine getdc1(cgq,cprjq,dcwavef,dcwaveprj,ibgq,icgq,istwfk,mcgq,mcprjq,&
-&                 mpi_enreg,natom,nband,npw1,nspinor,optcprj,s1cwave0)
+subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,&
+&                 ibgq,icgq,istwfk,mcgq,mcprjq,&
+&                 mpi_enreg,natom,nband,nband_me,npw1,nspinor,optcprj,s1cwave0)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: ibgq,icgq,istwfk,mcgq,mcprjq,natom,nband,npw1,nspinor,optcprj
+ integer,intent(in) :: band, nband_me
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
+ integer,intent(in) :: band_procs(nband),bands_treated_now(nband)
  real(dp),intent(in) :: cgq(2,mcgq),s1cwave0(2,npw1*nspinor)
  real(dp),intent(out) :: dcwavef(2,npw1*nspinor)
  type(pawcprj_type),intent(in) :: cprjq(natom,mcprjq)
@@ -1235,9 +1239,11 @@ subroutine getdc1(cgq,cprjq,dcwavef,dcwaveprj,ibgq,icgq,istwfk,mcgq,mcprjq,&
 !scalars
  integer, parameter :: tim_projbd=0
  integer :: ipw
+ integer :: iband, ierr
  real(dp),parameter :: scal=-half
 !arrays
  real(dp), allocatable :: dummy(:,:),scprod(:,:)
+ real(dp), allocatable :: dcwavef_tmp(:,:)
  type(pawcprj_type),allocatable :: tmpcprj(:,:)
 
 ! *********************************************************************
@@ -1251,13 +1257,36 @@ subroutine getdc1(cgq,cprjq,dcwavef,dcwaveprj,ibgq,icgq,istwfk,mcgq,mcprjq,&
 
  ABI_ALLOCATE(dummy,(0,0))
  ABI_ALLOCATE(scprod,(2,nband))
+ ABI_ALLOCATE(dcwavef_tmp,(2,npw1*nspinor))
 
 !=== 1- COMPUTE: <G|S^(1)|C_k> - Sum_j [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>]
 !!               using the projb routine
 !Note the subtlety: projbd is called with useoverlap=0 and s1cwave0
 !in order to get Sum[<cgq|s1|c>|cgq>]=Sum[<cgq|gs1>|cgq>]
- call projbd(cgq,dcwavef,-1,icgq,0,istwfk,mcgq,0,nband,npw1,nspinor,&
-& dummy,scprod,0,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft)
+
+! run over procs in my pool which have a dcwavef to projbd
+ do iband = 1, nband
+   if (bands_treated_now(iband) == 0) cycle
+   dcwavef_tmp = zero
+
+! distribute dcwavef to my band pool 
+   if (iband == band) then
+     dcwavef_tmp = dcwavef
+   end if
+   call xmpi_bcast(dcwavef_tmp,band_procs(iband),mpi_enreg%comm_band,ierr)
+
+! get the projbd onto my processor's bands dcwavef = dcwavef - <cgq|dcwavef>|cgq>
+   call projbd(cgq,dcwavef,-1,icgq,0,istwfk,mcgq,0,nband_me,npw1,nspinor,&
+&   dummy,scprod,0,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft)
+
+! sum all of the corrections 
+   call xmpi_sum(dcwavef_tmp,mpi_enreg%comm_band,ierr)
+
+! save to my proc if it is my turn, and subtract Ntuple counted dcwavef
+   if (iband == band) then
+     dcwavef = dcwavef_tmp - (mpi_enreg%nproc_band-1)*dcwavef
+   end if
+ end do ! procs in my band pool
 
 !=== 2- COMPUTE: <G|delta_C^(1)> = -1/2.Sum_j [<C_k+q,j|S^(1)|C_k>.<G|C_k+q,j>] by substraction
 !$OMP PARALLEL DO PRIVATE(ipw) SHARED(dcwavef,s1cwave0,npw1,nspinor)
@@ -1275,6 +1304,7 @@ subroutine getdc1(cgq,cprjq,dcwavef,dcwaveprj,ibgq,icgq,istwfk,mcgq,mcprjq,&
 
  ABI_DEALLOCATE(dummy)
  ABI_DEALLOCATE(scprod)
+ ABI_DEALLOCATE(dcwavef_tmp)
 
  DBG_EXIT("COLL")
 

@@ -323,6 +323,7 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
  type(MPI_type) :: mpi_enreg_seq
 !arrays
  integer :: ddkfil(3),my_spintab(2),nband_tmp(1),npwar1_tmp(1)
+ integer,allocatable :: bands_treated_now(:),band_procs(:)
  integer,allocatable :: jpert1(:),jdir1(:),kg1_k(:,:),kg_k(:,:)
  integer,pointer :: my_atmtab(:)
  real(dp) :: dum1(1,1),dum2(1,1),dum3(1,1),epawnst(2),kpoint(3),kpq(3)
@@ -430,6 +431,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !Sizes for WF at k+q
  mcgq=mpw1*nspinor*dtset%mband_mem*mkqmem*nsppol
  mcprjq=nspinor*dtset%mband_mem*mkqmem*nsppol*usecprj
+
+ ABI_ALLOCATE(bands_treated_now, (maxval(nband_rbz)))
 
 !Check ddk files (needed to compute electric field perturbations)
  ddkfil(:)=0
@@ -1040,6 +1043,10 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
          ABI_ALLOCATE(gs1,(0,0))
        end if
 
+       ABI_ALLOCATE(band_procs, (nband_k))
+       call proc_distrb_band(band_procs,mpi_enreg%proc_distrb,ikpt,isppol,nband_k,&
+&        mpi_enreg%me_band,mpi_enreg%me_kpt,mpi_enreg%comm_band)
+
 !      LOOP OVER BANDS
        iband_me = 0
        do iband=1,nband_k
@@ -1049,6 +1056,13 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
            if (mpi_enreg%proc_distrb(ikpt,iband,isppol)/=me) cycle
          end if
          iband_me = iband_me + 1
+
+         bands_treated_now = 0
+         bands_treated_now(iband) = 1
+         call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
+#ifdef DEV_MJV
+print *, 'bands_treated_now ', bands_treated_now
+#endif
 
 !        Extract GS wavefunctions
          if (need_wfk) then
@@ -1352,9 +1366,9 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
                ABI_ALLOCATE(dcwavef,(2,npw1_k*nspinor))
                ABI_DATATYPE_ALLOCATE(dcwaveprj,(dtset%natom,nspinor))
                call pawcprj_alloc(dcwaveprj,0,gs_hamkq%dimcprj)
-!TODO MJV: PAW paral band distribution
-               call getdc1(cgq,cprjq,dcwavef,dcwaveprj,ibgq,icgq,istwf_k,mcgq,&
-&               mcprjq,mpi_enreg,dtset%natom,nband_k,npw1_k,nspinor,1,gs1)
+               call getdc1(iband,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,&
+&                 ibgq,icgq,istwf_k,mcgq,&
+&                 mcprjq,mpi_enreg,dtset%natom,nband_k,nband_me,npw1_k,nspinor,1,gs1)
 
 !              Accumulate 1st-order density due to delta_u^(j1)
                option=1;wfcorr=0
@@ -1376,6 +1390,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !          End of loops
          end do   ! idir1
        end do     ! iband
+
+       ABI_DEALLOCATE(band_procs)
 
 !      Accumulate contribution of this k-point
        d2nl (:,:,ipert1,idir,ipert)=d2nl (:,:,ipert1,idir,ipert)+d2nl_k (:,:)
@@ -1729,6 +1745,8 @@ subroutine dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dt
 !Overlap: store the diagonal part of the matrix in the
 !         2nd-order energy non-stationnary expression
  eovl1=zero;if (usepaw==1) eovl1=d2ovl(1,idir,ipert,idir,ipert)
+
+ ABI_DEALLOCATE(bands_treated_now)
 
  call destroy_mpi_enreg(mpi_enreg_seq)
  call timab(566,2,tsec)
@@ -2167,7 +2185,8 @@ subroutine dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
          dot_ndiagr=zero ; dot_ndiagi=zero
          jband_me = 0
          do jband = 1,nband_k              !compute dot1 and dot2
-           if (mpi_enreg%proc_distrb(ikpt,iband,isppol) /= mpi_enreg%me_kpt) cycle
+           !if (mpi_enreg%proc_distrb(ikpt,jband,isppol) /= mpi_enreg%me_kpt) cycle
+           if (mpi_enreg%proc_distrb(ikpt,jband,isppol) /= mpi_enreg%me_band) cycle
            jband_me = jband_me + 1
 
            if (abs(occ_k(jband)) > tol8) then

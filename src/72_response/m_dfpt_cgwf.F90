@@ -509,8 +509,9 @@ print *, 'bands_treated_now ', bands_treated_now
      ! see PRB 78, 035105 (2008) [[cite:Audouze2008]], Eq. (42)
      if (usedcwavef==2) then
 !TODO MJV: fix this for paralbd case
-       call getdc1(cgq,cprj_dummy,dcwavef,cprj_dummy,0,icgq,istwf_k,mcgq,0,&
-         mpi_enreg,natom,nband,npw1,nspinor,0,gs1c)
+       call getdc1(band,band_procs,bands_treated_now,cgq,cprj_dummy,dcwavef,cprj_dummy,&
+&           0,icgq,istwf_k,mcgq,0,&
+&           mpi_enreg,natom,nband,nband_me,npw1,nspinor,0,gs1c)
      end if
    end if ! gen_eigenpb
 
