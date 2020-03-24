@@ -1,0 +1,14 @@
+Installation Instructions
+*************************
+
+Basic Installation
+==================
+
+   Briefly, the shell command :
+
+    bash build-abinit-fallbacks.sh
+
+should configure, build, and install this package.
+The more-detailed instructions are available at
+
+    https://www.abinit.org/fbks_installation
