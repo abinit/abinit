@@ -1037,6 +1037,8 @@ iatom,iwchan,igqpt2(i),gij error=  10  1     4     4     4   0.01270
 -  1.127830E+03  1.127830E+03
 
  Analysis of degeneracies and characters (maximum tolerance=1.00E-05 a.u.)
+ For each vibration mode, or group of modes if degenerate,
+ the characters are given for each symmetry operation (see the list in the log file).
  Symmetry characters of vibration mode #   1
   1.0  1.0  1.0 -1.0 -1.0 -1.0
  Symmetry characters of vibration mode #   2
