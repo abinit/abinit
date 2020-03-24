@@ -1252,8 +1252,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getpawden',tread,'INT')
  if(tread==1) dtset%getpawden=intarr(1)
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getddb_path',tread,'KEY', key_value=key_value)
- if(tread==1) dtset%getddb_path = key_value
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getddb_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getddb_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getdvdb_path',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getdvdb_path = key_value

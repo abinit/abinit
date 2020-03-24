@@ -590,7 +590,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! According to getddb, build _DDB file name, referred as filddbsin
  stringfile='_DDB'; stringvar='ddb'
  call mkfilename(filnam,filddbsin,dtset%getddb,idtset,dtset%irdddb,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                  getpath=dtset%getddb_path)
+                  getpath=dtset%getddb_filepath)
 
  ! According to getpot, build _POT file name
  stringfile='_POT'; stringvar='pot'
@@ -1646,7 +1646,7 @@ subroutine iofn1(input_path, filnam, filstat, comm)
 
    if (len_trim(input_path) == 0) then
      ! Legacy Files file mode.
-     write(std_out, "(2a)")"DeprecationWarning: ",ch10
+     write(std_out, "(2a)")" DeprecationWarning: ",ch10
      write(std_out, "(a)") "     The files file has been deprecated in Abinit9 and will be removed in Abinit10."
      write(std_out, "(2a)")"     Use the syntax `abinit t01.abi` where t01.abi is an input with pseudopotenials.",ch10
      write(std_out, "(3a)")'            pseudos = "al.psp8, as.psp8"',ch10,ch10

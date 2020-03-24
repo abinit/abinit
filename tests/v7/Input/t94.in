@@ -1,4 +1,4 @@
-ddb_path = "t91.ddb.out"
+ddb_filepath = "t91.ddb.out"
 gkk_path = "t92o"
 ddk_path = "t94.ddk"
 eph_prefix = "t94"

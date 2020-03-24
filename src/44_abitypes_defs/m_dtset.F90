@@ -912,7 +912,7 @@ type, public :: dataset_type
  real(dp),allocatable :: kptbounds(:,:)
  real(dp) :: tmesh(3) ! = [5._dp, 59._dp, 6._dp] This triggers a bug in the bindings
 
- character(len=fnlen) :: getddb_path = ABI_NOFILE
+ character(len=fnlen) :: getddb_filepath = ABI_NOFILE
  character(len=fnlen) :: getden_path = ABI_NOFILE
  character(len=fnlen) :: getdvdb_path = ABI_NOFILE
  character(len=fnlen) :: getwfk_path = ABI_NOFILE
@@ -1461,7 +1461,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gethaydock         = dtin%gethaydock
  dtout%getocc             = dtin%getocc
  dtout%getpawden          = dtin%getpawden
- dtout%getddb_path        = dtin%getddb_path
+ dtout%getddb_filepath        = dtin%getddb_filepath
  dtout%getden_path        = dtin%getden_path
  dtout%getdvdb_path       = dtin%getdvdb_path
  dtout%getpot_path        = dtin%getpot_path
@@ -3111,7 +3111,7 @@ subroutine chkvars(string)
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
- list_vars=trim(list_vars)//' getddb getddb_path getden_path getddk getdelfd getdkdk getdkde getden getdvdb getdvdb_path'
+ list_vars=trim(list_vars)//' getddb getddb_filepath getden_path getddk getdelfd getdkdk getdkde getden getdvdb getdvdb_path'
  list_vars=trim(list_vars)//' getefmas getkerange_path getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_path getqps getscr getscr_path'
  list_vars=trim(list_vars)//' getwfkfine getwfkfine_path getsuscep'

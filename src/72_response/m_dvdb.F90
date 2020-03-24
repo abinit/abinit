@@ -6118,7 +6118,7 @@ end subroutine dvdb_write_v1qavg
 !!  dvdb_ngqpt(3)=Divisions of the Q-mesh reported in the DVDB file
 !!  dvdb_add_lr=0 to disable treatment of long-range part in Fourier interpolation.
 !!  qdamp=Defines exponential damping in LR potential
-!!  ddb_path=Path to DDB file. Used to treat LR part.
+!!  ddb_filepath=Path to DDB file. Used to treat LR part.
 !!  prtvol=Verbosity level.
 !!  coarse_ngqpt(3)= Coarse q-mesh used to analyze the accuracy of the FT interpolation
 !!    Must be divisor of dvdb_ngqpt. Use 0 to disable the test.
@@ -6135,10 +6135,10 @@ end subroutine dvdb_write_v1qavg
 !! SOURCE
 
 subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr, qdamp, &
-                              ddb_path, prtvol, coarse_ngqpt, comm)
+                              ddb_filepath, prtvol, coarse_ngqpt, comm)
 
 !Arguments ------------------------------------
- character(len=*),intent(in) :: dvdb_path, ddb_path
+ character(len=*),intent(in) :: dvdb_path, ddb_filepath
  integer,intent(in) :: comm, prtvol, dvdb_add_lr, qdamp, method, symv1
  integer,intent(in) :: dvdb_ngqpt(3), coarse_ngqpt(3)
 
@@ -6161,8 +6161,8 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
  qrefine = 1
 
  write(std_out,"(a)")sjoin(" Testing Fourier interpolation of V1(r) with ngqpt:", ltoa(dvdb_ngqpt))
- if (len_trim(ddb_path) > 0) then
-   write(std_out,"(a)")sjoin(" Reading Zeff and eps_inf from DDB file:", ddb_path)
+ if (len_trim(ddb_filepath) > 0) then
+   write(std_out,"(a)")sjoin(" Reading Zeff and eps_inf from DDB file:", ddb_filepath)
    write(std_out,"(a)")sjoin(" dvdb_add_lr set to:", itoa(dvdb_add_lr))
  end if
 
@@ -6176,11 +6176,11 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
  !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
 
  iblock_dielt = 0; iblock_dielt_zeff = 0
- if (len_trim(ddb_path) > 0) then
-   call dvdb%load_ddb(prtvol, chneut2, comm, ddb_path=ddb_path)
+ if (len_trim(ddb_filepath) > 0) then
+   call dvdb%load_ddb(prtvol, chneut2, comm, ddb_filepath=ddb_filepath)
  else
    dvdb%add_lr = 0
-   MSG_WARNING("ddb_path was not provided --> Setting dvdb_add_lr to zero")
+   MSG_WARNING("ddb_filepath was not provided --> Setting dvdb_add_lr to zero")
  end if
 
  call dvdb%print()
@@ -6555,13 +6555,13 @@ end subroutine dvdb_get_v1r_long_range
 !!  Use this function in eph driver
 !!
 
-subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_path, ddb)
+subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
 
 !Arguments ------------------------------------
 !scalars
  class(dvdb_t),intent(inout) :: dvdb
  integer,intent(in) :: chneut, prtvol, comm
- character(len=*),optional,intent(in) :: ddb_path
+ character(len=*),optional,intent(in) :: ddb_filepath
  type(ddb_type),optional,target,intent(in) :: ddb
 
 !Local variables ------------------------------
@@ -6580,11 +6580,11 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_path, ddb)
 
  my_rank = xmpi_comm_rank(comm)
 
- if (present(ddb_path)) then
+ if (present(ddb_filepath)) then
    ! Build ddb object from file. Will release memory before returning.
-   ABI_CHECK(.not. present(ddb), "ddb argument cannot be present when ddb_path is used")
+   ABI_CHECK(.not. present(ddb), "ddb argument cannot be present when ddb_filepath is used")
    ABI_CALLOC(dummy_atifc, (dvdb%natom))
-   call ddb_from_file(this_ddb, ddb_path, brav1, dvdb%natom, natifc0, dummy_atifc, cryst_ddb, comm, prtvol=prtvol)
+   call ddb_from_file(this_ddb, ddb_filepath, brav1, dvdb%natom, natifc0, dummy_atifc, cryst_ddb, comm, prtvol=prtvol)
    ABI_FREE(dummy_atifc)
    call cryst_ddb%free()
    ddb_ptr => this_ddb
@@ -6607,10 +6607,10 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_path, ddb)
 
  if (my_rank == master) then
    if (iblock_dielt_zeff == 0) then
-     call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_path))
+     call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_filepath))
      call wrtout(ab_out, "Values initialized with zeros")
    else
-     call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_path))
+     call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_filepath))
    end if
  end if
 
