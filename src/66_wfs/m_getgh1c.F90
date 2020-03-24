@@ -34,7 +34,7 @@ module m_getgh1c
  use defs_datatypes, only : pseudopotential_type
  use m_time,        only : timab
  use m_pawcprj,     only : pawcprj_type, pawcprj_alloc, pawcprj_free, pawcprj_copy, pawcprj_lincom, pawcprj_axpby
- use m_kg,          only : kpgstr, mkkin, mkkpg
+ use m_kg,          only : kpgstr, mkkin, mkkpg, mkkin_metdqdq
  use m_mkffnl,      only : mkffnl
  use m_pawfgr,      only : pawfgr_type
  use m_fft,         only : fftpac, fourwf
@@ -52,6 +52,8 @@ module m_getgh1c
  public :: rf_transgrid_and_pack
  public :: getgh1c_setup
  public :: getdc1
+ public :: getgh1dqc
+ public :: getgh1dqc_setup
 !!***
 
 contains
@@ -1277,6 +1279,474 @@ subroutine getdc1(cgq,cprjq,dcwavef,dcwaveprj,ibgq,icgq,istwfk,mcgq,mcprjq,&
  DBG_EXIT("COLL")
 
 end subroutine getdc1
+!!***
+
+!!****f* ABINIT/getgh1dqc
+!! NAME
+!!  getgh1dqc
+!!
+!! FUNCTION
+!! Computes <G|dH^(1)/dq_{gamma}|C> or <G|d^2H^(1)/dq_{gamma}dq_{delta}|C> 
+!! for input vector |C> expressed in reciprocal space.
+!! dH^(1)/dq_{gamma} and d^2H^(1)/dq_{gamma}dq_{delta} are the first
+!! and second q-gradient (at q=0) of the 1st-order perturbed Hamiltonian. 
+!! The first (second) derivative direction is inferred from idir (qdir1).
+!!
+!! COPYRIGHT
+!!  Copyright (C) 2018 ABINIT group (MR,MS)
+!!  This file is distributed under the terms of the
+!!  GNU General Public License, see ~abinit/COPYING
+!!  or http://www.gnu.org/copyleft/gpl.txt .
+!!
+!! INPUTS
+!!  cwave(2,npw*nspinor)=input wavefunction, in reciprocal space
+!!  cwaveprj(natom,nspinor*usecprj)=<p_lmn|C> coefficients for wavefunction |C> (and 1st derivatives)
+!!     if not allocated or size=0, they are locally computed (and not sotred)
+!!  gs_hamkq <type(gs_hamiltonian_type)>=all data for the Hamiltonian at k+q
+!!  idir=first index of the perturbation
+!!  ipert=type of the perturbation
+!!  mpi_enreg=information about MPI parallelization
+!!  npw=number of planewaves in basis sphere at given k.
+!!  npw1=number of planewaves in basis sphere at k+q
+!!  optlocal=0: local part of H^(1) is not computed 
+!!           1: local part of H^(1) is computed in gvloc1dqc
+!!  optnl=0: non-local part of H^(1) is not computed 
+!!        1: non-local part of H^(1) depending on VHxc^(1) is not computed in gvloc1dqc
+!!        2: non-local part of H^(1) is totally computed in gvloc1dqc
+!!  qdir1= direction of the 1st q-gradient
+!!  rf_hamkq <type(rf_hamiltonian_type)>=all data for the 1st-order Hamiltonian at k,k+q
+!!  qdir2= (optional) direction of the 2nd q-gradient
+!!
+!! OUTPUT
+!!  gh1dqc(2,npw1*nspinor)= <G|dH^(1)/dq_{\gamma}|C> on the k+q sphere
+!!  gvloc1dqc(2,npw1*nspinor)= local potential part of gh1dqc
+!!  gvnl1dqc(2,npw1*nspinor)= non local potential part of gh1dqc
+!!
+!! SIDE EFFECTS
+!!
+!! NOTES
+!!
+!!  Currently two Hamiltonian gradients at (q=0) are implemented:
+!!     ipert<=natom -> 		    first q-derivative along reduced coordinates directions 
+!!                     		    of the atomic displacement perturbation hamiltonian
+!!     ipert==natom+3 or natom+4 -> second q-derivative along cartesian coordinates
+!!                                  of the metric perturbation hamiltonian. 
+!! 				    Which is equivalent (except for an i factor) to the first 
+!!                                  q-derivative along cartesian coordinates of the strain
+!!                                  perturbation hamiltonian.
+!!
+!! PARENTS
+!!      dfpt_qdrpwf
+!!
+!! CHILDREN
+!!      fourwf,nonlopdq
+!!
+!! SOURCE
+
+subroutine getgh1dqc(cwave,cwaveprj,gh1dqc,gvloc1dqc,gvnl1dqc,gs_hamkq,&
+&          idir,ipert,mpi_enreg,optlocal,optnl,qdir1,rf_hamkq,&
+&          qdir2)                                                        !optional
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: idir,ipert,optlocal,optnl,qdir1
+ integer,intent(in),optional :: qdir2
+ type(MPI_type),intent(in) :: mpi_enreg
+ type(gs_hamiltonian_type),intent(inout),target :: gs_hamkq
+ type(rf_hamiltonian_type),intent(inout),target :: rf_hamkq
+
+!arrays
+ real(dp),intent(inout) :: cwave(2,gs_hamkq%npw_k*gs_hamkq%nspinor)
+ real(dp),intent(out) :: gh1dqc(2,gs_hamkq%npw_kp*gs_hamkq%nspinor)
+ real(dp),intent(out) :: gvloc1dqc(2,gs_hamkq%npw_kp*gs_hamkq%nspinor)
+ real(dp),intent(out) :: gvnl1dqc(2,gs_hamkq%npw_kp*gs_hamkq%nspinor)
+ real(dp),pointer :: dqdqkinpw(:),kinpw1(:)
+ type(pawcprj_type),intent(inout),target :: cwaveprj(:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: choice,cpopt,iidir,ipw,ipws,ispinor,my_nspinor,natom,nnlout
+ integer :: npw,npw1,paw_opt,signs,tim_fourwf,tim_nonlop
+ logical :: has_kin
+ character(len=500) :: msg
+ real(dp) :: lambda,weight
+
+!arrays
+ integer,parameter :: ngamma(3,3)=reshape((/1,6,5,9,2,4,8,7,3/),(/3,3/))
+ real(dp) :: enlout(1),svectout_dum(1,1)
+ real(dp),ABI_CONTIGUOUS pointer :: gvnl1dqc_(:,:)
+ real(dp), allocatable :: work(:,:,:,:)
+ 
+! *************************************************************************
+
+ DBG_ENTER("COLL")
+ 
+!======================================================================
+!== Initialisations and compatibility tests
+!======================================================================
+
+ npw  =gs_hamkq%npw_k
+ npw1 =gs_hamkq%npw_kp
+ natom=gs_hamkq%natom
+
+!Compatibility tests
+ if (mpi_enreg%paral_spinor==1) then
+   msg='Not compatible with parallelization over spinorial components !'
+   MSG_BUG(msg)
+ end if
+
+!Check sizes
+ my_nspinor=max(1,gs_hamkq%nspinor/mpi_enreg%nproc_spinor)
+ if (size(cwave)<2*npw*my_nspinor) then
+   msg='wrong size for cwave!'
+   MSG_BUG(msg)
+ end if
+ if (size(gh1dqc)<2*npw1*my_nspinor) then
+   msg='wrong size for gh1dqc!'
+   MSG_BUG(msg)
+ end if
+
+!=============================================================================
+!== Apply the q-gradients of the 1st-order local potential to the wavefunction
+!=============================================================================
+
+!Phonon and metric (strain) perturbation
+ if (ipert<=natom+5.and.ipert/=natom+1.and.ipert/=natom+2.and.optlocal>0) then 
+
+   ABI_ALLOCATE(work,(2,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6))
+
+   weight=one ; tim_fourwf=4
+   call fourwf(rf_hamkq%cplex,rf_hamkq%vlocal1,cwave,gvloc1dqc,work,gs_hamkq%gbound_k,gs_hamkq%gbound_kp,&
+ & gs_hamkq%istwf_k,gs_hamkq%kg_k,gs_hamkq%kg_kp,gs_hamkq%mgfft,mpi_enreg,1,gs_hamkq%ngfft,&
+ & npw,npw1,gs_hamkq%n4,gs_hamkq%n5,gs_hamkq%n6,2,tim_fourwf,weight,weight,&
+ & use_gpu_cuda=gs_hamkq%use_gpu_cuda)
+
+   ABI_DEALLOCATE(work)
+
+ else
+   
+!$OMP PARALLEL DO
+   do ipw=1,npw1*my_nspinor
+     gvloc1dqc(:,ipw)=zero
+   end do
+
+ end if
+
+!================================================================================
+!== Apply the q-gradients of the 1st-order non-local potential to the wavefunction
+!================================================================================
+
+!Initializations
+lambda=zero
+nnlout=1
+tim_nonlop=0
+
+!Allocations
+ABI_ALLOCATE(gvnl1dqc_,(2,npw1*my_nspinor))
+
+!Phonon perturbation
+!-------------------------------------------
+ !1st q-gradient
+ if (ipert<=natom.and..not.present(qdir2).and.optnl>0) then
+   cpopt=-1 ; choice=22 ; signs=2 ; paw_opt=0
+   call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
+&  paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl1dqc_,iatom_only=ipert,qdir=qdir1)
+
+!$OMP PARALLEL DO 
+   do ipw=1,npw1*my_nspinor
+     gvnl1dqc(1,ipw)=gvnl1dqc_(1,ipw)
+     gvnl1dqc(2,ipw)=gvnl1dqc_(2,ipw)
+   end do
+
+ !2nd q-gradient
+ else if (ipert<=natom.and.present(qdir2).and.optnl>0) then
+   iidir=ngamma(idir,qdir2)
+   cpopt=-1 ; choice=25 ; signs=2 ; paw_opt=0
+   call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,iidir,(/lambda/),mpi_enreg,1,nnlout,&
+&  paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl1dqc_,iatom_only=ipert,qdir=qdir1)
+
+!$OMP PARALLEL DO 
+   do ipw=1,npw1*my_nspinor
+     gvnl1dqc(1,ipw)=gvnl1dqc_(1,ipw)
+     gvnl1dqc(2,ipw)=gvnl1dqc_(2,ipw)
+   end do
+
+!Metric (strain) perturbation
+!-------------------------------------------
+ else if ((ipert==natom+3.or.ipert==natom+4).and.optnl>0) then
+   cpopt=-1 ; choice=33 ; signs=2 ; paw_opt=0
+   call nonlop(choice,cpopt,cwaveprj,enlout,gs_hamkq,idir,(/lambda/),mpi_enreg,1,nnlout,&
+&  paw_opt,signs,svectout_dum,tim_nonlop,cwave,gvnl1dqc_,qdir=qdir1)
+
+!$OMP PARALLEL DO 
+   do ipw=1,npw1*my_nspinor
+     gvnl1dqc(1,ipw)=gvnl1dqc_(1,ipw)
+     gvnl1dqc(2,ipw)=gvnl1dqc_(2,ipw)
+   end do
+
+ else
+
+!$OMP PARALLEL DO
+   do ipw=1,npw1*my_nspinor
+     gvnl1dqc(:,ipw)=zero
+   end do
+  
+ end if 
+
+!==============================================================================
+!== Apply the q-gradients of the 1st-order kinetic operator to the wavefunction
+!== (add it to nl contribution)
+!==============================================================================
+
+!Strain (metric) perturbation
+!-------------------------------------------
+ has_kin=(ipert==natom+3.or.ipert==natom+4)
+ if (associated(gs_hamkq%kinpw_kp)) then
+   kinpw1 => gs_hamkq%kinpw_kp
+ else if (has_kin) then
+   msg='need kinpw1 allocated!'
+   MSG_BUG(msg)
+ end if
+ if (associated(rf_hamkq%dkinpw_k)) then
+   dqdqkinpw => rf_hamkq%dkinpw_k
+ else if (has_kin) then
+   msg='need dqdqkinpw allocated!'
+   MSG_BUG(msg)
+ end if
+
+ if (has_kin) then
+!  Remember that npw=npw1 
+   do ispinor=1,my_nspinor
+!$OMP PARALLEL DO PRIVATE(ipw,ipws) SHARED(cwave,ispinor,gvnl1dqc,dqdqkinpw,kinpw1,npw,my_nspinor)
+     do ipw=1,npw
+       ipws=ipw+npw*(ispinor-1)
+       if(kinpw1(ipw)<huge(zero)*1.d-11)then
+         gvnl1dqc(1,ipws)=gvnl1dqc(1,ipws)+dqdqkinpw(ipw)*cwave(1,ipws)
+         gvnl1dqc(2,ipws)=gvnl1dqc(2,ipws)+dqdqkinpw(ipw)*cwave(2,ipws)
+       else
+         gvnl1dqc(1,ipws)=zero
+         gvnl1dqc(2,ipws)=zero
+       end if
+     end do
+   end do
+ end if
+
+!===================================================================================
+!== Sum contributions to get the application of dH^(1)/dq or d^2H^(1)/dqdq to the wf
+!===================================================================================
+
+ do ispinor=1,my_nspinor
+   ipws=(ispinor-1)*npw1
+!$OMP PARALLEL DO PRIVATE(ipw) SHARED(gh1dqc,gvnl1dqc,kinpw1,ipws,npw1)
+   do ipw=1+ipws,npw1+ipws
+     if(kinpw1(ipw-ipws)<huge(zero)*1.d-11)then
+       gh1dqc(1,ipw)=gvloc1dqc(1,ipw)+gvnl1dqc(1,ipw)
+       gh1dqc(2,ipw)=gvloc1dqc(2,ipw)+gvnl1dqc(2,ipw)
+     else
+       gh1dqc(1,ipw)=zero
+       gh1dqc(2,ipw)=zero
+     end if
+   end do
+ end do
+
+ ABI_DEALLOCATE(gvnl1dqc_)
+ DBG_EXIT("COLL")
+
+end subroutine getgh1dqc
+!!***
+
+!!****f* m_hamiltonian/getgh1dqc_setup
+!! NAME
+!!  getgh1dqc_setup
+!!
+!! FUNCTION
+!!
+!! INPUTS
+!!
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!!      dfpt_qdrpwf
+!!
+!! CHILDREN
+!!      kpgstr,load_k_hamiltonian,load_k_rf_hamiltonian,load_kprime_hamiltonian
+!!      mkffnl,mkkin,mkkpg
+!!
+!! SOURCE
+
+subroutine getgh1dqc_setup(gs_hamkq,rf_hamkq,dtset,psps,kpoint,kpq,idir,ipert,qdir1,&    ! In
+&                natom,rmet,gprimd,gmet,istwf_k,npw_k,npw1_k,nylmgr,&                    ! In
+&                useylmgr1,kg_k,ylm_k,kg1_k,ylm1_k,ylmgr1_k,&                            ! In
+&                nkpg,nkpg1,kpg_k,kpg1_k,dqdqkinpw,kinpw1,ffnlk,ffnl1,ph3d,ph3d1,&       ! Out
+&                qdir2)                                                                  ! Optional
+
+ implicit none
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: idir,ipert,istwf_k,natom,npw_k,npw1_k,nylmgr,qdir1,useylmgr1
+ integer,intent(in),optional :: qdir2
+ integer,intent(out) :: nkpg,nkpg1
+ type(gs_hamiltonian_type),intent(inout) :: gs_hamkq
+ type(rf_hamiltonian_type),intent(inout) :: rf_hamkq
+ type(dataset_type),intent(in) :: dtset
+ type(pseudopotential_type),intent(in) :: psps
+!arrays
+ integer,intent(in) :: kg_k(3,npw_k),kg1_k(3,npw1_k)
+ real(dp),intent(in) :: kpoint(3),kpq(3),gmet(3,3),gprimd(3,3),rmet(3,3)
+ real(dp),intent(in) :: ylm_k(npw_k,psps%mpsang*psps%mpsang*psps%useylm)
+! real(dp),intent(in) :: ylmgr1_k(npw1_k,3+6*((ipert-natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
+ real(dp),intent(in) :: ylmgr1_k(npw1_k,nylmgr,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
+ real(dp),intent(in) :: ylm1_k(npw1_k,psps%mpsang*psps%mpsang*psps%useylm)
+ real(dp),allocatable,intent(out) :: dqdqkinpw(:),kinpw1(:)
+ real(dp),allocatable,intent(out) :: ffnlk(:,:,:,:),ffnl1(:,:,:,:)
+ real(dp),allocatable,intent(out) :: kpg_k(:,:),kpg1_k(:,:),ph3d(:,:,:),ph3d1(:,:,:)
+
+!Local variables-------------------------------
+!scalars
+ integer :: dimffnl1,dimffnlk,ider,idir0,ig,mu,mua,mub,ntypat
+ integer :: nu,nua,nub
+ logical :: qne0
+!arrays
+ integer,parameter :: alpha(6)=(/1,2,3,3,3,2/),beta(6)=(/1,2,3,2,1,1/)
+ integer,parameter :: gamma(3,3)=reshape((/1,6,5,6,2,4,5,4,3/),(/3,3/))
+ real(dp) :: ylmgr_dum(1,1,1)
+ real(dp),allocatable :: ffnl1_tmp(:,:,:,:)
+
+
+! *************************************************************************
+
+ ntypat = psps%ntypat
+ qne0=((kpq(1)-kpoint(1))**2+(kpq(2)-kpoint(2))**2+(kpq(3)-kpoint(3))**2>=tol14)
+
+!Compute (k+G) vectors
+ nkpg=0;if(ipert>=1.and.ipert<=natom) nkpg=3*dtset%nloalg(3)
+ ABI_ALLOCATE(kpg_k,(npw_k,nkpg))
+ if (nkpg>0) then
+   call mkkpg(kg_k,kpg_k,kpoint,nkpg,npw_k)
+ end if
+
+!Compute (k+q+G) vectors
+ nkpg1=0;if(ipert>=1.and.ipert<=natom) nkpg1=3*dtset%nloalg(3)
+ ABI_ALLOCATE(kpg1_k,(npw1_k,nkpg1))
+ if (nkpg1>0) then
+   call mkkpg(kg1_k,kpg1_k,kpq(:),nkpg1,npw1_k)
+ end if
+
+!===== Preparation of the non-local contributions
+
+ dimffnlk=0;if (ipert<=natom) dimffnlk=1
+ ABI_ALLOCATE(ffnlk,(npw_k,dimffnlk,psps%lmnmax,ntypat))
+
+!Compute nonlocal form factors ffnlk at (k+G)
+if (ipert<=natom) then
+ ider=0;idir0=0
+ call mkffnl(psps%dimekb,dimffnlk,psps%ekb,ffnlk,psps%ffspl,&
+& gmet,gprimd,ider,idir0,psps%indlmn,kg_k,kpg_k,kpoint,psps%lmnmax,&
+& psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg,npw_k,ntypat,&
+& psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm_k,ylmgr_dum)
+end if
+
+!Compute nonlocal form factors ffnl1 at (k+q+G)
+!TODO: For the second order gradients, this routine is called for each 3 directions of the 
+!derivative and every time it calculates all the form factors derivatives. This could be
+!done just once.
+ !-- 1st q-grad of atomic displacement perturbation
+ if (ipert<=natom.and..not.present(qdir2)) then
+   ider=1;idir0=qdir1
+ !-- 2nd q-grad of atomic displacement perturbation
+ else if (ipert<=natom.and.present(qdir2)) then
+   ider=2;idir0=4
+ !-- 2nd q-grad of metric (1st q-grad of strain) perturbation
+ else if (ipert==natom+3.or.ipert==natom+4) then
+   ider=2;idir0=0
+ end if
+
+!Compute nonlocal form factors ffnl1 at (k+q+G), for all atoms
+ dimffnl1=1+ider
+ if (ider==2.and.(idir0==0.or.idir0==4)) dimffnl1=3+7*psps%useylm
+ ABI_ALLOCATE(ffnl1,(npw1_k,dimffnl1,psps%lmnmax,ntypat))
+ call mkffnl(psps%dimekb,dimffnl1,psps%ekb,ffnl1,psps%ffspl,gmet,gprimd,ider,idir0,&
+& psps%indlmn,kg1_k,kpg1_k,kpq,psps%lmnmax,psps%lnmax,psps%mpsang,psps%mqgrid_ff,nkpg1,&
+& npw1_k,ntypat,psps%pspso,psps%qgrid_ff,rmet,psps%usepaw,psps%useylm,ylm1_k,ylmgr1_k)
+
+!Convert nonlocal form factors to cartesian coordinates. 
+!For metric (strain) perturbation only.
+ if (ipert==natom+3.or.ipert==natom+4) then
+   ABI_ALLOCATE(ffnl1_tmp,(npw1_k,dimffnl1,psps%lmnmax,ntypat))
+   ffnl1_tmp=ffnl1
+
+   !First q-derivative
+   ffnl1(:,2:4,:,:)=zero
+   do mu=1,3
+     do ig=1,npw1_k
+       do nu=1,3
+         ffnl1(ig,1+mu,:,:)=ffnl1(ig,1+mu,:,:)+ffnl1_tmp(ig,1+nu,:,:)*gprimd(mu,nu)
+       end do
+     end do
+   end do
+
+   !Second q-derivative
+   ffnl1(:,5:10,:,:)=zero
+   do mu=1,6
+     mua=alpha(mu);mub=beta(mu)
+     do ig=1,npw1_k
+       do nua=1,3
+         do nub=1,3
+           nu=gamma(nua,nub)
+           ffnl1(ig,4+mu,:,:)=ffnl1(ig,4+mu,:,:)+ &
+         & ffnl1_tmp(ig,4+nu,:,:)*gprimd(mua,nua)*gprimd(mub,nub)
+         end do
+       end do
+     end do
+   end do
+
+   ABI_DEALLOCATE(ffnl1_tmp)
+ end if
+
+!===== Preparation of the kinetic contributions
+!Compute (1/2) (2 Pi)**2 (k+q+G)**2:
+ ABI_ALLOCATE(kinpw1,(npw1_k))
+ kinpw1(:)=zero
+ call mkkin(dtset%ecut,dtset%ecutsm,dtset%effmass_free,gmet,kg1_k,kinpw1,kpq,npw1_k,0,0)
+
+ABI_ALLOCATE(dqdqkinpw,(npw_k)) 
+ !-- Metric (strain) perturbation
+ if (ipert==natom+3.or.ipert==natom+4) then
+   call mkkin_metdqdq(dqdqkinpw,dtset%effmass_free,gprimd,idir,kg_k,kpoint,npw_k,qdir1)
+ else
+   dqdqkinpw(:)=zero
+ end if
+
+!===== Load the k/k+q dependent parts of the Hamiltonian
+
+!Load k-dependent part in the Hamiltonian datastructure
+ ABI_ALLOCATE(ph3d,(2,npw_k,gs_hamkq%matblk))
+ call gs_hamkq%load_k(kpt_k=kpoint,npw_k=npw_k,istwf_k=istwf_k,kg_k=kg_k,kpg_k=kpg_k,&
+& ph3d_k=ph3d,compute_ph3d=.true.,compute_gbound=.true.)
+ if (size(ffnlk)>0) then
+   call gs_hamkq%load_k(ffnl_k=ffnlk)
+ else
+   call gs_hamkq%load_k(ffnl_k=ffnl1)
+ end if
+
+!Load k+q-dependent part in the Hamiltonian datastructure
+!    Note: istwf_k is imposed to 1 for RF calculations (should use istwf_kq instead)
+ call gs_hamkq%load_kprime(kpt_kp=kpq,npw_kp=npw1_k,istwf_kp=istwf_k,&
+& kinpw_kp=kinpw1,kg_kp=kg1_k,kpg_kp=kpg1_k,ffnl_kp=ffnl1,&
+& compute_gbound=.true.)
+ if (qne0) then
+   ABI_ALLOCATE(ph3d1,(2,npw1_k,gs_hamkq%matblk))
+   call gs_hamkq%load_kprime(ph3d_kp=ph3d1,compute_ph3d=.true.)
+ end if
+
+!Load k-dependent part in the 1st-order Hamiltonian datastructure
+ call rf_hamkq%load_k(npw_k=npw_k,dkinpw_k=dqdqkinpw)
+
+end subroutine getgh1dqc_setup
 !!***
 
 end module m_getgh1c

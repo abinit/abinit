@@ -1294,7 +1294,7 @@ subroutine intagm(dprarr,intarr,jdtset,marr,narr,string,token,tread,typevarphys,
        if(sum_token/=0 .and. sum_token/=2) then
          write(msg, '(a,a,a,a,a,i0,a,a,a,a,a,a,a)' )&
          'The keyword "',trim(cs),'" has been found to take part',ch10,&
-         'to series definition in the multi-dataset mode',sum_token,' times.',ch10,&
+         'to series definition in the multi-dataset mode  ',sum_token,' times.',ch10,&
          'This is not allowed, since it should be used once with ":",',ch10,&
          'and once with "+" or "*".',ch10,&
          'Action: change the number of occurences of this keyword.'

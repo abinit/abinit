@@ -102,8 +102,8 @@ nfreqsp5 0
 eph_task6 4
 eph_stern6 1
 eph_ngqpt_fine6  4 4 4 
-getdvdb_path6 "t44o_DS20_DVDB"
-getpot_path6 "t41o_DS1_POT"
+getdvdb_filepath6 "t44o_DS20_DVDB"
+getpot_filepath6 "t41o_DS1_POT"
 symsigma6 1
 eph_intmeth6 2
 nfreqsp6 0

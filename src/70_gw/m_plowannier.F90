@@ -5,7 +5,7 @@
 !! FUNCTION
 !!
 !! COPYRIGHT
-!! Copyright (C) 2006-2020 ABINIT group (BAmadon,AGerossier)
+!! Copyright (C) 2006-2020 ABINIT group (BAmadon,AGerossier,ROuterovitch)
 !! This file is distributed under the terms of the
 !! GNU General Public License, see ~abinit/COPYING
 !! or http://www.gnu.org/copyleft/gpl.txt .
@@ -23,6 +23,15 @@
 #include "abi_common.h"
 
 MODULE m_plowannier
+
+
+#ifndef HAVE_CRPA_OPTIM
+#ifdef FC_INTEL
+#if  __INTEL_COMPILER<=1700
+!DEC$ NOOPTIMIZE
+#endif
+#endif
+#endif
 
  use defs_basis
  use m_errors
@@ -50,11 +59,20 @@ MODULE m_plowannier
  public :: copy_orbital
  public :: compute_coeff_plowannier
  public :: destroy_plowannier
+ public :: print_plowannier
+ public :: get_plowannier
+ public :: fullbz_plowannier
  public :: initialize_operwan
  public :: destroy_operwan
+ public :: zero_operwan
  public :: compute_oper_ks2wan
  public :: normalization_plowannier
  public :: print_operwan
+ public :: init_operwan_realspace
+ public :: reduce_operwan_realspace
+ public :: destroy_operwan_realspace
+ public :: zero_operwan_realspace
+ public :: compute_oper_wank2realspace
 !!***
 
 
@@ -189,6 +207,23 @@ type, public :: operwan_type
 end type operwan_type
 !!***
 
+!!****t* m_plowannier/atom_index_type
+!! NAME
+!!  atom_index_type_type
+!!
+!! FUNCTION
+!!
+!!
+!! SOURCE
+
+type, public :: atom_index_type
+
+  type(operwan_type), allocatable :: position(:,:)
+  ! size (number of positions chosen for atom1, number of positions chosen for atom2)
+
+end type atom_index_type
+!!***
+
 !!****t* m_plowannier/operwan_realspace_type
 !! NAME
 !!  operwan_realspace_type
@@ -200,8 +235,8 @@ end type operwan_type
 
 type, public :: operwan_realspace_type
 
-  type(operwan_type), allocatable :: position(:,:)
-  ! size (number of positions chosen for atom1, number of positions chosen for atom2)
+  type(atom_index_type), allocatable :: atom_index(:,:)
+  ! size (number of atom, number of atom)
 
 end type operwan_realspace_type
 !!***
@@ -227,14 +262,14 @@ type, public :: plowannier_type
   ! energy band maximum considered
 
   integer :: natom_wan
-  ! number of atoms in a cell
+  ! number of atoms (used to compute Wannier functions)
 
   integer :: size_wan
   ! sum of all the m possible for every atom considered
 
   integer, allocatable :: iatom_wan(:)
-  ! array of each atom's type
-
+  ! array of each atom (used to compute Wannier functions)
+ 
   integer, allocatable :: nbl_atom_wan(:)
   ! array of the number of l considered for each atom
 
@@ -262,14 +297,14 @@ type, public :: plowannier_type
   integer, allocatable :: position(:,:)
   ! size natom,3, gives the position of the cell for this atom (rprim coordinates)
 
-  real,allocatable :: kpt(:,:)
+  real(dp),allocatable :: kpt(:,:)
   ! gives the coordinates in the BZ of the kpoint
   ! size (3,nkpt)
 
-  real,allocatable :: wtk(:)
+  real(dp),allocatable :: wtk(:)
   !weight of each kpoint
 
-  real,allocatable :: acell(:)
+  real(dp),allocatable :: acell(:)
   !size of the cell
 
 end type plowannier_type
@@ -287,7 +322,24 @@ CONTAINS  !=====================================================================
 !!  initialize the variables useful for the computation
 !!
 !! INPUTS
-!! dtset : gives every information needed
+!! INPUTS
+!! plowan_bandf  = max index of band for Wannier construction
+!! plowan_bandi  = min index of band for Wannier construction
+!! plowan_compute = keyword to activate Wannier calculation
+!! plowan_iatom(plowan_natom) = index of atoms to use for Wannier
+!! plowan_it(plowan_nt)= index of atoms for real space calculation
+!! plowan_lcalc(sum_plowan_natom Plowan_nbl()) = index of l value for Wannier construction
+!! plowan_natom = nb of atoms for Wannier
+!! plowan_nbl(plowan_natom) = nb of l values for Wannier for each atoms.
+!! plowan_nt = nb of atoms for real space calculation
+!! plowan_projcalc(sum_plowan_natom Plowan_nbl()) = index of projectors for Wannier construction
+!! acell_orig(3,nimage) = cell parameters
+!! kpt(3,nkpt)  = k-points
+!! nkpt = nb of k-points
+!! nimage
+!! nspinor = nb of spinors
+!! nsppol = nb of polarization of wfc. 
+!! wtk = weight of k-points 
 !!
 !! OUTPUT
 !!  wan : plowannier type
@@ -297,18 +349,30 @@ CONTAINS  !=====================================================================
 !! NOTES
 !!
 !! PARENTS
-!!      outscfcv
+!! outscfcv,screening_driver,sigma_driver,fullbz_plowannier
 !!
 !! CHILDREN
 !!
 !! SOURCE
 
 
-subroutine init_plowannier(dtset,wan)
+subroutine init_plowannier(plowan_bandf,plowan_bandi,plowan_compute,plowan_iatom,plowan_it,&
+&plowan_lcalc,plowan_natom,plowan_nbl,plowan_nt,plowan_projcalc,acell_orig,kpt,nimage,nkpt,&
+&nspinor,nsppol,wtk,wan)
 
 !Arguments ----------------------------------
 !scalars
- type(dataset_type), intent(in) :: dtset
+! type(dataset_type), intent(in) :: dtset
+ integer,intent(in) ::plowan_bandi,plowan_bandf,plowan_natom,plowan_nt,plowan_compute
+ integer,intent(in) ::nkpt,nsppol,nspinor,nimage
+ integer,intent(in) ::plowan_iatom(plowan_natom)
+ integer,intent(in) ::plowan_nbl(plowan_natom)
+ integer,intent(in) ::plowan_lcalc(sum(plowan_nbl(:)))
+ integer,intent(in) ::plowan_projcalc(sum(plowan_nbl(:)))
+ integer,intent(in) ::plowan_it(plowan_nt*3)
+ real(dp),intent(in) :: kpt(3,nkpt)
+ real(dp),intent(in) :: wtk(nkpt)
+ real(dp),intent(in) :: acell_orig(3,nimage)
  type(plowannier_type), intent(inout) :: wan
 
 !Local --------------------------------------
@@ -317,19 +381,18 @@ subroutine init_plowannier(dtset,wan)
 !************************************************************************
 
  !! generally
- wan%nkpt = dtset%nkpt
- wan%bandi_wan = dtset%plowan_bandi
- wan%bandf_wan = dtset%plowan_bandf
- wan%nsppol = dtset%nsppol
- wan%nspinor = dtset%nspinor
+ wan%nkpt = nkpt
+ wan%bandi_wan = plowan_bandi
+ wan%bandf_wan = plowan_bandf
+ wan%nsppol = nsppol
+ wan%nspinor = nspinor
 
  !! for this case
- wan%natom_wan = dtset%plowan_natom
-
+ wan%natom_wan = plowan_natom
 
  !! generally
- ABI_ALLOCATE(wan%kpt,(3,size(dtset%kpt,2)))
- wan%kpt = dtset%kpt
+ ABI_ALLOCATE(wan%kpt,(3,size(kpt,2)))
+  wan%kpt = kpt
  ABI_ALLOCATE(wan%iatom_wan,(wan%natom_wan))
  ABI_ALLOCATE(wan%nbl_atom_wan,(wan%natom_wan))
  wan%nbl_atom_wan = 0
@@ -339,12 +402,12 @@ subroutine init_plowannier(dtset,wan)
  ABI_DATATYPE_ALLOCATE(wan%projector_wan,(wan%natom_wan))
  ABI_ALLOCATE(wan%position,(wan%natom_wan,3))
  wan%position = 0
- ABI_ALLOCATE(wan%wtk,(size(dtset%wtk,1)))
- wan%wtk(:) = dtset%wtk(:)
+ ABI_ALLOCATE(wan%wtk,(size(wtk,1)))
+ wan%wtk(:) = wtk(:)
  ABI_ALLOCATE(wan%acell,(3))
- wan%acell(1) = dtset%acell_orig(1,1)
- wan%acell(2) = dtset%acell_orig(2,1)
- wan%acell(3) = dtset%acell_orig(3,1)
+ wan%acell(1) = acell_orig(1,1)
+ wan%acell(2) = acell_orig(2,1)
+ wan%acell(3) = acell_orig(3,1)
 
  ! If we want to study twice the same atom (but at different positions), use the same iatom and modify the positions below.
  ! In this case, the Wannier functions will be orthonormalized for one atom.
@@ -358,32 +421,31 @@ subroutine init_plowannier(dtset,wan)
  iltot=0
  do iatom=1,wan%natom_wan
 
-   wan%iatom_wan(iatom)       = dtset%plowan_iatom(iatom)
-   wan%nbl_atom_wan(iatom)    = dtset%plowan_nbl  (iatom)
-   wan%nbproj_atom_wan(iatom) = dtset%plowan_nbl  (iatom)
+   wan%iatom_wan(iatom)       = plowan_iatom(iatom)
+   wan%nbl_atom_wan(iatom)    = plowan_nbl  (iatom)
+   wan%nbproj_atom_wan(iatom) = plowan_nbl  (iatom)
 
   ! Now we define for each atom the selected orbital moments.
    ABI_ALLOCATE(wan%latom_wan(iatom)%lcalc,(wan%nbl_atom_wan(iatom)))
    ABI_ALLOCATE(wan%projector_wan(iatom)%lproj,(wan%nbproj_atom_wan(iatom)))
    do il=1,wan%nbl_atom_wan(iatom)
      iltot=iltot+1
-     wan%latom_wan(iatom)%lcalc(il)=dtset%plowan_lcalc(iltot)
-     wan%projector_wan(iatom)%lproj(il)=dtset%plowan_projcalc(iltot)
+     wan%latom_wan(iatom)%lcalc(il)=plowan_lcalc(iltot)
+     wan%projector_wan(iatom)%lproj(il)=plowan_projcalc(iltot)
    enddo
 
   !For each iatom , pos is an array of two dimensions. The first one is
   !the number of lattice translation and the second one is ist
   !coordinates.
-   ABI_ALLOCATE(wan%nposition(iatom)%pos,(dtset%plowan_nt,3))
+   ABI_ALLOCATE(wan%nposition(iatom)%pos,(plowan_nt,3))
    ittot=0
-   do it=1,dtset%plowan_nt
-     wan%nposition(iatom)%pos(it,1) = dtset%plowan_it(ittot+1)
-     wan%nposition(iatom)%pos(it,2) = dtset%plowan_it(ittot+2)
-     wan%nposition(iatom)%pos(it,3) = dtset%plowan_it(ittot+3)
+   do it=1,plowan_nt
+     wan%nposition(iatom)%pos(it,1) = plowan_it(ittot+1)
+     wan%nposition(iatom)%pos(it,2) = plowan_it(ittot+2)
+     wan%nposition(iatom)%pos(it,3) = plowan_it(ittot+3)
      !write(std_out,*)  "position",wan%nposition(iatom)%pos(it,:)
      ittot=ittot+3
    enddo
-
  enddo
 
  !!generally
@@ -442,9 +504,9 @@ subroutine init_plowannier(dtset,wan)
      write(message,'(3a,2i6)') "  Number of wannier functions is larger than" ,&
      &" number of Kohn Sham bands used for Wannier functions: decrease the number of Wannier functions", &
      &" or increase the number of bands ",norbtot,wan%bandf_wan-wan%bandi_wan+1
-     MSG_ERROR(message)
+     !MSG_ERROR(message)
    endif
-   if(dtset%plowan_compute==2) then
+   if(plowan_compute==2) then
      write(message,'(3a)')  ch10,' == plowan_compute=2 => off diag blocks in the k-space Wannier Hamiltonian matrix',&
     &                          'is put to zero before diagonalisation'
      call wrtout(std_out,message,'COLL') ; call wrtout(ab_out,message,'COLL')
@@ -660,12 +722,9 @@ end subroutine destroy_orbital
 !! SOURCE
 
 
-subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,&
+subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,& 
 & mpi_enreg,occ,wan,pawtab,psps,usecprj,unpaw,pawrad,dtfil)
 
-#ifdef FC_INTEL
-!DEC$ NOOPTIMIZE
-#endif
 
  use m_hide_lapack
 
@@ -692,11 +751,11 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 !scalars
  integer :: band_index,dimpsichi,facpara
  integer :: iatom,iatom1,iatom2,iband,ibandc,ibg,ierr,ikpt
- integer :: iband1,owrunt
+ integer :: iband1,owrunt,opt
  integer :: ilmn,iorder_cprj,ispinor,isppol,itypat,ilmn2
  integer :: lmn_size
  integer :: m1,maxnproju,me,natom,nband_k,nband_k_cprj
- integer :: nnn,nprocband,spaceComm,n1,n2
+ integer :: nnn,nprocband,spaceComm
  integer :: plowan_greendos,plowan_hybrid,plowan_inter,plowan_computegreen
  real(dp) :: ph0phiint_used
  character(len=500) :: message
@@ -721,8 +780,11 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  logical :: lprojchi
  type(pawcprj_type),allocatable :: cwaveprj(:,:)
  type(operwan_type), allocatable :: operwan(:,:,:)
- type(operwan_realspace_type), allocatable :: operwan_realspace(:,:)
+ type(operwan_realspace_type) :: operwan_realspace
+ type(operwan_realspace_type) :: operocc
+ complex(dpc), allocatable :: eigenks(:,:,:,:)
  complex(dpc), allocatable :: operks(:,:,:,:)
+ complex(dpc), allocatable :: identityks(:,:,:,:)
  real(dp), allocatable :: ff(:)
  complex(dpc), allocatable :: operwansquare(:,:,:,:)
  complex(dpc), allocatable :: operwansquarereal(:,:,:)
@@ -735,7 +797,32 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  real(dp), allocatable :: eig(:), rwork(:)
  complex(dpc), allocatable :: zwork(:)
  integer :: lwork,info,whole_diag
+ !complex(dpc), allocatable :: densmat(:,:)
 !************************************************************************
+
+! Drive the normalization of the psichis
+
+if (dtset%plowan_projcalc(1)==-2)then
+  if (dtset%ucrpa >= 1 .or. dtset%dmft_kspectralfunc==1) then 
+    opt = 0
+  else
+    opt=1
+  endif
+else
+  opt=0
+end if
+
+if (opt==0) then
+  write(message,*)ch10,"Normalization of plowannier k-point by k-point"
+else
+  write(message,*)ch10,"Normalization of plowannier on the sum of the k-points"
+endif
+
+MSG_COMMENT(message)
+!opt=1
+        ! 0 : normalization k-point by k-point (normal use of plowan)
+        ! 1 : normalization of the sum over k-points (use with crpa old keywords)
+
 
 ! Internal variables (could be put one day as input variables of ABINIT).
  plowan_computegreen   = 0  !
@@ -883,7 +970,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      MSG_ERROR(message)
    end if
    rewind(unt)
-   write(unt,*) "Number of bands,   spins, and  k-point; and spin-orbit flag"
+   write(unt,*) " Number of bands,   spins, and  k-point; and spin-orbit flag"
    write(unt,*) dtset%mband,wan%nsppol,wan%nkpt,wan%nspinor,wan%bandi_wan,wan%bandf_wan
    write(unt,*) " For each k-point, eigenvalues for each band"
    write(unt,*) (dtset%wtk(ikpt)*facpara,ikpt=1,wan%nkpt)
@@ -918,6 +1005,14 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      proj = wan%projector_wan(iatom)%lproj(il)
      itypat = dtset%typat(wan%iatom_wan(iatom))
      lmn_size = pawtab(itypat)%lmn_size
+     ! modif proj if proj == -2 ---> usemdft has been used
+     if (proj==-2) then
+       do ilmn = 1,lmn_size 
+         if ( psps%indlmn(1,ilmn,itypat) .eq. l .and. psps%indlmn(2,ilmn,itypat) .eq. 0 .and. proj .eq. -2 ) then
+           proj=psps%indlmn(5,ilmn,itypat)
+         end if
+       end do
+     end if
      ! check if the choice of proj is coherent with the value of l
      do ilmn = 1,lmn_size
        if (psps%indlmn(1,ilmn,itypat).eq. l .and. psps%indlmn(2,ilmn,itypat) .eq. 0) then
@@ -928,7 +1023,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
        end if
      end do
      if (count .eq. 0) then
-       write(message,'(a)') "The projector choice is not consistent with the orbital l"
+       write(message,'(a)') " The projector choice is not consistent with the orbital l"
        MSG_ERROR(message)
      else !good choice of projector
        wan%psichi(1,1,iatom)%atom(il)%ph0phiint = zero
@@ -1064,89 +1159,186 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
 
 
- call normalization_plowannier(wan)
-
-
-
-
  !! -------------------------------------------------------------
- !! COMPUTATION OF THE OCCUPATION MATRIX
+ !! COMPUTATION OF THE OCCUPATION MATRIX BEFORE NORMALIZATION
  !! -------------------------------------------------------------
  !! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
- if (prtocc .eq. 1) then
+ if (dtset%prtvol >= 5) then
    !Inialize an empty Wannier operator
    ABI_DATATYPE_ALLOCATE(operwan,(wan%nkpt,wan%natom_wan,wan%natom_wan))
    call initialize_operwan(wan,operwan)
 
    !Creation of the KS occupation operator
-   ABI_ALLOCATE(operks,(wan%nkpt,wan%bandf_wan-wan%bandi_wan+1,wan%bandf_wan-wan%bandi_wan+1,wan%nsppol))
-   operks = czero
+   ABI_ALLOCATE(eigenks,(wan%nkpt,wan%bandf_wan-wan%bandi_wan+1,wan%bandf_wan-wan%bandi_wan+1,wan%nsppol))
+   ABI_ALLOCATE(identityks,(wan%nkpt,wan%bandf_wan-wan%bandi_wan+1,wan%bandf_wan-wan%bandi_wan+1,wan%nsppol))
+   eigenks = czero
+   identityks=czero
+   do isppol = 1,wan%nsppol
+     do iband1 = 1,wan%bandf_wan-wan%bandi_wan+1
+      ibandc = iband1 + wan%bandi_wan - 1
+       do ikpt = 1,wan%nkpt
+        eigenks(ikpt,iband1,iband1,isppol) = occ(((ikpt-1)*dtset%mband+ibandc+(isppol-1)*wan%nkpt*dtset%mband))
+         !write(6,*) 'eigenks', ikpt,iband1,isppol,((ikpt-1)*dtset%mband+ibandc+(isppol-1)*wan%nkpt*dtset%mband),occ(((ikpt-1)*dtset%mband+ibandc+(isppol-1)*wan%nkpt*dtset%mband))
+       end do
+     end do
+   end do
+   
+   
+   !compute the occupation in wannier basis and print it
+  write(message,*)char(10),&
+&" Print the occupation levels (not normalized) for 1 atom, 1 orbitals"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   write(message,*)" Atom =",wan%iatom_wan(1),"orbital =",wan%latom_wan(1)%lcalc(1)
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   do ikpt = 1,wan%nkpt
+     call compute_oper_ks2wan(wan,eigenks,operwan,ikpt)
+   enddo
+   call init_operwan_realspace(wan,operocc)
+   write(message,*)char(10)," The occupation matrix before normalization is :"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   call compute_oper_wank2realspace(wan,operwan,operocc)
+    if (wan%nsppol ==1)then
+     write(message,*)char(10)," For one spin :"
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')     
+     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+       write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))
+       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+     enddo
+   else 
+     write(message,*)char(10)," For spin up :"
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+       write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))
+       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+     enddo
+     write(message,*)char(10)," For spin down : "
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1       
+       write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,2,1,1))
+       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+     enddo
+   endif
+ 
+ endif
+
+ !!-------------------------------------------------------------
+ !!NORMALIZATION
+ !!--------------------------------------------------------------
+
+ if(dtset%prtvol>=5) then 
    do isppol = 1,wan%nsppol
      do iband1 = 1,wan%bandf_wan-wan%bandi_wan+1
        ibandc = iband1 + wan%bandi_wan - 1
        do ikpt = 1,wan%nkpt
-         operks(ikpt,iband1,iband1,isppol) = occ(((ikpt-1)*dtset%mband+ibandc+(isppol-1)*wan%nkpt*dtset%mband))
+         identityks(ikpt,iband1,iband1,isppol) = one
+!write(6,*) "idks", identityks(ikpt,iband1,iband1,isppol) 
        end do
      end do
    end do
-
-   !compute the occupation in wannier basis
+   call zero_operwan(wan,operwan)
    do ikpt = 1,wan%nkpt
-     call compute_oper_ks2wan(wan,operks,operwan,ikpt)
+     call compute_oper_ks2wan(wan,identityks,operwan,ikpt)
+   enddo
+   do ikpt = 1,wan%nkpt
+    ! if (ikpt<=5)then
+       write(message,*)char(10)," For ikpt=",ikpt,"the normalization matrix is before normalization :"
+       call wrtout(std_out,message,'COLL'); !call wrtout(ab_out,message,'COLL')
+       do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+         write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
+         call wrtout(std_out,mat_writing,'COLL'); !call wrtout(ab_out,mat_writing,'COLL')
+       enddo
+     !endif
    end do
-   ABI_DEALLOCATE(operks)
+ endif
 
-   !To diagonalize the block matrix for each orbital
-!! do iatom1 = 1,wan%natom_wan
- !!  do il1 = 1,wan%nbl_atom_wan(iatom1)
-  !!   do isppol = 1,wan%nsppol
-   !!    count = 2*wan%latom_wan(iatom1)%lcalc(il1)+1
-    !!   ABI_ALLOCATE(matrix_to_diag,(count,count))
-     !!  ABI_ALLOCATE(eig,(count))
-     !!  ABI_ALLOCATE(rwork,(3*count-2))
-    !!   lwork = 65*count !Value to optimize the diagonalization
-   !!    ABI_ALLOCATE(zwork,(lwork))
-  !!     do ikpt = 1,wan%nkpt
- !!        matrix_to_diag(:,:) = operwan(ikpt,iatom1,iatom1)%atom(il1,il1)%matl(:,:,isppol,1,1)
-!!         call zheev('v','u',count,matrix_to_diag,count,eig,zwork,lwork,rwork,info)
- !!        if (info .eq. 0) then !!Correct diagonalization
-  !!         matrix_to_diag = czero
-   !!        do im1 = 1,count
-    !!         matrix_to_diag(im1,im1) = eig(im1)
-     !!      end do
-      !!     operwan(ikpt,iatom1,iatom1)%atom(il1,il1)%matl(:,:,isppol,1,1) = matrix_to_diag(:,:)
-       !!  else
-      !!     write(message,'(a)') "Error in the normalization of the Wannier eigenvalues"
-     !!      MSG_ERROR(message)
-    !!     end if
-   !!    end do
-  !!     ABI_DEALLOCATE(matrix_to_diag)
-   !!    ABI_DEALLOCATE(eig)
-    !!   ABI_DEALLOCATE(rwork)
-   !!    ABI_DEALLOCATE(zwork)
-  !!   end do
- !!  end do
-!! end do
+ 
+ call normalization_plowannier(wan,opt)
 
 
+ if (dtset%prtvol>=5) then
+   call zero_operwan(wan,operwan)
+   do ikpt = 1,wan%nkpt
+     call compute_oper_ks2wan(wan,identityks,operwan,ikpt)
+   enddo
+   do ikpt = 1,wan%nkpt
+     !if (ikpt<=5)then
+       write(message,*)char(10)," For ikpt=",ikpt,"the normalization matrix is after normalization :"
+       call wrtout(std_out,message,'COLL'); !call wrtout(ab_out,message,'COLL')
+       do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+         write(mat_writing,'(7f20.5)')real(operwan(ikpt,1,1)%atom(1,1)%matl(im1,:,1,1,1))
+         call wrtout(std_out,mat_writing,'COLL'); !call wrtout(ab_out,mat_writing,'COLL')
+       enddo
+     !endif
+   end do
+ endif
+ !! -------------------------------------------------------------
+ !! COMPUTATION OF THE OCCUPATION MATRIX AFTER NORMALIZATION
+ !! -------------------------------------------------------------
+ !! vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+ !compute the occupation in wannier basis and print it
 
+ if (dtset%prtvol >= 5) then  
+   write(message,*)char(10),&
+     &" Print the occupation levels (normalized) for 1 atom, 1 orbital"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   write(message,*)"Atom =",wan%iatom_wan(1),"orbital =",wan%latom_wan(1)%lcalc(1)
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   call zero_operwan(wan,operwan)
+   do ikpt = 1,wan%nkpt
+     call compute_oper_ks2wan(wan,eigenks,operwan,ikpt)
+   enddo
+   call zero_operwan_realspace(wan,operocc)
+   write(message,*)char(10)," The occupation matrix after normalization is :"
+   call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+   call compute_oper_wank2realspace(wan,operwan,operocc)
+   if (wan%nsppol ==1)then
+     write(message,*)char(10)," For one spin :"
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')     
+     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+       write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))
+       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+     enddo
+   else 
+     write(message,*)char(10)," For spin up :"
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1
+       write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,1,1,1))
+       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+     enddo
+     write(message,*)char(10)," For spin down : "
+     call wrtout(std_out,message,'COLL'); call wrtout(ab_out,message,'COLL')
+     do im1=1,2*wan%latom_wan(1)%lcalc(1)+1       
+       write(mat_writing,'(7f20.10)')real(operocc%atom_index(1,1)%position(1,1)%atom(1,1)%matl(im1,:,2,1,1))
+       call wrtout(std_out,mat_writing,'COLL'); call wrtout(ab_out,mat_writing,'COLL')
+     enddo
+   endif
 
 
    mat_writing = ""
-
+   
    if (me.eq.0) then
-     !print operwan in the real space, in a file
+!print operwan in the real space, in a file
      mat_writing = trim(dtfil%filnam_ds(4))//"_wannierocc"
      convert = 1
      call print_operwan(wan,operwan,trim(mat_writing),convert)
    end if
-   call destroy_operwan(wan,operwan) !!Destroy the occupation matrix
+! destroy operators and the occupation matrix
+   ABI_DEALLOCATE(eigenks)
+   ABI_DEALLOCATE(identityks)
+   call destroy_operwan(wan,operwan)
    ABI_DATATYPE_DEALLOCATE(operwan)
+   call destroy_operwan_realspace(wan,operocc)!!Destroy the occupation matrix 
+ endif
 
- end if
 
 !! ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+
+
+
+
 
 
  !! -------------------------------------------------------------
@@ -1185,10 +1377,11 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
        do m1= 1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
          do isppol = 1,wan%nsppol
            if (aimag(operwan(ikpt,iatom1,iatom1)%atom(il1,il1)%matl(m1,m1,isppol,1,1)) > 1d-8) then
-             write(mat_writing,'(a)') "An eigenvalue has an imaginary part: ikpt, atom, l, m, isppol, value"
+             write(mat_writing,'(a)') " An eigenvalue has an imaginary part: ikpt, atom, l, m, isppol, value"
              write(mat_writing2,'(i0,i0,i0,i0,i0,E15.6)') ikpt, iatom1, il1, im1, isppol, &
   &                   operwan(ikpt,iatom1,iatom1)%atom(il1,il1)%matl(m1,m1,isppol,1,1)
              MSG_ERROR(message)
+             
            end if
          end do
        end do
@@ -1204,64 +1397,69 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  !! Transform the Wannier operator in real space (in eV)
  !! 1) allocate operwan_realspace
  !! -------------------------------------------------------------
- ABI_DATATYPE_ALLOCATE(operwan_realspace,(wan%natom_wan,wan%natom_wan))
- do iatom1 = 1,wan%natom_wan
-   do iatom2 = 1,wan%natom_wan
-     n1=size(wan%nposition(iatom1)%pos,1)
-     n2=size(wan%nposition(iatom2)%pos,1)
-     ABI_DATATYPE_ALLOCATE(operwan_realspace(iatom1,iatom2)%position,(n1,n2))
-     do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
-       do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
-         n1=wan%nbl_atom_wan(iatom1)
-         n2=wan%nbl_atom_wan(iatom2)
-         ABI_DATATYPE_ALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom,(n1,n2))
-         do il1 = 1,wan%nbl_atom_wan(iatom1)
-           do il2 = 1,wan%nbl_atom_wan(iatom2)
-             n1=2*wan%latom_wan(iatom1)%lcalc(il1)+1
-             n2=2*wan%latom_wan(iatom2)%lcalc(il2)+1
- ABI_ALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl,(n1,n2,wan%nsppol,1,1))
-             operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl = zero
-           end do
-         end do
-       end do
-     end do
-   end do
- end do
+if (dtset%plowan_realspace >= 1) then
+  call init_operwan_realspace(wan,operwan_realspace)
+endif
+
+! ABI_DATATYPE_ALLOCATE(operwan_realspace,(wan%natom_wan,wan%natom_wan))
+! do iatom1 = 1,wan%natom_wan
+!   do iatom2 = 1,wan%natom_wan
+!     n1=size(wan%nposition(iatom1)%pos,1)
+!     n2=size(wan%nposition(iatom2)%pos,1)
+!     ABI_DATATYPE_ALLOCATE(operwan_realspace(iatom1,iatom2)%position,(n1,n2))
+!     do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+!       do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+!         n1=wan%nbl_atom_wan(iatom1)
+!         n2=wan%nbl_atom_wan(iatom2)
+!         ABI_DATATYPE_ALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom,(n1,n2))
+!         do il1 = 1,wan%nbl_atom_wan(iatom1)
+!           do il2 = 1,wan%nbl_atom_wan(iatom2)
+!             n1=2*wan%latom_wan(iatom1)%lcalc(il1)+1
+!             n2=2*wan%latom_wan(iatom2)%lcalc(il2)+1
+! ABI_ALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl,(n1,n2,wan%nsppol,1,1))
+!             operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl = zero
+!           end do
+!         end do
+!       end do
+!     end do
+!   end do
+! end do
 
  !! -------------------------------------------------------------
  !! Transform the Wannier operator in real space (in eV)
  !! 2) compute the value in real space (only if kptopt>0 ie BZ correctly sampled)
  !! -------------------------------------------------------------
- if (dtset%plowan_realspace == 1 .and. dtset%kptopt > 0 ) then ! interpolation and kptopt >0 : compute Wannier functions in real space.
-   do isppol = 1,wan%nsppol
-     do iatom1 = 1,wan%natom_wan
-       do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
-         do il1 = 1,wan%nbl_atom_wan(iatom1)
-           do im1 = 1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
-             do iatom2 = 1,wan%natom_wan
-               do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
-                 do il2 = 1,wan%nbl_atom_wan(iatom2)
-                   do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
-                     !sum over ikpt
-                     do ikpt = 1,wan%nkpt
-                       operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,isppol,1,1) =&
-                         operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,isppol,1,1)&
-                         + real(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,1,1)&
-                         * wan%wtk(ikpt) * exp( cmplx(0.0,1.0) * two_pi * ( &
-                         wan%kpt(1,ikpt) * ( wan%nposition(iatom1)%pos(pos1,1) - wan%nposition(iatom2)%pos(pos2,1) )+&
-                         wan%kpt(2,ikpt) * ( wan%nposition(iatom1)%pos(pos1,2) - wan%nposition(iatom2)%pos(pos2,2) )+&
-                         wan%kpt(3,ikpt) * ( wan%nposition(iatom1)%pos(pos1,3) - wan%nposition(iatom2)%pos(pos2,3)))))
-                     end do
-                     !end of the sum
-                   end do
-                 end do
-               end do
-             end do
-           end do
-         end do
-       end do
-     end do
-   end do
+ if (dtset%plowan_realspace >= 1 .and. dtset%kptopt > 0 ) then ! interpolation and kptopt >0 : compute Wannier functions in real space.
+   call compute_oper_wank2realspace(wan,operwan,operwan_realspace)
+!   do isppol = 1,wan%nsppol
+!     do iatom1 = 1,wan%natom_wan
+!       do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+!         do il1 = 1,wan%nbl_atom_wan(iatom1)
+!           do im1 = 1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
+!             do iatom2 = 1,wan%natom_wan
+!               do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+!                 do il2 = 1,wan%nbl_atom_wan(iatom2)
+!                   do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
+!                     !sum over ikpt
+!                     do ikpt = 1,wan%nkpt
+!                       operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,isppol,1,1) =&
+!                         operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,isppol,1,1)&
+!                         + real(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,1,1)&
+!                         * wan%wtk(ikpt) * exp( cmplx(0.0,1.0) * two_pi * ( &
+!                         wan%kpt(1,ikpt) * ( wan%nposition(iatom1)%pos(pos1,1) - wan%nposition(iatom2)%pos(pos2,1) )+&
+!                         wan%kpt(2,ikpt) * ( wan%nposition(iatom1)%pos(pos1,2) - wan%nposition(iatom2)%pos(pos2,2) )+&
+!                         wan%kpt(3,ikpt) * ( wan%nposition(iatom1)%pos(pos1,3) - wan%nposition(iatom2)%pos(pos2,3)))))
+!                     end do
+!                     !end of the sum
+!                   end do
+!                 end do
+!               end do
+!             end do
+!           end do
+!         end do
+!       end do
+!     end do
+!   end do
 
 
 
@@ -1274,29 +1472,28 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    write(message,'(4a)') ch10,&
 &   '  == Write hamiltonian in real space Wannier function to file ',trim(owrfile),' =='
    call wrtout(std_out,message,'COLL')
-
-   if (open_file(owrfile, message, newunit=owrunt, form="unformatted", status="unknown", action="write") /= 0) then
-     MSG_ERROR(message)
-   end if
-
-   rewind(owrunt)
-   do isppol = 1,wan%nsppol
-     do iatom1 = 1,wan%natom_wan
-       do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
-         do il1 = 1,wan%nbl_atom_wan(iatom1)
-           do iatom2 = 1,wan%natom_wan
-             do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
-               do il2 = 1,wan%nbl_atom_wan(iatom2)
-                 write(owrunt) operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(:,:,isppol,1,1)
+   if (me.eq.0) then
+     if (open_file(owrfile, message, newunit=owrunt, form="unformatted", status="unknown", action="write") /= 0) then
+       MSG_ERROR(message)
+     end if
+     rewind(owrunt)
+     do isppol = 1,wan%nsppol
+       do iatom1 = 1,wan%natom_wan
+         do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+           do il1 = 1,wan%nbl_atom_wan(iatom1)
+             do iatom2 = 1,wan%natom_wan
+               do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+                 do il2 = 1,wan%nbl_atom_wan(iatom2)
+                   write(owrunt) operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(:,:,isppol,1,1)
+                 end do
                end do
              end do
            end do
          end do
        end do
      end do
-   end do
-   close(owrunt)
-
+     close(owrunt)
+   end if
  end if ! plotwan_realspace>0 and kptopt>0
 
  !^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1404,7 +1601,6 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    if (open_file(owrfile, message, newunit=owrunt, form="unformatted", status="old", action="read") /= 0) then
      MSG_ERROR(message)
    end if
-
    rewind(owrunt)
    do isppol = 1,wan%nsppol
      do iatom1 = 1,wan%natom_wan
@@ -1413,7 +1609,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
            do iatom2 = 1,wan%natom_wan
              do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
                do il2 = 1,wan%nbl_atom_wan(iatom2)
-                 read(owrunt) operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(:,:,isppol,1,1)
+                 read(owrunt) operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(:,:,isppol,1,1)
                end do
              end do
            end do
@@ -1431,13 +1627,13 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    if(3==4) then
      do isppol = 1,wan%nsppol
        do pos2 = 2,size(wan%nposition(2)%pos,1)
-         operwan_realspace(1,2)%position(1,pos2)%atom(1,1)%matl(:,:,isppol,1,1) = zero
-         operwan_realspace(2,1)%position(pos2,1)%atom(1,1)%matl(:,:,isppol,1,1) = zero
+         operwan_realspace%atom_index(1,2)%position(1,pos2)%atom(1,1)%matl(:,:,isppol,1,1) = zero
+         operwan_realspace%atom_index(2,1)%position(pos2,1)%atom(1,1)%matl(:,:,isppol,1,1) = zero
         !             atoms 1 and 2 are selected for removal
         !             position(1,pos2): select cell 1 and all other cells  pos2.
         !             atom(1,1): selected index 1 of atom1 and index 1 of atom2
         !             mat1(:,:,isppol,1,1): remove all ml terms.
-         operwan_realspace(1,1)%position(1,pos2)%atom(1,2)%matl(:,:,isppol,1,1) = zero
+         operwan_realspace%atom_index(1,1)%position(1,pos2)%atom(1,2)%matl(:,:,isppol,1,1) = zero
        end do
      end do
      write(message,'(2a)') '  == Block suppressed in the real space Wannier hamiltonian'
@@ -1465,7 +1661,8 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
                      do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
                        operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,1,1) =&
                          operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,1,1)&
-                         +real(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,isppol,1,1)&
+                         +real(operwan_realspace%atom_index(iatom1,iatom2)%&
+                         &position(pos1,pos2)%atom(il1,il2)%matl(im1,im2,isppol,1,1)&
                          * exp( - cmplx(0.0,1.0) * two_pi * ( &
                          wan%kpt(1,ikpt) * ( wan%nposition(iatom1)%pos(pos1,1) - wan%nposition(iatom2)%pos(pos2,1) )+&
                          wan%kpt(2,ikpt) * ( wan%nposition(iatom1)%pos(pos1,2) - wan%nposition(iatom2)%pos(pos2,2) )+&
@@ -1482,30 +1679,33 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
      end do
    end do
 
- end if ! plowan_realspace==2 (Wannier interpolation)
+ ! plowan_realspace==2 (Wannier interpolation)
 
  !! -------------------------------------------------------------
  !! End Transform the Wannier operator in real space (in eV)
  !! n) deallocate operwan_realspace
- !! -------------------------------------------------------------
- do iatom1 = 1,wan%natom_wan
-   do iatom2 = 1,wan%natom_wan
-     do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
-       do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
-         do il1 = 1,wan%nbl_atom_wan(iatom1)
-           do il2 = 1,wan%nbl_atom_wan(iatom2)
-             ABI_DEALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl)
-           end do
-         end do
-         ABI_DATATYPE_DEALLOCATE(operwan_realspace(iatom1,iatom2)%position(pos1,pos2)%atom)
-       end do
-     end do
-     ABI_DATATYPE_DEALLOCATE(operwan_realspace(iatom1,iatom2)%position)
-   end do
- end do
- ABI_DATATYPE_DEALLOCATE(operwan_realspace)
-
-
+ !! ------------------------------------------------------------
+!   do iatom1 = 1,wan%natom_wan
+!     do iatom2 = 1,wan%natom_wan
+!       do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+!         do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+!           do il1 = 1,wan%nbl_atom_wan(iatom1)
+!             do il2 = 1,wan%nbl_atom_wan(iatom2)
+!               ABI_DATATYPE_DEALLOCATE(operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl)
+!             end do
+!           end do
+!           ABI_DATATYPE_DEALLOCATE(operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom)
+!         end do
+!       end do
+!       ABI_DATATYPE_DEALLOCATE(operwan_realspace%atom_index(iatom1,iatom2)%position)
+!     end do
+!   end do
+!   ABI_DATATYPE_DEALLOCATE(operwan_realspace%atom_index)
+ endif
+ if (dtset%plowan_realspace >= 1) then
+   call destroy_operwan_realspace(wan,operwan_realspace)
+ endif
+ 
  ! ----------------------------------------------------------------------------------------
  ! Here each block of the hamiltonian matrix in Wannier basis is diagonalized separately
  ! ----------------------------------------------------------------------------------------
@@ -1628,7 +1828,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
  ! Warning:  In the case of the diagonalisation of the whole hamltonien
  ! the band structure is separated in as many files as atoms.
  !------------------------------------------------------------------------
- if (band_struct .eq. 1) then
+ if (band_struct .eq. 1 ) then
 
    write(message,'(3a)') ch10,&
 &   ' == For each k-point of the path, gives the eigenvalues (in eV) of the Hamiltonian in the Wannier basis'
@@ -1641,7 +1841,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
    do iatom1 = 1,wan%natom_wan
      i2s = '(I0)'               ! trick to add the atom number
      write(x1,i2s) iatom1       ! at the end of the filename
-     if (wan%nsppol .eq. 1) then
+     if (wan%nsppol .eq. 1 .and. me.eq.0 ) then
        if (open_file(trim(dtfil%filnam_ds(4))//"_BANDSTRUCT"//trim(x1),message,newunit=unt) /= 0) then
          MSG_ERROR(message)
        end if
@@ -1716,7 +1916,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
  !!Here we only study the first atom
 
- if (plowan_computegreen .eq. 1) then
+ if (plowan_computegreen .eq. 1 .and. me.eq.0 ) then
    if (dos .ge. 1) then ! compute partial DOS for l=dos
      if (open_file(trim(dtfil%filnam_ds(4))//"_dosfromgreen",message,newunit=dos_unt) /= 0) then
        MSG_ERROR(message)
@@ -1909,7 +2109,7 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 
 
 
- if (plowan_computegreen .eq. 2) then !! Not working ! not tested, not up to date with the code
+ if (plowan_computegreen .eq. 2 .and. me.eq.0 ) then !! Not working ! not tested, not up to date with the code
    !Method 1
    ABI_ALLOCATE(energies,(7,wan%nsppol))
    ABI_ALLOCATE(Ffftable,(7,wan%nsppol))
@@ -2118,6 +2318,293 @@ subroutine compute_coeff_plowannier(cryst_struc,cprj,dimcprj,dtset,eigen,fermie,
 end subroutine compute_coeff_plowannier
 !!***
 
+!!****f* m_plowannier/print_plowannier
+!! NAME
+!!  print_plowannier
+!!
+!! FUNCTION
+!!  print the wannier weight (psichi) on a forlb.ovlp file
+!!
+!! INPUTS
+!! dtset%typat,wan
+!!
+!! OUTPUT
+!!
+!! PARENTS
+!! outscfcv
+!!
+!! CHILDREN
+!! open_file, wrtout
+!! SOURCE
+
+
+
+ subroutine print_plowannier(wan)
+
+ use m_abicore
+ use m_io_tools,  only : open_file
+ use m_specialmsg, only : wrtout
+ implicit none
+
+ !Arguments-------------------------
+ type(plowannier_type),intent(in) :: wan
+ !Local variables-------------------
+ character(len=500) :: msg
+ integer :: unt,iatom,spin,ikpt,iband,ibandc,il,ispinor,im
+
+ !Creation of the data.plowann file
+ if (open_file('data.plowann',msg,newunit=unt,form='formatted',status='replace') /= 0) then
+  MSG_ERROR(msg)
+ end if
+ rewind(unt)
+
+ write(msg,'(2a)') ch10,' Print the psichi coefficients in data.plowann'
+ call wrtout(std_out,msg,'COLL') ; call wrtout(ab_out,msg,'COLL')
+ 
+ !Header of the file data.plowann
+ write(unt,'(a22,i2)')"Total number of atom =", wan%natom_wan
+ write(unt,*)"List of atoms", wan%iatom_wan(:)
+ write(unt,'(a7,2i4)')"Bands =",wan%bandi_wan,wan%bandf_wan
+ write(unt,'(a26,i2)')"Total number of orbitals =",sum(wan%nbl_atom_wan(:))
+ do iatom=1,wan%natom_wan
+   write(unt,'(a17,i2,a3,4i2)')"Orbitals for atom",wan%iatom_wan(iatom)," = ",wan%latom_wan(iatom)%lcalc(:)
+ enddo
+ write(unt,'(a16,i2)')"Number of spin =",wan%nsppol
+ write(unt,'(a19,i4)')"Number of k-points=",wan%nkpt
+ do ikpt=1,wan%nkpt
+   write(unt,'(a,2x,i4)')"ikpt =",ikpt
+    do spin=1,wan%nsppol
+      do ispinor=1,wan%nspinor
+        do iband=wan%bandi_wan,wan%bandf_wan
+          ibandc=iband-wan%bandi_wan+1
+          write(unt,'(2x,a,2x,i2,2x,i2)')"iband =",iband
+          do iatom=1,wan%natom_wan
+            do il=1,wan%nbl_atom_wan(iatom)
+              do im=1,2*wan%latom_wan(iatom)%lcalc(il)+1
+                write(unt,'(8x,3i3,2x,2f23.15)')iatom,wan%latom_wan(iatom)%lcalc(il),im,&
+                &real(wan%psichi(ikpt,ibandc,iatom)%atom(il)%matl(im,spin,ispinor))&
+                &,aimag(wan%psichi(ikpt,ibandc,iatom)%atom(il)%matl(im,spin,ispinor))
+              enddo!m
+            enddo!l
+          enddo!atom
+        enddo!band
+      enddo!spinor
+    enddo!spin
+  enddo!k-point
+ close(unt)
+ end subroutine print_plowannier
+!!***
+
+
+!!****f* m_plowannier/get_plowannier
+!! NAME
+!!  get_plowannier
+!!
+!! FUNCTION
+!!  get the psichies (Wannier weights) from a data.plowann file
+!!
+!! INPUTS
+!! wan
+!!
+!! OUTPUT
+!! wan 
+!! 
+!! PARENTS
+!! outscfcv,cchi0, cchi0q0, prep_calc_ucrpa
+!!
+!! CHILDREN
+!! open_file,
+!! SOURCE
+
+ subroutine get_plowannier(wan_in,wan_out,dtset)
+
+ use m_abicore
+ use defs_abitypes
+ use m_io_tools,  only : open_file
+ use m_specialmsg, only : wrtout
+ implicit none
+
+ !Arguments-------------------------
+ type(plowannier_type),intent(inout) :: wan_in
+ type(plowannier_type),intent(inout) :: wan_out
+ type(dataset_type),intent(in) :: dtset
+ !Local variables-------------------
+ character(len=500) :: msg
+ integer :: unt,iatom,spin,ikpt,iband,ibandc,il,ispinor,im,dummy,natom,bandi,bandf,nbl,nspin,nkpt
+ real(dp) ::xx,yy
+
+ !Opening of the data.plowann file
+ if (open_file('data.plowann',msg,newunit=unt,form='formatted',status='old') /= 0) then
+  MSG_ERROR(msg)
+ end if
+ rewind(unt)
+ 
+
+ !Reading of the header of data.plowann
+ read(unt,'(a22,i2)') msg, natom
+ read(unt,*)
+ read(unt,'(a7,2i4)') msg, bandi,bandf
+ read(unt,'(a26,i2)') msg, nbl
+ do iatom=1,wan_in%natom_wan
+   read(unt,*)
+ enddo
+ read(unt,'(a16,i2)') msg, nspin
+ read(unt,'(a19,i4)') msg, nkpt
+
+ !Testing the header
+ if (natom /= wan_in%natom_wan .OR.&
+& nbl/= sum(wan_in%nbl_atom_wan(:)) .OR. nspin /= wan_in%nsppol .OR. nkpt/=wan_in%nkpt ) then
+   write(msg,'(a,3i3)')"Not the same atoms or bands in both datasets",natom,bandi,bandf
+   MSG_ERROR(msg)
+ endif
+
+ call init_plowannier(bandf,bandi,dtset%plowan_compute,&
+     &dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
+     &dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
+     &dtset%kptns,dtset%nimage,dtset%nkpt,dtset%nspinor,dtset%nsppol,dtset%wtk,wan_out)
+
+ call destroy_plowannier(wan_in)
+
+ write(msg,'(a)')"Reading of the Wannier weights from data.plowann"
+ call wrtout(std_out,msg,'COLL')
+ call wrtout(ab_out,msg,'COLL')
+ !Reading of the psichis 
+ do ikpt=1,wan_out%nkpt
+   read(unt,*)
+    do spin=1,wan_out%nsppol
+      do ispinor=1,wan_out%nspinor
+        do iband=wan_out%bandi_wan,wan_out%bandf_wan
+          ibandc=iband-wan_out%bandi_wan+1
+          read(unt,*)
+          do iatom=1,wan_out%natom_wan
+            do il=1,wan_out%nbl_atom_wan(iatom)
+              do im=1,2*wan_out%latom_wan(iatom)%lcalc(il)+1
+                read(unt,'(8x,3i3,2x,2f23.15)')dummy,dummy,dummy,xx,yy
+                wan_out%psichi(ikpt,ibandc,iatom)%atom(il)%matl(im,spin,ispinor)=cmplx(xx,yy)
+              enddo!m
+            enddo!l
+          enddo!atom
+        enddo!band
+      enddo!spinor
+    enddo!spin
+  enddo!k-point
+ close(unt)
+end subroutine get_plowannier
+!!***
+
+
+!!****f* m_plowannier/fullbz_plowannier
+!! NAME
+!!  fullbz_plowannier
+!!
+!! FUNCTION
+!!  Reconstruct the pischis on the full BZ 
+!!
+!! INPUTS
+!! dtset,kmesh,cryst,wanibz
+!!
+!! OUTPUT
+!! wanbz 
+!! 
+!! PARENTS
+!! screening_driver
+!!
+!! CHILDREN
+!! 
+!! SOURCE
+
+ subroutine fullbz_plowannier(dtset,kmesh,cryst,pawang,wanibz,wanbz)
+   
+   use m_abicore
+   use m_specialmsg, only : wrtout
+   use defs_abitypes
+   use m_bz_mesh, only : kmesh_t, get_BZ_item
+   use m_crystal, only : crystal_t
+   use m_pawang, only  : pawang_type
+   implicit none
+
+!Arguments-------------------------
+   type(plowannier_type),intent(inout) :: wanibz
+   type(plowannier_type),intent(out) :: wanbz
+   type(dataset_type),intent(in) :: dtset
+   type(kmesh_t),intent(in) :: kmesh
+   type(crystal_t),intent(in) :: cryst
+   type(pawang_type),intent(in) :: pawang
+!Local variables----------------------
+   character(len=500) :: msg
+   integer :: sym,iatom,spin,ik_bz,iband,ibandc,il,ispinor,im,ik_ibz,isym,itim
+   integer ::  at_indx,indx, iat,m1,m2,l
+   real(dp) :: kbz(3),wtk(kmesh%nbz)
+!*****************************************************************************************
+  
+   wtk=one
+   sym=kmesh%nbz/kmesh%nibz
+   call init_plowannier(wanibz%bandf_wan,wanibz%bandi_wan,dtset%plowan_compute,&
+     &dtset%plowan_iatom,dtset%plowan_it,dtset%plowan_lcalc,dtset%plowan_natom,&
+     &dtset%plowan_nbl,dtset%plowan_nt,dtset%plowan_projcalc,dtset%acell_orig,&
+     &kmesh%bz,dtset%nimage,kmesh%nbz,dtset%nspinor,dtset%nsppol,wtk,wanbz)
+  
+   write(msg,'(a)')" Reconstruction of the full Brillouin Zone using data.plowann in the IBZ"
+   call wrtout(std_out,msg,'COLL');call wrtout(ab_out,msg,'COLL')
+   if (cryst%nsym==1) then
+     do ik_bz=1,kmesh%nbz
+       do iband=wanbz%bandi_wan,wanbz%bandf_wan
+         ibandc=iband-wanbz%bandi_wan+1
+         do iatom=1,wanbz%natom_wan
+           do il=1,wanbz%nbl_atom_wan(iatom)
+             do im=1,2*wanbz%latom_wan(iatom)%lcalc(il)+1
+               do spin=1,wanbz%nsppol
+                 do ispinor=1,wanbz%nspinor
+                   if (kmesh%tabi(ik_bz)==1) then 
+                     wanbz%psichi(ik_bz,ibandc,iatom)%atom(il)%matl(im,spin,ispinor)=&
+                       &wanibz%psichi(kmesh%tab(ik_bz),ibandc,iatom)%atom(il)%matl(im,spin,ispinor)
+                   else if (kmesh%tabi(ik_bz)==-1) then
+                     wanbz%psichi(ik_bz,ibandc,iatom)%atom(il)%matl(im,spin,ispinor)=&
+                       &conjg(wanibz%psichi(kmesh%tab(ik_bz),ibandc,iatom)%atom(il)%matl(im,spin,ispinor))
+                   endif
+                 enddo
+               enddo
+             enddo
+           enddo
+         enddo
+       enddo
+     enddo
+   else if (cryst%nsym>1) then
+    do ik_bz=1,kmesh%nbz
+      call get_BZ_item(kmesh,ik_bz,kbz,ik_ibz,isym,itim)
+      do iatom=1,wanbz%natom_wan
+        indx=cryst%indsym(4,isym,wanibz%iatom_wan(iatom))
+!Link beetween full list and wan list of atom
+        do iat=1,wanbz%natom_wan
+          if (indx==wanbz%iatom_wan(iat))then
+            at_indx=iat
+          end if
+        end do
+!
+        do spin=1,wanibz%nsppol
+          do ispinor=1,wanibz%nspinor
+            do il=1,wanibz%nbl_atom_wan(iatom)
+              l=wanibz%latom_wan(iatom)%lcalc(il)
+              do m1=1,2*l+1
+                do m2=1,2*l+1
+                  do iband=wanibz%bandi_wan,wanibz%bandf_wan
+                    ibandc=iband-wanibz%bandi_wan+1
+                    wanbz%psichi(ik_bz,ibandc,iatom)%atom(il)%matl(m1,spin,ispinor)=&
+                      &wanbz%psichi(ik_bz,ibandc,iatom)%atom(il)%matl(m1,spin,ispinor)+&
+                      &wanibz%psichi(ik_ibz,ibandc,at_indx)%atom(il)%matl(m2,spin,ispinor)&
+                      &*pawang%zarot(m2,m1,l+1,isym)
+                  end do
+                enddo
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+  end if
+  call destroy_plowannier(wanibz)
+end subroutine fullbz_plowannier
+!!***
 
 !!****f* m_plowannier/destroy_plowannier
 !! NAME
@@ -2303,6 +2790,62 @@ end subroutine compute_coeff_plowannier
  end subroutine destroy_operwan
 !!***
 
+!!****f* m_plowannier/zero_operwan
+!! NAME
+!!  zero_operwan
+!!
+!! FUNCTION
+!!  zero operwan
+!!
+!! INPUTS
+!!  wan
+!!
+!! OUTPUT
+!!  operwan
+!!
+!! PARENTS
+!!      m_plowannier
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+ subroutine zero_operwan(wan,operwan)
+
+   implicit none
+
+   !Arguments----------------------------------
+   type(plowannier_type), intent(in) :: wan
+   type(operwan_type), intent(inout) :: operwan(wan%nkpt,wan%natom_wan,wan%natom_wan)
+
+   !Local variables----------------------------
+   integer :: ikpt,  iatom1, iatom2, il1, il2, isppol, ispinor1, ispinor2,  im1, im2
+
+
+   do ikpt = 1,wan%nkpt
+     do isppol = 1,wan%nsppol
+       do iatom1 = 1,wan%natom_wan
+         do iatom2 = 1,wan%natom_wan
+           do il1 = 1,wan%nbl_atom_wan(iatom1)
+             do il2 = 1,wan%nbl_atom_wan(iatom2)
+               do im1 = 1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
+                 do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
+                   do ispinor1 = 1,wan%nspinor
+                     do ispinor2 = 1,wan%nspinor
+                       operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)=czero
+                     end do
+                   end do
+                 end do
+               end do
+             end do
+           end do
+         end do
+       end do
+     end do
+   end do
+
+ end subroutine zero_operwan
+!!***
 
 !!****f* m_plowannier/compute_oper_ks2wan
 !! NAME
@@ -2325,10 +2868,6 @@ end subroutine compute_coeff_plowannier
 !! SOURCE
 
  subroutine compute_oper_ks2wan(wan,operks,operwan,option)
-
-#ifdef FC_INTEL
-!DEC$ NOOPTIMIZE
-#endif
 
    !Arguments--------------------------
    type(plowannier_type), intent(in) :: wan
@@ -2363,6 +2902,7 @@ end subroutine compute_coeff_plowannier
                    *operks(option,iband1,iband2,isppol)*wan%psichi(option,iband1,iatom1)%atom(il1)%matl(im1,isppol,ispinor1)
                        end do
                      end do
+                    ! write(6,*) "operwan",im1,im2,operwan(option,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)
                    end do
                  end do
                end do
@@ -2386,7 +2926,7 @@ end subroutine compute_oper_ks2wan
 !!  Use compute_oper_ks2wan to calculate overlap and do the normalization for the wan%psichi coefficients
 !!
 !! INPUTS
-!!  wan, option (=0 if we normalize over all k)
+!!  wan, opt (=0 normalize k-point by k-point; =1 normalize the sum over k)
 !!
 !! OUTPUT
 !!  wan itself is modified
@@ -2399,25 +2939,31 @@ end subroutine compute_oper_ks2wan
 !! SOURCE
 
 
-subroutine normalization_plowannier(wan)
+subroutine normalization_plowannier(wan,opt)
 
   use m_matrix, only : invsqrt_matrix
 
 !Arguments------------------
   type(plowannier_type), intent(inout) :: wan
-
+  integer, intent(in) :: opt
 !Local----------------------
   complex(dpc), allocatable :: operks(:,:,:,:)
   type(operwan_type), allocatable :: operwan(:,:,:)
   complex(dpc), allocatable :: operwansquare(:,:,:,:)
   complex(dpc), allocatable :: tmp_operwansquare(:,:)
-  integer :: ikpt, iband, iband1, iband2, isppol,  ispinor1, ispinor2, iatom1, &
-&  iatom2, il1, il2, im1, im2, index_c, index_l, n1,n2,n3
+  integer :: ikpt, iband, iband1, iband2, isppol,  ispinor1, ispinor2, iatom1,nb_zeros_tot
+  integer :: iatom2, il1, il2, im1, im2, index_c, index_l, n1,n2,n3, nkpt,nb_of_zeros
   type(orbital_type), allocatable :: psichinormalized(:,:,:)
   !character(len = 50) :: mat_writing2
   !character(len = 5000) :: mat_writing
   character(len = 500) :: message
 
+  !Initialize nkpt (wan%nkpt if opt=0, 1 if opt=1)
+  if (opt==1) then 
+    nkpt=1
+  else 
+    nkpt=wan%nkpt
+  end if
 
   !First, creation of the ks identity operator
   ABI_ALLOCATE(operks,(wan%nkpt,wan%bandf_wan-wan%bandi_wan+1,wan%bandf_wan-wan%bandi_wan+1,wan%nsppol))
@@ -2446,7 +2992,7 @@ subroutine normalization_plowannier(wan)
     call compute_oper_ks2wan(wan,operks,operwan,ikpt)
   end do
 
-
+  
 
   !transform the operwan into an inversible matrix
   !!operwansquare is the overlap square matrix (wan%size_wan * wan%size_wan)
@@ -2474,8 +3020,14 @@ subroutine normalization_plowannier(wan)
                 do il2 = 1,wan%nbl_atom_wan(iatom2)
                   do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
                     do ikpt = 1,wan%nkpt
-         operwansquare(ikpt,isppol,index_l+wan%size_wan*(ispinor1-1),index_c+wan%size_wan*(ispinor2-1))  &
-&                 = operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)
+                      if (opt==1) then ! operwansquare is a sum of operwan over k points     
+                        operwansquare(1,isppol,index_l+wan%size_wan*(ispinor1-1),index_c+wan%size_wan*(ispinor2-1))  &
+&                        =operwansquare(1,isppol,index_l+wan%size_wan*(ispinor1-1),index_c+wan%size_wan*(ispinor2-1))+ &
+&                        (operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)*wan%wtk(ikpt))
+                      else !operwansquare is a matrix with a k-point dimension
+                        operwansquare(ikpt,isppol,index_l+wan%size_wan*(ispinor1-1),index_c+wan%size_wan*(ispinor2-1))  &
+                          &= operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)
+                      end if
                     end do
                     index_c = index_c + 1
                   end do !im2
@@ -2506,12 +3058,15 @@ subroutine normalization_plowannier(wan)
 
 
   !take the square root inverse of operwansquare for normalization purposes
+  nb_zeros_tot=0
   ABI_ALLOCATE(tmp_operwansquare,(wan%nspinor*wan%size_wan,wan%nspinor*wan%size_wan))
   do isppol = 1,wan%nsppol
-    do ikpt = 1,wan%nkpt
+    do ikpt = 1,nkpt
+      write(std_out,*)"ikpt = ", ikpt
       tmp_operwansquare(:,:)=operwansquare(ikpt,isppol,:,:)
-      call invsqrt_matrix(tmp_operwansquare,wan%nspinor*wan%size_wan)
+      call invsqrt_matrix(tmp_operwansquare,wan%nspinor*wan%size_wan,nb_of_zeros)
       operwansquare(ikpt,isppol,:,:)=tmp_operwansquare(:,:)
+      nb_zeros_tot=nb_zeros_tot+nb_of_zeros
     end do
   end do
   ABI_DEALLOCATE(tmp_operwansquare)
@@ -2544,11 +3099,19 @@ subroutine normalization_plowannier(wan)
                   do il2 = 1,wan%nbl_atom_wan(iatom2)
                     do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
                       do ikpt = 1,wan%nkpt
-                        psichinormalized(ikpt,iband,iatom1)%atom(il1)%matl(im1,isppol,ispinor1) =&
-                          psichinormalized(ikpt,iband,iatom1)%atom(il1)%matl(im1,isppol,ispinor1) +&
-                          wan%psichi(ikpt,iband,iatom2)%atom(il2)%matl(im2,isppol,ispinor2)*&
-                          operwansquare(ikpt,isppol,index_l+wan%size_wan*(ispinor1-1),index_c+&
-                          wan%size_wan*(ispinor2-1))
+                        if (opt==1)then ! all the psichi are normalized with the same operwansquare
+                          psichinormalized(ikpt,iband,iatom1)%atom(il1)%matl(im1,isppol,ispinor1) =&
+&                           psichinormalized(ikpt,iband,iatom1)%atom(il1)%matl(im1,isppol,ispinor1) +&
+&                           wan%psichi(ikpt,iband,iatom2)%atom(il2)%matl(im2,isppol,ispinor2)*&
+&                           operwansquare(1,isppol,index_l+wan%size_wan*(ispinor1-1),index_c+&
+&                           wan%size_wan*(ispinor2-1))                          
+                        else ! each psichi is normalized with his own operwansquare
+                          psichinormalized(ikpt,iband,iatom1)%atom(il1)%matl(im1,isppol,ispinor1) =&
+&                           psichinormalized(ikpt,iband,iatom1)%atom(il1)%matl(im1,isppol,ispinor1) +&
+&                           wan%psichi(ikpt,iband,iatom2)%atom(il2)%matl(im2,isppol,ispinor2)*&
+&                           operwansquare(ikpt,isppol,index_l+wan%size_wan*(ispinor1-1),index_c+&
+&                           wan%size_wan*(ispinor2-1))
+                        end if
                       end do
                       index_c = index_c + 1
                     end do !im2
@@ -2597,20 +3160,23 @@ subroutine normalization_plowannier(wan)
                 do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
                   do ispinor1 = 1,wan%nspinor
                     do ispinor2 = 1,wan%nspinor
-                      if (iatom1.eq.iatom2 .and. il1.eq.il2 .and. im1.eq.im2 .and. ispinor1.eq.ispinor2) then
-                        if (abs(cmplx(1.0,0.0,dpc)-&
-             &             operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)) > 1d-8) then
-                          write(message,'(a,i0,a,F18.11)') 'Normalization error for ikpt =',ikpt,&
-         &                         ' on diag, value = ',&
-          &                        abs(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2))
-                          MSG_ERROR(message)
-                        end if
-                      else
-                        if (abs(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)) > 1d-8) then
-                          write(message,'(a,i0,a,F10.3)') 'Normalization error for ikpt =',ikpt,&
-         &                         ' not on diag, value = ',&
-         &                           abs(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2))
-                         MSG_ERROR(message)
+                      if (opt==0 .and. nb_zeros_tot==0) then
+                        if (iatom1.eq.iatom2 .and. il1.eq.il2 .and. im1.eq.im2 .and. ispinor1.eq.ispinor2) then
+                          if (abs(cmplx(1.0,0.0,dpc)-&
+                            &operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%&
+                            &matl(im1,im2,isppol,ispinor1,ispinor2)) > 1d-8) then
+                            write(message,'(a,i0,a,F18.11)') 'Normalization error for ikpt =',ikpt,&
+                              &' on diag, value = ',&
+                              &abs(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2))
+                            MSG_ERROR(message)
+                          end if
+                        else
+                          if (abs(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)) > 1d-8) then
+                            write(message,'(a,i0,a,F10.3)') 'Normalization error for ikpt =',ikpt,&
+                              &' not on diag, value = ',&
+                              &abs(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2))
+                            MSG_ERROR(message)
+                          end if
                         end if
                       end if
                     end do
@@ -2623,7 +3189,11 @@ subroutine normalization_plowannier(wan)
       end do
     end do
   end do
-
+  if (opt==0 .and. nb_zeros_tot/=0) then
+    write(message,'(a,i2,a)')"The matrix inversion detects ",nb_zeros_tot,&
+    " zero(s) on the diagonals. Take results with caution or modify nkpt and/or bands for plowan"
+    MSG_COMMENT(message)
+  end if
 
   !!Uncomment to print the overlap matrix in the log file (for ikpt = 1)
 !  do isppol = 1,wan%nsppol
@@ -2817,6 +3387,377 @@ end do
   close(unt)
 
 end subroutine print_operwan
+!!***
 
+
+!!****f* m_plowannier/init_operwan_realspace
+!! NAME
+!!  init_operwan_realspace
+!!
+!! FUNCTION
+!!  Initialize an operwan_realspace type variable
+!!
+!! INPUTS
+!!  wan, operwan_realspace
+!!
+!! OUTPUT
+!! operwan_realspace
+!!
+!! PARENTS
+!! m_plowannier
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine init_operwan_realspace(wan,oprs)
+
+!Arguments----------------------------------
+  type(operwan_realspace_type),intent(inout) :: oprs
+  type(plowannier_type), intent(in) :: wan
+
+!Local variables----------------------------
+  integer :: i1,i2,n1,n2,p1,p2,l1,l2,sp,pi
+  
+ !variable names is shorten to achieve not too long line lenght
+  sp=wan%nsppol
+  pi=wan%nspinor
+  ABI_DATATYPE_ALLOCATE(oprs%atom_index,(wan%natom_wan,wan%natom_wan))
+  do i1 = 1,wan%natom_wan
+    do i2 = 1,wan%natom_wan
+      n1=size(wan%nposition(i1)%pos,1)
+      n2=size(wan%nposition(i2)%pos,1)
+      ABI_DATATYPE_ALLOCATE(oprs%atom_index(i1,i2)%position,(n1,n2))
+      do p1 = 1,size(wan%nposition(i1)%pos,1)
+        do p2 = 1,size(wan%nposition(i2)%pos,1)
+          n1=wan%nbl_atom_wan(i1)
+          n2=wan%nbl_atom_wan(i2)
+          ABI_DATATYPE_ALLOCATE(oprs%atom_index(i1,i2)%position(p1,p2)%atom,(n1,n2))
+          do l1 = 1,wan%nbl_atom_wan(i1)
+            do l2 = 1,wan%nbl_atom_wan(i2)
+              n1=2*wan%latom_wan(i1)%lcalc(l1)+1
+              n2=2*wan%latom_wan(i2)%lcalc(l2)+1
+              ABI_ALLOCATE(oprs%atom_index(i1,i2)%position(p1,p2)%atom(l1,l2)%matl,(n1,n2,sp,pi,pi))
+              oprs%atom_index(i1,i2)%position(p1,p2)%atom(l1,l2)%matl = czero
+            end do
+         end do
+       end do
+     end do
+   end do
+ end do
+
+end subroutine init_operwan_realspace
+!!***
+
+!!****f* m_plowannier/reduce_operwan_realspace
+!! NAME
+!!  reduce_operwan_realspace
+!!
+!! FUNCTION
+!!  reduce a table of operwan_realspace type
+!!
+!! INPUTS
+!!  wan,rhot1,npwx,nibz,comm,nbz,nsppol
+!!
+!! OUTPUT
+!! rhot1
+!!
+!! PARENTS
+!! m_sigma_driver
+!!
+!! CHILDREN
+!!
+!! SOURCE
+
+subroutine reduce_operwan_realspace(wan,rhot1,npwx,nibz,comm,nbz,nsppol)
+
+
+  use m_xmpi, only : xmpi_barrier,xmpi_sum  
+!Arguments---------------------------------------
+  type(plowannier_type),intent(in) :: wan
+  integer, intent(in) :: npwx,nibz,comm,nbz,nsppol
+  type(operwan_realspace_type),target,intent(inout) :: rhot1(npwx,nibz)
+!Local variables----------------------------------
+  complex(dpc),allocatable ::  buffer(:)
+  integer :: dim,pwx,ibz, spin, ispinor1, ispinor2, iatom1, iatom2, pos1, pos2
+  integer :: il1, il2, im1, im2, nnn, ierr
+  complex(dpc),pointer :: oper_ptr(:,:,:,:,:)
+
+  
+   dim=0
+     do pwx=1,npwx
+     do ibz=1,nibz
+       do spin=1,wan%nsppol
+       do ispinor1=1,wan%nspinor
+       do ispinor2=1,wan%nspinor
+         do iatom1=1,wan%natom_wan
+         do iatom2=1,wan%natom_wan
+           do pos1=1,size(wan%nposition(iatom1)%pos,1)
+           do pos2=1,size(wan%nposition(iatom2)%pos,1)
+             do il1=1,wan%nbl_atom_wan(iatom1)
+             do il2=1,wan%nbl_atom_wan(iatom2)
+               do im1=1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
+               do im2=1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
+     dim=dim+1
+               enddo!im2
+               enddo!im1
+             enddo!il2
+             enddo!il1
+           enddo!pos2
+           enddo!pos1
+         enddo!iatom2
+         enddo!iatom1
+       enddo!ispinor2
+       enddo!ispinor1
+       enddo!spin
+     enddo!ibz
+     enddo!pwx
+     ABI_ALLOCATE(buffer,(dim))
+     nnn=0
+     do pwx=1,npwx
+     do ibz=1,nibz         
+       do iatom1=1,wan%natom_wan
+       do iatom2=1,wan%natom_wan
+         do pos1=1,size(wan%nposition(iatom1)%pos,1)
+         do pos2=1,size(wan%nposition(iatom2)%pos,1)
+           do il1=1,wan%nbl_atom_wan(iatom1)
+           do il2=1,wan%nbl_atom_wan(iatom2)
+             oper_ptr=>rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl
+             do im1=1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
+             do im2=1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
+               do spin=1,wan%nsppol
+                 do ispinor1=1,wan%nspinor
+                 do ispinor2=1,wan%nspinor
+     nnn=nnn+1
+     buffer(nnn)=oper_ptr(im1,im2,spin,ispinor1,ispinor2)
+                 enddo!ispinor2
+                 enddo!ispinor1
+               enddo!spin
+             enddo!im2
+             enddo!im1
+           enddo!il2
+           enddo!il1
+         enddo!pos2
+         enddo!pos1
+       enddo!iatom2
+       enddo!iatom1
+     enddo!ibz  
+     enddo!pwx
+     call xmpi_barrier(comm)
+     call xmpi_sum(buffer,comm,ierr)
+     call xmpi_barrier(comm)
+     buffer=buffer/nbz/nsppol
+     nnn=0
+     do pwx=1,npwx
+     do ibz=1,nibz
+         do iatom1=1,wan%natom_wan
+         do iatom2=1,wan%natom_wan
+           do pos1=1,size(wan%nposition(iatom1)%pos,1)
+           do pos2=1,size(wan%nposition(iatom2)%pos,1)
+             do il1=1,wan%nbl_atom_wan(iatom1)
+             do il2=1,wan%nbl_atom_wan(iatom2)
+               oper_ptr=>rhot1(pwx,ibz)%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl
+               do im1=1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
+               do im2=1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
+                 do spin=1,wan%nsppol
+                   do ispinor1=1,wan%nspinor
+                   do ispinor2=1,wan%nspinor
+      nnn=nnn+1
+      oper_ptr(im1,im2,spin,ispinor1,ispinor2)=buffer(nnn)
+               enddo!im2
+               enddo!im1
+             enddo!il2
+             enddo!il1
+           enddo!pos2
+           enddo!pos1
+         enddo!iatom2
+         enddo!iatom1
+       enddo!ispinor2
+       enddo!ispinor1
+       enddo!spin
+     enddo!ibz
+     enddo!pwx
+     ABI_DEALLOCATE(buffer)
+
+
+end subroutine reduce_operwan_realspace
+!!***
+
+!!****f* m_plowannier/destroy_operwan_realspace
+!! NAME
+!!  destroy_operwan_realspace
+!!
+!! FUNCTION
+!!  Destroy an operwan_realspace type variable
+!!
+!! INPUTS
+!!  wan, operwan_realspace
+!!
+!! OUTPUT
+!! operwan_realspace
+!!
+!! PARENTS
+!! m_plowannier
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine destroy_operwan_realspace(wan,operwan_realspace)
+
+!Arguments----------------------------------
+  type(operwan_realspace_type),intent(inout) :: operwan_realspace
+  type(plowannier_type), intent(in) :: wan
+
+!Local variables----------------------------
+  integer :: iatom1,iatom2,pos1,pos2,il1,il2
+
+
+ do iatom1 = 1,wan%natom_wan
+   do iatom2 = 1,wan%natom_wan
+     do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+       do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+         do il1 = 1,wan%nbl_atom_wan(iatom1)
+           do il2 = 1,wan%nbl_atom_wan(iatom2)
+            ABI_DEALLOCATE(operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom(il1,il2)%matl)
+           end do
+         end do
+         ABI_DATATYPE_DEALLOCATE(operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%atom)
+       end do
+     end do
+     ABI_DATATYPE_DEALLOCATE(operwan_realspace%atom_index(iatom1,iatom2)%position)
+   end do
+ end do
+ ABI_DATATYPE_DEALLOCATE(operwan_realspace%atom_index)
+
+end subroutine destroy_operwan_realspace
+!!***
+
+
+!!****f* m_plowannier/zero_operwan_realspace
+!! NAME
+!!  zero_operwan_realspace
+!!
+!! FUNCTION
+!!  Set an operwan_realspace to zero
+!!
+!! INPUTS
+!!  wan, operwan_realspace
+!!
+!! OUTPUT
+!! operwan_realspace
+!!
+!! PARENTS
+!! m_plowannier
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine zero_operwan_realspace(wan,operwan_realspace)
+
+!Arguments----------------------------------
+  type(operwan_realspace_type),intent(inout) :: operwan_realspace
+  type(plowannier_type), intent(in) :: wan
+
+!Local variables----------------------------
+  integer :: isppol,iatom1,iatom2,pos1,pos2,il1,il2,im1,im2,ispinor1,ispinor2
+
+
+  do isppol = 1,wan%nsppol
+    do ispinor1=1,wan%nspinor
+      do ispinor2=1,wan%nspinor
+        do iatom1 = 1,wan%natom_wan
+          do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+            do il1 = 1,wan%nbl_atom_wan(iatom1)
+              do im1 = 1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
+                do iatom2 = 1,wan%natom_wan
+                  do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+                    do il2 = 1,wan%nbl_atom_wan(iatom2)
+                      do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
+                        operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%&
+                          &atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)=czero
+                      enddo
+                    enddo
+                  enddo
+                enddo
+              enddo
+            enddo
+          enddo
+        enddo
+      enddo
+    enddo
+  enddo
+end subroutine zero_operwan_realspace
+!!***
+
+
+
+
+!!****f* m_plowannier/compute_oper_wank2realspace
+!! NAME
+!!  compute_operwan_wanK2realspace
+!!
+!! FUNCTION
+!! Compute an operator from WannierK space to real space
+!!
+!! INPUTS
+!!  wan,operwan, operwan_realspace
+!!
+!! OUTPUT
+!! operwan_realspace
+!!
+!! PARENTS
+!! m_plowannier
+!!
+!! CHILDREN
+!!
+!! SOURCE
+subroutine compute_oper_wank2realspace(wan,operwan,operwan_realspace)
+
+!Arguments----------------------------------
+  type(operwan_realspace_type),intent(inout) :: operwan_realspace
+  type(operwan_type),intent(in) :: operwan(:,:,:) 
+  type(plowannier_type), intent(in) :: wan
+  
+
+!Local variables----------------------------
+  integer :: isppol,iatom1,pos1,il1,im1,iatom2,pos2,il2,im2,ikpt,ispinor1,ispinor2
+  
+
+  do isppol = 1,wan%nsppol
+    do ispinor1=1,wan%nspinor
+      do ispinor2=1,wan%nspinor
+        do iatom1 = 1,wan%natom_wan
+          do pos1 = 1,size(wan%nposition(iatom1)%pos,1)
+            do il1 = 1,wan%nbl_atom_wan(iatom1)
+              do im1 = 1,2*wan%latom_wan(iatom1)%lcalc(il1)+1
+                do iatom2 = 1,wan%natom_wan
+                  do pos2 = 1,size(wan%nposition(iatom2)%pos,1)
+                    do il2 = 1,wan%nbl_atom_wan(iatom2)
+                      do im2 = 1,2*wan%latom_wan(iatom2)%lcalc(il2)+1
+                       !sum over ikpt
+                        do ikpt = 1,wan%nkpt
+                          operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%&
+                            &atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2) =&
+                            operwan_realspace%atom_index(iatom1,iatom2)%position(pos1,pos2)%&
+                            &atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)&
+                            + real(operwan(ikpt,iatom1,iatom2)%atom(il1,il2)%matl(im1,im2,isppol,ispinor1,ispinor2)&
+                            * wan%wtk(ikpt) * exp( cmplx(0.0,1.0) * two_pi * ( &
+                            wan%kpt(1,ikpt) * ( wan%nposition(iatom1)%pos(pos1,1) - wan%nposition(iatom2)%pos(pos2,1) )+&
+                            wan%kpt(2,ikpt) * ( wan%nposition(iatom1)%pos(pos1,2) - wan%nposition(iatom2)%pos(pos2,2) )+&
+                            wan%kpt(3,ikpt) * ( wan%nposition(iatom1)%pos(pos1,3) - wan%nposition(iatom2)%pos(pos2,3)))))
+                        end do
+                       !end of the sum
+                      end do
+                    enddo
+                  enddo
+                end do
+              end do
+            end do
+          end do
+        end do
+      end do
+    end do
+  end do
+end subroutine compute_oper_wank2realspace
+!!***
 END MODULE m_plowannier
 !!***

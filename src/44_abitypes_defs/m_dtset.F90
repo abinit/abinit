@@ -135,6 +135,7 @@ type, public :: dataset_type
  integer :: d3e_pert1_phon
  integer :: d3e_pert2_elfd
  integer :: d3e_pert2_phon
+ integer :: d3e_pert2_strs
  integer :: d3e_pert3_elfd
  integer :: d3e_pert3_phon
  integer :: efmas
@@ -270,6 +271,8 @@ type, public :: dataset_type
  integer :: lotf_nitex
  integer :: lotf_nneigx
  integer :: lotf_version
+ integer :: lw_flexo
+ integer :: lw_qdrpl
  integer :: magconon
  integer :: maxnsym
  integer :: max_ncpus
@@ -399,6 +402,7 @@ type, public :: dataset_type
  integer :: positron
  integer :: posnstep
  integer :: ppmodel
+ integer :: prepalw
  integer :: prepanl
  integer :: prepgkk
  integer :: prtbbb
@@ -908,16 +912,16 @@ type, public :: dataset_type
  real(dp),allocatable :: kptbounds(:,:)
  real(dp) :: tmesh(3) ! = [5._dp, 59._dp, 6._dp] This triggers a bug in the bindings
 
- character(len=fnlen) :: getddb_path = ABI_NOFILE
- character(len=fnlen) :: getden_path = ABI_NOFILE
- character(len=fnlen) :: getdvdb_path = ABI_NOFILE
- character(len=fnlen) :: getwfk_path = ABI_NOFILE
- character(len=fnlen) :: getwfkfine_path = ABI_NOFILE
- character(len=fnlen) :: getwfq_path = ABI_NOFILE
- character(len=fnlen) :: getkerange_path = ABI_NOFILE
- character(len=fnlen) :: getpot_path = ABI_NOFILE
- character(len=fnlen) :: getscr_path = ABI_NOFILE
- !character(len=fnlen) :: getsigeph_path = ABI_NOFILE
+ character(len=fnlen) :: getddb_filepath = ABI_NOFILE
+ character(len=fnlen) :: getden_filepath = ABI_NOFILE
+ character(len=fnlen) :: getdvdb_filepath = ABI_NOFILE
+ character(len=fnlen) :: getwfk_filepath = ABI_NOFILE
+ character(len=fnlen) :: getwfkfine_filepath = ABI_NOFILE
+ character(len=fnlen) :: getwfq_filepath = ABI_NOFILE
+ character(len=fnlen) :: getkerange_filepath = ABI_NOFILE
+ character(len=fnlen) :: getpot_filepath = ABI_NOFILE
+ character(len=fnlen) :: getscr_filepath = ABI_NOFILE
+ !character(len=fnlen) :: getsigeph_filepath = ABI_NOFILE
 
  contains
 
@@ -1358,6 +1362,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%d3e_pert1_phon     = dtin%d3e_pert1_phon
  dtout%d3e_pert2_elfd     = dtin%d3e_pert2_elfd
  dtout%d3e_pert2_phon     = dtin%d3e_pert2_phon
+ dtout%d3e_pert2_strs     = dtin%d3e_pert2_strs
  dtout%d3e_pert3_elfd     = dtin%d3e_pert3_elfd
  dtout%d3e_pert3_phon     = dtin%d3e_pert3_phon
  dtout%efmas              = dtin%efmas
@@ -1456,14 +1461,14 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gethaydock         = dtin%gethaydock
  dtout%getocc             = dtin%getocc
  dtout%getpawden          = dtin%getpawden
- dtout%getddb_path        = dtin%getddb_path
- dtout%getden_path        = dtin%getden_path
- dtout%getdvdb_path       = dtin%getdvdb_path
- dtout%getpot_path        = dtin%getpot_path
- dtout%getscr_path        = dtin%getscr_path
- dtout%getwfk_path        = dtin%getwfk_path
- dtout%getwfkfine_path    = dtin%getwfkfine_path
- dtout%getwfq_path        = dtin%getwfq_path
+ dtout%getddb_filepath        = dtin%getddb_filepath
+ dtout%getden_filepath        = dtin%getden_filepath
+ dtout%getdvdb_filepath       = dtin%getdvdb_filepath
+ dtout%getpot_filepath        = dtin%getpot_filepath
+ dtout%getscr_filepath        = dtin%getscr_filepath
+ dtout%getwfk_filepath        = dtin%getwfk_filepath
+ dtout%getwfkfine_filepath    = dtin%getwfkfine_filepath
+ dtout%getwfq_filepath        = dtin%getwfq_filepath
  dtout%getqps             = dtin%getqps
  dtout%getscr             = dtin%getscr
  dtout%getsuscep          = dtin%getsuscep
@@ -1568,6 +1573,8 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%lotf_nneigx        = dtin%lotf_nneigx
  dtout%lotf_version       = dtin%lotf_version
 #endif
+ dtout%lw_flexo           = dtin%lw_flexo
+ dtout%lw_qdrpl           = dtin%lw_qdrpl
  dtout%magconon           = dtin%magconon
  dtout%maxnsym            = dtin%maxnsym
  dtout%max_ncpus          = dtin%max_ncpus
@@ -1699,6 +1706,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%positron           = dtin%positron
  dtout%posnstep           = dtin%posnstep
  dtout%ppmodel            = dtin%ppmodel
+ dtout%prepalw            = dtin%prepalw
  dtout%prepanl            = dtin%prepanl
  dtout%prepgkk            = dtin%prepgkk
  dtout%prtbbb             = dtin%prtbbb
@@ -2081,7 +2089,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%einterp = dtin%einterp
  call alloc_copy(dtin%kptbounds, dtout%kptbounds)
  dtout%tmesh = dtin%tmesh
- dtout%getkerange_path = dtin%getkerange_path
+ dtout%getkerange_filepath = dtin%getkerange_filepath
 
  DBG_EXIT("COLL")
 
@@ -2419,6 +2427,16 @@ subroutine dtset_get_npert_rbz(dtset, nband_rbz, nkpt_rbz, npert)
 
  ABI_MALLOC(pertsy,(3,mpert))
  call irreducible_set_pert(indsym,mpert,dtset%natom,dtset%nsym,pertsy,dtset%rfdir,rfpert,symq,symrec,dtset%symrel)
+
+!MR: Desactivate perturbation symmetries for a longwave calculation (TODO)
+ if (dtset%prepalw==1) then
+   do ipert=1,dtset%natom+6
+     do idir=1,3
+       if( pertsy(idir,ipert)==-1 ) pertsy(idir,ipert)=1
+     end do
+   end do
+ end if
+
  npert=0
 ! ABI_MALLOC(pert_tmp,(3*mpert))
 
@@ -3068,6 +3086,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' dosdeltae dtion dvdb_add_lr dvdb_ngqpt dvdb_qcache_mb dynamics dynimage'
  list_vars=trim(list_vars)//' d3e_pert1_atpol d3e_pert1_dir d3e_pert1_elfd d3e_pert1_phon'
  list_vars=trim(list_vars)//' d3e_pert2_atpol d3e_pert2_dir d3e_pert2_elfd d3e_pert2_phon'
+ list_vars=trim(list_vars)//' d3e_pert2_strs'
  list_vars=trim(list_vars)//' d3e_pert3_atpol d3e_pert3_dir d3e_pert3_elfd d3e_pert3_phon'
 !E
  list_vars=trim(list_vars)//' ecut ecuteps ecutsigx ecutsm ecutwfn effmass_free efmas'
@@ -3092,11 +3111,12 @@ subroutine chkvars(string)
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
- list_vars=trim(list_vars)//' getddb getddb_path getden_path getddk getdelfd getdkdk getdkde getden getdvdb getdvdb_path'
- list_vars=trim(list_vars)//' getefmas getkerange_path getgam_eig2nkq'
- list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_path getqps getscr getscr_path'
- list_vars=trim(list_vars)//' getwfkfine getwfkfine_path getsuscep'
- list_vars=trim(list_vars)//' getvel getwfk getwfk_path getwfq getwfq_path getxcart getxred'
+ list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
+ list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getdvdb getdvdb_filepath'
+ list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
+ list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getqps getscr getscr_filepath'
+ list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
+ list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp'
@@ -3132,6 +3152,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' latt_friction latt_taut latt_taup latt_compressibility latt_mask'
  list_vars=trim(list_vars)//' ldaminushalf lexexch localrdwf lpawu'
  list_vars=trim(list_vars)//' lotf_classic lotf_nitex lotf_nneigx lotf_version'
+ list_vars=trim(list_vars)//' lw_flexo lw_qdrpl'
 !M
  list_vars=trim(list_vars)//' max_ncpus macro_uj maxestep maxnsym mdf_epsinf mdtemp mdwall'
  list_vars=trim(list_vars)//' magconon magcon_lambda mbpt_sciss'
@@ -3174,7 +3195,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' plowan_natom plowan_nbl plowan_nt plowan_projcalc plowan_realspace'
  list_vars=trim(list_vars)//' polcen posdoppler positron posnstep posocc postoldfe postoldff'
  list_vars=trim(list_vars)//' ppmfrq ppmodel pp_dirpath'
- list_vars=trim(list_vars)//' prepanl prepgkk'
+ list_vars=trim(list_vars)//' prepalw prepanl prepgkk'
  list_vars=trim(list_vars)//' prtatlist prtbbb prtbltztrp prtcif prtden'
  list_vars=trim(list_vars)//' prtdensph prtdipole prtdos prtdosm prtebands prtefg prtefmas prteig prteliash prtelf'
  list_vars=trim(list_vars)//' prtfc prtfull1wf prtfsurf prtgden prtgeo prtgsr prtgkk prtkden prtkpt prtlden'
@@ -3195,7 +3216,7 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' rfstrs rfuser rf2_dkdk rf2_dkde rf2_pert1_dir rf2_pert2_dir rhoqpmix rprim'
  !These input parameters are obsolete (keep them for compatibility)
  list_vars=trim(list_vars)//' rf1atpol rf1dir rf1elfd rf1phon'
- list_vars=trim(list_vars)//' rf2atpol rf2dir rf2elfd rf2phon'
+ list_vars=trim(list_vars)//' rf2atpol rf2dir rf2elfd rf2phon rf2strs'
  list_vars=trim(list_vars)//' rf3atpol rf3dir rf3elfd rf3phon'
 !S
  list_vars=trim(list_vars)//' scalecart shiftk shiftq signperm'
