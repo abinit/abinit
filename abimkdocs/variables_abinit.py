@@ -2033,7 +2033,7 @@ Variable(
     text=r"""
 This variable is mandatory when [[optdriver]] == 7. It defines the number of
 divisions in the (homogeneous) q-mesh used to generate the DDB file. See also
-the description of the [[getddb]], [[getddb_path]] input variables.
+the description of the [[getddb]], [[getddb_filepath]] input variables.
 """,
 ),
 
@@ -4834,7 +4834,7 @@ dataset to find the proper dataset. As an example:
 
 refers to dataset 2 when dataset 4 is initialized.
 
-Note also that, starting Abinit v9, one can also use [[getddb_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getddb_filepath]] to specify the path of the file directly.
 """,
 ),
 
@@ -7503,7 +7503,7 @@ the charge neutrality sum rule is usually prohibitively large.
 
 A non-zero value of [[irdddb]] is treated in the same way as other "ird" variables.
 For further information about the *files file*, consult the [[help:abinit#files-file]].
-Note also that, starting Abinit v9, one can also use [[getddb_path]] to specify the path of the DDB file directly.
+Note also that, starting Abinit v9, one can also use [[getddb_filepath]] to specify the path of the DDB file directly.
 """,
 
 ),
@@ -20943,7 +20943,7 @@ Alternative to [[getwfq]] and [[irdwfq]]. The string must be enclosed between qu
 ),
 
 Variable(
-    abivarname="getddb_path",
+    abivarname="getddb_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20955,7 +20955,7 @@ Variable(
 Specify the path of the DDB file using a string instead of the dataset index.
 Alternative to [[getddb]] and [[irdddb]]. The string must be enclosed between quotation marks:
 
-    getddb_path "../outdata/out_DDB"
+    getddb_filepath "../outdata/out_DDB"
 """
 ),
 

@@ -3,7 +3,7 @@
 ndtset 10
 
 getwfk_path  "t60o_DS20_WFK"
-getddb_path  "t60o_DS20_DDB"
+getddb_filepath  "t60o_DS20_DDB"
 
 #getwfk   20    # Read GS wavefunctions from DS20_WFK
 #getddb   20    # Read DDB files from DS20_DDB

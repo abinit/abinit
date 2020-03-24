@@ -2158,7 +2158,7 @@ The default values will not work.
 
 # ABINIT 9
 Variable(
-    abivarname="ddb_path@anaddb",
+    abivarname="ddb_filepath@anaddb",
     varset="anaddb",
     vartype="string",
     topics=['Control_useful'],
@@ -2173,7 +2173,7 @@ This variable specifies the input DDB file when anaddb is invoked with the new s
 
 instead of the legacy mode based on the files file. Example:
 
-    ddb_path = "out_DDB"
+    ddb_filepath = "out_DDB"
 
 !!! important
 

@@ -250,7 +250,7 @@ For some examples, see tests [[test:v8_90]], [[test:v7_45]], and [[test:v5_54]].
 
 A similar command line interface can also be used for the anaddb code.
 In this case, the relevant variables are: 
-[[output@anaddb]], [[ddb_path@anaddb]], [[gkk_path@anaddb]], [[eph_prefix@anaddb]].
+[[output@anaddb]], [[ddb_filepath@anaddb]], [[gkk_path@anaddb]], [[eph_prefix@anaddb]].
 
 The new syntax is:
 
@@ -277,7 +277,7 @@ and `get*` variables are replaced by indipendent input files that are connected 
 
 List of new input variables that rely on this feature:
 
-- [[getddb_path]], an alternative to [[getddb]] or [[irdddb]], see test [[test:v9_60]]
+- [[getddb_filepath]], an alternative to [[getddb]] or [[irdddb]], see test [[test:v9_60]]
 - [[getden_path]], an alternative to [[getden]] or [[irdden]], see test [[test:v8_36]] and [[test:v8_41]]
 - [[getscr_path]], an alternative to [[getscr]] or [[irdscr]], see test [[test:v67mbpt_51]]
 - [[getwfkfine_path]], an alternative to [[getwfkfine]] or [[irdwfkfine]], see tests [[test:v9_55]], [[test:v9_56]]
@@ -287,7 +287,7 @@ List of new input variables that rely on this feature:
 - [[getpot_path]], see test [[test:v8_44]]
 - [[pseudos]], [[indata_prefix]], [[outdata_prefix]], [[tmpdata_prefix]], [[output_file]], see test [[test:v9_04]]
 - [[pp_dirpath]]: cannot be tested  EXPLICITLY because system dependent but used by runtests.py when generating the input file. 
-- [[output@anaddb]], [[ddb_path@anaddb]], [[gkk_path@anaddb]], [[eph_prefix@anaddb]].
+- [[output@anaddb]], [[ddb_filepath@anaddb]], [[gkk_path@anaddb]], [[eph_prefix@anaddb]].
   See tests [[test:v8_52]] for a standard analysis of the DDB file and 
   [[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
 
