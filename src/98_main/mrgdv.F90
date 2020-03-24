@@ -59,7 +59,7 @@ program mrgdv
  integer :: ii, nargs, nfiles, comm, prtvol, my_rank, lenr, dvdb_add_lr, method, dvdb_qdamp, symv1scf
  character(len=24) :: codename
  character(len=500) :: command,arg, msg
- character(len=fnlen) :: dvdb_path, dump_file, ddb_filepath
+ character(len=fnlen) :: dvdb_filepath, dump_file, ddb_filepath
  type(dvdb_t) :: dvdb
 !arrays
  integer :: ngqpt(3), coarse_ngqpt(3), ngfftf(18)
@@ -93,13 +93,13 @@ program mrgdv
 
  if (nargs == 0) then
    ! We are reading from stdin
-   call prompt("Enter name of output file:", dvdb_path)
+   call prompt("Enter name of output file:", dvdb_filepath)
    call prompt("Enter total number of DFPT POT files:", nfiles)
    ABI_MALLOC(v1files, (nfiles))
    do ii=1,nfiles
      call prompt(sjoin("Enter name of POT file", itoa(ii), ":"), v1files(ii))
    end do
-   call dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
+   call dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
    ABI_FREE(v1files)
 
  else
@@ -138,9 +138,9 @@ program mrgdv
    case ("merge")
      ! Get name of output database and list of v1 files.
      ABI_CHECK(nargs > 1, "Additional arguments are missing")
-     call get_command_argument(2, dvdb_path)
-     if (file_exists(dvdb_path)) then
-       MSG_ERROR(sjoin("Cannot overwrite existing file:", dvdb_path))
+     call get_command_argument(2, dvdb_filepath)
+     if (file_exists(dvdb_filepath)) then
+       MSG_ERROR(sjoin("Cannot overwrite existing file:", dvdb_filepath))
      end if
 
      nfiles = nargs - 2
@@ -150,34 +150,34 @@ program mrgdv
      end do
 
      ! Merge POT files.
-     call dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
+     call dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
      ABI_FREE(v1files)
 
    case ("info")
      ! Get name of output database and list of v1 files.
      ABI_CHECK(nargs > 1, "Additional arguments are missing")
-     call get_command_argument(2, dvdb_path)
+     call get_command_argument(2, dvdb_filepath)
 
-     dvdb = dvdb_new(dvdb_path, comm)
+     dvdb = dvdb_new(dvdb_filepath, comm)
      call dvdb%print(prtvol=prtvol)
      call dvdb%list_perts([-1, -1, -1])
      call dvdb%free()
 
    case ("test_v1comp", "test_v1complete")
      call wrtout(std_out," Testing symmetries (assuming overcomplete DVDB, pass extra argument to dump v1(r)) to file")
-     call get_command_argument(2, dvdb_path)
+     call get_command_argument(2, dvdb_filepath)
      ABI_CHECK(get_arg("symv1scf", symv1scf, msg, default=0) == 0, msg)
      ABI_CHECK(get_arg("potfile", dump_file, msg, default="") == 0, msg)
-     call dvdb_test_v1complete(dvdb_path, symv1scf, dump_file, comm)
+     call dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_file, comm)
 
    case ("test_v1rsym")
      call wrtout(std_out," Testing symmetries of V1(r) in real space.")
-     call get_command_argument(2, dvdb_path)
+     call get_command_argument(2, dvdb_filepath)
      ABI_CHECK(get_arg("symv1scf", symv1scf, msg, default=0) == 0, msg)
-     call dvdb_test_v1rsym(dvdb_path, symv1scf, comm)
+     call dvdb_test_v1rsym(dvdb_filepath, symv1scf, comm)
 
    case ("test_ftinterp")
-     call get_command_argument(2, dvdb_path)
+     call get_command_argument(2, dvdb_filepath)
      ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, default=2, want_len=3) == 0, msg)
      ABI_CHECK(get_arg("ddb-path", ddb_filepath, msg, default="") == 0, msg)
      ABI_CHECK(get_arg("method", method, msg, default=0) == 0, msg)
@@ -185,17 +185,17 @@ program mrgdv
      ABI_CHECK(get_arg("dvdb-add-lr", dvdb_add_lr, msg, default=1) == 0, msg)
      ABI_CHECK(get_arg("qdamp", dvdb_qdamp, msg, default=-1) == 0, msg)
      ABI_CHECK(get_arg_list("coarse-ngqpt", coarse_ngqpt, lenr, msg, default=0, want_len=3) == 0, msg)
-     call dvdb_test_ftinterp(dvdb_path, method, symv1scf, ngqpt, dvdb_add_lr, dvdb_qdamp, &
+     call dvdb_test_ftinterp(dvdb_filepath, method, symv1scf, ngqpt, dvdb_add_lr, dvdb_qdamp, &
                              ddb_filepath, prtvol, coarse_ngqpt, comm)
 
    case ("downsample")
-     call get_command_argument(2, dvdb_path)
+     call get_command_argument(2, dvdb_filepath)
      call get_command_argument(3, dump_file)
      ABI_CHECK(get_arg_list("ngqpt", ngqpt, lenr, msg, want_len=3) == 0, msg)
      write(std_out,"(a)")sjoin(" Downsampling Q-mesh with ngqpt:", ltoa(ngqpt))
-     write(std_out,"(a)")trim(dvdb_path), " --> ", trim(dump_file)
+     write(std_out,"(a)")trim(dvdb_filepath), " --> ", trim(dump_file)
 
-     dvdb = dvdb_new(dvdb_path, xmpi_comm_self)
+     dvdb = dvdb_new(dvdb_filepath, xmpi_comm_self)
      call ngfft_seq(ngfftf, dvdb%ngfft3_v1(:, 1))
      call dvdb%open_read(ngfftf, xmpi_comm_self)
      call dvdb%print()
@@ -204,9 +204,9 @@ program mrgdv
      call dvdb%free()
 
    !case ("convert")
-   !  call get_command_argument(2, dvdb_path)
+   !  call get_command_argument(2, dvdb_filepath)
    !  call get_command_argument(3, dump_file)
-   !  call dvdb_convert_fort2nc(dvdb_path, dump_file, comm)
+   !  call dvdb_convert_fort2nc(dvdb_filepath, dump_file, comm)
 
    case default
      MSG_ERROR(sjoin("Unknown command:", command))

@@ -912,7 +912,7 @@ type, public :: dataset_type
  character(len=fnlen) :: getkerange_filepath = ABI_NOFILE
  character(len=fnlen) :: getpot_filepath = ABI_NOFILE
  character(len=fnlen) :: getscr_filepath = ABI_NOFILE
- !character(len=fnlen) :: getsigeph_path = ABI_NOFILE
+ !character(len=fnlen) :: getsigeph_filepath = ABI_NOFILE
 
  contains
 
@@ -1448,13 +1448,13 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getocc             = dtin%getocc
  dtout%getpawden          = dtin%getpawden
  dtout%getddb_filepath        = dtin%getddb_filepath
- dtout%getden_filepath        = dtin%getden_path
- dtout%getdvdb_filepath       = dtin%getdvdb_path
- dtout%getpot_filepath        = dtin%getpot_path
- dtout%getscr_filepath        = dtin%getscr_path
- dtout%getwfk_filepath        = dtin%getwfk_path
- dtout%getwfkfine_filepath    = dtin%getwfkfine_path
- dtout%getwfq_filepath        = dtin%getwfq_path
+ dtout%getden_filepath        = dtin%getden_filepath
+ dtout%getdvdb_filepath       = dtin%getdvdb_filepath
+ dtout%getpot_filepath        = dtin%getpot_filepath
+ dtout%getscr_filepath        = dtin%getscr_filepath
+ dtout%getwfk_filepath        = dtin%getwfk_filepath
+ dtout%getwfkfine_filepath    = dtin%getwfkfine_filepath
+ dtout%getwfq_filepath        = dtin%getwfq_filepath
  dtout%getqps             = dtin%getqps
  dtout%getscr             = dtin%getscr
  dtout%getsuscep          = dtin%getsuscep

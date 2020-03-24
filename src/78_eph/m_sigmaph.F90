@@ -638,7 +638,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  type(rf2_t) :: rf2
  type(hdr_type) :: pot_hdr
  character(len=500) :: msg
- character(len=fnlen) :: sigeph_path
+ character(len=fnlen) :: sigeph_filepath
 !arrays
  integer :: g0_k(3),g0_kq(3)
  integer :: work_ngfft(18),gmax(3)
@@ -698,9 +698,9 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
  ! Check if a previous netcdf file is present and restart the calculation
  ! Here we try to read an existing SIGEPH file if eph_restart
  ! we compare the variables with the state of the code (i.e. new sigmaph generated in sigmaph_new)
- restart = 0; ierr = 1; sigeph_path = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
+ restart = 0; ierr = 1; sigeph_filepath = strcat(dtfil%filnam_ds(4), "_SIGEPH.nc")
  if (my_rank == master .and. dtset%eph_restart == 1) then
-   sigma_restart = sigmaph_read(sigeph_path, dtset, xmpi_comm_self, msg, ierr)
+   sigma_restart = sigmaph_read(sigeph_filepath, dtset, xmpi_comm_self, msg, ierr)
  end if
 
  sigma = sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, comm)
@@ -729,7 +729,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
    ! Open file inside ncwrite_comm to perform parallel IO if kpt parallelism.
    if (sigma%ncwrite_comm%value /= xmpi_comm_null) then
 #ifdef HAVE_NETCDF
-     NCF_CHECK(nctk_open_modify(sigma%ncid, sigeph_path, sigma%ncwrite_comm%value))
+     NCF_CHECK(nctk_open_modify(sigma%ncid, sigeph_filepath, sigma%ncwrite_comm%value))
      NCF_CHECK(nctk_set_datamode(sigma%ncid))
 #endif
    end if

@@ -9,7 +9,7 @@ for file in "$@"
 do
  echo "working on $file"
  rm -f tmp.file
- sed -e 's!ddk_path!ddk_filepath!' $file > tmp.file
+ sed -e 's!sigeph_path!sigeph_filepath!' $file > tmp.file
  echo "changes done "
  # put the modified file at the correct place
  mv tmp.file $file
