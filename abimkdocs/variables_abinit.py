@@ -5097,7 +5097,7 @@ to read a DVDB file produced in a previous dataset.
 For example, one can concatenate a dataset in which an initial set of DFPT potentials
 on a relatively coarse q-mesh is interpolated on a denser q-mesh using [[eph_task]] = 5 and [[eph_ngqpt_fine]].
 
-Note also that, starting Abinit v9, one can also use [[getdvdb_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getdvdb_filepath]] to specify the path of the file directly.
 """
 ),
 
@@ -5241,7 +5241,7 @@ a GW calculation), to indicate that the dielectric matrix (_SCR file) is to be
 taken from the output of a previous dataset. It is used to chain the
 calculations, since it describes from which dataset the OUTPUT dielectric
 matrix is to be taken, as INPUT of the present dataset.
-Note also that, starting Abinit v9, one can also use [[getscr_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getscr_filepath]] to specify the path of the file directly.
 
 If [[getscr]] == 0, no such use of previously computed output _SCR file is done.
 If [[getscr]] is positive, its value gives the index of the dataset from which
@@ -20960,7 +20960,7 @@ Alternative to [[getddb]] and [[irdddb]]. The string must be enclosed between qu
 ),
 
 Variable(
-    abivarname="getdvdb_path",
+    abivarname="getdvdb_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20972,7 +20972,7 @@ Variable(
 Specify the path of the DVDB file using a string instead of the dataset index.
 Alternative to [[getdvdb]] and [[irddvdb]]. The string must be enclosed between quotation marks:
 
-    getdvdb_path "../outdata/out_DVDB"
+    getdvdb_filepath "../outdata/out_DVDB"
 """
 ),
 
@@ -20994,7 +20994,7 @@ Alternative to [[getden]] and [[irdden]]. The string must be enclosed between qu
 ),
 
 Variable(
-    abivarname="getscr_path",
+    abivarname="getscr_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -21006,7 +21006,7 @@ Variable(
 Specify the path of the SCR file using a string instead of the dataset index.
 Alternative to [[getscr]] and [[irdscr]]. The string must be enclosed between quotation marks:
 
-    getscr_path "../outdata/out_SCR"
+    getscr_filepath "../outdata/out_SCR"
 """
 ),
 

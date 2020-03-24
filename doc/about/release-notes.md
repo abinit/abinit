@@ -104,7 +104,7 @@ List of tests: [[test:v9_50]], [[test:v9_61]] and [[test:v8_44]].
 New input variables: [[dvdb_qcache_mb]], 
 [[eph_phrange]], [[eph_tols_idelta]], [[eph_ecutosc]], [[eph_restart]], 
 [[eph_stern]], [[eph_use_ftinterp]],
-[[getdvdb]], [[getdvdb_path]], [[getkerange_path]],
+[[getdvdb]], [[getdvdb_filepath]], [[getkerange_path]],
 [[irddvdb]], [[prteliash]], [[sigma_bsum_range]], [[sigma_erange]],
 [[sigma_ngkpt]], [[sigma_nshiftk]], [[sigma_shiftk]], [[symv1scf]].
 
@@ -279,7 +279,7 @@ List of new input variables that rely on this feature:
 
 - [[getddb_filepath]], an alternative to [[getddb]] or [[irdddb]], see test [[test:v9_60]]
 - [[getden_path]], an alternative to [[getden]] or [[irdden]], see test [[test:v8_36]] and [[test:v8_41]]
-- [[getscr_path]], an alternative to [[getscr]] or [[irdscr]], see test [[test:v67mbpt_51]]
+- [[getscr_filepath]], an alternative to [[getscr]] or [[irdscr]], see test [[test:v67mbpt_51]]
 - [[getwfkfine_path]], an alternative to [[getwfkfine]] or [[irdwfkfine]], see tests [[test:v9_55]], [[test:v9_56]]
 - [[getwfk_path]], an alternative to [[getwfk]] or [[irdwfk]], see test [[test:v9_60]]
 - [[getwfq_path]], an alternative to [[getwfq]] or [[irdwfq]], see test [[test:v7_98]]
