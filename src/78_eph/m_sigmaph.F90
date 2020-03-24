@@ -2837,9 +2837,9 @@ type(sigmaph_t) function sigmaph_new(dtset, ecut, cryst, ebands, ifc, dtfil, com
  !  NB: The routines assume that the k-mesh for electrons and the q-mesh for phonons are the same.
  !  Thus we need to downsample the k-mesh if it's denser that the q-mesh.
 
- ! TODO: Should only check the value of getwfkfine_path
+ ! TODO: Should only check the value of getwfkfine_filepath
  new%use_doublegrid = .False.
- if (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_path /= ABI_NOFILE) then
+ if (dtset%getwfkfine /= 0 .or. dtset%irdwfkfine /= 0 .or. dtset%getwfkfine_filepath /= ABI_NOFILE) then
 
    wfk_fname_dense = trim(dtfil%fnameabi_wfkfine)
    if (nctk_try_fort_or_ncfile(wfk_fname_dense, msg) /= 0) then

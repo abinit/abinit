@@ -5346,7 +5346,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to [[irdwfk]],.
-Note also that, starting Abinit v9, one can also use [[getwfk_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getwfk_filepath]] to specify the path of the file directly.
 
 The [[getwfk]], **getwfq**, **get1wf** and **getddk** variables are typically
 used to chain the calculations in the multi-dataset mode, since they describe
@@ -5446,7 +5446,7 @@ Variable(
     text=r"""
 Eventually used when [[ndtset]] > 0 (in the multi-dataset mode), to indicate
 starting wavefunctions, as an alternative to [[irdwfq]].
-Note also that, starting Abinit v9, one can also use [[getwfq_path]] to specify the path of the file directly.
+Note also that, starting Abinit v9, one can also use [[getwfq_filepath]] to specify the path of the file directly.
 
 The **getwfk**, [[getwfq]], **get1wf** and **getddk** variables are typically
 used to chain the calculations in the multi-dataset mode, since they describe
@@ -20870,7 +20870,7 @@ Note also that relative paths are interpreted according to the working directory
 ),
 
 Variable(
-    abivarname="getwfk_path",
+    abivarname="getwfk_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20882,13 +20882,13 @@ Variable(
 Specify the path of the WFK file using a string instead of the dataset index.
 Alternative to [[getwfk]] and [[irdwfk]]. The string must be enclosed between quotation marks:
 
-    getwfk_path "../outdata/out_WFK"
+    getwfk_filepath "../outdata/out_WFK"
 """
 ),
 
 
 Variable(
-    abivarname="getwfkfine_path",
+    abivarname="getwfkfine_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20900,13 +20900,13 @@ Variable(
 Specify the path of the fine WFK file using a string instead of the dataset index.
 Alternative to [[getwfkfine]] and [[irdwfkfine]]. The string must be enclosed between quotation marks:
 
-    getwfkfine_path "../outdata/out_WFK"
+    getwfkfine_filepath "../outdata/out_WFK"
 """
 ),
 
 
 Variable(
-    abivarname="getwfq_path",
+    abivarname="getwfq_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20918,7 +20918,7 @@ Variable(
 Specify the path of the WFQ file using a string instead of the dataset index.
 Alternative to [[getwfq]] and [[irdwfq]]. The string must be enclosed between quotation marks:
 
-    getwfq_path "../outdata/out_WFQ"
+    getwfq_filepath "../outdata/out_WFQ"
 """
 ),
 

@@ -915,9 +915,9 @@ type, public :: dataset_type
  character(len=fnlen) :: getddb_filepath = ABI_NOFILE
  character(len=fnlen) :: getden_path = ABI_NOFILE
  character(len=fnlen) :: getdvdb_filepath = ABI_NOFILE
- character(len=fnlen) :: getwfk_path = ABI_NOFILE
- character(len=fnlen) :: getwfkfine_path = ABI_NOFILE
- character(len=fnlen) :: getwfq_path = ABI_NOFILE
+ character(len=fnlen) :: getwfk_filepath = ABI_NOFILE
+ character(len=fnlen) :: getwfkfine_filepath = ABI_NOFILE
+ character(len=fnlen) :: getwfq_filepath = ABI_NOFILE
  character(len=fnlen) :: getkerange_path = ABI_NOFILE
  character(len=fnlen) :: getpot_path = ABI_NOFILE
  character(len=fnlen) :: getscr_filepath = ABI_NOFILE
@@ -1466,9 +1466,9 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%getdvdb_filepath       = dtin%getdvdb_path
  dtout%getpot_path        = dtin%getpot_path
  dtout%getscr_filepath        = dtin%getscr_path
- dtout%getwfk_path        = dtin%getwfk_path
- dtout%getwfkfine_path    = dtin%getwfkfine_path
- dtout%getwfq_path        = dtin%getwfq_path
+ dtout%getwfk_filepath        = dtin%getwfk_path
+ dtout%getwfkfine_filepath    = dtin%getwfkfine_path
+ dtout%getwfq_filepath        = dtin%getwfq_path
  dtout%getqps             = dtin%getqps
  dtout%getscr             = dtin%getscr
  dtout%getsuscep          = dtin%getsuscep
@@ -3115,8 +3115,8 @@ subroutine chkvars(string)
  list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getdvdb getdvdb_filepath'
  list_vars=trim(list_vars)//' getefmas getkerange_path getgam_eig2nkq'
  list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_path getqps getscr getscr_filepath'
- list_vars=trim(list_vars)//' getwfkfine getwfkfine_path getsuscep'
- list_vars=trim(list_vars)//' getvel getwfk getwfk_path getwfq getwfq_path getxcart getxred'
+ list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
+ list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp'
