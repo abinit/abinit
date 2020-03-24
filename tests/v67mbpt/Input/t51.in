@@ -72,7 +72,7 @@ nfreqim3  0
 optdriver4 99
 getwfk4  2
 #getscr4  3
-getscr_path4 "t51o_DS3_SCR"
+getscr_filepath4 "t51o_DS3_SCR"
 getbsreso4 4
 #getbseig4 4
 
