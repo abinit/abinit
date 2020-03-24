@@ -2089,7 +2089,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%einterp = dtin%einterp
  call alloc_copy(dtin%kptbounds, dtout%kptbounds)
  dtout%tmesh = dtin%tmesh
- dtout%getkerange_filepath = dtin%getkerange_path
+ dtout%getkerange_filepath = dtin%getkerange_filepath
 
  DBG_EXIT("COLL")
 

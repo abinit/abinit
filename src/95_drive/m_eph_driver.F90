@@ -228,7 +228,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
  ! Use the ddb file as prefix if getdvdb or irddvb are not given in the input.
  dvdb_filepath = dtfil%fildvdbin
  if (dvdb_filepath == ABI_NOFILE) then
-   dvdb_filepath = dtfil%filddbsin; ii=len_trim(dvdb_path); dvdb_path(ii-2:ii+1) = "DVDB"
+   dvdb_filepath = dtfil%filddbsin; ii=len_trim(dvdb_filepath); dvdb_filepath(ii-2:ii+1) = "DVDB"
  end if
  use_wfk = all(dtset%eph_task /= [5, -5, 6, +15, -15, 16])
  use_wfq = (dtset%irdwfq /= 0 .or. dtset%getwfq /= 0 .and. dtset%eph_frohlichm /= 1)
@@ -245,7 +245,7 @@ subroutine eph(acell, codvsn, dtfil, dtset, pawang, pawrad, pawtab, psps, rprim,
 
  if (my_rank == master) then
    if (.not. file_exists(ddb_filepath)) MSG_ERROR(sjoin("Cannot find DDB file:", ddb_filepath))
-   if (use_dvdb .and. .not. file_exists(dvdb_filepath)) MSG_ERROR(sjoin("Cannot find DVDB file:", dvdb_path))
+   if (use_dvdb .and. .not. file_exists(dvdb_filepath)) MSG_ERROR(sjoin("Cannot find DVDB file:", dvdb_filepath))
 
    ! Accept WFK file in Fortran or netcdf format.
    if (use_wfk .and. nctk_try_fort_or_ncfile(wfk0_path, msg) /= 0) then
