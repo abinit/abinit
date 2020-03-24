@@ -3,9 +3,9 @@
 ndtset 6
 
 # General input for e-ph computations
-optdriver 7 # We do an e-ph run
-eph_task -4 # We compute only the imaginary part of the self-energy
-occopt 3 # Fermi-Dirac occupation function
+optdriver 7  # We do an e-ph run
+eph_task -4  # We compute only the imaginary part of the self-energy
+occopt 3     # Fermi-Dirac occupation function
 
 # Definition of the meshes
 ngkpt  24 24 24 # Dense mesh
@@ -17,9 +17,9 @@ ddb_ngqpt 4 4 4 # Mesh used for the phonons
 eph_ngqpt_fine 24 24 24 # We interpolate the matrix elements on the same
                         # dense mesh as the k-grid
 
-getwfk_path "teph4mob_4o_DS2_WFK" # We have to read the dense WFK file
-getddb_path "teph4mob_2_DDB" # We need the ddb and dvdb
-getdvdb_path "teph4mob_3_DVDB"
+getwfk_filepath "teph4mob_4o_DS2_WFK" # We have to read the dense WFK file
+getddb_filepath "teph4mob_2_DDB"      # We need the ddb and dvdb
+getdvdb_filepath "teph4mob_3_DVDB"
 
 # Definition of the variables related to transport properties
 tmesh 5.0 59.0 6 # Temperature array at which the mobility will be computed

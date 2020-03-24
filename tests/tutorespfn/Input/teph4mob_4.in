@@ -1,6 +1,6 @@
 # Crystalline AlAs : computation of the dense WFK
 
-   ndtset   3
+ndtset   3
 
 #
 # General input data for GS and WFK

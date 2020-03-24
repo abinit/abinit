@@ -263,9 +263,9 @@ We will need the WFK, the DDB and the DVDB files obtained previously.
 One can specify the paths to these files using strings instead of integers:
 
 ```sh
-getwfk_path "teph4mob_4o_DS2_WFK"
-getddb_path "teph4mob_2_DDB"
-getdvdb_path "teph4mob_3_DVDB"
+getwfk_filepath "teph4mob_4o_DS2_WFK"
+getddb_filepath "teph4mob_2_DDB"
+getdvdb_filepath "teph4mob_3_DVDB"
 ```
 
 Now copy the input file in the *Work_eph4mob* directory, and run the code with:
@@ -483,9 +483,9 @@ on the polar divergence of the matrix elements: if this divergence is very diffi
 the coarse $\qq$-mesh for the e-ph matrix elements will have to be dense.
 
 The double-grid technique requires a second WFK file, containing the dense mesh. 
-You can specify the path to the dense WFK file using [[getwfkfine_path]]:
+You can specify the path to the dense WFK file using [[getwfkfine_filepath]]:
 
-     getwfkfine_path "teph4mob_4o_DS3_WFK"
+     getwfkfine_filepath "teph4mob_4o_DS3_WFK"
 
 The file *$\$ABI_TUTORESPFN/Input/teph4mob_7.in* is an example of such computation.
 
@@ -564,4 +564,4 @@ TODO: [[transport_ngkpt]]
 
 ### How to compute only the k-points close to the CBM/VBM
 
-TODO: [[getkerange_path]]
+TODO: [[getkerange_filepath]]
