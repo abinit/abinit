@@ -973,7 +973,7 @@ subroutine sigmaph(wfk0_path, dtfil, ngfft, ngfftf, dtset, cryst, ebands, dvdb, 
 
  if (dtset%eph_stern == 1) then
    ! Read GS POT (vtrial) from input POT file
-   ! In principle one may store vtrial in the DVDB but getpot_path is simpler to implement.
+   ! In principle one may store vtrial in the DVDB but getpot_filepath is simpler to implement.
    call wrtout([std_out, ab_out], sjoin(" Reading GS KS potential for Sternheimer from: ", dtfil%filpotin))
    call read_rhor(dtfil%filpotin, cplex1, nspden, nfftf, ngfftf, pawread0, mpi_enreg, vtrial, pot_hdr, pawrhoij, comm, &
                   allow_interp=.True.)
