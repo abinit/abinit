@@ -1144,13 +1144,13 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfk',tread,'INT')
  if(tread==1) dtset%getwfk=intarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfk_path',tread,'KEY', key_value=key_value)
- if(tread==1) dtset%getwfk_path = key_value
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfk_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getwfk_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfkfine',tread,'INT')
  if(tread==1) dtset%getwfkfine=intarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfkfine_path',tread,'KEY', key_value=key_value)
- if(tread==1) dtset%getwfkfine_path = key_value
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfkfine_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getwfkfine_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getxcart',tread,'INT')
  if(tread==1) dtset%getxcart=intarr(1)
@@ -1189,8 +1189,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfq',tread,'INT')
  if(tread==1) dtset%getwfq=intarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfq_path',tread,'KEY', key_value=key_value)
- if(tread==1) dtset%getwfq_path = key_value
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getwfq_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getwfq_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'get1wf',tread,'INT')
  if(tread==1) dtset%get1wf=intarr(1)

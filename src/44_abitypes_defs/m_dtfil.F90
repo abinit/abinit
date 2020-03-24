@@ -539,7 +539,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  end if
  stringvar='wfk'
  call mkfilename(filnam,fnamewffk,dtset%getwfk,idtset,dtset%irdwfk,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                 getpath=dtset%getwfk_path)
+                 getpath=dtset%getwfk_filepath)
 
  if (dtset%optdriver /= RUNL_RESPFN) ireadwf = will_read
  if(ndtset/=0 .and. dtset%optdriver==RUNL_RESPFN .and. will_read==0)then
@@ -558,7 +558,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
    ! According to getwfq and irdwfq, build _WFQ file name, referred as fnamewffq
    stringfile='_WFQ' ; stringvar='wfq'
    call mkfilename(filnam,fnamewffq,dtset%getwfq,idtset,dtset%irdwfq,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                   getpath=dtset%getwfq_path)
+                   getpath=dtset%getwfq_filepath)
    ! If fnamewffq is not initialized thanks to getwfq or irdwfq, use fnamewffk
    if(will_read==0) fnamewffq = fnamewffk
 
@@ -721,7 +721,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! A default is avaible if getwfkfine is 0
  stringfile='_WFK' ; stringvar='wfkfine'
  call mkfilename(filnam,filwfkfine,dtset%getwfkfine,idtset,dtset%irdwfkfine,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                 getpath=dtset%getwfkfine_path)
+                 getpath=dtset%getwfkfine_filepath)
  if(will_read==0)filwfkfine=trim(filnam_ds(3))//'_WFK'
 
  dtfil%ireadden      =ireadden
