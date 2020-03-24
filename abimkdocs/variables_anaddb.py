@@ -2220,7 +2220,7 @@ instead of the legacy mode based on the files file. Example:
 #),
 
 Variable(
-    abivarname="gkk_path@anaddb",
+    abivarname="gkk_filepath@anaddb",
     varset="anaddb",
     vartype="string",
     topics=['Control_useful'],
@@ -2258,7 +2258,7 @@ This variable is optional and used for performing EPH calculation with [[elphfla
 ),
 
 Variable(
-    abivarname="ddk_path@anaddb",
+    abivarname="ddk_filepath@anaddb",
     varset="anaddb",
     vartype="string",
     topics=['Control_useful'],
@@ -2279,7 +2279,7 @@ This variable is optional and used for performing transport calculations with [[
 
 Example:
 
-    ddk_path = "t94.ddk"
+    ddk_filepath = "t94.ddk"
 
 where t94.ddk contains the list of file names.
 

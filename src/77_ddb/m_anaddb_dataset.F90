@@ -2093,13 +2093,13 @@ subroutine anaddb_init(input_path, filnam)
 
    ! Nobody knows the scope of this line in the files file.
    !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "md_output", tread, 'KEY', key_value=filnam(4))
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gkk_path", tread, 'KEY', key_value=filnam(5))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gkk_filepath", tread, 'KEY', key_value=filnam(5))
    if (tread == 1) write(std_out, "(2a)")'- Name for input elphon matrix elements (GKK file): ', trim(filnam(5))
 
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "eph_prefix", tread, 'KEY', key_value=filnam(6))
    if (tread == 1) write(std_out, "(2a)")"- Root name for elphon output files: ", trim(filnam(6))
 
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddk_path", tread, 'KEY', key_value=filnam(7))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddk_filepath", tread, 'KEY', key_value=filnam(7))
    if (tread == 1) write(std_out, "(2a)")"- File containing ddk filenames for elphon/transport: ", trim(filnam(7))
 
    ABI_FREE(intarr)
@@ -2201,7 +2201,7 @@ subroutine anaddb_chkvars(string)
  list_logicals=' '
 
 !String input variables
- list_strings=' gruns_ddbs ddb_filepath output_file gkk_path eph_prefix ddk_path' ! md_output
+ list_strings=' gruns_ddbs ddb_filepath output_file gkk_filepath eph_prefix ddk_filepath' ! md_output
 !</ANADDB_VARS>
 
 !Extra token, also admitted:
