@@ -996,8 +996,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getscr',tread,'INT')
  if(tread==1) dtset%getscr=intarr(1)
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getscr_path',tread,'KEY', key_value=key_value)
- if(tread==1) dtset%getscr_path = key_value
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getscr_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getscr_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'gwgamma',tread,'INT')
  if(tread==1) dtset%gwgamma=intarr(1)
@@ -1255,8 +1255,8 @@ subroutine invars2(bravais,dtset,iout,jdtset,lenstr,mband,msym,npsp,string,usepa
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getddb_filepath',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getddb_filepath = key_value
 
- call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getdvdb_path',tread,'KEY', key_value=key_value)
- if(tread==1) dtset%getdvdb_path = key_value
+ call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getdvdb_filepath',tread,'KEY', key_value=key_value)
+ if(tread==1) dtset%getdvdb_filepath = key_value
 
  call intagm(dprarr,intarr,jdtset,marr,1,string(1:lenstr),'getpot_path',tread,'KEY', key_value=key_value)
  if(tread==1) dtset%getpot_path = key_value

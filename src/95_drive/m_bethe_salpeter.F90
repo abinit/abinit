@@ -1204,7 +1204,7 @@ subroutine setup_bse(codvsn,acell,rprim,ngfftf,ngfft_osc,Dtset,Dtfil,BS_files,Ps
 
  nqlwl = 0
  w_fname = ABI_NOFILE
- if (Dtset%getscr/=0 .or. Dtset%irdscr/=0 .or. dtset%getscr_path /= ABI_NOFILE) then
+ if (Dtset%getscr/=0 .or. Dtset%irdscr/=0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
    w_fname=Dtfil%fnameabi_scr
  else if (Dtset%getsuscep/=0.or.Dtset%irdsuscep/=0) then
    w_fname=Dtfil%fnameabi_sus

@@ -600,7 +600,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! According to getdvdb, build _DVDB file name
  stringfile='_DVDB'; stringvar='dvdb'
  call mkfilename(filnam,dtfil%fildvdbin,dtset%getdvdb,idtset,dtset%irddvdb,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                  getpath=dtset%getdvdb_path)
+                  getpath=dtset%getdvdb_filepath)
  if (will_read == 0) dtfil%fildvdbin = ABI_NOFILE
 
  ! According to getden, build _DEN file name, referred as fildensin
@@ -678,7 +678,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! A default is available if getscr is 0
  stringfile='_SCR' ; stringvar='scr'
  call mkfilename(filnam,filscr,dtset%getscr,idtset,dtset%irdscr,jdtset_,ndtset,stringfile,stringvar,will_read, &
-                 getpath=dtset%getscr_path)
+                 getpath=dtset%getscr_filepath)
  if(will_read==0)filscr=trim(filnam_ds(3))//'_SCR'
 
  ! According to getsuscep and irdsuscep, build _SUS file name, referred as filsus
