@@ -162,6 +162,9 @@ pages:
     - Statistics: variables/varset_stats.md
 - Tutorial:
     - Overview: tutorial/index.md
+    - Building Abinit: 
+        - Compilation Howto: tutorial/compilation.md
+        - Source Code: tutorial/source_code.md
     - Base Tutorials:
         - Base1: tutorial/base1.md
         - Base2: tutorial/base2.md

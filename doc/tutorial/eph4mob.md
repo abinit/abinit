@@ -509,6 +509,16 @@ However, we found that there is very little use to go beyond a mesh three times 
 Using a 72x72x72 fine mesh for the energies gives a mobility of 149.87 cm$^2$/V/s,
 and a 96x96x96 mesh leads to 146.24 cm$^2$/V/s: the improvement is indeed rather limited.
 
+### On the importance of the initial DFPT mesh
+
+At this point it is worth commenting about the importance of the initial DFPT $\qq$-mesh.
+The Fourier interpolation implicitly assumes that the signal in $\RR$-space decays quickly hence
+the quality of the *interpolated* phonon frequencies and of the *interpolated* DFPT potentials, 
+between the ab-initio points depends on the spacing of the initial $\qq$-mesh that 
+in turns defines the size of the Born-von-Karman supercell.
+
+A more detailed discussion can be found in [[cite:Brunin2020]], [[cite:Verdi2015]] and [[cite:Sjakste2015]].
+
 ## Additional tricks
 
 ### MPI parallelism and memory requirements
