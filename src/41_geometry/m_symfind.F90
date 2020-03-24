@@ -1275,8 +1275,9 @@ subroutine symspgr(bravais,labels,nsym,spgroup,symrel,tnons,tolsym)
 
  do isym=1,nsymconv
 
-!  Note : 192 is the fixed dimension of labels, so the mod should not be useful, but this avoids possible memory problems.
-   call symcharac(center, determinant(isym), iholohedry, isym, labels(mod(isym,192)), &   
+!  Note : nsymconv might be bigger than 192, but only for non-primitive cells, in which case labels will not be echoed anywhere.
+!  192 is the fixed dimension of labels, so this avoids possible memory problems.
+   call symcharac(center, determinant(isym), iholohedry, isym, labels(mod(isym-1,192)+1), &   
    symrelconv(:,:,isym), tnonsconv(:,isym), t_axes(isym))
    if (t_axes(isym) == -1) then
      write(message, '(a,a,i3,a,3(a,3i4,a),a,3es22.12,a,a,3es22.12)' )ch10,&
