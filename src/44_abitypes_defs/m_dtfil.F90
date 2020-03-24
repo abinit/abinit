@@ -152,7 +152,7 @@ module m_dtfil
 
   character(len=fnlen) :: filpotin
    ! Filename used to read POT file.
-   ! Initialize via getpot_path
+   ! Initialize via getpot_filepath
 
   character(len=fnlen) :: filkdensin
    ! if no dataset mode             : abi//'KDEN'
@@ -595,7 +595,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  ! According to getpot, build _POT file name
  stringfile='_POT'; stringvar='pot'
  call mkfilename(filnam, dtfil%filpotin, 0, idtset, 0, jdtset_, ndtset, stringfile, stringvar, will_read, &
-                  getpath=dtset%getpot_path)
+                  getpath=dtset%getpot_filepath)
 
  ! According to getdvdb, build _DVDB file name
  stringfile='_DVDB'; stringvar='dvdb'
@@ -617,7 +617,7 @@ subroutine dtfil_init(dtfil,dtset,filnam,filstat,idtset,jdtset_,mpi_enreg,ndtset
  end if
  stringvar='den'
  call mkfilename(filnam,fildensin,dtset%getden,idtset,dtset%irdden,jdtset_,ndtset,stringfile,stringvar, will_read, &
-                 getpath=dtset%getden_path)
+                 getpath=dtset%getden_filepath)
 
  if(will_read==0)fildensin=trim(filnam_ds(3))//'_DEN'
  ireadden=will_read

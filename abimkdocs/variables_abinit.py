@@ -20682,7 +20682,7 @@ the projection in the subspace orthogonal to the nband states).
 
 The Sternheimer approach requires an external file with the KS potential produced by setting [[prtpot]] = 1
 during the GS run and the specification of [[tolwfr]] in the EPH input file.
-The path to the POT file used in the EPH calculation is specified via [[getpot_path]].
+The path to the POT file used in the EPH calculation is specified via [[getpot_filepath]].
 The number of line minimisations for the Sternheimer solver is defined by [[nline]].
 
 !!! important
@@ -20698,7 +20698,7 @@ The number of line minimisations for the Sternheimer solver is defined by [[nlin
 ),
 
 Variable(
-    abivarname="getkerange_path",
+    abivarname="getkerange_filepath",
     varset="eph",
     vartype="string",
     topics=['ElPhonInt_expert'],
@@ -20872,7 +20872,7 @@ at the input [[qpt]].
 #),
 
 Variable(
-    abivarname="getpot_path",
+    abivarname="getpot_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20977,7 +20977,7 @@ Alternative to [[getdvdb]] and [[irddvdb]]. The string must be enclosed between 
 ),
 
 Variable(
-    abivarname="getden_path",
+    abivarname="getden_filepath",
     varset="files",
     vartype="string",
     topics=['multidtset_useful'],
@@ -20989,7 +20989,7 @@ Variable(
 Specify the path of the DEN file using a string instead of the dataset index.
 Alternative to [[getden]] and [[irdden]]. The string must be enclosed between quotation marks:
 
-    getden_path "../outdata/out_DEN"
+    getden_filepath "../outdata/out_DEN"
 """
 ),
 

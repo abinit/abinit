@@ -104,7 +104,7 @@ List of tests: [[test:v9_50]], [[test:v9_61]] and [[test:v8_44]].
 New input variables: [[dvdb_qcache_mb]], 
 [[eph_phrange]], [[eph_tols_idelta]], [[eph_ecutosc]], [[eph_restart]], 
 [[eph_stern]], [[eph_use_ftinterp]],
-[[getdvdb]], [[getdvdb_filepath]], [[getkerange_path]],
+[[getdvdb]], [[getdvdb_filepath]], [[getkerange_filepath]],
 [[irddvdb]], [[prteliash]], [[sigma_bsum_range]], [[sigma_erange]],
 [[sigma_ngkpt]], [[sigma_nshiftk]], [[sigma_shiftk]], [[symv1scf]].
 
@@ -278,13 +278,13 @@ and `get*` variables are replaced by indipendent input files that are connected 
 List of new input variables that rely on this feature:
 
 - [[getddb_filepath]], an alternative to [[getddb]] or [[irdddb]], see test [[test:v9_60]]
-- [[getden_path]], an alternative to [[getden]] or [[irdden]], see test [[test:v8_36]] and [[test:v8_41]]
+- [[getden_filepath]], an alternative to [[getden]] or [[irdden]], see test [[test:v8_36]] and [[test:v8_41]]
 - [[getscr_filepath]], an alternative to [[getscr]] or [[irdscr]], see test [[test:v67mbpt_51]]
 - [[getwfkfine_filepath]], an alternative to [[getwfkfine]] or [[irdwfkfine]], see tests [[test:v9_55]], [[test:v9_56]]
 - [[getwfk_filepath]], an alternative to [[getwfk]] or [[irdwfk]], see test [[test:v9_60]]
 - [[getwfq_filepath]], an alternative to [[getwfq]] or [[irdwfq]], see test [[test:v7_98]]
-- [[getkerange_path]], see test [[test:v9_60]]
-- [[getpot_path]], see test [[test:v8_44]]
+- [[getkerange_filepath]], see test [[test:v9_60]]
+- [[getpot_filepath]], see test [[test:v8_44]]
 - [[pseudos]], [[indata_prefix]], [[outdata_prefix]], [[tmpdata_prefix]], [[output_file]], see test [[test:v9_04]]
 - [[pp_dirpath]]: cannot be tested  EXPLICITLY because system dependent but used by runtests.py when generating the input file. 
 - [[output@anaddb]], [[ddb_filepath@anaddb]], [[gkk_path@anaddb]], [[eph_prefix@anaddb]].
