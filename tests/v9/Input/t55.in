@@ -38,8 +38,8 @@ eph_intmeth 1
 ###########
 # Use of the two-grids technique
 ###########
-getwfkfine_path1 "t50o_DS6_WFK"
-getwfkfine_path2 "t50o_DS6_WFK"
+getwfkfine_filepath1 "t50o_DS6_WFK"
+getwfkfine_filepath2 "t50o_DS6_WFK"
 eph_intmeth2 2
 
 bs_interp_kmult3 2 2 2

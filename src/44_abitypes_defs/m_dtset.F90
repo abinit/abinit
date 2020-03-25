@@ -912,16 +912,16 @@ type, public :: dataset_type
  real(dp),allocatable :: kptbounds(:,:)
  real(dp) :: tmesh(3) ! = [5._dp, 59._dp, 6._dp] This triggers a bug in the bindings
 
- character(len=fnlen) :: getddb_path = ABI_NOFILE
- character(len=fnlen) :: getden_path = ABI_NOFILE
- character(len=fnlen) :: getdvdb_path = ABI_NOFILE
- character(len=fnlen) :: getwfk_path = ABI_NOFILE
- character(len=fnlen) :: getwfkfine_path = ABI_NOFILE
- character(len=fnlen) :: getwfq_path = ABI_NOFILE
- character(len=fnlen) :: getkerange_path = ABI_NOFILE
- character(len=fnlen) :: getpot_path = ABI_NOFILE
- character(len=fnlen) :: getscr_path = ABI_NOFILE
- !character(len=fnlen) :: getsigeph_path = ABI_NOFILE
+ character(len=fnlen) :: getddb_filepath = ABI_NOFILE
+ character(len=fnlen) :: getden_filepath = ABI_NOFILE
+ character(len=fnlen) :: getdvdb_filepath = ABI_NOFILE
+ character(len=fnlen) :: getwfk_filepath = ABI_NOFILE
+ character(len=fnlen) :: getwfkfine_filepath = ABI_NOFILE
+ character(len=fnlen) :: getwfq_filepath = ABI_NOFILE
+ character(len=fnlen) :: getkerange_filepath = ABI_NOFILE
+ character(len=fnlen) :: getpot_filepath = ABI_NOFILE
+ character(len=fnlen) :: getscr_filepath = ABI_NOFILE
+ !character(len=fnlen) :: getsigeph_filepath = ABI_NOFILE
 
  contains
 
@@ -1461,14 +1461,14 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%gethaydock         = dtin%gethaydock
  dtout%getocc             = dtin%getocc
  dtout%getpawden          = dtin%getpawden
- dtout%getddb_path        = dtin%getddb_path
- dtout%getden_path        = dtin%getden_path
- dtout%getdvdb_path       = dtin%getdvdb_path
- dtout%getpot_path        = dtin%getpot_path
- dtout%getscr_path        = dtin%getscr_path
- dtout%getwfk_path        = dtin%getwfk_path
- dtout%getwfkfine_path    = dtin%getwfkfine_path
- dtout%getwfq_path        = dtin%getwfq_path
+ dtout%getddb_filepath        = dtin%getddb_filepath
+ dtout%getden_filepath        = dtin%getden_filepath
+ dtout%getdvdb_filepath       = dtin%getdvdb_filepath
+ dtout%getpot_filepath        = dtin%getpot_filepath
+ dtout%getscr_filepath        = dtin%getscr_filepath
+ dtout%getwfk_filepath        = dtin%getwfk_filepath
+ dtout%getwfkfine_filepath    = dtin%getwfkfine_filepath
+ dtout%getwfq_filepath        = dtin%getwfq_filepath
  dtout%getqps             = dtin%getqps
  dtout%getscr             = dtin%getscr
  dtout%getsuscep          = dtin%getsuscep
@@ -2089,7 +2089,7 @@ type(dataset_type) function dtset_copy(dtin) result(dtout)
  dtout%einterp = dtin%einterp
  call alloc_copy(dtin%kptbounds, dtout%kptbounds)
  dtout%tmesh = dtin%tmesh
- dtout%getkerange_path = dtin%getkerange_path
+ dtout%getkerange_filepath = dtin%getkerange_filepath
 
  DBG_EXIT("COLL")
 
@@ -3111,11 +3111,12 @@ subroutine chkvars(string)
 !G
  list_vars=trim(list_vars)//' ga_algor ga_fitness ga_n_rules ga_opt_percent ga_rules'
  list_vars=trim(list_vars)//' genafm getbscoup getbseig getbsreso getcell'
- list_vars=trim(list_vars)//' getddb getddb_path getden_path getddk getdelfd getdkdk getdkde getden getdvdb getdvdb_path'
- list_vars=trim(list_vars)//' getefmas getkerange_path getgam_eig2nkq'
- list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_path getqps getscr getscr_path'
- list_vars=trim(list_vars)//' getwfkfine getwfkfine_path getsuscep'
- list_vars=trim(list_vars)//' getvel getwfk getwfk_path getwfq getwfq_path getxcart getxred'
+ list_vars=trim(list_vars)//' getddb getddb_filepath getden_filepath getddk'
+ list_vars=trim(list_vars)//' getdelfd getdkdk getdkde getden getdvdb getdvdb_filepath'
+ list_vars=trim(list_vars)//' getefmas getkerange_filepath getgam_eig2nkq'
+ list_vars=trim(list_vars)//' gethaydock getocc getpawden getpot_filepath getqps getscr getscr_filepath'
+ list_vars=trim(list_vars)//' getwfkfine getwfkfine_filepath getsuscep'
+ list_vars=trim(list_vars)//' getvel getwfk getwfk_filepath getwfq getwfq_filepath getxcart getxred'
  list_vars=trim(list_vars)//' get1den get1wf goprecon goprecprm'
  list_vars=trim(list_vars)//' gpu_devices gpu_linalg_limit gwcalctyp gwcomp gwencomp gwgamma gwmem'
  list_vars=trim(list_vars)//' gwpara gwrpacorr gw_customnfreqsp'

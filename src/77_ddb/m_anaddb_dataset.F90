@@ -2079,10 +2079,10 @@ subroutine anaddb_init(input_path, filnam)
 
  if (len_trim(input_path) == 0) then
    ! Legacy Files file mode.
-   write(std_out, "(2a)")"DeprecationWarning: ",ch10
+   write(std_out, "(2a)")" DeprecationWarning: ",ch10
    write(std_out, "(a)") "     The files file has been deprecated in Abinit9 and will be removed in Abinit10."
-   write(std_out, "(2a)")"     Use the syntax `anaddb t01.abi` where t01.abi is an anaddb input with ddb_path.",ch10
-   write(std_out, "(3a)")'            ddb_path = "out_DDB"',ch10,ch10
+   write(std_out, "(2a)")"     Use the syntax `anaddb t01.abi` where t01.abi is an anaddb input with ddb_filepath.",ch10
+   write(std_out, "(3a)")'            ddb_filepath = "out_DDB"',ch10,ch10
 
    write(std_out,*)' Give name for formatted input file: '
    read(std_in, '(a)' ) filnam(1)
@@ -2125,19 +2125,19 @@ subroutine anaddb_init(input_path, filnam)
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "output_file", tread, 'KEY', key_value=filnam(2))
    write(std_out, "(2a)")'- Name for formatted output file: ', trim(filnam(2))
 
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddb_path", tread, 'KEY', key_value=filnam(3))
-   ABI_CHECK(tread == 1, "ddb_path variable must be specified in the input file")
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddb_filepath", tread, 'KEY', key_value=filnam(3))
+   ABI_CHECK(tread == 1, "ddb_filepath variable must be specified in the input file")
    write(std_out, "(2a)")'- Input derivative database: ', trim(filnam(3))
 
    ! Nobody knows the scope of this line in the files file.
    !call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "md_output", tread, 'KEY', key_value=filnam(4))
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gkk_path", tread, 'KEY', key_value=filnam(5))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "gkk_filepath", tread, 'KEY', key_value=filnam(5))
    if (tread == 1) write(std_out, "(2a)")'- Name for input elphon matrix elements (GKK file): ', trim(filnam(5))
 
    call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "eph_prefix", tread, 'KEY', key_value=filnam(6))
    if (tread == 1) write(std_out, "(2a)")"- Root name for elphon output files: ", trim(filnam(6))
 
-   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddk_path", tread, 'KEY', key_value=filnam(7))
+   call intagm(dprarr, intarr, jdtset, marr, 1, string(1:lenstr), "ddk_filepath", tread, 'KEY', key_value=filnam(7))
    if (tread == 1) write(std_out, "(2a)")"- File containing ddk filenames for elphon/transport: ", trim(filnam(7))
 
    ABI_FREE(intarr)
@@ -2239,7 +2239,7 @@ subroutine anaddb_chkvars(string)
  list_logicals=' '
 
 !String input variables
- list_strings=' gruns_ddbs ddb_path output_file gkk_path eph_prefix ddk_path' ! md_output
+ list_strings=' gruns_ddbs ddb_filepath output_file gkk_filepath eph_prefix ddk_filepath' ! md_output
 !</ANADDB_VARS>
 
 !Extra token, also admitted:
