@@ -20751,7 +20751,7 @@ Variable(
     dimensions=[5],
     defaultval=0,
     mnemonics="EPH Number of Processors for Perturbations, Q-points, Bands, K-points, Spin.",
-    added_in_version="9.0.0",
+    added_in_version="9.1.0",
     text=r"""
 This variable defines the Cartesian grid of MPI processors used for EPH calculations.
 If not specified in the input, the code will generate this grid automatically using the total number of processors
