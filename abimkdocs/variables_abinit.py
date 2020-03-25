@@ -14702,7 +14702,7 @@ Variable(
     mnemonics="PRinT the GEOmetry analysis",
     added_in_version="before_v9",
     text=r"""
-If set to 1 or a larger value, provide output of geometrical analysis (bond
+If set to 1 or a larger value, provide output of geometry analysis (bond
 lengths and bond angles). The value of [[prtgeo]] is taken by the code to be
 the maximum coordination number of atoms in the system.
 It will deduce a maximum number of "nearest" and "next-nearest" neighbors
@@ -14982,10 +14982,10 @@ Variable(
     text=r"""
 Print out VASP-style PROCAR files, to generate "fat band" structures, where the
 thickness is proportional to the atomic and angular momentum character. Used in
-particular with the [pyprocar](https://github.com/romerogroup/pyprocar]
+particular with the [pyprocar](https://github.com/romerogroup/pyprocar)
 package. The same fractions are used as with [[prtdos]] 3, but output in the
 VASP format. Attempts have been made to support spin polarized and spinor
-calculations, but there may be subtle inconsistencies
+calculations, but there may be subtle inconsistencies.
 """,
 ),
 
@@ -21197,7 +21197,7 @@ Variable(
     added_in_version="9.0.0",
     text=r"""
 This variable provides a simplified interface to build the crystalline structure from an external file.
-The idea is to keep the **geometrical information** separated from the input file so that one
+The idea is to keep the **geometry information** separated from the input file so that one
 can perform multiple calculations in different input files sharing the same structure
 without having to copy & paste the description of the unit cell inside the input.
 The single source of truth is now given by an external file that can be easily shared.

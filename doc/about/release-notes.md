@@ -254,7 +254,7 @@ For some examples, see tests [[test:v8_90]], [[test:v7_45]], and [[test:v5_54]].
 
 A similar command line interface can also be used for the anaddb code.
 In this case, the relevant variables are: 
-[[output@anaddb]], [[ddb_filepath@anaddb]], [[gkk_filepath@anaddb]], [[eph_prefix@anaddb]].
+[[output_file@anaddb]], [[ddb_filepath@anaddb]], [[ddk_filepath@anaddb]], [[gkk_filepath@anaddb]], [[eph_prefix@anaddb]].
 
 The new syntax is:
 
@@ -475,10 +475,10 @@ https://www.secondprinciples.unican.es
 
 By Marcus Schmitt, Jordan Bieder, Matthieu Verstraete and Philippe Ghosez
 
-**D.12** The following units are now also allowed in the input file:
+**D.12** The following units are now also allowed in input files:
 
-- S Sec Second 
-- nm (for nanometer)
+- S Sec Second  for the ABINIT input file;
+- nm (for nanometer)  got the ABINIT and ANADDB input files.
 
 **D.13** TDEP utility:
 added [[guide:tdep|A-TDep user guide]],
