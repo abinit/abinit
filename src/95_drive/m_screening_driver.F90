@@ -61,8 +61,7 @@ module m_screening_driver
                              get_ng0sh, kmesh_print, find_qmesh, get_BZ_item
  use m_kg,            only : getph
  use m_gsphere,       only : gsph_free, gsphere_t, gsph_init, merge_and_sort_kg, setshells
- use m_vcoul_dt
- use m_vcoul,         only : vcoul_free, vcoul_init
+ use m_vcoul,         only : vcoul_t, vcoul_free, vcoul_init
  use m_qparticles,    only : rdqps, rdgw, show_QP
  use m_screening,     only : make_epsm1_driver, lwl_write, chi_t, chi_free, chi_new
  use m_io_screening,  only : hscr_new, hscr_io, write_screening, hscr_free, hscr_t
