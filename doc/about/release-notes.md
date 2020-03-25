@@ -22,11 +22,6 @@ Xavier
 
 ### **A.** Important remarks and warnings.
 
-<!-- 
-MG TODO: Use different md files for the release notes because the link #B.5 will break when we 
-release a new version
--->
-
 **A.1** At the occasion of the switch from ABINITv8 to ABINITv9, many improvements of the formats and content of files written
     by ABINIT have been made, so the backward compatibility of ABINITv9 may be broken. 
     The present ABINITv9.0 is NOT to be considered a production version. It is a beta release, allowing developers to get feedback
@@ -35,14 +30,14 @@ release a new version
 
 In particular: 
 
-1. The build system relies on new `.ac9` files (see [B.5](#B.5)), superceeding the v8 `.ac` files.
+1. The build system relies on new `.ac9` files (see [B.5](#v9.0.B.5)), superceeding the v8 `.ac` files.
    A bash script (`upgrade-build-config-file.sh`) located in the top level directory of the package can be used
    to convert from the old `.ac`format to `.ac9`.
 2. The build system of ABINITv9 does not build anymore the hard dependencies (Linalg, NetCDF4, HDF5, LibXC, ...), 
-as this was not sustainable (see [B.5](#B.5)) and nowadays most users install themselves prerequired libraries.
+as this was not sustainable (see [B.5](#v9.0.B.5)) and nowadays most users install themselves prerequired libraries.
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
-    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#B.8)). Note that the YAML output is still under development and modifications may appear in the next versions. A python API to extract the results of the calculation will be provided when the implementation is finalized.
-4. Several default values have been changed, see [A.3](#A.3).
+    This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#v9.0.B.8)). Note that the YAML output is still under development and modifications may appear in the next versions. A python API to extract the results of the calculation will be provided when the implementation is finalized.
+4. Several default values have been changed, see [A.3](#v9.0.A.3).
 
 
 **A.2** 
@@ -53,7 +48,7 @@ A version of this paper, that is not formatted for Computer Phys. Comm., is also
 The licence allows the authors to put it on the Web.
 Other specific publications are mentioned in the [Suggested acknowledgment page](../theory/acknowledgments).
 
-<a name="A.3"></a>
+<a name="v9.0.A.3"></a>
 **A.3**  The default values of the following ABINIT input variables have been changed:
     [[ixcrot]], [[chneut]], [[ntime]], [[symsigma]], [[prtkden]].
 
@@ -158,7 +153,7 @@ By T. Cavignac, B. Amadon and O. Gingras.
 **B.3** Spin model within Multibinit 
 
 The new capabilities of Multibinit within ABINITv9 are described
-fully in the Sec. 4.1 of [[cite:Gonze2020]]. See also Sec. [D.1](#D.1).
+fully in the Sec. 4.1 of [[cite:Gonze2020]]. See also Sec. [D.1](#v9.0.D.1).
 In particular, a spin model, described specifically in Sec. 4.1.2 of [[cite:Gonze2020]], is available, as follows.
 
 >Multibinit implements the most commonly used model for spin systems, 
@@ -214,7 +209,7 @@ New input variables: [[chrgat]], [[constraint_kind]], [[ratsm]].
 
 By X. Gonze.
 
-<a name="B.5"></a>
+<a name="v9.0.B.5"></a>
 **B.5** Large modifications of the build system 
 
 The build system relies on new <hostname>.ac9 files, superceeding the v8 <hostname>.ac files.
@@ -303,7 +298,7 @@ List of new input variables that rely on this feature:
 
 By M. Giantomassi
 
-<a name="B.8"></a>
+<a name="v9.0.B.8"></a>
 **B.8** YAML sections in the output file 
 
 YAML sections are now generated in the output file, sometimes replacing text sections, sometime providing new information.
@@ -416,7 +411,7 @@ See related information in Sec. 5.4 of [[cite:Gonze2020]].
 
 * * *
 
-<a name="D.1"></a>
+<a name="v9.0.D.1"></a>
 ### **D.**  Other changes (or on-going developments, not yet finalized)
 
 **D.1**  Miscellaneous improvements of Multibinit (lattice part)
