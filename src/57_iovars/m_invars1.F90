@@ -2156,7 +2156,7 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%dmft_solv=5
    if(dtsets(idtset)%ucrpa>0.and.dtsets(idtset)%usedmft==1) dtsets(idtset)%dmft_solv=0
    dtsets(idtset)%dmft_t2g=0
-   dtsets(idtset)%dmft_x2my2d=0
+!  dtsets(idtset)%dmft_x2my2d=0
    dtsets(idtset)%dmft_tolfreq=tol4
    dtsets(idtset)%dmft_tollc=tol5
    dtsets(idtset)%dmft_charge_prec=tol6
@@ -2794,10 +2794,6 @@ subroutine indefo(dtsets,ndtset_alloc,nprocs)
    dtsets(idtset)%chneut = 1
    dtsets(idtset)%symdynmat = 1
 
-   dtsets(idtset)%ph_freez_disp_addStrain = 0
-   dtsets(idtset)%ph_freez_disp_option = 0
-   dtsets(idtset)%ph_freez_disp_nampl = 0
-   if(dtsets(idtset)%ph_freez_disp_nampl>0)dtsets(idtset)%ph_freez_disp_ampl = zero
    dtsets(idtset)%ph_ndivsm = 20
    dtsets(idtset)%ph_nqpath = 0
    dtsets(idtset)%ph_ngqpt = [20, 20, 20]
