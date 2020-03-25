@@ -6,7 +6,8 @@ List of changes with respect to version 8.10.
 Many thanks to the contributors to the ABINIT project between
 October 2018 and March 2020. These release notes
 are relative to modifications/improvements of ABINIT v9.0 with respect to v8.10
-(merge requests up to, and including, MR613 are taken into account).
+(merge requests up to, and including, MR613 are taken into account,
+as well as MR621, 623, 626, 628-632).
 
 The list of contributors includes:
 B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, J. Bouchet, E. Bousquet, F. Bruneval, G. Brunin, Wei Chen, 
@@ -37,8 +38,8 @@ In particular:
 1. The build system relies on new `.ac9` files (see [B.5](#B.5)), superceeding the v8 `.ac` files.
    A bash script (`upgrade-build-config-file.sh`) located in the top level directory of the package can be used
    to convert from the old `.ac`format to `.ac9`.
-2. The build system of ABINITv9 does not build the hard dependencies (Linalg, NetCDF4, HDF5, LibXC, ...), 
-as this was not sustainable anymore (see [B.5](#B.5)), but nowadays most users install themselves prerequired libraries.
+2. The build system of ABINITv9 does not build anymore the hard dependencies (Linalg, NetCDF4, HDF5, LibXC, ...), 
+as this was not sustainable (see [B.5](#B.5)) and nowadays most users install themselves prerequired libraries.
 3. The main ABINIT output file now contains sections written in YAML (sometimes replacing text sections, sometimes adding information).
     This means that some user-developed parsing tools might not work anymore, and should be adapted to the new ABINITv9 output file (see [B.8](#B.8)). Note that the YAML output is still under development and modifications may appear in the next versions. A python API to extract the results of the calculation will be provided when the implementation is finalized.
 4. Several default values have been changed, see [A.3](#A.3).
@@ -212,7 +213,7 @@ By X. Gonze.
 
 The build system relies on new <hostname>.ac9 files, superceeding the v8 <hostname>.ac files.
 Fully documented example files can be found in doc/build/config-examples.
-The build system of ABINITv9 does not build the (hard and soft) dependencies (Linalg, NetCDF4, HDF, LibXC, Wannier90, ...), as this was not sustainable anymore.
+The build system of ABINITv9 does not build anymore the (hard and soft) dependencies (Linalg, NetCDF4, HDF, LibXC, Wannier90, ...), as this was not sustainable.
 Three libraries are now mandatory: linalg, NetCDF4/HDF5 and LibXC. Failing to link to them will prevent building ABINIT.
 The other libraries are optional, there will only be a warning if they are not available.
 If the user does not provide the path to these libraries,
@@ -233,7 +234,10 @@ or
     abinit run.abi > run.log 2> run.err &
 
 where `run.abi` is the Abinit input file that now provides all the information related to pseudos 
-and the prefixes that were previously passed via the "files" file.
+and the prefixes that were previously passed via the "files" file. For comparison, the old syntax is
+
+    abinit < run.files > run.log 2> run.err &      ! This is the old syntax
+
 A file extension for the input file is highly recommended (in this example we use `.abi`)
 as by default the parser will use the string before the file extension as root to build the prefixes 
 for the input/output/temporary files.
@@ -303,7 +307,7 @@ Example of tests: paral#86, v67mbpt#2. See the input variable use_yaml (TO BE DO
 -->
 At the occasion of the development of this capability, and its adaptation to the test farm, the
 perl script fldiff.pl has been replaced by a Python version.
-See related information in Sec. 5.5 of [[cite:Gonze2020.
+See related information in Sec. 5.5 of [[cite:Gonze2020]].
 
 By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze.
 
@@ -311,14 +315,14 @@ By T. Cavignac, M. Giantomassi, GM Rignanese, X Gonze.
 **B.9** New approach to define crystalline structures in the Abinit input
 
 The new variable [[structure]] can be used to initialize the lattice vectors 
-and the atomic positions from an external file.
+and the atomic positions **from an external file**.
 Variables such as [[natom]], [[ntypat]], [[typat]] and [[znucl]] are automatically initialized
 and need not to be specified in the ABINIT input.
-At present, the code can read ABINIT netcdf files produced (`GSR.nc`, `WFK.nc`, `DEN.nc`, `HIST.nc`)
+At present, the code can read netcdf files produced by ABINIT (`GSR.nc`, `WFK.nc`, `DEN.nc`, `HIST.nc`)
 and POSCAR files in VASP-5 format.
 See the documentation for the syntax and limitations.
 
-By M. Giantomassi
+By M. Giantomassi.
 
 
 **B.10** New capabilities of abipy and abiflows 
@@ -353,7 +357,7 @@ Use:
 
 to install the dependencies in user mode.
 
-By M. Giantomassi
+By M. Giantomassi.
 
 
 **C.2** Test farm: new and obsolete bots
@@ -389,8 +393,8 @@ By Th. Cavignac (MR 526)
 
 **C.7** Split of the source tree (ongoing).
 
-In view of increased modularity, the source tree had to be split in two parts, one for low-level routines, largely independent of ABINIT,
-and one for more specific routines to ABINIT. The low-level routines should become a separate library, with its own build system and make.. 
+In order to improve modularity, the source tree must be split in two parts, one for low-level routines, largely independent of ABINIT,
+and one for more specific routines to ABINIT. The low-level routines should become a separate library, with its own build system and make. 
 At present the low-level library have been moved out of src, inside the shared/common/src directory.
 See related information in Sec. 5.4 of [[cite:Gonze2020]].
 
@@ -423,11 +427,11 @@ By M. Schmitt, F. Ricci, who else ?
 
 **D.2** Miscellaneous improvements in the Chern number and orbital magnetization calculations,
 including parallelization over k points of the Chern number calculation.
-New test: v8#39.
+New test [[test:v8_39]].
 
 By J. Zwanziger (MR 469, 500, 545, 588)
 
-**D.3** Calculation of Debye-Waller tensor. [[test:v8_58]].
+**D.3** Calculation of Debye-Waller tensor. New test [[test:v8_58]].
 
 By M. Giantomassi
 
@@ -453,23 +457,23 @@ By H. Miranda and M. Giantomassi
 
 By M. Giantomassi
 
-**D.8** New para_gspw tutorial, new version of auto paral (with threads)
+**D.8** Upgraded [[tutorial:paral_gspw]], new version of auto paral (with threads)
 
 By M. Torrent (MR502).
 
-**D.9** Test wannier90 interface with nsppol=2 and nspden=2, wannier90#4.
+**D.9** Test wannier90 interface with [[nsppol]]=2 and [[nspden]]=2, [[test:wannier90_04]].
 
 By He Xu
 
 **D.10** Mixed precision for FFT transforms. New input variable [[mixprec]]
-see [[test:v8_44]], [[test:v9_57]], [test:v9_60]], and [[test:v9_61]].
+see [[test:v8_44]], [[test:v9_57]], [[test:v9_60]], and [[test:v9_61]].
 
 From M. Giantomassi (MR491).
 
-**D.11** Multibinit interface with scale-up
-A whole set of new input variables... However not tested, not documented !
+**D.11** Multibinit has been interfaced with scale-up,
+https://www.secondprinciples.unican.es
 
-By ??
+By Marcus Schmitt, Jordan Bieder, Matthieu Verstraete and Philippe Ghosez
 
 **D.12** The following units are now also allowed in the input file:
 
@@ -539,7 +543,19 @@ By F. Jollet (MR 412)
 
 By F. Goudreault (MR 408)
 
-**D.27** Miscellaneous additional bug fixes and improvements of documentation.
+**D.27** Improve ELPA detection; make abinit compatible with ELPA2019
+
+By M. Torrent (MR 626)
+
+**D.28** Upgrade of [[tutorial:base3]] and [[tutorial:basepar]].
+
+By X. Gonze (MR628)
+
+**D.29** New input variable [[prtprocar]], see test [[test:v5_40]].
+
+By M. Verstraete (MR630)
+
+**D.30** Miscellaneous additional bug fixes and improvements of documentation.
 L. Baguet, JM Beuken, J. Bieder, E. Bousquet, F. Bruneval, T. Cavignac, M. Giantomassi, X. Gonze, F. Jollet, N. Pike, Y Pouillon, M. Torrent, J. Van Bever, M. Verstraete, He Xu.
 
 
