@@ -636,7 +636,7 @@ integer :: icg, icg_tmp, ibdoffst, npw, iband_me
      call timab(553,1,tsec)
      call pawinit(dtset%effmass_free,gnt_option,zero,zero,dtset%pawlcutd,dtset%pawlmix,&
 &     psps%mpsang,dtset%pawnphi,dtset%nsym,dtset%pawntheta,&
-&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%xclevel,0,dtset%usepotzero)
+&     pawang,pawrad,dtset%pawspnorb,pawtab,dtset%pawxcdev,dtset%ixc,dtset%usepotzero)
      call setsym_ylm(gprimd,pawang%l_max-1,dtset%nsym,dtset%pawprtvol,&
 &     rprimd,symrec,pawang%zarot)
 

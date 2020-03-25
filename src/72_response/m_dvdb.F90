@@ -2646,7 +2646,7 @@ subroutine v1phq_symmetrize(cryst,idir,ipert,symq,ngfft,cplex,nfft,nspden,nsppol
 
  !if (psps%usepaw==1) then
  !  ! Allocate/initialize only zarot in pawang1 datastructure
- !  call pawang_init(pawang1,0,0,pawang%l_max-1,0,nsym1,0,1,0,0,0)
+ !  call pawang_init(pawang1,0,0,pawang%l_max-1,0,0,nsym1,0,0,0,0)
  !  call setsym_ylm(gprimd,pawang1%l_max-1,pawang1%nsym,0,rprimd,symrc1,pawang1%zarot)
  !end if
 
@@ -5085,7 +5085,7 @@ end subroutine dvdb_list_perts
 !!
 !! INPUT
 !!  nfiles=Number of files to be merged.
-!!  dvdb_path=Name of output DVDB file.
+!!  dvdb_filepath=Name of output DVDB file.
 !!  prtvol=Verbosity level.
 !!
 !! SIDE EFFECTS
@@ -5098,12 +5098,12 @@ end subroutine dvdb_list_perts
 !!
 !! SOURCE
 
-subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
+subroutine dvdb_merge_files(nfiles, v1files, dvdb_filepath, prtvol)
 
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: nfiles,prtvol
- character(len=*),intent(in) :: dvdb_path
+ character(len=*),intent(in) :: dvdb_filepath
  character(len=*),intent(inout) :: v1files(nfiles)
 
 !Local variables-------------------------------
@@ -5128,8 +5128,8 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
 
 !************************************************************************
 
- if (file_exists(dvdb_path)) then
-   MSG_ERROR(sjoin("Cannot overwrite existing file:", dvdb_path))
+ if (file_exists(dvdb_filepath)) then
+   MSG_ERROR(sjoin("Cannot overwrite existing file:", dvdb_filepath))
  end if
 
  ! If a file is not found, try the netcdf version and change v1files accordingly.
@@ -5144,7 +5144,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  nperts = size(hdr1_list)
 
  ! Write dvdb file (we only support fortran binary format)
- if (open_file(dvdb_path, msg, newunit=ount, form="unformatted", action="write", status="unknown") /= 0) then
+ if (open_file(dvdb_filepath, msg, newunit=ount, form="unformatted", action="write", status="unknown") /= 0) then
    MSG_ERROR(msg)
  end if
  write(ount, err=10, iomsg=msg) dvdb_last_version
@@ -5248,7 +5248,7 @@ subroutine dvdb_merge_files(nfiles, v1files, dvdb_path, prtvol)
  write(std_out,"(a,i0,a)")"Merged successfully ", nfiles, " files"
 
  ! List available perturbations.
- dvdb = dvdb_new(dvdb_path, xmpi_comm_self)
+ dvdb = dvdb_new(dvdb_filepath, xmpi_comm_self)
  call dvdb%print()
  call dvdb%list_perts([-1, -1, -1])
  call dvdb%free()
@@ -5532,10 +5532,10 @@ end subroutine dvdb_test_v1rsym
 !!
 !! SOURCE
 
-subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
+subroutine dvdb_test_v1complete(dvdb_filepath, symv1scf, dump_path, comm)
 
 !Arguments ------------------------------------
- character(len=*),intent(in) :: dvdb_path,dump_path
+ character(len=*),intent(in) :: dvdb_filepath,dump_path
  integer,intent(in) :: symv1scf, comm
 
 !Local variables-------------------------------
@@ -5560,7 +5560,7 @@ subroutine dvdb_test_v1complete(dvdb_path, symv1scf, dump_path, comm)
 
  my_rank = xmpi_comm_rank(comm)
 
- dvdb = dvdb_new(dvdb_path, comm)
+ dvdb = dvdb_new(dvdb_filepath, comm)
  dvdb%debug = .false.
  dvdb%symv1 = symv1scf
  call dvdb%print()
@@ -6114,11 +6114,11 @@ end subroutine dvdb_write_v1qavg
 !!  Debugging tool used to test the Fourier interpolation of the DFPT potentials.
 !!
 !! INPUTS
-!!  dvdb_path=Filename
+!!  dvdb_filepath=Filename
 !!  dvdb_ngqpt(3)=Divisions of the Q-mesh reported in the DVDB file
 !!  dvdb_add_lr=0 to disable treatment of long-range part in Fourier interpolation.
 !!  qdamp=Defines exponential damping in LR potential
-!!  ddb_path=Path to DDB file. Used to treat LR part.
+!!  ddb_filepath=Path to DDB file. Used to treat LR part.
 !!  prtvol=Verbosity level.
 !!  coarse_ngqpt(3)= Coarse q-mesh used to analyze the accuracy of the FT interpolation
 !!    Must be divisor of dvdb_ngqpt. Use 0 to disable the test.
@@ -6134,11 +6134,11 @@ end subroutine dvdb_write_v1qavg
 !!
 !! SOURCE
 
-subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr, qdamp, &
-                              ddb_path, prtvol, coarse_ngqpt, comm)
+subroutine dvdb_test_ftinterp(dvdb_filepath, method, symv1, dvdb_ngqpt, dvdb_add_lr, qdamp, &
+                              ddb_filepath, prtvol, coarse_ngqpt, comm)
 
 !Arguments ------------------------------------
- character(len=*),intent(in) :: dvdb_path, ddb_path
+ character(len=*),intent(in) :: dvdb_filepath, ddb_filepath
  integer,intent(in) :: comm, prtvol, dvdb_add_lr, qdamp, method, symv1
  integer,intent(in) :: dvdb_ngqpt(3), coarse_ngqpt(3)
 
@@ -6161,12 +6161,12 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
  qrefine = 1
 
  write(std_out,"(a)")sjoin(" Testing Fourier interpolation of V1(r) with ngqpt:", ltoa(dvdb_ngqpt))
- if (len_trim(ddb_path) > 0) then
-   write(std_out,"(a)")sjoin(" Reading Zeff and eps_inf from DDB file:", ddb_path)
+ if (len_trim(ddb_filepath) > 0) then
+   write(std_out,"(a)")sjoin(" Reading Zeff and eps_inf from DDB file:", ddb_filepath)
    write(std_out,"(a)")sjoin(" dvdb_add_lr set to:", itoa(dvdb_add_lr))
  end if
 
- dvdb = dvdb_new(dvdb_path, comm)
+ dvdb = dvdb_new(dvdb_filepath, comm)
  dvdb%debug = .False.
  ABI_CHECK(any(symv1 == [0, 1, 2]), sjoin("invalid value of symv1:", itoa(symv1)))
  dvdb%symv1 = symv1
@@ -6176,11 +6176,11 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
  !call dvdb%set_pert_distrib(sigma%comm_pert, sigma%my_pinfo, sigma%pert_table)
 
  iblock_dielt = 0; iblock_dielt_zeff = 0
- if (len_trim(ddb_path) > 0) then
-   call dvdb%load_ddb(prtvol, chneut2, comm, ddb_path=ddb_path)
+ if (len_trim(ddb_filepath) > 0) then
+   call dvdb%load_ddb(prtvol, chneut2, comm, ddb_filepath=ddb_filepath)
  else
    dvdb%add_lr = 0
-   MSG_WARNING("ddb_path was not provided --> Setting dvdb_add_lr to zero")
+   MSG_WARNING("ddb_filepath was not provided --> Setting dvdb_add_lr to zero")
  end if
 
  call dvdb%print()
@@ -6254,7 +6254,7 @@ subroutine dvdb_test_ftinterp(dvdb_path, method, symv1, dvdb_ngqpt, dvdb_add_lr,
    vd_max = vdiff_t()
 #endif
 
-   coarse_fname = strcat(dvdb_path, "_COARSE")
+   coarse_fname = strcat(dvdb_filepath, "_COARSE")
    call dvdb%qdownsample(coarse_fname, coarse_ngqpt, comm)
 
    coarse_dvdb = dvdb_new(coarse_fname, comm)
@@ -6555,13 +6555,13 @@ end subroutine dvdb_get_v1r_long_range
 !!  Use this function in eph driver
 !!
 
-subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_path, ddb)
+subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_filepath, ddb)
 
 !Arguments ------------------------------------
 !scalars
  class(dvdb_t),intent(inout) :: dvdb
  integer,intent(in) :: chneut, prtvol, comm
- character(len=*),optional,intent(in) :: ddb_path
+ character(len=*),optional,intent(in) :: ddb_filepath
  type(ddb_type),optional,target,intent(in) :: ddb
 
 !Local variables ------------------------------
@@ -6580,11 +6580,11 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_path, ddb)
 
  my_rank = xmpi_comm_rank(comm)
 
- if (present(ddb_path)) then
+ if (present(ddb_filepath)) then
    ! Build ddb object from file. Will release memory before returning.
-   ABI_CHECK(.not. present(ddb), "ddb argument cannot be present when ddb_path is used")
+   ABI_CHECK(.not. present(ddb), "ddb argument cannot be present when ddb_filepath is used")
    ABI_CALLOC(dummy_atifc, (dvdb%natom))
-   call ddb_from_file(this_ddb, ddb_path, brav1, dvdb%natom, natifc0, dummy_atifc, cryst_ddb, comm, prtvol=prtvol)
+   call ddb_from_file(this_ddb, ddb_filepath, brav1, dvdb%natom, natifc0, dummy_atifc, cryst_ddb, comm, prtvol=prtvol)
    ABI_FREE(dummy_atifc)
    call cryst_ddb%free()
    ddb_ptr => this_ddb
@@ -6607,10 +6607,10 @@ subroutine dvdb_load_ddb(dvdb, chneut, prtvol, comm, ddb_path, ddb)
 
  if (my_rank == master) then
    if (iblock_dielt_zeff == 0) then
-     call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_path))
+     call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_filepath))
      call wrtout(ab_out, "Values initialized with zeros")
    else
-     call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_path))
+     call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_filepath))
    end if
  end if
 
