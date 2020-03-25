@@ -13,7 +13,7 @@ You already should know how to use ABINIT in the PAW case (see the tutorial [PAW
 
 This tutorial should take about 2h00.
 
-[TUTORIAL_README]
+[TUTORIAL_READMEV9]
 
 ## 1. The PAW atomic dataset - introduction
 
@@ -87,20 +87,19 @@ mkdir Work_paw2
 cd Work_paw2
 ```
 
-Provided that ABINIT has been compiled with the `--with-dft-flavor="...+atompaw"` option,
-the `ATOMPAW` code is directly available from command line. Try to type:
+You have now to install the `ATOMPAW` code. Try to type in your browser:
 
-     atompaw
+     https://users.wfu.edu/natalie/papers/pwpaw/atompaw-4.1.0.6.tar.gz
 
-If `atompaw vx.y.z` message appears, everything is fine.
-Otherwise, you can try:
+Then, download the file, unzip and untar it.Go into the directory "doc", open the file "atompaw-usersguide.pdf". Go p.3 and follow the instructions to compile atompaw.
 
-    $ABI_HOME/fallbacks/exports/bin/atompaw
 
 !!! Note
     In the following, we name *atompaw* the `ATOMPAW` executable.
 
 **How to use `ATOMPAW`?**
+
+The following process will be applied to Ni in the next paragraph:
 
 1. Edit an input file in a text editor (content of input explained [here](paw2_assets/atompaw-usersguide.pdf))
 2. Run: *atompaw < inputfile*
@@ -263,7 +262,7 @@ Finally, partial-waves basis contains two $s$\-, two $p$\-  and two $d$\- partia
       * Next two lines: `ABINITOUT` makes `ATOMPAW` generate a PAW dataset for ABINIT;
         The next line contains options for this ABINIT file. "default" set all parameters to their default value.
 ```
-    ABINITOUT
+    XMLOUT
     default
 
 ```
@@ -462,9 +461,10 @@ Now the PS partial-wave and projector have the same order of magnitude!
 Examine the logarithmic derivatives, i.e., derivatives of an $l$-state
 $\frac{d(log(\Psi_l(E))}{dE}$ computed for the exact atomic problem and with the PAW dataset.
 They are printed in the `logderiv.l` files. Each `logderiv.l` file corresponds to an
-angular momentum $l$  and contains three columns of data: the
-energy, the logarithmic derivative of the $l$-state of the exact atomic problem
-and of the pseudized problem. In our Ni example, $l=0$, $1$ or $2$.
+angular momentum $l$  and contains five columns of data: the
+energy, the logarithmic derivative of the $l$-state of the exact atomic problem,
+ the logarithmic derivative of the pseudized problem and two other colums that do not matter for this section. In the following, when you edit a loderiv file, only edit the three first columns.
+In our Ni example, $l=0$, $1$ or $2$.
 
 The logarithmic derivatives should have the following properties:
 
@@ -552,14 +552,14 @@ Edit again the file and replace `troulliermartins` by `bessel` (line 28); then c
 line `2.0 2.0 2.0 2.0` by `2.0 2.0 1.8 2.0` (decreasing the $r_{Vloc}$ radius from $2.0$ to $1.8$).
 Run `ATOMPAW`: the ghost state disappears!
 
-Start from the original state of *Ni.ghost.atompaw.input* file and put `1.8` for
-the matching radius of $p$\- states (put `1.8` on lines 31 and 32).
+Start from the original state of *Ni.ghost.atompaw.input* file and put `1.6` for
+the matching radius of $p$\- states (put `1.6` on lines 31 and 32).
 Run `ATOMPAW`: the ghost state disappears!
 
 ## 7. Testing the "efficiency" of a PAW dataset
 
 Let's use again our *Ni.atompaw.input1* file for Nickel (with all our modifications).
-You get a file *Ni.GGA-PBE-paw.abinit* containing the PAW dataset designated for ABINIT.
+You get a file *Ni.GGA-PBE-paw.xml* containing the PAW dataset designated for ABINIT.
 
 To test the efficiency of the generated PAW dataset, we finally will use ABINIT!
 You are about to run a DFT computation and determine the size of the _plane
@@ -567,12 +567,11 @@ wave basis_ needed to reach a given accuracy. If the _cut-off energy_ defining t
 _plane waves basis_ is too high (higher than 20 Hartree),
 some changes have to be made in the input file.
 
-Copy *\$ABI_TESTS/tutorial/Input/tpaw2_x.files* and
-*\$ABI_TESTS/tutorial/Input/tpaw2_1.in* in your working directory.
+Copy *\$ABI_TESTS/tutorial/Input/tpaw2_1.in* in your working directory.
 Edit *tpaw2_1.in*, and activate the 8 datasets.
 Run ABINIT with them.
 
-{% dialog tests/tutorial/Input/tpaw2_x.files tests/tutorial/Input/tpaw2_1.in %}
+{% dialog tests/tutorial/Input/tpaw2_1.in %}
 
 ABINIT computes the _total energy_ of ferromagnetic FCC Nickel for several values of [[ecut]].
 At the end of output file, you get this:
@@ -585,14 +584,14 @@ At the end of output file, you get this:
       ecut6     1.80000000E+01 Hartree
       ecut7     2.00000000E+01 Hartree
       ecut8     2.20000000E+01 Hartree
-    etotal1    -3.9300291581E+01
-    etotal2    -3.9503638785E+01
-    etotal3    -3.9583278145E+01
-    etotal4    -3.9613946329E+01
-    etotal5    -3.9623543087E+01
-    etotal6    -3.9626889070E+01
-    etotal7    -3.9628094989E+01
-    etotal8    -3.9628458879E+01
+    etotal1    -3.9299840066E+01
+    etotal2    -3.9503112955E+01
+    etotal3    -3.9582704516E+01
+    etotal4    -3.9613343901E+01
+    etotal5    -3.9622927015E+01
+    etotal6    -3.9626266739E+01
+    etotal7    -3.9627470087E+01
+    etotal8    -3.9627833090E+01
 
 `etotal` convergence (at 1 mHartree) is achieve for 18<=$e_{cut}$<=20 Hartree
 `etotal` convergence (at 0,1 mHartree) is achieve for $e_{cut}$>22 Hartree
@@ -624,14 +623,14 @@ This is not a good result for a PAW dataset; let's try to optimize it.
       ecut6     1.80000000E+01 Hartree
       ecut7     2.00000000E+01 Hartree
       ecut8     2.20000000E+01 Hartree
-    etotal1    -3.9600469883E+01
-    etotal2    -3.9627528577E+01
-    etotal3    -3.9627858027E+01
-    etotal4    -3.9628445505E+01
-    etotal5    -3.9628912968E+01
-    etotal6    -3.9629038227E+01
-    etotal7    -3.9629045275E+01
-    etotal8    -3.9629064079E+01
+    etotal1    -3.9599860476E+01
+    etotal2    -3.9626919903E+01
+    etotal3    -3.9627249378E+01
+    etotal4    -3.9627836846E+01
+    etotal5    -3.9628304332E+01
+    etotal6    -3.9628429611E+01
+    etotal7    -3.9628436662E+01
+    etotal8    -3.9628455467E+01
 
 `etotal` convergence (at 1 mHartree) is achieve for 12 <= $e_{cut}$ <= 14 Hartree
 `etotal` convergence (at 0,1 mHartree) is achieve for 16 <= $e_{cut}$ <= 18 Hartree
@@ -640,8 +639,8 @@ This is a reasonable result for a PAW dataset!
 
 * 3rd possibility: use _enhanced polynomial_ pseudization scheme for projectors.
   Edit *\$ABI_HOME/doc/tutorial/paw2_assets/Ni.atompaw.input2* and replace `custom rrkj`
-  by `custom polynom2 7 10`.
-  Repeat the entire procedure (`ATOMPAW` \+ `ABINIT`)... and look at the `ecut` convergence.
+  by `custom polynom2 7 10`. It may sometimes improve the ecut convergence.
+  
 
 ### Optional_exercise
 
@@ -666,17 +665,18 @@ Results are below:
       ecut6     1.80000000E+01 Hartree
       ecut7     2.00000000E+01 Hartree
       ecut8     2.20000000E+01 Hartree
-    etotal1    -3.9609758248E+01
-    etotal2    -3.9615269046E+01
-    etotal3    -3.9618415691E+01
-    etotal4    -3.9622479240E+01
-    etotal5    -3.9624694849E+01
-    etotal6    -3.9625216320E+01
-    etotal7    -3.9625264395E+01
-    etotal8    -3.9625314410E+01
-
+    etotal1    -3.9608001348E+01
+    etotal2    -3.9613479343E+01
+    etotal3    -3.9616615528E+01
+    etotal4    -3.9620665403E+01
+    etotal5    -3.9622873734E+01
+    etotal6    -3.9623393021E+01
+    etotal7    -3.9623440787E+01
+    etotal8    -3.9623490997E+01
+   
+ 
 `etotal` convergence (at 1 mHartree) is achieved for 14 <= $e_{cut}$ <= 16 Hartree
-`etotal` convergence (at 0,1 mHartree) is achieved for 18 <= $e_{cut}$ <= 20 Hartree
+`etotal` convergence (at 0,1 mHartree) is achieved for 20 <= $e_{cut}$ <= 22 Hartree
 
 !!! note
 
@@ -708,8 +708,8 @@ Results are below:
 The last step is to examine carefully the physical quantities obtained with our PAW dataset.
 
 Copy *\$ABI_TESTS/tutorial/Input/tpaw2_2.in* in your working directory.
-Edit it, activate the 8 datasets,
-change *tpaw2_x.files* to use *\$ABI_HOME/doc/tutorial/paw2_assets/Ni.GGA-PBE-paw.abinit.rrkj* psp file
+Edit it, activate the 7 datasets,
+ and use *\$ABI_HOME/doc/tutorial/paw2_assets/Ni.GGA-PBE-paw.rrkj.xml* psp file
 (obtained from *Ni.atompaw.input2 file*).
 Run ABINIT (this may take a while...).
 

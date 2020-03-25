@@ -31,6 +31,6 @@ custom rrkj                                 ! Scheme for PS partial waves and pr
 2.3                                         ! r_c matching radius for second p partial wave
 2.3                                         ! r_c matching radius for first  d partial wave
 2.3                                         ! r_c matching radius for second d partial wave
-ABINITOUT                                   ! Option for ABINIT file creation
+XMLOUT                                   ! Option for ABINIT file creation
 default                                     ! All parameters set to default for ABINIT file
 0                                           ! End of file
