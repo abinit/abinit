@@ -27,7 +27,6 @@
 
 module m_fock
 
- use m_vcoul_dt
  use m_vcoul 
 
  use defs_basis

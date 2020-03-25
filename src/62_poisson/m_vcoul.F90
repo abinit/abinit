@@ -29,9 +29,6 @@
 
 MODULE m_vcoul
 
- use m_vcoul_dt
- use m_vcutoff_sphere,  only : cutoff_sphere
-
  use defs_basis
  use m_abicore
  use m_errors
@@ -57,7 +54,104 @@ MODULE m_vcoul
  implicit none
 
  private
-	
+!!***
+
+!!****t* m_vcoul/vcoul_t
+!! NAME
+!!  vcoul_t
+!!
+!! FUNCTION
+!!  This data type contains the square root of the Fourier components of the Coulomb interaction
+!!  calculated taking into account a possible cutoff. Info on the particular geometry used for the cutoff
+!!  as well as quantities required to deal with the Coulomb divergence.
+!!
+!! SOURCE
+
+ type,public :: vcoul_t
+
+  ! TODO: Remove it
+  integer  :: nfft
+  ! Number of points in FFT grid
+
+  integer  :: ng
+   ! Number of G-vectors
+
+  integer  :: nqibz
+   ! Number of irreducible q-points
+
+  integer  :: nqlwl
+   ! Number of small q-points around Gamma
+
+  real(dp) :: alpha(3)
+   ! Lenght of the finite surface
+
+  real(dp) :: rcut
+   ! Cutoff radius
+
+  real(dp) :: i_sz
+   ! Value of the integration of the Coulomb singularity 4\pi/V_BZ \int_BZ d^3q 1/q^2
+
+  real(dp) :: i_sz_resid
+   ! Residual difference between the i_sz in the sigma self-energy for exchange,
+   ! and the i_sz already present in the generalized Kohn-Sham eigenenergies
+   ! Initialized to the same value as i_sz
+
+  real(dp) :: hcyl
+   ! Length of the finite cylinder along the periodic dimension
+
+  real(dp) :: ucvol
+    ! Volume of the unit cell
+
+  character(len=50) :: mode
+   ! String defining the cutoff mode, possible values are: sphere,cylinder,surface,crystal
+
+  integer :: pdir(3)
+   ! 1 if the system is periodic along this direction
+
+  ! TODO: Remove it
+  integer :: ngfft(18)
+    ! Information on the FFT grid
+
+  real(dp) :: boxcenter(3)
+   ! 1 if the point in inside the cutoff region 0 otherwise
+   ! Reduced coordinates of the center of the box (input variable)
+
+  real(dp) :: vcutgeo(3)
+    ! For each reduced direction gives the length of the finite system
+    ! 0 if the system is infinite along that particular direction
+    ! negative value to indicate that a finite size has to be used
+
+  real(dp) :: rprimd(3,3)
+    ! Lattice vectors in real space.
+
+  real(dp),allocatable :: qibz(:,:)
+   ! qibz(3,nqibz)
+   ! q-points in the IBZ.
+
+  real(dp),allocatable :: qlwl(:,:)
+   ! qibz(3,nqlwl)
+   ! q-points for the treatment of the Coulomb singularity.
+
+  complex(gwpc),allocatable :: vc_sqrt(:,:)
+    ! vc_sqrt(ng,nqibz)
+    ! Square root of the Coulomb interaction in reciprocal space.
+    ! A cut might be applied.
+
+  complex(gwpc),allocatable :: vcqlwl_sqrt(:,:)
+    ! vcqs_sqrt(ng,nqlwl)
+    ! Square root of the Coulomb term calculated for small q-points
+
+  complex(gwpc),allocatable :: vc_sqrt_resid(:,:)
+    ! vc_sqrt_resid(ng,nqibz)
+    ! Square root of the residual difference between the Coulomb interaction in the sigma self-energy for exchange,
+    ! and the Coulomb interaction already present in the generalized Kohn-Sham eigenenergies (when they come from an hybrid)
+    ! Given in reciprocal space. At the call to vcoul_init, it is simply initialized at the value of vc_sqrt(:,:),
+    ! and only later modified.
+    ! A cut might be applied.
+
+ end type vcoul_t
+
+
  public ::  vcoul_init           ! Main creation method.
  public ::  vcoul_plot           ! Plot vc in real and reciprocal space.
  public ::  vcoul_print          ! Report info on the object.
@@ -1352,6 +1446,92 @@ subroutine vcoul_free(Vcp)
  ABI_SFREE(Vcp%vcqlwl_sqrt)
 
 end subroutine vcoul_free
+!!***
+
+!----------------------------------------------------------------------
+
+!!****f* m_vcoul/cutoff_sphere
+!! NAME
+!! cutoff_sphere
+!!
+!! FUNCTION
+!!  Calculate the Fourier transform of the Coulomb interaction with a spherical cutoff:
+!!   $ v_{cut}(G)= \frac{4\pi}{|q+G|^2} [ 1-cos(|q+G|*R_cut) ] $  (1)
+!!
+!! INPUTS
+!!  gmet(3,3)=Metric in reciprocal space.
+!!  gvec(3,ngvec)=G vectors in reduced coordinates.
+!!  rcut=Cutoff radius of the sphere.
+!!  ngvec=Number of G vectors
+!!  nqpt=Number of q-points
+!!  qpt(3,nqpt)=q-points where the cutoff Coulomb is required.
+!!
+!! OUTPUT
+!!  vc_cut(ngvec,nqpt)=Fourier components of the effective Coulomb interaction.
+!!
+!! NOTES
+!!  For |q|<small and G=0 we use 2pi.R_cut^2, namely we consider the limit q-->0 of Eq. (1)
+!!
+!! PARENTS
+!!      m_vcoul
+!!
+!! CHILDREN
+!!      calck0,paw_jbessel,quadrature
+!!
+!! SOURCE
+
+subroutine cutoff_sphere(nqpt,qpt,ngvec,gvec,gmet,rcut,vc_cut)
+
+!Arguments ------------------------------------
+!scalars
+ integer,intent(in) :: ngvec,nqpt
+ real(dp),intent(in) :: rcut
+!arrays
+ integer,intent(in) :: gvec(3,ngvec)
+ real(dp),intent(in) :: gmet(3,3),qpt(3,nqpt)
+ real(dp),intent(out) :: vc_cut(ngvec,nqpt)
+
+!Local variables-------------------------------
+!scalars
+ integer :: ig,igs,iqpt
+ real(dp) :: qpg
+ logical :: ltest
+
+!************************************************************************
+
+ !------------------------------------------------------------
+ ! Code modification by Bruno Rousseau, Montreal, 06/11/2013
+ !------------------------------------------------------------
+ !
+ ! In order for the code below to run in parallel using MPI
+ ! within the gwls code (by Laflamme-Jansen, Cote and Rousseau)
+ ! the ABI_CHECK below must be removed.
+ !
+ ! The ABI_CHECK below will fail if G-vectors are distributed on
+ ! many processors, as only the master process has G=(0,0,0).
+ !
+ ! The test does not seem necessary; IF a process has G=(0,0,0)
+ ! (namely, the master process), then it will be the first G vector.
+ ! If a process does not have G=(0,0,0) (ie, all the other processes),
+ ! then they don't need to worry about the G-> 0 limit.
+ !
+
+ ltest=ALL(gvec(:,1)==0)
+ !ABI_CHECK(ltest,'The first G vector should be Gamma')
+
+ do iqpt=1,nqpt
+   igs=1
+   if (ltest .and. normv(qpt(:,iqpt),gmet,'G')<GW_TOLQ0) then ! For small q and G=0, use the limit q-->0.
+     vc_cut(1,iqpt)=two_pi*rcut**2
+     igs=2
+   end if
+   do ig=igs,ngvec
+     qpg=normv(qpt(:,iqpt)+gvec(:,ig),gmet,'G')
+     vc_cut(ig,iqpt)=four_pi*(one-COS(rcut*qpg))/qpg**2
+   end do
+ end do
+
+end subroutine cutoff_sphere
 !!***
 
 
