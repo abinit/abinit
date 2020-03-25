@@ -112,7 +112,7 @@ contains  !===========================================================
 !!  Construct new object from a list of DDB files.
 !!
 !! INPUTS
-!!  ddb_paths(:)=Paths of the DDB files (must be ordered by volume)
+!!  ddb_filepaths(:)=Paths of the DDB files (must be ordered by volume)
 !!  inp<anaddb_dataset_type>=Anaddb dataset with input variables
 !!  comm=MPI communicator
 !!
@@ -122,13 +122,13 @@ contains  !===========================================================
 !!
 !! SOURCE
 
-type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
+type(gruns_t) function gruns_new(ddb_filepaths, inp, comm) result(new)
 
 !Arguments ------------------------------------
  integer,intent(in) :: comm
  type(anaddb_dataset_type),intent(in) :: inp
 !arrays
- character(len=*),intent(in) :: ddb_paths(:)
+ character(len=*),intent(in) :: ddb_filepaths(:)
 
 !Local variables-------------------------------
  integer,parameter :: natifc0=0,master=0
@@ -145,7 +145,7 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 
  nprocs = xmpi_comm_size(comm); my_rank = xmpi_comm_rank(comm)
 
- new%nvols = size(ddb_paths)
+ new%nvols = size(ddb_filepaths)
  ABI_MALLOC(new%cryst_vol, (new%nvols))
  ABI_MALLOC(new%ddb_vol, (new%nvols))
  ABI_MALLOC(new%ifc_vol, (new%nvols))
@@ -154,15 +154,15 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
 
  ddbun = get_unit()
  do ivol=1,new%nvols
-   call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_paths(ivol)))
-   call ddb_hdr_open_read(ddb_hdr, ddb_paths(ivol), ddbun, DDB_VERSION, dimonly=1)
+   call wrtout(ab_out, sjoin(" Reading DDB file:", ddb_filepaths(ivol)))
+   call ddb_hdr_open_read(ddb_hdr, ddb_filepaths(ivol), ddbun, DDB_VERSION, dimonly=1)
    natom = ddb_hdr%natom
 
    call ddb_hdr_free(ddb_hdr)
 
    ABI_MALLOC(atifc0, (natom))
    atifc0 = 0
-   call ddb_from_file(new%ddb_vol(ivol), ddb_paths(ivol), inp%brav, natom, natifc0, atifc0, new%cryst_vol(ivol), comm)
+   call ddb_from_file(new%ddb_vol(ivol), ddb_filepaths(ivol), inp%brav, natom, natifc0, atifc0, new%cryst_vol(ivol), comm)
    ABI_FREE(atifc0)
    if (my_rank == master) then
      call new%cryst_vol(ivol)%print(header=sjoin("Structure for ivol:", itoa(ivol)), unit=ab_out, prtvol=-1)
@@ -174,10 +174,10 @@ type(gruns_t) function gruns_new(ddb_paths, inp, comm) result(new)
    ABI_CALLOC(qdrp_cart, (3,3,3,natom))
    iblock = new%ddb_vol(ivol)%get_dielt_zeff(new%cryst_vol(ivol), inp%rfmeth, inp%chneut, inp%selectz, dielt, zeff)
    if (iblock == 0) then
-     call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_paths(ivol)))
+     call wrtout(ab_out, sjoin("- Cannot find dielectric tensor and Born effective charges in DDB file:", ddb_filepaths(ivol)))
      call wrtout(ab_out, "Values initialized with zeros")
    else
-     call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_paths(ivol)))
+     call wrtout(ab_out, sjoin("- Found dielectric tensor and Born effective charges in DDB file:", ddb_filepaths(ivol)))
    end if
 
    call ifc_init(new%ifc_vol(ivol), new%cryst_vol(ivol), new%ddb_vol(ivol),&

@@ -3314,7 +3314,7 @@ subroutine setup_sigma(codvsn,wfk_fname,acell,rprim,ngfftf,Dtset,Dtfil,Psps,Pawt
 
  mqmem=0; if (Dtset%gwmem/10==1) mqmem=1
 
- if (dtset%getscr /=0 .or. dtset%irdscr/=0 .or. dtset%getscr_path /= ABI_NOFILE) then
+ if (dtset%getscr /=0 .or. dtset%irdscr/=0 .or. dtset%getscr_filepath /= ABI_NOFILE) then
    fname=Dtfil%fnameabi_scr
  else if (Dtset%getsuscep/=0.or.Dtset%irdsuscep/=0) then
    fname=Dtfil%fnameabi_sus
