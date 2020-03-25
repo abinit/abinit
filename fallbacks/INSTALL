@@ -4,11 +4,14 @@ Installation Instructions
 Basic Installation
 ==================
 
-   Briefly, the shell command :
+Briefly, this shell command :
 
-    bash build-abinit-fallbacks.sh
+    ./build-abinit-fallbacks.sh
 
-should configure, build, and install this package.
+should configure, build, and install all mandatory fallbacks.
+
+Mandatory fallbaks are : HDF5, netCDF4, netCDF4-fortran and libXC.
+
 The more-detailed instructions are available at
 
     https://www.abinit.org/fbks_installation

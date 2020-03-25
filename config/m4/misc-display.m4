@@ -171,7 +171,6 @@ AC_DEFUN([ABI_MSG_NOTICE],[
 ]) dnl ABI_MSG_NOTICE
 
 
-
 dnl ABI_MSG_NOTICE_L(FILE, TITLE)
 dnl ---------------------------
 dnl
@@ -188,20 +187,16 @@ AC_DEFUN([ABI_MSG_NOTICE_L],[
   TPUT_BOLD="\$(tput bold)"
   TPUT_OFF="\$(tput sgr0)"
 
-  abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_BOLD/")
-  abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_OFF/")
-
-  test "${abi_msg_title}" = "" && abi_msg_title="\$(tput bold)IMPORTANT NOTE\$(tput sgr0)"
   let spacer=64
   let tput_spacer=0
-  have_tput=`echo $abi_msg_title | grep tput`
-  if test "${have_tput}" != "" ; then
-     tput_spacer=10
-     abi_msg_title=`eval echo ${abi_msg_title}`
-  fi
+  while test "`echo $abi_msg_title | grep __`" ; do
+     abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_BOLD/;s/__/$TPUT_OFF/")
+     let tput_spacer=tput_spacer+10
+  done
+  abi_msg_title=`eval echo ${abi_msg_title}`
 
   dnl Format title
-  titlel=${#abi_msg_title}
+  let titlel=${#abi_msg_title}
   let Fill=spacer-titlel+tput_spacer
   abi_msg_title=`printf "${abi_msg_title}";printf ' %.0s' $(seq 1 $Fill)`
 
@@ -216,19 +211,18 @@ AC_DEFUN([ABI_MSG_NOTICE_L],[
     dnl Format and write message
 
     while read abi_msg_line; do
-      abi_msg_line=$(echo "$abi_msg_line" | sed "s/__/$TPUT_BOLD/")
-      abi_msg_line=$(echo "$abi_msg_line" | sed "s/__/$TPUT_OFF/")
 
       let tput_spacer=0
-      have_tput="`echo $abi_msg_line | grep tput`"
-      if test "${have_tput}" != "" ; then
-         tput_spacer=10
-         abi_msg_line=`eval echo ${abi_msg_line}`
-      fi
-    
+      while test "`echo $abi_msg_line | grep __`" ; do
+          abi_msg_line=$(echo "$abi_msg_line" | sed "s/__/$TPUT_BOLD/;s/__/$TPUT_OFF/")
+          let tput_spacer=tput_spacer+10
+      done
+      abi_msg_line=`eval echo ${abi_msg_line}`
+
+      dnl Format line
       let linel=${#abi_msg_line}
       let Fill=spacer-linel+tput_spacer
-      #test "$linel" -gt "64" || echo "too long... : $linel, Fill = $Fill"
+      dnl test "$linel" -gt "64" || echo "too long... : $linel, Fill = $Fill"
       abi_msg_line=`printf "${abi_msg_line}";printf ' %.0s' $(seq 1 $Fill)`
     
       echo "  | ${abi_msg_line} |"
@@ -242,7 +236,6 @@ AC_DEFUN([ABI_MSG_NOTICE_L],[
     AC_MSG_WARN([message file ${abi_msg_file} not found])
   fi
 ]) dnl ABI_MSG_NOTICE_L
-
 
 
 
@@ -261,17 +254,15 @@ AC_DEFUN([ABI_MSG_NOTICE_S],[
   TPUT_BOLD="\$(tput bold)"
   TPUT_OFF="\$(tput sgr0)"
 
-  abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_BOLD/")
-  abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_OFF/")
-
   test "${abi_msg_title}" = "" && abi_msg_title="\$(tput bold)IMPORTANT NOTE\$(tput sgr0)"
+
   let spacer=64
   let tput_spacer=0
-  have_tput=`echo $abi_msg_title | grep tput`
-  if test "${have_tput}" != "" ; then
-    tput_spacer=10
-    abi_msg_title="`eval echo ${abi_msg_title}`"
-  fi
+  while test "`echo $abi_msg_title | grep __`" ; do
+     abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_BOLD/;s/__/$TPUT_OFF/")
+     let tput_spacer=tput_spacer+10
+  done
+  abi_msg_title=`eval echo ${abi_msg_title}`
 
   dnl Format title
   titlel=${#abi_msg_title}
@@ -285,28 +276,23 @@ AC_DEFUN([ABI_MSG_NOTICE_S],[
   echo "  +------------------------------------------------------------------+"
 
   dnl Format solution if provided
-  abi_msg_title="$2"
-  if test "${abi_msg_title}" != ""; then
-
-      abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_BOLD/")
-      abi_msg_title=$(echo "$abi_msg_title" | sed "s/__/$TPUT_OFF/")
- 
-      test "${abi_msg_title}" = "" && abi_msg_title="\$(tput bold)IMPORTANT NOTE\$(tput sgr0)"
+  abi_msg_line="$2"
+  if test "${abi_msg_line}" != ""; then
       let spacer=64
       let tput_spacer=0
-      have_tput=`echo $abi_msg_title | grep tput`
-      if test "${have_tput}" != ""; then
-         tput_spacer=10
-         abi_msg_title=`eval echo ${abi_msg_title}`
-      fi
-      
-      dnl Format title
-      titlel=${#abi_msg_title}
-      let Fill=spacer-titlel+tput_spacer
-      #test "$titlel" -gt "64" || echo "too long... : $titlel, Fill = $Fill"
-      abi_msg_title=`printf "${abi_msg_title}";printf ' %.0s' $(seq 1 $Fill)`
+      while test "`echo $abi_msg_line | grep __`" ; do
+          abi_msg_line=$(echo "$abi_msg_line" | sed "s/__/$TPUT_BOLD/;s/__/$TPUT_OFF/")
+          let tput_spacer=tput_spacer+10
+      done
+      abi_msg_line=`eval echo ${abi_msg_line}`
 
-      echo "  | ${abi_msg_title} |"
+      dnl Format line
+      linel=${#abi_msg_line}
+      let Fill=spacer-linel+tput_spacer
+      dnl test "$linel" -gt "64" || echo "too long... : $linel, Fill = $Fill"
+      abi_msg_line=`printf "${abi_msg_line}";printf ' %.0s' $(seq 1 $Fill)`
+
+      echo "  | ${abi_msg_line} |"
       echo "  +------------------------------------------------------------------+"
   fi
 
