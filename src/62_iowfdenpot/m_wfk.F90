@@ -2036,6 +2036,7 @@ print *, ' Wfkfptr after update ', wfk%f90_fptr, ' recnpw ', REC_NPW
 
 #ifdef HAVE_MPI_IO
  case (IO_MODE_MPI)
+!----------------------------------------------------------------------------
 ! record 1 npw, nspinor, nband of length 3
    my_offset = Wfk%offset_ks(ik_ibz,spin,REC_NPW)
 
@@ -2068,6 +2069,7 @@ print *, ' Wfkfptr after update ', wfk%f90_fptr, ' recnpw ', REC_NPW
    end if
    ABI_CHECK_MPI(mpierr,"writing REC_NPW")
 
+!----------------------------------------------------------------------------
 ! record 2 kg
    if (present(kg_k)) then
      my_offset = Wfk%offset_ks(ik_ibz,spin,REC_KG)
@@ -2081,9 +2083,12 @@ print *, ' Wfkfptr after update ', wfk%f90_fptr, ' recnpw ', REC_NPW
      ABI_CHECK_MPI(mpierr,"mpio_write_kg_k")
    end if
 
-! record 3 eigk occk
+!----------------------------------------------------------------------------
    if (Wfk%formeig==0) then
+!----------------------------------------------------------------------------
 
+!----------------------------------------------------------------------------
+! record 3 eigk occk
      if (present(eig_k) .and. present(occ_k)) then
 
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_EIG)
@@ -2107,6 +2112,7 @@ print *, ' Wfkfptr after update ', wfk%f90_fptr, ' recnpw ', REC_NPW
        ABI_FREE(tmp_eigk)
      end if
 
+!----------------------------------------------------------------------------
 ! record 4 cg
      if (present(cg_k)) then
 !TODO: in principle these markers are written when the file is opened, no need here.
@@ -2132,8 +2138,11 @@ print *, 'GS writing mpio ik, band_block(1), Wfk%offset_ks(ik_ibz,spin,REC_CG), 
        ABI_CHECK(ierr==0,"ierr!=0")
      end if
 
+!----------------------------------------------------------------------------
    else if (Wfk%formeig==1) then
+!----------------------------------------------------------------------------
 
+!----------------------------------------------------------------------------
 ! record 3 eigk occk
      if (present(eig_k)) then
 #ifdef DEV_MJV
@@ -2171,6 +2180,7 @@ print *, 'RF writing mpio eig spin, ik, band_block(1), band_block(2), Wfk%offset
        ABI_CHECK_MPI(mpierr,"FILE_WRITE")
      end if
 
+!----------------------------------------------------------------------------
 ! record 4 cg
      if (present(cg_k)) then
 !       ABI_CHECK(band_block(1)==1,"band_block(1) !=1 not coded")

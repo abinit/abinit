@@ -65,10 +65,10 @@ contains
 !! INPUTS
 !! dtset <type(dataset_type)> = all input variables in this dataset
 !! gmet(3,3) = reciprocal space metric tensor in bohr**-2
-!! kg(3,mpw*mkmem) = reduced (integer) coordinates of G vecs in basis sphere
-!! kg1(3,mpw1*mkmem) = reduced (integer) coordinates of G vecs for response wfs
+!! kg(3,mpw*mkmem_rbz) = reduced (integer) coordinates of G vecs in basis sphere
+!! kg1(3,mpw1*mkmem_rbz) = reduced (integer) coordinates of G vecs for response wfs
 !! mband =  maximum number of bands
-!! mkmem = maximum number of k-points in core memory
+!! mkmem_rbz = maximum number of k-points in core memory
 !! mpw = maximum number of plane waves
 !! mpw1 = maximum number of plane waves for response wavefunctions
 !! nkpt = number of k points
@@ -80,7 +80,7 @@ contains
 !!
 !! OUTPUT
 !! dtefield=variables related to response Berry-phase calculation
-!! pwindall(max(mpw,mpw1)*mkmem,8,3) = array used to compute the overlap matrices
+!! pwindall(max(mpw,mpw1)*mkmem_rbz,8,3) = array used to compute the overlap matrices
 !! pwindall(:,1,:) <- <u^(0)_i|u^(0)_i+1>
 !! pwindall(:,2,:) <- <u^(0)_i|u^(0)_i-1>
 !! pwindall(:,3,:) <- <u^(1)_i|u^(1)_i+1>
@@ -102,19 +102,19 @@ contains
 !!
 !! SOURCE
 
-subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
+subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem_rbz,mpi_enreg,&
 &                mpw,mpw1,nkpt,npwarr,npwar1,nsppol,occ,pwindall,rprimd)
 
 !Arguments ----------------------------------------
 !scalars
- integer,intent(in) :: mband,mkmem,mpw,mpw1,nkpt,nsppol
+ integer,intent(in) :: mband,mkmem_rbz,mpw,mpw1,nkpt,nsppol
  type(MPI_type),intent(inout) :: mpi_enreg
  type(dataset_type),intent(in) :: dtset
  type(efield_type),intent(inout) :: dtefield !vz_i needs efield2
 !arrays
- integer,intent(in) :: kg(3,mpw*mkmem),kg1(3,mpw1*mkmem),npwar1(nkpt)
+ integer,intent(in) :: kg(3,mpw*mkmem_rbz),kg1(3,mpw1*mkmem_rbz),npwar1(nkpt)
  integer,intent(in) :: npwarr(nkpt)
- integer,intent(out) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
+ integer,intent(out) :: pwindall(max(mpw,mpw1)*mkmem_rbz,8,3)
  real(dp),intent(in) :: gmet(3,3),occ(mband*nkpt*nsppol),rprimd(3,3)
 
 !Local variables ----------------------------------
@@ -420,7 +420,7 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
 !Build the array pwindall that is needed to compute the different overlap matrices
 !at k +- dk
 
- ABI_ALLOCATE(kg_tmp,(3,max(mpw,mpw1)*mkmem))
+ ABI_ALLOCATE(kg_tmp,(3,max(mpw,mpw1)*mkmem_rbz))
  ABI_ALLOCATE(kpt1,(3,nkpt))
  ABI_ALLOCATE(npwarr_tmp,(nkpt))
  ABI_ALLOCATE(npwtot,(nkpt))
@@ -447,7 +447,7 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
 !      Set up the basis sphere of plane waves at kpt1
        kg_tmp(:,:) = 0
        call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg_tmp,&
-&       kpt1,dtset%mkmem,dtset%nband,nkpt,'PERS',mpi_enreg,mpw,&
+&       kpt1,mkmem_rbz,dtset%nband,nkpt,'PERS',mpi_enreg,mpw,&
 &       npwarr_tmp,npwtot,dtset%nsppol)
 
        ikg = 0 ; ikg1 = 0
@@ -515,7 +515,7 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
 !      Set UP THE BASIS SPHERE OF PLANE waves at kpt1
        kg_tmp(:,:) = 0
        call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg_tmp,&
-&       kpt1,dtset%mkmem,dtset%nband,nkpt,'PERS',mpi_enreg,mpw1,&
+&       kpt1,mkmem_rbz,dtset%nband,nkpt,'PERS',mpi_enreg,mpw1,&
 &       npwarr_tmp,npwtot,dtset%nsppol)
 
 
@@ -581,7 +581,7 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
 !      Set UP THE BASIS SPHERE OF PLANE waves at kpt1
        kg_tmp(:,:) = 0
        call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg_tmp,&
-&       kpt1,dtset%mkmem,dtset%nband,nkpt,'PERS',mpi_enreg,mpw,&
+&       kpt1,mkmem_rbz,dtset%nband,nkpt,'PERS',mpi_enreg,mpw,&
 &       npwarr_tmp,npwtot,dtset%nsppol)
 
        ikg = 0 ; ikg1 = 0
@@ -645,7 +645,7 @@ subroutine dfptff_initberry(dtefield,dtset,gmet,kg,kg1,mband,mkmem,mpi_enreg,&
 !      Set UP THE BASIS SPHERE OF PLANE waves at kpt1
        kg_tmp(:,:) = 0
        call kpgio(ecut_eff,dtset%exchn2n3d,gmet,dtset%istwfk,kg_tmp,&
-&       kpt1,dtset%mkmem,dtset%nband,nkpt,'PERS',mpi_enreg,mpw1,&
+&       kpt1,mkmem_rbz,dtset%nband,nkpt,'PERS',mpi_enreg,mpw1,&
 &       npwarr_tmp,npwtot,dtset%nsppol)
 
        ikg = 0 ; ikg1 = 0
@@ -708,14 +708,14 @@ end subroutine dfptff_initberry
 !! For the initials of contributors, see ~abinit/doc/developers/contributors.txt .
 !!
 !! INPUTS
-!! cg(2,mpw*nspinor*mband*mkmem*nsppol) = planewave coefficients of wavefunctions
+!! cg(2,mpw*nspinor*mband*mkmem_rbz*nsppol) = planewave coefficients of wavefunctions
 !! cg1(2,mpw1*nspinor*mband*mk1mem*nsppol) = pw coefficients of
 !! RF wavefunctions at k,q.
 !! dtefield = variables related to finite electric field calculation
 !! ikpt = the index of the current k point
 !! isppol=1 for unpolarized, 2 for spin-polarized
 !! mband =  maximum number of bands
-!! mkmem = maximum number of k-points in core memory
+!! mkmem_rbz = maximum number of k-points in core memory
 !! mpw = maximum number of plane waves
 !! mpw1 = maximum number of plane waves for response wavefunctions
 !! nkpt = number of k points
@@ -725,7 +725,7 @@ end subroutine dfptff_initberry
 !! nsppol = 1 for unpolarized, 2 for spin-polarized
 !! qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3) =
 !! inverse of the overlap matrix
-!! pwindall(max(mpw,mpw1)*mkmem,8,3) = array used to compute the overlap matrices
+!! pwindall(max(mpw,mpw1)*mkmem_rbz,8,3) = array used to compute the overlap matrices
 !! pwindall(:,1,:) <- <u^(0)_i|u^(0)_i+1>
 !! pwindall(:,2,:) <- <u^(0)_i|u^(0)_i-1>
 !! pwindall(:,3,:) <- <u^(1)_i|u^(1)_i+1>
@@ -746,21 +746,22 @@ end subroutine dfptff_initberry
 !!
 !! SOURCE
 
-subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,mband,mband_mem,mpw,mpw1,mkmem,mk1mem,&
+subroutine dfptff_gradberry(cg,cg1,dtefield,grad_berry,ikpt,isppol,&
+&                     mband,mband_mem,mpw,mpw1,mkmem_rbz,mk1mem,&
 &                     mpi_enreg,nkpt,&
 &                     npwarr,npwar1,nspinor,nsppol,qmat,pwindall)
 
 !Arguments ----------------------------------------
 !scalars
- integer,intent(in) :: ikpt,isppol,mband,mk1mem,mkmem,mpw,mpw1,nkpt,nspinor
+ integer,intent(in) :: ikpt,isppol,mband,mk1mem,mkmem_rbz,mpw,mpw1,nkpt,nspinor
  integer,intent(in) :: mband_mem
  integer,intent(in) :: nsppol
  type(efield_type),intent(in) :: dtefield
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: npwar1(nkpt),npwarr(nkpt)
- integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)
+ integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem_rbz,8,3)
+ real(dp),intent(in) :: cg(2,mpw*nspinor*mband_mem*mkmem_rbz*nsppol)
  real(dp),intent(in) :: cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)
  real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
 !TODO MJV: grad_berry should also be dimensioned with mband_mem
@@ -1194,7 +1195,7 @@ end subroutine dfptff_gradberry
 !! term, Eq.(23) in PRB 75, 115116(2007) [[cite:Wang2007]].
 !!
 !! INPUTS
-!! cg(2,mpw*nspinor*mband*mkmem*nsppol) = planewave coefficients of wavefunctions
+!! cg(2,mpw*nspinor*mband*mkmem_rbz*nsppol) = planewave coefficients of wavefunctions
 !! cg1(2,mpw1*nspinor*mband*mk1mem*nsppol) = pw coefficients of
 !! RF wavefunctions at k,q.
 !! dtefield = variables related to response Berry-phase calculation
@@ -1202,7 +1203,7 @@ end subroutine dfptff_gradberry
 !! isppol = the index of the spin component
 !! mband =  maximum number of bands
 !! mband_mem =  maximum number of bands on this cpu
-!! mkmem = maximum number of k-points in core memory
+!! mkmem_rbz = maximum number of k-points in core memory
 !! mpi_enreg = parallel distribution datastructure
 !! mpw = maximum number of plane waves
 !! mpw1 = maximum number of plane waves for response wavefunctions
@@ -1213,7 +1214,7 @@ end subroutine dfptff_gradberry
 !! nsppol = 1 for unpolarized, 2 for spin-polarized
 !! qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3) =
 !! inverse of the overlap matrix
-!! pwindall(max(mpw,mpw1)*mkmem,8,3) = array used to compute the overlap matrices
+!! pwindall(max(mpw,mpw1)*mkmem_rbz,8,3) = array used to compute the overlap matrices
 !! pwindall(:,1,:) <- <u^(0)_i|u^(0)_i+1>
 !! pwindall(:,2,:) <- <u^(0)_i|u^(0)_i-1>
 !! pwindall(:,3,:) <- <u^(1)_i|u^(1)_i+1>
@@ -1234,20 +1235,21 @@ end subroutine dfptff_gradberry
 !!
 !! SOURCE
 
-subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,mband,mband_mem,mpw,mpw1,mkmem,mk1mem,&
+subroutine dfptff_gbefd(cg,cg1,dtefield,grad_berry,idir_efield,ikpt,isppol,&
+&                 mband,mband_mem,mpw,mpw1,mkmem_rbz,mk1mem,&
 &                 mpi_enreg,nkpt,npwarr,npwar1,nspinor,nsppol,qmat,pwindall,rprimd)
 
 !Arguments ----------------------------------------
 !scalars
- integer,intent(in) :: idir_efield,ikpt,isppol,mband,mk1mem,mkmem,mpw,mpw1,nkpt
+ integer,intent(in) :: idir_efield,ikpt,isppol,mband,mk1mem,mkmem_rbz,mpw,mpw1,nkpt
  integer,intent(in) :: mband_mem
  integer,intent(in) :: nspinor,nsppol
  type(efield_type),intent(in) :: dtefield
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: npwar1(nkpt),npwarr(nkpt)
- integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)
+ integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem_rbz,8,3)
+ real(dp),intent(in) :: cg(2,mpw*nspinor*mband_mem*mkmem_rbz*nsppol)
  real(dp),intent(in) :: cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol)
  real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
  real(dp),intent(in) :: rprimd(3,3)
@@ -1696,14 +1698,14 @@ end subroutine dfptff_gbefd
 !! term, Eq.(6) in PRB 75, 115116(2007) [[cite:Wang2007]].
 !!
 !! INPUTS
-!! cg(2,mpw*nspinor*mband*mkmem*nsppol) = planewave coefficients of wavefunctions
+!! cg(2,mpw*nspinor*mband*mkmem_rbz*nsppol) = planewave coefficients of wavefunctions
 !! cg1(2,mpw1*nspinor*mband*mk1mem*nsppol) = pw coefficients of
 !! RF wavefunctions at k,q.
 !! dtefield = variables related to response Berry-phase calculation
 !! ikpt = the index of the current k point
 !! isppol = the index of the spin component
 !! mband =  maximum number of bands
-!! mkmem = maximum number of k-points in core memory
+!! mkmem_rbz = maximum number of k-points in core memory
 !! mpw = maximum number of plane waves
 !! mpw1 = maximum number of plane waves for response wavefunctions
 !! nkpt = number of k points
@@ -1713,7 +1715,7 @@ end subroutine dfptff_gbefd
 !! nsppol = 1 for unpolarized, 2 for spin-polarized
 !! qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3) =
 !! inverse of the overlap matrix
-!! pwindall(max(mpw,mpw1)*mkmem,8,3) = array used to compute the overlap matrices
+!! pwindall(max(mpw,mpw1)*mkmem_rbz,8,3) = array used to compute the overlap matrices
 !! pwindall(:,1,:) <- <u^(0)_i|u^(0)_i+1>
 !! pwindall(:,2,:) <- <u^(0)_i|u^(0)_i-1>
 !! pwindall(:,3,:) <- <u^(1)_i|u^(1)_i+1>
@@ -1734,21 +1736,21 @@ end subroutine dfptff_gbefd
 !!
 !! SOURCE
 
-subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mband_mem,mkmem,&
+subroutine dfptff_edie(cg,cg1,dtefield,eberry,idir_efield,mband,mband_mem,mkmem_rbz,&
 &                mpi_enreg,mpw,mpw1,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat,rprimd)
 
 !Arguments ----------------------------------------
 !scalars
- integer,intent(in) :: idir_efield,mband,mkmem,mpw,mpw1,nkpt,nspinor,nsppol
+ integer,intent(in) :: idir_efield,mband,mkmem_rbz,mpw,mpw1,nkpt,nspinor,nsppol
  integer,intent(in) :: mband_mem
  real(dp),intent(out) :: eberry
  type(efield_type),intent(in) :: dtefield
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: npwar1(nkpt),npwarr(nkpt)
- integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: cg(2,mpw*mband_mem*mkmem*nspinor*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*mband_mem*mkmem*nspinor*nsppol)
+ integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem_rbz,8,3)
+ real(dp),intent(in) :: cg(2,mpw*mband_mem*mkmem_rbz*nspinor*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*mband_mem*mkmem_rbz*nspinor*nsppol)
  real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
  real(dp),intent(in) :: rprimd(3,3)
 
@@ -2093,14 +2095,14 @@ end subroutine dfptff_edie
 !! calculation of the energy from the term \Omega E \cdot P
 !!
 !! INPUTS
-!! cg(2,mpw*nspinor*mband*mkmem*nsppol) = planewave coefficients of wavefunctions
+!! cg(2,mpw*nspinor*mband*mkmem_rbz*nsppol) = planewave coefficients of wavefunctions
 !! cg1(2,mpw1*nspinor*mband*mk1mem*nsppol) = pw coefficients of
 !! RF wavefunctions at k,q.
 !! dtefield = variables related to response Berry-phase calculation
 !! ikpt = the index of the current k point
 !! isppol = the index of the spin component
 !! mband =  maximum number of bands
-!! mkmem = maximum number of k-points in core memory
+!! mkmem_rbz = maximum number of k-points in core memory
 !! mpw = maximum number of plane waves
 !! mpw1 = maximum number of plane waves for response wavefunctions
 !! nkpt = number of k points
@@ -2110,7 +2112,7 @@ end subroutine dfptff_edie
 !! nsppol = 1 for unpolarized, 2 for spin-polarized
 !! qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3) =
 !! inverse of the overlap matrix
-!! pwindall(max(mpw,mpw1)*mkmem,8,3) = array used to compute the overlap matrices
+!! pwindall(max(mpw,mpw1)*mkmem_rbz,8,3) = array used to compute the overlap matrices
 !! pwindall(:,1,:) <- <u^(0)_i|u^(0)_i+1>
 !! pwindall(:,2,:) <- <u^(0)_i|u^(0)_i-1>
 !! pwindall(:,3,:) <- <u^(1)_i|u^(1)_i+1>
@@ -2131,21 +2133,21 @@ end subroutine dfptff_edie
 !!
 !! SOURCE
 
-subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mband_mem,mkmem,&
+subroutine dfptff_ebp(cg,cg1,dtefield,eberry,mband,mband_mem,mkmem_rbz,&
 &               mpi_enreg,mpw,mpw1,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat)
 
 !Arguments ----------------------------------------
 !scalars
- integer,intent(in) :: mband,mkmem,mpw,mpw1,nkpt,nspinor,nsppol
+ integer,intent(in) :: mband,mkmem_rbz,mpw,mpw1,nkpt,nspinor,nsppol
  integer,intent(in) :: mband_mem
  real(dp),intent(out) :: eberry
  type(efield_type),intent(in) :: dtefield
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: npwar1(nkpt),npwarr(nkpt)
- integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: cg(2,mpw*mband_mem*mkmem*nspinor*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*mband_mem*mkmem*nspinor*nsppol)
+ integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem_rbz,8,3)
+ real(dp),intent(in) :: cg(2,mpw*mband_mem*mkmem_rbz*nspinor*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*mband_mem*mkmem_rbz*nspinor*nsppol)
  real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
 
 !Local variables ----------------------------------
@@ -2421,13 +2423,13 @@ end subroutine dfptff_ebp
 !! calculate electric susceptibility tensor in Eq.(28) in PRB 75, 115116(2007) [[cite:Wang2007]].
 !!
 !! INPUTS
-!! cg(2,mpw*nspinor*mband*mkmem*nsppol) = planewave coefficients of wavefunctions
+!! cg(2,mpw*nspinor*mband*mkmem_rbz*nsppol) = planewave coefficients of wavefunctions
 !! cg1(2,mpw1*nspinor*mband*mk1mem*nsppol) = pw coefficients of
 !! RF wavefunctions at k,q.
 !! dtefield = variables related to response Berry-phase calculation
 !! idirpert = the current coloumn of the dielectric permittivity tensor
 !! mband =  maximum number of bands
-!! mkmem = maximum number of k-points in core memory
+!! mkmem_rbz = maximum number of k-points in core memory
 !! mpw = maximum number of plane waves
 !! mpw1 = maximum number of plane waves for response wavefunctions
 !! nkpt = number of k points
@@ -2437,7 +2439,7 @@ end subroutine dfptff_ebp
 !! nsppol = 1 for unpolarized, 2 for spin-polarized
 !! qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3) =
 !! inverse of the overlap matrix
-!! pwindall(max(mpw,mpw1)*mkmem,8,3) = array used to compute the overlap matrices
+!! pwindall(max(mpw,mpw1)*mkmem_rbz,8,3) = array used to compute the overlap matrices
 !! pwindall(:,1,:) <- <u^(0)_i|u^(0)_i+1>
 !! pwindall(:,2,:) <- <u^(0)_i|u^(0)_i-1>
 !! pwindall(:,3,:) <- <u^(1)_i|u^(1)_i+1>
@@ -2459,21 +2461,21 @@ end subroutine dfptff_ebp
 !!
 !! SOURCE
 
-subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mband_mem,mkmem,&
+subroutine dfptff_die(cg,cg1,dtefield,d2lo,idirpert,ipert,mband,mband_mem,mkmem_rbz,&
 &               mpi_enreg,mpw,mpw1,mpert,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat,rprimd)
 
 !Arguments ----------------------------------------
 !scalars
- integer,intent(in) :: idirpert,ipert,mband,mkmem,mpert,mpw,mpw1,nkpt,nspinor
+ integer,intent(in) :: idirpert,ipert,mband,mkmem_rbz,mpert,mpw,mpw1,nkpt,nspinor
  integer,intent(in) :: mband_mem
  integer,intent(in) :: nsppol
  type(efield_type),intent(in) :: dtefield
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: npwar1(nkpt),npwarr(nkpt)
- integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: cg(2,mpw*mband_mem*mkmem*nspinor*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*mband_mem*mkmem*nspinor*nsppol)
+ integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem_rbz,8,3)
+ real(dp),intent(in) :: cg(2,mpw*mband_mem*mkmem_rbz*nspinor*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*mband_mem*mkmem_rbz*nspinor*nsppol)
  real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(inout) :: d2lo(2,3,mpert,3,mpert) !vz_i
@@ -2624,14 +2626,14 @@ end subroutine dfptff_die
 !! calculate Born effective charge tensor in Eq.(33) in PRB 75, 115116(2007) [[cite:Wang2007]].
 !!
 !! INPUTS
-!! cg(2,mpw*nspinor*mband_mem*mkmem*nsppol) = planewave coefficients of wavefunctions
+!! cg(2,mpw*nspinor*mband_mem*mkmem_rbz*nsppol) = planewave coefficients of wavefunctions
 !! cg1(2,mpw1*nspinor*mband_mem*mk1mem*nsppol) = pw coefficients of
 !! RF wavefunctions at k,q.
 !! dtefield = variables related to response Berry-phase calculation
 !! idirpert = the current coloumn of the dielectric permittivity tensor
 !! mband =  maximum number of bands
 !! mband_mem =  maximum number of bands on this cpu
-!! mkmem = maximum number of k-points in core memory
+!! mkmem_rbz = maximum number of k-points in core memory
 !! mpw = maximum number of plane waves
 !! mpw1 = maximum number of plane waves for response wavefunctions
 !! nkpt = number of k points
@@ -2641,7 +2643,7 @@ end subroutine dfptff_die
 !! nsppol = 1 for unpolarized, 2 for spin-polarized
 !! qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3) =
 !! inverse of the overlap matrix
-!! pwindall(max(mpw,mpw1)*mkmem,8,3) = array used to compute the overlap matrices
+!! pwindall(max(mpw,mpw1)*mkmem_rbz,8,3) = array used to compute the overlap matrices
 !! pwindall(:,1,:) <- <u^(0)_i|u^(0)_i+1>
 !! pwindall(:,2,:) <- <u^(0)_i|u^(0)_i-1>
 !! pwindall(:,3,:) <- <u^(1)_i|u^(1)_i+1>
@@ -2663,21 +2665,21 @@ end subroutine dfptff_die
 !!
 !! SOURCE
 
-subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mband_mem,mkmem,&
+subroutine dfptff_bec(cg,cg1,dtefield,natom,d2lo,idirpert,ipert,mband,mband_mem,mkmem_rbz,&
 &               mpi_enreg,mpw,mpw1,mpert,nkpt,npwarr,npwar1,nsppol,nspinor,pwindall,qmat,rprimd)
 
 !Arguments ----------------------------------------
 !scalars
- integer,intent(in) :: idirpert,ipert,mband,mkmem,mpert,mpw,mpw1,natom,nkpt
+ integer,intent(in) :: idirpert,ipert,mband,mkmem_rbz,mpert,mpw,mpw1,natom,nkpt
  integer,intent(in) :: mband_mem
  integer,intent(in) :: nspinor,nsppol
  type(efield_type),intent(in) :: dtefield
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
  integer,intent(in) :: npwar1(nkpt),npwarr(nkpt)
- integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: cg(2,mpw*mband_mem*mkmem*nspinor*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*mband_mem*mkmem*nspinor*nsppol)
+ integer,intent(in) :: pwindall(max(mpw,mpw1)*mkmem_rbz,8,3)
+ real(dp),intent(in) :: cg(2,mpw*mband_mem*mkmem_rbz*nspinor*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*mband_mem*mkmem_rbz*nspinor*nsppol)
  real(dp),intent(in) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
  real(dp),intent(in) :: rprimd(3,3)
  real(dp),intent(inout) :: d2lo(2,3,mpert,3,mpert) !vz_i
@@ -2837,13 +2839,13 @@ end subroutine dfptff_bec
 !! calculation of the inverse of the overlap matrix
 !!
 !! INPUTS
-!! cg(2,mpw*nspinor*mband_mem*mkmem*nsppol) = planewave coefficients of wavefunctions
+!! cg(2,mpw*nspinor*mband_mem*mkmem_rbz*nsppol) = planewave coefficients of wavefunctions
 !! RF wavefunctions at k,q.
 !! dtefield = variables related to response Berry-phase calculation
 !! ikpt = the index of the current k point
 !! mband =  maximum number of bands
 !! mband_mem =  maximum number of bands on this cpu
-!! mkmem = maximum number of k-points in core memory
+!! mkmem_rbz = maximum number of k-points in core memory
 !! mpw = maximum number of plane waves
 !! mpw1 = maximum number of plane waves for response wavefunctions
 !! nkpt = number of k points
@@ -2851,7 +2853,7 @@ end subroutine dfptff_bec
 !! npwar1(nkpt) = number of planewaves in basis and boundary for response wfs
 !! nspinor = 1 for scalar wfs, 2 for spinor wfs
 !! nsppol = 1 for unpolarized, 2 for spin-polarized
-!! pwindall(max(mpw,mpw1)*mkmem,8,3) = array used to compute the overlap matrices
+!! pwindall(max(mpw,mpw1)*mkmem_rbz,8,3) = array used to compute the overlap matrices
 !!
 !! OUTPUT
 !! qmat(2,dtefield%nband_occ,dtefield%nband_occ,nkpt,2,3) = inverse of the overlap matrix
@@ -2864,19 +2866,19 @@ end subroutine dfptff_bec
 !!
 !! SOURCE
 
-subroutine qmatrix(cg,dtefield,qmat,mpi_enreg,mpw,mpw1,mkmem,mband,mband_mem,npwarr,nkpt,nspinor,nsppol,pwindall)
+subroutine qmatrix(cg,dtefield,qmat,mpi_enreg,mpw,mpw1,mkmem_rbz,mband,mband_mem,npwarr,nkpt,nspinor,nsppol,pwindall)
 
  use m_hide_lapack, only : dzgedi, dzgefa
 
 !Arguments ----------------------------------------
 !scalars
- integer,intent(in) :: mband,mkmem,mpw,mpw1,nkpt,nspinor,nsppol
+ integer,intent(in) :: mband,mkmem_rbz,mpw,mpw1,nkpt,nspinor,nsppol
  integer,intent(in) :: mband_mem
  type(efield_type),intent(in) :: dtefield
  type(MPI_type),intent(in) :: mpi_enreg
 !arrays
- integer,intent(in) :: npwarr(nkpt),pwindall(max(mpw,mpw1)*mkmem,8,3)
- real(dp),intent(in) :: cg(2,mpw*nspinor*mband_mem*mkmem*nsppol)
+ integer,intent(in) :: npwarr(nkpt),pwindall(max(mpw,mpw1)*mkmem_rbz,8,3)
+ real(dp),intent(in) :: cg(2,mpw*nspinor*mband_mem*mkmem_rbz*nsppol)
  real(dp),intent(out) :: qmat(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3)
 
 !Local variables -------------------------

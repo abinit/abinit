@@ -95,7 +95,7 @@ contains
 !!
 !! INPUTS
 !!  atindx(natom)=index table for atoms (see gstate.f)
-!!  cg(2,mpw*nspinor*mband*mkmem*nsppol) = array for planewave
+!!  cg(2,mpw*nspinor*mband*mkmem_rbz*nsppol) = array for planewave
 !!                                          coefficients of wavefunctions
 !!  cg1 = first derivative of cg with respect the perturbation i1pert
 !!  cg2 = first derivative of cg with respect the perturbation i2pert
@@ -110,10 +110,10 @@ contains
 !!  indsy1(4,nsym1,natom)=indirect indexing array for atom labels
 !!  i1dir,i2dir,i3dir=directions of the corresponding perturbations
 !!  i1pert,i2pert,i3pert = type of perturbation that has to be computed
-!!  kg(3,mpw*mkmem)=reduced planewave coordinates
+!!  kg(3,mpw*mkmem_rbz)=reduced planewave coordinates
 !!  mband = maximum number of bands
 !!  mgfft=maximum size of 1D FFTs
-!!  mkmem = maximum number of k points which can fit in core memory
+!!  mkmem_rbz = maximum number of k points which can fit in core memory
 !!  mk1mem = maximum number of k points for first-order WF
 !!           which can fit in core memory
 !!  mpert =maximum number of ipert
@@ -191,7 +191,7 @@ contains
 !! SOURCE
 
 subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_hamkq,k3xc,indsy1,i1dir,i2dir,i3dir,&
-& i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,nfftf,nfftotf,ngfftf,nkpt,nk3xc,&
+& i1pert,i2pert,i3pert,kg,mband,mgfft,mkmem_rbz,mk1mem,mpert,mpi_enreg,mpsang,mpw,natom,nattyp,nfftf,nfftotf,ngfftf,nkpt,nk3xc,&
 & nspden,nspinor,nsppol,nsym1,npwarr,occ,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawtab,&
 & pawrhoij0,pawrhoij1_i1pert,pawrhoij1_i2pert,pawrhoij1_i3pert,&
 & paw_an0,paw_an1_i2pert,paw_ij1_i2pert,ph1d,psps,rho1r1,rho2r1,rho3r1,rprimd,symaf1,symrc1,&
@@ -201,7 +201,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 !Arguments ------------------------------------
 !scalars
  integer,intent(in) :: cplex,i1dir,i1pert,i2dir,i2pert,i3dir,i3pert,mband,mgfft
- integer,intent(in) :: mk1mem,mkmem,mpert,mpsang,mpw,natom,nfftf,nfftotf,nkpt,nspden,nsym1
+ integer,intent(in) :: mk1mem,mkmem_rbz,mpert,mpsang,mpw,natom,nfftf,nfftotf,nkpt,nspden,nsym1
  integer,intent(in) :: nk3xc,nspinor,nsppol
  real(dp),intent(in) :: ucvol
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -214,9 +214,9 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  type(wfk_t),intent(inout) :: ddk_f(5)
 
 !arrays
- integer,intent(in) :: atindx(natom),kg(3,mpw*mkmem),nattyp(psps%ntypat),ngfftf(18),npwarr(nkpt)
+ integer,intent(in) :: atindx(natom),kg(3,mpw*mkmem_rbz),nattyp(psps%ntypat),ngfftf(18),npwarr(nkpt)
  integer,intent(in) :: indsy1(4,nsym1,dtset%natom),symaf1(nsym1),symrc1(3,3,nsym1)
- real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*nspinor*mband*mkmem_rbz*nsppol)
  real(dp),intent(in) :: cg1(2,mpw*nspinor*mband*mk1mem*nsppol)
  real(dp),intent(in) :: cg2(2,mpw*nspinor*mband*mk1mem*nsppol)
  real(dp),intent(in) :: cg3(2,mpw*nspinor*mband*mk1mem*nsppol)
@@ -399,11 +399,11 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
  sumi = zero
 
 !Set up the Ylm for each k point
- ABI_ALLOCATE(ylm,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
- ABI_ALLOCATE(ylmgr,(dtset%mpw*dtset%mkmem,9,psps%mpsang*psps%mpsang*psps%useylm))
+ ABI_ALLOCATE(ylm,(dtset%mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
+ ABI_ALLOCATE(ylmgr,(dtset%mpw*mkmem_rbz,9,psps%mpsang*psps%mpsang*psps%useylm))
  if (psps%useylm==1) then
    option=2
-   call initylmg(gs_hamkq%gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%nband,&
+   call initylmg(gs_hamkq%gprimd,kg,dtset%kptns,mkmem_rbz,mpi_enreg,psps%mpsang,dtset%mpw,dtset%nband,&
    dtset%nkpt,npwarr,dtset%nsppol,option,rprimd,ylm,ylmgr)
  end if
 
@@ -413,11 +413,11 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
 & (i2pert==natom+1.or.i2pert==natom+3.or.i2pert==natom+4.or.(usepaw==1.and.i2pert==natom+2))) then
    useylmgr1=1; option=1
  end if
- ABI_ALLOCATE(ylm1,(dtset%mpw*dtset%mkmem,psps%mpsang*psps%mpsang*psps%useylm))
- ABI_ALLOCATE(ylmgr1,(dtset%mpw*dtset%mkmem,3,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
+ ABI_ALLOCATE(ylm1,(dtset%mpw*mkmem_rbz,psps%mpsang*psps%mpsang*psps%useylm))
+ ABI_ALLOCATE(ylmgr1,(dtset%mpw*mkmem_rbz,3,psps%mpsang*psps%mpsang*psps%useylm*useylmgr1))
 !To change the following when q/=0
  if (psps%useylm==1) then
-   call initylmg(gs_hamkq%gprimd,kg,dtset%kptns,dtset%mkmem,mpi_enreg,psps%mpsang,dtset%mpw,dtset%nband,&
+   call initylmg(gs_hamkq%gprimd,kg,dtset%kptns,mkmem_rbz,mpi_enreg,psps%mpsang,dtset%mpw,dtset%nband,&
    dtset%nkpt,npwarr,dtset%nsppol,option,rprimd,ylm1,ylmgr1)
  end if
 
@@ -693,7 +693,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
   !      Compute : < u^(ip1) | ( H^(ip2) - eps^(0) S^(ip2) ) | u^(ip3) >
   !           or : < u^(ip3) | ( H^(ip2) - eps^(0) S^(ip2) ) | u^(ip1) >
          call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwave_right,cprj_empty,h_cwave,s_cwave,eig0_k,eig1_k_i2pert,&
-&         jband,gs_hamkq,iddk,i2dir,i2pert,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
+&         jband,gs_hamkq,iddk,i2dir,i2pert,ikpt,isppol,mkmem_rbz,mpi_enreg,nband_k,nsppol,&
 &         debug_mode,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf)
          call dotprod_g(dotr,doti,gs_hamkq%istwf_k,size_wf,2,cwave_left,h_cwave,mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
 
@@ -832,7 +832,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
            iddk(2,:) =  s_cwave(1,:)
            call rf2_getidir(idir_phon,idir_elfd,idir_getgh2c)
            call rf2_apply_hamiltonian(cg_jband,cprj_jband,cwavef2,cprj_empty,s_cwave,dummy_array2,eig0_k,eig1_k_i2pert,&
-&           jband,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
+&           jband,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,ikpt,isppol,mkmem_rbz,mpi_enreg,nband_k,nsppol,&
 &           debug_mode,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,enl=chi_ij,ffnl1=ffnl1,ffnl1_test=ffnl1_test)
            call dotprod_g(enlout1(1),enlout1(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cgj,s_cwave,&
 &           mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)
@@ -849,7 +849,7 @@ subroutine dfptnl_pert(atindx,cg,cg1,cg2,cg3,cplex,dtfil,dtset,d3etot,eigen0,gs_
            iddk(1,:) = -s_cwave(2,:)
            iddk(2,:) =  s_cwave(1,:)
            call rf2_apply_hamiltonian(cg_jband,cprj_jband,cgj,cprj_empty,s_cwave,dummy_array2,eig0_k,eig1_k_i2pert,&
-&           jband,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,ikpt,isppol,mkmem,mpi_enreg,nband_k,nsppol,&
+&           jband,gs_hamkq,iddk,idir_getgh2c,ipert_phon+natom+11,ikpt,isppol,mkmem_rbz,mpi_enreg,nband_k,nsppol,&
 &           debug_mode,dtset%prtvol,rf_hamkq_i2pert,size_cprj,size_wf,enl=chi_ij,ffnl1=ffnl1,ffnl1_test=ffnl1_test)
            call dotprod_g(enlout2(1),enlout2(2),gs_hamkq%istwf_k,npw_k*nspinor,2,cwavef2,s_cwave,&
 &           mpi_enreg%me_g0,mpi_enreg%comm_spinorfft)

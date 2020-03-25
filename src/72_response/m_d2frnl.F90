@@ -159,7 +159,7 @@ contains
 !! SOURCE
 
 subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg,efmasval,eigen,eltfrnl,&
-&          gsqcut,has_allddk,indsym,kg,mgfftf,mpi_enreg,mpsang,my_natom,natom,nfftf,ngfft,ngfftf,npwarr,&
+&          gsqcut,has_allddk,indsym,kg,mkmem_rbz,mgfftf,mpi_enreg,mpsang,my_natom,natom,nfftf,ngfft,ngfftf,npwarr,&
 &          occ,paw_ij,pawang,pawbec,pawfgrtab,pawpiezo,pawrad,pawrhoij,pawtab,ph1d,ph1df,piezofrnl,psps,&
 &          rprimd,rfphon,rfstrs,symrec,vtrial,vxc,xred,ylm,ylmgr)
 
@@ -167,6 +167,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !scalars
  integer,intent(in) :: dyfr_cplex,dyfr_nondiag,mgfftf,mpsang,my_natom,natom
  integer,intent(in) :: nfftf,pawbec,pawpiezo,rfphon,rfstrs
+ integer,intent(in) :: mkmem_rbz
  real(dp),intent(in) :: gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
@@ -174,17 +175,17 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  type(pawang_type),intent(in) :: pawang
  type(pseudopotential_type),intent(in) :: psps
 !arrays
- integer,intent(in) :: indsym(4,dtset%nsym,natom),kg(3,dtset%mpw*dtset%mkmem)
+ integer,intent(in) :: indsym(4,dtset%nsym,natom),kg(3,dtset%mpw*mkmem_rbz)
  integer,intent(in) :: ngfft(18),ngfftf(18),npwarr(dtset%nkpt)
  integer,intent(in) :: symrec(3,3,dtset%nsym)
- real(dp),intent(in) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband_mem*dtset%mkmem*dtset%nsppol)
+ real(dp),intent(in) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband_mem*mkmem_rbz*dtset%nsppol)
  real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*natom)
  real(dp),intent(in) :: ph1df(2,3*(2*mgfftf+1)*natom),rprimd(3,3)
  real(dp),intent(in) :: vxc(nfftf,dtset%nspden),xred(3,natom)
- real(dp),intent(in) :: ylm(dtset%mpw*dtset%mkmem,mpsang*mpsang*psps%useylm)
- real(dp),intent(in) :: ylmgr(dtset%mpw*dtset%mkmem,9,mpsang*mpsang*psps%useylm)
+ real(dp),intent(in) :: ylm(dtset%mpw*mkmem_rbz,mpsang*mpsang*psps%useylm)
+ real(dp),intent(in) :: ylmgr(dtset%mpw*mkmem_rbz,9,mpsang*mpsang*psps%useylm)
  real(dp),intent(in),target :: vtrial(nfftf,dtset%nspden)
  real(dp),intent(out) :: becfrnl(3,natom,3*pawbec),piezofrnl(6,3*pawpiezo)
  real(dp),intent(out) :: dyfrnl(dyfr_cplex,3,3,natom,1+(natom-1)*dyfr_nondiag)
@@ -868,7 +869,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
      end if
 !    Increment indexes
      bdtot_index=bdtot_index+nband_k
-     if (dtset%mkmem/=0) then
+     if (mkmem_rbz/=0) then
        ibg=ibg+nband_k*dtset%nspinor
        icg=icg+npw_k*dtset%nspinor*nband_me
        ikg=ikg+npw_k

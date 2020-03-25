@@ -289,6 +289,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
  integer :: gscase,iband,iblok,icase,icase_eq,idir,idir0,idir1,idir2,idir_eq,idir_dkdk,ierr
  integer :: ii,ikpt,ikpt1,jband,initialized,iorder_cprj,ipert,ipert_cnt,ipert_eq,ipert_me,ireadwf0
  integer :: iscf_mod,iscf_mod_save,isppol,istr,isym,mcg,mcgq,mcg1,mcprj,mcprjq,mband
+ integer :: mband_mem_rbz
  integer :: mcgmq,mcg1mq,mpw1_mq !+/-q duplicates
  integer :: icg
  integer :: maxidir,me,mgfftf,mkmem_rbz,mk1mem_rbz,mkqmem_rbz,mpw,mpw1,my_nkpt_rbz
@@ -1016,17 +1017,19 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_ALLOCATE(mpi_enreg%my_kpttab,(nkpt_rbz))
    if(xmpi_paral==1) then
      ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt_rbz,dtset%mband,dtset%nsppol))
-     call distrb2(dtset%mband,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,dtset%nsppol,mpi_enreg)
+     call distrb2(dtset%mband,mband_mem_rbz,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,dtset%nsppol,mpi_enreg)
    else
      mpi_enreg%my_kpttab(:)=(/(ii,ii=1,nkpt_rbz)/)
    end if
    my_nkpt_rbz=maxval(mpi_enreg%my_kpttab)
-   call initmpi_band(mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
    mkmem_rbz =my_nkpt_rbz ; mkqmem_rbz=my_nkpt_rbz ; mk1mem_rbz=my_nkpt_rbz
-#ifdef DEV_MJV
-print *, ' dtset%mkmem, mkmem_rbz ', dtset%mkmem, mkmem_rbz
-#endif
    ABI_UNUSED((/mkmem,mk1mem,mkqmem/))
+
+#ifdef DEV_MJV
+print *, ' dtset%mkmem, mkmem_rbz, nkpt_rbz ', dtset%mkmem, mkmem_rbz, nkpt_rbz
+print *, 'call initmpi_band ', mkmem_rbz
+#endif
+   call initmpi_band(mkmem_rbz,mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
 
 ! given number of reduced kpt, store distribution of bands across procs
    ABI_ALLOCATE(distrb_flags,(nkpt_rbz,dtset%mband,dtset%nsppol))
@@ -1155,8 +1158,10 @@ print *, 'shape cg 1 ', shape(cg)
        !mcprj=dtset%nspinor*dtset%mband_mem*mkmem_rbz*dtset%nsppol
        mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
        !mcprj=dtset%nspinor*dtset%mband*nkpt_rbz*dtset%nsppol
+#ifdef DEV_MJV
 print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
 & mcprj, dtset%nspinor, dtset%mband, mkmem_rbz, dtset%nsppol, nband_rbz
+#endif
        ABI_DATATYPE_DEALLOCATE(cprj)
        ABI_DATATYPE_ALLOCATE(cprj,(dtset%natom,mcprj))
        call pawcprj_alloc(cprj,ncpgr,dimcprj_srt)
@@ -1299,7 +1304,6 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
      cgq = cg
      eigenq = eigen0
    else
-print *, 'not gamma or explicit wfq file'
      call timab(144,1,tsec)
      call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
 &          formeig, istwfk_rbz, kpq_rbz, dtset%kptopt, mcgq, dtset%mband, dtset%mband_mem, mpw1,&
@@ -1504,12 +1508,10 @@ print *, 'not gamma or explicit wfq file'
    call timab(144,1,tsec)
    if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &      (dtset%get1wf /= 0 .or. dtset%ird1wf /= 0)) then
-print *, 'call read_my_kptbands'
      call wfk_read_my_kptbands(fiwf1i, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
 &          formeig, istwfk_rbz, kpq_rbz, dtset%kptopt, mcg1, dtset%mband, dtset%mband_mem, mpw1,&
 &          dtset%natom, nkpt_rbz, npwar1, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg1, eigen=eigen1, ask_accurate_=0)
-print *, 'out of read_my_kptbands'
    else
      cg1 = zero
      eigen1 = zero

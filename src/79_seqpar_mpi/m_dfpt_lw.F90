@@ -204,6 +204,7 @@ subroutine dfpt_qdrpole(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,&
  integer :: optorth,optene,option,optres
  integer :: pawread,pertcase,qdir,spaceworld
  integer :: usexcnhat,useylmgr
+ integer :: mband_mem
  integer,parameter :: formeig1=1
  integer,parameter :: re=1,im=2
  real(dp) :: boxcut,doti,dotr,dum_scl,ecut_eff,ecut,etotal,fermie,gsqcut,residm
@@ -654,13 +655,13 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ABI_ALLOCATE(mpi_enreg%my_kpttab,(nkpt_rbz))
  if(xmpi_paral==1) then
    ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt_rbz,dtset%mband,dtset%nsppol))
-   call distrb2(dtset%mband,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,dtset%nsppol,mpi_enreg)
+   call distrb2(dtset%mband,mband_mem,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,dtset%nsppol,mpi_enreg)
  else
    mpi_enreg%my_kpttab(:)=(/(ii,ii=1,nkpt_rbz)/)
  end if
  my_nkpt_rbz=maxval(mpi_enreg%my_kpttab)
- call initmpi_band(mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
  mkmem_rbz =my_nkpt_rbz 
+ call initmpi_band(mkmem_rbz,mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
  
 !Set up the basis sphere of planewaves at k
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&
@@ -1680,6 +1681,7 @@ subroutine dfpt_flexo(atindx,blkflg,codvsn,d3etot,doccde,dtfil,dtset,dyewdq,dyew
  integer :: nylmgr,optene,option,optorth,optres
  integer :: pawread,pertcase,qdir,spaceworld
  integer :: usexcnhat,useylmgr
+ integer :: mband_mem
  integer,parameter :: formeig1=1
  integer,parameter :: re=1,im=2
  real(dp) :: boxcut,delad,delag,delbd,delbg
@@ -2351,13 +2353,13 @@ call getmpw(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kpt_rbz,mpi_enreg,mpw,nkpt_
  ABI_ALLOCATE(mpi_enreg%my_kpttab,(nkpt_rbz))
  if(xmpi_paral==1) then
    ABI_ALLOCATE(mpi_enreg%proc_distrb,(nkpt_rbz,dtset%mband,dtset%nsppol))
-   call distrb2(dtset%mband,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,dtset%nsppol,mpi_enreg)
+   call distrb2(dtset%mband,mband_mem,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,dtset%nsppol,mpi_enreg)
  else
    mpi_enreg%my_kpttab(:)=(/(ii,ii=1,nkpt_rbz)/)
  end if
  my_nkpt_rbz=maxval(mpi_enreg%my_kpttab)
- call initmpi_band(mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
  mkmem_rbz =my_nkpt_rbz 
+ call initmpi_band(mkmem_rbz,mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
  
 !Set up the basis sphere of planewaves at k
  call kpgio(ecut_eff,dtset%exchn2n3d,gmet,istwfk_rbz,kg,&

@@ -737,6 +737,7 @@ end function mpi_distrib_is_ok
 !!
 !! FUNCTION
 !!  test a condition to cycle over bands and k-points which do not belong to the present processor
+!!  if return value is true, you can cycle over the given range of bands for this k and sppol
 !!
 !! INPUTS
 !!
@@ -759,6 +760,7 @@ function proc_distrb_cycle(distrb,ikpt,iband1,iband2,isppol,me)
  proc_distrb_cycle=.false.
  if (allocated(distrb)) then
    if (isppol==-1) then
+! in this condition, if one of the distrb is for me, then the minval will be == 0, so it returns false
      proc_distrb_cycle=(minval(abs(distrb(ikpt,iband1:iband2,:)-me))/=0)
    else
      proc_distrb_cycle=(minval(abs(distrb(ikpt,iband1:iband2,isppol)-me))/=0)
@@ -2195,10 +2197,11 @@ end subroutine clnmpi_pert
 !!
 !! SOURCE
 
-subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
+subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
 
 !Arguments ------------------------------------
 !scalars
+ integer,intent(in) :: mkmem
  integer,intent(in) :: nkpt,nsppol
  integer,intent(in) :: nband(nkpt*nsppol)
  type(MPI_type),intent(inout) :: mpi_enreg
@@ -2207,27 +2210,44 @@ subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
 !scalars
  integer :: ii,ikpt,iproc_min,iproc_max,irank,isppol
  integer :: me,nband_k,nproc,nbsteps,nrank,nstates,spacecomm
+ integer :: nproc_eff, mband
  character(len=500) :: msg
 !arrays
  integer,allocatable :: ranks(:)
 
 ! ***********************************************************************
 
+#ifdef DEV_MJV
+print *, 'enter initmpi_band'
+#endif
  mpi_enreg%comm_band=xmpi_comm_self
 
- if (mpi_enreg%paralbd==1.and.xmpi_paral==1) then
+ mband = maxval(nband)
+
+ if (mpi_enreg%paralbd==1.and.xmpi_paral==1.and.mkmem>0) then
 
 !  Comm_kpt is supposed to treat spins, k-points and bands
-!TODO MJV: I think we need to make a proper subcomm here, not treat bands inside the same comm...
+!MJV: I think we need to make a proper subcomm here, not treat bands inside the same comm...
    spacecomm=mpi_enreg%comm_kpt
    nproc=mpi_enreg%nproc_kpt
+   nproc_eff=ceiling(dble(nkpt)/dble(mkmem))
    me=mpi_enreg%me_kpt
+#ifdef DEV_MJV
+print *, 'me, nproc, nproc_eff, mkmem = ', me, nproc, nproc_eff, mkmem
+#endif
 
+! total number of states/bands, over all k and spin
    nstates=sum(nband(1:nkpt*nsppol))
-   nbsteps=nstates/nproc
-   if (mod(nstates,nproc)/=0) nbsteps=nbsteps+1
+   nbsteps=nstates/nproc_eff
+#ifdef DEV_MJV
+print *, 'nbsteps ',nbsteps, ' vs old ', nstates/nproc
+#endif
+   if (mod(nstates,nproc_eff)/=0) nbsteps=nbsteps+1
+#ifdef DEV_MJV
+print *, 'nbsteps primed ',nbsteps
+#endif
 
-   if (nbsteps<maxval(nband(1:nkpt*nsppol))) then
+   if (nbsteps<mband) then
 
      nrank=0
      do isppol=1,nsppol
@@ -2237,11 +2257,15 @@ subroutine initmpi_band(mpi_enreg,nband,nkpt,nsppol)
          if (nbsteps<nband_k) then
            iproc_min=minval(mpi_enreg%proc_distrb(ikpt,:,isppol))
            iproc_max=maxval(mpi_enreg%proc_distrb(ikpt,:,isppol))
+#ifdef DEV_MJV
+print *, 'me, iproc_min, iproc_max ', me, iproc_min, iproc_max
+#endif
            if ((me>=iproc_min).and.(me<=iproc_max)) then
              nrank=iproc_max-iproc_min+1
              if (.not.allocated(ranks)) then
                ABI_ALLOCATE(ranks,(nrank))
                if (nrank>0) ranks=(/((iproc_min+irank-1),irank=1,nrank)/)
+! TODO MJV: I believe we can lift this restriction now!
              else if (nrank/=size(ranks)) then
                msg='Number of bands per proc should be the same for all k-points!'
                MSG_BUG(msg)
@@ -2434,11 +2458,12 @@ end function iwrite_fftdatar
 !!
 !! SOURCE
 
-subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
+subroutine distrb2(mband,mband_mem_out,nband,nkpt,nproc,nsppol,mpi_enreg)
 
 !Arguments ------------------------------------
  integer,intent(in) :: mband,nkpt,nproc,nsppol
  integer,intent(in) :: nband(nkpt*nsppol)
+ integer,intent(out) :: mband_mem_out
  type(MPI_type),intent(inout) :: mpi_enreg
 
 !Local variables-------------------------------
@@ -2453,9 +2478,13 @@ subroutine distrb2(mband,nband,nkpt,nproc,nsppol,mpi_enreg)
 !******************************************************************
 
  nproc_kpt=mpi_enreg%nproc_kpt
+#ifdef DEV_MJV
 print *, ' nproc_kpt, nproc, mpi_enreg%paral_pertmpi_enreg%nproc_pert ', nproc_kpt, nproc, mpi_enreg%paral_pert, mpi_enreg%nproc_pert
+#endif
  if (mpi_enreg%paral_pert==1) nproc_kpt=nproc
 ! if (mpi_enreg%paral_pert==1) nproc_kpt=nproc/mpi_enreg%nproc_pert
+
+ mband_mem_out = mband
 
 !Initialization of proc_distrb
  mpi_enreg%proc_distrb = nproc+1
@@ -2495,6 +2524,7 @@ print *, ' nproc_kpt, nproc, mpi_enreg%paral_pertmpi_enreg%nproc_pert ', nproc_k
    first=.false.; has_file = file_exists("kpt_distrb")
  end if
 
+!---------------------------------------------------------------------------
 !Initialize the processor distribution, either from a file, or from an algorithm
  if (has_file) then
    if (open_file('kpt_distrb',msg,newunit=temp_unit,form='formatted',status='old') /= 0) then
@@ -2617,6 +2647,7 @@ print *, ' inb = ', inb
 print *, ' inb1 = ', inb1
 #endif
          if (mod(nband_k,inb)/=0) inb1=inb1+1
+         mband_mem_out = max(mband_mem_out,inb1)
          do iiband=1,nband_k
            ind=(iiband-1)/inb1+ind0
            mpi_enreg%proc_distrb(iikpt,iiband,1)=ind
@@ -2697,19 +2728,21 @@ print *, ' inb1 = ', inb1
    ikpt_this_proc=0
    do iikpt=1,nkpt
      nband_k=nband(iikpt+(iisppol-1)*nkpt)
+#ifdef DEV_MJV
+print *,  'iisppol, iikpt ', iisppol, iikpt, mpi_enreg%me_kpt
+#endif
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,iikpt,1,nband_k,iisppol,mpi_enreg%me_kpt)) cycle
      ikpt_this_proc=ikpt_this_proc+1
+#ifdef DEV_MJV
+print *,  'me, ikpt_this_proc ', mpi_enreg%me_kpt, ikpt_this_proc
+#endif
      mpi_enreg%my_kpttab(iikpt)=ikpt_this_proc
      mpi_enreg%my_isppoltab(iisppol)=1
-     iband_this_proc = 0
-     do iband=1,nband_k
-       if(proc_distrb_cycle(mpi_enreg%proc_distrb,iikpt,iband,iband,iisppol,mpi_enreg%me_kpt)) cycle
-       iband_this_proc = iband_this_proc + 1
-     end do
    end do
  end do
 
 #ifdef DEV_MJV
+print *, 'mpi_enreg%my_kpttab ', mpi_enreg%my_kpttab
 print *, 'iisppol, iiband, iikpt, mpi_enreg%proc_distrb nkpt = ', nkpt
 do iisppol=1,nsppol
 do iikpt=1,nkpt
@@ -2718,9 +2751,6 @@ print *, iisppol, iiband, iikpt, mpi_enreg%proc_distrb(iikpt,iiband,iisppol)
 end do
 end do
 end do
-write (401, '(a)') ' mpi_enreg%proc_distrb '
-write (401, *) mpi_enreg%proc_distrb
-flush (401)
 #endif
 
 end subroutine distrb2

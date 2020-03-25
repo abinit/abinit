@@ -596,6 +596,12 @@ print *, 'me, ikpt, nband_k ', me, ikpt, nband_k, xmpi_paral
  if(mode_paral == 'PERS') then
 #ifdef DEV_MJV
 print *, 'me = ', mpi_enreg%me_kpt, ' comm ',  mpi_enreg%comm_kpt
+print *, 'npwarr ', npwarr
+print *, 'mpi_enreg%comm_kpt ', mpi_enreg%comm_kpt
+print *, 'mpi_enreg%me_kpt ', mpi_enreg%me_kpt
+print *, 'mpi_enreg%nproc_kpt ', mpi_enreg%nproc_kpt
+print *, 'mpi_enreg%nproc ', mpi_enreg%nproc
+print *, 'mpi_enreg%comm_kptband ', mpi_enreg%comm_kptband
 #endif
    call xmpi_sum(npwarr,mpi_enreg%comm_kpt,ierr)
  end if

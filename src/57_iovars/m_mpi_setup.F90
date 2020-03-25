@@ -574,7 +574,7 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
        nkpt_me=0
        if(response==0 .or. (response==1 .and. dtsets(idtset)%efmas==1))then
          mpi_enregs(idtset)%paralbd=0
-         call distrb2(mband_upper,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset))
+         call distrb2(mband_upper,mband_mem,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset))
          do iikpt=1,nkpt
            if(.not.(proc_distrb_cycle(mpi_enregs(idtset)%proc_distrb,iikpt,1,1,-1,mpi_enregs(idtset)%me_kpt)))&
 &           nkpt_me=nkpt_me+1
@@ -590,12 +590,13 @@ subroutine mpi_setup(dtsets,filnam,lenstr,mpi_enregs,ndtset,ndtset_alloc,string)
 !        value of one of these k-point sets ...
 !        This is to be corrected when RF is implemented
 !        for spin-polarized case.
+!  ENDTODO
          mpi_enregs(idtset)%paralbd=1
 !        nproc=mpi_enregs(idtset)%nproc_cell*mpi_enregs(idtset)%nproc_pert
 print *, 'respfn call to distrb2 mband_upper,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset)%paralbd'
 print *,                         mband_upper,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset)%paralbd
 print *,  'bandpp ', dtsets(idtset)%bandpp
-         call distrb2(mband_upper,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset))
+         call distrb2(mband_upper,mband_mem,dtsets(idtset)%nband,nkpt,nproc,nsppol,mpi_enregs(idtset))
          do isppol=1,nsppol
            nspink=0
            do iikpt=1,nkpt
@@ -621,6 +622,7 @@ print *,  'bandpp ', dtsets(idtset)%bandpp
 
 !        mband_mem
          ABI_ALLOCATE (mybands, (mband_upper))
+         mband_mem = 0
          do isppol=1,nsppol
            do iikpt=1,nkpt
              mybands = 0

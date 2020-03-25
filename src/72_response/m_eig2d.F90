@@ -819,6 +819,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
  integer :: ikpt,ipert1,ipert2,isppol,istwf_k,jband,npw1_k,nkpt_sub,ikpt2
 !integer :: ipw
  integer :: master,me,spaceworld,ierr
+ integer :: mband_mem
 !real(dp),parameter :: etol=1.0d-3
  real(dp),parameter :: etol=1.0d-6
 !real(dp),parameter :: etol=zero
@@ -903,7 +904,7 @@ subroutine eig2stern(occ,bdeigrf,clflg,cg1_pert,dim_eig2nkq,dim_eig2rf,eigen0,ei
    ABI_ALLOCATE(mpi_enreg%my_kpttab,(nkpt_rbz))
 !  Assume the number of bands is the same for all k points.
    nband_rbz(:)=mband
-   call distrb2(mband,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,nsppol,mpi_enreg)
+   call distrb2(mband,mband_mem,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,nsppol,mpi_enreg)
  end if
 
  icg2=0
@@ -1308,6 +1309,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
 !integer :: ipw
  character(len=fnlen) :: dscrpt,fname
  integer :: master,me,spaceworld,ierr
+ integer :: mband_mem
 ! real(dp),parameter :: etol=1.0d-6
  real(dp),parameter :: etol=1.0d-7
 !real(dp),parameter :: etol=zero
@@ -1372,7 +1374,7 @@ subroutine eig2tot(dtfil,xred,psps,pawtab,natom,bdeigrf,clflg,dim_eig2nkq,eigen0
    ABI_ALLOCATE(mpi_enreg%my_kpttab,(nkpt_rbz))
 !  Assume the number of bands is the same for all k points.
    nband_rbz(:)=mband
-   call distrb2(mband,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,nsppol,mpi_enreg)
+   call distrb2(mband,mband_mem,nband_rbz,nkpt_rbz,mpi_enreg%nproc_cell,nsppol,mpi_enreg)
  end if
 
  if(ieig2rf == 4 ) then

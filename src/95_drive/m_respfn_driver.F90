@@ -473,7 +473,6 @@ integer :: icg, icg_tmp, ibdoffst, npw, iband_me
  ireadwf0=1
 
 
-!TODO: parallelize mband_mem here as well
  mcg=dtset%mpw*dtset%nspinor*dtset%mband_mem*dtset%mkmem*dtset%nsppol
  ABI_ALLOCATE(cg,(2,mcg))
  !ABI_MALLOC_OR_DIE(cg,(2,mcg), ierr)
@@ -983,7 +982,8 @@ integer :: icg, icg_tmp, ibdoffst, npw, iband_me
 !Compute the nonlocal part of the elastic tensor and/or dynamical matrix
  if (rfstrs/=0.or.rfphon==1.or.dtset%efmas>0.or.pawbec==1.or.pawpiezo==1)then
    call d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,&
-&   dyfr_nondiag,efmasdeg,efmasval,eigen0,eltfrnl,gsqcut,has_allddk,indsym,kg,mgfftf,&
+&   dyfr_nondiag,efmasdeg,efmasval,eigen0,eltfrnl,gsqcut,has_allddk,indsym,kg,&
+&   dtset%mkmem,mgfftf,&
 &   mpi_enreg,psps%mpsang,my_natom,natom,nfftf,ngfft,ngfftf,&
 &   npwarr,occ,paw_ij,pawang,pawbec,pawfgrtab,pawpiezo,pawrad,&
 &   pawrhoij,pawtab,ph1d,ph1df,piezofrnl,psps,rprimd,rfphon,&
