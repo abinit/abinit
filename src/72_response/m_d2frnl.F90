@@ -159,7 +159,7 @@ contains
 !! SOURCE
 
 subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg,efmasval,eigen,eltfrnl,&
-&          gsqcut,has_allddk,indsym,kg,mkmem_rbz,mgfftf,mpi_enreg,mpsang,my_natom,natom,nfftf,ngfft,ngfftf,npwarr,&
+&          gsqcut,has_allddk,indsym,kg,mband_mem_rbz,mkmem_rbz,mgfftf,mpi_enreg,mpsang,my_natom,natom,nfftf,ngfft,ngfftf,npwarr,&
 &          occ,paw_ij,pawang,pawbec,pawfgrtab,pawpiezo,pawrad,pawrhoij,pawtab,ph1d,ph1df,piezofrnl,psps,&
 &          rprimd,rfphon,rfstrs,symrec,vtrial,vxc,xred,ylm,ylmgr)
 
@@ -167,7 +167,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
 !scalars
  integer,intent(in) :: dyfr_cplex,dyfr_nondiag,mgfftf,mpsang,my_natom,natom
  integer,intent(in) :: nfftf,pawbec,pawpiezo,rfphon,rfstrs
- integer,intent(in) :: mkmem_rbz
+ integer,intent(in) :: mkmem_rbz,mband_mem_rbz
  real(dp),intent(in) :: gsqcut
  type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
@@ -178,7 +178,7 @@ subroutine d2frnl(becfrnl,cg,dtfil,dtset,dyfrnl,dyfr_cplex,dyfr_nondiag,efmasdeg
  integer,intent(in) :: indsym(4,dtset%nsym,natom),kg(3,dtset%mpw*mkmem_rbz)
  integer,intent(in) :: ngfft(18),ngfftf(18),npwarr(dtset%nkpt)
  integer,intent(in) :: symrec(3,3,dtset%nsym)
- real(dp),intent(in) :: cg(2,dtset%mpw*dtset%nspinor*dtset%mband_mem*mkmem_rbz*dtset%nsppol)
+ real(dp),intent(in) :: cg(2,dtset%mpw*dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol)
  real(dp),intent(in) :: eigen(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: occ(dtset%mband*dtset%nkpt*dtset%nsppol)
  real(dp),intent(in) :: ph1d(2,3*(2*dtset%mgfft+1)*natom)

@@ -435,6 +435,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
    ABI_ALLOCATE(dimcprj_srt,(dtset%natom))
    call pawcprj_getdim(dimcprj_srt,dtset%natom,nattyp,dtset%ntypat,dtset%typat,pawtab,'O')
  end if
+ mband_mem_rbz = dtset%mband_mem
 
 !Save values of SCF cycle parameters
  iscf_mod_save = iscf_mod
@@ -1027,6 +1028,7 @@ subroutine dfpt_looppert(atindx,blkflg,codvsn,cpus,dim_eigbrd,dim_eig2nkq,doccde
 
 #ifdef DEV_MJV
 print *, ' dtset%mkmem, mkmem_rbz, nkpt_rbz ', dtset%mkmem, mkmem_rbz, nkpt_rbz
+print *, 'mband_mem_rbz ', mband_mem_rbz
 print *, 'call initmpi_band ', mkmem_rbz
 #endif
    call initmpi_band(mkmem_rbz,mpi_enreg,nband_rbz,nkpt_rbz,dtset%nsppol)
@@ -1116,8 +1118,8 @@ print *, ' call initylmg'
 
 !  Initialize GS wavefunctions at k
    ireadwf0=1; formeig=0 ; ask_accurate=1 ; optorth=0
-   mcg=mpw*dtset%nspinor*dtset%mband_mem*mkmem_rbz*dtset%nsppol
-   if (one*mpw*dtset%nspinor*dtset%mband_mem*mkmem_rbz*dtset%nsppol > huge(1)) then
+   mcg=mpw*dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol
+   if (one*mpw*dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol > huge(1)) then
      write (message,'(4a, 5(a,i0), 2a)')&
 &     "Default integer is not wide enough to store the size of the GS wavefunction array (WF0, mcg).",ch10,&
 &     "Action: increase the number of processors. Consider also OpenMP threads.",ch10,&
@@ -1136,7 +1138,7 @@ print *, 'shape cg 1 ', shape(cg)
 
 ! Initialize the wave function type and read GS WFK
    call wfk_read_my_kptbands(dtfil%fnamewffk, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
-&          formeig, istwfk_rbz, kpt_rbz, dtset%kptopt, mcg, dtset%mband, dtset%mband_mem, mpw,&
+&          formeig, istwfk_rbz, kpt_rbz, dtset%kptopt, mcg, dtset%mband, mband_mem_rbz, mpw,&
 &          dtset%natom, nkpt_rbz, npwarr, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg, eigen=eigen0, occ=occ_disk)
   
@@ -1155,7 +1157,7 @@ print *, 'shape cg 1 ', shape(cg)
      if (ipert==dtset%natom+3.or.ipert==dtset%natom+4) ncpgr=1
      if (usecprj==1) then
 !TODO : distribute cprj by band as well?
-       !mcprj=dtset%nspinor*dtset%mband_mem*mkmem_rbz*dtset%nsppol
+       !mcprj=dtset%nspinor*mband_mem_rbz*mkmem_rbz*dtset%nsppol
        mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol
        !mcprj=dtset%nspinor*dtset%mband*nkpt_rbz*dtset%nsppol
 #ifdef DEV_MJV
@@ -1273,7 +1275,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
 !  Initialize wavefunctions at k+q
 !  MG: Here it is possible to avoid the extra reading if the same k mesh can be used.
    ireadwf0=1 ; formeig=0 ; ask_accurate=1 ; optorth=0
-   mcgq=mpw1*dtset%nspinor*dtset%mband_mem*mkqmem_rbz*dtset%nsppol
+   mcgq=mpw1*dtset%nspinor*mband_mem_rbz*mkqmem_rbz*dtset%nsppol
    !SPr: verified until here, add mcgq for -q
    if (one*mpw1*dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol > huge(1)) then
      write (message,'(4a, 5(a,i0), 2a)')&
@@ -1290,7 +1292,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
    if (.not.kramers_deg) then
      !ABI_MALLOC_OR_DIE(cg_pq,(2,mcgq), ierr)
      !ABI_ALLOCATE(eigen_pq,(dtset%mband*nkpt_rbz*dtset%nsppol))
-     mcgmq=mpw1_mq*dtset%nspinor*dtset%mband_mem*mkqmem_rbz*dtset%nsppol
+     mcgmq=mpw1_mq*dtset%nspinor*mband_mem_rbz*mkqmem_rbz*dtset%nsppol
      ABI_MALLOC_OR_DIE(cg_mq,(2,mcgmq), ierr)
 
      ABI_ALLOCATE(eigen_mq,(dtset%mband*nkpt_rbz*dtset%nsppol))
@@ -1306,7 +1308,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
    else
      call timab(144,1,tsec)
      call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
-&          formeig, istwfk_rbz, kpq_rbz, dtset%kptopt, mcgq, dtset%mband, dtset%mband_mem, mpw1,&
+&          formeig, istwfk_rbz, kpq_rbz, dtset%kptopt, mcgq, dtset%mband, mband_mem_rbz, mpw1,&
 &          dtset%natom, nkpt_rbz, npwar1, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cgq, eigen=eigenq, occ=occ_disk)
      call timab(144,2,tsec)
@@ -1315,7 +1317,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
        !SPr: later "make" a separate WFQ file for "-q"
        call timab(144,1,tsec)
        call wfk_read_my_kptbands(dtfil%fnamewffq, distrb_flags, spacecomm,dtset%ecut*(dtset%dilatmx)**2, &
-&          formeig, istwfk_rbz, kmq_rbz, dtset%kptopt, mcgmq, dtset%mband, dtset%mband_mem, mpw1_mq,&
+&          formeig, istwfk_rbz, kmq_rbz, dtset%kptopt, mcgmq, dtset%mband, mband_mem_rbz, mpw1_mq,&
 &          dtset%natom, nkpt_rbz, npwar1_mq, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg_mq, eigen=eigen_mq, occ=occ_tmp)
        call timab(144,2,tsec)
@@ -1336,7 +1338,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
      if (usecprj==1) then
        mcprjq=dtset%nspinor*dtset%mband*mkqmem_rbz*dtset%nsppol
 !TODO : distribute cprj by band as well?
-       !mcprjq=dtset%nspinor*dtset%mband_mem*mkqmem_rbz*dtset%nsppol
+       !mcprjq=dtset%nspinor*mband_mem_rbz*mkqmem_rbz*dtset%nsppol
        ABI_DATATYPE_DEALLOCATE(cprjq)
        ABI_DATATYPE_ALLOCATE(cprjq,(dtset%natom,mcprjq))
        call pawcprj_alloc(cprjq,0,dimcprj_srt)
@@ -1465,7 +1467,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
    if ((dtset%ieig2rf > 0 .and. dtset%ieig2rf/=2) .or. dtset%efmas > 0) then
      dim_eig2rf=1
    end if
-   mcg1=mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol
+   mcg1=mpw1*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol
    if (one*mpw1*dtset%nspinor*dtset%mband*mk1mem_rbz*dtset%nsppol > huge(1)) then
      write (message,'(4a, 5(a,i0), 2a)')&
 &     "Default integer is not wide enough to store the size of the GS wavefunction array (WFK1, mcg1).",ch10,&
@@ -1477,17 +1479,17 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
    end if
    ABI_MALLOC_OR_DIE(cg1,(2,mcg1), ierr)
    if (.not.kramers_deg) then
-     mcg1mq=mpw1_mq*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol
+     mcg1mq=mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol
      ABI_MALLOC_OR_DIE(cg1_mq,(2,mcg1mq), ierr)
    end if
 
-   ABI_ALLOCATE(cg1_active,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
-   ABI_ALLOCATE(gh1c_set,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
-   ABI_ALLOCATE(gh0c1_set,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
+   ABI_ALLOCATE(cg1_active,(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
+   ABI_ALLOCATE(gh1c_set,(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
+   ABI_ALLOCATE(gh0c1_set,(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
    if (.not.kramers_deg) then
-     ABI_ALLOCATE(cg1_active_mq,(2,mpw1_mq*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
-     ABI_ALLOCATE(gh1c_set_mq,(2,mpw1_mq*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
-     ABI_ALLOCATE(gh0c1_set_mq,(2,mpw1_mq*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
+     ABI_ALLOCATE(cg1_active_mq,(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
+     ABI_ALLOCATE(gh1c_set_mq,(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
+     ABI_ALLOCATE(gh0c1_set_mq,(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
    end if
 !  XG090606 This is needed in the present 5.8.2 , for portability for the pathscale machine.
 !  However, it is due to a bug to be corrected by Paul Boulanger. When the bug will be corrected,
@@ -1509,7 +1511,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
    if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &      (dtset%get1wf /= 0 .or. dtset%ird1wf /= 0)) then
      call wfk_read_my_kptbands(fiwf1i, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2,&
-&          formeig, istwfk_rbz, kpq_rbz, dtset%kptopt, mcg1, dtset%mband, dtset%mband_mem, mpw1,&
+&          formeig, istwfk_rbz, kpq_rbz, dtset%kptopt, mcg1, dtset%mband, mband_mem_rbz, mpw1,&
 &          dtset%natom, nkpt_rbz, npwar1, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg1, eigen=eigen1, ask_accurate_=0)
    else
@@ -1526,7 +1528,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
      if ((file_exists(nctk_ncify(fiwf1i)) .or. file_exists(fiwf1i)) .and. &
 &        (dtset%get1wf > 0 .or. dtset%ird1wf > 0)) then
        call wfk_read_my_kptbands(fiwf1i, distrb_flags, spacecomm, dtset%ecut*(dtset%dilatmx)**2, &
-&          formeig, istwfk_rbz, kmq_rbz, dtset%kptopt, mcg1mq, dtset%mband, dtset%mband_mem, mpw1_mq,&
+&          formeig, istwfk_rbz, kmq_rbz, dtset%kptopt, mcg1mq, dtset%mband, mband_mem_rbz, mpw1_mq,&
 &          dtset%natom, nkpt_rbz, npwar1_mq, dtset%nspinor, dtset%nsppol, dtset%usepaw,&
 &          cg1_mq, eigen=eigen1_mq, ask_accurate_=0)
      else
@@ -1868,7 +1870,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
 &       ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elpsp1,&
 &       enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr,idir,&
 &       indkpt1,indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
-&       kg,kg1,kpt_rbz,kxc,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
+&       kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
 &       mpert,mpi_enreg,mpw,mpw1,mpw1_mq,my_natom,&
 &       nattyp,nband_rbz,ncpgr,nfftf,ngfftf,nhat,nkpt,nkpt_rbz,nkxc,&
 &       npwarr,npwar1,nspden,&
@@ -1887,7 +1889,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
 &       ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elpsp1,&
 &       enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr,idir,&
 &       indkpt1,indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
-&       kg,kg1,kpt_rbz,kxc,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
+&       kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mgfftf,mkmem_rbz,mkqmem_rbz,mk1mem_rbz,&
 &       mpert,mpi_enreg,mpw,mpw1,mpw1_mq,my_natom,&
 &       nattyp,nband_rbz,ncpgr,nfftf,ngfftf,nhat,nkpt,nkpt_rbz,nkxc,&
 &       npwarr,npwar1,nspden,&
@@ -1915,9 +1917,9 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
        end if
        if (.not.associated(eigen1_pert)) then
          ABI_ALLOCATE(eigen1_pert,(2*dtset%mband**2*nkpt*dtset%nsppol,3,mpert))
-         ABI_MALLOC_OR_DIE(cg1_pert,(2,mpw1*nspinor*dtset%mband_mem*mk1mem_rbz*nsppol*dim_eig2rf,3,mpert),ierr)
-         ABI_ALLOCATE(gh0c1_pert,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
-         ABI_ALLOCATE(gh1c_pert,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
+         ABI_MALLOC_OR_DIE(cg1_pert,(2,mpw1*nspinor*mband_mem_rbz*mk1mem_rbz*nsppol*dim_eig2rf,3,mpert),ierr)
+         ABI_ALLOCATE(gh0c1_pert,(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
+         ABI_ALLOCATE(gh1c_pert,(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
          ABI_ALLOCATE(kpt_rbz_pert,(3,nkpt_rbz))
          ABI_ALLOCATE(npwarr_pert,(nkpt_rbz,mpert))
          ABI_ALLOCATE(npwar1_pert,(nkpt_rbz,mpert))
@@ -1950,9 +1952,9 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
        end if
        if (.not.associated(eigen1_pert)) then
          ABI_ALLOCATE(eigen1_pert,(2*dtset%mband**2*nkpt*dtset%nsppol,3,mpert))
-         ABI_ALLOCATE(cg1_pert,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
-         ABI_ALLOCATE(gh0c1_pert,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
-         ABI_ALLOCATE(gh1c_pert,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
+         ABI_ALLOCATE(cg1_pert,(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
+         ABI_ALLOCATE(gh0c1_pert,(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
+         ABI_ALLOCATE(gh1c_pert,(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol*dim_eig2rf,3,mpert))
          ABI_ALLOCATE(kpt_rbz_pert,(3,nkpt_rbz))
          ABI_ALLOCATE(npwarr_pert,(nkpt_rbz,mpert))
          eigen1_pert(:,:,:) = zero
@@ -1961,7 +1963,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
          gh1c_pert(:,:,:,:) = zero
          npwarr_pert (:,:) = 0
          kpt_rbz_pert = kpt_rbz
-         ABI_ALLOCATE(cg0_pert,(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
+         ABI_ALLOCATE(cg0_pert,(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem_rbz*dtset%nsppol*dim_eig2rf))
          cg0_pert = cg
        end if
        eigen1_pert(1:2*dtset%mband**2*nkpt_rbz*dtset%nsppol,idir,ipert) = eigen1(:)
@@ -2092,7 +2094,7 @@ print *, 'mcprj=dtset%nspinor*dtset%mband*mkmem_rbz*dtset%nsppol nband_rbz ', &
 &                dtset%nsppol,resid)
      ! Output 1st-order wavefunctions in file
      call wfk_write_my_kptbands(fiwf1o, distrb_flags, spacecomm, formeig, hdr, dtset%iomode, &
-&          dtset%mband, dtset%mband_mem, dtset%mpw, nkpt_rbz, dtset%nspinor, dtset%nsppol, &
+&          dtset%mband, mband_mem_rbz, dtset%mpw, nkpt_rbz, dtset%nspinor, dtset%nsppol, &
 &          cg1, kg1, eigen1)
 
 !     call outwf(cg1,dtset,psps,eigen1,fiwf1o,hdr,kg1,kpt_rbz,&

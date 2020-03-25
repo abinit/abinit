@@ -448,7 +448,7 @@ print *, 'zeroing ipw ', ipw
        nband_me = proc_distrb_nband(mpi_enreg%proc_distrb,ikpt,nband_k,isppol,me)
 
 #ifdef DEV_MJV
-print *, ' vtowfk isppol.ikpt, nband_me ', isppol, ikpt, nband_me, iband, iband_me 
+print *, ' vtowfk isppol, ikpt, nband_me iband iband_me ', isppol, ikpt, nband_me, iband, iband_me 
 print *, 'usedcwavef ', usedcwavef
 print *, ' occ_k, eig0nk,eig0_kq ', occ_k(iband), eig0nk,eig0_kq
 print *, 'cgwf cwavef 444 ', cwavef(:,1:5)

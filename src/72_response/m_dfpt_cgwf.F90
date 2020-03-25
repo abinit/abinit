@@ -290,6 +290,9 @@ print *, 'bands_treated_now ', bands_treated_now
  if (berryopt== 4.or.berryopt== 6.or.berryopt== 7.or. berryopt==14.or.berryopt==16.or.berryopt==17) then
    ABI_ALLOCATE(gberry,(2,npw1*nspinor))
    gberry(:,1:npw1*nspinor)=grad_berry(:,1:npw1*nspinor,band)
+#ifdef DEV_MJV
+print *, 'gberry 294 ', gberry(:,1:10)
+#endif
  else
    ABI_ALLOCATE(gberry,(0,0))
  end if
@@ -486,6 +489,9 @@ print *, 'bands_treated_now ', bands_treated_now
    call getgh1c(berryopt,cwave0,cwaveprj0,gh1c,gberry,gs1c,gs_hamkq,gvnlx1,idir,ipert,eshift,&
      mpi_enreg,optlocal,optnl,opt_gvnlx1,rf_hamkq,sij_opt,tim_getgh1c,usevnl)
 
+#ifdef DEV_MJV
+print *, 'gh1c 490 ', gh1c(:,1:10)
+#endif
    if (gen_eigenpb) then
      if (ipert/=natom+2) then  ! S^(1) is zero for ipert=natom+2
 !$OMP PARALLEL
@@ -609,6 +615,9 @@ print *, ' band_procs(iband), mpi_enreg%comm_band ', band_procs(iband), mpi_enre
    end if
  end do
 
+#ifdef DEV_MJV
+print *, 'gh1c 619 ', gh1c(:,1:10)
+#endif
 
  if(ipert/=natom+10.and.ipert/=natom+11) then
    ! For ipert=natom+10 or natom+11, this is done in rf2_init
@@ -775,6 +784,8 @@ print *, 'skipping for buffer band'
  end if
 #ifdef DEV_MJV
 print *, 'cwavef 763 ', cwavef(:,23)
+print *, 'ghc 778 ', ghc(:,1:10)
+print *, 'gh1c 778 ', gh1c(:,1:10)
 #endif
 
  ! Initialize resid, in case of nline==0
@@ -816,6 +827,9 @@ print *, 'cwavef 763 ', cwavef(:,23)
      end do
    end if
 
+#ifdef DEV_MJV
+print *, 'gresid 821 ', gresid(:,1:5)
+#endif
    ! ======================================================================
    ! =========== PROJECT THE STEEPEST DESCENT DIRECTION ===================
    ! ========= OVER THE SUBSPACE ORTHOGONAL TO OTHER BANDS ================
@@ -841,7 +855,7 @@ print *, 'cwavef 763 ', cwavef(:,23)
        call projbd(gscq,work,-1,igscq,icgq,istwf_k,mgscq,mcgq,nband_me,npw1,nspinor,&
          cgq,  scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
      else
-       call projbd( cgq,work,-1,icgq, 0,   istwf_k,mcgq,mgscq,nband_me,npw1,nspinor,&
+       call projbd( cgq,work,-1, icgq,   0,istwf_k,mcgq,mgscq,nband_me,npw1,nspinor,&
          dummy,scprod,0,tim_projbd,useoverlap,me_g0,comm_fft)
      end if
   

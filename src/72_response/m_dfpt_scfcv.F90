@@ -154,6 +154,7 @@ contains
 !!  kg1(3,mpw1*mk1mem)=reduced planewave coordinates at k+q, with RF k points
 !!  kpt_rbz(3,nkpt_rbz)=reduced coordinates of k points.
 !!  kxc(nfftf,nkxc)=exchange and correlation kernel (see rhotoxc.f)
+!!  mband_mem_rbz=maximum number of bands per processor in memory for cg
 !!  mgfftf=maximum size of 1D FFTs for the "fine" grid (see NOTES in respfn.F90)
 !!  mkmem =number of k points treated by this node (GS data)
 !!  mkqmem =number of k+q points which can fit in memory (GS data); 0 if use disk
@@ -288,7 +289,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &  ehart01,ehart1,eigenq,eigen0,eigen1,eii,ek0,ek1,eloc0,elpsp1,&
 &  enl0,enl1,eovl1,epaw1,etotal,evdw,exc1,fermie,gh0c1_set,gh1c_set,hdr,idir,indkpt1,&
 &  indsy1,initialized,ipert,irrzon1,istwfk_rbz,&
-&  kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,&
+&  kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mgfftf,mkmem,mkqmem,mk1mem,&
 &  mpert,mpi_enreg,mpw,mpw1,mpw1_mq,my_natom,nattyp,nband_rbz,ncpgr,&
 &  nfftf,ngfftf,nhat,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
 &  nsym1,n3xccc,occkq,occ_rbz,&
@@ -307,6 +308,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  type(pseudopotential_type),intent(in) :: psps
  integer,intent(in) :: cplex,dim_eig2rf,idir,ipert,mgfftf,mk1mem,mkmem,mkqmem
  integer,intent(in) :: mpert,mpw,mpw1,my_natom,n3xccc,ncpgr,nfftf
+ integer,intent(in) :: mband_mem_rbz
  integer,intent(in) :: mpw1_mq !-q duplicate
  integer,intent(in) :: nkpt,nkpt_rbz,nkxc,nspden
  integer,intent(in) :: nsym1,pertcase,prtbbb,usecprj,useylmgr,useylmgr1
@@ -333,17 +335,17 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),intent(in) :: qphon(3)
 ! nfft**(1-1/nsym1) is 1 if nsym1==1, and nfft otherwise
  integer,intent(in) :: ngfftf(18)
- real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband_mem*mkmem*dtset%nsppol)
- real(dp),intent(inout) :: cg1(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem*dtset%nsppol)
- real(dp),intent(out) :: cg1_active(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem*dtset%nsppol*dim_eig2rf)
- real(dp),intent(out) :: gh1c_set(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem*dtset%nsppol*dim_eig2rf)
- real(dp),intent(out) :: gh0c1_set(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem*dtset%nsppol*dim_eig2rf)
- real(dp),intent(in)  :: cgq(2,mpw1*dtset%nspinor*dtset%mband_mem*mkqmem*dtset%nsppol)
- real(dp),optional,intent(inout) :: cg1_mq(2,mpw1_mq*dtset%nspinor*dtset%mband_mem*mk1mem*dtset%nsppol)                  !start -q duplicates
- real(dp),optional,intent(out)   :: cg1_active_mq(2,mpw1_mq*dtset%nspinor*dtset%mband_mem*mk1mem*dtset%nsppol*dim_eig2rf)!
- real(dp),optional,intent(out)   :: gh1c_set_mq(2,mpw1_mq*dtset%nspinor*dtset%mband_mem*mk1mem*dtset%nsppol*dim_eig2rf)  !
- real(dp),optional,intent(out)   :: gh0c1_set_mq(2,mpw1_mq*dtset%nspinor*dtset%mband_mem*mk1mem*dtset%nsppol*dim_eig2rf) !
- real(dp),optional,intent(in)    :: cg_mq(2,mpw1_mq*dtset%nspinor*dtset%mband_mem*mkqmem*dtset%nsppol)                   !
+ real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*mband_mem_rbz*mkmem*dtset%nsppol)
+ real(dp),intent(inout) :: cg1(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol)
+ real(dp),intent(out) :: cg1_active(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf)
+ real(dp),intent(out) :: gh1c_set(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf)
+ real(dp),intent(out) :: gh0c1_set(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf)
+ real(dp),intent(in)  :: cgq(2,mpw1*dtset%nspinor*mband_mem_rbz*mkqmem*dtset%nsppol)
+ real(dp),optional,intent(inout) :: cg1_mq(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol)                  !start -q duplicates
+ real(dp),optional,intent(out)   :: cg1_active_mq(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf)!
+ real(dp),optional,intent(out)   :: gh1c_set_mq(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf)  !
+ real(dp),optional,intent(out)   :: gh0c1_set_mq(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*dim_eig2rf) !
+ real(dp),optional,intent(in)    :: cg_mq(2,mpw1_mq*dtset%nspinor*mband_mem_rbz*mkqmem*dtset%nsppol)                   !
  real(dp),optional,intent(in)    :: eigen_mq(dtset%mband*nkpt_rbz*dtset%nsppol)                                      !
  real(dp),optional,intent(in)    :: docckde_mq(dtset%mband*nkpt_rbz*dtset%nsppol)                                    !
  real(dp),optional,intent(out)   :: eigen1_mq(2*dtset%mband*dtset%mband*nkpt_rbz*dtset%nsppol)                       !
@@ -378,8 +380,8 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
  real(dp),intent(in) :: ylmgr(mpw*mkmem,3,psps%mpsang*psps%mpsang*psps%useylm*useylmgr)
  real(dp),intent(in) :: ylmgr1(mpw1*mk1mem,3+6*((ipert-dtset%natom)/10),psps%mpsang*psps%mpsang*psps%useylm*useylmgr1)
  real(dp),intent(in) :: zeff(3,3,dtset%natom)
- type(pawcprj_type),intent(in) :: cprj(dtset%natom,dtset%nspinor*dtset%mband_mem*mkmem*dtset%nsppol*usecprj)
- type(pawcprj_type),intent(in) :: cprjq(dtset%natom,dtset%nspinor*dtset%mband_mem*mkqmem*dtset%nsppol*usecprj)
+ type(pawcprj_type),intent(in) :: cprj(dtset%natom,dtset%nspinor*mband_mem_rbz*mkmem*dtset%nsppol*usecprj)
+ type(pawcprj_type),intent(in) :: cprjq(dtset%natom,dtset%nspinor*mband_mem_rbz*mkqmem*dtset%nsppol*usecprj)
  type(datafiles_type),intent(in) :: dtfil
  type(hdr_type),intent(inout) :: hdr
  type(pawang_type),intent(in) :: pawang,pawang1
@@ -540,7 +542,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
    ABI_ALLOCATE(nhat1,(cplex*nfftf,dtset%nspden))
    nhat1=zero
 !  Projections of 1-st order WF on nl projectors
-   ABI_DATATYPE_ALLOCATE(cprj1,(dtset%natom,dtset%nspinor*dtset%mband_mem*mk1mem*dtset%nsppol*usecprj))
+   ABI_DATATYPE_ALLOCATE(cprj1,(dtset%natom,dtset%nspinor*mband_mem_rbz*mk1mem*dtset%nsppol*usecprj))
    if (usecprj==1.and.mk1mem/=0) then
      !cprj ordered by atom-type
      ABI_ALLOCATE(dimcprj,(dtset%natom))
@@ -676,7 +678,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 &   mpw,mpw1,nkpt,npwarr,npwar1,dtset%nsppol,occ_rbz,pwindall,rprimd)
 !  calculate inverse of the overlap matrix
    ABI_ALLOCATE(qmat,(2,dtefield%mband_occ,dtefield%mband_occ,nkpt,2,3))
-   call qmatrix(cg,dtefield,qmat,mpi_enreg,mpw,mpw1,mkmem,dtset%mband,dtset%mband_mem,&
+   call qmatrix(cg,dtefield,qmat,mpi_enreg,mpw,mpw1,mkmem,dtset%mband,mband_mem_rbz,&
 &    npwarr,nkpt,dtset%nspinor,dtset%nsppol,pwindall)
  else
    ABI_ALLOCATE(pwindall,(0,0,0))
@@ -826,7 +828,7 @@ subroutine dfpt_scfcv(atindx,blkflg,cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cpus,
 
        call dfpt_rhofermi(cg,cgq,cplex,cprj,cprjq,&
 &       doccde_rbz,docckqde,dtfil,dtset,eigenq,eigen0,eigen1,fe1fixed,gmet,gprimd,idir,&
-&       indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,dtset%mband_mem,mkmem,mkqmem,mk1mem,mpi_enreg,&
+&       indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,mband_mem_rbz,mkmem,mkqmem,mk1mem,mpi_enreg,&
 &       mpw,mpw1,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,ngfftf,nhatfermi,nkpt_rbz,npwarr,npwar1,&
 &       nspden,dtset%nsppol,nsym1,occkq,occ_rbz,&
 &       paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
@@ -838,7 +840,7 @@ print *, 'DFPT scfcv going into rhofermi for mq'
 #endif
          call dfpt_rhofermi(cg,cg_mq,cplex,cprj,cprjq,&
 &         doccde_rbz,docckde_mq,dtfil,dtset,eigen_mq,eigen0,eigen1_mq,fe1fixed_mq,gmet,gprimd,idir,&
-&         indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1_mq,kpt_rbz,dtset%mband,dtset%mband_mem,mkmem,mkqmem,mk1mem,mpi_enreg,&
+&         indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1_mq,kpt_rbz,dtset%mband,mband_mem_rbz,mkmem,mkqmem,mk1mem,mpi_enreg,&
 &         mpw,mpw1_mq,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,ngfftf,nhatfermi,nkpt_rbz,npwarr,npwar1_mq,&
 &         nspden,dtset%nsppol,nsym1,occk_mq,occ_rbz,&
 &         paw_ij,pawang,pawang1,pawfgr,pawfgrtab,pawrad,pawrhoijfermi,pawtab,&
@@ -934,7 +936,7 @@ print *, 'DFPT scfcv going into newfermie for mq'
    call dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 &   dbl_nnsclo,dim_eig2rf,doccde_rbz,docckqde,dtefield,dtfil,dtset,dtset%qptn,edocc,&
 &   eeig0,eigenq,eigen0,eigen1,ek0,ek1,eloc0,enl0,enl1,fermie1,gh0c1_set,gh1c_set,&
-&   gmet,gprimd,idir,indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,dtset%mband_mem,&
+&   gmet,gprimd,idir,indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,mband_mem_rbz,&
 &   mkmem,mkqmem,mk1mem,mpi_enreg,mpw,mpw1,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,&
 &   nhat1,nkpt_rbz,npwarr,npwar1,res2,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid1,&
 &   occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
@@ -951,7 +953,7 @@ print *, 'DFPT scfcv going into vtorho for mq'
      call dfpt_vtorho(cg,cg_mq,cg1_mq,cg1_active_mq,cplex,cprj,cprjq,cprj1,&
 &     dbl_nnsclo_mq,dim_eig2rf,doccde_rbz,docckde_mq,dtefield,dtfil,dtset,-dtset%qptn,edocc_mq,&
 &     eeig0_mq,eigen_mq,eigen0,eigen1_mq,ek0_mq,ek1_mq,eloc0_mq,enl0_mq,enl1_mq,fermie1_mq,gh0c1_set_mq,gh1c_set_mq,&
-&     gmet,gprimd,idir,indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1_mq,kpt_rbz,dtset%mband,dtset%mband_mem,&
+&     gmet,gprimd,idir,indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1_mq,kpt_rbz,dtset%mband,mband_mem_rbz,&
 &     mkmem,mkqmem,mk1mem,mpi_enreg,mpw,mpw1_mq,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,&
 &     nhat1,nkpt_rbz,npwarr,npwar1_mq,res2_mq,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid1_mq,&
 &     occk_mq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
@@ -976,11 +978,11 @@ print *, 'DFPT scfcv going into vtorho for mq'
 !    calculate \Omega E \cdot P term
      if (ipert<=dtset%natom) then
 !      phonon perturbation
-       call  dfptff_ebp(cg,cg1,dtefield,eberry,dtset%mband,dtset%mband_mem,mkmem,&
+       call  dfptff_ebp(cg,cg1,dtefield,eberry,dtset%mband,mband_mem_rbz,mkmem,&
 &       mpi_enreg,mpw,mpw1,nkpt,npwarr,npwar1,dtset%nsppol,dtset%nspinor,pwindall,qmat)
      else if (ipert==dtset%natom+2) then
 !      electric field perturbation
-       call  dfptff_edie(cg,cg1,dtefield,eberry,idir,dtset%mband,dtset%mband_mem,mkmem,&
+       call  dfptff_edie(cg,cg1,dtefield,eberry,idir,dtset%mband,mband_mem_rbz,mkmem,&
 &       mpi_enreg,mpw,mpw1,nkpt,npwarr,npwar1,dtset%nsppol,dtset%nspinor,pwindall,qmat,rprimd)
      end if
    end if
@@ -1189,7 +1191,7 @@ print *, 'istep loop finished'
    call dfpt_vtorho(cg,cgq,cg1,cg1_active,cplex,cprj,cprjq,cprj1,&
 &   dbl_nnsclo,dim_eig2rf,doccde_rbz,docckqde,dtefield,dtfil,dtset,dtset%qptn,edocc,&
 &   eeig0,eigenq,eigen0,eigen1,ek0,ek1,eloc0,enl0,enl1,fermie1,gh0c1_set,gh1c_set,&
-&   gmet,gprimd,idir,indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,dtset%mband_mem,&
+&   gmet,gprimd,idir,indsy1,ipert,irrzon1,istwfk_rbz,kg,kg1,kpt_rbz,dtset%mband,mband_mem_rbz,&
 &   mkmem,mkqmem,mk1mem,mpi_enreg,mpw,mpw1,my_natom,dtset%natom,nband_rbz,ncpgr,nfftf,&
 &   nhat1,nkpt_rbz,npwarr,npwar1,res3,nspden,dtset%nsppol,nsym1,dtset%ntypat,nvresid2,&
 &   occkq,occ_rbz,optres,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrhoij,&
@@ -1330,7 +1332,7 @@ print *, 'calling nselt ', ipert
    call dfpt_nselt(blkflg,cg,cg1,cplex,&
 &   d2bbb,d2lo,d2nl,ecut,dtset%ecutsm,dtset%effmass_free,&
 &   gmet,gprimd,gsqcut,idir,&
-&   ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,dtset%mband,dtset%mband_mem,mgfftf,&
+&   ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,dtset%mband,mband_mem_rbz,mgfftf,&
 &   mkmem,mk1mem,mpert,mpi_enreg,psps%mpsang,mpw,mpw1,&
 &   dtset%natom,nband_rbz,nfftf,ngfftf,&
 &   nkpt_rbz,nkxc,dtset%nloalg,&
@@ -1347,7 +1349,7 @@ print *, 'calling nselt ', ipert
    if (psps%usepaw==1.or.dtset%userie==919) then
      call dfpt_nstpaw(blkflg,cg,cgq,cg1,cplex,cprj,cprjq,docckqde,doccde_rbz,dtfil,dtset,d2lo,d2nl,d2ovl,&
 &     eigenq,eigen0,eigen1,eovl1,gmet,gprimd,gsqcut,idir,indkpt1,indsy1,ipert,irrzon1,istwfk_rbz,&
-&     kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,dtset%mband_mem,ncpgr,&
+&     kg,kg1,kpt_rbz,kxc,mgfftf,mkmem,mkqmem,mk1mem,mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,mband_mem_rbz,ncpgr,&
 &     nfftf,ngfftf,nhat,nhat1,nkpt_rbz,nkxc,npwarr,npwar1,nspden,dtset%nspinor,dtset%nsppol,&
 &     nsym1,n3xccc,occkq,occ_rbz,paw_an,paw_an1,paw_ij,paw_ij1,pawang,pawang1,pawfgr,pawfgrtab,pawrad,&
 &     pawrhoij,pawrhoij1,pawtab,phnons1,ph1d,ph1df,psps,rhog,rhor,rhor1,rmet,rprimd,symaf1,symrc1,&
@@ -1356,13 +1358,13 @@ print *, 'calling nselt ', ipert
    else
      if (dtset%nspden==4) then
        call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
-&       gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mkmem,mk1mem,mpert,mpi_enreg,&
+&       gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &       mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
 &       dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,symrc1,ucvol,&
 &       wtk_rbz,xred,ylm,ylm1,rhor=rhor,vxc=vxc)
      else
        call dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,gmet,&
-&       gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mkmem,mk1mem,mpert,mpi_enreg,&
+&       gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,mpert,mpi_enreg,&
 &       mpw,mpw1,nattyp,nband_rbz,nfftf,ngfftf,nkpt,nkpt_rbz,nkxc,npwarr,npwar1,nspden,&
 &       dtset%nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,symrc1,ucvol,&
 &       wtk_rbz,xred,ylm,ylm1)
@@ -1377,7 +1379,7 @@ print *, 'calling nselt ', ipert
  if ((dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17).and.&
 & ipert<=dtset%natom) then
-   call dfptff_bec(cg,cg1,dtefield,dtset%natom,d2lo,idir,ipert,dtset%mband,dtset%mband_mem,mkmem,&
+   call dfptff_bec(cg,cg1,dtefield,dtset%natom,d2lo,idir,ipert,dtset%mband,mband_mem_rbz,mkmem,&
 &   mpi_enreg,mpw,mpw1,mpert,nkpt,npwarr,npwar1,dtset%nsppol,dtset%nspinor,pwindall,qmat,rprimd)
    blkflg(:,dtset%natom+2,:,1:dtset%natom)=1
  end if
@@ -1386,7 +1388,7 @@ print *, 'calling nselt ', ipert
  if ((dtset%berryopt== 4.or.dtset%berryopt== 6.or.dtset%berryopt== 7.or.&
 & dtset%berryopt==14.or.dtset%berryopt==16.or.dtset%berryopt==17).and.&
 & ipert==dtset%natom+2) then
-   call dfptff_die(cg,cg1,dtefield,d2lo,idir,ipert,dtset%mband,dtset%mband_mem,mkmem,&
+   call dfptff_die(cg,cg1,dtefield,d2lo,idir,ipert,dtset%mband,mband_mem_rbz,mkmem,&
 &   mpi_enreg,mpw,mpw1,mpert,nkpt,npwarr,npwar1,dtset%nsppol,dtset%nspinor,pwindall,qmat,rprimd)
    blkflg(:,dtset%natom+2,:,dtset%natom+2)=1
  end if
@@ -3032,7 +3034,7 @@ end subroutine dfpt_nsteltwf
 !! SOURCE
 
 subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eigen0,eigen1,&
-&          gmet,gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mkmem,mk1mem,&
+&          gmet,gsqcut,idir,indkpt1,indsy1,ipert,istwfk_rbz,kg,kg1,kpt_rbz,kxc,mband_mem_rbz,mkmem,mk1mem,&
 &          mpert,mpi_enreg,mpw,mpw1,nattyp,nband_rbz,nfft,ngfft,nkpt,nkpt_rbz,nkxc,&
 &          npwarr,npwar1,nspden,nsppol,nsym1,occ_rbz,ph1d,psps,rhor1,rmet,rprimd,&
 &          symrc1,ucvol,wtk_rbz,xred,ylm,ylm1,rhor,vxc)
@@ -3040,6 +3042,7 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
 !Arguments -------------------------------
 !scalars
  integer,intent(in) :: cplex,idir,ipert,mk1mem,mkmem,mpert,mpw,mpw1,nfft,nkpt,nkpt_rbz,nkxc,nspden,nsppol,nsym1
+ integer,intent(in) :: mband_mem_rbz
  real(dp),intent(in) :: gsqcut,ucvol
  type(MPI_type),intent(in) :: mpi_enreg
  type(datafiles_type),intent(in) :: dtfil
@@ -3051,8 +3054,8 @@ subroutine dfpt_nstdy(atindx,blkflg,cg,cg1,cplex,dtfil,dtset,d2bbb,d2lo,d2nl,eig
  integer,intent(in) :: nattyp(dtset%ntypat),nband_rbz(nkpt_rbz*nsppol),ngfft(18)
  integer,intent(in) :: npwar1(nkpt_rbz),npwarr(nkpt_rbz),symrc1(3,3,nsym1)
  integer,intent(inout) :: blkflg(3,mpert,3,mpert) !vz_i
- real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*dtset%mband_mem*mkmem*nsppol)
- real(dp),intent(in) :: cg1(2,mpw1*dtset%nspinor*dtset%mband_mem*mk1mem*nsppol)
+ real(dp),intent(in) :: cg(2,mpw*dtset%nspinor*mband_mem_rbz*mkmem*nsppol)
+ real(dp),intent(in) :: cg1(2,mpw1*dtset%nspinor*mband_mem_rbz*mk1mem*nsppol)
  real(dp),intent(in) :: eigen0(dtset%mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: eigen1(2*dtset%mband*dtset%mband*nkpt_rbz*nsppol)
  real(dp),intent(in) :: gmet(3,3),kpt_rbz(3,nkpt_rbz)
@@ -3266,7 +3269,7 @@ print *, 'nstdy cycle, ik,isppol, nband ', proc_distrb_cycle(mpi_enreg%proc_dist
 !    and update of rhor1 to this k-point and this spin polarization.
 !    Note that dfpt_nstwf is called with kpoint, while kpt is used inside dfpt_vtowfk
      call dfpt_nstwf(cg,cg1,ddkfil,dtset,d2bbb_k,d2nl_k,eig_k,eig1_k,gs_hamkq,&
-&     icg,icg1,idir,ikpt,ipert,isppol,istwf_k,kg_k,kg1_k,kpoint,kpq,mkmem,mk1mem,mpert,&
+&     icg,icg1,idir,ikpt,ipert,isppol,istwf_k,kg_k,kg1_k,kpoint,kpq,mband_mem_rbz,mkmem,mk1mem,mpert,&
 &     mpi_enreg,mpw,mpw1,nband_k,npw_k,npw1_k,nsppol,&
 &     occ_k,psps,rmet,ddks,wtk_k,ylm_k,ylm1_k)
 

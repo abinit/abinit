@@ -554,10 +554,12 @@ print *, ' vtorho nband_me ', nband_me
 !    rocceig(m,n)=(occ_kq(m)-occ_k(n))/(eig0_kq(m)-eig0_k(n))
 !    and decide to which band to attribute it.
 #ifdef DEV_MJV
-print *, doccde_k
-print *, doccde_kq
-print *, occ_k
-print *, occ_kq
+print *, 'doccde_k',  doccde_k
+print *, 'doccde_kq ', doccde_kq
+print *, 'occ_k  ',   occ_k
+print *, 'occ_kq ',   occ_kq   
+print *, 'eig0_k  ',   eig0_k
+print *, 'eig0_kq  ',   eig0_kq
 #endif
      call occeig(doccde_k,doccde_kq,eig0_k,eig0_kq,nband_k,dtset%occopt,occ_k,occ_kq,rocceig)
 

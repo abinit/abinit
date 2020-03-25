@@ -3558,15 +3558,15 @@ print *, ' npw_kf == npwarr(ikf), istwf_kf, ecut_eff_in ecut ', npw_kf,npwarr(ik
    end do ! kpt disk
  end do ! sppol
 
- if(present(eigen)) then
-   call xmpi_sum(eigen,comm,ierr)
- end if
- if(present(occ)) then
-   call xmpi_sum(occ,comm,ierr)
- end if
- if(present(kg)) then
-   call xmpi_sum(kg,comm,ierr)
- end if
+! if(present(eigen)) then
+!   call xmpi_sum(eigen,comm,ierr)
+! end if
+! if(present(occ)) then
+!   call xmpi_sum(occ,comm,ierr)
+! end if
+! if(present(kg)) then
+!   call xmpi_sum(kg,comm,ierr)
+! end if
 
  if(present(pawrhoij) .and. usepaw_in==1) then
 #ifdef DEV_MJV

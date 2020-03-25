@@ -2219,30 +2219,37 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
 
 #ifdef DEV_MJV
 print *, 'enter initmpi_band'
+print *, ' mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol '
+print *,   mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol 
 #endif
  mpi_enreg%comm_band=xmpi_comm_self
 
  mband = maxval(nband)
 
- if (mpi_enreg%paralbd==1.and.xmpi_paral==1.and.mkmem>0) then
-
 !  Comm_kpt is supposed to treat spins, k-points and bands
 !MJV: I think we need to make a proper subcomm here, not treat bands inside the same comm...
-   spacecomm=mpi_enreg%comm_kpt
-   nproc=mpi_enreg%nproc_kpt
-   nproc_eff=ceiling(dble(nkpt)/dble(mkmem))
+ spacecomm=mpi_enreg%comm_kpt
+ nproc=mpi_enreg%nproc_kpt
+
+! make sure we have saturated kpt parallelization mkmem==1
+ if (mpi_enreg%paralbd==1.and.xmpi_paral==1.and.mkmem==1 .and. nproc >= 2*nkpt*nsppol) then
+
+! number of procs per kpt/spin, on which we can distribute bands
+   nproc_eff=nproc/nkpt*nsppol
    me=mpi_enreg%me_kpt
 #ifdef DEV_MJV
 print *, 'me, nproc, nproc_eff, mkmem = ', me, nproc, nproc_eff, mkmem
 #endif
 
-! total number of states/bands, over all k and spin
+!! total number of states/bands, over all k and spin
    nstates=sum(nband(1:nkpt*nsppol))
-   nbsteps=nstates/nproc_eff
+! number of bands per proc in the band pool
+!   nbsteps=nstates/nproc_eff
+   nbsteps = mband / nproc_eff 
 #ifdef DEV_MJV
 print *, 'nbsteps ',nbsteps, ' vs old ', nstates/nproc
 #endif
-   if (mod(nstates,nproc_eff)/=0) nbsteps=nbsteps+1
+   if (mod(mband,nproc_eff)/=0) nbsteps=nbsteps+1
 #ifdef DEV_MJV
 print *, 'nbsteps primed ',nbsteps
 #endif
@@ -2484,7 +2491,7 @@ print *, ' nproc_kpt, nproc, mpi_enreg%paral_pertmpi_enreg%nproc_pert ', nproc_k
  if (mpi_enreg%paral_pert==1) nproc_kpt=nproc
 ! if (mpi_enreg%paral_pert==1) nproc_kpt=nproc/mpi_enreg%nproc_pert
 
- mband_mem_out = mband
+ mband_mem_out = 0
 
 !Initialization of proc_distrb
  mpi_enreg%proc_distrb = nproc+1
@@ -2740,6 +2747,8 @@ print *,  'me, ikpt_this_proc ', mpi_enreg%me_kpt, ikpt_this_proc
      mpi_enreg%my_isppoltab(iisppol)=1
    end do
  end do
+
+ if (mband_mem_out == 0) mband_mem_out = mband
 
 #ifdef DEV_MJV
 print *, 'mpi_enreg%my_kpttab ', mpi_enreg%my_kpttab
