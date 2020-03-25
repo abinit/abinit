@@ -11,8 +11,8 @@ as well as MR621, 623, 626, 628-632).
 
 The list of contributors includes:
 B. Amadon, L. Baguet, J.-M. Beuken, J. Bieder, J. Bouchet, E. Bousquet, F. Bruneval, G. Brunin, Wei Chen, 
-Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault, B. Guster, G. Hautier, Xu He, F. Jollet,
-H. Miranda, F. Naccarato, G. Petretto, N. Pike, Y. Pouillon, F. Ricci, M. Torrent, J. Van Bever, M. Verstraete, J. Zwanziger.
+Ph. Ghosez, M. Giantomassi, O. Gingras, X. Gonze, F. Goudreault, B. Guster, G. Hautier, Xu He, N. Helbig, F. Jollet,
+H. Miranda, F. Naccarato, G. Petretto, N. Pike, Y. Pouillon, F. Ricci, M. Schmitt, M. Torrent, J. Van Bever, M. Verstraete, J. Zwanziger.
 
 It is worth to read carefully all the modifications that are mentioned in the present file,
 and examine the links to help files or test cases.
@@ -148,7 +148,7 @@ fully in the Sec. 3.7 of [[cite:Gonze2020]], as follows.
 
 Also, the DMFT k-resolved spectral function is available (MR 529, 490).
 
-List of tests: paral#84,85,86,99, v8#01.
+List of tests: [[test:paral_84]], [[test:paral_86]], [[test:paral_99]], [[test:v8_01]].
 New input variables: [[dmft_charge_prec]] and [[dmft_kspectral_func]] (test to be provided for the latter). 
 Also [[dmft_occnd_imag]], but only for keeping backward compatibility for tests.
 
@@ -171,17 +171,23 @@ In particular, a spin model, described specifically in Sec. 4.1.2 of [[cite:Gonz
 >degrees of freedom (in particular using the inter-atomic force constants). 
 
 A tutorial for the multibinit spin model has been written, [[tutorial:spin_model]].
-List of tests in addition to those of the tutorial: v8#16, v8#23.
-New input variables: slc_coupling,
-[[spin_calc_correlation_obs@multibinit|spin_calc_correlation_obs]], 
+
+Many new input variables are present.
+Not all these new input variables are present in automatic tests, though, in this beta-release. 
+These "non-tested" input variables are indicated below with 'NT'.
+This will be completed for the production version v9.2 .
+List of tests in addition to those of the tutorial: [[test:v8_16]], [[test:v8_23]].
+New input variables: slc_coupling (NT),
+[[spin_calc_correlation_obs@multibinit|spin_calc_correlation_obs]] (NT), 
 [[spin_calc_thermo_obs@multibinit|spin_calc_thermo_obs]], 
-[[spin_calc_traj_obs@multibinit|spin_calc_traj_obs]], 
-[[spin_damping@multibinit|spin_damping]], 
-[[spin_init_orientation@multibinit|spin_init_orientation]], 
-[[spin_init_qpoint@multibinit|spin_init_qpoint]],
-[[spin_init_rotate_axis@multibinit|spin_init_rotate_axis]], 
+[[spin_calc_traj_obs@multibinit|spin_calc_traj_obs]] (NT), 
+[[spin_damping@multibinit|spin_damping]] (NT), 
+[[spin_init_orientation@multibinit|spin_init_orientation]] (NT), 
+[[spin_init_qpoint@multibinit|spin_init_qpoint]] (NT),
+[[spin_init_rotate_axis@multibinit|spin_init_rotate_axis]] (NT), 
 [[spin_init_state@multibinit|spin_init_state]], 
 [[spin_ntime_pre@multibinit|spin_ntime_pre]], 
+[[spin_projection_qpoint@multibinit|spin_projection_qpoint]] (NT), 
 [[spin_sia_add@multibinit|spin_sia_add]], 
 [[spin_sia_k1amp@multibinit|spin_sia_k1amp]], 
 [[spin_sia_k1dir@multibinit|spin_sia_k1dir]], 
@@ -191,7 +197,7 @@ New input variables: slc_coupling,
 [[spin_var_temperature@multibinit|spin_var_temperature]], 
 [[spin_write_traj@multibinit|spin_write_traj]].
 
-By He Xu, Ph. Ghosez, M. Verstraete + ... ?
+By He Xu, N. Helbig, J. Bieder, Ph. Ghosez, M. Verstraete
 
 
 **B.4** Constrained DFT
@@ -291,7 +297,7 @@ List of new input variables that rely on this feature:
 - [[getpot_filepath]], see test [[test:v8_44]]
 - [[pseudos]], [[indata_prefix]], [[outdata_prefix]], [[tmpdata_prefix]], [[output_file]], see test [[test:v9_04]]
 - [[pp_dirpath]]: cannot be tested  EXPLICITLY because system dependent but used by runtests.py when generating the input file. 
-- [[output@anaddb]], [[ddb_filepath@anaddb]], [[gkk_filepath@anaddb]], [[eph_prefix@anaddb]].
+- [[output_file@anaddb]], [[ddb_filepath@anaddb]], [[gkk_filepath@anaddb]], [[eph_prefix@anaddb]].
   See tests [[test:v8_52]] for a standard analysis of the DDB file and 
   [[test:v7_94]] for the (old implementation) of electron-phonon calculations in anaddb.
 
@@ -359,6 +365,16 @@ to install the dependencies in user mode.
 
 By M. Giantomassi.
 
+**C.2** New characteristics of input variables
+
+In the description of input variables (e.g. files abimkdocs/variables_abinit.py), a new field `added_in_version` has been introduced,
+for example,
+
+     added_in_version="9.0.0"
+
+or, for variables introduced prior to v9,
+
+     added_in_version="before_v9"
 
 **C.2** Test farm: new and obsolete bots
 
@@ -407,22 +423,30 @@ See related information in Sec. 5.4 of [[cite:Gonze2020]].
 
 Miscellaneous improvements have been made to the lattice part of Multibinit.
 See the new input variables below, also see the Sec. 4.1.1 of [[cite:Gonze2020]].
-See also v8#94, test of the supercell_latt input variable (NOT DOCUMENTED).
+See also [[test:v8_94]], test of the supercell_latt input variable (NOT DOCUMENTED).
 
-New tests: v8#38, v8#94, v8#98, v8#99.
-New input variables:
+New tests: [[test:v8_38]], [[test:v8_94]], [[test:v8_98]] and [[test:v8_99]]. 
+New input variables are listed below.
+Not all these new input variables are present in automatic tests, though, in this beta-release.
+These "non-tested" input variables are indicated below with 'NT'.
+Also, not all of these are documented.
+This will be completed for the production version v9.2 .
 
-- [[analyze_anh_pot@multibinit|analyze_anh_pot]] v8#98
-- [[fit_anhaStrain@multibinit|fit_anhaStrain]] NOT TESTED
-- fit_iatom, tests in paral#81, 82, v8#13-15, but not documented. The tests were already existing.
-- latt_friction, NOT TESTED, NOT DOCUMENTED
-- [[opt_effpot@multibinit|opt_effpot]], test in v8#99
-- [[opt_ncoeff@multibinit|opt_ncoeff]], test in v8#99
-- [[opt_coeff@multibinit|opt_coeff]], test in v8#99
+- [[analyze_anh_pot@multibinit|analyze_anh_pot]] 
+- fit_SPC_maxS@multibinit (NT)
+- fit_iatom@multibinit [[test:paral_81]], [[test:paral_82]], [[test:v8_13]], [[test:v8_14]], but not documented. 
+- latt_compressibility@multibinit, NOT TESTED, NOT DOCUMENTED
+- [[latt_friction@multibinit|latt_friction]] (NT)
+- latt_mask@multibinit, NOT TESTED, NOT DOCUMENTED
+- [[latt_taup@multibinit|latt_taup]] (NT)
+- [[latt_taut@multibinit|latt_taut]] (NT)
+- [[opt_effpot@multibinit|opt_effpot]]
+- [[opt_ncoeff@multibinit|opt_ncoeff]]
+- [[opt_coeff@multibinit|opt_coeff]]
 - prt_names, NOT TESTED, NOT DOCUMENTED
 - [[test_effpot@multibinit|test_effpot]] v8#98
 
-By M. Schmitt, F. Ricci, who else ?
+By M. Schmitt, He Xu, F. Ricci, M. Verstraete, Ph. Ghosez
 
 
 **D.2** Miscellaneous improvements in the Chern number and orbital magnetization calculations,
