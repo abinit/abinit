@@ -261,6 +261,7 @@ subroutine dfpt_cgwf(band,band_me,band_procs,berryopt,cgq,cwavef,cwave0,cwaveprj
  call xmpi_sum(bands_treated_now,mpi_enreg%comm_band,ierr)
 #ifdef DEV_MJV
 print *, 'bands_treated_now ', bands_treated_now
+print *, 'bands_skipped_now ', bands_skipped_now
 #endif
 
 
@@ -303,6 +304,10 @@ print *, 'gberry 294 ', gberry(:,1:10)
 ! this is used many times - no use de and re allocating
  ABI_ALLOCATE(work,(2,npw1*nspinor))
 
+#ifdef DEV_MJV
+print *, 'bands_treated_now 308 ', bands_treated_now
+print *, 'bands_skipped_now 308 ', bands_skipped_now
+#endif
 !DEBUG!! Several checking statements
  if (prtvol==-level.or.prtvol==-19.or.prtvol==-20) then
    write(msg,'(a)') " ** cgwf3 : debugging mode, tests will be done"
@@ -571,7 +576,7 @@ print *, 'gh1c 490 ', gh1c(:,1:10)
 
  ! Projecting out all bands
  ! While we could avoid calculating all the eig1_k to obtain the perturbed density,
- ! we do need all of the matrix element when outputing the full 1st-order wfn.
+ ! we do need all of the matrix elements when outputing the full 1st-order wfn.
  ! Note the subtlety:
  ! -For the generalized eigenPb, S|cgq> is used in place of |cgq>,
  ! in order to apply P_c+ projector (see PRB 73, 235101 (2006) [[cite:Audouze2006]], Eq. (71), (72))
@@ -684,7 +689,8 @@ print *, 'gh1c 619 ', gh1c(:,1:10)
    end do
  end do
 #ifdef DEV_MJV
-print *, 'cwavef 670 ', cwavef(:,23)
+print *, 'cwavef 670 ', cwavef(:,1:5)
+print *, 'mpi_enreg%nproc_band ', mpi_enreg%nproc_band
 #endif
 
  ! Apply the orthogonality condition: <C1 k,q|C0 k+q>=0 (NCPP) or <C1 k,q|S0|C0 k+q>=0 (PAW)
@@ -709,7 +715,7 @@ print *, 'cwavef 670 ', cwavef(:,23)
    end if
  end do
 #ifdef DEV_MJV
-print *, 'cwavef 692 ', cwavef(:,23)
+print *, 'cwavef 692 ', cwavef(:,1:5)
 #endif
 
 
@@ -720,6 +726,9 @@ print *, 'cwavef 692 ', cwavef(:,23)
      do ipw=1,npw1*nspinor
        cwavef(1:2,ipw)=cwavef(1:2,ipw)+dcwavef(1:2,ipw)
      end do
+#ifdef DEV_MJV
+print *, 'dcwavef 739 ', dcwavef(:,1:5)
+#endif
    end if
  else
    ! In 2nd order case, dcwavef/=0 even in NC, and it is already computed in rf2_init (called in dfpt_vtowfk.F90)
@@ -728,6 +737,9 @@ print *, 'cwavef 692 ', cwavef(:,23)
    end do
  end if
 
+#ifdef DEV_MJV
+print *, 'cwavef 739 ', cwavef(:,1:5)
+#endif
  if(band>max(1,nband-nbdbuf))then
    ! Treat the case of buffer bands
    cwavef=zero
@@ -1117,7 +1129,7 @@ print *, 'gh_direc ', gh_direc(1:2,1:5)
    ! ======================================================================
 
 #ifdef DEV_MJV
-print *, 'dedt, d2edt2, theta ', dedt, d2edt2, theta
+print *, 'dedt, d2edt2, theta 1120 ', dedt, d2edt2, theta
 #endif
 
    ! see Eq.(31) of PRB55, 10337 (1997) [[cite:Gonze1997]]
@@ -1149,7 +1161,7 @@ print *, 'dedt, d2edt2, theta ', dedt, d2edt2, theta
      call wrtout(std_out,msg,'COLL')
      theta=zero
 #ifdef DEV_MJV
-print *, 'dedt, d2edt2, theta ', dedt, d2edt2, theta
+print *, 'dedt, d2edt2, theta 1152 ', dedt, d2edt2, theta
 #endif
    end if
 
@@ -1170,6 +1182,10 @@ print *, 'skipping for theta below machine prec'
    ! ======================================================================
    ! ================ GENERATE NEW |wf>, H|wf>, Vnl|Wf ... ================
    ! ======================================================================
+#ifdef DEV_MJV
+print *, 'skipme ', skipme
+print *, ' cwavef 1174 ', cwavef(:,1:5)
+#endif
 
    if (skipme == 0) then
      call cg_zaxpy(npw1*nspinor, [theta, zero], conjgr,cwavef)
@@ -1230,7 +1246,13 @@ print *, 'skipping for deltae diff'
 !   even if the present band will not be updated
    bands_skipped_now(band) = skipme
    call xmpi_sum(bands_skipped_now,mpi_enreg%comm_band,ierr)
+#ifdef DEV_MJV
+print *, 'bands_skipped_now 1 ', bands_skipped_now
+#endif
    bands_skipped_now = bands_skipped_now - bands_treated_now
+#ifdef DEV_MJV
+print *, 'bands_skipped_now 2 ', bands_skipped_now
+#endif
    if (sum(abs(bands_skipped_now)) == 0) exit
 
    ! ======================================================================
@@ -1240,7 +1262,7 @@ print *, 'skipping for deltae diff'
    ! Note that there are five "exit" instruction inside the loop.
    nlines_done = nlines_done + 1
 #ifdef DEV_MJV
-print *, 'cgwf  cwavef  1180 ',cwavef(:,23)
+print *, 'cgwf  cwavef  1180 ',cwavef(:,1:5), cwavef(:,23)
 #endif
  end do ! iline
 #ifdef DEV_MJV

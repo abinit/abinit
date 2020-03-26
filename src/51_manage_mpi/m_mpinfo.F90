@@ -760,6 +760,9 @@ function proc_distrb_cycle(distrb,ikpt,iband1,iband2,isppol,me)
  proc_distrb_cycle=.false.
  if (allocated(distrb)) then
    if (isppol==-1) then
+#ifdef DEV_MJV
+print *, 'proc_distrb_cycle vals ', distrb(ikpt,iband1:iband2,:)-me
+#endif
 ! in this condition, if one of the distrb is for me, then the minval will be == 0, so it returns false
      proc_distrb_cycle=(minval(abs(distrb(ikpt,iband1:iband2,:)-me))/=0)
    else
@@ -2217,11 +2220,6 @@ subroutine initmpi_band(mkmem,mpi_enreg,nband,nkpt,nsppol)
 
 ! ***********************************************************************
 
-#ifdef DEV_MJV
-print *, 'enter initmpi_band'
-print *, ' mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol '
-print *,   mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol 
-#endif
  mpi_enreg%comm_band=xmpi_comm_self
 
  mband = maxval(nband)
@@ -2230,6 +2228,11 @@ print *,   mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol
 !MJV: I think we need to make a proper subcomm here, not treat bands inside the same comm...
  spacecomm=mpi_enreg%comm_kpt
  nproc=mpi_enreg%nproc_kpt
+#ifdef DEV_MJV
+print *, 'enter initmpi_band'
+print *, ' mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol '
+print *,   mpi_enreg%paralbd, xmpi_paral, mkmem, nproc, nkpt, nsppol 
+#endif
 
 ! make sure we have saturated kpt parallelization mkmem==1
  if (mpi_enreg%paralbd==1.and.xmpi_paral==1.and.mkmem==1 .and. nproc >= 2*nkpt*nsppol) then
@@ -2288,6 +2291,9 @@ print *, 'ranks not alloc'
        ABI_ALLOCATE(ranks,(0))
      end if
 
+#ifdef DEV_MJV
+print *, 'call subcomm ',  spacecomm,nrank, ' ranks ', ranks, ' ', mpi_enreg%me_band
+#endif
      mpi_enreg%comm_band=xmpi_subcomm(spacecomm,nrank,ranks, my_rank_in_group=mpi_enreg%me_band)
      mpi_enreg%nproc_band=nrank
 !     mpi_enreg%me_band=mod(me, nrank)

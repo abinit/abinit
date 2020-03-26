@@ -558,16 +558,22 @@ print *, 'me mpi_enreg%proc_distrb ', me, mpi_enreg%proc_distrb
    nband_k = nband(ikpt)
 
 #ifdef DEV_MJV
-print *, 'me, ikpt, nband_k ', me, ikpt, nband_k, xmpi_paral
+print *, 'me, ikpt, nband_k ', me, ikpt, nband_k, xmpi_paral, mode_paral
 #endif
    if(mode_paral=='PERS')then
      if(proc_distrb_cycle(mpi_enreg%proc_distrb,ikpt,1,nband_k,-1,me)) cycle
    end if
 
+#ifdef DEV_MJV
+print *, '567'
+#endif
    kpoint(:)=kptns(:,ikpt)
    istwf_k=istwfk(ikpt)
    call kpgsph(ecut,exchn2n3d,gmet,ikg,ikpt,istwf_k,kg,kpoint,mkmem,mpi_enreg,mpw,npw1)
 
+#ifdef DEV_MJV
+print *, '571'
+#endif
    test_npw=.true.
    if (xmpi_paral==1)then
      if (mode_paral=='PERS')then
@@ -576,6 +582,9 @@ print *, 'me, ikpt, nband_k ', me, ikpt, nband_k, xmpi_paral
    end if
    if (test_npw) npwarr(ikpt)=npw1
 
+#ifdef DEV_MJV
+print *, '580'
+#endif
 !  Make sure npw < nband never happens:
 !  if (npw1<nband(ikpt)) then
 !  write(message, '(a,a,a,a,i5,a,3f8.4,a,a,i10,a,i10,a,a,a,a)' )ch10,&
@@ -602,6 +611,10 @@ print *, 'mpi_enreg%me_kpt ', mpi_enreg%me_kpt
 print *, 'mpi_enreg%nproc_kpt ', mpi_enreg%nproc_kpt
 print *, 'mpi_enreg%nproc ', mpi_enreg%nproc
 print *, 'mpi_enreg%comm_kptband ', mpi_enreg%comm_kptband
+#endif
+   call xmpi_sum(npwarr,mpi_enreg%comm_kpt,ierr)
+#ifdef DEV_MJV
+print *, '610'
 #endif
    call xmpi_sum(npwarr,mpi_enreg%comm_kpt,ierr)
  end if

@@ -1276,7 +1276,7 @@ subroutine getdc1(band,band_procs,bands_treated_now,cgq,cprjq,dcwavef,dcwaveprj,
    call xmpi_bcast(dcwavef_tmp,band_procs(iband),mpi_enreg%comm_band,ierr)
 
 ! get the projbd onto my processor's bands dcwavef = dcwavef - <cgq|dcwavef>|cgq>
-   call projbd(cgq,dcwavef,-1,icgq,0,istwfk,mcgq,0,nband_me,npw1,nspinor,&
+   call projbd(cgq,dcwavef_tmp,-1,icgq,0,istwfk,mcgq,0,nband_me,npw1,nspinor,&
 &   dummy,scprod,0,tim_projbd,0,mpi_enreg%me_g0,mpi_enreg%comm_fft)
 
 ! sum all of the corrections 

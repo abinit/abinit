@@ -2044,6 +2044,9 @@ print *, ' Wfkfptr after update ', wfk%f90_fptr, ' recnpw ', REC_NPW
 !   call xmpio_write_frmarkers(Wfk%fh,my_offset,sc_mode,1,bsize_rec,ierr)
 !   ABI_CHECK(ierr==0,"ierr!=0")
 
+#ifdef DEV_MJV
+print *, ' write npw '
+#endif
    my_offset = Wfk%offset_ks(ik_ibz,spin,REC_NPW) + xmpio_bsize_frm
 
    call MPI_TYPE_CONTIGUOUS(3, MPI_INTEGER, recnpw_type, mpierr)
@@ -2071,6 +2074,9 @@ print *, ' Wfkfptr after update ', wfk%f90_fptr, ' recnpw ', REC_NPW
 
 !----------------------------------------------------------------------------
 ! record 2 kg
+#ifdef DEV_MJV
+print *, ' write kg '
+#endif
    if (present(kg_k)) then
      my_offset = Wfk%offset_ks(ik_ibz,spin,REC_KG)
 
@@ -2082,6 +2088,9 @@ print *, ' Wfkfptr after update ', wfk%f90_fptr, ' recnpw ', REC_NPW
      call mpio_write_kg_k(Wfk%fh,my_offset,npw_disk,sc_mode,kg_k,mpierr)
      ABI_CHECK_MPI(mpierr,"mpio_write_kg_k")
    end if
+#ifdef DEV_MJV
+print *, ' done write kg'
+#endif
 
 !----------------------------------------------------------------------------
    if (Wfk%formeig==0) then
@@ -2091,6 +2100,9 @@ print *, ' Wfkfptr after update ', wfk%f90_fptr, ' recnpw ', REC_NPW
 ! record 3 eigk occk
      if (present(eig_k) .and. present(occ_k)) then
 
+#ifdef DEV_MJV
+print *, ' write eigk formeig 0'
+#endif
        my_offset = Wfk%offset_ks(ik_ibz,spin,REC_EIG)
 
 !       bsize_rec(1) = 2 * nband_disk * xmpi_bsize_dp
@@ -2187,7 +2199,7 @@ print *, 'RF writing mpio eig spin, ik, band_block(1), band_block(2), Wfk%offset
 
        types = [MPI_DOUBLE_COMPLEX, MPI_DOUBLE_COMPLEX]
        !sizes = [npw_disk*nspinor_disk, band_block(2)-band_block(1)]
-       sizes = [npw_disk*nspinor_disk, nb_block]
+       sizes = [npw_disk*nspinor_disk, nband_disk]
 
        call xmpio_create_fstripes(nb_block,sizes,types,cgblock_type,my_offpad,mpierr)
        ABI_CHECK_MPI(mpierr,"xmpio_create_fstripes")
