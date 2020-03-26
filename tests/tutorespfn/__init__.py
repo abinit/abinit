@@ -60,7 +60,6 @@ inp_files = [
 "toptic_3.in",
 "toptic_4.in",
 "toptic_5.in",
-"toptic_6.in",
 "trf1_1.in",
 "trf1_2.in",
 "trf1_3.in",
