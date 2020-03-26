@@ -455,10 +455,9 @@ By J. Zwanziger (MR 469, 500, 545, 588)
 By M. Giantomassi
 
 
-**D.4** Test of linear electro-optical coefficient, tutorespfn toptic#5-6.
-NOTE: #5 is exactly the same as #3 - should be rationalized !
+**D.4** Test of linear electro-optical coefficient, tutorespfn toptic#5.
 
-By N. Pike (MR 581, 575).
+By N. Pike (MR 575).
 
 **D.5** NCPP Wavefunction mixing with Variational Energy
 and minor improvements to prepare PAW+Hybrid variational energy.
@@ -546,9 +545,9 @@ By J. Bieder (MR510)
 
 By H. Miranda (MR 462).
 
-**D.23** Updated user interface of Raman_spec.py
+**D.23** Updated user interface of Raman_spec.py . Added one section to tutorial NLO to describe use of Raman_spec.py.
 
-By N. Pike (MR 460)
+By N. Pike (MR 460, MR 581)
 
 **D.24** XML format for core wavefunctions
 
