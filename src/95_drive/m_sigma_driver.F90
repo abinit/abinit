@@ -114,7 +114,7 @@ module m_sigma_driver
  use m_paw_correlations,only : pawpuxinit
 ! MRM density matrix module and Gaussian quadrature one
  use m_gwrdm,         only : calc_rdmx, calc_rdmc, natoccs, printdm1, update_hdr_bst!,update_wfd_bst
- use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre
+ use m_gaussian_quadrature, only: get_frequencies_and_weights_legendre,cgqf
 
  implicit none
 
@@ -234,13 +234,14 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
  integer :: temp_unt,ncid
  integer :: work_size,nstates_per_proc,my_nbks
  !integer :: jb_qp,ib_ks,ks_irr
- integer :: ib1dm,order_int,ifreqs!,gw1rdm -> to be used with gwcalctyp !MRM
+ integer :: ib1dm,order_int,ifreqs,gaussian_kind!,gw1rdm -> to be used with gwcalctyp !MRM
  real(dp) :: compch_fft,compch_sph,r_s,rhoav,alpha
  real(dp) :: drude_plsmf,my_plsmf,ecore,ecut_eff,ecutdg_eff,ehartree
  real(dp) :: ex_energy,gsqcutc_eff,gsqcutf_eff,gsqcut_shp,norm,oldefermi
  real(dp) :: ucvol,vxcavg,vxcavg_qp
  real(dp) :: gwc_gsq,gwx_gsq,gw_gsq
  real(dp):: eff,mempercpu_mb,max_wfsmem_mb,nonscal_mem,ug_mem,ur_mem,cprj_mem
+ real(dp):: gwalpha,gwbeta,wmin,wmax ! MRM
  complex(dpc) :: max_degw,cdummy
  logical :: use_paw_aeur,dbg_mode,pole_screening,call_pawinit,is_dfpt=.false.
  character(len=500) :: msg
@@ -2207,7 +2208,24 @@ subroutine sigma(acell,codvsn,Dtfil,Dtset,Pawang,Pawrad,Pawtab,Psps,rprim,conver
      order_int=Sigp%nomegasi 
      ABI_MALLOC(freqs,(order_int))
      ABI_MALLOC(weights,(order_int))
-     call get_frequencies_and_weights_legendre(order_int,freqs,weights)
+     if(dtset%userid==0) then
+       call get_frequencies_and_weights_legendre(order_int,freqs,weights)
+     else
+       gaussian_kind=1
+       gwalpha=0.0_dp
+       gwbeta=0.0_dp
+       wmin=dtset%userra
+       wmax=dtset%userrb
+       if(wmin==0.0_dp .and. wmax==1.0_dp) then
+         call cgqf(order_int,gaussian_kind,gwalpha,gwbeta,wmin,wmax,freqs,weights)
+         !weights(:)=weights(:)/freqs(:)**2.0_dp          ! Chi scheme
+         !freqs(:)=1.0_dp/freqs(:)-1.0_dp
+         weights(:)=weights(:)/(1.0_dp-freqs(:))**2.0_dp  ! Cubature scheme
+         freqs(:)=freqs(:)/(1.0_dp-freqs(:))
+       else
+         call cgqf(order_int,gaussian_kind,gwalpha,gwbeta,wmin,wmax,freqs,weights)
+       endif
+     endif
      !Form complex frequencies from 0 to iInf and print them
      do ifreqs=1,order_int
        Sigp%omegasi(ifreqs)=cmplx(0.0d0,freqs(ifreqs))

@@ -146,7 +146,13 @@ subroutine calc_rdmc(ib1,ib2,nomega_sigc,kpoint,iinfo,Sr,weights,sigcme_k,BSt,dm
    write(msg,'(a37,a7,a14,3f10.5)')'Computing the 1-RDM correction for  ',msg2,' and k-point: ',BSt%kptns(1:,kpoint)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
-   write(msg,'(a11,i5,a8,i5)')'from band ',ib1,' to band',ib2
+   write(msg,'(a11,i5,a8,i5,a5,i5,a7)')'from band ',ib1,' to band',ib2,' with',nomega_sigc,' omegas'
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   write(msg,'(a11,*(f10.5))')'First omega',Sr%omega_i(1)
+   call wrtout(std_out,msg,'COLL')
+   call wrtout(ab_out,msg,'COLL')
+   write(msg,'(a11,*(f10.5))')'Last  omega',Sr%omega_i(nomega_sigc)
    call wrtout(std_out,msg,'COLL')
    call wrtout(ab_out,msg,'COLL')
  endif
