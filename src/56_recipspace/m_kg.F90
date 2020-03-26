@@ -611,9 +611,6 @@ print *, 'mpi_enreg%me_kpt ', mpi_enreg%me_kpt
 print *, 'mpi_enreg%nproc_kpt ', mpi_enreg%nproc_kpt
 print *, 'mpi_enreg%nproc ', mpi_enreg%nproc
 print *, 'mpi_enreg%comm_kptband ', mpi_enreg%comm_kptband
-#endif
-   call xmpi_sum(npwarr,mpi_enreg%comm_kpt,ierr)
-#ifdef DEV_MJV
 print *, '610'
 #endif
    call xmpi_sum(npwarr,mpi_enreg%comm_kpt,ierr)
