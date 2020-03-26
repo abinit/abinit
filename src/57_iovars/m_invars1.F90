@@ -411,7 +411,7 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
    if(tread==1) dtsets(idtset)%usewvl=intarr(1)
 
    call geo%free()
- end do
+ end do ! idtset
 
 !mxnatom =maxval(dtsets(1:ndtset_alloc)%natom)
 !mxntypat =maxval(dtsets(1:ndtset_alloc)%ntypat)
@@ -454,13 +454,21 @@ subroutine invars0(dtsets, istatr, istatshft, lenstr, msym, mxnatom, mxnimage, m
      do idtset=1,ndtset_alloc
        if(dtsets(idtset)%ntypat/=mxntypat)then
          write(msg, '(5a,i0,a,i0,2a,i0,2a)' )&
-         'When npsp is not defined, the input variable ntypat must be',ch10,&
-         'the same for all datasets. However, it has been found that for',ch10,&
-         'jdtset: ',dtsets(idtset)%jdtset,', ntypat= ',dtsets(idtset)%ntypat,ch10,&
-         'differs from the maximum value of ntypat= ',mxntypat,ch10,&
-         'Action: check the input variables npsp and ntypat.'
+          ' When npsp is not defined, the input variable ntypat must be',ch10,&
+          ' the same for all datasets. However, it has been found that for',ch10,&
+          ' jdtset: ',dtsets(idtset)%jdtset,', ntypat= ',dtsets(idtset)%ntypat,ch10,&
+          ' differs from the maximum value of ntypat= ',mxntypat,ch10,&
+          ' Action: check the input variables npsp and ntypat.'
          MSG_ERROR(msg)
        end if
+       if(dtsets(idtset)%ntypat>npsp)then
+         write(msg, '(5a,i0,a,i0,a,i0,2a)' )&
+          ' The number of pseudopotentials, npsp, must never be smaller than ntypat.',ch10,&
+          ' However, it has been found that for',ch10,&
+          ' jdtset: ',dtsets(idtset)%jdtset,', ntypat= ',dtsets(idtset)%ntypat,' and npsp=',npsp,ch10,&
+          ' Action: check the input variables npsp and ntypat.'
+         MSG_ERROR(msg)
+       endif
      end do
    end if
  end if
